@@ -1,0 +1,232 @@
+# G6Lite 使用文档
+
+G6Lite 是基于 WebGL 的高性能图分析引擎，面向大规模图数据分析与可视化。
+
+## 快速开始
+
+### 安装
+
+```bash
+npm install @antv/g6-lite
+```
+
+### 最简示例
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: 'container',  // 容器选择器或 DOM 元素
+  data: {
+    nodes: [
+      { id: '0' },
+      { id: '1' },
+    ],
+    edges: [{ source: '0', target: '1' }],
+  },
+  layout: { type: 'circular', radius: 150 },
+  behaviors: ['zoom-canvas', 'drag-canvas'],
+  theme: 'light',
+});
+
+await graph.render();
+```
+
+创建 `Graph` 后必须调用 `await graph.render()` 才会执行布局并绘制。销毁时调用 `graph.destroy()`。
+
+---
+
+## 数据格式
+
+图数据通过 `data` 传入，结构为 `{ nodes, edges }`。
+
+### nodes
+
+- **id**（必填）：节点唯一标识。
+- **name**（可选）：名称。
+- **data**（可选）：扩展数据，可用于样式函数或业务逻辑。
+- **x, y**（可选）：若不做布局或部分节点需固定位置时可传。
+
+```ts
+const nodes = [
+  { id: '0', name: '节点0', data: { cluster: 'a', value: 1 } },
+  { id: '1', name: '节点1', data: { cluster: 'b' } },
+];
+```
+
+### edges
+
+- **source**（必填）：起点节点 id。
+- **target**（必填）：终点节点 id。
+- **data**（可选）：边的扩展数据。
+
+```ts
+const edges = [
+  { source: '0', target: '1', data: { weight: 2 } },
+];
+```
+
+---
+
+## 图配置项
+
+`Graph` 的配置对象支持以下字段：
+
+| 选项 | 类型 | 说明 |
+|------|------|------|
+| **container** | `string \| HTMLElement` | 挂载画布的容器（选择器或 DOM） |
+| **data** | `GraphData` | 图数据 `{ nodes, edges }` |
+| **node** | `NodeConfig` | 节点类型与样式 |
+| **edge** | `EdgeConfig` | 边类型与样式 |
+| **layout** | `LayoutConfig` | 布局类型与参数 |
+| **behaviors** | `BehaviorOption[]` | 交互列表 |
+| **theme** | `ThemeOption` | 主题：`'light'` / `'dark'` 或带覆盖项的对象 |
+
+---
+
+## 节点与边样式
+
+### node
+
+- **type**：`'circle'`（默认）或 `'rect'`（当前实现中节点以圆形点绘制）。
+- **style**：
+  - **fill**：填充色，支持 `string` 或 `(node) => string`。
+  - **size** / **width** / **height**：尺寸，支持数值或 `(node) => number`。
+
+```ts
+node: {
+  type: 'circle',
+  style: {
+    fill: (d) => (d.data?.cluster === 'a' ? '#5B8FF9' : '#61DDAA'),
+    size: 12,
+  },
+}
+```
+
+### edge
+
+- **type**：`'line'`（默认）或 `'arc'`。
+- **style**：
+  - **stroke**：线条颜色。
+  - **lineWidth**：线宽。支持值或 `(source, target, edge) => number`。
+
+```ts
+edge: {
+  type: 'line',
+  style: { stroke: '#e2e2e2', lineWidth: 2 },
+}
+```
+
+样式仅暴露可在 WebGL 下高效实现的属性，便于大规模渲染。
+
+---
+
+## 布局
+
+通过 `layout` 配置布局，内部使用 [@antv/layout](https://github.com/antvis/layout)，选项会透传到底层算法。
+
+### 常用布局类型
+
+| type | 说明 | 常用参数 |
+|------|------|----------|
+| **circular** | 环形 | `radius`, `center` |
+| **force** | 力导向 | `linkDistance`, `nodeStrength` |
+| **grid** | 网格 | `rows`, `cols` |
+| **dagre** | 有向无环图 | `rankdir`, `nodesep`, `ranksep` |
+| **concentric** | 同心圆 | `center`, `minNodeSpacing` |
+| **radial** | 辐射 | `center` |
+| **random** | 随机 | `center` |
+
+### 示例
+
+```ts
+// 环形
+layout: { type: 'circular', radius: 150 }
+
+// 力导向
+layout: { type: 'force', linkDistance: 100 }
+
+// 网格
+layout: { type: 'grid', rows: 3, cols: 4 }
+
+// Dagre（自上而下）
+layout: { type: 'dagre', rankdir: 'TB', nodesep: 40, ranksep: 60 }
+```
+
+不传 `layout` 时，将使用节点自带的 `x、y`（缺省为 0）。
+
+---
+
+## 交互（behaviors）
+
+`behaviors` 为字符串或配置对象数组，内置以下行为：
+
+| 行为 | 说明 |
+|------|------|
+| **zoom-canvas** | 滚轮缩放画布 |
+| **drag-canvas** | 拖拽平移画布 |
+| **highlight-node** | 悬停节点时高亮该节点及一度邻居 |
+| **highlight-edge** | 悬停边时高亮该边及两端节点 |
+
+可同时启用多个；当同时启用 `highlight-node` 与 `highlight-edge` 时，边悬停优先。
+
+```ts
+behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge']
+```
+
+---
+
+## 主题（theme）
+
+- **字符串**：`'light'` 或 `'dark'`，使用内置主题。
+- **对象**：在某一主题基础上覆盖部分 token。
+
+内置 token 包括：`nodeFill`、`nodeSize`、`edgeStroke`、`edgeLineWidth`、`canvasBackground`。
+
+```ts
+// 使用预设
+theme: 'dark'
+
+// 覆盖部分 token
+theme: {
+  type: 'light',
+  edgeLineWidth: 2,
+  canvasBackground: '#f5f5f5',
+}
+```
+
+---
+
+## API
+
+### Graph
+
+- **constructor(options: GraphOptions)**  
+  创建图实例，不会立即渲染。
+
+- **render(): Promise\<void\>**  
+  执行布局、渲染并注册 behaviors，需在创建后调用一次。
+
+- **destroy(): void**  
+  移除交互监听、ResizeObserver 和画布，销毁实例。
+
+### 类型导出
+
+可从 `@antv/g6-lite` 使用：`GraphOptions`、`GraphData`、`GraphNode`、`GraphEdge`、`NodeConfig`、`EdgeConfig`、`LayoutConfig`、`ThemeOption` 等。
+
+---
+
+## 示例与 Demo
+
+仓库 `playground/` 下提供可运行示例，运行 `npm run dev` 后可在页面中切换：
+
+| Demo | 说明 |
+|------|------|
+| **basic** | 最简图：少量节点边 + 环形布局 |
+| **node-style** | 按节点 `data` 用函数设置 fill、size |
+| **layouts** | 同一数据下切换 circular / force / grid / dagre |
+| **theme** | light / dark 及 token 覆盖 |
+| **behaviors** | 缩放、拖拽、节点/边高亮 |
+| **large** | 较多节点边，验证基础性能 |
+
+每个 demo 的源码即「使用文档」的配套示例，可直接复制到项目中使用或修改。

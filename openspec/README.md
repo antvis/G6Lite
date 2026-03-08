@@ -1,0 +1,30 @@
+# OpenSpec — G6Lite
+
+本目录为 [OpenSpec](https://openspec.dev/) 规范目录，将产品与设计文档转化为可被 AI 与人类共同遵循的规格说明（Source of Truth）。
+
+## 目录结构
+
+- **specs/** — 当前已达成共识的规格，按能力分目录存放：
+  - **g6lite-overview** — 产品定位与范围
+  - **graph-rendering** — 图渲染：Graph 构造、数据格式、节点/边样式
+  - **layout** — 布局：基于 AntV Layout 的封装与透传
+  - **behaviors** — 交互：zoom-canvas、drag-canvas、highlight-edge、highlight-node
+  - **theme** — 主题：light/dark 及 token 覆盖
+  - **project-requirements** — 工程要求：TypeScript、目录、playground、性能与包体
+  - **future-capabilities** — 当前不做、后续可能：动画、分析
+
+- **changes/** — 变更提案（未创建时可为空），每个提案包含 proposal、design、tasks 及 specs 增量。
+
+## 来源文档
+
+上述规格由 `issue1.md` 中的「背景」「规划」「功能和设计」「要求」等章节转换而来，采用 OpenSpec 约定的格式：
+
+- **Purpose** — 该能力的用途
+- **Requirements** — 使用 SHALL 的强制性要求
+- **Scenarios** — GIVEN / WHEN / THEN 场景说明
+
+## 参考链接
+
+- AntV Layout: https://github.com/antvis/layout
+- AntV Layout 文档: https://layout.antv.vision/zh/guide/introduction
+- OpenSpec: https://openspec.dev/

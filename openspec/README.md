@@ -10,10 +10,15 @@
   - **layout** — 布局：基于 AntV Layout 的封装与透传
   - **behaviors** — 交互：zoom-canvas、drag-canvas、highlight-edge、highlight-node
   - **theme** — 主题：light/dark 及 token 覆盖
+  - **canvas-tools** — 画布工具栏：放大、缩小、全屏与还原
+  - **labels** — 节点与边标签渲染
+  - **large-demo-5000** — 5000 点带标签的性能验证 Demo
   - **project-requirements** — 工程要求：TypeScript、目录、playground、性能与包体
   - **future-capabilities** — 当前不做、后续可能：动画、分析
 
-- **changes/** — 变更提案（未创建时可为空），每个提案包含 proposal、design、tasks 及 specs 增量。
+- **changes/** — 变更与提案目录：
+  - 已发布版本的变更日志（例如：`changelog-0.2.0.md`）
+  - 按需的 proposal / design / tasks / specs 增量文档
 
 ## 来源文档
 

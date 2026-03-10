@@ -3,9 +3,14 @@
  * 左侧选择 Demo，右侧渲染对应示例
  */
 import { demos } from './demos/index.ts';
+import { attachCanvasTools } from './tooling.ts';
 
 const CONTAINER_SELECTOR = '#graph-container';
 let currentInstance: { destroy?: () => void } | null = null;
+
+function isGraphWithTools(g: unknown): g is { getCamera(): unknown; setCamera(v: unknown): void; getCanvas(): unknown } {
+  return !!g && typeof (g as { getCamera?: unknown }).getCamera === 'function' && typeof (g as { setCamera?: unknown }).setCamera === 'function' && typeof (g as { getCanvas?: unknown }).getCanvas === 'function';
+}
 
 async function runDemo(id: string) {
   const demo = demos.find((d) => d.id === id);
@@ -29,6 +34,9 @@ async function runDemo(id: string) {
   try {
     const result = await demo.run(canvasWrap);
     currentInstance = result as { destroy?: () => void } | null;
+    if (result && isGraphWithTools(result)) {
+      attachCanvasTools(canvasWrap as HTMLElement, result);
+    }
   } catch (e) {
     console.error(e);
     container.innerHTML = `<pre style="padding:12px;color:#f66;">${String(e)}</pre>`;

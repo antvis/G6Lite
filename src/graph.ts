@@ -6,7 +6,8 @@ import { resolveTheme } from './theme.js';
 import { runLayout } from './layout/index.js';
 import { Renderer } from './renderer/renderer.js';
 import { registerBehaviors } from './behaviors/index.js';
-import type { GraphOptions, GraphData, ThemeOption } from './types.js';
+import type { GraphOptions, GraphData, ThemeOption, LayoutNode } from './types.js';
+import type { Camera } from './renderer/camera.js';
 
 export class Graph {
   private options: GraphOptions;
@@ -15,7 +16,8 @@ export class Graph {
   private renderer: Renderer;
   private behaviorTeardown: (() => void) | null = null;
   private resizeObserver: ResizeObserver | null = null;
-  private layoutNodes: Array<{ id: string; x: number; y: number; name?: string; data?: Record<string, unknown> }> = [];
+  private layoutNodes: LayoutNode[] = [];
+  private initialCamera: Camera | null = null;
 
   constructor(options: GraphOptions) {
     this.options = options;
@@ -38,7 +40,7 @@ export class Graph {
       const result = await runLayout(data, layout);
       nodes = result.nodes;
     }
-    this.layoutNodes = nodes;
+    this.layoutNodes = nodes as LayoutNode[];
 
     this.renderer.setData({
       nodes,
@@ -56,6 +58,11 @@ export class Graph {
     const width = this.containerEl.clientWidth || 800;
     const height = this.containerEl.clientHeight || 600;
     this.renderer.resize(width, height);
+    // capture initial camera after first fit
+    if (!this.initialCamera) {
+      const cam = this.renderer.getCamera();
+      this.initialCamera = { x: cam.x, y: cam.y, zoom: cam.zoom };
+    }
 
     this.resizeObserver = new ResizeObserver(() => {
       const w = this.containerEl.clientWidth || 800;
@@ -71,6 +78,39 @@ export class Graph {
     this.behaviorTeardown?.();
     this.resizeObserver?.disconnect();
     this.canvas.remove();
+  }
+
+  /** Expose current camera for tools. */
+  getCamera(): Camera {
+    return this.renderer.getCamera();
+  }
+
+  /** Update camera (pan/zoom) and re-draw. */
+  setCamera(partial: Partial<Camera>): void {
+    this.renderer.setCamera(partial);
+    const rect = this.containerEl.getBoundingClientRect();
+    this.renderer.resize(rect.width || 800, rect.height || 600);
+  }
+
+  /** Reset camera to initial state captured after first render. */
+  resetCamera(): void {
+    if (!this.initialCamera) return;
+    this.setCamera(this.initialCamera);
+  }
+
+  /** Return layouted nodes (id + x,y) for tools/labels. */
+  getLayoutNodes(): LayoutNode[] {
+    return this.layoutNodes.slice();
+  }
+
+  /** Return raw graph data as provided. */
+  getData(): GraphData {
+    return this.options.data;
+  }
+
+  /** Return underlying canvas element. */
+  getCanvas(): HTMLCanvasElement {
+    return this.canvas;
   }
 }
 

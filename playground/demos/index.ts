@@ -7,6 +7,7 @@ import * as layouts from './layouts.ts';
 import * as theme from './theme.ts';
 import * as behaviors from './behaviors.ts';
 import * as large from './large.ts';
+import * as largeLabeled from './large-labeled.ts';
 
 export interface DemoItem {
   id: string;
@@ -21,4 +22,5 @@ export const demos: DemoItem[] = [
   { id: 'theme', name: '主题', run: theme.run },
   { id: 'behaviors', name: '交互高亮', run: behaviors.run },
   { id: 'large', name: '较大规模', run: large.run },
+  { id: 'large-labeled', name: '5000 节点 + 标签', run: largeLabeled.run },
 ];

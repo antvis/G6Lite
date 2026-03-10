@@ -18,7 +18,9 @@ export function dragCanvas(renderer: Renderer): () => void {
     const dx = e.clientX - down.x;
     const dy = e.clientY - down.y;
     const zoom = renderer.getCamera().zoom;
-    renderer.setCamera({ x: down.camX - dx / zoom, y: down.camY + dy / zoom });
+    // 使拖拽方向与鼠标方向一致：
+    // 鼠标向右拖，画面向右移动；鼠标向下拖，画面向下移动。
+    renderer.setCamera({ x: down.camX + dx / zoom, y: down.camY + dy / zoom });
     renderer.draw();
   };
   const onUp = () => {

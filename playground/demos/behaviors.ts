@@ -32,7 +32,7 @@ export async function run(container: string | HTMLElement) {
     edge: { type: 'line', style: { lineWidth: 2 } },
     layout: { type: 'circular', radius: 150 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
-    theme: 'dark',
+    theme: 'light',
   });
   await graph.render();
   return graph;

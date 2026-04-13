@@ -56,6 +56,7 @@ export interface EdgeConfig {
   style?: {
     stroke?: EdgeStyleValue<string>;
     lineWidth?: EdgeStyleValue<number>;
+    curvature?: EdgeStyleValue<number>;
   };
 }
 

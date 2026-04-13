@@ -43,7 +43,7 @@ export async function run(container: string | HTMLElement) {
   }
 
   const btnBar = document.createElement('div');
-  btnBar.style.cssText = 'padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;background:#252525;';
+  btnBar.style.cssText = 'padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;background:#f0f0f0;';
   [
     { label: 'Light', value: 'light' as const },
     { label: 'Dark', value: 'dark' as const },
@@ -51,13 +51,13 @@ export async function run(container: string | HTMLElement) {
   ].forEach(({ label, value }) => {
     const btn = document.createElement('button');
     btn.textContent = label;
-    btn.style.cssText = 'padding:6px 12px;cursor:pointer;border-radius:4px;border:1px solid #555;background:#333;color:#eee;';
+    btn.style.cssText = 'padding:6px 12px;cursor:pointer;border-radius:4px;border:1px solid #ccc;background:#fff;color:#333;';
     btn.onclick = () => renderTheme(value);
     btnBar.appendChild(btn);
   });
   wrapper.insertBefore(btnBar, canvasParent);
 
-  await renderTheme('dark');
+  await renderTheme('light');
 
   return {
     destroy: () => {

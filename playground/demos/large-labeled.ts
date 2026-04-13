@@ -2,7 +2,7 @@
  * Demo: 5000 节点 + 标签 — 性能与标签验证
  */
 import { Graph } from '../../src/index.ts';
-import { attachLabels } from '../tooling.ts';
+import { attachLabelsCanvas } from '../tooling.ts';
 
 function generateData(nodeCount: number, degree: number) {
   const nodes = Array.from({ length: nodeCount }, (_, i) => ({
@@ -47,12 +47,12 @@ export async function run(container: string | HTMLElement) {
     edge: { type: 'line', style: { lineWidth: 0.5 } },
     layout: { type: 'force', linkDistance: 25 },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    theme: 'dark',
+    theme: 'light',
   });
 
   await graph.render();
 
-  attachLabels(wrap, graph as any, {
+  attachLabelsCanvas(wrap, graph as any, {
     nodeLabel: (n) => n.name ?? n.id,
   });
 

@@ -6,6 +6,7 @@
 
 - **specs/** — 当前已达成共识的规格，按能力分目录存放：
   - **g6lite-overview** — 产品定位与范围
+  - **architecture** — 内部架构：渲染管线、Program 抽象、Framebuffer 拾取、性能优化、状态管理、标签系统
   - **graph-rendering** — 图渲染：Graph 构造、数据格式、节点/边样式
   - **layout** — 布局：基于 AntV Layout 的封装与透传
   - **behaviors** — 交互：zoom-canvas、drag-canvas、highlight-edge、highlight-node

@@ -1,26 +1,39 @@
 /**
  * highlight-edge: hover edge highlights it and its source/target nodes.
+ * Uses screenToGraph + O(n) hit testing.
  */
 
 import type { Renderer } from '../renderer/renderer.js';
 
 export function highlightEdge(renderer: Renderer): () => void {
   const canvas = renderer.getCanvas();
-  const edges = renderer.getEdges();
 
   const onMove = (e: MouseEvent) => {
     const [gx, gy] = renderer.screenToGraph(e.clientX, e.clientY);
+    const edges = renderer.getEdges();
     const edgeIdx = renderer.hitTestEdge(gx, gy);
     if (edgeIdx >= 0) {
-      const e = edges[edgeIdx];
-      const nodeIds = new Set<string>([e.source, e.target]);
-      renderer.setHighlight({ nodeIds, edgeIndices: new Set([edgeIdx]) });
+      canvas.style.cursor = 'pointer';
+      const edge = edges[edgeIdx];
+      renderer.setHighlight({
+        nodeIds: new Set([edge.source, edge.target]),
+        edgeIndices: new Set([edgeIdx]),
+      });
     } else {
-      const nodeId = renderer.hitTestNode(gx, gy);
-      if (!nodeId) renderer.setHighlight({});
+      canvas.style.cursor = 'default';
+      renderer.setHighlight({});
     }
   };
 
+  const onLeave = () => {
+    canvas.style.cursor = 'default';
+    renderer.setHighlight({});
+  };
+
   canvas.addEventListener('mousemove', onMove);
-  return () => canvas.removeEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseleave', onLeave);
+  return () => {
+    canvas.removeEventListener('mousemove', onMove);
+    canvas.removeEventListener('mouseleave', onLeave);
+  };
 }

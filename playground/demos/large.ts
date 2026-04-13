@@ -38,7 +38,7 @@ export async function run(container: string | HTMLElement) {
     edge: { type: 'line', style: { lineWidth: 1 } },
     layout: { type: 'force', linkDistance: 60 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node'],
-    theme: 'dark',
+    theme: 'light',
   });
   await graph.render();
   return graph;

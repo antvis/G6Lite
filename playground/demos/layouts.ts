@@ -45,17 +45,17 @@ export async function run(container: string | HTMLElement) {
       edge: { type: 'line' },
       layout: { ...layout },
       behaviors: ['zoom-canvas', 'drag-canvas'],
-      theme: 'dark',
+      theme: 'light',
     });
     await currentGraph.render();
   }
 
   const btnBar = document.createElement('div');
-  btnBar.style.cssText = 'padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;background:#252525;';
+  btnBar.style.cssText = 'padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;background:#f0f0f0;';
   ['Circular', 'Force', 'Grid', 'Dagre'].forEach((label, i) => {
     const btn = document.createElement('button');
     btn.textContent = label;
-    btn.style.cssText = 'padding:6px 12px;cursor:pointer;border-radius:4px;border:1px solid #555;background:#333;color:#eee;';
+    btn.style.cssText = 'padding:6px 12px;cursor:pointer;border-radius:4px;border:1px solid #ccc;background:#fff;color:#333;';
     btn.onclick = () => renderLayout(i);
     btnBar.appendChild(btn);
   });

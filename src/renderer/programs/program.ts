@@ -100,6 +100,41 @@ export abstract class Program {
     gl.drawArrays(this.getDrawMethod(), 0, vertexCount);
   }
 
+  /**
+   * Patch color floats for a single item in the buffer without full reprocess.
+   * Finds the color attribute offset from the layout, writes color for all vertices of the item.
+   */
+  patchItemColor(itemIndex: number, color: [number, number, number]): void {
+    const layout = this.getAttributeLayout();
+    const fpv = this.getFloatsPerVertex();
+    const vpn = this.getVerticesPerItem();
+
+    // Find offset of 'a_color' within one vertex
+    let colorOffset = -1;
+    let off = 0;
+    for (const attr of layout) {
+      if (attr.name === 'a_color') { colorOffset = off; break; }
+      off += attr.size;
+    }
+    if (colorOffset < 0) return;
+
+    const baseOffset = itemIndex * vpn * fpv;
+    for (let v = 0; v < vpn; v++) {
+      const o = baseOffset + v * fpv + colorOffset;
+      this.array[o] = color[0];
+      this.array[o + 1] = color[1];
+      this.array[o + 2] = color[2];
+    }
+  }
+
+  /** Re-upload buffer data to GPU after patching. */
+  reupload(): void {
+    this.upload();
+  }
+
+  /** Expose array for direct reads (e.g., to check current color values). */
+  getArray(): Float32Array { return this.array; }
+
   destroy(): void {
     this.gl.deleteBuffer(this.buffer);
     this.gl.deleteProgram(this.glProgram);

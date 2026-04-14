@@ -14,6 +14,9 @@
   - **canvas-tools** — 画布工具栏：放大、缩小、全屏与还原
   - **labels** — 节点与边标签渲染
   - **large-demo-5000** — 5000 点带标签的性能验证 Demo
+  - **performance-optimization** — 性能优化：5000 节点首屏渲染、增量高亮、hideEdgesOnMove、颜色缓存
+  - **performance-benchmark** — 性能压测：浏览器压测页面、自动化测试场景、可视化报告
+  - **layout-performance** — 布局性能：压测瓶颈分析、iterations 参数 Bug、animate 模式、大图调优方案
   - **project-requirements** — 工程要求：TypeScript、目录、playground、性能与包体
   - **future-capabilities** — 当前不做、后续可能：动画、分析
 

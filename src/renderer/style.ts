@@ -18,6 +18,10 @@ export interface ResolvedEdgeStyle {
   curvature: number;
 }
 
+// Scratch objects reused across calls — callers must NOT store references
+const _nodeScratch: ResolvedNodeStyle = { fill: '', size: 0, width: 0, height: 0 };
+const _edgeScratch: ResolvedEdgeStyle = { stroke: '', lineWidth: 0, curvature: 0 };
+
 export function resolveNodeStyle(
   node: GraphNode & { x: number; y: number },
   config: NodeConfig | undefined,
@@ -28,12 +32,11 @@ export function resolveNodeStyle(
   const sizeNum = typeof size === 'number' ? size : 8;
   const width = resolveStyleValue(config?.style?.width, node, sizeNum);
   const height = resolveStyleValue(config?.style?.height, node, sizeNum);
-  return {
-    fill,
-    size: sizeNum,
-    width: typeof width === 'number' ? width : sizeNum,
-    height: typeof height === 'number' ? height : sizeNum,
-  };
+  _nodeScratch.fill = fill;
+  _nodeScratch.size = sizeNum;
+  _nodeScratch.width = typeof width === 'number' ? width : sizeNum;
+  _nodeScratch.height = typeof height === 'number' ? height : sizeNum;
+  return _nodeScratch;
 }
 
 export function resolveEdgeStyle(
@@ -46,11 +49,10 @@ export function resolveEdgeStyle(
   const stroke = resolveEdgeStyleValue(config?.style?.stroke, source, target, edge, theme.edgeStroke ?? '#e2e2e2');
   const lineWidth = resolveEdgeStyleValue(config?.style?.lineWidth, source, target, edge, theme.edgeLineWidth ?? 1);
   const curvature = resolveEdgeStyleValue(config?.style?.curvature, source, target, edge, 0.3);
-  return {
-    stroke,
-    lineWidth: typeof lineWidth === 'number' ? lineWidth : 1,
-    curvature: typeof curvature === 'number' ? curvature : 0.3,
-  };
+  _edgeScratch.stroke = stroke;
+  _edgeScratch.lineWidth = typeof lineWidth === 'number' ? lineWidth : 1;
+  _edgeScratch.curvature = typeof curvature === 'number' ? curvature : 0.3;
+  return _edgeScratch;
 }
 
 function resolveStyleValue<T>(

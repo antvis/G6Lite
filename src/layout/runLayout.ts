@@ -45,11 +45,39 @@ const LAYOUT_MAP = {
  */
 export async function runLayout(data: GraphData, config: LayoutConfig): Promise<LayoutResult> {
   const LayoutClass = LAYOUT_MAP[config.type] ?? RandomLayout;
-  const { type, ...opts } = config;
+  const { type, ...opts } = config as Record<string, unknown>;
+  const nodeCount = data.nodes.length;
+
+  // R-LAYOUT-01: Map user-friendly 'iterations' to @antv/layout's 'maxIteration'
+  if ('iterations' in opts && !('maxIteration' in opts)) {
+    opts.maxIteration = opts.iterations;
+  }
+  delete opts.iterations;
+
+  // R-LAYOUT-02: Disable animate mode for large graphs (avoids setInterval overhead)
+  if (nodeCount > 500 && opts.animate === undefined) {
+    opts.animate = false;
+  }
+
+  // R-LAYOUT-03: Auto-tune defaults for large force layouts
+  if ((type === 'force' || type === 'fruchterman') && nodeCount > 1000) {
+    if (opts.maxIteration === undefined) opts.maxIteration = 200;
+    if (opts.minMovement === undefined) opts.minMovement = 1.0;
+  }
+
   const layout = new LayoutClass(opts);
 
+  // R-LAYOUT-04: Random initial positions for nodes without coordinates.
+  // Force layouts degrade catastrophically (20x slower) when all nodes start at (0,0)
+  // because repulsive forces hit a singularity. Spreading nodes randomly first lets
+  // the algorithm converge efficiently.
+  const spread = Math.sqrt(nodeCount) * 10;
   const layoutData: GraphData = {
-    nodes: data.nodes.map((n) => ({ ...n, x: n.x ?? 0, y: n.y ?? 0 })),
+    nodes: data.nodes.map((n) => ({
+      ...n,
+      x: n.x ?? Math.random() * spread,
+      y: n.y ?? Math.random() * spread,
+    })),
     edges: data.edges.map((e) => ({ ...e, id: `${e.source}-${e.target}` })),
   };
 

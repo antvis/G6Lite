@@ -12,6 +12,7 @@ export function dragCanvas(renderer: Renderer): () => void {
     if (e.button !== 0) return;
     const cam = renderer.getCamera();
     down = { x: e.clientX, y: e.clientY, camX: cam.x, camY: cam.y };
+    renderer.setMoving(true);
   };
   const onMove = (e: MouseEvent) => {
     if (!down) return;
@@ -21,9 +22,10 @@ export function dragCanvas(renderer: Renderer): () => void {
     // 使拖拽方向与鼠标方向一致：
     // 鼠标向右拖，画面向右移动；鼠标向下拖，画面向下移动。
     renderer.setCamera({ x: down.camX + dx / zoom, y: down.camY + dy / zoom });
-    renderer.draw();
+    renderer.scheduleRender();
   };
   const onUp = () => {
+    if (down) renderer.setMoving(false);
     down = null;
   };
 

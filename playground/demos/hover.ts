@@ -71,7 +71,7 @@ export async function run(container: string | HTMLElement) {
         lineWidth: 2,
       },
     },
-    layout: { type: 'force', iterations: 300 },
+    layout: { type: 'force', maxIteration: 300 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
     theme: 'light',
   });

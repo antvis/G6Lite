@@ -11,7 +11,7 @@ import { fragmentShader } from './shaders/edgeArc.frag.js';
 import { encodeId } from '../picking.js';
 
 const FLOATS_PER_VERTEX = 8;
-const SEGMENTS = 16;
+const SEGMENTS = 8;
 const VERTICES_PER_ITEM = SEGMENTS * 2;
 
 export class EdgeArcProgram extends Program {

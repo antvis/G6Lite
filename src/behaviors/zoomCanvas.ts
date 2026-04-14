@@ -8,6 +8,8 @@ export function zoomCanvas(renderer: Renderer): () => void {
   const canvas = renderer.getCanvas();
   const onWheel = (e: WheelEvent) => {
     e.preventDefault();
+    renderer.setMoving(true);
+    renderer.setMoving(false); // triggers 150ms debounce restore
     const cam = renderer.getCamera();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
     const newZoomRaw = cam.zoom * delta;
@@ -24,7 +26,7 @@ export function zoomCanvas(renderer: Renderer): () => void {
     const nextCamY = h / (2 * newZoom) - centerGraphY;
 
     renderer.setCamera({ zoom: newZoom, x: nextCamX, y: nextCamY });
-    renderer.draw();
+    renderer.scheduleRender();
   };
   canvas.addEventListener('wheel', onWheel, { passive: false });
   return () => canvas.removeEventListener('wheel', onWheel);

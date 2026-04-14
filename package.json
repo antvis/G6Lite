@@ -17,6 +17,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "build:playground": "vite build",
     "dev": "vite playground",
     "typecheck": "tsc --noEmit"
   },

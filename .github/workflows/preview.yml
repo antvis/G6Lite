@@ -1,65 +1,30 @@
-name: Preview Deploy
+name: Surge PR Preview
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    paths:
+      - 'playground/**'
+      - 'src/**'
 
 jobs:
-  deploy:
-    if: github.event.action != 'closed'
+  preview:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
-      - run: npm install
+      - name: Install dependencies
+        run: npm install
 
-      - run: npm run build:playground
+      - name: Build playground
+        run: npm run build:playground
 
-      - name: Deploy to Surge
-        run: npx surge playground/dist g6lite-pr-${{ github.event.pull_request.number }}.surge.sh --token ${{ secrets.SURGE_TOKEN }}
-
-      - name: Comment preview URL
-        uses: actions/github-script@v7
+      - uses: afc163/surge-preview@v1
         with:
-          script: |
-            const prNumber = context.payload.pull_request.number;
-            const domain = `g6lite-pr-${prNumber}.surge.sh`;
-            const body = [
-              `**Preview deployed!**`,
-              `- Playground: https://${domain}`,
-              `- Benchmark: https://${domain}/bench.html`,
-            ].join('\n');
-
-            // Update existing comment or create new one
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-            });
-            const botComment = comments.find(c => c.body?.includes('Preview deployed!'));
-
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                body,
-              });
-            }
-
-  teardown:
-    if: github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    steps:
-      - run: npx surge teardown g6lite-pr-${{ github.event.pull_request.number }}.surge.sh --token ${{ secrets.SURGE_TOKEN }}
+          surge_token: ${{ secrets.SURGE_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dist: playground/dist
+          build: echo "Already built"

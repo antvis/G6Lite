@@ -4,86 +4,41 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
 
-permissions:
-  pull-requests: write
-
 jobs:
-  deploy:
-    if: github.event.action != 'closed'
+  preview:
     runs-on: ubuntu-latest
     steps:
+      - name: Teardown on close
+        if: github.event.action == 'closed'
+        run: |
+          DOMAIN="g6lite-pr-${{ github.event.pull_request.number }}.surge.sh"
+          npx surge teardown "$DOMAIN" --token "$SURGE_TOKEN"
+        env:
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+
       - uses: actions/checkout@v4
+        if: github.event.action != 'closed'
 
       - uses: actions/setup-node@v4
+        if: github.event.action != 'closed'
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
+        if: github.event.action != 'closed'
         run: npm install
 
       - name: Build playground
+        if: github.event.action != 'closed'
         # vite.config.ts sets root:'playground'; --outDir is relative to that root
         run: npx vite build --outDir dist
-        env:
-          NODE_ENV: production
 
       - name: Deploy to Surge
+        if: github.event.action != 'closed'
+        # Surge automatically posts the preview URL as a PR comment
         run: |
-          # Domain pattern: g6lite-pr-<number>.surge.sh (project-specific prefix)
           DOMAIN="g6lite-pr-${{ github.event.pull_request.number }}.surge.sh"
-          # Vite root is 'playground', so the build output is in playground/dist
           npx surge ./playground/dist "$DOMAIN" --token "$SURGE_TOKEN"
-          echo "PREVIEW_URL=https://$DOMAIN" >> "$GITHUB_ENV"
-        env:
-          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-
-      - name: Comment preview URL on PR
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            const botComment = comments.find(c =>
-              c.user.type === 'Bot' && c.body.includes('<!-- surge-preview -->')
-            );
-            const body = `<!-- surge-preview -->
-            ## 🚀 Playground Preview
-
-            Deployed to: **[${{ env.PREVIEW_URL }}](${{ env.PREVIEW_URL }})**
-
-            > Updated at: ${new Date().toISOString()}`;
-
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            }
-
-  teardown:
-    if: github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Teardown Surge deployment
-        run: |
-          DOMAIN="g6lite-pr-${{ github.event.pull_request.number }}.surge.sh"
-          npx surge teardown "$DOMAIN" --token "$SURGE_TOKEN"
         env:
           SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}

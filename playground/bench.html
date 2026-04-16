@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>G6Lite Performance Benchmark</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
+
+    .header {
+      background: #1a1a2e; color: #fff; padding: 16px 24px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .header h1 { font-size: 18px; font-weight: 600; }
+    .header .badge { background: #6c5ce7; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+
+    .main { display: flex; height: calc(100vh - 56px); }
+
+    /* Left: graph preview */
+    .preview { flex: 1; min-width: 300px; position: relative; background: #fff; border-right: 1px solid #e0e0e0; }
+    .preview-label {
+      position: absolute; top: 8px; left: 12px; font-size: 12px; color: #999;
+      z-index: 1; pointer-events: none;
+    }
+    #graph-container { width: 100%; height: 100%; }
+
+    /* Right: controls + results */
+    .sidebar { width: 520px; overflow-y: auto; display: flex; flex-direction: column; }
+
+    /* Config panel */
+    .config { padding: 16px; border-bottom: 1px solid #e0e0e0; background: #fff; }
+    .config h3 { font-size: 14px; margin-bottom: 12px; color: #555; }
+
+    .tier-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .tier-checkbox { display: none; }
+    .tier-label {
+      padding: 6px 16px; border: 1px solid #d0d0d0; border-radius: 6px;
+      cursor: pointer; font-size: 13px; transition: all 0.15s; user-select: none;
+    }
+    .tier-checkbox:checked + .tier-label {
+      background: #6c5ce7; color: #fff; border-color: #6c5ce7;
+    }
+
+    .custom-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+    .custom-row label { font-size: 13px; color: #666; white-space: nowrap; }
+    .custom-row input {
+      width: 80px; padding: 4px 8px; border: 1px solid #d0d0d0; border-radius: 4px;
+      font-size: 13px; text-align: center;
+    }
+
+    .btn-row { display: flex; gap: 8px; }
+    .btn {
+      padding: 8px 20px; border: none; border-radius: 6px; font-size: 13px;
+      cursor: pointer; font-weight: 500; transition: all 0.15s;
+    }
+    .btn-primary { background: #6c5ce7; color: #fff; }
+    .btn-primary:hover { background: #5a4bd1; }
+    .btn-primary:disabled { background: #b8b0e8; cursor: not-allowed; }
+    .btn-stop { background: #e74c3c; color: #fff; }
+    .btn-stop:hover { background: #c0392b; }
+    .btn-stop:disabled { background: #e8a8a1; cursor: not-allowed; }
+
+    /* Progress */
+    .progress { padding: 12px 16px; border-bottom: 1px solid #e0e0e0; background: #fafafa; }
+    .progress-bar-outer {
+      height: 6px; background: #e0e0e0; border-radius: 3px; margin-bottom: 6px; overflow: hidden;
+    }
+    .progress-bar-inner { height: 100%; background: #6c5ce7; border-radius: 3px; transition: width 0.3s; width: 0%; }
+    .progress-text { font-size: 12px; color: #888; }
+    #live-metrics { font-size: 12px; color: #555; margin-top: 4px; }
+
+    /* Results table */
+    .results { flex: 1; padding: 16px; background: #fff; }
+    .results h3 { font-size: 14px; margin-bottom: 12px; color: #555; }
+    #results-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    #results-table th {
+      background: #f0f0f0; padding: 8px 10px; text-align: center;
+      font-weight: 500; border-bottom: 2px solid #d0d0d0; white-space: nowrap;
+    }
+    #results-table td {
+      padding: 8px 10px; text-align: center; border-bottom: 1px solid #eee;
+    }
+    #results-table tr:hover { background: #f8f8ff; }
+    .cell-good { color: #27ae60; }
+    .cell-warn { color: #f39c12; }
+    .cell-bad { color: #e74c3c; }
+
+    .export-row { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-sm {
+      padding: 6px 14px; border: 1px solid #d0d0d0; border-radius: 4px;
+      background: #fff; font-size: 12px; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-sm:hover { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>G6Lite Performance Benchmark</h1>
+    <span class="badge">v0.1</span>
+  </div>
+
+  <div class="main">
+    <div class="preview">
+      <div class="preview-label" id="preview-label">Graph Preview</div>
+      <div id="graph-container"></div>
+    </div>
+
+    <div class="sidebar">
+      <div class="config">
+        <h3>Configuration</h3>
+        <div class="tier-row">
+          <input type="checkbox" class="tier-checkbox" id="t100" value="100" checked>
+          <label class="tier-label" for="t100">100</label>
+          <input type="checkbox" class="tier-checkbox" id="t1000" value="1000" checked>
+          <label class="tier-label" for="t1000">1,000</label>
+          <input type="checkbox" class="tier-checkbox" id="t5000" value="5000" checked>
+          <label class="tier-label" for="t5000">5,000</label>
+          <input type="checkbox" class="tier-checkbox" id="t10000" value="10000" checked>
+          <label class="tier-label" for="t10000">10,000</label>
+        </div>
+        <div class="custom-row">
+          <label>Custom:</label>
+          <input type="number" id="custom-nodes" placeholder="Nodes" min="10" max="100000">
+          <label>Degree:</label>
+          <input type="number" id="custom-degree" placeholder="3" min="1" max="20" value="3">
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-start">Start Benchmark</button>
+          <button class="btn btn-stop" id="btn-stop" disabled>Stop</button>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="progress-bar-outer">
+          <div class="progress-bar-inner" id="progress-bar"></div>
+        </div>
+        <div class="progress-text" id="progress-text">Ready</div>
+        <div id="live-metrics"></div>
+      </div>
+
+      <div class="results">
+        <h3>Results</h3>
+        <table id="results-table">
+          <thead>
+            <tr>
+              <th>Scale</th>
+              <th>Layout</th>
+              <th>First Render</th>
+              <th>Highlight</th>
+              <th>Drag FPS</th>
+              <th>Zoom FPS</th>
+              <th>Pick</th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+        <div class="export-row">
+          <button class="btn-sm" id="btn-copy">Copy Markdown</button>
+          <button class="btn-sm" id="btn-export">Export JSON</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./bench-main.ts"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+name: Surge PR Preview
+
+on:
+  pull_request:
+    paths:
+      - 'playground/**'
+      - 'src/**'
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build playground
+        run: npm run build:playground
+
+      - uses: afc163/surge-preview@v1
+        with:
+          surge_token: ${{ secrets.SURGE_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dist: playground/dist
+          build: echo "Already built"

@@ -1,0 +1,45 @@
+{
+  "name": "@antv/g6-lite",
+  "version": "0.1.0",
+  "description": "A high-performance graph analysis engine based on WebGL, designed for large-scale graph data analysis.",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:playground": "vite build",
+    "dev": "vite playground",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "graph",
+    "visualization",
+    "webgl",
+    "antv",
+    "g6"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "lil-gui": "^0.21.0",
+    "stats.js": "^0.17.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.4.0"
+  },
+  "dependencies": {
+    "@antv/graphlib": "^2.0.0",
+    "@antv/layout": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

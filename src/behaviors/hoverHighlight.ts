@@ -1,35 +1,39 @@
 /**
  * Combined hover: highlight edge (and its nodes) or highlight node (and adjacent).
- * Uses screenToGraph + O(n) hit testing. Edge takes precedence.
+ * Uses O(1) GPU framebuffer picking via renderer.pickAt(). Edge takes precedence.
  */
 
 import type { Renderer } from '../renderer/renderer.js';
+import type { Graph } from '../graph.js';
 
-export function hoverHighlight(renderer: Renderer): () => void {
+export function hoverHighlight(renderer: Renderer, graph?: Graph): () => void {
   const canvas = renderer.getCanvas();
 
   const onMove = (e: MouseEvent) => {
-    const edges = renderer.getEdges();
-    const [gx, gy] = renderer.screenToGraph(e.clientX, e.clientY);
+    const result = renderer.pickAt(e.clientX, e.clientY);
 
-    // Try edge hit first
-    const edgeIdx = renderer.hitTestEdge(gx, gy);
-    if (edgeIdx >= 0) {
-      const edge = edges[edgeIdx];
-      canvas.style.cursor = 'pointer';
-      renderer.setHighlight({
-        nodeIds: new Set([edge.source, edge.target]),
-        edgeIndices: new Set([edgeIdx]),
-      });
-      return;
+    // Edge takes precedence
+    if (result && result.type === 'edge') {
+      const edges = renderer.getEdges();
+      const edge = edges[result.index];
+      if (edge) {
+        canvas.style.cursor = 'pointer';
+        renderer.setHighlight({
+          nodeIds: new Set([edge.source, edge.target]),
+          edgeIndices: new Set([result.index]),
+        });
+        graph?.eventEmitter.emit('edge:hover', { edgeIndex: result.index, source: edge.source, target: edge.target, event: e });
+        return;
+      }
     }
 
-    // Try node hit
-    const nodeId = renderer.hitTestNode(gx, gy);
-    if (nodeId) {
+    // Node hit
+    if (result && result.type === 'node') {
       canvas.style.cursor = 'pointer';
+      const nodeId = result.id;
       const nodeIds = new Set<string>([nodeId]);
       const edgeIndices = new Set<number>();
+      const edges = renderer.getEdges();
       edges.forEach((edge, i) => {
         if (edge.source === nodeId || edge.target === nodeId) {
           nodeIds.add(edge.source).add(edge.target);
@@ -37,16 +41,17 @@ export function hoverHighlight(renderer: Renderer): () => void {
         }
       });
       renderer.setHighlight({ nodeIds, edgeIndices });
+      graph?.eventEmitter.emit('node:hover', { nodeId, event: e });
       return;
     }
 
     canvas.style.cursor = 'default';
-    renderer.setHighlight({});
+    renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
   };
 
   const onLeave = () => {
     canvas.style.cursor = 'default';
-    renderer.setHighlight({});
+    renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
   };
 
   canvas.addEventListener('mousemove', onMove);

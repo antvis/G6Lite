@@ -125,12 +125,22 @@ async function benchFirstRender(
 ): Promise<{ total: number; layout: number; render: number }> {
   await cleanContainer(cont);
 
+  let layoutDuration = 0;
+  const graph = new Graph({
+    container: cont,
+    data: graphData,
+    layout: { type: 'force', maxIteration: 100, animate: false },
+    theme: 'light',
+  });
+  graph.on('layout:end', (e: { duration: number }) => { layoutDuration = e.duration; });
+
   const t0 = performance.now();
-  const graph = await makeGraph(graphData, cont);
+  await graph.render();
+  fitView(graph);
   const total = performance.now() - t0;
 
-  const render = Math.min(total * 0.15, 20);
-  const layout = total - render;
+  const layout = layoutDuration || 0;
+  const render = total - layout;
 
   graph.destroy();
   return { total, layout, render };
@@ -326,6 +336,7 @@ function addResultRow(result: BenchResult): void {
   tr.innerHTML = `
     <td><strong>${formatScale(result.scale.nodes, result.scale.edges)}</strong></td>
     <td>${formatNum(result.firstRender.layout)}ms</td>
+    <td>${formatNum(result.firstRender.render)}ms</td>
     <td>${formatNum(result.firstRender.total)}ms</td>
     <td>${formatNum(result.highlight.median)}ms</td>
     <td class="${result.dragFPS >= 50 ? 'cell-good' : result.dragFPS >= 30 ? 'cell-warn' : 'cell-bad'}">${formatNum(result.dragFPS, 0)} FPS</td>
@@ -433,12 +444,12 @@ async function runBenchmark(): Promise<void> {
 
 function resultsToMarkdown(): string {
   const lines = [
-    '| Scale | Layout | First Render | Highlight | Drag FPS | Zoom FPS | Pick |',
-    '|-------|--------|-------------|-----------|----------|----------|------|',
+    '| Scale | Layout | Render | First Render | Highlight | Drag FPS | Zoom FPS | Pick |',
+    '|-------|--------|--------|-------------|-----------|----------|----------|------|',
   ];
   for (const r of results) {
     lines.push(
-      `| ${formatScale(r.scale.nodes, r.scale.edges)} | ${formatNum(r.firstRender.layout)}ms | ${formatNum(r.firstRender.total)}ms | ${formatNum(r.highlight.median)}ms | ${formatNum(r.dragFPS, 0)} FPS | ${formatNum(r.zoomFPS, 0)} FPS | ${formatNum(r.pickAt.median, 2)}ms |`,
+      `| ${formatScale(r.scale.nodes, r.scale.edges)} | ${formatNum(r.firstRender.layout)}ms | ${formatNum(r.firstRender.render)}ms | ${formatNum(r.firstRender.total)}ms | ${formatNum(r.highlight.median)}ms | ${formatNum(r.dragFPS, 0)} FPS | ${formatNum(r.zoomFPS, 0)} FPS | ${formatNum(r.pickAt.median, 2)}ms |`,
     );
   }
   return lines.join('\n');

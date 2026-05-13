@@ -18,6 +18,10 @@
   - **performance-benchmark** — 性能压测：浏览器压测页面、自动化测试场景、可视化报告
   - **layout-performance** — 布局性能：压测瓶颈分析、iterations 参数 Bug、animate 模式、大图调优方案
   - **project-requirements** — 工程要求：TypeScript、目录、playground、性能与包体
+  - **edge-visual-upgrade** — 边视觉升级：状态系统、箭头、虚线、多边处理、边标签、边文本
+  - **indented-tree-layout** — 缩进树布局：自研布局算法 + 正交边连接器（待实现）
+  - **mindmap-layout** — 思维导图布局：中心展开 + S 型曲线连接器（待实现）
+  - **fishbone-layout** — 鱼骨图布局：脊柱 + 斜角分支布局（待实现）
   - **future-capabilities** — 当前不做、后续可能：动画、分析
 
 - **changes/** — 变更与提案目录：

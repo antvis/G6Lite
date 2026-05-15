@@ -6,7 +6,7 @@ performance/
 
 # Test coverage
 coverage/
-openspec/
+openspec/*
 
 # Local development files (not for commit)
 *.sh

@@ -1599,6 +1599,64 @@ export class Renderer {
     return this.viewportCullEnabled && this.nodes.length > 2000;
   }
 
+  /**
+   * Compute visible elements based on current camera and viewport.
+   * For large graphs, only render elements within viewport + margin.
+   */
+  private updateVisibility(): void {
+    const { nodes, edges, camera, canvas } = this;
+    const w = canvas.width / (window.devicePixelRatio ?? 1);
+    const h = canvas.height / (window.devicePixelRatio ?? 1);
+
+    // Compute visible graph bounds
+    const margin = this.viewportMargin / camera.zoom;
+    const viewLeft = -camera.x - margin;
+    const viewRight = -camera.x + w / camera.zoom + margin;
+    const viewTop = -camera.y - margin;
+    const viewBottom = -camera.y + h / camera.zoom + margin;
+
+    // Reuse arrays to avoid GC pressure
+    this.visibleNodeIndices.length = 0;
+    if (!this._nodeVisible || this._nodeVisible.length < nodes.length) {
+      this._nodeVisible = new Uint8Array(nodes.length);
+    }
+    const nodeVisible = this._nodeVisible;
+
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      // Use approximate node size for culling (24px default)
+      const nodeSize = 24 / camera.zoom;
+      if (
+        node.x + nodeSize >= viewLeft &&
+        node.x - nodeSize <= viewRight &&
+        node.y + nodeSize >= viewTop &&
+        node.y - nodeSize <= viewBottom
+      ) {
+        this.visibleNodeIndices.push(i);
+        nodeVisible[i] = 1;
+      } else {
+        nodeVisible[i] = 0;
+      }
+    }
+
+    // Find visible edges (at least one endpoint visible)
+    this.visibleEdgeIndices.length = 0;
+    for (let i = 0; i < edges.length; i++) {
+      const srcIdx = this.edgeSourceIdx[i];
+      const tgtIdx = this.edgeTargetIdx[i];
+      if (srcIdx >= 0 && tgtIdx >= 0) {
+        if (nodeVisible[srcIdx] || nodeVisible[tgtIdx]) {
+          this.visibleEdgeIndices.push(i);
+        }
+      }
+    }
+  }
+
+  /** Check if viewport culling should be enabled based on node count. */
+  private shouldCull(): boolean {
+    return this.viewportCullEnabled && this.nodes.length > 2000;
+  }
+
   setHighlight(option: { nodeIds?: Set<string>; edgeIndices?: Set<number> }): void {
     this.highlightNodeIds = option.nodeIds ?? new Set();
     this.highlightEdgeIndices = option.edgeIndices ?? new Set();

@@ -19,6 +19,8 @@ import type { Graph } from '../graph.js';
 export interface LassoSelectOptions {
   /** Modifier key to activate. Default: null (always active) */
   key?: 'shift' | 'ctrl' | null;
+  /** Throttle interval for real-time selection during drag (ms). Default: 100 */
+  throttleMs?: number;
 }
 
 /** Ray-casting point-in-polygon test */
@@ -48,6 +50,8 @@ export function lassoSelect(
   let svgOverlay: SVGSVGElement | null = null;
   let polyline: SVGPolylineElement | null = null;
   let selectedIds: string[] = [];
+  const throttleMs = options?.throttleMs ?? 100;
+  let lastSelectTime = 0;
 
   const isModifierHeld = (e: MouseEvent): boolean => {
     if (!modifierKey) return true;
@@ -87,7 +91,7 @@ export function lassoSelect(
   const selectNodesInPath = (): void => {
     // Clear previous selection
     for (const id of selectedIds) {
-      graph.clearItemStates(id);
+      graph.setItemState(id, 'selected', false);
     }
     selectedIds = [];
 
@@ -118,6 +122,7 @@ export function lassoSelect(
     if (hit && hit.type === 'node') return;
 
     selecting = true;
+    lastSelectTime = 0;
     const [gx, gy] = renderer.screenToGraph(e.clientX, e.clientY);
     path = [{ sx: e.clientX, sy: e.clientY, gx, gy }];
 
@@ -133,9 +138,10 @@ export function lassoSelect(
     path.push({ sx: e.clientX, sy: e.clientY, gx, gy });
     updatePolyline();
 
-    // Throttle selection checks to every 3 points for performance
-    if (path.length % 3 === 0) {
+    const now = performance.now();
+    if (now - lastSelectTime >= throttleMs) {
       selectNodesInPath();
+      lastSelectTime = now;
     }
   };
 

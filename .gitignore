@@ -3,4 +3,7 @@ dist
 package-lock.json
 .DS_Store
 performance/
-openspec/nginx.conf
+
+# Test coverage
+coverage/
+openspec/

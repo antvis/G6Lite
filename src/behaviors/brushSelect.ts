@@ -33,7 +33,6 @@ export function brushSelect(
   let startX = 0;
   let startY = 0;
   let overlay: HTMLDivElement | null = null;
-  let selectedIds: string[] = [];
 
   const isModifierHeld = (e: MouseEvent): boolean => {
     if (!modifierKey) return true;
@@ -68,11 +67,13 @@ export function brushSelect(
   };
 
   const selectNodesInRect = (x1: number, y1: number, x2: number, y2: number): void => {
-    // Clear previous selection
-    for (const id of selectedIds) {
-      graph.clearItemStates(id);
+    // Clear previous selection (only 'selected' state)
+    const prevSelected = graph.findNodesByState('selected');
+    for (const id of prevSelected) {
+      graph.setItemState(id, 'selected', false);
     }
-    selectedIds = [];
+
+    const selectedIds: string[] = [];
 
     // Convert screen rect to graph coordinates
     const [gx1, gy1] = renderer.screenToGraph(Math.min(x1, x2), Math.min(y1, y2));
@@ -98,7 +99,7 @@ export function brushSelect(
     if (!isModifierHeld(e)) return;
 
     // Check if we hit a node — if so, don't start brush (let drag-node handle it)
-    const hit = renderer.pickAt(e.clientX, e.clientY);
+    const hit = renderer.pickAt(e.offsetX, e.offsetY);
     if (hit && hit.type === 'node') return;
 
     selecting = true;
@@ -113,6 +114,9 @@ export function brushSelect(
   const onMouseMove = (e: MouseEvent): void => {
     if (!selecting) return;
     updateOverlay(startX, startY, e.clientX, e.clientY);
+    // Note: CR suggests throttling selectNodesInRect for performance,
+    // but keeping real-time for responsiveness on small graphs.
+    // For large graphs (>1000 nodes), consider throttling.
     selectNodesInRect(startX, startY, e.clientX, e.clientY);
   };
 
@@ -124,6 +128,8 @@ export function brushSelect(
       overlay.style.display = 'none';
     }
 
+    // Final selection set is already applied, just emit end event
+    const selectedIds = graph.findNodesByState('selected');
     graph.eventEmitter.emit('brush:end', { nodeIds: selectedIds });
   };
 

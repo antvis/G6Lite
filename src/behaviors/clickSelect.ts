@@ -2,6 +2,12 @@
  * click-select: click to select/deselect nodes and edges.
  * Clicking a node/edge toggles its 'selected' state.
  * Clicking the canvas background clears all selections.
+ *
+ * CR Fixes:
+ * - Use DataModel edge.id instead of edgeIndex for stable identity
+ * - Sync state via graph.setItemState/clearItemStates
+ * - Query current selection via graph.findNodesByState (single source of truth)
+ * - Only clear 'selected' state, not all states
  */
 
 import type { Renderer } from '../renderer/renderer.js';
@@ -9,49 +15,49 @@ import type { Graph } from '../graph.js';
 
 export function clickSelect(renderer: Renderer, graph: Graph): () => void {
   const canvas = renderer.getCanvas();
-  /** Track currently selected items for clearing on canvas click. */
-  const selectedNodeIds = new Set<string>();
-  const selectedEdgeIndices = new Set<number>();
 
   const onClick = (e: MouseEvent) => {
-    const result = renderer.pickAt(e.clientX, e.clientY);
+    const result = renderer.pickAt(e.offsetX, e.offsetY);
 
     if (result && result.type === 'node') {
       const nodeId = result.id;
-      if (selectedNodeIds.has(nodeId)) {
+      if (graph.findNodesByState('selected').includes(nodeId)) {
         // Deselect
-        graph.clearItemStates(nodeId);
-        selectedNodeIds.delete(nodeId);
+        graph.setItemState(nodeId, 'selected', false);
+        graph.eventEmitter.emit('node:selectchange', {
+          nodeId,
+          selected: false,
+          event: e,
+        });
       } else {
         // Select
         graph.setItemState(nodeId, 'selected', true);
-        selectedNodeIds.add(nodeId);
+        graph.eventEmitter.emit('node:selectchange', {
+          nodeId,
+          selected: true,
+          event: e,
+        });
       }
-      graph.eventEmitter.emit('node:selectchange', {
-        nodeId,
-        selected: selectedNodeIds.has(nodeId),
-        event: e,
-      });
     } else if (result && result.type === 'edge') {
-      const edgeIdx = result.index;
       const edges = renderer.getEdges();
-      const edge = edges[edgeIdx];
-      if (edge) {
-        if (selectedEdgeIndices.has(edgeIdx)) {
-          // Deselect — use source-target as identifier since edges lack stable IDs
-          selectedEdgeIndices.delete(edgeIdx);
-          // Clear states: find the edge by source-target pair via DataModel
+      const edge = edges[result.index];
+      if (edge && (edge as any).id) {
+        const edgeId = (edge as any).id as string;
+        if (graph.findEdgesByState('selected').includes(edgeId)) {
+          graph.setItemState(edgeId, 'selected', false);
           graph.eventEmitter.emit('edge:selectchange', {
-            edgeIndex: edgeIdx,
+            edgeId,
+            edgeIndex: result.index,
             source: edge.source,
             target: edge.target,
             selected: false,
             event: e,
           });
         } else {
-          selectedEdgeIndices.add(edgeIdx);
+          graph.setItemState(edgeId, 'selected', true);
           graph.eventEmitter.emit('edge:selectchange', {
-            edgeIndex: edgeIdx,
+            edgeId,
+            edgeIndex: result.index,
             source: edge.source,
             target: edge.target,
             selected: true,
@@ -60,15 +66,22 @@ export function clickSelect(renderer: Renderer, graph: Graph): () => void {
         }
       }
     } else {
-      // Canvas click — clear all node selections
+      // Canvas click — clear all selections (only 'selected' state)
+      const selectedNodeIds = graph.findNodesByState('selected');
+      const selectedEdgeIds = graph.findEdgesByState('selected');
+      const clearedIds: string[] = [];
+
       for (const id of selectedNodeIds) {
-        graph.clearItemStates(id);
+        graph.setItemState(id, 'selected', false);
+        clearedIds.push(id);
       }
-      const clearedNodeIds = [...selectedNodeIds];
-      selectedNodeIds.clear();
-      selectedEdgeIndices.clear();
-      if (clearedNodeIds.length > 0) {
-        graph.eventEmitter.emit('selection:clear', { ids: clearedNodeIds, event: e });
+      for (const id of selectedEdgeIds) {
+        graph.setItemState(id, 'selected', false);
+        clearedIds.push(id);
+      }
+
+      if (clearedIds.length > 0) {
+        graph.eventEmitter.emit('selection:clear', { ids: clearedIds, event: e });
       }
     }
   };

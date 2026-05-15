@@ -11,7 +11,7 @@ export function clickNode(renderer: Renderer, graph: Graph): () => void {
 
   // ──── click ────
   const onClick = (e: MouseEvent) => {
-    const result = renderer.pickAt(e.clientX, e.clientY);
+    const result = renderer.pickAt(e.offsetX, e.offsetY);
     if (result && result.type === 'node') {
       graph.eventEmitter.emit('node:click', { nodeId: result.id, event: e });
     } else if (result && result.type === 'edge') {
@@ -32,7 +32,7 @@ export function clickNode(renderer: Renderer, graph: Graph): () => void {
 
   // ──── dblclick (P1) ────
   const onDblClick = (e: MouseEvent) => {
-    const result = renderer.pickAt(e.clientX, e.clientY);
+    const result = renderer.pickAt(e.offsetX, e.offsetY);
     if (result && result.type === 'node') {
       graph.eventEmitter.emit('node:dblclick', { nodeId: result.id, event: e });
     } else if (result && result.type === 'edge') {
@@ -54,7 +54,7 @@ export function clickNode(renderer: Renderer, graph: Graph): () => void {
   // ──── contextmenu / right-click (P0) ────
   const onContextMenu = (e: MouseEvent) => {
     e.preventDefault();
-    const result = renderer.pickAt(e.clientX, e.clientY);
+    const result = renderer.pickAt(e.offsetX, e.offsetY);
     if (result && result.type === 'node') {
       graph.eventEmitter.emit('node:contextmenu', { nodeId: result.id, event: e });
     } else if (result && result.type === 'edge') {

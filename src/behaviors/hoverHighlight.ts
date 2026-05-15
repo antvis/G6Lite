@@ -68,7 +68,6 @@ export function hoverHighlight(renderer: Renderer, graph?: Graph): () => void {
         emitLeave(e);
       }
       canvas.style.cursor = 'pointer';
-      const nodeId = result.id;
       const nodeIds = new Set<string>([nodeId]);
       const edgeIndices = new Set<number>();
       const edges = renderer.getEdges();

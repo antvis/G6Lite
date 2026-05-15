@@ -19,6 +19,8 @@ import type { Graph } from '../graph.js';
 export interface BrushSelectOptions {
   /** Modifier key to activate. null = always active. Default: null */
   key?: 'shift' | 'ctrl' | null;
+  /** Throttle interval for real-time selection during drag (ms). Default: 100 */
+  throttleMs?: number;
 }
 
 export function brushSelect(
@@ -28,11 +30,16 @@ export function brushSelect(
 ): () => void {
   const canvas = renderer.getCanvas();
   const modifierKey = options?.key ?? null;
+  const throttleMs = options?.throttleMs ?? 100;
 
   let selecting = false;
   let startX = 0;
   let startY = 0;
   let overlay: HTMLDivElement | null = null;
+  let lastSelectTime = 0;
+  let pendingSelect = false;
+  let currentMouseX = 0;
+  let currentMouseY = 0;
 
   const isModifierHeld = (e: MouseEvent): boolean => {
     if (!modifierKey) return true;
@@ -93,18 +100,43 @@ export function brushSelect(
     }
   };
 
+  // Throttled selection to improve performance on large graphs
+  const throttledSelect = (): void => {
+    if (!selecting) return;
+
+    const now = performance.now();
+    if (now - lastSelectTime >= throttleMs) {
+      selectNodesInRect(startX, startY, currentMouseX, currentMouseY);
+      lastSelectTime = now;
+      pendingSelect = false;
+    } else if (!pendingSelect) {
+      pendingSelect = true;
+      setTimeout(
+        () => {
+          if (selecting) {
+            selectNodesInRect(startX, startY, currentMouseX, currentMouseY);
+            lastSelectTime = performance.now();
+          }
+          pendingSelect = false;
+        },
+        throttleMs - (now - lastSelectTime),
+      );
+    }
+  };
+
   const onMouseDown = (e: MouseEvent): void => {
-    // Only activate on left button with modifier (if specified)
     if (e.button !== 0) return;
     if (!isModifierHeld(e)) return;
 
-    // Check if we hit a node — if so, don't start brush (let drag-node handle it)
     const hit = renderer.pickAt(e.offsetX, e.offsetY);
     if (hit && hit.type === 'node') return;
 
     selecting = true;
     startX = e.clientX;
     startY = e.clientY;
+    currentMouseX = e.clientX;
+    currentMouseY = e.clientY;
+    lastSelectTime = 0;
 
     if (!overlay) {
       overlay = createOverlay();
@@ -113,11 +145,10 @@ export function brushSelect(
 
   const onMouseMove = (e: MouseEvent): void => {
     if (!selecting) return;
-    updateOverlay(startX, startY, e.clientX, e.clientY);
-    // Note: CR suggests throttling selectNodesInRect for performance,
-    // but keeping real-time for responsiveness on small graphs.
-    // For large graphs (>1000 nodes), consider throttling.
-    selectNodesInRect(startX, startY, e.clientX, e.clientY);
+    currentMouseX = e.clientX;
+    currentMouseY = e.clientY;
+    updateOverlay(startX, startY, currentMouseX, currentMouseY);
+    throttledSelect();
   };
 
   const onMouseUp = (e: MouseEvent): void => {
@@ -128,7 +159,9 @@ export function brushSelect(
       overlay.style.display = 'none';
     }
 
-    // Final selection set is already applied, just emit end event
+    // Execute final selection immediately on mouse up
+    selectNodesInRect(startX, startY, currentMouseX, currentMouseY);
+
     const selectedIds = graph.findNodesByState('selected');
     graph.eventEmitter.emit('brush:end', { nodeIds: selectedIds });
   };

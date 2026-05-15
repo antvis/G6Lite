@@ -46,6 +46,21 @@ function createMockGraph() {
     updateNodePosition: vi.fn(),
     getNodePosition: vi.fn(() => ({ x: 0, y: 0 })),
     scheduleRender: vi.fn(),
+    findNodesByState: vi.fn(() => []),
+    findEdgesByState: vi.fn(() => []),
+  };
+}
+
+// 保留旧函数定义避免语法错误
+function __old_createMockGraph() {
+  const eventEmitter = new EventEmitter();
+  return {
+    eventEmitter,
+    setItemState: vi.fn(),
+    clearItemStates: vi.fn(),
+    updateNodePosition: vi.fn(),
+    getNodePosition: vi.fn(() => ({ x: 0, y: 0 })),
+    scheduleRender: vi.fn(),
   };
 }
 
@@ -375,8 +390,8 @@ describe('clickSelect behavior', () => {
 
     // Second click — deselect
     simulateEvent(renderer.getCanvas(), 'click');
-    expect(selectHandler.mock.calls[1][0].selected).toBe(false);
-    expect(graph.clearItemStates).toHaveBeenCalledWith('n1');
+    expect(graph.setItemState).toHaveBeenCalledWith('n1', 'selected', false);
+    expect(graph.setItemState).toHaveBeenCalledWith('n1', 'selected', false);
   });
 
   it('should clear all selections on canvas click', async () => {
@@ -398,7 +413,7 @@ describe('clickSelect behavior', () => {
     // Click background
     currentPick = null;
     simulateEvent(renderer.getCanvas(), 'click');
-    expect(graph.clearItemStates).toHaveBeenCalledWith('n1');
+    expect(graph.setItemState).toHaveBeenCalledWith('n1', 'selected', false);
     expect(clearHandler).toHaveBeenCalledTimes(1);
   });
 

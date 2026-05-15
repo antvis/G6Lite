@@ -68,4 +68,25 @@ export class EdgeLineProgram extends Program {
     this.array[o + 14] = pG;
     this.array[o + 15] = pB;
   }
+
+  /** Patch source and target positions for a single edge. */
+  patchEdgeEndpoints(index: number, sx: number, sy: number, tx: number, ty: number): void {
+    const o = index * 2 * FLOATS_PER_VERTEX;
+    // source vertex position
+    this.array[o] = sx;
+    this.array[o + 1] = sy;
+    // target vertex position
+    this.array[o + 8] = tx;
+    this.array[o + 9] = ty;
+  }
+
+  /** Patch style attributes for a single edge. */
+  patchEdgeStyle(
+    index: number,
+    patch: {
+      color?: [number, number, number];
+    },
+  ): void {
+    if (patch.color) this.patchAttribute(index, 'a_color', patch.color);
+  }
 }

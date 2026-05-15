@@ -38,5 +38,6 @@ export function createProgram(
 export function getGL(canvas: HTMLCanvasElement): WebGLRenderingContext {
   const gl = canvas.getContext('webgl', { alpha: false, antialias: true });
   if (!gl) throw new Error('WebGL not supported');
+  gl.getExtension('OES_standard_derivatives');
   return gl;
 }

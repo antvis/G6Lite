@@ -30,6 +30,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "jsdom": "^29.1.1",
     "lil-gui": "^0.21.0",
     "stats.js": "^0.17.0",
     "typescript": "^5.3.3",

@@ -29,7 +29,9 @@ interface TreeNode {
 
 type LayoutInstance = {
   execute: (data: GraphData) => Promise<void>;
-  forEachNode: (fn: (n: { id: string; x: number; y: number; data?: Record<string, unknown> }) => void) => void;
+  forEachNode: (
+    fn: (n: { id: string; x: number; y: number; data?: Record<string, unknown> }) => void,
+  ) => void;
 };
 
 const DEFAULT_LEVEL_GAP = 120;
@@ -37,8 +39,14 @@ const DEFAULT_NODE_GAP = 30;
 const DEFAULT_NODE_WIDTH = 100;
 const DEFAULT_NODE_HEIGHT = 40;
 const DEFAULT_BRANCH_COLORS = [
-  '#5B8FF9', '#F6BD16', '#5AD8A6', '#5D7092',
-  '#E8684A', '#6F5EF9', '#C6E5FF', '#FFD8B8',
+  '#5B8FF9',
+  '#F6BD16',
+  '#5AD8A6',
+  '#5D7092',
+  '#E8684A',
+  '#6F5EF9',
+  '#C6E5FF',
+  '#FFD8B8',
 ];
 
 export class MindmapLayout implements LayoutInstance {
@@ -83,7 +91,9 @@ export class MindmapLayout implements LayoutInstance {
     return positions;
   }
 
-  forEachNode(fn: (n: { id: string; x: number; y: number; data?: Record<string, unknown> }) => void): void {
+  forEachNode(
+    fn: (n: { id: string; x: number; y: number; data?: Record<string, unknown> }) => void,
+  ): void {
     const collect = (node: TreeNode | null) => {
       if (!node) return;
       fn({ id: node.id, x: node.x, y: node.y, data: node.data as Record<string, unknown> });
@@ -172,9 +182,13 @@ export class MindmapLayout implements LayoutInstance {
           child.side = this.options.getSide!(graphNode, idx, undefined);
         });
       } else if (this.options.direction === 'LR') {
-        node.children.forEach(child => { child.side = 'right'; });
+        node.children.forEach((child) => {
+          child.side = 'right';
+        });
       } else if (this.options.direction === 'RL') {
-        node.children.forEach(child => { child.side = 'left'; });
+        node.children.forEach((child) => {
+          child.side = 'left';
+        });
       }
     } else {
       // Non-root: children expand to opposite side of parent
@@ -186,7 +200,7 @@ export class MindmapLayout implements LayoutInstance {
     }
 
     // Recursively assign to children
-    node.children.forEach(child => this.assignSides(child, node.side));
+    node.children.forEach((child) => this.assignSides(child, node.side));
   }
 
   private calcPositions(node: TreeNode): void {

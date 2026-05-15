@@ -51,14 +51,14 @@ export class IndentedLayout {
     }
 
     // Find root
-    const root = rootId ?? nodes.find(n => !hasParent.has(n.id))?.id ?? nodes[0].id;
+    const root = rootId ?? nodes.find((n) => !hasParent.has(n.id))?.id ?? nodes[0].id;
 
     // Resolve palettes
     const nPalette = nodeColors ?? (nodeColors === undefined ? undefined : DEFAULT_PALETTE);
     const ePalette = edgeColors ?? (edgeColors === undefined ? undefined : DEFAULT_PALETTE);
 
     // DFS to assign coordinates and colors
-    const nodeMap = new Map(nodes.map(n => [n.id, n]));
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     let rowIndex = 0;
     this.nodes = [];
 

@@ -12,11 +12,21 @@ import { encodeId } from '../picking.js';
 const FLOATS_PER_VERTEX = 8;
 
 export class EdgeLineProgram extends Program {
-  getVertexShader() { return vertexShader; }
-  getFragmentShader() { return fragmentShader; }
-  getFloatsPerVertex() { return FLOATS_PER_VERTEX; }
-  getVerticesPerItem() { return 2; }
-  getDrawMethod() { return this.gl.LINES; }
+  getVertexShader() {
+    return vertexShader;
+  }
+  getFragmentShader() {
+    return fragmentShader;
+  }
+  getFloatsPerVertex() {
+    return FLOATS_PER_VERTEX;
+  }
+  getVerticesPerItem() {
+    return 2;
+  }
+  getDrawMethod() {
+    return this.gl.LINES;
+  }
 
   getAttributeLayout(): AttributeLayout[] {
     return [
@@ -39,8 +49,10 @@ export class EdgeLineProgram extends Program {
    */
   processEdge(
     index: number,
-    sx: number, sy: number,
-    tx: number, ty: number,
+    sx: number,
+    sy: number,
+    tx: number,
+    ty: number,
     color: [number, number, number],
     pickingIndex: number,
   ): void {

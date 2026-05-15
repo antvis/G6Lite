@@ -110,7 +110,9 @@ export class FishboneLayout {
     }
   }
 
-  forEachNode(fn: (n: { id: string; x: number; y: number; data?: Record<string, unknown> }) => void): void {
+  forEachNode(
+    fn: (n: { id: string; x: number; y: number; data?: Record<string, unknown> }) => void,
+  ): void {
     if (!this.tree) return;
     const visit = (n: TreeNode) => {
       fn({ id: n.id, x: n.x, y: n.y, data: n.data });

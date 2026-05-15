@@ -14,7 +14,15 @@ import { DataModel } from './data-model.js';
 import { RenderScheduler, RefreshLevel } from './scheduler.js';
 import { EventEmitter } from './events.js';
 import { analyzeNodeConfig, analyzeEdgeConfig } from './renderer/style.js';
-import type { GraphOptions, GraphData, GraphNode, GraphEdge, ThemeOption, LayoutNode, ElementState } from './types.js';
+import type {
+  GraphOptions,
+  GraphData,
+  GraphNode,
+  GraphEdge,
+  ThemeOption,
+  LayoutNode,
+  ElementState,
+} from './types.js';
 import type { Camera } from './renderer/camera.js';
 
 /** Result of a pick operation at screen coordinates. */
@@ -55,6 +63,15 @@ export class Graph {
     const { data, node, edge, layout, behaviors, theme } = this.options;
     const themeTokens = resolveTheme((theme as ThemeOption) ?? 'light');
 
+    // First, set up canvas with correct dimensions before any drawing.
+    const width = this.containerEl.clientWidth || 800;
+    const height = this.containerEl.clientHeight || 600;
+    this.renderer.resize(width, height);
+
+    // Clear canvas with theme background immediately so the user sees a white
+    // canvas instead of a black void while layout is computing.
+    this.renderer.clearWithTheme(themeTokens);
+
     let nodes = data.nodes.map((n) => ({
       ...n,
       x: n.x ?? 0,
@@ -62,6 +79,9 @@ export class Graph {
     }));
 
     if (layout && data.nodes.length > 0) {
+      // Yield to the browser so the background clear takes effect before
+      // the potentially blocking layout computation.
+      await new Promise((resolve) => requestAnimationFrame(resolve));
       // Auto-enable worker for large graphs unless explicitly disabled
       if (layout.worker === undefined && data.nodes.length > 2000) {
         layout.worker = true;
@@ -81,15 +101,27 @@ export class Graph {
       nodeConfig: node,
       edgeConfig: edge,
       theme: themeTokens,
-      layoutDirection: (layout?.rankdir ?? layout?.direction) as ('TB' | 'LR' | 'BT' | 'RL') | undefined ?? 'TB',
+      layoutDirection:
+        ((layout?.rankdir ?? layout?.direction) as ('TB' | 'LR' | 'BT' | 'RL') | undefined) ?? 'TB',
       layoutType: layout?.type,
       polylineRouter: edge?.style?.router ?? 'orth',
     });
 
     // Populate DataModel with initial data (pass arrays directly, no map/copy)
     this.dataModel.replaceData(
-      nodes as Array<{ id: string; x: number; y: number; data?: Record<string, unknown>; states?: ElementState[] }>,
-      data.edges as Array<{ source: string; target: string; data?: Record<string, unknown>; states?: ElementState[] }>,
+      nodes as Array<{
+        id: string;
+        x: number;
+        y: number;
+        data?: Record<string, unknown>;
+        states?: ElementState[];
+      }>,
+      data.edges as Array<{
+        source: string;
+        target: string;
+        data?: Record<string, unknown>;
+        states?: ElementState[];
+      }>,
     );
     // Clear the dataReplaced change since we'll do a full process immediately
     this.dataModel.getChanges();
@@ -104,7 +136,8 @@ export class Graph {
       edgeConfig: edge,
       theme: themeTokens,
       layoutType: layout?.type,
-      layoutDirection: (layout?.rankdir ?? layout?.direction) as ('TB' | 'LR' | 'BT' | 'RL') | undefined ?? 'TB',
+      layoutDirection:
+        ((layout?.rankdir ?? layout?.direction) as ('TB' | 'LR' | 'BT' | 'RL') | undefined) ?? 'TB',
       polylineRouter: edge?.style?.router ?? 'orth',
     });
 
@@ -117,16 +150,18 @@ export class Graph {
       this.behaviorTeardown = registerBehaviors(this.renderer, behaviors, this);
     }
 
-    const width = this.containerEl.clientWidth || 800;
-    const height = this.containerEl.clientHeight || 600;
-    this.renderer.resize(width, height);
-
     // Auto fit view
     this.fitView();
 
     // Ensure first render completes synchronously so the canvas is painted
     // after render() returns. Subsequent resizes use scheduleRender (deferred).
     this.renderer.draw();
+
+    // Emit afterrender event on first render completion
+    this.eventEmitter.emit('afterrender', {
+      nodeCount: nodes.length,
+      edgeCount: data.edges.length,
+    });
 
     // Capture initial camera after first fit
     if (!this.initialCamera) {
@@ -138,6 +173,7 @@ export class Graph {
       const w = this.containerEl.clientWidth || 800;
       const h = this.containerEl.clientHeight || 600;
       this.renderer.resize(w, h);
+      this.eventEmitter.emit('resize', { width: w, height: h });
     });
     this.resizeObserver.observe(this.containerEl);
 
@@ -146,6 +182,7 @@ export class Graph {
   }
 
   destroy(): void {
+    this.eventEmitter.emit('destroy');
     this.behaviorTeardown?.();
     this.resizeObserver?.disconnect();
     this.scheduler?.destroy();
@@ -173,7 +210,10 @@ export class Graph {
   fitView(padding = 0.9): void {
     const nodes = this.layoutNodes;
     if (!nodes.length) return;
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity;
     for (const n of nodes) {
       if (n.x < minX) minX = n.x;
       if (n.x > maxX) maxX = n.x;
@@ -277,7 +317,9 @@ export class Graph {
 
   private ensureInitialized(): void {
     if (!this.initialized || !this.dataModel || !this.scheduler) {
-      throw new Error('Graph must be rendered before calling data operations. Call render() first.');
+      throw new Error(
+        'Graph must be rendered before calling data operations. Call render() first.',
+      );
     }
   }
 
@@ -289,16 +331,22 @@ export class Graph {
     this.ensureInitialized();
     this.dataModel!.addNode(node);
     this.scheduler!.schedule();
+    this.eventEmitter.emit('afteradditem', { type: 'node', id: node.id });
   }
 
   /**
    * Add multiple nodes in one batch. More efficient than calling addNode repeatedly
    * because it triggers a single render.
    */
-  addNodes(nodes: Array<{ id: string; x: number; y: number; data?: Record<string, unknown> }>): void {
+  addNodes(
+    nodes: Array<{ id: string; x: number; y: number; data?: Record<string, unknown> }>,
+  ): void {
     this.ensureInitialized();
     this.dataModel!.addNodes(nodes);
     this.scheduler!.schedule();
+    for (const n of nodes) {
+      this.eventEmitter.emit('afteradditem', { type: 'node', id: n.id });
+    }
   }
 
   /**
@@ -308,6 +356,7 @@ export class Graph {
     this.ensureInitialized();
     this.dataModel!.removeNode(id);
     this.scheduler!.schedule();
+    this.eventEmitter.emit('afterremoveitem', { type: 'node', id });
   }
 
   /**
@@ -317,6 +366,9 @@ export class Graph {
     this.ensureInitialized();
     this.dataModel!.removeNodes(ids);
     this.scheduler!.schedule();
+    for (const id of ids) {
+      this.eventEmitter.emit('afterremoveitem', { type: 'node', id });
+    }
   }
 
   /**
@@ -328,6 +380,7 @@ export class Graph {
     this.ensureInitialized();
     this.dataModel!.updateNodePosition(id, x, y);
     this.scheduler!.schedule();
+    this.eventEmitter.emit('afterupdateitem', { type: 'node', id, action: 'position' });
   }
 
   /**
@@ -338,6 +391,7 @@ export class Graph {
     this.ensureInitialized();
     this.dataModel!.updateNodeData(id, data);
     this.scheduler!.schedule();
+    this.eventEmitter.emit('afterupdateitem', { type: 'node', id, action: 'data' });
   }
 
   /**
@@ -347,16 +401,32 @@ export class Graph {
     this.ensureInitialized();
     const id = this.dataModel!.addEdge(edge);
     this.scheduler!.schedule();
+    this.eventEmitter.emit('afteradditem', {
+      type: 'edge',
+      id,
+      source: edge.source,
+      target: edge.target,
+    });
     return id;
   }
 
   /**
    * Add multiple edges in one batch. Returns the auto-generated edge IDs.
    */
-  addEdges(edges: Array<{ source: string; target: string; data?: Record<string, unknown> }>): string[] {
+  addEdges(
+    edges: Array<{ source: string; target: string; data?: Record<string, unknown> }>,
+  ): string[] {
     this.ensureInitialized();
     const ids = this.dataModel!.addEdges(edges);
     this.scheduler!.schedule();
+    for (let i = 0; i < ids.length; i++) {
+      this.eventEmitter.emit('afteradditem', {
+        type: 'edge',
+        id: ids[i],
+        source: edges[i].source,
+        target: edges[i].target,
+      });
+    }
     return ids;
   }
 
@@ -367,6 +437,7 @@ export class Graph {
     this.ensureInitialized();
     this.dataModel!.removeEdge(id);
     this.scheduler!.schedule();
+    this.eventEmitter.emit('afterremoveitem', { type: 'edge', id });
   }
 
   /**
@@ -376,6 +447,9 @@ export class Graph {
     this.ensureInitialized();
     this.dataModel!.removeEdges(ids);
     this.scheduler!.schedule();
+    for (const id of ids) {
+      this.eventEmitter.emit('afterremoveitem', { type: 'edge', id });
+    }
   }
 
   // ──── P1: State management ────
@@ -428,7 +502,9 @@ export class Graph {
    */
   getAdjacentEdges(nodeId: string): Array<{ id: string; source: string; target: string }> {
     if (!this.dataModel) return [];
-    return this.dataModel.getAdjacentEdges(nodeId).map(e => ({ id: e.id, source: e.source, target: e.target }));
+    return this.dataModel
+      .getAdjacentEdges(nodeId)
+      .map((e) => ({ id: e.id, source: e.source, target: e.target }));
   }
 
   /**
@@ -450,6 +526,26 @@ export class Graph {
    */
   getEdgeCount(): number {
     return this.dataModel?.getEdgeCount() ?? 0;
+  }
+
+  // ──── Batch state queries (P3) ────
+
+  /**
+   * Find all node IDs that have the given state.
+   * Example: graph.findNodesByState('selected') → ['node1', 'node3']
+   */
+  findNodesByState(state: ElementState): string[] {
+    if (!this.dataModel) return [];
+    return this.dataModel.findNodesByState(state);
+  }
+
+  /**
+   * Find all edge IDs that have the given state.
+   * Example: graph.findEdgesByState('active') → ['e0', 'e5']
+   */
+  findEdgesByState(state: ElementState): string[] {
+    if (!this.dataModel) return [];
+    return this.dataModel.findEdgesByState(state);
   }
 
   /**

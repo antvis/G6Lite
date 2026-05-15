@@ -18,7 +18,13 @@ import { EdgeCubicProgram } from './programs/edgeCubic.js';
 import { EdgeArrowProgram } from './programs/edgeArrow.js';
 import { EdgeLoopProgram } from './programs/edgeLoop.js';
 import { PickingManager } from './picking.js';
-import { computeOrthogonalRoute, applyRoundedCorners, computeTreeRoutes, computeIndentedRoutes, computeFishboneRoute } from '../routing/orthogonal.js';
+import {
+  computeOrthogonalRoute,
+  applyRoundedCorners,
+  computeTreeRoutes,
+  computeIndentedRoutes,
+  computeFishboneRoute,
+} from '../routing/orthogonal.js';
 import type { Waypoint, NodeRect } from '../routing/orthogonal.js';
 import type { RenderParams } from './programs/program.js';
 import type { Program } from './programs/program.js';
@@ -74,7 +80,12 @@ export class Renderer {
   private edgeTargetIdx: Int32Array = new Int32Array(0);
   private nodeConfig: NodeConfig | undefined;
   private edgeConfig: EdgeConfig | undefined;
-  private theme: ThemeTokens = { nodeFill: '#5B8FF9', nodeSize: 8, edgeStroke: '#e2e2e2', edgeLineWidth: 1 };
+  private theme: ThemeTokens = {
+    nodeFill: '#5B8FF9',
+    nodeSize: 8,
+    edgeStroke: '#e2e2e2',
+    edgeLineWidth: 1,
+  };
   private layoutDirection: 'TB' | 'LR' | 'BT' | 'RL' = 'TB';
   private polylineRouter: 'orth' | 'tree' | 'indented' | 'fishbone' = 'orth';
   private indentTarget: 'left' | 'right' = 'left';
@@ -120,10 +131,10 @@ export class Renderer {
   private _nodeHeights: Float64Array | null = null;
   private _nodeVisible: Uint8Array | null = null;
 
-  
   constructor(container: string | HTMLElement) {
     const el = typeof container === 'string' ? document.querySelector(container) : container;
-    if (!el || !(el instanceof HTMLCanvasElement)) throw new Error('Container must be a canvas or canvas selector');
+    if (!el || !(el instanceof HTMLCanvasElement))
+      throw new Error('Container must be a canvas or canvas selector');
     this.canvas = el;
     this.gl = getGL(this.canvas);
     this.gl.enable(this.gl.BLEND);
@@ -218,7 +229,8 @@ export class Renderer {
     const hasHighlight = this.highlightNodeIds.size > 0;
 
     // -- Process nodes --
-    const nodeProgram = this.activeNodeType === 'rect' ? this.programs.nodeRect : this.programs.nodeCircle;
+    const nodeProgram =
+      this.activeNodeType === 'rect' ? this.programs.nodeRect : this.programs.nodeCircle;
     nodeProgram.reallocate(nodes.length);
 
     // Pre-allocate arrays for edge processing (reused across process calls)
@@ -242,7 +254,14 @@ export class Renderer {
       const isRect = this.activeNodeType === 'rect';
       if (!isRect) {
         // Circle nodes: use template + processNodeStatic for maximum throughput
-        const template = NodeCircleProgram.buildTemplate(base.size, baseColor, effectiveStrokeWidth, strokeColor, effectiveOpacity, base.haloWidth);
+        const template = NodeCircleProgram.buildTemplate(
+          base.size,
+          baseColor,
+          effectiveStrokeWidth,
+          strokeColor,
+          effectiveOpacity,
+          base.haloWidth,
+        );
         for (let i = 0; i < nodes.length; i++) {
           const node = nodes[i];
           (nodeProgram as NodeCircleProgram).processNodeStatic(i, node.x, node.y, i, template);
@@ -252,7 +271,20 @@ export class Renderer {
       } else {
         for (let i = 0; i < nodes.length; i++) {
           const node = nodes[i];
-          (nodeProgram as NodeRectProgram).processNode(i, node.x, node.y, base.width, base.height, baseColor, i, effectiveStrokeWidth, strokeColor, effectiveOpacity, base.haloWidth, base.borderRadius);
+          (nodeProgram as NodeRectProgram).processNode(
+            i,
+            node.x,
+            node.y,
+            base.width,
+            base.height,
+            baseColor,
+            i,
+            effectiveStrokeWidth,
+            strokeColor,
+            effectiveOpacity,
+            base.haloWidth,
+            base.borderRadius,
+          );
           nodeHalfWidths[i] = base.width / 2;
           nodeHeights[i] = base.height;
         }
@@ -271,15 +303,43 @@ export class Renderer {
         const isStrokeTransparent = style.stroke === 'transparent' || style.stroke === 'none';
         const color: [number, number, number] = active
           ? baseColor
-          : [baseColor[0] * 0.25 + bg[0] * 0.75, baseColor[1] * 0.25 + bg[1] * 0.75, baseColor[2] * 0.25 + bg[2] * 0.75];
+          : [
+              baseColor[0] * 0.25 + bg[0] * 0.75,
+              baseColor[1] * 0.25 + bg[1] * 0.75,
+              baseColor[2] * 0.25 + bg[2] * 0.75,
+            ];
         const opacity = active ? style.opacity : Math.min(style.opacity, 0.25);
         const effectiveOpacity = isFillTransparent ? 0 : opacity;
         const effectiveStrokeWidth = isStrokeTransparent ? 0 : style.strokeWidth;
 
         if (this.activeNodeType === 'rect') {
-          (nodeProgram as NodeRectProgram).processNode(i, node.x, node.y, style.width, style.height, color, i, effectiveStrokeWidth, strokeColor, effectiveOpacity, style.haloWidth, style.borderRadius);
+          (nodeProgram as NodeRectProgram).processNode(
+            i,
+            node.x,
+            node.y,
+            style.width,
+            style.height,
+            color,
+            i,
+            effectiveStrokeWidth,
+            strokeColor,
+            effectiveOpacity,
+            style.haloWidth,
+            style.borderRadius,
+          );
         } else {
-          (nodeProgram as NodeCircleProgram).processNode(i, node.x, node.y, style.size, color, i, effectiveStrokeWidth, strokeColor, effectiveOpacity, style.haloWidth);
+          (nodeProgram as NodeCircleProgram).processNode(
+            i,
+            node.x,
+            node.y,
+            style.size,
+            color,
+            i,
+            effectiveStrokeWidth,
+            strokeColor,
+            effectiveOpacity,
+            style.haloWidth,
+          );
         }
 
         // Pre-compute dimensions for edge processing
@@ -313,8 +373,9 @@ export class Renderer {
       // Static config: arrow count is deterministic without per-edge resolveEdgeStyle
       const endArrow = edgeCache.cachedStyle.endArrow;
       const startArrow = edgeCache.cachedStyle.startArrow;
-      arrowCount = regularIndices.length * (Number(endArrow) + Number(startArrow))
-        + selfLoopIndices.length * Number(endArrow);
+      arrowCount =
+        regularIndices.length * (Number(endArrow) + Number(startArrow)) +
+        selfLoopIndices.length * Number(endArrow);
     } else {
       // Dynamic config: must resolve per-edge to count arrows; cache results for reuse
       dynamicEdgeStyleCache = new Array(edges.length);
@@ -333,7 +394,20 @@ export class Renderer {
     }
 
     // -- Process regular edges --
-    this.processFullEdges(regularIndices, selfLoopIndices, nodes, edges, edgeConfig, theme, nodeHalfWidths, nodeHeights, bg, hasHighlight, arrowCount, dynamicEdgeStyleCache);
+    this.processFullEdges(
+      regularIndices,
+      selfLoopIndices,
+      nodes,
+      edges,
+      edgeConfig,
+      theme,
+      nodeHalfWidths,
+      nodeHeights,
+      bg,
+      hasHighlight,
+      arrowCount,
+      dynamicEdgeStyleCache,
+    );
 
     this.picking.setNodeCount(nodes.length);
     this.needToProcess = false;
@@ -366,7 +440,9 @@ export class Renderer {
 
     // For polyline: compute all routes first to know total segment count
     // Reuse dynamicEdgeStyleCache from process() if available, otherwise build one for polyline
-    const edgeStyleCache: ResolvedEdgeStyle[] | null = dynamicEdgeStyleCache ?? (isPolyline && edges.length <= 2000 ? new Array(edges.length) : null);
+    const edgeStyleCache: ResolvedEdgeStyle[] | null =
+      dynamicEdgeStyleCache ??
+      (isPolyline && edges.length <= 2000 ? new Array(edges.length) : null);
 
     if (isPolyline) {
       // Only cache routes for reasonably sized graphs
@@ -400,14 +476,21 @@ export class Renderer {
             tgt: { x: tgt.x, y: tgt.y, width: tgtW, height: tgtH },
           });
         }
-        const routes = this.polylineRouter === 'indented'
-          ? computeIndentedRoutes(edgeRects, this.layoutDirection, this.indentTarget, this.trunkGap)
-          : computeTreeRoutes(edgeRects, this.layoutDirection, 'cubic');
+        const routes =
+          this.polylineRouter === 'indented'
+            ? computeIndentedRoutes(
+                edgeRects,
+                this.layoutDirection,
+                this.indentTarget,
+                this.trunkGap,
+              )
+            : computeTreeRoutes(edgeRects, this.layoutDirection, 'cubic');
         for (const [i, rawRoute] of routes) {
           const r = radiusByIndex.get(i) ?? 0;
-          const route = (this.polylineRouter === 'indented' && r > 0)
-            ? applyRoundedCorners(rawRoute, r)
-            : rawRoute;
+          const route =
+            this.polylineRouter === 'indented' && r > 0
+              ? applyRoundedCorners(rawRoute, r)
+              : rawRoute;
           if (shouldCacheRoutes) {
             this.polylineRoutes.set(i, route);
           }
@@ -428,17 +511,18 @@ export class Renderer {
           const srcH = nodeHeights[srcIdx];
           const tgtW = nodeHalfWidths[tgtIdx] * 2;
           const tgtH = nodeHeights[tgtIdx];
-          const rawRoute = this.polylineRouter === 'fishbone'
-            ? computeFishboneRoute(
-                { x: src.x, y: src.y, width: srcW, height: srcH },
-                { x: tgt.x, y: tgt.y, width: tgtW, height: tgtH },
-                this.layoutDirection,
-              )
-            : computeOrthogonalRoute(
-                { x: src.x, y: src.y, width: srcW, height: srcH },
-                { x: tgt.x, y: tgt.y, width: tgtW, height: tgtH },
-                this.layoutDirection,
-              );
+          const rawRoute =
+            this.polylineRouter === 'fishbone'
+              ? computeFishboneRoute(
+                  { x: src.x, y: src.y, width: srcW, height: srcH },
+                  { x: tgt.x, y: tgt.y, width: tgtW, height: tgtH },
+                  this.layoutDirection,
+                )
+              : computeOrthogonalRoute(
+                  { x: src.x, y: src.y, width: srcW, height: srcH },
+                  { x: tgt.x, y: tgt.y, width: tgtW, height: tgtH },
+                  this.layoutDirection,
+                );
           const route = style.radius > 0 ? applyRoundedCorners(rawRoute, style.radius) : rawRoute;
           if (shouldCacheRoutes) {
             this.polylineRoutes.set(i, route);
@@ -455,7 +539,8 @@ export class Renderer {
 
     // Fast path: static edge config with no highlight — use cached style directly
     const eCache = edgeConfig ? edgeConfigCache.get(edgeConfig) : undefined;
-    const useStaticEdgeStyle = eCache?.styleType === 'static' && eCache.cachedStyle && !hasHighlight && !isPolyline;
+    const useStaticEdgeStyle =
+      eCache?.styleType === 'static' && eCache.cachedStyle && !hasHighlight && !isPolyline;
 
     for (let ri = 0; ri < regularIndices.length; ri++) {
       const i = regularIndices[ri];
@@ -479,7 +564,11 @@ export class Renderer {
       let opacity = style.opacity;
       const color: [number, number, number] = active
         ? edgeBaseColor
-        : [edgeBaseColor[0] * 0.08 + bg[0] * 0.92, edgeBaseColor[1] * 0.08 + bg[1] * 0.92, edgeBaseColor[2] * 0.08 + bg[2] * 0.92];
+        : [
+            edgeBaseColor[0] * 0.08 + bg[0] * 0.92,
+            edgeBaseColor[1] * 0.08 + bg[1] * 0.92,
+            edgeBaseColor[2] * 0.08 + bg[2] * 0.92,
+          ];
       if (!active) opacity = Math.min(opacity, 0.08);
 
       const pickIdx = nodes.length + i;
@@ -492,9 +581,17 @@ export class Renderer {
           for (let s = 0; s < route.length - 1; s++) {
             (edgeProg as EdgeRectProgram).processEdge(
               polySegIdx++,
-              route[s].x, route[s].y,
-              route[s + 1].x, route[s + 1].y,
-              color, pickIdx, style.lineWidth, dashCycle, opacity, 0, 0,
+              route[s].x,
+              route[s].y,
+              route[s + 1].x,
+              route[s + 1].y,
+              color,
+              pickIdx,
+              style.lineWidth,
+              dashCycle,
+              opacity,
+              0,
+              0,
             );
           }
         }
@@ -505,33 +602,60 @@ export class Renderer {
         const clampTarget = tgtHalfW + (style.endArrow ? style.arrowSize * 0.8 : 0);
 
         if (this.activeEdgeType === 'arc') {
-          (edgeProg as EdgeArcProgram).processEdge(ri, src.x, src.y, tgt.x, tgt.y, color, pickIdx, style.curvature);
+          (edgeProg as EdgeArcProgram).processEdge(
+            ri,
+            src.x,
+            src.y,
+            tgt.x,
+            tgt.y,
+            color,
+            pickIdx,
+            style.curvature,
+          );
         } else if (this.activeEdgeType === 'cubic') {
           const curveOffset = style.curveOffset ?? 60;
           const direction = src.x < tgt.x ? 'LR' : 'RL';
           // Calculate edge endpoints at node edges
-          let edgeSrcX = src.x, edgeSrcY = src.y;
-          let edgeTgtX = tgt.x, edgeTgtY = tgt.y;
-          if (direction === 'LR') {
-            // From right of source to left of target
-            edgeSrcX = src.x + srcHalfW;
-            edgeTgtX = tgt.x - tgtHalfW;
-          } else {
-            // From left of source to right of target
-            edgeSrcX = src.x - srcHalfW;
-            edgeTgtX = tgt.x + tgtHalfW;
-          }
-          (edgeProg as EdgeCubicProgram).processEdge(ri, edgeSrcX, edgeSrcY, edgeTgtX, edgeTgtY, color, pickIdx, curveOffset, direction);
+          const edgeSrcX = direction === 'LR' ? src.x + srcHalfW : src.x - srcHalfW;
+          const edgeSrcY = src.y;
+          const edgeTgtX = direction === 'LR' ? tgt.x - tgtHalfW : tgt.x + tgtHalfW;
+          const edgeTgtY = tgt.y;
+          (edgeProg as EdgeCubicProgram).processEdge(
+            ri,
+            edgeSrcX,
+            edgeSrcY,
+            edgeTgtX,
+            edgeTgtY,
+            color,
+            pickIdx,
+            curveOffset,
+            direction,
+          );
         } else if (this.activeEdgeType === 'rect') {
-          (edgeProg as EdgeRectProgram).processEdge(ri, src.x, src.y, tgt.x, tgt.y, color, pickIdx, style.lineWidth, dashCycle, opacity, clampSource, clampTarget);
+          (edgeProg as EdgeRectProgram).processEdge(
+            ri,
+            src.x,
+            src.y,
+            tgt.x,
+            tgt.y,
+            color,
+            pickIdx,
+            style.lineWidth,
+            dashCycle,
+            opacity,
+            clampSource,
+            clampTarget,
+          );
         } else {
           (edgeProg as EdgeLineProgram).processEdge(ri, src.x, src.y, tgt.x, tgt.y, color, pickIdx);
         }
       }
 
       // Arrows
-      let arrowSrcX = src.x, arrowSrcY = src.y;
-      let arrowTgtSrcX = tgt.x, arrowTgtSrcY = tgt.y;
+      let arrowSrcX = src.x,
+        arrowSrcY = src.y;
+      let arrowTgtSrcX = tgt.x,
+        arrowTgtSrcY = tgt.y;
       if (isPolyline) {
         // Arrow direction from last segment of polyline
         const route = this.polylineRoutes.get(i);
@@ -557,13 +681,35 @@ export class Renderer {
         const tgtRadius = nodeHalfWidths[tgtIdx];
         const arrowTgtX = isPolyline ? (this.polylineRoutes.get(i)?.at(-1)?.x ?? tgt.x) : tgt.x;
         const arrowTgtY = isPolyline ? (this.polylineRoutes.get(i)?.at(-1)?.y ?? tgt.y) : tgt.y;
-        arrowProg.processArrow(arrowIdx++, arrowSrcX, arrowSrcY, arrowTgtX, arrowTgtY, style.arrowSize, style.lineWidth, 0, color, pickIdx);
+        arrowProg.processArrow(
+          arrowIdx++,
+          arrowSrcX,
+          arrowSrcY,
+          arrowTgtX,
+          arrowTgtY,
+          style.arrowSize,
+          style.lineWidth,
+          0,
+          color,
+          pickIdx,
+        );
       }
       if (style.startArrow) {
         const srcRadius = nodeHalfWidths[srcIdx];
         const arrowSrcPtX = isPolyline ? (this.polylineRoutes.get(i)?.[0]?.x ?? src.x) : src.x;
         const arrowSrcPtY = isPolyline ? (this.polylineRoutes.get(i)?.[0]?.y ?? src.y) : src.y;
-        arrowProg.processArrow(arrowIdx++, arrowTgtSrcX, arrowTgtSrcY, arrowSrcPtX, arrowSrcPtY, style.arrowSize, style.lineWidth, 0, color, pickIdx);
+        arrowProg.processArrow(
+          arrowIdx++,
+          arrowTgtSrcX,
+          arrowTgtSrcY,
+          arrowSrcPtX,
+          arrowSrcPtY,
+          style.arrowSize,
+          style.lineWidth,
+          0,
+          color,
+          pickIdx,
+        );
       }
     }
     edgeProg.upload();
@@ -578,13 +724,19 @@ export class Renderer {
       const nIdx = this.edgeSourceIdx[i];
       if (nIdx < 0) continue;
       const node = nodes[nIdx];
-      const style = useStaticEdgeStyle ? eCache.cachedStyle! : (dynamicEdgeStyleCache?.[i] ?? resolveEdgeStyle(node, node, e, edgeConfig, theme));
+      const style = useStaticEdgeStyle
+        ? eCache.cachedStyle!
+        : (dynamicEdgeStyleCache?.[i] ?? resolveEdgeStyle(node, node, e, edgeConfig, theme));
       const active = !hasHighlight || this.highlightEdgeIndices.has(i);
       // Use pre-parsed colors if available (static optimization), otherwise parse on-the-fly
       const edgeBaseColor = style.strokeRGB ?? parseColor(style.stroke);
       const color: [number, number, number] = active
         ? edgeBaseColor
-        : [edgeBaseColor[0] * 0.08 + bg[0] * 0.92, edgeBaseColor[1] * 0.08 + bg[1] * 0.92, edgeBaseColor[2] * 0.08 + bg[2] * 0.92];
+        : [
+            edgeBaseColor[0] * 0.08 + bg[0] * 0.92,
+            edgeBaseColor[1] * 0.08 + bg[1] * 0.92,
+            edgeBaseColor[2] * 0.08 + bg[2] * 0.92,
+          ];
       const pickIdx = nodes.length + i;
 
       // Nested mode: all loops point upward (top), increasing distance
@@ -609,7 +761,18 @@ export class Renderer {
         // P3 (end point on node edge)
         const p3x = node.x + nodeRadius * Math.cos(endAngle);
         const p3y = node.y + nodeRadius * Math.sin(endAngle);
-        arrowProg.processArrow(arrowIdx++, cp2x, cp2y, p3x, p3y, style.arrowSize, style.lineWidth, 0, color, pickIdx);
+        arrowProg.processArrow(
+          arrowIdx++,
+          cp2x,
+          cp2y,
+          p3x,
+          p3y,
+          style.arrowSize,
+          style.lineWidth,
+          0,
+          color,
+          pickIdx,
+        );
       }
     }
     loopProg.upload();
@@ -649,7 +812,11 @@ export class Renderer {
       const baseColor = parseColor(style.fill);
       const color: [number, number, number] = active
         ? baseColor
-        : [baseColor[0] * 0.25 + bg[0] * 0.75, baseColor[1] * 0.25 + bg[1] * 0.75, baseColor[2] * 0.25 + bg[2] * 0.75];
+        : [
+            baseColor[0] * 0.25 + bg[0] * 0.75,
+            baseColor[1] * 0.25 + bg[1] * 0.75,
+            baseColor[2] * 0.25 + bg[2] * 0.75,
+          ];
       nodeProgram.patchItemColor(idx, color);
     }
 
@@ -679,7 +846,11 @@ export class Renderer {
       const edgeBaseColor = style.strokeRGB ?? parseColor(style.stroke);
       const color: [number, number, number] = active
         ? edgeBaseColor
-        : [edgeBaseColor[0] * 0.08 + bg[0] * 0.92, edgeBaseColor[1] * 0.08 + bg[1] * 0.92, edgeBaseColor[2] * 0.08 + bg[2] * 0.92];
+        : [
+            edgeBaseColor[0] * 0.08 + bg[0] * 0.92,
+            edgeBaseColor[1] * 0.08 + bg[1] * 0.92,
+            edgeBaseColor[2] * 0.08 + bg[2] * 0.92,
+          ];
       edgeProgram.patchItemColor(i, color);
     }
 
@@ -749,14 +920,33 @@ export class Renderer {
           const style = resolveEdgeStyle(src, tgt, e, this.edgeConfig, this.theme);
           const srcStyle = resolveNodeStyle(src, this.nodeConfig, this.theme);
           const tgtStyle = resolveNodeStyle(tgt, this.nodeConfig, this.theme);
-          const srcHalfW = (this.activeNodeType === 'rect' ? srcStyle.width : srcStyle.size) / 2 * this.camera.zoom;
-          const tgtHalfW = (this.activeNodeType === 'rect' ? tgtStyle.width : tgtStyle.size) / 2 * this.camera.zoom;
+          const srcHalfW =
+            ((this.activeNodeType === 'rect' ? srcStyle.width : srcStyle.size) / 2) *
+            this.camera.zoom;
+          const tgtHalfW =
+            ((this.activeNodeType === 'rect' ? tgtStyle.width : tgtStyle.size) / 2) *
+            this.camera.zoom;
           const clampSource = srcHalfW + (style.startArrow ? style.arrowSize * 0.8 : 0);
           const clampTarget = tgtHalfW + (style.endArrow ? style.arrowSize * 0.8 : 0);
-          (edgeProgram as import('./programs/edgeRect.js').EdgeRectProgram).patchEdgeEndpoints(i, src.x, src.y, tgt.x, tgt.y);
-          (edgeProgram as import('./programs/edgeRect.js').EdgeRectProgram).patchEdgeStyle(i, { clampSource, clampTarget });
+          (edgeProgram as import('./programs/edgeRect.js').EdgeRectProgram).patchEdgeEndpoints(
+            i,
+            src.x,
+            src.y,
+            tgt.x,
+            tgt.y,
+          );
+          (edgeProgram as import('./programs/edgeRect.js').EdgeRectProgram).patchEdgeStyle(i, {
+            clampSource,
+            clampTarget,
+          });
         } else {
-          (edgeProgram as import('./programs/edgeLine.js').EdgeLineProgram).patchEdgeEndpoints(i, src.x, src.y, tgt.x, tgt.y);
+          (edgeProgram as import('./programs/edgeLine.js').EdgeLineProgram).patchEdgeEndpoints(
+            i,
+            src.x,
+            src.y,
+            tgt.x,
+            tgt.y,
+          );
         }
       }
       edgeProgram.upload();
@@ -774,7 +964,11 @@ export class Renderer {
    * Incremental style update: patch style attributes for items whose state or data changed.
    * Avoids full buffer rebuild by only patching the affected attribute floats.
    */
-  patchStyles(dataModel: import('../data-model.js').DataModel, changedNodeIds: Set<string>, changedEdgeIds: Set<string>): void {
+  patchStyles(
+    dataModel: import('../data-model.js').DataModel,
+    changedNodeIds: Set<string>,
+    changedEdgeIds: Set<string>,
+  ): void {
     const bg = parseColor(this.theme.canvasBackground ?? '#fff');
     const hasHighlight = this.highlightNodeIds.size > 0;
     const nodeProgram = this.activeNodeProgram;
@@ -794,7 +988,7 @@ export class Renderer {
           x: node.x,
           y: node.y,
           data: node.data as any,
-          states: node.states.size > 0 ? Array.from(node.states) as any : undefined,
+          states: node.states.size > 0 ? (Array.from(node.states) as any) : undefined,
         };
 
         const style = resolveNodeStyle(this.nodes[idx], this.nodeConfig, this.theme);
@@ -803,7 +997,11 @@ export class Renderer {
         const baseColor = style.fillRGB ?? parseColor(style.fill);
         const color: [number, number, number] = active
           ? baseColor
-          : [baseColor[0] * 0.25 + bg[0] * 0.75, baseColor[1] * 0.25 + bg[1] * 0.75, baseColor[2] * 0.25 + bg[2] * 0.75];
+          : [
+              baseColor[0] * 0.25 + bg[0] * 0.75,
+              baseColor[1] * 0.25 + bg[1] * 0.75,
+              baseColor[2] * 0.25 + bg[2] * 0.75,
+            ];
         const opacity = active ? style.opacity : Math.min(style.opacity, 0.25);
         const strokeColor = style.strokeRGB ?? parseColor(style.stroke);
         const isFillTransparent = style.fill === 'transparent' || style.fill === 'none';
@@ -813,17 +1011,27 @@ export class Renderer {
 
         if (this.activeNodeType === 'rect') {
           (nodeProgram as import('./programs/nodeRect.js').NodeRectProgram).patchNodeStyle(idx, {
-            color, width: style.width, height: style.height,
-            strokeWidth: effectiveStrokeWidth, strokeColor,
-            opacity: effectiveOpacity, haloWidth: style.haloWidth,
+            color,
+            width: style.width,
+            height: style.height,
+            strokeWidth: effectiveStrokeWidth,
+            strokeColor,
+            opacity: effectiveOpacity,
+            haloWidth: style.haloWidth,
             borderRadius: style.borderRadius,
           });
         } else {
-          (nodeProgram as import('./programs/nodeCircle.js').NodeCircleProgram).patchNodeStyle(idx, {
-            color, size: style.size,
-            strokeWidth: effectiveStrokeWidth, strokeColor,
-            opacity: effectiveOpacity, haloWidth: style.haloWidth,
-          });
+          (nodeProgram as import('./programs/nodeCircle.js').NodeCircleProgram).patchNodeStyle(
+            idx,
+            {
+              color,
+              size: style.size,
+              strokeWidth: effectiveStrokeWidth,
+              strokeColor,
+              opacity: effectiveOpacity,
+              haloWidth: style.haloWidth,
+            },
+          );
         }
       }
       nodeProgram.reupload();
@@ -847,7 +1055,7 @@ export class Renderer {
           this.edges[idx] = {
             ...this.edges[idx],
             data: dmEdge.data as any,
-            states: dmEdge.states.size > 0 ? Array.from(dmEdge.states) as any : undefined,
+            states: dmEdge.states.size > 0 ? (Array.from(dmEdge.states) as any) : undefined,
           };
         }
 
@@ -859,17 +1067,27 @@ export class Renderer {
         const edgeBaseColor = style.strokeRGB ?? parseColor(style.stroke);
         const color: [number, number, number] = active
           ? edgeBaseColor
-          : [edgeBaseColor[0] * 0.08 + bg[0] * 0.92, edgeBaseColor[1] * 0.08 + bg[1] * 0.92, edgeBaseColor[2] * 0.08 + bg[2] * 0.92];
+          : [
+              edgeBaseColor[0] * 0.08 + bg[0] * 0.92,
+              edgeBaseColor[1] * 0.08 + bg[1] * 0.92,
+              edgeBaseColor[2] * 0.08 + bg[2] * 0.92,
+            ];
         const opacity = active ? style.opacity : Math.min(style.opacity, 0.08);
 
         if (isSimpleEdge) {
           if (this.activeEdgeType === 'rect') {
-            const dashCycle = style.lineDash.length >= 2 ? style.lineDash[0] + style.lineDash[1] : 0;
+            const dashCycle =
+              style.lineDash.length >= 2 ? style.lineDash[0] + style.lineDash[1] : 0;
             (edgeProgram as import('./programs/edgeRect.js').EdgeRectProgram).patchEdgeStyle(idx, {
-              color, lineWidth: style.lineWidth, dashCycle, opacity,
+              color,
+              lineWidth: style.lineWidth,
+              dashCycle,
+              opacity,
             });
           } else {
-            (edgeProgram as import('./programs/edgeLine.js').EdgeLineProgram).patchEdgeStyle(idx, { color });
+            (edgeProgram as import('./programs/edgeLine.js').EdgeLineProgram).patchEdgeStyle(idx, {
+              color,
+            });
           }
         }
         // For arc/cubic/polyline, style patching requires full re-tessellation — skip, will trigger PARTIAL_PROCESS
@@ -886,7 +1104,11 @@ export class Renderer {
    * Partial process: incrementally update GPU buffers for added/removed elements.
    * Optimized path: append new nodes/edges instead of full rebuild when possible.
    */
-  partialProcess(dataModel: import('../data-model.js').DataModel, addedNodeIds?: string[], addedEdgeIds?: string[]): void {
+  partialProcess(
+    dataModel: import('../data-model.js').DataModel,
+    addedNodeIds?: string[],
+    addedEdgeIds?: string[],
+  ): void {
     const prevNodeCount = this.nodes.length;
     const prevEdgeCount = this.edges.length;
 
@@ -895,7 +1117,11 @@ export class Renderer {
     this.edges = dataModel.getEdges() as unknown as GraphEdge[];
 
     // Rebuild ID index incrementally
-    if (addedNodeIds && addedNodeIds.length > 0 && this.nodes.length === prevNodeCount + addedNodeIds.length) {
+    if (
+      addedNodeIds &&
+      addedNodeIds.length > 0 &&
+      this.nodes.length === prevNodeCount + addedNodeIds.length
+    ) {
       // Optimized: only add new indices
       for (let i = prevNodeCount; i < this.nodes.length; i++) {
         this.nodeIdToIndex.set(this.nodes[i].id, i);
@@ -908,7 +1134,11 @@ export class Renderer {
       }
     }
 
-    if (addedEdgeIds && addedEdgeIds.length > 0 && this.edges.length === prevEdgeCount + addedEdgeIds.length) {
+    if (
+      addedEdgeIds &&
+      addedEdgeIds.length > 0 &&
+      this.edges.length === prevEdgeCount + addedEdgeIds.length
+    ) {
       for (let i = prevEdgeCount; i < this.edges.length; i++) {
         const edgeId = (this.edges[i] as any).id;
         if (edgeId) this.edgeIdToIndex.set(edgeId, i);
@@ -943,7 +1173,13 @@ export class Renderer {
 
     // Use incremental processing if only adding nodes/edges
     if (addedNodeIds?.length || addedEdgeIds?.length) {
-      this.incrementalProcessAdded(dataModel, addedNodeIds ?? [], addedEdgeIds ?? [], prevNodeCount, prevEdgeCount);
+      this.incrementalProcessAdded(
+        dataModel,
+        addedNodeIds ?? [],
+        addedEdgeIds ?? [],
+        prevNodeCount,
+        prevEdgeCount,
+      );
     } else {
       // Full rebuild needed for removals or mixed changes
       this.needToProcess = true;
@@ -966,7 +1202,8 @@ export class Renderer {
     const bg = parseColor(this.theme.canvasBackground ?? '#fff');
     const hasHighlight = this.highlightNodeIds.size > 0;
 
-    const nodeProgram = this.activeNodeType === 'rect' ? this.programs.nodeRect : this.programs.nodeCircle;
+    const nodeProgram =
+      this.activeNodeType === 'rect' ? this.programs.nodeRect : this.programs.nodeCircle;
 
     // Ensure buffer capacity
     nodeProgram.reallocate(this.nodes.length);
@@ -983,15 +1220,43 @@ export class Renderer {
       const isStrokeTransparent = style.stroke === 'transparent' || style.stroke === 'none';
       const color: [number, number, number] = active
         ? baseColor
-        : [baseColor[0] * 0.25 + bg[0] * 0.75, baseColor[1] * 0.25 + bg[1] * 0.75, baseColor[2] * 0.25 + bg[2] * 0.75];
+        : [
+            baseColor[0] * 0.25 + bg[0] * 0.75,
+            baseColor[1] * 0.25 + bg[1] * 0.75,
+            baseColor[2] * 0.25 + bg[2] * 0.75,
+          ];
       const opacity = active ? style.opacity : Math.min(style.opacity, 0.25);
       const effectiveOpacity = isFillTransparent ? 0 : opacity;
       const effectiveStrokeWidth = isStrokeTransparent ? 0 : style.strokeWidth;
 
       if (this.activeNodeType === 'rect') {
-        (nodeProgram as NodeRectProgram).processNode(i, node.x, node.y, style.width, style.height, color, i, effectiveStrokeWidth, strokeColor, effectiveOpacity, style.haloWidth, style.borderRadius);
+        (nodeProgram as NodeRectProgram).processNode(
+          i,
+          node.x,
+          node.y,
+          style.width,
+          style.height,
+          color,
+          i,
+          effectiveStrokeWidth,
+          strokeColor,
+          effectiveOpacity,
+          style.haloWidth,
+          style.borderRadius,
+        );
       } else {
-        (nodeProgram as NodeCircleProgram).processNode(i, node.x, node.y, style.size, color, i, effectiveStrokeWidth, strokeColor, effectiveOpacity, style.haloWidth);
+        (nodeProgram as NodeCircleProgram).processNode(
+          i,
+          node.x,
+          node.y,
+          style.size,
+          color,
+          i,
+          effectiveStrokeWidth,
+          strokeColor,
+          effectiveOpacity,
+          style.haloWidth,
+        );
       }
     }
     nodeProgram.upload();
@@ -1104,7 +1369,12 @@ export class Renderer {
     }
   }
 
-  private renderPickingPass(w: number, h: number, nodeProgram: Program, edgeProgram: Program): void {
+  private renderPickingPass(
+    w: number,
+    h: number,
+    nodeProgram: Program,
+    edgeProgram: Program,
+  ): void {
     const gl = this.gl;
     this.picking.resize(w, h);
     this.picking.bind();
@@ -1134,7 +1404,23 @@ export class Renderer {
     this.scheduleRender();
   }
 
-  getCamera(): Camera { return this.camera; }
+  /** Clear the canvas with the theme background color immediately.
+   *  Called before layout so the user sees a white canvas instead of a black void. */
+  clearWithTheme(theme: { canvasBackground?: string }): void {
+    const gl = this.gl;
+    const w = this.canvas.width || this.canvas.clientWidth || 800;
+    const h = this.canvas.height || this.canvas.clientHeight || 600;
+    if (w > 0 && h > 0) {
+      gl.viewport(0, 0, w, h);
+    }
+    const bg = parseColor(theme.canvasBackground ?? '#fff');
+    gl.clearColor(bg[0], bg[1], bg[2], 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  }
+
+  getCamera(): Camera {
+    return this.camera;
+  }
 
   setCamera(cam: Partial<Camera>): void {
     if (cam.x !== undefined) this.camera.x = cam.x;
@@ -1159,7 +1445,10 @@ export class Renderer {
   }
 
   /** O(1) hit detection using framebuffer picking. Lazy-inits picking on first call. */
-  pickAt(screenX: number, screenY: number): { type: 'node'; id: string } | { type: 'edge'; index: number } | null {
+  pickAt(
+    screenX: number,
+    screenY: number,
+  ): { type: 'node'; id: string } | { type: 'edge'; index: number } | null {
     // Lazy init: first interaction triggers picking framebuffer render
     if (!this.pickingInitialized) {
       this.pickingInitialized = true;
@@ -1242,9 +1531,15 @@ export class Renderer {
     }
   }
 
-  getNodes(): LayoutNode[] { return this.nodes; }
-  getEdges(): GraphEdge[] { return this.edges; }
-  getCanvas(): HTMLCanvasElement { return this.canvas; }
+  getNodes(): LayoutNode[] {
+    return this.nodes;
+  }
+  getEdges(): GraphEdge[] {
+    return this.edges;
+  }
+  getCanvas(): HTMLCanvasElement {
+    return this.canvas;
+  }
 
   /**
    * Compute visible elements based on current camera and viewport.
@@ -1273,8 +1568,12 @@ export class Renderer {
       const node = nodes[i];
       // Use approximate node size for culling (24px default)
       const nodeSize = 24 / camera.zoom;
-      if (node.x + nodeSize >= viewLeft && node.x - nodeSize <= viewRight &&
-          node.y + nodeSize >= viewTop && node.y - nodeSize <= viewBottom) {
+      if (
+        node.x + nodeSize >= viewLeft &&
+        node.x - nodeSize <= viewRight &&
+        node.y + nodeSize >= viewTop &&
+        node.y - nodeSize <= viewBottom
+      ) {
         this.visibleNodeIndices.push(i);
         nodeVisible[i] = 1;
       } else {
@@ -1308,7 +1607,9 @@ export class Renderer {
   }
 
   /** Get cached polyline routes for label positioning. */
-  getPolylineRoutes(): Map<number, Waypoint[]> { return this.polylineRoutes; }
+  getPolylineRoutes(): Map<number, Waypoint[]> {
+    return this.polylineRoutes;
+  }
 
   destroy(): void {
     if (this.renderFrame !== null) cancelAnimationFrame(this.renderFrame);
@@ -1337,7 +1638,14 @@ export class Renderer {
   }
 }
 
-function pointToSegmentDist(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
+function pointToSegmentDist(
+  px: number,
+  py: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): number {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy) || 1e-6;

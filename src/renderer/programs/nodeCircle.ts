@@ -13,11 +13,21 @@ import { encodeId } from '../picking.js';
 const FLOATS_PER_VERTEX = 15;
 
 export class NodeCircleProgram extends Program {
-  getVertexShader() { return vertexShader; }
-  getFragmentShader() { return fragmentShader; }
-  getFloatsPerVertex() { return FLOATS_PER_VERTEX; }
-  getVerticesPerItem() { return 1; }
-  getDrawMethod() { return this.gl.POINTS; }
+  getVertexShader() {
+    return vertexShader;
+  }
+  getFragmentShader() {
+    return fragmentShader;
+  }
+  getFloatsPerVertex() {
+    return FLOATS_PER_VERTEX;
+  }
+  getVerticesPerItem() {
+    return 1;
+  }
+  getDrawMethod() {
+    return this.gl.POINTS;
+  }
 
   getAttributeLayout(): AttributeLayout[] {
     return [
@@ -41,7 +51,8 @@ export class NodeCircleProgram extends Program {
 
   processNode(
     index: number,
-    x: number, y: number,
+    x: number,
+    y: number,
     size: number,
     color: [number, number, number],
     pickingIndex: number,
@@ -76,7 +87,8 @@ export class NodeCircleProgram extends Program {
    */
   processNodeStatic(
     index: number,
-    x: number, y: number,
+    x: number,
+    y: number,
     pickingIndex: number,
     template: Float32Array,
   ): void {
@@ -101,9 +113,13 @@ export class NodeCircleProgram extends Program {
   ): Float32Array {
     const t = new Float32Array(FLOATS_PER_VERTEX);
     t[2] = size;
-    t[3] = color[0]; t[4] = color[1]; t[5] = color[2];
+    t[3] = color[0];
+    t[4] = color[1];
+    t[5] = color[2];
     t[9] = strokeWidth;
-    t[10] = strokeColor[0]; t[11] = strokeColor[1]; t[12] = strokeColor[2];
+    t[10] = strokeColor[0];
+    t[11] = strokeColor[1];
+    t[12] = strokeColor[2];
     t[13] = opacity;
     t[14] = haloWidth;
     return t;
@@ -123,7 +139,8 @@ export class NodeCircleProgram extends Program {
   ): void {
     if (patch.color) this.patchAttribute(index, 'a_color', patch.color);
     if (patch.size !== undefined) this.patchAttribute(index, 'a_size', [patch.size]);
-    if (patch.strokeWidth !== undefined) this.patchAttribute(index, 'a_strokeWidth', [patch.strokeWidth]);
+    if (patch.strokeWidth !== undefined)
+      this.patchAttribute(index, 'a_strokeWidth', [patch.strokeWidth]);
     if (patch.strokeColor) this.patchAttribute(index, 'a_strokeColor', patch.strokeColor);
     if (patch.opacity !== undefined) this.patchAttribute(index, 'a_opacity', [patch.opacity]);
     if (patch.haloWidth !== undefined) this.patchAttribute(index, 'a_haloWidth', [patch.haloWidth]);

@@ -17,7 +17,7 @@ function compileShader(gl: WebGLRenderingContext, type: number, source: string):
 export function createProgram(
   gl: WebGLRenderingContext,
   vertSource: string,
-  fragSource: string
+  fragSource: string,
 ): WebGLProgram {
   const vert = compileShader(gl, gl.VERTEX_SHADER, vertSource);
   const frag = compileShader(gl, gl.FRAGMENT_SHADER, fragSource);

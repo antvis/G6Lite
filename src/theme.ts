@@ -5,7 +5,18 @@
 
 import type { ThemeTokens } from './types.js';
 
-const CATEGORY_PALETTE = ['#1783FF', '#00C9C9', '#F08F56', '#D580FF', '#7863FF', '#DB9D0D', '#60C42D', '#FF80CA', '#2491B3', '#17C76F'];
+const CATEGORY_PALETTE = [
+  '#1783FF',
+  '#00C9C9',
+  '#F08F56',
+  '#D580FF',
+  '#7863FF',
+  '#DB9D0D',
+  '#60C42D',
+  '#FF80CA',
+  '#2491B3',
+  '#17C76F',
+];
 
 const light: ThemeTokens = {
   nodeFill: '#5B8FF9',
@@ -67,7 +78,9 @@ const presets: Record<string, ThemeTokens> = { light, dark };
  * Resolve theme option to a full ThemeTokens object.
  * String -> preset; object -> preset + overrides.
  */
-export function resolveTheme(theme: 'light' | 'dark' | { type: 'light' | 'dark' } & Partial<ThemeTokens>): ThemeTokens {
+export function resolveTheme(
+  theme: 'light' | 'dark' | ({ type: 'light' | 'dark' } & Partial<ThemeTokens>),
+): ThemeTokens {
   if (theme === 'light' || theme === 'dark') {
     return { ...presets[theme] };
   }

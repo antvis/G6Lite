@@ -14,16 +14,30 @@ const FLOATS_PER_VERTEX = 19;
 const VERTICES_PER_ITEM = 6;
 
 const CORNERS: [number, number][] = [
-  [-1, -1], [1, -1], [-1, 1],
-  [1, -1], [1, 1], [-1, 1],
+  [-1, -1],
+  [1, -1],
+  [-1, 1],
+  [1, -1],
+  [1, 1],
+  [-1, 1],
 ];
 
 export class NodeRectProgram extends Program {
-  getVertexShader() { return vertexShader; }
-  getFragmentShader() { return fragmentShader; }
-  getFloatsPerVertex() { return FLOATS_PER_VERTEX; }
-  getVerticesPerItem() { return VERTICES_PER_ITEM; }
-  getDrawMethod() { return this.gl.TRIANGLES; }
+  getVertexShader() {
+    return vertexShader;
+  }
+  getFragmentShader() {
+    return fragmentShader;
+  }
+  getFloatsPerVertex() {
+    return FLOATS_PER_VERTEX;
+  }
+  getVerticesPerItem() {
+    return VERTICES_PER_ITEM;
+  }
+  getDrawMethod() {
+    return this.gl.TRIANGLES;
+  }
 
   getAttributeLayout(): AttributeLayout[] {
     return [
@@ -49,8 +63,10 @@ export class NodeRectProgram extends Program {
 
   processNode(
     index: number,
-    x: number, y: number,
-    width: number, height: number,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
     color: [number, number, number],
     pickingIndex: number,
     strokeWidth: number = 0,
@@ -60,7 +76,9 @@ export class NodeRectProgram extends Program {
     borderRadius: number = 0,
   ): void {
     const [pr, pg, pb] = encodeId(pickingIndex);
-    const pR = pr / 255, pG = pg / 255, pB = pb / 255;
+    const pR = pr / 255,
+      pG = pg / 255,
+      pB = pb / 255;
 
     // Write first vertex fully, then copyWithin + patch corner for rest
     const base = index * VERTICES_PER_ITEM * FLOATS_PER_VERTEX;
@@ -112,10 +130,12 @@ export class NodeRectProgram extends Program {
     if (patch.width !== undefined && patch.height !== undefined) {
       this.patchAttribute(index, 'a_size', [patch.width, patch.height]);
     }
-    if (patch.strokeWidth !== undefined) this.patchAttribute(index, 'a_strokeWidth', [patch.strokeWidth]);
+    if (patch.strokeWidth !== undefined)
+      this.patchAttribute(index, 'a_strokeWidth', [patch.strokeWidth]);
     if (patch.strokeColor) this.patchAttribute(index, 'a_strokeColor', patch.strokeColor);
     if (patch.opacity !== undefined) this.patchAttribute(index, 'a_opacity', [patch.opacity]);
     if (patch.haloWidth !== undefined) this.patchAttribute(index, 'a_haloWidth', [patch.haloWidth]);
-    if (patch.borderRadius !== undefined) this.patchAttribute(index, 'a_borderRadius', [patch.borderRadius]);
+    if (patch.borderRadius !== undefined)
+      this.patchAttribute(index, 'a_borderRadius', [patch.borderRadius]);
   }
 }

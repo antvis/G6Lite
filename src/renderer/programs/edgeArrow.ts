@@ -21,20 +21,30 @@ const INDENT = 0.2;
 // Triangle 1: tip, leftBase, indent
 // Triangle 2: tip, indent, rightBase
 const COORDS: [number, number][] = [
-  [0.5, 1.0],    // tip
-  [0.0, 0.0],    // left base
-  [0.5, INDENT],  // indent (concave center)
-  [0.5, 1.0],    // tip
-  [0.5, INDENT],  // indent (concave center)
-  [1.0, 0.0],    // right base
+  [0.5, 1.0], // tip
+  [0.0, 0.0], // left base
+  [0.5, INDENT], // indent (concave center)
+  [0.5, 1.0], // tip
+  [0.5, INDENT], // indent (concave center)
+  [1.0, 0.0], // right base
 ];
 
 export class EdgeArrowProgram extends Program {
-  getVertexShader() { return vertexShader; }
-  getFragmentShader() { return fragmentShader; }
-  getFloatsPerVertex() { return FLOATS_PER_VERTEX; }
-  getVerticesPerItem() { return VERTICES_PER_ITEM; }
-  getDrawMethod() { return this.gl.TRIANGLES; }
+  getVertexShader() {
+    return vertexShader;
+  }
+  getFragmentShader() {
+    return fragmentShader;
+  }
+  getFloatsPerVertex() {
+    return FLOATS_PER_VERTEX;
+  }
+  getVerticesPerItem() {
+    return VERTICES_PER_ITEM;
+  }
+  getDrawMethod() {
+    return this.gl.TRIANGLES;
+  }
 
   getAttributeLayout(): AttributeLayout[] {
     return [
@@ -58,8 +68,10 @@ export class EdgeArrowProgram extends Program {
 
   processArrow(
     index: number,
-    sx: number, sy: number,
-    tx: number, ty: number,
+    sx: number,
+    sy: number,
+    tx: number,
+    ty: number,
     arrowSize: number,
     lineWidth: number,
     nodeRadius: number,
@@ -67,7 +79,9 @@ export class EdgeArrowProgram extends Program {
     pickingIndex: number,
   ): void {
     const [pr, pg, pb] = encodeId(pickingIndex);
-    const pR = pr / 255, pG = pg / 255, pB = pb / 255;
+    const pR = pr / 255,
+      pG = pg / 255,
+      pB = pb / 255;
 
     for (let v = 0; v < VERTICES_PER_ITEM; v++) {
       const o = (index * VERTICES_PER_ITEM + v) * FLOATS_PER_VERTEX;

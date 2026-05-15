@@ -172,9 +172,10 @@ export abstract class Program {
   patchItemPosition(itemIndex: number, x: number, y: number): void {
     const fpv = this.getFloatsPerVertex();
     const vpn = this.getVerticesPerItem();
-    const posOffset = this.findAttributeOffset('a_position') >= 0
-      ? this.findAttributeOffset('a_position')
-      : this.findAttributeOffset('a_center');
+    const posOffset =
+      this.findAttributeOffset('a_position') >= 0
+        ? this.findAttributeOffset('a_position')
+        : this.findAttributeOffset('a_center');
     if (posOffset < 0) return;
 
     const baseOffset = itemIndex * vpn * fpv;
@@ -218,7 +219,9 @@ export abstract class Program {
   }
 
   /** Expose array for direct reads (e.g., to check current color values). */
-  getArray(): Float32Array { return this.array; }
+  getArray(): Float32Array {
+    return this.array;
+  }
 
   destroy(): void {
     this.gl.deleteBuffer(this.buffer);

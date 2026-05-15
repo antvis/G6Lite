@@ -7,3 +7,9 @@ performance/
 # Test coverage
 coverage/
 openspec/
+
+# Local development files (not for commit)
+*.sh
+*.backup.*
+CLAUDE.md
+design/

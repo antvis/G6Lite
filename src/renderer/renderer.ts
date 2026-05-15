@@ -867,7 +867,7 @@ export class Renderer {
    * Incremental position update: patch position floats for moved nodes
    * and re-compute affected edges. Much cheaper than full process().
    */
-  patchPositions(dataModel: import('../data-model.js').DataModel, movedNodeIds: Set<string>): void {
+  patchPositions(dataModel: import('../dataModel.js').DataModel, movedNodeIds: Set<string>): void {
     if (movedNodeIds.size === 0) return;
 
     const nodeProgram = this.activeNodeProgram;
@@ -965,7 +965,7 @@ export class Renderer {
    * Avoids full buffer rebuild by only patching the affected attribute floats.
    */
   patchStyles(
-    dataModel: import('../data-model.js').DataModel,
+    dataModel: import('../dataModel.js').DataModel,
     changedNodeIds: Set<string>,
     changedEdgeIds: Set<string>,
   ): void {
@@ -1105,7 +1105,7 @@ export class Renderer {
    * Optimized path: append new nodes/edges instead of full rebuild when possible.
    */
   partialProcess(
-    dataModel: import('../data-model.js').DataModel,
+    dataModel: import('../dataModel.js').DataModel,
     addedNodeIds?: string[],
     addedEdgeIds?: string[],
   ): void {
@@ -1192,7 +1192,7 @@ export class Renderer {
    * Appends to existing GPU buffers instead of rebuilding.
    */
   private incrementalProcessAdded(
-    dataModel: import('../data-model.js').DataModel,
+    dataModel: import('../dataModel.js').DataModel,
     addedNodeIds: string[],
     addedEdgeIds: string[],
     prevNodeCount: number,

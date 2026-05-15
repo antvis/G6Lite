@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DataModel } from '../data-model.js';
+import { DataModel } from '../dataModel.js';
 import type { ThemeTokens } from '../types.js';
 
 const mockTheme: ThemeTokens = {

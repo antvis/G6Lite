@@ -5,14 +5,14 @@
 
 export { Graph } from './graph.js';
 export type { PickResult } from './graph.js';
-export { DataModel } from './data-model.js';
+export { DataModel } from './dataModel.js';
 export type {
   InternalNode,
   InternalEdge,
   ChangeType,
   ChangeRecord,
   DataModelOptions,
-} from './data-model.js';
+} from './dataModel.js';
 export { RenderScheduler, RefreshLevel } from './scheduler.js';
 export { EventEmitter } from './events.js';
 export type {

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { RenderScheduler, RefreshLevel } from '../scheduler.js';
-import { DataModel } from '../data-model.js';
+import { DataModel } from '../dataModel.js';
 import type { ThemeTokens } from '../types.js';
 
 const mockTheme: ThemeTokens = {

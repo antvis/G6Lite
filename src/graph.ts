@@ -10,7 +10,7 @@ import { terminateLayoutWorker } from './layout/workerLayout.js';
 import { Renderer } from './renderer/renderer.js';
 import type { RendererData } from './renderer/renderer.js';
 import { registerBehaviors } from './behaviors/index.js';
-import { DataModel } from './data-model.js';
+import { DataModel } from './dataModel.js';
 import { RenderScheduler, RefreshLevel } from './scheduler.js';
 import { EventEmitter } from './events.js';
 import { analyzeNodeConfig, analyzeEdgeConfig } from './renderer/style.js';

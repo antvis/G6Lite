@@ -679,8 +679,9 @@ export class Renderer {
       }
       if (style.endArrow) {
         const tgtRadius = nodeHalfWidths[tgtIdx];
-        const arrowTgtX = isPolyline ? (this.polylineRoutes.get(i)?.at(-1)?.x ?? tgt.x) : tgt.x;
-        const arrowTgtY = isPolyline ? (this.polylineRoutes.get(i)?.at(-1)?.y ?? tgt.y) : tgt.y;
+        const lastWp = isPolyline ? this.polylineRoutes.get(i) : undefined;
+        const arrowTgtX = lastWp && lastWp.length > 0 ? lastWp[lastWp.length - 1].x : tgt.x;
+        const arrowTgtY = lastWp && lastWp.length > 0 ? lastWp[lastWp.length - 1].y : tgt.y;
         arrowProg.processArrow(
           arrowIdx++,
           arrowSrcX,

@@ -17,16 +17,30 @@ const VERTICES_PER_ITEM = 6;
 // 6 vertices: (posCoef, normalCoef)
 // posCoef: 0=source, 1=target | normalCoef: -1 or +1
 const COEFFICIENTS: [number, number][] = [
-  [0, -1], [1, -1], [0, 1],
-  [1, -1], [1, 1], [0, 1],
+  [0, -1],
+  [1, -1],
+  [0, 1],
+  [1, -1],
+  [1, 1],
+  [0, 1],
 ];
 
 export class EdgeRectProgram extends Program {
-  getVertexShader() { return vertexShader; }
-  getFragmentShader() { return fragmentShader; }
-  getFloatsPerVertex() { return FLOATS_PER_VERTEX; }
-  getVerticesPerItem() { return VERTICES_PER_ITEM; }
-  getDrawMethod() { return this.gl.TRIANGLES; }
+  getVertexShader() {
+    return vertexShader;
+  }
+  getFragmentShader() {
+    return fragmentShader;
+  }
+  getFloatsPerVertex() {
+    return FLOATS_PER_VERTEX;
+  }
+  getVerticesPerItem() {
+    return VERTICES_PER_ITEM;
+  }
+  getDrawMethod() {
+    return this.gl.TRIANGLES;
+  }
 
   getAttributeLayout(): AttributeLayout[] {
     return [
@@ -53,8 +67,10 @@ export class EdgeRectProgram extends Program {
 
   processEdge(
     index: number,
-    sx: number, sy: number,
-    tx: number, ty: number,
+    sx: number,
+    sy: number,
+    tx: number,
+    ty: number,
     color: [number, number, number],
     pickingIndex: number,
     lineWidth: number,
@@ -64,7 +80,9 @@ export class EdgeRectProgram extends Program {
     clampTarget: number = 0,
   ): void {
     const [pr, pg, pb] = encodeId(pickingIndex);
-    const pR = pr / 255, pG = pg / 255, pB = pb / 255;
+    const pR = pr / 255,
+      pG = pg / 255,
+      pB = pb / 255;
 
     // Write first vertex fully, then copyWithin + patch coefficients for rest
     const base = index * VERTICES_PER_ITEM * FLOATS_PER_VERTEX;
@@ -101,10 +119,10 @@ export class EdgeRectProgram extends Program {
     const baseOffset = index * VERTICES_PER_ITEM * FLOATS_PER_VERTEX;
     for (let v = 0; v < VERTICES_PER_ITEM; v++) {
       const o = baseOffset + v * FLOATS_PER_VERTEX;
-      this.array[o] = sx;      // a_source.x
-      this.array[o + 1] = sy;  // a_source.y
-      this.array[o + 2] = tx;  // a_target.x
-      this.array[o + 3] = ty;  // a_target.y
+      this.array[o] = sx; // a_source.x
+      this.array[o + 1] = sy; // a_source.y
+      this.array[o + 2] = tx; // a_target.x
+      this.array[o + 3] = ty; // a_target.y
     }
   }
 
@@ -124,7 +142,9 @@ export class EdgeRectProgram extends Program {
     if (patch.lineWidth !== undefined) this.patchAttribute(index, 'a_lineWidth', [patch.lineWidth]);
     if (patch.dashCycle !== undefined) this.patchAttribute(index, 'a_dashCycle', [patch.dashCycle]);
     if (patch.opacity !== undefined) this.patchAttribute(index, 'a_opacity', [patch.opacity]);
-    if (patch.clampSource !== undefined) this.patchAttribute(index, 'a_clampSource', [patch.clampSource]);
-    if (patch.clampTarget !== undefined) this.patchAttribute(index, 'a_clampTarget', [patch.clampTarget]);
+    if (patch.clampSource !== undefined)
+      this.patchAttribute(index, 'a_clampSource', [patch.clampSource]);
+    if (patch.clampTarget !== undefined)
+      this.patchAttribute(index, 'a_clampTarget', [patch.clampTarget]);
   }
 }

@@ -1,6 +1,14 @@
 node_modules
 dist
-package-lock.json
 .DS_Store
 performance/
-openspec/nginx.conf
+
+# Test coverage
+coverage/
+openspec/*
+
+# Local development files (not for commit)
+*.sh
+*.backup.*
+CLAUDE.md
+design/

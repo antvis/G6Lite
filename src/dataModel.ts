@@ -93,14 +93,16 @@ export class DataModel {
       id: node.id,
       x: node.x,
       y: node.y,
-      data: node.data,  // Direct reference, no copy
+      data: node.data, // Direct reference, no copy
       states: EMPTY_SET,
     });
     this._nodeIdToIndex.set(node.id, index);
     this._changes.push({ type: 'nodeAdded', ids: [node.id] });
   }
 
-  addNodes(nodes: Array<{ id: string; x: number; y: number; data?: Record<string, unknown> }>): void {
+  addNodes(
+    nodes: Array<{ id: string; x: number; y: number; data?: Record<string, unknown> }>,
+  ): void {
     const ids: string[] = [];
     for (const node of nodes) {
       if (this._nodeIdToIndex.has(node.id)) continue;
@@ -109,7 +111,7 @@ export class DataModel {
         id: node.id,
         x: node.x,
         y: node.y,
-        data: node.data,  // Direct reference, no copy
+        data: node.data, // Direct reference, no copy
         states: EMPTY_SET,
       });
       this._nodeIdToIndex.set(node.id, index);
@@ -215,7 +217,7 @@ export class DataModel {
       id,
       source: edge.source,
       target: edge.target,
-      data: edge.data,  // Direct reference, no copy
+      data: edge.data, // Direct reference, no copy
       states: EMPTY_SET,
     });
     this._edgeIdToIndex.set(id, index);
@@ -223,7 +225,9 @@ export class DataModel {
     return id;
   }
 
-  addEdges(edges: Array<{ source: string; target: string; data?: Record<string, unknown> }>): string[] {
+  addEdges(
+    edges: Array<{ source: string; target: string; data?: Record<string, unknown> }>,
+  ): string[] {
     const ids: string[] = [];
     for (const edge of edges) {
       const id = `e${this._edgeIdCounter++}`;
@@ -232,7 +236,7 @@ export class DataModel {
         id,
         source: edge.source,
         target: edge.target,
-        data: edge.data,  // Direct reference, no copy
+        data: edge.data, // Direct reference, no copy
         states: EMPTY_SET,
       });
       this._edgeIdToIndex.set(id, index);
@@ -349,8 +353,19 @@ export class DataModel {
   // ──── Bulk replace ────
 
   replaceData(
-    nodes: Array<{ id: string; x: number; y: number; data?: Record<string, unknown>; states?: ElementState[] }>,
-    edges: Array<{ source: string; target: string; data?: Record<string, unknown>; states?: ElementState[] }>,
+    nodes: Array<{
+      id: string;
+      x: number;
+      y: number;
+      data?: Record<string, unknown>;
+      states?: ElementState[];
+    }>,
+    edges: Array<{
+      source: string;
+      target: string;
+      data?: Record<string, unknown>;
+      states?: ElementState[];
+    }>,
   ): void {
     // Clear all
     this._nodes.length = 0;
@@ -366,7 +381,7 @@ export class DataModel {
         id: n.id,
         x: n.x,
         y: n.y,
-        data: n.data,  // Direct reference
+        data: n.data, // Direct reference
         states: n.states && n.states.length > 0 ? new Set(n.states) : EMPTY_SET,
       });
       this._nodeIdToIndex.set(n.id, index);
@@ -380,7 +395,7 @@ export class DataModel {
         id,
         source: e.source,
         target: e.target,
-        data: e.data,  // Direct reference
+        data: e.data, // Direct reference
         states: e.states && e.states.length > 0 ? new Set(e.states) : EMPTY_SET,
       });
       this._edgeIdToIndex.set(id, index);
@@ -468,11 +483,55 @@ export class DataModel {
     return Array.from(neighbors);
   }
 
+  // ──── Batch state queries ────
+
+  /** Find all nodes that have the given state. O(N) iteration. */
+  findNodesByState(state: ElementState): string[] {
+    const result: string[] = [];
+    for (const node of this._nodes) {
+      if (node.states.has(state)) result.push(node.id);
+    }
+    return result;
+  }
+
+  /** Find all edges that have the given state. O(N) iteration. */
+  findEdgesByState(state: ElementState): string[] {
+    const result: string[] = [];
+    for (const edge of this._edges) {
+      if (edge.states.has(state)) result.push(edge.id);
+    }
+    return result;
+  }
+
+  /** Find all nodes matching a predicate. */
+  findNodes(predicate: (node: InternalNode) => boolean): InternalNode[] {
+    const result: InternalNode[] = [];
+    for (const node of this._nodes) {
+      if (predicate(node)) result.push(node);
+    }
+    return result;
+  }
+
+  /** Find all edges matching a predicate. */
+  findEdges(predicate: (edge: InternalEdge) => boolean): InternalEdge[] {
+    const result: InternalEdge[] = [];
+    for (const edge of this._edges) {
+      if (predicate(edge)) result.push(edge);
+    }
+    return result;
+  }
+
   // ───️ Deprecated: conversion methods (kept for compatibility) ────
 
   /** @deprecated Use getNodes() directly for better performance */
-  toLayoutNodes(): Array<{ id: string; x: number; y: number; data?: Record<string, unknown>; states?: ElementState[] }> {
-    return this._nodes.map(n => ({
+  toLayoutNodes(): Array<{
+    id: string;
+    x: number;
+    y: number;
+    data?: Record<string, unknown>;
+    states?: ElementState[];
+  }> {
+    return this._nodes.map((n) => ({
       id: n.id,
       x: n.x,
       y: n.y,
@@ -482,8 +541,14 @@ export class DataModel {
   }
 
   /** @deprecated Use getEdges() directly for better performance */
-  toGraphEdges(): Array<{ id: string; source: string; target: string; data?: Record<string, unknown>; states?: ElementState[] }> {
-    return this._edges.map(e => ({
+  toGraphEdges(): Array<{
+    id: string;
+    source: string;
+    target: string;
+    data?: Record<string, unknown>;
+    states?: ElementState[];
+  }> {
+    return this._edges.map((e) => ({
       id: e.id,
       source: e.source,
       target: e.target,

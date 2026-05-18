@@ -15,9 +15,9 @@ export function parseColor(hex: string): [number, number, number] {
   }
   const scale = hex.length <= 4 ? 0x11 : 0x1;
   c = [
-    parseInt(m[1], 16) * scale / 255,
-    parseInt(m[2], 16) * scale / 255,
-    parseInt(m[3], 16) * scale / 255,
+    (parseInt(m[1], 16) * scale) / 255,
+    (parseInt(m[2], 16) * scale) / 255,
+    (parseInt(m[3], 16) * scale) / 255,
   ];
   cache.set(hex, c);
   return c;

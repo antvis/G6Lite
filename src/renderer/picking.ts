@@ -53,13 +53,24 @@ export class PickingManager {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.colorTexture, 0);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      this.colorTexture,
+      0,
+    );
 
     // Depth renderbuffer (needed for correct z-order)
     this.renderbufferDepth = gl.createRenderbuffer();
     gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbufferDepth);
     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, w, h);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.renderbufferDepth);
+    gl.framebufferRenderbuffer(
+      gl.FRAMEBUFFER,
+      gl.DEPTH_ATTACHMENT,
+      gl.RENDERBUFFER,
+      this.renderbufferDepth,
+    );
 
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -91,10 +102,15 @@ export class PickingManager {
    * Read the picking framebuffer at the given screen coordinates.
    * Returns the identified item or null if nothing is there.
    */
-  pickAt(screenX: number, screenY: number, canvasWidth: number, canvasHeight: number): PickingResult | null {
+  pickAt(
+    screenX: number,
+    screenY: number,
+    canvasWidth: number,
+    canvasHeight: number,
+  ): PickingResult | null {
     const gl = this.gl;
     // Convert screen coords to picking framebuffer coords
-    const x = (screenX / canvasWidth * this.width) | 0;
+    const x = ((screenX / canvasWidth) * this.width) | 0;
     const y = ((1 - screenY / canvasHeight) * this.height) | 0; // flip Y
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
@@ -124,11 +140,7 @@ export class PickingManager {
 /** Encode a 0-based index into RGB bytes (24-bit). Index 0 maps to (0, 0, 1) to avoid all-zero. */
 export function encodeId(index: number): [number, number, number] {
   const id = index + 1; // shift by 1 so index 0 != background (0,0,0)
-  return [
-    (id >> 16) & 0xFF,
-    (id >> 8) & 0xFF,
-    id & 0xFF,
-  ];
+  return [(id >> 16) & 0xff, (id >> 8) & 0xff, id & 0xff];
 }
 
 /** Decode RGB bytes back to 0-based index. Returns -1 for background. */

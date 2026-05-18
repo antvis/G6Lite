@@ -59,7 +59,9 @@ export async function runLayout(data: GraphData, config: LayoutConfig): Promise<
   if (useWorker) {
     try {
       const workerResult = await runLayoutInWorker(data, config);
-      const posMap = new Map(workerResult.positions.map(p => [p.id, p] as [string, { x: number; y: number }]));
+      const posMap = new Map(
+        workerResult.positions.map((p) => [p.id, p] as [string, { x: number; y: number }]),
+      );
       const nodes: Array<GraphNode & { x: number; y: number }> = data.nodes.map((n) => {
         const pos = posMap.get(n.id);
         return { ...n, x: pos ? pos.x : 0, y: pos ? pos.y : 0 };
@@ -121,13 +123,14 @@ export async function runLayout(data: GraphData, config: LayoutConfig): Promise<
   });
 
   // Build a map of enriched node data from layoutData (layouts may write metadata like depth, _nodeColor)
-  const layoutNodeMap = new Map(layoutData.nodes.map(n => [n.id, n]));
+  const layoutNodeMap = new Map(layoutData.nodes.map((n) => [n.id, n]));
 
   const nodes: Array<GraphNode & { x: number; y: number }> = data.nodes.map((n) => {
     const pos = posMap.get(n.id);
     const layoutNode = layoutNodeMap.get(n.id);
     const mergedData = layoutNode?.data ? { ...n.data, ...layoutNode.data } : n.data;
-    if (pos && n.x === pos[0] && n.y === pos[1] && !layoutNode?.data) return n as GraphNode & { x: number; y: number };
+    if (pos && n.x === pos[0] && n.y === pos[1] && !layoutNode?.data)
+      return n as GraphNode & { x: number; y: number };
     return { ...n, data: mergedData, x: pos ? pos[0] : 0, y: pos ? pos[1] : 0 };
   });
 

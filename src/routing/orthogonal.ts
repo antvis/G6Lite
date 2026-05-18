@@ -33,11 +33,16 @@ export function computeOrthogonalRoute(
   offset = 20,
 ): Waypoint[] {
   switch (direction) {
-    case 'TB': return routeTB(src, tgt, offset);
-    case 'BT': return routeTB(tgt, src, offset).reverse();
-    case 'LR': return routeLR(src, tgt, offset);
-    case 'RL': return routeLR(tgt, src, offset).reverse();
-    default: return routeTB(src, tgt, offset);
+    case 'TB':
+      return routeTB(src, tgt, offset);
+    case 'BT':
+      return routeTB(tgt, src, offset).reverse();
+    case 'LR':
+      return routeLR(src, tgt, offset);
+    case 'RL':
+      return routeLR(tgt, src, offset).reverse();
+    default:
+      return routeTB(src, tgt, offset);
   }
 }
 
@@ -50,11 +55,7 @@ export function computeOrthogonalRoute(
  * @param arcSegs  Number of arc segments per corner (default 6)
  * @returns  New waypoint list with arc approximation at corners
  */
-export function applyRoundedCorners(
-  points: Waypoint[],
-  radius: number,
-  arcSegs = 12,
-): Waypoint[] {
+export function applyRoundedCorners(points: Waypoint[], radius: number, arcSegs = 12): Waypoint[] {
   if (points.length < 3 || radius <= 0) return points;
 
   const result: Waypoint[] = [points[0]];
@@ -108,8 +109,7 @@ export function applyRoundedCorners(
     if (sweep < -Math.PI) sweep += 2 * Math.PI;
 
     const arcR = Math.sqrt(
-      (arcStart.x - cx) * (arcStart.x - cx) +
-      (arcStart.y - cy) * (arcStart.y - cy),
+      (arcStart.x - cx) * (arcStart.x - cx) + (arcStart.y - cy) * (arcStart.y - cy),
     );
 
     for (let j = 1; j < arcSegs; j++) {
@@ -191,7 +191,7 @@ export function computeTreeRoutes(
 
   // Pre-compute incoming edge count and index per target node for port distribution
   const incomingCount = new Map<string, number>(); // tgt key → total incoming edges
-  const incomingIndex = new Map<number, number>();  // edge index → which incoming index it is
+  const incomingIndex = new Map<number, number>(); // edge index → which incoming index it is
   for (const edge of edges) {
     const tgtKey = `${edge.tgt.x},${edge.tgt.y}`;
     const count = incomingCount.get(tgtKey) ?? 0;
@@ -235,7 +235,8 @@ export function computeTreeRoutes(
         const tgtIdx = incomingIndex.get(edge.index) ?? 0;
         const tgtPortSpacing = edge.tgt.width * 0.6;
         const tgtPortStartX = edge.tgt.x - tgtPortSpacing / 2;
-        const tgtPortX = tgtTotal === 1 ? edge.tgt.x : tgtPortStartX + (tgtPortSpacing * tgtIdx) / (tgtTotal - 1);
+        const tgtPortX =
+          tgtTotal === 1 ? edge.tgt.x : tgtPortStartX + (tgtPortSpacing * tgtIdx) / (tgtTotal - 1);
 
         if (mode === 'cubic') {
           const p0 = { x: portX, y: srcBottom };
@@ -306,7 +307,11 @@ export function computeTreeRoutes(
 
 /** Tessellate a cubic bezier curve into N line segments. */
 function tessellateCubicBezier(
-  p0: Waypoint, cp1: Waypoint, cp2: Waypoint, p3: Waypoint, segments: number,
+  p0: Waypoint,
+  cp1: Waypoint,
+  cp2: Waypoint,
+  p3: Waypoint,
+  segments: number,
 ): Waypoint[] {
   const points: Waypoint[] = [];
   for (let i = 0; i <= segments; i++) {
@@ -357,9 +362,7 @@ export function computeIndentedRoutes(
         // Original behavior: trunk from parent center bottom, edge to child left edge
         const trunkX = src.x;
         const srcBottom = src.y + src.height / 2;
-        const tgtLeft = direction === 'LR'
-          ? tgt.x - tgt.width / 2
-          : tgt.x + tgt.width / 2;
+        const tgtLeft = direction === 'LR' ? tgt.x - tgt.width / 2 : tgt.x + tgt.width / 2;
 
         result.set(edge.index, [
           { x: trunkX, y: srcBottom },
@@ -371,9 +374,7 @@ export function computeIndentedRoutes(
       // TB/BT: trunk goes horizontally from parent right, then vertical to child
       const trunkY = src.y;
       const srcRight = src.x + src.width / 2;
-      const tgtTop = direction === 'TB'
-        ? tgt.y - tgt.height / 2
-        : tgt.y + tgt.height / 2;
+      const tgtTop = direction === 'TB' ? tgt.y - tgt.height / 2 : tgt.y + tgt.height / 2;
 
       result.set(edge.index, [
         { x: srcRight, y: trunkY },
@@ -451,7 +452,10 @@ export function computeFishboneRoute(
 
   if (dy < 2) {
     // Same vertical level → straight horizontal line
-    return [{ x: srcLeft, y: src.y }, { x: tgt.x, y: tgt.y }];
+    return [
+      { x: srcLeft, y: src.y },
+      { x: tgt.x, y: tgt.y },
+    ];
   }
 
   if (src.x > spineAnchorX) {

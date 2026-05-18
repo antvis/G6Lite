@@ -19,10 +19,16 @@ export interface GraphNode {
 }
 
 /** Extended payload attached to an edge. */
-export interface EdgeData extends Record<string, unknown> {}
+export type EdgeData = Record<string, unknown>;
 
 /** Shared state type for nodes and edges. */
-export type ElementState = 'default' | 'active' | 'selected' | 'disabled' | 'highlight' | 'inactive';
+export type ElementState =
+  | 'default'
+  | 'active'
+  | 'selected'
+  | 'disabled'
+  | 'highlight'
+  | 'inactive';
 
 /** Node states for visual differentiation. */
 export type NodeState = ElementState;
@@ -95,10 +101,10 @@ export interface EdgeConfig {
     arrowSize?: EdgeStyleValue<number>;
     lineDash?: EdgeStyleValue<number[]>;
     opacity?: EdgeStyleValue<number>;
-    radius?: EdgeStyleValue<number>;  // polyline corner radius
-    router?: 'orth' | 'tree' | 'indented' | 'fishbone';  // polyline routing mode
-    indentTarget?: 'left' | 'right';  // indented routing: edge end at child left or right edge
-    trunkGap?: number;  // indented routing: gap from trunk to child left edge
+    radius?: EdgeStyleValue<number>; // polyline corner radius
+    router?: 'orth' | 'tree' | 'indented' | 'fishbone'; // polyline routing mode
+    indentTarget?: 'left' | 'right'; // indented routing: edge end at child left or right edge
+    trunkGap?: number; // indented routing: gap from trunk to child left edge
   };
   stateStyles?: Partial<Record<EdgeState, EdgeStateStyleOverride>>;
 }
@@ -131,7 +137,7 @@ export interface ThemeTokens {
 }
 
 /** Theme: preset name or object with type and overrides. */
-export type ThemeOption = 'light' | 'dark' | { type: 'light' | 'dark' } & Partial<ThemeTokens>;
+export type ThemeOption = 'light' | 'dark' | ({ type: 'light' | 'dark' } & Partial<ThemeTokens>);
 
 /** Full graph options. */
 export interface GraphOptions {

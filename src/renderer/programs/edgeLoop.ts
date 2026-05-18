@@ -21,11 +21,21 @@ function cubicBezier(p0: number, p1: number, p2: number, p3: number, t: number):
 }
 
 export class EdgeLoopProgram extends Program {
-  getVertexShader() { return vertexShader; }
-  getFragmentShader() { return fragmentShader; }
-  getFloatsPerVertex() { return FLOATS_PER_VERTEX; }
-  getVerticesPerItem() { return VERTICES_PER_ITEM; }
-  getDrawMethod() { return this.gl.LINES; }
+  getVertexShader() {
+    return vertexShader;
+  }
+  getFragmentShader() {
+    return fragmentShader;
+  }
+  getFloatsPerVertex() {
+    return FLOATS_PER_VERTEX;
+  }
+  getVerticesPerItem() {
+    return VERTICES_PER_ITEM;
+  }
+  getDrawMethod() {
+    return this.gl.LINES;
+  }
 
   getAttributeLayout(): AttributeLayout[] {
     return [
@@ -54,7 +64,8 @@ export class EdgeLoopProgram extends Program {
    */
   processLoop(
     index: number,
-    nx: number, ny: number,
+    nx: number,
+    ny: number,
     radius: number,
     angle: number,
     loopSize: number,
@@ -62,7 +73,9 @@ export class EdgeLoopProgram extends Program {
     pickingIndex: number,
   ): void {
     const [pr, pg, pb] = encodeId(pickingIndex);
-    const pR = pr / 255, pG = pg / 255, pB = pb / 255;
+    const pR = pr / 255,
+      pG = pg / 255,
+      pB = pb / 255;
 
     // Start/end points on node edge, spread ~60° apart centered on angle
     const spread = 0.5; // radians (~30° each side)

@@ -18,7 +18,7 @@ export function graphToNDC(
   graphY: number,
   width: number,
   height: number,
-  cam: Camera
+  cam: Camera,
 ): [number, number] {
   const sx = (2 * cam.zoom) / width;
   const sy = (2 * cam.zoom) / height;
@@ -33,7 +33,7 @@ export function screenToGraph(
   screenY: number,
   width: number,
   height: number,
-  cam: Camera
+  cam: Camera,
 ): [number, number] {
   const ndcX = (screenX / width) * 2 - 1;
   const ndcY = 1 - (screenY / height) * 2;

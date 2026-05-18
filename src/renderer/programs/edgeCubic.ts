@@ -16,11 +16,21 @@ const SEGMENTS = 16;
 const VERTICES_PER_ITEM = SEGMENTS * 2;
 
 export class EdgeCubicProgram extends Program {
-  getVertexShader() { return vertexShader; }
-  getFragmentShader() { return fragmentShader; }
-  getFloatsPerVertex() { return FLOATS_PER_VERTEX; }
-  getVerticesPerItem() { return VERTICES_PER_ITEM; }
-  getDrawMethod() { return this.gl.LINES; }
+  getVertexShader() {
+    return vertexShader;
+  }
+  getFragmentShader() {
+    return fragmentShader;
+  }
+  getFloatsPerVertex() {
+    return FLOATS_PER_VERTEX;
+  }
+  getVerticesPerItem() {
+    return VERTICES_PER_ITEM;
+  }
+  getDrawMethod() {
+    return this.gl.LINES;
+  }
 
   getAttributeLayout(): AttributeLayout[] {
     return [
@@ -39,15 +49,19 @@ export class EdgeCubicProgram extends Program {
 
   processEdge(
     index: number,
-    sx: number, sy: number,
-    tx: number, ty: number,
+    sx: number,
+    sy: number,
+    tx: number,
+    ty: number,
     color: [number, number, number],
     pickingIndex: number,
     curveOffset: number,
     direction: 'LR' | 'RL' = 'LR',
   ): void {
     const [pr, pg, pb] = encodeId(pickingIndex);
-    const pR = pr / 255, pG = pg / 255, pB = pb / 255;
+    const pR = pr / 255,
+      pG = pg / 255,
+      pB = pb / 255;
 
     // Cubic bezier control points for S-curve
     let cpx1: number, cpy1: number, cpx2: number, cpy2: number;

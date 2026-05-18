@@ -39,15 +39,24 @@ function createMockRenderer(
 
 function createMockGraph() {
   const eventEmitter = new EventEmitter();
+  const stateMap = new Map<string, Set<string>>();
+
+  const setItemState = vi.fn((id: string, state: string, value: boolean) => {
+    if (!stateMap.has(state)) stateMap.set(state, new Set());
+    const set = stateMap.get(state)!;
+    if (value) set.add(id);
+    else set.delete(id);
+  });
+
   return {
     eventEmitter,
-    setItemState: vi.fn(),
+    setItemState,
     clearItemStates: vi.fn(),
     updateNodePosition: vi.fn(),
     getNodePosition: vi.fn(() => ({ x: 0, y: 0 })),
     scheduleRender: vi.fn(),
-    findNodesByState: vi.fn(() => []),
-    findEdgesByState: vi.fn(() => []),
+    findNodesByState: vi.fn((state: string) => [...(stateMap.get(state) ?? [])]),
+    findEdgesByState: vi.fn((state: string) => [...(stateMap.get(state) ?? [])]),
   };
 }
 

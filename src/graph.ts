@@ -87,6 +87,9 @@ export class Graph {
     }));
 
     if (layout && data.nodes.length > 0) {
+      // Yield to the browser so the background clear takes effect before
+      // the potentially blocking layout computation.
+      await new Promise((resolve) => requestAnimationFrame(resolve));
       // Auto-enable worker for large graphs unless explicitly disabled
       if (layout.worker === undefined && data.nodes.length >= 1000) {
         layout.worker = true;

@@ -24,6 +24,9 @@ import * as indentedTree from './indented-tree.ts';
 import * as mindmap from './mindmap.ts';
 import * as fishbone from './fishbone.ts';
 import * as performanceTest from './performance-test.ts';
+import * as setData from './set-data.ts';
+import * as labels from './labels.ts';
+import * as combo from './combo.ts';
 import basicSource from './basic.ts?raw';
 import nodeStyleSource from './node-style.ts?raw';
 import layoutsSource from './layouts.ts?raw';
@@ -47,6 +50,9 @@ import indentedTreeSource from './indented-tree.ts?raw';
 import mindmapSource from './mindmap.ts?raw';
 import fishboneSource from './fishbone.ts?raw';
 import performanceTestSource from './performance-test.ts?raw';
+import setDataSource from './set-data.ts?raw';
+import labelsSource from './labels.ts?raw';
+import comboSource from './combo.ts?raw';
 
 export interface DemoItem {
   id: string;
@@ -79,4 +85,7 @@ export const demos: DemoItem[] = [
   { id: 'mindmap', name: '思维导图', run: mindmap.run, source: mindmapSource },
   { id: 'fishbone', name: '鱼骨图', run: fishbone.run, source: fishboneSource },
   { id: 'performance', name: '性能测试', run: performanceTest.run, source: performanceTestSource },
+  { id: 'set-data', name: 'setData + layout()', run: setData.run, source: setDataSource },
+  { id: 'labels', name: '标签 + 图标', run: labels.run, source: labelsSource },
+  { id: 'combo', name: 'Combo 分组容器', run: combo.run, source: comboSource },
 ];

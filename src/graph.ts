@@ -9,8 +9,11 @@ import { runLayout } from './layout/index.js';
 import { terminateLayoutWorker } from './layout/workerLayout.js';
 import { Renderer } from './renderer/renderer.js';
 import type { RendererData } from './renderer/renderer.js';
+import { LabelRenderer } from './renderer/labelRenderer.js';
+import { ComboRenderer } from './renderer/comboRenderer.js';
 import { registerBehaviors } from './behaviors/index.js';
 import { DataModel } from './dataModel.js';
+import type { InternalNode, InternalEdge } from './dataModel.js';
 import { RenderScheduler, RefreshLevel } from './scheduler.js';
 import { EventEmitter } from './events.js';
 import { analyzeNodeConfig, analyzeEdgeConfig } from './renderer/style.js';
@@ -21,7 +24,10 @@ import type {
   GraphEdge,
   ThemeOption,
   LayoutNode,
+  LayoutConfig,
   ElementState,
+  ComboData,
+  InternalCombo,
 } from './types.js';
 import type { Camera } from './renderer/camera.js';
 
@@ -46,6 +52,8 @@ export class Graph {
   private resizeObserver: ResizeObserver | null = null;
   private layoutNodes: LayoutNode[] = [];
   private initialCamera: Camera | null = null;
+  private labelRenderer: LabelRenderer | null = null;
+  private comboRenderer: ComboRenderer | null = null;
   /** Whether render() has been called at least once. */
   private initialized = false;
 
@@ -79,11 +87,8 @@ export class Graph {
     }));
 
     if (layout && data.nodes.length > 0) {
-      // Yield to the browser so the background clear takes effect before
-      // the potentially blocking layout computation.
-      await new Promise((resolve) => requestAnimationFrame(resolve));
       // Auto-enable worker for large graphs unless explicitly disabled
-      if (layout.worker === undefined && data.nodes.length > 2000) {
+      if (layout.worker === undefined && data.nodes.length >= 1000) {
         layout.worker = true;
       }
 
@@ -96,15 +101,22 @@ export class Graph {
     }
     this.layoutNodes = nodes as LayoutNode[];
 
+    const layoutDirection =
+      ((layout?.rankdir ?? layout?.direction) as ('TB' | 'LR' | 'BT' | 'RL') | undefined) ?? 'TB';
+    const polylineRouter = edge?.style?.router ?? 'orth';
+
+    // Analyze configs for static style optimization (enables fast path)
+    analyzeNodeConfig(node, themeTokens);
+    analyzeEdgeConfig(edge, themeTokens);
+
     // Initialize DataModel
     this.dataModel = new DataModel({
       nodeConfig: node,
       edgeConfig: edge,
       theme: themeTokens,
-      layoutDirection:
-        ((layout?.rankdir ?? layout?.direction) as ('TB' | 'LR' | 'BT' | 'RL') | undefined) ?? 'TB',
+      layoutDirection,
       layoutType: layout?.type,
-      polylineRouter: edge?.style?.router ?? 'orth',
+      polylineRouter,
     });
 
     // Populate DataModel with initial data (pass arrays directly, no map/copy)
@@ -126,29 +138,67 @@ export class Graph {
     // Clear the dataReplaced change since we'll do a full process immediately
     this.dataModel.getChanges();
 
-    // Initialize RenderScheduler
-    this.scheduler = new RenderScheduler(this.renderer, this.dataModel);
+    // Repoint layoutNodes at the DataModel's node objects so the original
+    // post-layout array can be GC'd — one shared set of objects, not three.
+    this.layoutNodes = this.dataModel.getNodes() as unknown as LayoutNode[];
 
+    // Feed the Renderer the DataModel's own node/edge objects so there is a
+    // single shared set of element objects instead of two parallel copies.
+    // The renderer references (does not clone) these arrays; in-place mutation
+    // in patchPositions keeps both views consistent.
     this.renderer.setData({
-      nodes,
-      edges: data.edges,
+      nodes: this.dataModel.getNodes() as unknown as LayoutNode[],
+      edges: this.dataModel.getEdges() as unknown as GraphEdge[],
       nodeConfig: node,
       edgeConfig: edge,
       theme: themeTokens,
       layoutType: layout?.type,
-      layoutDirection:
-        ((layout?.rankdir ?? layout?.direction) as ('TB' | 'LR' | 'BT' | 'RL') | undefined) ?? 'TB',
-      polylineRouter: edge?.style?.router ?? 'orth',
+      layoutDirection,
+      polylineRouter,
     });
 
-    // Analyze configs for static style optimization (enables fast path)
-    analyzeNodeConfig(node, themeTokens);
-    analyzeEdgeConfig(edge, themeTokens);
+    // Initialize combos if present
+    if (data.combos?.length) {
+      this.dataModel.initCombos(data.combos, data.nodes);
+    }
+
+    // Initialize RenderScheduler
+    this.scheduler = new RenderScheduler(this.renderer, this.dataModel);
 
     if (behaviors?.length) {
       this.behaviorTeardown?.();
       this.behaviorTeardown = registerBehaviors(this.renderer, behaviors, this);
     }
+
+    // Initialize combo renderer (Canvas2D underlay for combo backgrounds)
+    if (this.dataModel.hasCombos()) {
+      this.comboRenderer = new ComboRenderer(this.containerEl, this.canvas);
+      this.dataModel.updateComboBounds(this.getComboStylePadding());
+      this.renderer.onBeforeDraw(() => {
+        if (this.comboRenderer && this.dataModel?.hasCombos()) {
+          this.dataModel.updateComboBounds(this.getComboStylePadding());
+          this.comboRenderer.draw(
+            this.dataModel.getCombos(),
+            this.renderer.getCamera(),
+            this.options.combo,
+          );
+        }
+      });
+    }
+
+    // Initialize label renderer (Canvas2D overlay for labels and icons)
+    this.labelRenderer = new LabelRenderer(this.containerEl, this.canvas);
+    this.labelRenderer.setScheduleRedraw(() => this.renderer.scheduleRender());
+    this.renderer.onAfterDraw(() => {
+      this.labelRenderer?.draw(
+        this.renderer.getNodes(),
+        this.renderer.getEdges(),
+        this.renderer.getCamera(),
+        this.options.node,
+        this.options.edge,
+        this.renderer.getNodeIdToIndex(),
+      );
+    });
 
     // Auto fit view
     this.fitView();
@@ -169,9 +219,16 @@ export class Graph {
       this.initialCamera = { x: cam.x, y: cam.y, zoom: cam.zoom };
     }
 
+    // Seed last-observed size so the immediate ResizeObserver callback on .observe()
+    // is filtered out when the container hasn't actually resized.
+    let lastObservedW = this.containerEl.clientWidth || 800;
+    let lastObservedH = this.containerEl.clientHeight || 600;
     this.resizeObserver = new ResizeObserver(() => {
       const w = this.containerEl.clientWidth || 800;
       const h = this.containerEl.clientHeight || 600;
+      if (w === lastObservedW && h === lastObservedH) return;
+      lastObservedW = w;
+      lastObservedH = h;
       this.renderer.resize(w, h);
       this.eventEmitter.emit('resize', { width: w, height: h });
     });
@@ -186,6 +243,8 @@ export class Graph {
     this.behaviorTeardown?.();
     this.resizeObserver?.disconnect();
     this.scheduler?.destroy();
+    this.labelRenderer?.destroy();
+    this.comboRenderer?.destroy();
     terminateLayoutWorker();
     this.canvas.remove();
   }
@@ -222,8 +281,11 @@ export class Graph {
     }
     const graphW = maxX - minX || 1;
     const graphH = maxY - minY || 1;
-    const viewW = this.containerEl.clientWidth || 800;
-    const viewH = this.containerEl.clientHeight || 600;
+    // Use canvas physical pixels (same coordinate space as the shader's u_resolution)
+    const viewW =
+      this.canvas.width || (this.containerEl.clientWidth || 800) * (window.devicePixelRatio ?? 1);
+    const viewH =
+      this.canvas.height || (this.containerEl.clientHeight || 600) * (window.devicePixelRatio ?? 1);
     const scaleX = viewW / graphW;
     const scaleY = viewH / graphH;
     const zoom = Math.min(scaleX, scaleY) * padding;
@@ -580,6 +642,298 @@ export class Graph {
   /** Subscribe to an event once. */
   once(event: string, handler: (...args: any[]) => void): void {
     this.eventEmitter.once(event, handler);
+  }
+
+  // ──── P0: Runtime data/layout/options ────
+
+  /**
+   * Replace all graph data at runtime. Runs layout if configured, then triggers full re-render.
+   */
+  async setData(data: GraphData): Promise<void> {
+    this.ensureInitialized();
+    let nodes = data.nodes.map((n) => ({ ...n, x: n.x ?? 0, y: n.y ?? 0 }));
+    const layout = this.options.layout;
+    if (layout && data.nodes.length > 0) {
+      this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
+      const t0 = performance.now();
+      const result = await runLayout(data, layout);
+      const duration = performance.now() - t0;
+      this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
+      nodes = result.nodes;
+    }
+    this.layoutNodes = nodes as LayoutNode[];
+    this.dataModel!.replaceData(nodes as any[], data.edges as any[]);
+    this.options.data = data;
+    this.fitView();
+    this.scheduler!.schedule();
+    this.eventEmitter.emit('datachange', {
+      nodeCount: nodes.length,
+      edgeCount: data.edges.length,
+    });
+  }
+
+  /**
+   * Update visual configuration (node/edge styles, theme) at runtime.
+   * Triggers a full re-process to apply new styles.
+   */
+  updateOptions(opts: Partial<Pick<GraphOptions, 'node' | 'edge' | 'theme'>>): void {
+    this.ensureInitialized();
+    if (opts.node) {
+      this.options.node = {
+        ...this.options.node,
+        ...opts.node,
+        style: { ...this.options.node?.style, ...opts.node.style },
+      };
+    }
+    if (opts.edge) {
+      this.options.edge = {
+        ...this.options.edge,
+        ...opts.edge,
+        style: { ...this.options.edge?.style, ...opts.edge.style },
+      };
+    }
+    if (opts.theme) this.options.theme = opts.theme;
+    const themeTokens = resolveTheme((this.options.theme as ThemeOption) ?? 'light');
+    this.dataModel!.nodeConfig = this.options.node;
+    this.dataModel!.edgeConfig = this.options.edge;
+    this.dataModel!.theme = themeTokens;
+    analyzeNodeConfig(this.options.node, themeTokens);
+    analyzeEdgeConfig(this.options.edge, themeTokens);
+    this.scheduler!.forceFlush(RefreshLevel.FULL_PROCESS);
+  }
+
+  /**
+   * Set the layout configuration. Does not execute layout — call layout() after.
+   */
+  setLayout(config: LayoutConfig): void {
+    this.options.layout = config;
+  }
+
+  /**
+   * Execute the current layout algorithm and update node positions.
+   */
+  async layout(): Promise<void> {
+    this.ensureInitialized();
+    const layout = this.options.layout;
+    if (!layout) return;
+    const data = this.options.data;
+    if (data.nodes.length === 0) return;
+    this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
+    const t0 = performance.now();
+    const result = await runLayout(data, layout);
+    const duration = performance.now() - t0;
+    this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
+    this.layoutNodes = result.nodes as LayoutNode[];
+    this.dataModel!.replaceData(result.nodes as any[], data.edges as any[]);
+    this.scheduler!.schedule();
+  }
+
+  /**
+   * Get a single node's internal data by ID. O(1) lookup.
+   */
+  getNodeData(id: string): InternalNode | undefined {
+    return this.dataModel?.getNode(id);
+  }
+
+  /**
+   * Get a single edge's internal data by ID. O(1) lookup.
+   */
+  getEdgeData(id: string): InternalEdge | undefined {
+    return this.dataModel?.getEdge(id);
+  }
+
+  // ──── P1: Batch state, visibility, focus ────
+
+  /**
+   * Set states on multiple items in a single batch, triggering only one render.
+   */
+  batchSetState(items: Array<{ id: string; state: ElementState; value: boolean }>): void {
+    this.ensureInitialized();
+    for (const { id, state, value } of items) {
+      if (this.dataModel!.hasNode(id)) {
+        this.dataModel!.setNodeState(id, state, value);
+      } else if (this.dataModel!.hasEdge(id)) {
+        this.dataModel!.setEdgeState(id, state, value);
+      }
+    }
+    this.scheduler!.schedule();
+  }
+
+  /**
+   * Get all active states on a node or edge.
+   */
+  getItemStates(id: string): ElementState[] {
+    if (!this.dataModel) return [];
+    const node = this.dataModel.getNode(id);
+    if (node) return Array.from(node.states);
+    const edge = this.dataModel.getEdge(id);
+    if (edge) return Array.from(edge.states);
+    return [];
+  }
+
+  /**
+   * Hide a node or edge (sets opacity to 0 via 'hidden' state).
+   */
+  hideItem(id: string): void {
+    this.setItemState(id, 'hidden', true);
+  }
+
+  /**
+   * Show a previously hidden node or edge.
+   */
+  showItem(id: string): void {
+    this.setItemState(id, 'hidden', false);
+  }
+
+  /**
+   * Move the viewport to center on the specified node(s).
+   */
+  focusItem(id: string | string[], padding = 20): void {
+    if (!this.dataModel) return;
+    const ids = Array.isArray(id) ? id : [id];
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity;
+    for (const nodeId of ids) {
+      const node = this.dataModel.getNode(nodeId);
+      if (!node) continue;
+      if (node.x < minX) minX = node.x;
+      if (node.x > maxX) maxX = node.x;
+      if (node.y < minY) minY = node.y;
+      if (node.y > maxY) maxY = node.y;
+    }
+    if (minX === Infinity) return;
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    const viewW = this.containerEl.clientWidth || 800;
+    const viewH = this.containerEl.clientHeight || 600;
+    const cam = this.renderer.getCamera();
+    const camX = viewW / (2 * cam.zoom) - centerX;
+    const camY = viewH / (2 * cam.zoom) - centerY;
+    this.renderer.setCamera({ x: camX, y: camY });
+    this.renderer.scheduleRender();
+  }
+
+  // ──── Combo operations ────
+
+  collapseCombo(comboId: string): void {
+    if (!this.dataModel) return;
+    this.dataModel.setComboCollapsed(comboId, true);
+    const nodeIds = this.dataModel.getComboAllNodeIds(comboId);
+    for (const id of nodeIds) {
+      this.dataModel.setNodeState(id, 'hidden', true);
+    }
+    this.scheduler?.schedule();
+    this.eventEmitter.emit('combo:collapse', { comboId });
+  }
+
+  expandCombo(comboId: string): void {
+    if (!this.dataModel) return;
+    this.dataModel.setComboCollapsed(comboId, false);
+    const nodeIds = this.dataModel.getComboAllNodeIds(comboId);
+    for (const id of nodeIds) {
+      this.dataModel.setNodeState(id, 'hidden', false);
+    }
+    this.scheduler?.schedule();
+    this.eventEmitter.emit('combo:expand', { comboId });
+  }
+
+  toggleCombo(comboId: string): void {
+    if (!this.dataModel) return;
+    const combo = this.dataModel.getCombo(comboId);
+    if (!combo) return;
+    if (combo.collapsed) {
+      this.expandCombo(comboId);
+    } else {
+      this.collapseCombo(comboId);
+    }
+  }
+
+  getComboData(id: string): InternalCombo | undefined {
+    return this.dataModel?.getCombo(id);
+  }
+
+  getComboChildren(id: string): { nodes: string[]; combos: string[] } {
+    const combo = this.dataModel?.getCombo(id);
+    if (!combo) return { nodes: [], combos: [] };
+    return {
+      nodes: Array.from(combo.childNodeIds),
+      combos: Array.from(combo.childComboIds),
+    };
+  }
+
+  getNodeCombo(nodeId: string): string | undefined {
+    return this.dataModel?.getNodeCombo(nodeId);
+  }
+
+  addToCombo(nodeId: string, comboId: string): void {
+    if (!this.dataModel) return;
+    this.dataModel.setNodeCombo(nodeId, comboId);
+    this.scheduler?.schedule();
+  }
+
+  removeFromCombo(nodeId: string): void {
+    if (!this.dataModel) return;
+    this.dataModel.setNodeCombo(nodeId, undefined);
+    this.scheduler?.schedule();
+  }
+
+  createCombo(combo: ComboData, childNodeIds?: string[]): void {
+    if (!this.dataModel) return;
+    this.dataModel.addCombo(combo);
+    if (childNodeIds) {
+      for (const nodeId of childNodeIds) {
+        this.dataModel.setNodeCombo(nodeId, combo.id);
+      }
+    }
+    // Initialize combo renderer if first combo
+    if (!this.comboRenderer) {
+      this.comboRenderer = new ComboRenderer(this.containerEl, this.canvas);
+      this.renderer.onBeforeDraw(() => {
+        if (this.comboRenderer && this.dataModel?.hasCombos()) {
+          this.dataModel.updateComboBounds(this.getComboStylePadding());
+          this.comboRenderer.draw(
+            this.dataModel.getCombos(),
+            this.renderer.getCamera(),
+            this.options.combo,
+          );
+        }
+      });
+    }
+    this.scheduler?.schedule();
+  }
+
+  removeCombo(comboId: string): void {
+    if (!this.dataModel) return;
+    this.dataModel.removeCombo(comboId);
+    this.scheduler?.schedule();
+  }
+
+  /** Pick a combo at screen coordinates. Returns combo ID or null. */
+  pickComboAt(screenX: number, screenY: number): string | null {
+    if (!this.comboRenderer || !this.dataModel?.hasCombos()) return null;
+    const rect = this.canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const x = (screenX - rect.left) * dpr;
+    const y = (screenY - rect.top) * dpr;
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    return this.comboRenderer.pickAt(
+      x,
+      y,
+      this.dataModel.getCombos(),
+      this.renderer.getCamera(),
+      w,
+      h,
+    );
+  }
+
+  private getComboStylePadding(): number {
+    const p = this.options.combo?.style?.padding;
+    if (typeof p === 'number') return p;
+    if (Array.isArray(p)) return Math.max(...p);
+    return 20;
   }
 }
 

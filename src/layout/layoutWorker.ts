@@ -75,6 +75,22 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
     }
   }
 
+  // ForceAtlas2: cap maxIteration (default 0 → @antv/layout auto-expands to 950)
+  // and disable `prune`, whose finishing pass runs a pure O(n²) tick(100) with
+  // barnesHut forced off (5000 nodes: 37s → ~1s, measured). The real options are
+  // `barnesHut`/`prune`; `barnesHutOptimize` was an invalid no-op and is removed.
+  if (type === 'force-atlas2') {
+    if (opts.barnesHut === undefined) opts.barnesHut = true;
+    if (opts.prune === undefined && nodeCount > 200) opts.prune = false;
+    if (nodeCount > 5000) {
+      if (opts.maxIteration === undefined) opts.maxIteration = 50;
+    } else if (nodeCount >= 1000) {
+      if (opts.maxIteration === undefined) opts.maxIteration = 100;
+    } else {
+      if (opts.maxIteration === undefined) opts.maxIteration = 100;
+    }
+  }
+
   // Spread initial positions for force layouts
   const spread = Math.max(200, Math.sqrt(nodeCount) * 30);
   const layoutNodes = nodes.map((n) => ({

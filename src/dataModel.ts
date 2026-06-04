@@ -5,7 +5,14 @@
  * to determine the optimal refresh strategy.
  */
 
-import type { ElementState, NodeConfig, EdgeConfig, ThemeTokens } from './types.js';
+import type {
+  ElementState,
+  NodeConfig,
+  EdgeConfig,
+  ThemeTokens,
+  ComboData,
+  InternalCombo,
+} from './types.js';
 
 /** Internal node model with resolved style cache. */
 export interface InternalNode {
@@ -66,6 +73,10 @@ export class DataModel {
 
   private _edgeIdCounter = 0;
   private _changes: ChangeRecord[] = [];
+
+  // Combo storage
+  private _combos = new Map<string, InternalCombo>();
+  private _nodeToCombo = new Map<string, string>();
 
   // Config (may be updated via updateData)
   nodeConfig?: NodeConfig;
@@ -555,5 +566,185 @@ export class DataModel {
       data: e.data,
       states: e.states.size > 0 ? Array.from(e.states) : undefined,
     }));
+  }
+
+  // ──── Combo operations ────
+
+  initCombos(combos: ComboData[], nodes: Array<{ id: string; comboId?: string }>): void {
+    this._combos.clear();
+    this._nodeToCombo.clear();
+    for (const c of combos) {
+      this._combos.set(c.id, {
+        id: c.id,
+        parentId: c.parentId,
+        childNodeIds: new Set(),
+        childComboIds: new Set(),
+        collapsed: false,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+        data: c.data,
+        states: new Set(),
+      });
+    }
+    // Build parent-child combo relationships
+    for (const c of combos) {
+      if (c.parentId && this._combos.has(c.parentId)) {
+        this._combos.get(c.parentId)!.childComboIds.add(c.id);
+      }
+    }
+    // Assign nodes to combos
+    for (const n of nodes) {
+      if (n.comboId && this._combos.has(n.comboId)) {
+        this._combos.get(n.comboId)!.childNodeIds.add(n.id);
+        this._nodeToCombo.set(n.id, n.comboId);
+      }
+    }
+  }
+
+  addCombo(combo: ComboData): void {
+    if (this._combos.has(combo.id)) return;
+    this._combos.set(combo.id, {
+      id: combo.id,
+      parentId: combo.parentId,
+      childNodeIds: new Set(),
+      childComboIds: new Set(),
+      collapsed: false,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      data: combo.data,
+      states: new Set(),
+    });
+    if (combo.parentId && this._combos.has(combo.parentId)) {
+      this._combos.get(combo.parentId)!.childComboIds.add(combo.id);
+    }
+  }
+
+  removeCombo(id: string): void {
+    const combo = this._combos.get(id);
+    if (!combo) return;
+    // Unparent from parent combo
+    if (combo.parentId) {
+      this._combos.get(combo.parentId)?.childComboIds.delete(id);
+    }
+    // Remove node associations
+    for (const nodeId of combo.childNodeIds) {
+      this._nodeToCombo.delete(nodeId);
+    }
+    this._combos.delete(id);
+  }
+
+  setNodeCombo(nodeId: string, comboId: string | undefined): void {
+    const oldComboId = this._nodeToCombo.get(nodeId);
+    if (oldComboId) {
+      this._combos.get(oldComboId)?.childNodeIds.delete(nodeId);
+    }
+    if (comboId && this._combos.has(comboId)) {
+      this._combos.get(comboId)!.childNodeIds.add(nodeId);
+      this._nodeToCombo.set(nodeId, comboId);
+    } else {
+      this._nodeToCombo.delete(nodeId);
+    }
+  }
+
+  getNodeCombo(nodeId: string): string | undefined {
+    return this._nodeToCombo.get(nodeId);
+  }
+
+  getCombo(id: string): InternalCombo | undefined {
+    return this._combos.get(id);
+  }
+
+  getCombos(): InternalCombo[] {
+    return Array.from(this._combos.values());
+  }
+
+  hasCombos(): boolean {
+    return this._combos.size > 0;
+  }
+
+  setComboCollapsed(id: string, collapsed: boolean): void {
+    const combo = this._combos.get(id);
+    if (combo) combo.collapsed = collapsed;
+  }
+
+  /** Recompute combo bounding boxes based on child node positions. */
+  updateComboBounds(padding = 20): void {
+    // Process from leaf combos up to root combos
+    const processed = new Set<string>();
+    const update = (comboId: string): void => {
+      if (processed.has(comboId)) return;
+      const combo = this._combos.get(comboId);
+      if (!combo) return;
+
+      // First process child combos
+      for (const childId of combo.childComboIds) {
+        update(childId);
+      }
+
+      let minX = Infinity,
+        maxX = -Infinity,
+        minY = Infinity,
+        maxY = -Infinity;
+
+      // Include child nodes
+      for (const nodeId of combo.childNodeIds) {
+        const node = this.getNode(nodeId);
+        if (node) {
+          if (node.x < minX) minX = node.x;
+          if (node.x > maxX) maxX = node.x;
+          if (node.y < minY) minY = node.y;
+          if (node.y > maxY) maxY = node.y;
+        }
+      }
+
+      // Include child combo bounds
+      for (const childId of combo.childComboIds) {
+        const child = this._combos.get(childId);
+        if (child && child.width > 0) {
+          const cx0 = child.x - child.width / 2;
+          const cx1 = child.x + child.width / 2;
+          const cy0 = child.y - child.height / 2;
+          const cy1 = child.y + child.height / 2;
+          if (cx0 < minX) minX = cx0;
+          if (cx1 > maxX) maxX = cx1;
+          if (cy0 < minY) minY = cy0;
+          if (cy1 > maxY) maxY = cy1;
+        }
+      }
+
+      if (minX === Infinity) {
+        combo.x = 0;
+        combo.y = 0;
+        combo.width = 0;
+        combo.height = 0;
+      } else {
+        const pad = typeof padding === 'number' ? padding : 20;
+        combo.x = (minX + maxX) / 2;
+        combo.y = (minY + maxY) / 2;
+        combo.width = maxX - minX + pad * 2;
+        combo.height = maxY - minY + pad * 2;
+      }
+
+      processed.add(comboId);
+    };
+
+    for (const [id] of this._combos) {
+      update(id);
+    }
+  }
+
+  /** Get all node IDs belonging to a combo (including nested combos). */
+  getComboAllNodeIds(comboId: string): string[] {
+    const combo = this._combos.get(comboId);
+    if (!combo) return [];
+    const result: string[] = [...combo.childNodeIds];
+    for (const childComboId of combo.childComboIds) {
+      result.push(...this.getComboAllNodeIds(childComboId));
+    }
+    return result;
   }
 }

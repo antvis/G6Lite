@@ -60,15 +60,34 @@ export abstract class Program {
     this.itemCount = count;
     const needed = count * this.getVerticesPerItem() * this.getFloatsPerVertex();
     if (this.array.length < needed) {
-      // Exponential growth to reduce reallocation frequency
-      // Double the capacity or add 50% margin for large arrays
-      const newCapacity = needed < 1000 ? needed * 2 : Math.floor(needed * 1.5);
+      // Exponential growth to reduce reallocation frequency.
+      // Double small arrays; grow large arrays by 25% to bound CPU-side slack.
+      const newCapacity = needed < 1000 ? needed * 2 : Math.floor(needed * 1.25);
       const newArray = new Float32Array(newCapacity);
       // Preserve existing data for incremental processing
       if (this.array.length > 0) {
         newArray.set(this.array);
       }
       this.array = newArray;
+    }
+  }
+
+  /**
+   * Reclaim CPU-side slack after a full rebuild. The backing Float32Array is a
+   * permanent CPU mirror of the GPU buffer; after a full process() it can hold
+   * up to 25-100% slack from exponential growth that is never otherwise freed.
+   * Only shrinks when slack is large and worth reclaiming, to avoid realloc
+   * churn on small or frequently-updated graphs. Safe to call after process():
+   * patch/incremental paths either keep the length or call reallocate() to grow.
+   */
+  shrinkToFit(): void {
+    const usedFloats = this.itemCount * this.getVerticesPerItem() * this.getFloatsPerVertex();
+    if (usedFloats === 0) {
+      if (this.array.length > 0) this.array = new Float32Array(0);
+      return;
+    }
+    if (this.array.length > usedFloats * 1.5 && this.array.length - usedFloats > 4096) {
+      this.array = this.array.slice(0, usedFloats);
     }
   }
 

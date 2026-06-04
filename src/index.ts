@@ -25,6 +25,12 @@ export type {
   LayoutConfig,
   ThemeOption,
   ElementState,
+  LabelPlacement,
+  EdgeLabelPlacement,
+  ComboData,
+  ComboConfig,
+  ComboStyleConfig,
+  InternalCombo,
 } from './types.js';
 export type { RendererData } from './renderer/renderer.js';
 export { resolveTheme } from './theme.js';

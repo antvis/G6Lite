@@ -58,7 +58,7 @@ export function clickSelect(
   };
 
   const onClick = (e: MouseEvent) => {
-    const result = renderer.pickAt(e.offsetX, e.offsetY);
+    const result = renderer.pickAt(e.clientX, e.clientY);
 
     if (result && result.type === 'node') {
       const nodeId = result.id;

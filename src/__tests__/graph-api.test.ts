@@ -193,20 +193,20 @@ describe('P1: click-select multiple', () => {
     });
 
     // Click n1 without shift — selects n1
-    const e1 = { offsetX: 10, offsetY: 10, shiftKey: false } as any;
+    const e1 = { clientX: 10, clientY: 10, shiftKey: false } as any;
     handlers['click'][0](e1);
     expect(stateMap.get('selected')?.has('n1')).toBe(true);
 
     // Click n2 with shift — adds n2, keeps n1
     currentPickResult = { type: 'node', id: 'n2' };
-    const e2 = { offsetX: 20, offsetY: 20, shiftKey: true } as any;
+    const e2 = { clientX: 20, clientY: 20, shiftKey: true } as any;
     handlers['click'][0](e2);
     expect(stateMap.get('selected')?.has('n1')).toBe(true);
     expect(stateMap.get('selected')?.has('n2')).toBe(true);
 
     // Click n3 without shift — clears previous, selects only n3
     currentPickResult = { type: 'node', id: 'n3' };
-    const e3 = { offsetX: 30, offsetY: 30, shiftKey: false } as any;
+    const e3 = { clientX: 30, clientY: 30, shiftKey: false } as any;
     handlers['click'][0](e3);
     expect(stateMap.get('selected')?.has('n1')).toBe(false);
     expect(stateMap.get('selected')?.has('n2')).toBe(false);

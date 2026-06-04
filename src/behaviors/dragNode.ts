@@ -53,9 +53,11 @@ export function dragNode(renderer: Renderer, graph: Graph): () => void {
       startMouse = { x: e.clientX, y: e.clientY };
       draggingComboId = comboId;
 
-      // Get all nodes in this combo (including nested)
+      // Get all nodes in this combo (including nested). A collapsed combo's
+      // bounds are still computed from its child node positions, so dragging it
+      // must move those children regardless of collapsed state.
       const comboData = graph.getComboData(comboId);
-      if (comboData && !comboData.collapsed) {
+      if (comboData) {
         draggingIds = getAllComboNodeIds(graph, comboId);
       } else {
         draggingIds = [];

@@ -675,10 +675,14 @@ export class DataModel {
   updateComboBounds(padding = 20): void {
     // Process from leaf combos up to root combos
     const processed = new Set<string>();
+    const visiting = new Set<string>();
     const update = (comboId: string): void => {
       if (processed.has(comboId)) return;
+      // Guard against circular parent-child relationships to avoid stack overflow.
+      if (visiting.has(comboId)) return;
       const combo = this._combos.get(comboId);
       if (!combo) return;
+      visiting.add(comboId);
 
       // First process child combos
       for (const childId of combo.childComboIds) {
@@ -730,6 +734,7 @@ export class DataModel {
       }
 
       processed.add(comboId);
+      visiting.delete(comboId);
     };
 
     for (const [id] of this._combos) {
@@ -738,12 +743,15 @@ export class DataModel {
   }
 
   /** Get all node IDs belonging to a combo (including nested combos). */
-  getComboAllNodeIds(comboId: string): string[] {
+  getComboAllNodeIds(comboId: string, visited = new Set<string>()): string[] {
+    // Guard against circular parent-child relationships to avoid stack overflow.
+    if (visited.has(comboId)) return [];
+    visited.add(comboId);
     const combo = this._combos.get(comboId);
     if (!combo) return [];
     const result: string[] = [...combo.childNodeIds];
     for (const childComboId of combo.childComboIds) {
-      result.push(...this.getComboAllNodeIds(childComboId));
+      result.push(...this.getComboAllNodeIds(childComboId, visited));
     }
     return result;
   }

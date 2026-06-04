@@ -254,14 +254,22 @@ export class ComboRenderer {
     const comboMap = new Map<string, InternalCombo>();
     for (const c of combos) comboMap.set(c.id, c);
 
+    const visiting = new Set<string>();
     const getDepth = (id: string): number => {
       if (depthMap.has(id)) return depthMap.get(id)!;
+      // Guard against circular parent-child relationships to avoid stack overflow.
+      if (visiting.has(id)) {
+        depthMap.set(id, 0);
+        return 0;
+      }
       const c = comboMap.get(id);
       if (!c || !c.parentId || !comboMap.has(c.parentId)) {
         depthMap.set(id, 0);
         return 0;
       }
+      visiting.add(id);
       const d = getDepth(c.parentId) + 1;
+      visiting.delete(id);
       depthMap.set(id, d);
       return d;
     };

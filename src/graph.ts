@@ -248,6 +248,7 @@ export class Graph {
     this.scheduler?.destroy();
     this.labelRenderer?.destroy();
     this.comboRenderer?.destroy();
+    this.renderer.destroy();
     terminateLayoutWorker();
     this.canvas.remove();
   }

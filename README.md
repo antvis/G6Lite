@@ -73,6 +73,12 @@ Output: `dist/` (ESM + declarations).
 
 Requirements and scenarios are maintained in [openspec/specs](./openspec/README.md) (OpenSpec format).
 
+## Contributing
+
+Contributions are welcome! Please read the [Contributing Guide](./CONTRIBUTING.md)
+for the development setup, workflow, commit convention, and DCO sign-off
+requirements before opening a Pull Request.
+
 ## License
 
 MIT

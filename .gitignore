@@ -7,8 +7,17 @@ performance/
 coverage/
 openspec/*
 
+# docs website (Next.js)
+website/node_modules
+website/.next
+website/out
+website/.source
+
 # Local development files (not for commit)
 *.sh
 *.backup.*
 CLAUDE.md
 design/
+
+# npm pack output
+*.tgz

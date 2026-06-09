@@ -1,6 +1,9 @@
-# G6Lite 使用文档
+---
+title: 完整指南
+description: G6Lite 数据格式、配置项、节点/边样式、布局、交互、主题与 API 说明
+---
 
-G6Lite 是基于 WebGL 的高性能图分析引擎，面向大规模图数据分析与可视化。
+> 本页为现有完整指南，后续将拆分为 data / node / edge / layout / behavior 等独立章节。
 
 ## 快速开始
 
@@ -34,8 +37,6 @@ await graph.render();
 
 创建 `Graph` 后必须调用 `await graph.render()` 才会执行布局并绘制。销毁时调用 `graph.destroy()`。
 
----
-
 ## 数据格式
 
 图数据通过 `data` 传入，结构为 `{ nodes, edges }`。
@@ -66,8 +67,6 @@ const edges = [
 ];
 ```
 
----
-
 ## 图配置项
 
 `Graph` 的配置对象支持以下字段：
@@ -81,8 +80,6 @@ const edges = [
 | **layout** | `LayoutConfig` | 布局类型与参数 |
 | **behaviors** | `BehaviorOption[]` | 交互列表 |
 | **theme** | `ThemeOption` | 主题：`'light'` / `'dark'` 或带覆盖项的对象 |
-
----
 
 ## 节点与边样式
 
@@ -119,8 +116,6 @@ edge: {
 
 样式仅暴露可在 WebGL 下高效实现的属性，便于大规模渲染。
 
----
-
 ## 布局
 
 通过 `layout` 配置布局，内部使用 [@antv/layout](https://github.com/antvis/layout)，选项会透传到底层算法。
@@ -155,8 +150,6 @@ layout: { type: 'dagre', rankdir: 'TB', nodesep: 40, ranksep: 60 }
 
 不传 `layout` 时，将使用节点自带的 `x、y`（缺省为 0）。
 
----
-
 ## 交互（behaviors）
 
 `behaviors` 为字符串或配置对象数组，内置以下行为：
@@ -173,8 +166,6 @@ layout: { type: 'dagre', rankdir: 'TB', nodesep: 40, ranksep: 60 }
 ```ts
 behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge']
 ```
-
----
 
 ## 主题（theme）
 
@@ -195,26 +186,17 @@ theme: {
 }
 ```
 
----
-
 ## API
 
 ### Graph
 
-- **constructor(options: GraphOptions)**  
-  创建图实例，不会立即渲染。
-
-- **render(): Promise\<void\>**  
-  执行布局、渲染并注册 behaviors，需在创建后调用一次。
-
-- **destroy(): void**  
-  移除交互监听、ResizeObserver 和画布，销毁实例。
+- **constructor(options: GraphOptions)** — 创建图实例，不会立即渲染。
+- **render(): Promise\<void\>** — 执行布局、渲染并注册 behaviors，需在创建后调用一次。
+- **destroy(): void** — 移除交互监听、ResizeObserver 和画布，销毁实例。
 
 ### 类型导出
 
 可从 `@antv/g6-lite` 使用：`GraphOptions`、`GraphData`、`GraphNode`、`GraphEdge`、`NodeConfig`、`EdgeConfig`、`LayoutConfig`、`ThemeOption` 等。
-
----
 
 ## 示例与 Demo
 

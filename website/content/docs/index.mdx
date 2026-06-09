@@ -1,0 +1,27 @@
+---
+title: 概览
+description: G6Lite — 基于 WebGL 的高性能图可视化与分析引擎
+---
+
+G6Lite 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL 引擎，与 AntV 生态保持一致的设计风格。
+
+## 为什么选择 G6Lite
+
+- **能用**：`npm install @antv/g6-lite`，最简示例即可跑通。
+- **能快**：核心引擎采用 Array 化的 DataModel、分级刷新调度与静态样式优先策略，轻松渲染万级节点。
+- **能扩展**：布局、节点/边渲染、交互行为均可组合扩展。
+
+<Cards>
+  <Card title="快速开始" href="/docs/guide/quick-start" />
+  <Card title="项目介绍" href="/docs/guide/introduction" />
+  <Card title="性能指标" href="/docs/metrics/performance" />
+  <Card title="包大小" href="/docs/metrics/bundle-size" />
+</Cards>
+
+## 核心能力
+
+- ⚡ **WebGL 高性能渲染** — 节点（circle / rect）与边（line / cubic / polyline）以极少 draw call 渲染。
+- 🧭 **15+ 布局** — force / circular / grid / dagre / fishbone / mindmap / indented-tree / fa2 等，基于 [@antv/layout](https://github.com/antvis/layout)。
+- 🖱️ **完整交互** — clickSelect / dragNode / hoverHighlight / brushSelect 等开箱即用。
+- 🎨 **主题** — 内置 light / dark 与 token 覆盖。
+- 📦 **增量更新近零成本** — RefreshLevel 分级调度 + GPU patch，高亮 / 状态变更 / 拾取开销极低。

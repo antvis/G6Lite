@@ -1,22 +1,30 @@
 # G6Lite
 
-A high-performance graph analysis engine based on WebGL, designed for large-scale graph data analysis.
+[![npm version](https://img.shields.io/npm/v/@antv/g6-lite.svg)](https://www.npmjs.com/package/@antv/g6-lite)
+[![CI](https://github.com/antvis/G6Lite/actions/workflows/ci.yml/badge.svg)](https://github.com/antvis/G6Lite/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![bundle size](https://img.shields.io/badge/gzip-~117%20KB-brightgreen.svg)](./docs/metrics/bundle-size.md)
 
-## Features
+> 基于 WebGL 的高性能图可视化与分析引擎，为大规模图数据而生。
+>
+> A high-performance graph analysis engine based on WebGL, designed for large-scale graph data analysis.
 
-- **WebGL rendering** — Nodes (circle/rect) and edges (line) with minimal draw calls
-- **Layout** — Thin wrapper over [@antv/layout](https://github.com/antvis/layout): circular, force, grid, dagre, and more
-- **Behaviors** — `zoom-canvas`, `drag-canvas`, `highlight-node`, `highlight-edge`
-- **Theme** — Built-in `light` and `dark` with token overrides
-- **TypeScript** — Full typings and strict mode
+## ✨ 特性 / Features
 
-## Install
+- **⚡ WebGL 高性能渲染** — 节点（circle / rect）与边（line / cubic / polyline）以极少 draw call 渲染，万级节点流畅交互。
+- **🧭 丰富布局** — 基于 [@antv/layout](https://github.com/antvis/layout) 内置 15+ 布局：force / circular / grid / dagre / fishbone / mindmap / indented-tree / fa2 等。
+- **🖱️ 完整交互** — `clickSelect`、`dragNode`、`hoverHighlight`、`brushSelect`、`zoom-canvas`、`drag-canvas` 等开箱即用。
+- **🎨 主题** — 内置 `light` / `dark` 主题与 token 覆盖。
+- **📦 增量更新近零成本** — RefreshLevel 分级调度 + GPU patch，高亮 / 状态变更 / 拾取开销极低。
+- **🔷 TypeScript** — 完整类型定义，strict 模式。
+
+## 📦 安装 / Install
 
 ```bash
 npm install @antv/g6-lite
 ```
 
-## Usage
+## 🚀 快速开始 / Quick Start
 
 ```ts
 import { Graph } from '@antv/g6-lite';
@@ -43,10 +51,33 @@ const graph = new Graph({
 await graph.render();
 ```
 
-## 使用文档与 Demo
+## 📖 文档 / Documentation
 
-- **使用文档**：[docs/guide.md](./docs/guide.md) — 数据格式、配置项、布局、交互、主题与 API 说明。
-- **Playground**：运行 `npm run dev` 后，在浏览器中可切换以下示例：
+完整文档以官网站点形式提供（基于 [dumi](https://d.umijs.org/)）。本地预览：
+
+```bash
+npm run docs:dev      # 启动文档站点
+npm run docs:build    # 构建静态站点到 site/
+```
+
+站点内容：
+
+- **指南 / Guide** — 项目介绍、快速开始、数据格式、节点 / 边样式、布局、交互、主题（建设中，逐步补全）。
+- **指标 / Metrics**：
+  - [包大小](./docs/metrics/bundle-size.md) — 真实打包体积与同类库对比。
+  - [浏览器兼容性](./docs/metrics/browser-compatibility.md) — WebGL 支持矩阵与最低版本。
+  - [性能指标](./docs/metrics/performance.md) — 指标定义、测试环境与核心数据。
+- **完整指南** — 现有 [docs/guide.md](./docs/guide.md) 覆盖数据 / 配置 / 布局 / 交互 / 主题与 API。
+
+> 公网文档站点（GitHub Pages）将在 `0.1.0` 正式发布时上线。
+
+## 🎮 Playground
+
+```bash
+npm run dev
+```
+
+运行后在浏览器中可切换示例：
 
 | Demo | 说明 |
 |------|------|
@@ -54,31 +85,41 @@ await graph.render();
 | 节点样式 | 按 `data` 用函数设置 fill、size |
 | 布局切换 | 同一数据下切换 circular / force / grid / dagre |
 | 主题 | light / dark 及 token 覆盖 |
-| 交互高亮 | 缩放、拖拽、节点/边高亮 |
+| 交互高亮 | 缩放、拖拽、节点 / 边高亮 |
 | 较大规模 | 约 200 节点，验证基础性能 |
 
-```bash
-npm run dev
-```
-
-## Build
+## 🔨 构建 / Build
 
 ```bash
-npm run build
+npm run build    # 输出 dist/（ESM + 类型声明）
+npm run ci       # lint + typecheck + test + build
+npm run size     # 检查打包体积
 ```
 
-Output: `dist/` (ESM + declarations).
+## 🗺️ Roadmap
 
-## Spec
+当前处于 `0.1.0-beta` 阶段，目标是首个对外开源版本 `0.1.0`。进行中的工作：
 
-Requirements and scenarios are maintained in [openspec/specs](./openspec/README.md) (OpenSpec format).
+- ✅ 核心引擎、渲染、15+ 布局、P0–P3 交互行为
+- ✅ 治理文件（CONTRIBUTING / CODE_OF_CONDUCT / Issue & PR 模板）
+- ✅ 文档站点骨架（dumi）+ 三份指标文档
+- 🚧 Guide 各章节正文、Combo / Label 文档与示例
+- 🚧 测试覆盖率门槛、独立 examples、API 文档
+- 🚧 GitHub Pages 部署、changesets 发布流程
 
-## Contributing
+完整路线图见仓库内部 Roadmap 文档。
 
-Contributions are welcome! Please read the [Contributing Guide](./CONTRIBUTING.md)
-for the development setup, workflow, commit convention, and DCO sign-off
-requirements before opening a Pull Request.
+## 🤝 贡献 / Contributing
 
-## License
+欢迎贡献！提交 Pull Request 前请阅读 [贡献指南](./CONTRIBUTING.md)，了解开发环境、工作流、提交规范（Conventional Commits）与 DCO 签名要求。
 
-MIT
+参与本项目即表示你同意遵守 [行为准则](./CODE_OF_CONDUCT.md)。
+
+## 💬 社区 / Community
+
+- **Bug 与功能建议**：通过 [GitHub Issues](https://github.com/antvis/G6Lite/issues) 提交（已提供 Bug / Feature / Question 模板）。
+- **讨论与提问**：[GitHub Discussions](https://github.com/antvis/G6Lite/discussions)。
+
+## 📄 License
+
+[MIT](./LICENSE) © AntV

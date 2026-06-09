@@ -18,6 +18,26 @@ import type {
   NodeState,
 } from '../types.js';
 
+/**
+ * State containers come in two shapes depending on the source: a plain array
+ * (from GraphNode/GraphEdge configs) or a Set (from DataModel's InternalNode/
+ * InternalEdge, which the renderer references directly to avoid copies).
+ * These helpers read either without allocating.
+ */
+type StateLike = readonly string[] | ReadonlySet<string> | undefined;
+
+function hasAnyState(states: StateLike): boolean {
+  if (!states) return false;
+  return Array.isArray(states) ? states.length > 0 : (states as ReadonlySet<string>).size > 0;
+}
+
+function hasState(states: StateLike, state: string): boolean {
+  if (!states) return false;
+  return Array.isArray(states)
+    ? states.includes(state)
+    : (states as ReadonlySet<string>).has(state);
+}
+
 export interface ResolvedNodeStyle {
   fill: string;
   fillRGB?: [number, number, number]; // Pre-parsed color (optional, for static optimization)
@@ -259,18 +279,22 @@ export function resolveNodeStyle(
     let haloWidth = 0;
 
     const states = (node as GraphNode).states;
-    if (states && states.length > 0) {
-      for (const state of states) {
-        if (state === 'default') continue;
-        const override = config?.stateStyles?.[state] ?? theme.nodeStateStyles?.[state];
-        if (!override) continue;
-        if (override.fill !== undefined) fill = override.fill;
-        if (override.stroke !== undefined) stroke = override.stroke;
-        if (override.strokeWidth !== undefined) strokeWidth = override.strokeWidth;
-        if (override.opacity !== undefined) opacity = override.opacity;
+    if (hasAnyState(states)) {
+      if (hasState(states, 'hidden')) {
+        opacity = 0;
+      } else {
+        for (const state of states!) {
+          if (state === 'default') continue;
+          const override = config?.stateStyles?.[state] ?? theme.nodeStateStyles?.[state];
+          if (!override) continue;
+          if (override.fill !== undefined) fill = override.fill;
+          if (override.stroke !== undefined) stroke = override.stroke;
+          if (override.strokeWidth !== undefined) strokeWidth = override.strokeWidth;
+          if (override.opacity !== undefined) opacity = override.opacity;
+        }
+        if (hasState(states, 'active')) haloWidth = 8;
+        if (hasState(states, 'selected')) haloWidth = 12;
       }
-      if (states.includes('active')) haloWidth = 8;
-      if (states.includes('selected')) haloWidth = 12;
     }
 
     _nodeScratch.fill = fill;
@@ -332,19 +356,23 @@ function resolveNodeStyleDynamic(
 
   // Apply state style overrides (last state wins)
   const states = (node as GraphNode).states;
-  if (states && states.length > 0) {
-    for (const state of states) {
-      if (state === 'default') continue;
-      const override = config?.stateStyles?.[state] ?? theme.nodeStateStyles?.[state];
-      if (!override) continue;
-      if (override.fill !== undefined) fill = override.fill;
-      if (override.stroke !== undefined) stroke = override.stroke;
-      if (override.strokeWidth !== undefined) strokeWidth = override.strokeWidth;
-      if (override.opacity !== undefined) opacity = override.opacity;
+  if (hasAnyState(states)) {
+    if (hasState(states, 'hidden')) {
+      opacity = 0;
+    } else {
+      for (const state of states!) {
+        if (state === 'default') continue;
+        const override = config?.stateStyles?.[state] ?? theme.nodeStateStyles?.[state];
+        if (!override) continue;
+        if (override.fill !== undefined) fill = override.fill;
+        if (override.stroke !== undefined) stroke = override.stroke;
+        if (override.strokeWidth !== undefined) strokeWidth = override.strokeWidth;
+        if (override.opacity !== undefined) opacity = override.opacity;
+      }
+      // Halo for active/selected states
+      if (hasState(states, 'active')) haloWidth = 8;
+      if (hasState(states, 'selected')) haloWidth = 12;
     }
-    // Halo for active/selected states
-    if (states.includes('active')) haloWidth = 8;
-    if (states.includes('selected')) haloWidth = 12;
   }
 
   _nodeScratch.fill = fill;
@@ -379,15 +407,19 @@ export function resolveEdgeStyle(
     let lineDash = base.lineDash;
 
     const states = edge.states;
-    if (states && states.length > 0) {
-      for (const state of states) {
-        if (state === 'default') continue;
-        const override = config?.stateStyles?.[state] ?? theme.edgeStateStyles?.[state];
-        if (!override) continue;
-        if (override.stroke !== undefined) stroke = override.stroke;
-        if (override.lineWidth !== undefined) lineWidth = override.lineWidth;
-        if (override.opacity !== undefined) opacity = override.opacity;
-        if (override.lineDash !== undefined) lineDash = override.lineDash;
+    if (hasAnyState(states)) {
+      if (hasState(states, 'hidden')) {
+        opacity = 0;
+      } else {
+        for (const state of states!) {
+          if (state === 'default') continue;
+          const override = config?.stateStyles?.[state] ?? theme.edgeStateStyles?.[state];
+          if (!override) continue;
+          if (override.stroke !== undefined) stroke = override.stroke;
+          if (override.lineWidth !== undefined) lineWidth = override.lineWidth;
+          if (override.opacity !== undefined) opacity = override.opacity;
+          if (override.lineDash !== undefined) lineDash = override.lineDash;
+        }
       }
     }
 
@@ -477,14 +509,18 @@ function resolveEdgeStyleDynamic(
   // Apply state style overrides (last state wins)
   const states = edge.states;
   if (states && states.length > 0) {
-    for (const state of states) {
-      if (state === 'default') continue;
-      const override = config?.stateStyles?.[state] ?? theme.edgeStateStyles?.[state];
-      if (!override) continue;
-      if (override.stroke !== undefined) stroke = override.stroke;
-      if (override.lineWidth !== undefined) lineWidth = override.lineWidth;
-      if (override.opacity !== undefined) opacity = override.opacity;
-      if (override.lineDash !== undefined) lineDash = override.lineDash;
+    if (states.includes('hidden' as any)) {
+      opacity = 0;
+    } else {
+      for (const state of states) {
+        if (state === 'default') continue;
+        const override = config?.stateStyles?.[state] ?? theme.edgeStateStyles?.[state];
+        if (!override) continue;
+        if (override.stroke !== undefined) stroke = override.stroke;
+        if (override.lineWidth !== undefined) lineWidth = override.lineWidth;
+        if (override.opacity !== undefined) opacity = override.opacity;
+        if (override.lineDash !== undefined) lineDash = override.lineDash;
+      }
     }
   }
 

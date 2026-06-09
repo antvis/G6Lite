@@ -83,20 +83,57 @@ export async function runLayout(data: GraphData, config: LayoutConfig): Promise<
   }
   delete opts.iterations;
 
-  // R-LAYOUT-02: Disable animate mode for large graphs (avoids setInterval overhead)
-  if (nodeCount > 500 && opts.animate === undefined) {
+  // R-LAYOUT-02: Always disable animate mode — we await the result synchronously,
+  // so timer-based stepping adds overhead without benefit. Without this, d3-force
+  // resolves immediately before the simulation converges.
+  if (opts.animate === undefined) {
     opts.animate = false;
   }
 
-  // R-LAYOUT-03: Auto-tune defaults for large force layouts
-  if ((type === 'force' || type === 'fruchterman' || type === 'd3-force') && nodeCount > 1000) {
+  // R-LAYOUT-03: Auto-tune defaults for force layouts
+  if (type === 'force' || type === 'fruchterman') {
     if (nodeCount > 5000) {
-      // Very large graphs: fewer iterations + higher convergence threshold
       if (opts.maxIteration === undefined) opts.maxIteration = 50;
       if (opts.minMovement === undefined) opts.minMovement = 2.0;
-    } else {
+    } else if (nodeCount >= 1000) {
       if (opts.maxIteration === undefined) opts.maxIteration = 200;
       if (opts.minMovement === undefined) opts.minMovement = 1.5;
+    } else {
+      if (opts.maxIteration === undefined) opts.maxIteration = 100;
+      if (opts.minMovement === undefined) opts.minMovement = 1.0;
+    }
+  }
+
+  // R-LAYOUT-03b: Auto-tune ForceAtlas2. Two failure modes to guard against:
+  //  1. Default maxIteration is 0, which @antv/layout auto-expands to 950 — never
+  //     leave it at 0 for large graphs.
+  //  2. When `prune` is on (auto-enabled at >100 nodes), FA2's finishing pass runs
+  //     `simulation.tick(100)` with barnesHut FORCED OFF — a pure O(n²) step that
+  //     takes ~37s for 5000 nodes and freezes the page. Setting prune=false keeps
+  //     barnesHut active throughout (5000 nodes: 37s → ~1s, measured).
+  // (Note: the real @antv/layout option is `barnesHut`/`prune`; `barnesHutOptimize`
+  //  was an invalid no-op field and has been removed.)
+  if (type === 'force-atlas2') {
+    if (opts.barnesHut === undefined) opts.barnesHut = true;
+    if (opts.prune === undefined && nodeCount > 200) opts.prune = false;
+    if (nodeCount > 5000) {
+      if (opts.maxIteration === undefined) opts.maxIteration = 50;
+    } else if (nodeCount >= 1000) {
+      if (opts.maxIteration === undefined) opts.maxIteration = 100;
+    } else {
+      if (opts.maxIteration === undefined) opts.maxIteration = 100;
+    }
+  }
+
+  // R-LAYOUT-04b: D3ForceLayout uses simulation timer (rAF-based) — increase alphaDecay
+  // so it converges faster. Default alphaDecay=0.0228 → ~300 frames (~5s).
+  // With alphaDecay=0.1 → ~45 frames (~0.7s); alphaDecay=0.05 → ~90 frames (~1.5s).
+  if (type === 'd3-force') {
+    if (opts.alphaDecay === undefined) opts.alphaDecay = 0.1;
+    // Default linkDistance=30 produces very compact layouts. Scale it so the graph
+    // fills the viewport at zoom=1 after fitView.
+    if (opts.linkDistance === undefined) {
+      opts.linkDistance = Math.max(200, Math.sqrt(nodeCount) * 80);
     }
   }
 
@@ -115,7 +152,34 @@ export async function runLayout(data: GraphData, config: LayoutConfig): Promise<
     edges: data.edges as any[],
   };
 
-  await layout.execute(layoutData);
+  // R-LAYOUT-05: D3ForceLayout uses rAF-based simulation timer — each tick takes 16ms
+  // wall-clock time regardless of CPU cost. Manually ticking synchronously avoids this
+  // and completes in <10ms for small graphs instead of ~700ms.
+  if (type === 'd3-force' && 'tick' in layout && 'stop' in layout) {
+    const sim = layout as unknown as {
+      execute: (data: GraphData) => Promise<void>;
+      tick: (iterations?: number) => void;
+      stop: () => void;
+      getAlpha: () => number;
+      forEachNode: (fn: (n: { id: string; x: number; y: number }) => void) => void;
+    };
+    // execute() sets up simulation and starts the rAF timer
+    const execPromise = sim.execute(layoutData);
+    // Stop the rAF timer immediately — we'll tick manually
+    sim.stop();
+    // Manually tick synchronously until converged
+    const alphaMin = (opts.alphaMin as number) ?? 0.001;
+    const maxTicks = 300;
+    for (let i = 0; i < maxTicks; i++) {
+      if (sim.getAlpha() < alphaMin) break;
+      sim.tick(1);
+    }
+    // The execute() promise resolves on 'end' event which won't fire since we stopped
+    // the timer. We don't need it — positions are already synced by tick().
+    void execPromise;
+  } else {
+    await layout.execute(layoutData);
+  }
 
   const posMap = new Map<string, [number, number]>();
   layout.forEachNode((node: { id: string; x: number; y: number }) => {

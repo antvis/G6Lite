@@ -128,7 +128,7 @@ export function brushSelect(
     if (e.button !== 0) return;
     if (!isModifierHeld(e)) return;
 
-    const hit = renderer.pickAt(e.offsetX, e.offsetY);
+    const hit = renderer.pickAt(e.clientX, e.clientY);
     if (hit && hit.type === 'node') return;
 
     selecting = true;

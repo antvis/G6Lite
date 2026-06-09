@@ -16,6 +16,7 @@ export interface GraphNode {
   x?: number;
   y?: number;
   states?: NodeState[];
+  comboId?: string;
 }
 
 /** Extended payload attached to an edge. */
@@ -28,7 +29,8 @@ export type ElementState =
   | 'selected'
   | 'disabled'
   | 'highlight'
-  | 'inactive';
+  | 'inactive'
+  | 'hidden';
 
 /** Node states for visual differentiation. */
 export type NodeState = ElementState;
@@ -44,10 +46,11 @@ export interface GraphEdge {
   states?: EdgeState[];
 }
 
-/** Graph data: nodes and edges arrays. */
+/** Graph data: nodes, edges, and optional combos. */
 export interface GraphData {
   nodes: GraphNode[];
   edges: GraphEdge[];
+  combos?: ComboData[];
 }
 
 /** Style value or function for node. */
@@ -61,6 +64,12 @@ export interface NodeStateStyleOverride {
   opacity?: number;
 }
 
+/** Label placement relative to node. */
+export type LabelPlacement = 'center' | 'top' | 'bottom' | 'left' | 'right';
+
+/** Edge label placement along the edge. */
+export type EdgeLabelPlacement = 'start' | 'center' | 'end';
+
 /** Node config: type and style (WebGL-capable only). */
 export interface NodeConfig {
   type?: 'circle' | 'rect';
@@ -73,6 +82,22 @@ export interface NodeConfig {
     strokeWidth?: NodeStyleValue<number>;
     opacity?: NodeStyleValue<number>;
     borderRadius?: NodeStyleValue<number>;
+    // Label
+    label?: NodeStyleValue<string | false>;
+    labelFontSize?: NodeStyleValue<number>;
+    labelFontFamily?: NodeStyleValue<string>;
+    labelFontWeight?: NodeStyleValue<string>;
+    labelColor?: NodeStyleValue<string>;
+    labelPlacement?: NodeStyleValue<LabelPlacement>;
+    labelOffsetX?: NodeStyleValue<number>;
+    labelOffsetY?: NodeStyleValue<number>;
+    labelBackground?: NodeStyleValue<string | false>;
+    labelBackgroundPadding?: NodeStyleValue<number>;
+    labelMaxWidth?: NodeStyleValue<number>;
+    // Icon
+    icon?: NodeStyleValue<string | false>;
+    iconWidth?: NodeStyleValue<number>;
+    iconHeight?: NodeStyleValue<number>;
   };
   stateStyles?: Partial<Record<NodeState, NodeStateStyleOverride>>;
 }
@@ -105,6 +130,15 @@ export interface EdgeConfig {
     router?: 'orth' | 'tree' | 'indented' | 'fishbone'; // polyline routing mode
     indentTarget?: 'left' | 'right'; // indented routing: edge end at child left or right edge
     trunkGap?: number; // indented routing: gap from trunk to child left edge
+    // Label
+    label?: EdgeStyleValue<string | false>;
+    labelFontSize?: EdgeStyleValue<number>;
+    labelFontFamily?: EdgeStyleValue<string>;
+    labelColor?: EdgeStyleValue<string>;
+    labelPlacement?: EdgeStyleValue<EdgeLabelPlacement>;
+    labelBackground?: EdgeStyleValue<string | false>;
+    labelBackgroundPadding?: EdgeStyleValue<number>;
+    labelAutoRotate?: EdgeStyleValue<boolean>;
   };
   stateStyles?: Partial<Record<EdgeState, EdgeStateStyleOverride>>;
 }
@@ -139,12 +173,56 @@ export interface ThemeTokens {
 /** Theme: preset name or object with type and overrides. */
 export type ThemeOption = 'light' | 'dark' | ({ type: 'light' | 'dark' } & Partial<ThemeTokens>);
 
+/** Combo (group container) user data. */
+export interface ComboData {
+  id: string;
+  parentId?: string;
+  style?: Partial<ComboStyleConfig>;
+  data?: Record<string, unknown>;
+}
+
+/** Combo style configuration. */
+export interface ComboStyleConfig {
+  fill?: string | ((combo: InternalCombo) => string);
+  stroke?: string | ((combo: InternalCombo) => string);
+  strokeWidth?: number;
+  opacity?: number;
+  borderRadius?: number;
+  padding?: number | [number, number, number, number];
+  label?: string | ((combo: InternalCombo) => string);
+  labelFontSize?: number;
+  labelColor?: string;
+  labelPlacement?: 'top' | 'bottom' | 'inside';
+  collapsedSize?: number;
+}
+
+/** Combo config in GraphOptions. */
+export interface ComboConfig {
+  style?: ComboStyleConfig;
+}
+
+/** Internal combo model with computed bounds. */
+export interface InternalCombo {
+  id: string;
+  parentId?: string;
+  childNodeIds: Set<string>;
+  childComboIds: Set<string>;
+  collapsed: boolean;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  data?: Record<string, unknown>;
+  states: Set<ElementState>;
+}
+
 /** Full graph options. */
 export interface GraphOptions {
   container: string | HTMLElement;
   data: GraphData;
   node?: NodeConfig;
   edge?: EdgeConfig;
+  combo?: ComboConfig;
   layout?: LayoutConfig;
   behaviors?: BehaviorOption[];
   theme?: ThemeOption;

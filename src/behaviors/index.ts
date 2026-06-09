@@ -24,6 +24,7 @@ export type BehaviorName =
   | 'drag-canvas'
   | 'highlight-node'
   | 'highlight-edge'
+  | 'hover-highlight'
   | 'click-node'
   | 'drag-node'
   | 'click-select'
@@ -41,12 +42,13 @@ type BehaviorFactory = (renderer: Renderer, graph: Graph, config?: BehaviorConfi
 
 const BEHAVIORS: Record<string, BehaviorFactory> = {
   'zoom-canvas': (r) => zoomCanvas(r),
-  'drag-canvas': (r) => dragCanvas(r),
+  'drag-canvas': (r, g) => dragCanvas(r, g),
   'highlight-node': (r, g) => highlightNode(r, g),
   'highlight-edge': (r, g) => highlightEdge(r, g),
   'click-node': (r, g) => clickNode(r, g),
   'drag-node': (r, g) => dragNode(r, g),
-  'click-select': (r, g) => clickSelect(r, g),
+  'hover-highlight': (r, g, config) => hoverHighlight(r, g, config as any),
+  'click-select': (r, g, config) => clickSelect(r, g, config as any),
   'drag-edge': (r, g) => dragEdge(r, g),
   wheel: (r, g) => wheelEvent(r, g),
   'brush-select': (r, g, config) =>
@@ -81,7 +83,16 @@ export function registerBehaviors(
   }
 
   if (useCombinedHover) {
-    teardowns.push(hoverHighlight(renderer, graph));
+    const hoverConfig = names.find(
+      (n) => typeof n !== 'string' && (n.type === 'highlight-node' || n.type === 'highlight-edge'),
+    );
+    teardowns.push(
+      hoverHighlight(
+        renderer,
+        graph,
+        typeof hoverConfig === 'string' ? undefined : (hoverConfig as any),
+      ),
+    );
   }
 
   return () => teardowns.forEach((f) => f());

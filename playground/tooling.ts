@@ -232,6 +232,14 @@ export function attachLabelsCanvas(
     ctx.clearRect(0, 0, w, h);
     ctx.textBaseline = 'middle';
 
+    // Reuse a halo via stroke+fill rather than canvas shadowBlur — shadowBlur is a
+    // slow software path that costs ~200µs per fillText, dominating draw time at 5k labels.
+    ctx.lineJoin = 'round';
+    ctx.miterLimit = 2;
+    const HALO_COLOR = 'rgba(255,255,255,0.85)';
+    const CULL_MARGIN = 64;
+    let lastFont = '';
+
     let index = 0;
     function drawChunk() {
       if (token !== drawToken) return;
@@ -243,35 +251,32 @@ export function attachLabelsCanvas(
           (opts?.nodeLabel && opts.nodeLabel(node)) ?? node.name ?? node.id;
         if (!label) continue;
 
+        const [ndcX, ndcY] = graphToNDC(node.x, node.y, w, h, cam);
+        const px = ((ndcX + 1) / 2) * w;
+        const py = ((1 - ndcY) / 2) * h;
+        if (px < -CULL_MARGIN || px > w + CULL_MARGIN || py < -CULL_MARGIN || py > h + CULL_MARGIN) {
+          continue;
+        }
+
         const nodePos = getPosition(node);
 
         // Compute per-node font size
         const nodeFontSize = isFontSizeFunction ? getNodeFontSize(node) : fontSizeCss;
         const fontSizeDevice = nodeFontSize * dpr;
-
-        const [ndcX, ndcY] = graphToNDC(node.x, node.y, w, h, cam);
-        const px = ((ndcX + 1) / 2) * w;
-        const py = ((1 - ndcY) / 2) * h;
+        const useHalo = nodePos !== 'inside' && nodePos !== 'right';
 
         const lines = label.split('\n');
-
-        // Per-node shadow setup
-        if (nodePos !== 'inside' && nodePos !== 'right') {
-          ctx.shadowColor = 'rgba(255,255,255,0.85)';
-          ctx.shadowBlur = Math.max(2, fontSizeDevice * 0.35);
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-        } else {
-          ctx.shadowColor = 'transparent';
-          ctx.shadowBlur = 0;
-        }
 
         if (nodePos === 'right') {
           // Text left-aligned at node center (depth * indent),
           // positioned ABOVE the edge line.
           ctx.textAlign = 'left';
           ctx.textBaseline = 'bottom';
-          ctx.font = `${fontSizeDevice}px ${FONT_FAMILY}`;
+          const fontStr = `${fontSizeDevice}px ${FONT_FAMILY}`;
+          if (fontStr !== lastFont) {
+            ctx.font = fontStr;
+            lastFont = fontStr;
+          }
           ctx.fillStyle = getNodeColor(node);
           const offsetY = 3 * dpr;
           if (lines.length === 1) {
@@ -357,7 +362,11 @@ export function attachLabelsCanvas(
           }
         } else {
           // Render text above or below the node
-          ctx.font = `${fontSizeDevice}px ${FONT_FAMILY}`;
+          const fontStr = `${fontSizeDevice}px ${FONT_FAMILY}`;
+          if (fontStr !== lastFont) {
+            ctx.font = fontStr;
+            lastFont = fontStr;
+          }
           ctx.fillStyle = getNodeColor(node);
 
           // 'above': text left-aligned at node's left edge (where indented-tree edge arrives),
@@ -370,10 +379,16 @@ export function attachLabelsCanvas(
             ctx.textAlign = 'left';
           }
 
+          if (useHalo) {
+            ctx.lineWidth = Math.max(2, fontSizeDevice * 0.3);
+            ctx.strokeStyle = HALO_COLOR;
+          }
+
           if (lines.length === 1) {
             const offsetY = nodePos === 'below'
               ? fontSizeDevice * 0.8
               : -fontSizeDevice * 0.6;
+            if (useHalo) ctx.strokeText(lines[0], textX, py + offsetY);
             ctx.fillText(lines[0], textX, py + offsetY);
           } else {
             const totalH = lines.length * lineHeight;
@@ -381,7 +396,9 @@ export function attachLabelsCanvas(
               ? py + fontSizeDevice * 0.5
               : py - totalH - fontSizeDevice * 0.2;
             for (let i = 0; i < lines.length; i++) {
-              ctx.fillText(lines[i].trim(), textX, baseY + i * lineHeight + lineHeight / 2);
+              const ly = baseY + i * lineHeight + lineHeight / 2;
+              if (useHalo) ctx.strokeText(lines[i].trim(), textX, ly);
+              ctx.fillText(lines[i].trim(), textX, ly);
             }
           }
 

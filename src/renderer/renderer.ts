@@ -50,8 +50,8 @@ export class Renderer {
   private canvas: HTMLCanvasElement;
   private gl: WebGLRenderingContext;
 
-  // All programs (created once)
-  private programs: {
+  // Programs (created lazily on first use to avoid upfront shader compilation)
+  private _programs: Partial<{
     nodeCircle: NodeCircleProgram;
     nodeRect: NodeRectProgram;
     edgeLine: EdgeLineProgram;
@@ -60,8 +60,8 @@ export class Renderer {
     edgeCubic: EdgeCubicProgram;
     edgeArrow: EdgeArrowProgram;
     edgeLoop: EdgeLoopProgram;
-    edgePolyline: EdgeRectProgram; // reuses EdgeRect shader for polyline segments
-  };
+    edgePolyline: EdgeRectProgram;
+  }> = {};
 
   // Active program type (resolved from config)
   private activeNodeType: NodeProgramType = 'circle';
@@ -120,16 +120,14 @@ export class Renderer {
   private needPickingRender = false;
   private pickingInitialized = false;
 
-  // Viewport culling for large graphs
-  private viewportCullEnabled = true;
-  private viewportMargin = 100; // pixels outside viewport to include
-  private visibleNodeIndices: number[] = [];
-  private visibleEdgeIndices: number[] = [];
+  // Before-draw callback (used by ComboRenderer underlay)
+  private beforeDrawCallback: (() => void) | null = null;
+  // After-draw callback (used by LabelRenderer)
+  private afterDrawCallback: (() => void) | null = null;
 
   // Reusable arrays for process() to avoid GC pressure
   private _nodeHalfWidths: Float64Array | null = null;
   private _nodeHeights: Float64Array | null = null;
-  private _nodeVisible: Uint8Array | null = null;
 
   constructor(container: string | HTMLElement) {
     const el = typeof container === 'string' ? document.querySelector(container) : container;
@@ -139,34 +137,61 @@ export class Renderer {
     this.gl = getGL(this.canvas);
     this.gl.enable(this.gl.BLEND);
     this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-
-    this.programs = {
-      nodeCircle: new NodeCircleProgram(this.gl),
-      nodeRect: new NodeRectProgram(this.gl),
-      edgeLine: new EdgeLineProgram(this.gl),
-      edgeRect: new EdgeRectProgram(this.gl),
-      edgeArc: new EdgeArcProgram(this.gl),
-      edgeCubic: new EdgeCubicProgram(this.gl),
-      edgeArrow: new EdgeArrowProgram(this.gl),
-      edgeLoop: new EdgeLoopProgram(this.gl),
-      edgePolyline: new EdgeRectProgram(this.gl),
-    };
     this.picking = new PickingManager(this.gl);
   }
 
+  private getProgram<K extends keyof typeof this._programs>(
+    key: K,
+  ): NonNullable<(typeof this._programs)[K]> {
+    if (!this._programs[key]) {
+      switch (key) {
+        case 'nodeCircle':
+          this._programs.nodeCircle = new NodeCircleProgram(this.gl);
+          break;
+        case 'nodeRect':
+          this._programs.nodeRect = new NodeRectProgram(this.gl);
+          break;
+        case 'edgeLine':
+          this._programs.edgeLine = new EdgeLineProgram(this.gl);
+          break;
+        case 'edgeRect':
+          this._programs.edgeRect = new EdgeRectProgram(this.gl);
+          break;
+        case 'edgeArc':
+          this._programs.edgeArc = new EdgeArcProgram(this.gl);
+          break;
+        case 'edgeCubic':
+          this._programs.edgeCubic = new EdgeCubicProgram(this.gl);
+          break;
+        case 'edgeArrow':
+          this._programs.edgeArrow = new EdgeArrowProgram(this.gl);
+          break;
+        case 'edgeLoop':
+          this._programs.edgeLoop = new EdgeLoopProgram(this.gl);
+          break;
+        case 'edgePolyline':
+          this._programs.edgePolyline = new EdgeRectProgram(this.gl);
+          break;
+      }
+    }
+    return this._programs[key]! as NonNullable<(typeof this._programs)[K]>;
+  }
+
   private get activeNodeProgram(): Program {
-    return this.activeNodeType === 'rect' ? this.programs.nodeRect : this.programs.nodeCircle;
+    return this.activeNodeType === 'rect'
+      ? this.getProgram('nodeRect')
+      : this.getProgram('nodeCircle');
   }
 
   private get activeEdgeProgram(): Program {
-    if (this.activeEdgeType === 'polyline') return this.programs.edgePolyline;
+    if (this.activeEdgeType === 'polyline') return this.getProgram('edgePolyline');
     return this.activeEdgeType === 'arc'
-      ? this.programs.edgeArc
+      ? this.getProgram('edgeArc')
       : this.activeEdgeType === 'cubic'
-        ? this.programs.edgeCubic
+        ? this.getProgram('edgeCubic')
         : this.activeEdgeType === 'rect'
-          ? this.programs.edgeRect
-          : this.programs.edgeLine;
+          ? this.getProgram('edgeRect')
+          : this.getProgram('edgeLine');
   }
 
   updateData(renderData: RendererData): void {
@@ -177,8 +202,8 @@ export class Renderer {
     this.polylineRouter = renderData.polylineRouter ?? 'orth';
     this.indentTarget = renderData.edgeConfig?.style?.indentTarget ?? 'left';
     this.trunkGap = renderData.edgeConfig?.style?.trunkGap ?? 0;
-    this.nodes = renderData.nodes;
-    this.edges = renderData.edges;
+    this.nodes = renderData.nodes as typeof this.nodes;
+    this.edges = renderData.edges as typeof this.edges;
     this.nodeIdToIndex.clear();
     this.edgeIdToIndex.clear();
     renderData.nodes.forEach((n, i) => this.nodeIdToIndex.set(n.id, i));
@@ -230,7 +255,7 @@ export class Renderer {
 
     // -- Process nodes --
     const nodeProgram =
-      this.activeNodeType === 'rect' ? this.programs.nodeRect : this.programs.nodeCircle;
+      this.activeNodeType === 'rect' ? this.getProgram('nodeRect') : this.getProgram('nodeCircle');
     nodeProgram.reallocate(nodes.length);
 
     // Pre-allocate arrays for edge processing (reused across process calls)
@@ -241,9 +266,19 @@ export class Renderer {
     const nodeHalfWidths = this._nodeHalfWidths;
     const nodeHeights = this._nodeHeights!;
 
-    // Fast path: static node config with no highlight — skip per-node resolveNodeStyle calls
+    // Fast path: static node config with no highlight and no per-node states
     const nCache = nodeConfig ? nodeConfigCache.get(nodeConfig) : undefined;
+    let hasNodeStates = false;
     if (nCache?.styleType === 'static' && nCache.cachedStyle && !hasHighlight) {
+      for (let i = 0; i < nodes.length; i++) {
+        const s = (nodes[i] as any).states;
+        if (s && (s.size > 0 || s.length > 0)) {
+          hasNodeStates = true;
+          break;
+        }
+      }
+    }
+    if (nCache?.styleType === 'static' && nCache.cachedStyle && !hasHighlight && !hasNodeStates) {
       const base = nCache.cachedStyle;
       const baseColor = base.fillRGB;
       const strokeColor = base.strokeRGB;
@@ -412,6 +447,14 @@ export class Renderer {
     this.picking.setNodeCount(nodes.length);
     this.needToProcess = false;
     this.needPickingRender = true;
+
+    // Reclaim CPU-side Float32Array slack after the full rebuild. Only the
+    // programs touched by a full process() are shrunk; patch/incremental paths
+    // keep their buffers and re-grow via reallocate() as needed.
+    this.activeNodeProgram.shrinkToFit();
+    this.activeEdgeProgram.shrinkToFit();
+    this._programs.edgeArrow?.shrinkToFit();
+    this._programs.edgeLoop?.shrinkToFit();
   }
 
   /**
@@ -434,7 +477,7 @@ export class Renderer {
     const edgeProg = this.activeEdgeProgram;
     const isPolyline = this.activeEdgeType === 'polyline';
 
-    const arrowProg = this.programs.edgeArrow;
+    const arrowProg = this.getProgram('edgeArrow');
     arrowProg.reallocate(arrowCount);
     let arrowIdx = 0;
 
@@ -716,7 +759,7 @@ export class Renderer {
     edgeProg.upload();
 
     // -- Process self-loop edges --
-    const loopProg = this.programs.edgeLoop;
+    const loopProg = this.getProgram('edgeLoop');
     loopProg.reallocate(selfLoopIndices.length);
     const loopNodeCounter = new Map<string, number>();
     for (let li = 0; li < selfLoopIndices.length; li++) {
@@ -880,9 +923,11 @@ export class Renderer {
       const idx = this.nodeIdToIndex.get(id);
       if (idx === undefined) continue;
 
-      // Update internal nodes array
+      // Update internal nodes array in place (avoid per-frame object allocation)
       if (idx < this.nodes.length) {
-        this.nodes[idx] = { ...this.nodes[idx], x: node.x, y: node.y };
+        const n = this.nodes[idx];
+        n.x = node.x;
+        n.y = node.y;
       }
 
       // Patch position in GPU buffer via Program method (handles all vertices)
@@ -983,16 +1028,10 @@ export class Renderer {
         const idx = this.nodeIdToIndex.get(id);
         if (idx === undefined) continue;
 
-        // Update internal nodes array with latest data/state
-        this.nodes[idx] = {
-          ...this.nodes[idx],
-          x: node.x,
-          y: node.y,
-          data: node.data as any,
-          states: node.states.size > 0 ? (Array.from(node.states) as any) : undefined,
-        };
-
-        const style = resolveNodeStyle(this.nodes[idx], this.nodeConfig, this.theme);
+        // this.nodes aliases the DataModel node objects; resolve style directly
+        // from the DataModel node (its states Set is read natively). Do NOT
+        // rewrite this.nodes[idx] — that would replace the shared object.
+        const style = resolveNodeStyle(node as any, this.nodeConfig, this.theme);
         const active = !hasHighlight || this.highlightNodeIds.has(id);
         // Use pre-parsed colors if available (static optimization), otherwise parse on-the-fly
         const baseColor = style.fillRGB ?? parseColor(style.fill);
@@ -1050,19 +1089,15 @@ export class Renderer {
         const tgtIdx = this.edgeTargetIdx[idx];
         if (srcIdx < 0 || tgtIdx < 0) continue;
 
-        // Update internal edge with latest state
+        // this.edges aliases the DataModel edge objects; resolve style directly
+        // from the DataModel edge (its states Set is read natively). Do NOT
+        // rewrite this.edges[idx] — that would replace the shared object.
         const dmEdge = dataModel.getEdge(edgeId);
-        if (dmEdge) {
-          this.edges[idx] = {
-            ...this.edges[idx],
-            data: dmEdge.data as any,
-            states: dmEdge.states.size > 0 ? (Array.from(dmEdge.states) as any) : undefined,
-          };
-        }
+        const edgeForStyle = (dmEdge ?? e) as any;
 
         const src = this.nodes[srcIdx];
         const tgt = this.nodes[tgtIdx];
-        const style = resolveEdgeStyle(src, tgt, this.edges[idx], this.edgeConfig, this.theme);
+        const style = resolveEdgeStyle(src, tgt, edgeForStyle, this.edgeConfig, this.theme);
         const active = !hasHighlight || this.highlightEdgeIndices.has(idx);
         // Use pre-parsed colors if available (static optimization), otherwise parse on-the-fly
         const edgeBaseColor = style.strokeRGB ?? parseColor(style.stroke);
@@ -1113,7 +1148,6 @@ export class Renderer {
     const prevNodeCount = this.nodes.length;
     const prevEdgeCount = this.edges.length;
 
-    // Use DataModel arrays directly (no conversion/copy)
     this.nodes = dataModel.getNodes() as unknown as LayoutNode[];
     this.edges = dataModel.getEdges() as unknown as GraphEdge[];
 
@@ -1204,7 +1238,7 @@ export class Renderer {
     const hasHighlight = this.highlightNodeIds.size > 0;
 
     const nodeProgram =
-      this.activeNodeType === 'rect' ? this.programs.nodeRect : this.programs.nodeCircle;
+      this.activeNodeType === 'rect' ? this.getProgram('nodeRect') : this.getProgram('nodeCircle');
 
     // Ensure buffer capacity
     nodeProgram.reallocate(this.nodes.length);
@@ -1298,6 +1332,11 @@ export class Renderer {
       this.pendingDraw = true;
       return;
     }
+    // Cancel any already-scheduled rAF so we don't double-draw on the next frame.
+    if (this.renderFrame !== null) {
+      cancelAnimationFrame(this.renderFrame);
+      this.renderFrame = null;
+    }
     if (this.needHighlightUpdate) this.processHighlightDelta();
     if (this.needToProcess) this.process();
 
@@ -1305,11 +1344,6 @@ export class Renderer {
     const w = this.canvas.width;
     const h = this.canvas.height;
     if (w <= 0 || h <= 0) return;
-
-    // Update visibility for large graphs
-    if (this.shouldCull()) {
-      this.updateVisibility();
-    }
 
     const params: RenderParams = { width: w, height: h, camera: this.camera };
     const nodeProgram = this.activeNodeProgram;
@@ -1326,48 +1360,26 @@ export class Renderer {
     gl.clearColor(bg[0], bg[1], bg[2], 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
+    // Draw combo underlay before WebGL content
+    this.beforeDrawCallback?.();
+
     if (!this.hideEdges) {
-      if (this.shouldCull()) {
-        // Render only visible edges
-        this.renderVisibleEdges(edgeProgram, params);
-        this.programs.edgeLoop.render(params); // Self-loops are few, render all
-        this.renderVisibleArrows(params);
-      } else {
-        edgeProgram.render(params);
-        this.programs.edgeLoop.render(params);
-        this.programs.edgeArrow.render(params);
-      }
-    }
-
-    if (this.shouldCull()) {
-      this.renderVisibleNodes(nodeProgram, params);
-    } else {
-      nodeProgram.render(params);
-    }
-  }
-
-  /** Render only visible nodes using renderRange for efficient GPU culling. */
-  private renderVisibleNodes(nodeProgram: Program, params: RenderParams): void {
-    // For now, render all nodes if any are visible
-    // TODO: sort nodes spatially in process() to enable true range rendering
-    if (this.visibleNodeIndices.length > 0) {
-      nodeProgram.render(params);
-    }
-  }
-
-  /** Render only visible edges. */
-  private renderVisibleEdges(edgeProgram: Program, params: RenderParams): void {
-    if (this.visibleEdgeIndices.length > 0) {
       edgeProgram.render(params);
+      this.getProgram('edgeLoop').render(params);
+      this.getProgram('edgeArrow').render(params);
     }
+
+    nodeProgram.render(params);
+
+    this.afterDrawCallback?.();
   }
 
-  /** Render arrows for visible edges only. */
-  private renderVisibleArrows(params: RenderParams): void {
-    // Arrow program shares visibility with edges
-    if (this.visibleEdgeIndices.length > 0) {
-      this.programs.edgeArrow.render(params);
-    }
+  onBeforeDraw(cb: () => void): void {
+    this.beforeDrawCallback = cb;
+  }
+
+  onAfterDraw(cb: () => void): void {
+    this.afterDrawCallback = cb;
   }
 
   private renderPickingPass(
@@ -1387,8 +1399,8 @@ export class Renderer {
       picking: true,
     };
     edgeProgram.render(pickParams);
-    this.programs.edgeLoop.render(pickParams);
-    this.programs.edgeArrow.render(pickParams);
+    this.getProgram('edgeLoop').render(pickParams);
+    this.getProgram('edgeArrow').render(pickParams);
     nodeProgram.render(pickParams);
     this.picking.unbind(w, h);
     gl.enable(gl.BLEND);
@@ -1397,12 +1409,19 @@ export class Renderer {
 
   resize(width: number, height: number): void {
     const dpr = Math.min(2, window.devicePixelRatio ?? 1);
-    this.canvas.width = width * dpr;
-    this.canvas.height = height * dpr;
+    const newW = width * dpr;
+    const newH = height * dpr;
+    if (this.canvas.width === newW && this.canvas.height === newH) return;
+    this.canvas.width = newW;
+    this.canvas.height = newH;
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
     this.needPickingRender = true;
-    this.scheduleRender();
+    // Skip the sync draw when there's no data yet (initial resize before setData).
+    // The caller (Graph.render) will clearWithTheme + draw once data is ready.
+    if (this.nodes.length === 0) return;
+    // Draw synchronously to avoid black flash (setting canvas.width clears content)
+    this.draw();
   }
 
   /** Clear the canvas with the theme background color immediately.
@@ -1516,20 +1535,9 @@ export class Renderer {
   }
 
   /** Hide edges during camera movement, restore after delay. */
-  setMoving(moving: boolean): void {
-    if (this.edgeRestoreTimer !== null) {
-      clearTimeout(this.edgeRestoreTimer);
-      this.edgeRestoreTimer = null;
-    }
-    if (moving) {
-      this.hideEdges = true;
-    } else {
-      this.edgeRestoreTimer = setTimeout(() => {
-        this.hideEdges = false;
-        this.edgeRestoreTimer = null;
-        this.scheduleRender();
-      }, 150);
-    }
+  setMoving(_moving: boolean): void {
+    // No-op: edge hiding during move was causing black-flash artifacts.
+    // WebGL renders edges at 60fps without issue for typical graph sizes.
   }
 
   getNodes(): LayoutNode[] {
@@ -1541,63 +1549,8 @@ export class Renderer {
   getCanvas(): HTMLCanvasElement {
     return this.canvas;
   }
-
-  /**
-   * Compute visible elements based on current camera and viewport.
-   * For large graphs, only render elements within viewport + margin.
-   */
-  private updateVisibility(): void {
-    const { nodes, edges, camera, canvas } = this;
-    const w = canvas.width / (window.devicePixelRatio ?? 1);
-    const h = canvas.height / (window.devicePixelRatio ?? 1);
-
-    // Compute visible graph bounds
-    const margin = this.viewportMargin / camera.zoom;
-    const viewLeft = -camera.x - margin;
-    const viewRight = -camera.x + w / camera.zoom + margin;
-    const viewTop = -camera.y - margin;
-    const viewBottom = -camera.y + h / camera.zoom + margin;
-
-    // Reuse arrays to avoid GC pressure
-    this.visibleNodeIndices.length = 0;
-    if (!this._nodeVisible || this._nodeVisible.length < nodes.length) {
-      this._nodeVisible = new Uint8Array(nodes.length);
-    }
-    const nodeVisible = this._nodeVisible;
-
-    for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i];
-      // Use approximate node size for culling (24px default)
-      const nodeSize = 24 / camera.zoom;
-      if (
-        node.x + nodeSize >= viewLeft &&
-        node.x - nodeSize <= viewRight &&
-        node.y + nodeSize >= viewTop &&
-        node.y - nodeSize <= viewBottom
-      ) {
-        this.visibleNodeIndices.push(i);
-        nodeVisible[i] = 1;
-      } else {
-        nodeVisible[i] = 0;
-      }
-    }
-
-    // Find visible edges (at least one endpoint visible)
-    this.visibleEdgeIndices.length = 0;
-    for (let i = 0; i < edges.length; i++) {
-      const srcIdx = this.edgeSourceIdx[i];
-      const tgtIdx = this.edgeTargetIdx[i];
-      if (srcIdx >= 0 && tgtIdx >= 0) {
-        if (nodeVisible[srcIdx] || nodeVisible[tgtIdx]) {
-          this.visibleEdgeIndices.push(i);
-        }
-      }
-    }
-  }
-
-  /** Check if viewport culling should be enabled based on node count. */
-  private shouldCull(): boolean {
-    return this.viewportCullEnabled && this.nodes.length > 2000;
+  getNodeIdToIndex(): Map<string, number> {
+    return this.nodeIdToIndex;
   }
 
   setHighlight(option: { nodeIds?: Set<string>; edgeIndices?: Set<number> }): void {
@@ -1615,13 +1568,15 @@ export class Renderer {
   destroy(): void {
     if (this.renderFrame !== null) cancelAnimationFrame(this.renderFrame);
     if (this.edgeRestoreTimer !== null) clearTimeout(this.edgeRestoreTimer);
-    this.programs.nodeCircle.destroy();
-    this.programs.nodeRect.destroy();
-    this.programs.edgeLine.destroy();
-    this.programs.edgeRect.destroy();
-    this.programs.edgeArc.destroy();
-    this.programs.edgeArrow.destroy();
-    this.programs.edgePolyline.destroy();
+    this._programs.nodeCircle?.destroy();
+    this._programs.nodeRect?.destroy();
+    this._programs.edgeLine?.destroy();
+    this._programs.edgeRect?.destroy();
+    this._programs.edgeArc?.destroy();
+    this._programs.edgeCubic?.destroy();
+    this._programs.edgeArrow?.destroy();
+    this._programs.edgeLoop?.destroy();
+    this._programs.edgePolyline?.destroy();
     this.picking.destroy();
     // Release WebGL context to free GPU memory and avoid context limit
     const ext = this.gl.getExtension('WEBGL_lose_context');

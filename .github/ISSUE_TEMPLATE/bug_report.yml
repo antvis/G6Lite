@@ -1,0 +1,86 @@
+name: 🐛 Bug 报告 / Bug Report
+description: 报告一个可复现的问题 / Report a reproducible problem
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！请尽量完整填写以下信息，便于我们快速定位问题。
+        Thanks for the report! Please fill in as much as possible so we can reproduce it quickly.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: 提交前确认 / Prerequisites
+      options:
+        - label: 我已搜索过 [现有 Issue](https://github.com/antvis/G6Lite/issues)，确认没有重复 / I have searched existing issues and found no duplicate.
+          required: true
+        - label: 我使用的是最新版本（或已说明具体版本） / I am using the latest version (or have specified the version).
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述 / Description
+      description: 清晰描述发生了什么，以及你期望的行为。 / Describe what happened and what you expected.
+      placeholder: |
+        实际表现 / Actual: ...
+        期望表现 / Expected: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤 / Steps to Reproduce
+      description: 提供最小可复现步骤或代码片段；如有在线 Demo（CodeSandbox / StackBlitz）更佳。 / Minimal steps or code snippet; an online demo is even better.
+      placeholder: |
+        1. 初始化 Graph，配置 ...
+        2. 调用 ...
+        3. 观察到 ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: 相关代码 / Relevant Code
+      description: 粘贴最小可复现代码。 / Paste a minimal reproducible snippet.
+      render: typescript
+
+  - type: input
+    id: version
+    attributes:
+      label: G6Lite 版本 / Version
+      placeholder: e.g. 0.1.0-beta.4
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: 浏览器 / Browser
+      multiple: true
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - 其他 / Other
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境 / Environment
+      description: 操作系统、浏览器版本、Node 版本等。 / OS, browser version, Node version, etc.
+      placeholder: e.g. macOS 14 / Chrome 124 / Node 20
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 控制台日志 / Console Output
+      description: 相关报错或警告（如有）。 / Errors or warnings, if any.
+      render: shell

@@ -1,11 +1,15 @@
 import Link from 'next/link';
 
+// 缩略图为真实 g6-lite(WebGL)渲染的截图,见 public/layouts/*.png。
+// 重新生成:npx vite --port 5179 --no-open & 然后 node scripts/capture-thumbnails.mjs。
+// 配色参考 AntV 分类色板:每张卡一种靓丽但浅的底色,与图元强调色对应。
 const gallery = [
-  { title: '力导向布局', desc: '万级节点社群结构', emoji: '🕸️' },
-  { title: '环形 / 网格', desc: '规整拓扑一览', emoji: '⭕' },
-  { title: 'DAG / 树', desc: '层级与流程关系', emoji: '🌳' },
-  { title: '高亮聚焦', desc: '邻居高亮与框选', emoji: '🎯' },
-  { title: '鱼骨 / 脑图', desc: '自研专题布局', emoji: '🐟' },
+  { type: 'force', title: '力导向', desc: '社群结构自然展开', bg: '#eef3ff' },
+  { type: 'circular', title: '环形', desc: '环状关系一览', bg: '#eafaf4' },
+  { type: 'radial', title: '辐射', desc: '以中心向外发散', bg: '#fdf1ee' },
+  { type: 'dagre', title: 'DAG / 层级', desc: '有向流程分层', bg: '#fff8e8' },
+  { type: 'grid', title: '网格', desc: '规整对齐排布', bg: '#eef9fb' },
+  { type: 'mindmap', title: '脑图', desc: '树状层级展开', bg: '#f4eefc' },
 ];
 
 const features = [
@@ -86,20 +90,17 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 pt-24 pb-16 lg:grid-cols-[1.1fr_1fr] lg:pt-32 lg:pb-20">
           {/* 左 */}
           <div className="animate-in-up">
-            <span className="inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3.5 py-1.5 text-sm text-fd-muted-foreground">
-              <span className="rounded bg-fd-primary/15 px-1.5 py-0.5 text-xs font-semibold text-fd-primary">
-                NEW
-              </span>
-              基于 WebGL 的图引擎
+            <span className="inline-flex items-center gap-2 rounded-full bg-fd-primary/10 px-4 py-1.5 text-sm font-medium text-fd-primary">
+              轻量 · 高性能 · 开箱即用
             </span>
-            <h1 className="mt-6 text-[2.75rem] font-bold leading-[1.08] tracking-tight text-fd-foreground sm:text-[3.25rem]">
-              交互零延迟的
+            <h1 className="mt-6 text-[2.75rem] font-bold leading-[1.25] tracking-tight text-fd-foreground sm:text-[3.25rem]">
+              基于 <span className="text-fd-primary">WebGL</span> 的
               <br />
-              大规模图引擎
+              <span className="text-fd-primary">大规模</span>图可视化引擎
             </h1>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-fd-muted-foreground">
-              高亮、选中、框选等增量更新走 GPU patch，单次开销近 0ms。
-              让万级节点的图分析在浏览器中始终流畅。
+              为大规模图分析而生。万级节点实时渲染，高频交互零延迟，
+              核心 ~28KB（约 G6 v5 的 1/4）——性能与轻量兼得。
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link
@@ -120,60 +121,65 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* 右：安装 + 入口卡片 */}
+          {/* 右：终端窗口 */}
           <div
-            className="animate-in-up rounded-2xl border border-fd-border bg-fd-card p-6 shadow-xl shadow-black/5"
+            className="animate-in-up overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-xl shadow-black/5"
             style={{ animationDelay: '0.15s' }}
           >
-            <div className="flex items-center gap-2 text-sm font-medium text-fd-muted-foreground">
-              <span className="inline-block size-2 rounded-full bg-fd-primary" />
-              安装
+            {/* 标题栏 */}
+            <div className="flex items-center gap-2 border-b border-fd-border bg-fd-secondary/60 px-4 py-3">
+              <span className="size-3 rounded-full bg-[#ff5f57]" />
+              <span className="size-3 rounded-full bg-[#febc2e]" />
+              <span className="size-3 rounded-full bg-[#28c840]" />
+              <span className="ml-2 font-mono text-xs text-fd-muted-foreground">bash — @antv/g6-lite</span>
             </div>
-            <div className="mt-3 flex items-center gap-2 rounded-lg bg-fd-secondary px-4 py-3 font-mono text-sm">
-              <span className="text-fd-primary">$</span>
-              npm install @antv/g6-lite
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              {[
-                { label: '项目介绍', href: '/docs/guide/introduction' },
-                { label: '快速开始', href: '/docs/guide/quick-start' },
-                { label: '性能指标', href: '/docs/metrics/performance' },
-                { label: '包大小', href: '/docs/metrics/bundle-size' },
-              ].map((q) => (
-                <Link
-                  key={q.href}
-                  href={q.href}
-                  className="rounded-lg border border-fd-border px-4 py-3 text-sm transition-colors hover:border-fd-primary/50 hover:bg-fd-accent"
-                >
-                  {q.label} →
-                </Link>
-              ))}
+            {/* 命令行区 */}
+            <div className="space-y-2 px-5 py-5 font-mono text-sm leading-relaxed">
+              <div className="flex items-center gap-2">
+                <span className="select-none text-fd-primary">$</span>
+                <span className="text-fd-foreground">npm install @antv/g6-lite</span>
+              </div>
+              <div className="text-fd-muted-foreground">
+                <span className="text-[#28a745]">+</span> @antv/g6-lite@1.0.0
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="select-none text-fd-primary">$</span>
+                <span className="inline-block h-4 w-2 animate-pulse bg-fd-foreground/70 align-middle" />
+              </div>
             </div>
           </div>
         </div>
 
         {/* 能力画廊：全宽无限横向跑马灯 */}
-        <div className="marquee-mask relative w-full overflow-hidden pb-20">
+        <div className="marquee-mask relative w-full overflow-hidden pt-12 pb-20">
           {/* 两侧渐隐遮罩 */}
           <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-fd-background to-transparent" />
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-fd-background to-transparent" />
-          <div className="marquee-track gap-5">
+          <div className="marquee-track gap-8 py-6">
             {[...gallery, ...gallery].map((g, i) => (
               <div
                 key={`${g.title}-${i}`}
-                className="w-64 shrink-0 overflow-hidden rounded-2xl border border-fd-border bg-fd-card transition-transform duration-300 hover:-translate-y-1.5"
+                className="group relative h-80 w-96 shrink-0 overflow-hidden rounded-3xl shadow-lg shadow-black/5 transition-transform duration-300 hover:rotate-0 hover:-translate-y-2"
+                style={{
+                  backgroundColor: g.bg,
+                  rotate: i % 2 === 0 ? '-2.5deg' : '2.5deg',
+                }}
               >
+                {/* 真实 g6-lite 渲染截图,铺满卡片 */}
+                <img
+                  src={`/layouts/${g.type}.png`}
+                  alt={`${g.title}布局示例`}
+                  loading="lazy"
+                  className="absolute inset-0 size-full object-contain p-8"
+                />
+                {/* 底部渐变蒙层 + 标题 */}
                 <div
-                  className="flex h-36 items-center justify-center text-5xl"
+                  className="absolute inset-x-0 bottom-0 px-6 pb-5 pt-12"
                   style={{
-                    background:
-                      'linear-gradient(135deg, color-mix(in oklab, var(--brand-from) 22%, transparent) 0%, color-mix(in oklab, var(--brand-to) 10%, transparent) 60%, transparent 100%)',
+                    background: `linear-gradient(to top, ${g.bg} 28%, color-mix(in srgb, ${g.bg} 70%, transparent) 60%, transparent 100%)`,
                   }}
                 >
-                  {g.emoji}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold">{g.title}</h3>
+                  <h3 className="text-base font-semibold text-fd-foreground">{g.title}</h3>
                   <p className="mt-1 text-sm text-fd-muted-foreground">{g.desc}</p>
                 </div>
               </div>

@@ -41,9 +41,14 @@
     radial-gradient(70% 60% at 50% 110%, #3b261e 0%, transparent 60%);
 }
 
-/* 浅色模式整页纯白背景（仅作用于浅色，不影响深色） */
+/* 浅色模式整页纯白:背景及所有静态承载面(卡片/次级/弱化/浮层)统一为纯白,
+ * 卡片本身带 border-fd-border,纯白底仍有边框可辨。仅作用于浅色,不影响深色。 */
 html:not(.dark) {
   --color-fd-background: #ffffff;
+  --color-fd-card: #ffffff;
+  --color-fd-secondary: #ffffff;
+  --color-fd-muted: #ffffff;
+  --color-fd-popover: #ffffff;
 }
 
 body {

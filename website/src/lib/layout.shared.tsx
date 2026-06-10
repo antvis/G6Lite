@@ -1,5 +1,5 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { appName, gitConfig } from './shared';
+import { appName } from './shared';
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -11,6 +11,7 @@ export function baseOptions(): BaseLayoutProps {
       { text: '指南', url: '/docs/guide/introduction' },
       { text: '指标', url: '/docs/metrics/performance' },
     ],
-    githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,
+    /* 顶部导航栏保留搜索、主题切换与 GitHub 入口 */
+    githubUrl: 'https://github.com/antvis/G6Lite',
   };
 }

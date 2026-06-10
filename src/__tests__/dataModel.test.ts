@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { DataModel } from '../dataModel.js';
 import type { ThemeTokens } from '../types.js';
 
@@ -417,5 +417,164 @@ describe('findNodesByState after state operations', () => {
     expect(model.findNodesByState('active')).toEqual(['a']);
     model.clearNodeStates('a');
     expect(model.findNodesByState('selected')).toEqual([]);
+  });
+});
+
+describe('DataModel combo operations', () => {
+  it('should add a combo and query it', () => {
+    const model = createModel();
+    model.addCombo({ id: 'c1', data: { name: 'Group 1' } });
+    expect(model.hasCombos()).toBe(true);
+    expect(model.getCombos()).toHaveLength(1);
+    const combo = model.getCombo('c1');
+    expect(combo).toBeDefined();
+    expect(combo!.id).toBe('c1');
+    expect(combo!.collapsed).toBe(false);
+  });
+
+  it('should not add a duplicate combo', () => {
+    const model = createModel();
+    model.addCombo({ id: 'c1' });
+    model.addCombo({ id: 'c1' });
+    expect(model.getCombos()).toHaveLength(1);
+  });
+
+  it('should nest a combo under its parent', () => {
+    const model = createModel();
+    model.addCombo({ id: 'parent' });
+    model.addCombo({ id: 'child', parentId: 'parent' });
+    expect(model.getCombo('parent')!.childComboIds.has('child')).toBe(true);
+  });
+
+  it('should associate nodes with a combo via initCombos', () => {
+    const model = createModel();
+    model.addNodes([
+      { id: 'n1', x: 0, y: 0 },
+      { id: 'n2', x: 10, y: 10 },
+    ]);
+    model.initCombos(
+      [{ id: 'c1' }],
+      [
+        { id: 'n1', comboId: 'c1' },
+        { id: 'n2', comboId: 'c1' },
+      ],
+    );
+    expect(model.getNodeCombo('n1')).toBe('c1');
+    expect(model.getCombo('c1')!.childNodeIds.size).toBe(2);
+  });
+
+  it('should move a node between combos with setNodeCombo', () => {
+    const model = createModel();
+    model.addNode({ id: 'n1', x: 0, y: 0 });
+    model.addCombo({ id: 'a' });
+    model.addCombo({ id: 'b' });
+    model.setNodeCombo('n1', 'a');
+    expect(model.getNodeCombo('n1')).toBe('a');
+    model.setNodeCombo('n1', 'b');
+    expect(model.getNodeCombo('n1')).toBe('b');
+    expect(model.getCombo('a')!.childNodeIds.has('n1')).toBe(false);
+    expect(model.getCombo('b')!.childNodeIds.has('n1')).toBe(true);
+    // Detach
+    model.setNodeCombo('n1', undefined);
+    expect(model.getNodeCombo('n1')).toBeUndefined();
+  });
+
+  it('should remove a combo and clear node associations', () => {
+    const model = createModel();
+    model.addNode({ id: 'n1', x: 0, y: 0 });
+    model.addCombo({ id: 'parent' });
+    model.addCombo({ id: 'c1', parentId: 'parent' });
+    model.setNodeCombo('n1', 'c1');
+    model.removeCombo('c1');
+    expect(model.getCombo('c1')).toBeUndefined();
+    expect(model.getNodeCombo('n1')).toBeUndefined();
+    expect(model.getCombo('parent')!.childComboIds.has('c1')).toBe(false);
+  });
+
+  it('should toggle collapsed state', () => {
+    const model = createModel();
+    model.addCombo({ id: 'c1' });
+    model.setComboCollapsed('c1', true);
+    expect(model.getCombo('c1')!.collapsed).toBe(true);
+    model.setComboCollapsed('c1', false);
+    expect(model.getCombo('c1')!.collapsed).toBe(false);
+  });
+
+  it('should compute combo bounds from child node positions', () => {
+    const model = createModel();
+    model.addNodes([
+      { id: 'n1', x: 0, y: 0 },
+      { id: 'n2', x: 100, y: 50 },
+    ]);
+    model.initCombos(
+      [{ id: 'c1' }],
+      [
+        { id: 'n1', comboId: 'c1' },
+        { id: 'n2', comboId: 'c1' },
+      ],
+    );
+    model.updateComboBounds(20);
+    const combo = model.getCombo('c1')!;
+    expect(combo.x).toBe(50); // (0 + 100) / 2
+    expect(combo.y).toBe(25); // (0 + 50) / 2
+    expect(combo.width).toBe(140); // 100 - 0 + 20 * 2
+    expect(combo.height).toBe(90); // 50 - 0 + 20 * 2
+  });
+
+  it('should give an empty combo zero bounds', () => {
+    const model = createModel();
+    model.addCombo({ id: 'c1' });
+    model.updateComboBounds();
+    const combo = model.getCombo('c1')!;
+    expect(combo.width).toBe(0);
+    expect(combo.height).toBe(0);
+  });
+
+  it('should expand nested combo bounds to include child combos', () => {
+    const model = createModel();
+    model.addNodes([
+      { id: 'n1', x: 0, y: 0 },
+      { id: 'n2', x: 200, y: 200 },
+    ]);
+    model.initCombos(
+      [{ id: 'parent' }, { id: 'child', parentId: 'parent' }],
+      [
+        { id: 'n1', comboId: 'parent' },
+        { id: 'n2', comboId: 'child' },
+      ],
+    );
+    model.updateComboBounds(10);
+    const parent = model.getCombo('parent')!;
+    // Parent bounds must enclose both its own node (0,0) and the child combo around (200,200)
+    expect(parent.width).toBeGreaterThan(0);
+    expect(parent.x).toBeGreaterThan(0);
+  });
+
+  it('should collect all node ids including nested combos', () => {
+    const model = createModel();
+    model.addNodes([
+      { id: 'n1', x: 0, y: 0 },
+      { id: 'n2', x: 0, y: 0 },
+    ]);
+    model.initCombos(
+      [{ id: 'parent' }, { id: 'child', parentId: 'parent' }],
+      [
+        { id: 'n1', comboId: 'parent' },
+        { id: 'n2', comboId: 'child' },
+      ],
+    );
+    const ids = model.getComboAllNodeIds('parent');
+    expect(ids.sort()).toEqual(['n1', 'n2']);
+  });
+
+  it('should guard against circular combo references', () => {
+    const model = createModel();
+    model.addCombo({ id: 'a' });
+    model.addCombo({ id: 'b', parentId: 'a' });
+    // Force a cycle: make `a` also a child of `b`
+    model.getCombo('b')!.childComboIds.add('a');
+    // Should not stack-overflow
+    expect(() => model.updateComboBounds()).not.toThrow();
+    expect(() => model.getComboAllNodeIds('a')).not.toThrow();
   });
 });

@@ -247,6 +247,29 @@ private updateVisibility(): void {
 
 **状态**：已计算可见性，待实施 `renderRange()` 只渲染可见节点。
 
+### 5.5 交互事件调度（InteractionDispatcher）
+
+**设计目标**：把交互架构对齐 G6——元素事件由**唯一**的调度层分发，所有 behavior 收敛为消费者，消除重复 picking 与双发。
+
+```
+canvas/window DOM 事件
+   → InteractionDispatcher（graph.render() 中默认挂载）
+       · 命中检测唯一入口：renderer.pickAt → node → edge → combo → canvas
+       · hover 状态机（mousemove/mouseleave）+ 按下/点击/滚轮（各 pick 一次）
+       · 在 graph.eventEmitter 发出规范事件（payload 携带元素 data）
+   → graph.on(...) ← tooltip / hoverHighlight / clickSelect / dragNode / …（消费者）
+```
+
+**关键点**：
+
+- **唯一 picking**：每个 DOM 事件只 `pickAt` 一次，结果在分级 emit 时共享；hover 用 `lastHover` 状态机，仅在元素切换时发 `pointerover`/`pointerleave`，同元素移动发 `pointermove`。
+- **规范事件名**（对齐 G6 pointer*）：`node:pointerover/move/leave/down`、`node:click/dblclick/contextmenu/wheel`，`edge:*`、`combo:*`、`canvas:*`。废弃旧名 `node:hover` / `node:mouseleave` 等，无别名、无双轨。
+- **拖拽折中**：拖拽 behavior 的**起点判定**来自调度层 `*:pointerdown`；进行时的连续 `mousemove`/`mouseup`（算位移增量）仍由各 drag behavior 自挂 window 监听——手势进行时是私有状态，不上全局总线。dragEdge 的落点 `pickAt` 在 `canvas:pointerup` 回调内自做（仅松手一次）。
+- **挂载/销毁**：`graph.render()` 中、`registerBehaviors` 之前 `attachInteraction`，teardown 并入 `graph.destroy()`（在 behaviorTeardown 之前）。
+- 旧 `click-node` / `wheel` behavior 已删除（职责被调度层接管）。
+
+实现见 `src/interaction/dispatcher.ts`，测试见 `src/__tests__/interaction.test.ts`。
+
 ---
 
 ## 6. 样式系统（已优化）

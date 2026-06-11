@@ -1,21 +1,20 @@
 /**
  * drag-canvas: drag to pan.
- * Skips activation when the click hits a node (via WebGL picking) or a combo.
+ * Pan starts on canvas:pointerdown from the InteractionDispatcher — that event
+ * fires only when no node/edge/combo is under the cursor, so the former manual
+ * pick guard is no longer needed. In-flight move/up tracking is owned here.
  */
 
-import type { Renderer } from '../renderer/renderer.js';
 import type { Graph } from '../graph.js';
+import type { Renderer } from '../renderer/renderer.js';
 
 export function dragCanvas(renderer: Renderer, graph?: Graph): () => void {
-  const canvas = renderer.getCanvas();
+  if (!graph) return () => {};
   let down: { x: number; y: number; camX: number; camY: number } | null = null;
 
-  const onDown = (e: MouseEvent) => {
+  const onDown = (payload: { event: MouseEvent }) => {
+    const e = payload.event;
     if (e.button !== 0) return;
-    // Don't start canvas drag if a node or combo is under the cursor
-    const pick = renderer.pickAt(e.clientX, e.clientY);
-    if (pick) return;
-    if (graph && graph.pickComboAt(e.clientX, e.clientY)) return;
     const cam = renderer.getCamera();
     down = { x: e.clientX, y: e.clientY, camX: cam.x, camY: cam.y };
   };
@@ -31,11 +30,11 @@ export function dragCanvas(renderer: Renderer, graph?: Graph): () => void {
     down = null;
   };
 
-  canvas.addEventListener('mousedown', onDown);
+  graph.eventEmitter.on('canvas:pointerdown', onDown);
   window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseup', onUp);
   return () => {
-    canvas.removeEventListener('mousedown', onDown);
+    graph.eventEmitter.off('canvas:pointerdown', onDown);
     window.removeEventListener('mousemove', onMove);
     window.removeEventListener('mouseup', onUp);
   };

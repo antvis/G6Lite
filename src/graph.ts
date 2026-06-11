@@ -4,32 +4,32 @@
  * P4: EventEmitter for interaction events, GPU-picking behaviors, drag-node support.
  */
 
-import { resolveTheme } from './theme.js';
+import { registerBehaviors } from './behaviors/index.js';
+import type { InternalEdge, InternalNode } from './dataModel.js';
+import { DataModel } from './dataModel.js';
+import { EventEmitter } from './events.js';
+import { attachInteraction } from './interaction/dispatcher.js';
 import { runLayout } from './layout/index.js';
 import { terminateLayoutWorker } from './layout/workerLayout.js';
-import { Renderer } from './renderer/renderer.js';
-import type { RendererData } from './renderer/renderer.js';
-import { LabelRenderer } from './renderer/labelRenderer.js';
-import { ComboRenderer } from './renderer/comboRenderer.js';
-import { registerBehaviors } from './behaviors/index.js';
-import { DataModel } from './dataModel.js';
-import type { InternalNode, InternalEdge } from './dataModel.js';
-import { RenderScheduler, RefreshLevel } from './scheduler.js';
-import { EventEmitter } from './events.js';
-import { analyzeNodeConfig, analyzeEdgeConfig } from './renderer/style.js';
-import type {
-  GraphOptions,
-  GraphData,
-  GraphNode,
-  GraphEdge,
-  ThemeOption,
-  LayoutNode,
-  LayoutConfig,
-  ElementState,
-  ComboData,
-  InternalCombo,
-} from './types.js';
 import type { Camera } from './renderer/camera.js';
+import { ComboRenderer } from './renderer/comboRenderer.js';
+import { LabelRenderer } from './renderer/labelRenderer.js';
+import type { RendererData } from './renderer/renderer.js';
+import { Renderer } from './renderer/renderer.js';
+import { analyzeEdgeConfig, analyzeNodeConfig } from './renderer/style.js';
+import { RefreshLevel, RenderScheduler } from './scheduler.js';
+import { resolveTheme } from './theme.js';
+import type {
+  ComboData,
+  ElementState,
+  GraphData,
+  GraphEdge,
+  GraphOptions,
+  InternalCombo,
+  LayoutConfig,
+  LayoutNode,
+  ThemeOption,
+} from './types.js';
 
 /** Result of a pick operation at screen coordinates. */
 export interface PickResult {
@@ -49,6 +49,7 @@ export class Graph {
   private dataModel: DataModel | null = null;
   private scheduler: RenderScheduler | null = null;
   private behaviorTeardown: (() => void) | null = null;
+  private interactionTeardown: (() => void) | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private layoutNodes: LayoutNode[] = [];
   private initialCamera: Camera | null = null;
@@ -168,6 +169,12 @@ export class Graph {
     // Initialize RenderScheduler
     this.scheduler = new RenderScheduler(this.renderer, this.dataModel);
 
+    // Mount the interaction dispatcher (single source of pointer hit-testing
+    // and element event dispatch) before behaviors, so behaviors consume its
+    // events rather than doing their own picking.
+    this.interactionTeardown?.();
+    this.interactionTeardown = attachInteraction(this.renderer, this);
+
     if (behaviors?.length) {
       this.behaviorTeardown?.();
       this.behaviorTeardown = registerBehaviors(this.renderer, behaviors, this);
@@ -244,6 +251,7 @@ export class Graph {
   destroy(): void {
     this.eventEmitter.emit('destroy');
     this.behaviorTeardown?.();
+    this.interactionTeardown?.();
     this.resizeObserver?.disconnect();
     this.scheduler?.destroy();
     this.labelRenderer?.destroy();

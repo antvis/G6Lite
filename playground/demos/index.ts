@@ -10,6 +10,7 @@ import * as large from './large.ts';
 import * as largeLabeled from './large-labeled.ts';
 import * as shapes from './shapes.ts';
 import * as hover from './hover.ts';
+import * as tooltip from './tooltip.ts';
 import * as edgeStates from './edge-states.ts';
 import * as edgeTypes from './edge-types.ts';
 import * as edgeColors from './edge-colors.ts';
@@ -36,6 +37,7 @@ import largeSource from './large.ts?raw';
 import largeLabeledSource from './large-labeled.ts?raw';
 import shapesSource from './shapes.ts?raw';
 import hoverSource from './hover.ts?raw';
+import tooltipSource from './tooltip.ts?raw';
 import edgeStatesSource from './edge-states.ts?raw';
 import edgeTypesSource from './edge-types.ts?raw';
 import edgeColorsSource from './edge-colors.ts?raw';
@@ -68,6 +70,7 @@ export const demos: DemoItem[] = [
   { id: 'theme', name: '主题切换', run: theme.run, source: themeSource },
   { id: 'behaviors', name: '交互高亮', run: behaviors.run, source: behaviorsSource },
   { id: 'hover', name: 'Hover 高亮', run: hover.run, source: hoverSource },
+  { id: 'tooltip', name: 'Tooltip 浮层', run: tooltip.run, source: tooltipSource },
   { id: 'shapes', name: '图形类型', run: shapes.run, source: shapesSource },
   { id: 'large', name: '较大规模 (200节点)', run: large.run, source: largeSource },
   { id: 'large-labeled', name: '5000 节点 + 标签', run: largeLabeled.run, source: largeLabeledSource },

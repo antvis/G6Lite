@@ -1,39 +1,43 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { EventEmitter } from '../events.js';
 
 // ============================================================
-// Behavior tests using mock renderer & graph (no WebGL needed)
+// Behavior tests — post-dispatcher architecture.
+//
+// Behaviors are now pure consumers of the InteractionDispatcher's element
+// events. So these tests no longer simulate raw DOM events; they emit the
+// dispatcher's normalized events on graph.eventEmitter and assert the
+// behavior's side-effects (setItemState / setHighlight / emitted events).
+// The dispatcher's own hit-testing is covered in interaction.test.ts.
 // ============================================================
 
-function createMockRenderer(
-  pickResult: { type: 'node'; id: string } | { type: 'edge'; index: number } | null,
-) {
-  const handlers: Record<string, EventListener[]> = {};
-  const canvas = {
-    addEventListener: vi.fn((event: string, handler: EventListener) => {
-      if (!handlers[event]) handlers[event] = [];
-      handlers[event].push(handler);
-    }),
-    removeEventListener: vi.fn((event: string, handler: EventListener) => {
-      if (handlers[event]) {
-        handlers[event] = handlers[event].filter((h) => h !== handler);
-      }
-    }),
-    style: { cursor: 'default' },
-  };
+function createMockRenderer() {
+  const canvas = { style: { cursor: 'default' } };
   return {
     getCanvas: () => canvas,
-    pickAt: vi.fn(() => pickResult),
-    getEdges: vi.fn(() => [
-      { source: 'a', target: 'b' },
-      { source: 'b', target: 'c' },
+    pickAt: vi.fn(
+      () => null as { type: 'node'; id: string } | { type: 'edge'; index: number } | null,
+    ),
+    getNodes: vi.fn(() => [
+      { id: 'a', x: 0, y: 0 },
+      { id: 'b', x: 10, y: 0 },
+      { id: 'c', x: 20, y: 0 },
     ]),
+    getEdges: vi.fn(() => [
+      { id: 'e0', source: 'a', target: 'b' },
+      { id: 'e1', source: 'b', target: 'c' },
+    ]),
+    getNodeIdToIndex: vi.fn(
+      () =>
+        new Map([
+          ['a', 0],
+          ['b', 1],
+          ['c', 2],
+        ]),
+    ),
     setHighlight: vi.fn(),
     getCamera: vi.fn(() => ({ zoom: 1, x: 0, y: 0 })),
-    handlers,
-    setPickResult(result: typeof pickResult) {
-      pickResult = result;
-    },
+    screenToGraph: vi.fn((x: number, y: number) => [x, y]),
   };
 }
 
@@ -51,290 +55,327 @@ function createMockGraph() {
   return {
     eventEmitter,
     setItemState,
+    getItemStates: vi.fn((id: string) => {
+      const out: string[] = [];
+      for (const [state, set] of stateMap) if (set.has(id)) out.push(state);
+      return out;
+    }),
     clearItemStates: vi.fn(),
     updateNodePosition: vi.fn(),
-    getNodePosition: vi.fn(() => ({ x: 0, y: 0 })),
+    getNodePosition: vi.fn((id: string) => {
+      const map: Record<string, { x: number; y: number }> = {
+        a: { x: 0, y: 0 },
+        b: { x: 10, y: 0 },
+        c: { x: 20, y: 0 },
+      };
+      return map[id] ?? null;
+    }),
+    getNodes: vi.fn(() => [
+      { id: 'a', x: 0, y: 0 },
+      { id: 'b', x: 10, y: 0 },
+      { id: 'c', x: 20, y: 0 },
+    ]),
+    getNeighborNodes: vi.fn(() => [] as string[]),
+    getComboData: vi.fn(() => null),
+    getComboChildren: vi.fn(() => ({ nodes: [] as string[], combos: [] as string[] })),
     scheduleRender: vi.fn(),
     findNodesByState: vi.fn((state: string) => [...(stateMap.get(state) ?? [])]),
     findEdgesByState: vi.fn((state: string) => [...(stateMap.get(state) ?? [])]),
   };
 }
 
-// 保留旧函数定义避免语法错误
-function __old_createMockGraph() {
-  const eventEmitter = new EventEmitter();
+/** Build a fake MouseEvent payload for dispatcher events. */
+function mouseEvent(extra: Partial<MouseEvent> = {}): MouseEvent {
   return {
-    eventEmitter,
-    setItemState: vi.fn(),
-    clearItemStates: vi.fn(),
-    updateNodePosition: vi.fn(),
-    getNodePosition: vi.fn(() => ({ x: 0, y: 0 })),
-    scheduleRender: vi.fn(),
-  };
-}
-
-function simulateEvent(canvas: any, event: string, extra: Partial<MouseEvent> = {}) {
-  const e = {
     preventDefault: vi.fn(),
     clientX: 100,
     clientY: 100,
     button: 0,
+    shiftKey: false,
+    ctrlKey: false,
+    metaKey: false,
     ...extra,
   } as unknown as MouseEvent;
-  const list = (canvas as any).addEventListener.mock.calls
-    .filter((c: string[]) => c[0] === event)
-    .map((c: any[]) => c[1]);
-  if (list.length > 0) {
-    // Use the last registered handler
-    list[list.length - 1](e);
-  }
-  return e;
 }
 
 // ============================================================
-// clickNode: click + dblclick + contextmenu
+// clickSelect — consumes node:click / edge:click / canvas:click
 // ============================================================
-describe('clickNode behavior (click + dblclick + contextmenu)', () => {
-  it('should emit node:click on node hit', async () => {
-    const { clickNode } = await import('../behaviors/clickNode.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
+describe('clickSelect behavior', () => {
+  it('selects a node on node:click', async () => {
+    const { clickSelect } = await import('../behaviors/clickSelect.js');
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const clickHandler = vi.fn();
-    graph.eventEmitter.on('node:click', clickHandler);
+    const selectHandler = vi.fn();
+    graph.eventEmitter.on('node:selectchange', selectHandler);
 
-    clickNode(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'click');
+    clickSelect(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:click', { nodeId: 'a', event: mouseEvent() });
 
-    expect(clickHandler).toHaveBeenCalledTimes(1);
-    expect(clickHandler.mock.calls[0][0].nodeId).toBe('n1');
+    expect(selectHandler).toHaveBeenCalledTimes(1);
+    expect(selectHandler.mock.calls[0][0].nodeId).toBe('a');
+    expect(selectHandler.mock.calls[0][0].selected).toBe(true);
+    expect(graph.setItemState).toHaveBeenCalledWith('a', 'selected', true);
   });
 
-  it('should emit edge:click on edge hit', async () => {
-    const { clickNode } = await import('../behaviors/clickNode.js');
-    const renderer = createMockRenderer({ type: 'edge', index: 0 });
+  it('deselects a node on a second node:click', async () => {
+    const { clickSelect } = await import('../behaviors/clickSelect.js');
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const clickHandler = vi.fn();
-    graph.eventEmitter.on('edge:click', clickHandler);
 
-    clickNode(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'click');
+    clickSelect(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:click', { nodeId: 'a', event: mouseEvent() });
+    graph.eventEmitter.emit('node:click', { nodeId: 'a', event: mouseEvent() });
 
-    expect(clickHandler).toHaveBeenCalledTimes(1);
-    expect(clickHandler.mock.calls[0][0].source).toBe('a');
-    expect(clickHandler.mock.calls[0][0].target).toBe('b');
+    expect(graph.setItemState).toHaveBeenNthCalledWith(1, 'a', 'selected', true);
+    expect(graph.setItemState).toHaveBeenNthCalledWith(2, 'a', 'selected', false);
   });
 
-  it('should emit canvas:click on no hit', async () => {
-    const { clickNode } = await import('../behaviors/clickNode.js');
-    const renderer = createMockRenderer(null);
+  it('clears all selections on canvas:click', async () => {
+    const { clickSelect } = await import('../behaviors/clickSelect.js');
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const clickHandler = vi.fn();
-    graph.eventEmitter.on('canvas:click', clickHandler);
+    const clearHandler = vi.fn();
+    graph.eventEmitter.on('selection:clear', clearHandler);
 
-    clickNode(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'click');
+    clickSelect(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:click', { nodeId: 'a', event: mouseEvent() });
+    graph.eventEmitter.emit('canvas:click', { event: mouseEvent() });
 
-    expect(clickHandler).toHaveBeenCalledTimes(1);
+    expect(graph.setItemState).toHaveBeenCalledWith('a', 'selected', false);
+    expect(clearHandler).toHaveBeenCalledTimes(1);
   });
 
-  it('should emit node:dblclick on node double-click', async () => {
-    const { clickNode } = await import('../behaviors/clickNode.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
+  it('selects an edge on edge:click', async () => {
+    const { clickSelect } = await import('../behaviors/clickSelect.js');
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const dblclickHandler = vi.fn();
-    graph.eventEmitter.on('node:dblclick', dblclickHandler);
+    const handler = vi.fn();
+    graph.eventEmitter.on('edge:selectchange', handler);
 
-    clickNode(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'dblclick');
+    clickSelect(renderer as any, graph as any);
+    graph.eventEmitter.emit('edge:click', {
+      edgeIndex: 0,
+      source: 'a',
+      target: 'b',
+      event: mouseEvent(),
+    });
 
-    expect(dblclickHandler).toHaveBeenCalledTimes(1);
-    expect(dblclickHandler.mock.calls[0][0].nodeId).toBe('n1');
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler.mock.calls[0][0].edgeId).toBe('e0');
+    expect(graph.setItemState).toHaveBeenCalledWith('e0', 'selected', true);
   });
 
-  it('should emit edge:dblclick on edge double-click', async () => {
-    const { clickNode } = await import('../behaviors/clickNode.js');
-    const renderer = createMockRenderer({ type: 'edge', index: 0 });
+  it('teardown unsubscribes from click events', async () => {
+    const { clickSelect } = await import('../behaviors/clickSelect.js');
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const dblclickHandler = vi.fn();
-    graph.eventEmitter.on('edge:dblclick', dblclickHandler);
+    const handler = vi.fn();
+    graph.eventEmitter.on('node:selectchange', handler);
 
-    clickNode(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'dblclick');
-
-    expect(dblclickHandler).toHaveBeenCalledTimes(1);
-    expect(dblclickHandler.mock.calls[0][0].source).toBe('a');
-  });
-
-  it('should emit canvas:dblclick on no hit', async () => {
-    const { clickNode } = await import('../behaviors/clickNode.js');
-    const renderer = createMockRenderer(null);
-    const graph = createMockGraph();
-    const dblclickHandler = vi.fn();
-    graph.eventEmitter.on('canvas:dblclick', dblclickHandler);
-
-    clickNode(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'dblclick');
-
-    expect(dblclickHandler).toHaveBeenCalledTimes(1);
-  });
-
-  it('should emit node:contextmenu on right-click node', async () => {
-    const { clickNode } = await import('../behaviors/clickNode.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
-    const graph = createMockGraph();
-    const ctxHandler = vi.fn();
-    graph.eventEmitter.on('node:contextmenu', ctxHandler);
-
-    clickNode(renderer as any, graph as any);
-    const e = simulateEvent(renderer.getCanvas(), 'contextmenu');
-
-    expect(e.preventDefault).toHaveBeenCalled();
-    expect(ctxHandler).toHaveBeenCalledTimes(1);
-    expect(ctxHandler.mock.calls[0][0].nodeId).toBe('n1');
-  });
-
-  it('should emit edge:contextmenu on right-click edge', async () => {
-    const { clickNode } = await import('../behaviors/clickNode.js');
-    const renderer = createMockRenderer({ type: 'edge', index: 1 });
-    const graph = createMockGraph();
-    const ctxHandler = vi.fn();
-    graph.eventEmitter.on('edge:contextmenu', ctxHandler);
-
-    clickNode(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'contextmenu');
-
-    expect(ctxHandler).toHaveBeenCalledTimes(1);
-    expect(ctxHandler.mock.calls[0][0].source).toBe('b');
-    expect(ctxHandler.mock.calls[0][0].target).toBe('c');
-  });
-
-  it('should emit canvas:contextmenu on right-click background', async () => {
-    const { clickNode } = await import('../behaviors/clickNode.js');
-    const renderer = createMockRenderer(null);
-    const graph = createMockGraph();
-    const ctxHandler = vi.fn();
-    graph.eventEmitter.on('canvas:contextmenu', ctxHandler);
-
-    clickNode(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'contextmenu');
-
-    expect(ctxHandler).toHaveBeenCalledTimes(1);
-  });
-
-  it('should teardown all event listeners', async () => {
-    const { clickNode } = await import('../behaviors/clickNode.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
-    const graph = createMockGraph();
-
-    const teardown = clickNode(renderer as any, graph as any);
-    const canvas = renderer.getCanvas();
-
-    // Should have added 3 listeners (click, dblclick, contextmenu)
-    expect(canvas.addEventListener).toHaveBeenCalledTimes(3);
+    const teardown = clickSelect(renderer as any, graph as any);
     teardown();
-
-    // After teardown, canvas listeners are removed (3 removed)
-    // We verify the removeEventListener calls happened
-    expect(canvas.removeEventListener).toHaveBeenCalled();
+    graph.eventEmitter.emit('node:click', { nodeId: 'a', event: mouseEvent() });
+    expect(handler).not.toHaveBeenCalled();
   });
 });
 
 // ============================================================
-// hoverHighlight: mouseleave events
+// hoverHighlight — consumes *:pointerover / *:pointerleave
 // ============================================================
-describe('hoverHighlight behavior (mouseleave events)', () => {
-  it('should emit node:mouseleave when moving from node to empty', async () => {
+describe('hoverHighlight behavior', () => {
+  it('highlights a node and its incident edges on node:pointerover', async () => {
     const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
-    let currentPickResult: any = { type: 'node', id: 'n1' };
-    const renderer = createMockRenderer(null);
-    // Override pickAt to be dynamic
-    (renderer.pickAt as any).mockImplementation(() => currentPickResult);
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const hoverHandler = vi.fn();
-    const leaveHandler = vi.fn();
-    graph.eventEmitter.on('node:hover', hoverHandler);
-    graph.eventEmitter.on('node:mouseleave', leaveHandler);
 
     hoverHighlight(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: mouseEvent() });
 
-    // Hover onto node
-    currentPickResult = { type: 'node', id: 'n1' };
-    simulateEvent(renderer.getCanvas(), 'mousemove');
-    expect(hoverHandler).toHaveBeenCalledTimes(1);
-
-    // Hover off to empty
-    currentPickResult = null;
-    simulateEvent(renderer.getCanvas(), 'mousemove');
-    expect(leaveHandler).toHaveBeenCalledTimes(1);
-    expect(leaveHandler.mock.calls[0][0].nodeId).toBe('n1');
+    expect(renderer.setHighlight).toHaveBeenCalledTimes(1);
+    const arg = renderer.setHighlight.mock.calls[0][0];
+    expect(arg.nodeIds.has('a')).toBe(true);
+    // edge e0 (a→b) is incident to 'a'
+    expect(arg.edgeIndices.has(0)).toBe(true);
   });
 
-  it('should emit node:mouseleave when switching between nodes', async () => {
+  it('highlights edge endpoints on edge:pointerover', async () => {
     const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
-    let currentPickResult: any = { type: 'node', id: 'n1' };
-    const renderer = createMockRenderer(null);
-    (renderer.pickAt as any).mockImplementation(() => currentPickResult);
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const leaveHandler = vi.fn();
-    graph.eventEmitter.on('node:mouseleave', leaveHandler);
 
     hoverHighlight(renderer as any, graph as any);
+    graph.eventEmitter.emit('edge:pointerover', {
+      edgeIndex: 0,
+      source: 'a',
+      target: 'b',
+      event: mouseEvent(),
+    });
 
-    // Hover onto n1
-    currentPickResult = { type: 'node', id: 'n1' };
-    simulateEvent(renderer.getCanvas(), 'mousemove');
-    // Switch to n2
-    currentPickResult = { type: 'node', id: 'n2' };
-    simulateEvent(renderer.getCanvas(), 'mousemove');
-
-    expect(leaveHandler).toHaveBeenCalledTimes(1);
-    expect(leaveHandler.mock.calls[0][0].nodeId).toBe('n1');
+    const arg = renderer.setHighlight.mock.calls[0][0];
+    expect(arg.nodeIds.has('a')).toBe(true);
+    expect(arg.nodeIds.has('b')).toBe(true);
+    expect(arg.edgeIndices.has(0)).toBe(true);
   });
 
-  it('should emit edge:mouseleave when moving from edge to empty', async () => {
+  it('clears highlight on node:pointerleave', async () => {
     const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
-    let currentPickResult: any = { type: 'edge', index: 0 };
-    const renderer = createMockRenderer(null);
-    (renderer.pickAt as any).mockImplementation(() => currentPickResult);
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const leaveHandler = vi.fn();
-    graph.eventEmitter.on('edge:mouseleave', leaveHandler);
 
     hoverHighlight(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: mouseEvent() });
+    graph.eventEmitter.emit('node:pointerleave', { nodeId: 'a', event: mouseEvent() });
 
-    // Hover onto edge
-    currentPickResult = { type: 'edge', index: 0 };
-    simulateEvent(renderer.getCanvas(), 'mousemove');
-    // Hover off
-    currentPickResult = null;
-    simulateEvent(renderer.getCanvas(), 'mousemove');
-
-    expect(leaveHandler).toHaveBeenCalledTimes(1);
-    expect(leaveHandler.mock.calls[0][0].source).toBe('a');
-    expect(leaveHandler.mock.calls[0][0].target).toBe('b');
+    const lastArg = renderer.setHighlight.mock.calls.at(-1)![0];
+    expect(lastArg.nodeIds.size).toBe(0);
+    expect(lastArg.edgeIndices.size).toBe(0);
   });
 
-  it('should emit leave on canvas mouseleave', async () => {
+  it('teardown unsubscribes', async () => {
     const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const leaveHandler = vi.fn();
-    graph.eventEmitter.on('node:mouseleave', leaveHandler);
 
-    hoverHighlight(renderer as any, graph as any);
-
-    // First hover onto node
-    simulateEvent(renderer.getCanvas(), 'mousemove');
-    // Then mouse leaves canvas
-    simulateEvent(renderer.getCanvas(), 'mouseleave');
-
-    expect(leaveHandler).toHaveBeenCalledTimes(1);
-    expect(leaveHandler.mock.calls[0][0].nodeId).toBe('n1');
+    const teardown = hoverHighlight(renderer as any, graph as any);
+    teardown();
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: mouseEvent() });
+    expect(renderer.setHighlight).not.toHaveBeenCalled();
   });
 });
 
 // ============================================================
-// Graph lifecycle events
+// dragNode — gesture start from node:pointerdown / combo:pointerdown
+// ============================================================
+describe('dragNode behavior', () => {
+  it('emits node:dragstart on node:pointerdown', async () => {
+    const { dragNode } = await import('../behaviors/dragNode.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const startHandler = vi.fn();
+    graph.eventEmitter.on('node:dragstart', startHandler);
+
+    dragNode(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
+
+    expect(startHandler).toHaveBeenCalledTimes(1);
+    expect(startHandler.mock.calls[0][0].nodeId).toBe('a');
+    expect(startHandler.mock.calls[0][0].nodeIds).toEqual(['a']);
+  });
+
+  it('ignores non-left-button pointerdown', async () => {
+    const { dragNode } = await import('../behaviors/dragNode.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const startHandler = vi.fn();
+    graph.eventEmitter.on('node:dragstart', startHandler);
+
+    dragNode(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent({ button: 2 }) });
+
+    expect(startHandler).not.toHaveBeenCalled();
+  });
+
+  it('teardown unsubscribes from pointerdown', async () => {
+    const { dragNode } = await import('../behaviors/dragNode.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const startHandler = vi.fn();
+    graph.eventEmitter.on('node:dragstart', startHandler);
+
+    const teardown = dragNode(renderer as any, graph as any);
+    teardown();
+    graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
+    expect(startHandler).not.toHaveBeenCalled();
+  });
+});
+
+// ============================================================
+// dragEdge — gesture start from edge:pointerdown, drop on canvas:pointerup
+// ============================================================
+describe('dragEdge behavior', () => {
+  it('emits edge:dragstart on edge:pointerdown', async () => {
+    const { dragEdge } = await import('../behaviors/dragEdge.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const handler = vi.fn();
+    graph.eventEmitter.on('edge:dragstart', handler);
+
+    dragEdge(renderer as any, graph as any);
+    graph.eventEmitter.emit('edge:pointerdown', {
+      edgeIndex: 0,
+      source: 'a',
+      target: 'b',
+      event: mouseEvent(),
+    });
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler.mock.calls[0][0].source).toBe('a');
+    expect(handler.mock.calls[0][0].target).toBe('b');
+    expect(handler.mock.calls[0][0].dragEnd).toBeDefined();
+  });
+
+  it('reconnects to a node on canvas:pointerup over a node', async () => {
+    const { dragEdge } = await import('../behaviors/dragEdge.js');
+    const renderer = createMockRenderer();
+    renderer.pickAt.mockReturnValue({ type: 'node', id: 'c' });
+    const graph = createMockGraph();
+    const endHandler = vi.fn();
+    graph.eventEmitter.on('edge:dragend', endHandler);
+
+    dragEdge(renderer as any, graph as any);
+    graph.eventEmitter.emit('edge:pointerdown', {
+      edgeIndex: 0,
+      source: 'a',
+      target: 'b',
+      event: mouseEvent({ clientX: 0, clientY: 0 }), // closer to source 'a'
+    });
+    graph.eventEmitter.emit('canvas:pointerup', { event: mouseEvent() });
+
+    expect(endHandler).toHaveBeenCalledTimes(1);
+    expect(endHandler.mock.calls[0][0].reconnected).toBe(true);
+    expect(endHandler.mock.calls[0][0].newEndpoint).toBe('c');
+  });
+
+  it('does not start drag on edge:pointerdown with non-left button', async () => {
+    const { dragEdge } = await import('../behaviors/dragEdge.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const handler = vi.fn();
+    graph.eventEmitter.on('edge:dragstart', handler);
+
+    dragEdge(renderer as any, graph as any);
+    graph.eventEmitter.emit('edge:pointerdown', {
+      edgeIndex: 0,
+      source: 'a',
+      target: 'b',
+      event: mouseEvent({ button: 2 }),
+    });
+
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('teardown unsubscribes', async () => {
+    const { dragEdge } = await import('../behaviors/dragEdge.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const handler = vi.fn();
+    graph.eventEmitter.on('edge:dragstart', handler);
+
+    const teardown = dragEdge(renderer as any, graph as any);
+    teardown();
+    graph.eventEmitter.emit('edge:pointerdown', {
+      edgeIndex: 0,
+      source: 'a',
+      target: 'b',
+      event: mouseEvent(),
+    });
+    expect(handler).not.toHaveBeenCalled();
+  });
+});
+
+// ============================================================
+// Graph lifecycle events (EventEmitter contract)
 // ============================================================
 describe('Graph lifecycle events', () => {
   it('EventEmitter supports afterrender event name', () => {
@@ -365,276 +406,84 @@ describe('Graph lifecycle events', () => {
 });
 
 // ============================================================
-// click-select behavior
-// ============================================================
-describe('clickSelect behavior', () => {
-  it('should emit node:selectchange on node click', async () => {
-    const { clickSelect } = await import('../behaviors/clickSelect.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
-    const graph = createMockGraph();
-    const selectHandler = vi.fn();
-    graph.eventEmitter.on('node:selectchange', selectHandler);
-
-    clickSelect(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'click');
-
-    expect(selectHandler).toHaveBeenCalledTimes(1);
-    expect(selectHandler.mock.calls[0][0].nodeId).toBe('n1');
-    expect(selectHandler.mock.calls[0][0].selected).toBe(true);
-    expect(graph.setItemState).toHaveBeenCalledWith('n1', 'selected', true);
-  });
-
-  it('should deselect on second click', async () => {
-    const { clickSelect } = await import('../behaviors/clickSelect.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
-    const graph = createMockGraph();
-    const selectHandler = vi.fn();
-    graph.eventEmitter.on('node:selectchange', selectHandler);
-
-    clickSelect(renderer as any, graph as any);
-
-    // First click — select
-    simulateEvent(renderer.getCanvas(), 'click');
-    expect(selectHandler.mock.calls[0][0].selected).toBe(true);
-
-    // Second click — deselect
-    simulateEvent(renderer.getCanvas(), 'click');
-    expect(graph.setItemState).toHaveBeenCalledWith('n1', 'selected', false);
-    expect(graph.setItemState).toHaveBeenCalledWith('n1', 'selected', false);
-  });
-
-  it('should clear all selections on canvas click', async () => {
-    const { clickSelect } = await import('../behaviors/clickSelect.js');
-    let currentPick: any = { type: 'node', id: 'n1' };
-    const renderer = createMockRenderer(null);
-    (renderer.pickAt as any).mockImplementation(() => currentPick);
-    const graph = createMockGraph();
-    const clearHandler = vi.fn();
-    graph.eventEmitter.on('selection:clear', clearHandler);
-
-    clickSelect(renderer as any, graph as any);
-
-    // Select a node
-    currentPick = { type: 'node', id: 'n1' };
-    simulateEvent(renderer.getCanvas(), 'click');
-    expect(graph.setItemState).toHaveBeenCalledWith('n1', 'selected', true);
-
-    // Click background
-    currentPick = null;
-    simulateEvent(renderer.getCanvas(), 'click');
-    expect(graph.setItemState).toHaveBeenCalledWith('n1', 'selected', false);
-    expect(clearHandler).toHaveBeenCalledTimes(1);
-  });
-
-  it('should teardown event listener', async () => {
-    const { clickSelect } = await import('../behaviors/clickSelect.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
-    const graph = createMockGraph();
-
-    const teardown = clickSelect(renderer as any, graph as any);
-    const canvas = renderer.getCanvas();
-    expect(canvas.addEventListener).toHaveBeenCalledTimes(1);
-    teardown();
-  });
-});
-
-// ============================================================
-// wheelEvent behavior
-// ============================================================
-describe('wheelEvent behavior', () => {
-  it('should emit node:wheel on wheel over node', async () => {
-    const { wheelEvent } = await import('../behaviors/wheelEvent.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
-    const graph = createMockGraph();
-    const handler = vi.fn();
-    graph.eventEmitter.on('node:wheel', handler);
-
-    wheelEvent(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'wheel');
-
-    expect(handler).toHaveBeenCalledTimes(1);
-    expect(handler.mock.calls[0][0].nodeId).toBe('n1');
-  });
-
-  it('should emit edge:wheel on wheel over edge', async () => {
-    const { wheelEvent } = await import('../behaviors/wheelEvent.js');
-    const renderer = createMockRenderer({ type: 'edge', index: 0 });
-    const graph = createMockGraph();
-    const handler = vi.fn();
-    graph.eventEmitter.on('edge:wheel', handler);
-
-    wheelEvent(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'wheel');
-
-    expect(handler).toHaveBeenCalledTimes(1);
-    expect(handler.mock.calls[0][0].source).toBe('a');
-    expect(handler.mock.calls[0][0].target).toBe('b');
-  });
-
-  it('should emit canvas:wheel on wheel over background', async () => {
-    const { wheelEvent } = await import('../behaviors/wheelEvent.js');
-    const renderer = createMockRenderer(null);
-    const graph = createMockGraph();
-    const handler = vi.fn();
-    graph.eventEmitter.on('canvas:wheel', handler);
-
-    wheelEvent(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'wheel');
-
-    expect(handler).toHaveBeenCalledTimes(1);
-  });
-
-  it('should teardown wheel listener', async () => {
-    const { wheelEvent } = await import('../behaviors/wheelEvent.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
-    const graph = createMockGraph();
-
-    const teardown = wheelEvent(renderer as any, graph as any);
-    expect(renderer.getCanvas().addEventListener).toHaveBeenCalledWith(
-      'wheel',
-      expect.any(Function),
-      { passive: true },
-    );
-    teardown();
-    expect(renderer.getCanvas().removeEventListener).toHaveBeenCalled();
-  });
-});
-
-// ============================================================
-// dragEdge behavior
-// ============================================================
-describe('dragEdge behavior', () => {
-  it('should emit edge:dragstart on mousedown over edge', async () => {
-    const { dragEdge } = await import('../behaviors/dragEdge.js');
-    const renderer = createMockRenderer({ type: 'edge', index: 0 });
-    // Mock screenToGraph
-    (renderer as any).screenToGraph = vi.fn(() => [0, 0]);
-    const graph = createMockGraph();
-    graph.getNodePosition = vi.fn(() => ({ x: 0, y: 0 }));
-    const handler = vi.fn();
-    graph.eventEmitter.on('edge:dragstart', handler);
-
-    dragEdge(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'mousedown');
-
-    expect(handler).toHaveBeenCalledTimes(1);
-    expect(handler.mock.calls[0][0].source).toBe('a');
-    expect(handler.mock.calls[0][0].target).toBe('b');
-  });
-
-  it('should not start drag on mousedown over node', async () => {
-    const { dragEdge } = await import('../behaviors/dragEdge.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
-    const graph = createMockGraph();
-    const handler = vi.fn();
-    graph.eventEmitter.on('edge:dragstart', handler);
-
-    dragEdge(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'mousedown');
-
-    expect(handler).not.toHaveBeenCalled();
-  });
-
-  it('should emit edge:dragstart on edge mousedown', async () => {
-    const { dragEdge } = await import('../behaviors/dragEdge.js');
-    const renderer = createMockRenderer({ type: 'edge', index: 0 });
-    (renderer as any).screenToGraph = vi.fn(() => [0, 0]);
-    const graph = createMockGraph();
-    graph.getNodePosition = vi.fn(() => ({ x: 0, y: 0 }));
-    const startHandler = vi.fn();
-    graph.eventEmitter.on('edge:dragstart', startHandler);
-
-    const teardown = dragEdge(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'mousedown');
-
-    expect(startHandler).toHaveBeenCalledTimes(1);
-    expect(startHandler.mock.calls[0][0].source).toBe('a');
-    expect(startHandler.mock.calls[0][0].target).toBe('b');
-    expect(startHandler.mock.calls[0][0].dragEnd).toBeDefined();
-    teardown();
-  });
-
-  it('should teardown drag listeners', async () => {
-    const { dragEdge } = await import('../behaviors/dragEdge.js');
-    const renderer = createMockRenderer({ type: 'edge', index: 0 });
-    (renderer as any).screenToGraph = vi.fn(() => [0, 0]);
-    const graph = createMockGraph();
-    graph.getNodePosition = vi.fn(() => ({ x: 0, y: 0 }));
-
-    const teardown = dragEdge(renderer as any, graph as any);
-    expect(renderer.getCanvas().addEventListener).toHaveBeenCalled();
-    teardown();
-  });
-});
-
-// ============================================================
-// brush-select / lasso-select (structural tests — no WebGL)
+// brush-select / lasso-select — start from canvas:pointerdown
 // ============================================================
 describe('brushSelect behavior', () => {
-  it('should register and teardown without error', async () => {
+  it('registers and tears down without error', async () => {
     const { brushSelect } = await import('../behaviors/brushSelect.js');
-    const renderer = createMockRenderer(null);
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
     const teardown = brushSelect(renderer as any, graph as any);
-    expect(renderer.getCanvas().addEventListener).toHaveBeenCalled();
+    expect(typeof teardown).toBe('function');
     teardown();
   });
 
-  it('should accept key option', async () => {
+  it('accepts a key option', async () => {
     const { brushSelect } = await import('../behaviors/brushSelect.js');
-    const renderer = createMockRenderer(null);
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
     const teardown = brushSelect(renderer as any, graph as any, { key: 'shift' });
     teardown();
   });
 
-  it('should not start brush on node hit', async () => {
+  it('does not start on node:pointerdown (only canvas/edge/combo subscribed)', async () => {
     const { brushSelect } = await import('../behaviors/brushSelect.js');
-    const renderer = createMockRenderer({ type: 'node', id: 'n1' });
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const selectHandler = vi.fn();
-    graph.eventEmitter.on('brush:select', selectHandler);
+    const endHandler = vi.fn();
+    graph.eventEmitter.on('brush:end', endHandler);
 
     brushSelect(renderer as any, graph as any);
-    simulateEvent(renderer.getCanvas(), 'mousedown', { button: 0 });
-    // No move/up so brush:select should not fire (hit node blocks it)
-    expect(selectHandler).not.toHaveBeenCalled();
+    // node:pointerdown is not subscribed → brush never starts → mouseup emits nothing
+    graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mouseup'));
+    expect(endHandler).not.toHaveBeenCalled();
   });
 });
 
 describe('lassoSelect behavior', () => {
-  it('should register and teardown without error', async () => {
+  it('registers and tears down without error', async () => {
     const { lassoSelect } = await import('../behaviors/lassoSelect.js');
-    const renderer = createMockRenderer(null);
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
     const teardown = lassoSelect(renderer as any, graph as any);
-    expect(renderer.getCanvas().addEventListener).toHaveBeenCalled();
+    expect(typeof teardown).toBe('function');
     teardown();
   });
 
-  it('should accept key option', async () => {
+  it('accepts a key option', async () => {
     const { lassoSelect } = await import('../behaviors/lassoSelect.js');
-    const renderer = createMockRenderer(null);
+    const renderer = createMockRenderer();
     const graph = createMockGraph();
     const teardown = lassoSelect(renderer as any, graph as any, { key: 'ctrl' });
     teardown();
   });
+
+  it('starts on canvas:pointerdown and selects on mouseup', async () => {
+    const { lassoSelect } = await import('../behaviors/lassoSelect.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const endHandler = vi.fn();
+    graph.eventEmitter.on('lasso:end', endHandler);
+
+    lassoSelect(renderer as any, graph as any);
+    graph.eventEmitter.emit('canvas:pointerdown', { event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mouseup'));
+    expect(endHandler).toHaveBeenCalledTimes(1);
+  });
 });
 
 // ============================================================
-// Point-in-polygon (lasso helper)
+// Point-in-polygon (lasso helper, ray-casting)
 // ============================================================
 describe('pointInPolygon utility', () => {
-  it('should detect point inside a rectangle', async () => {
-    // Import the module to access the function indirectly via lassoSelect
-    // We test the logic directly
+  it('detects a point inside a rectangle', () => {
     const polygon = [
       { x: 0, y: 0 },
       { x: 10, y: 0 },
       { x: 10, y: 10 },
       { x: 0, y: 10 },
     ];
-    // Ray casting algorithm (inline test)
     function pointInPolygon(px: number, py: number, poly: Array<{ x: number; y: number }>) {
       let inside = false;
       for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {

@@ -3,32 +3,31 @@
  * and framebuffer picking for O(1) hit detection.
  */
 
-import { getGL } from './gl.js';
-import { parseColor } from './color.js';
-import { resolveNodeStyle, resolveEdgeStyle, edgeConfigCache, nodeConfigCache } from './style.js';
-import type { ResolvedNodeStyle, ResolvedEdgeStyle } from './style.js';
+import type { NodeRect, Waypoint } from '../routing/orthogonal.js';
+import {
+  applyRoundedCorners,
+  computeFishboneRoute,
+  computeIndentedRoutes,
+  computeOrthogonalRoute,
+  computeTreeRoutes,
+} from '../routing/orthogonal.js';
+import type { EdgeConfig, GraphEdge, LayoutNode, NodeConfig, ThemeTokens } from '../types.js';
 import type { Camera } from './camera.js';
 import { createCamera } from './camera.js';
+import { parseColor } from './color.js';
+import { getGL } from './gl.js';
+import { PickingManager } from './picking.js';
+import { EdgeArcProgram } from './programs/edgeArc.js';
+import { EdgeArrowProgram } from './programs/edgeArrow.js';
+import { EdgeCubicProgram } from './programs/edgeCubic.js';
+import { EdgeLineProgram } from './programs/edgeLine.js';
+import { EdgeLoopProgram } from './programs/edgeLoop.js';
+import { EdgeRectProgram } from './programs/edgeRect.js';
 import { NodeCircleProgram } from './programs/nodeCircle.js';
 import { NodeRectProgram } from './programs/nodeRect.js';
-import { EdgeLineProgram } from './programs/edgeLine.js';
-import { EdgeRectProgram } from './programs/edgeRect.js';
-import { EdgeArcProgram } from './programs/edgeArc.js';
-import { EdgeCubicProgram } from './programs/edgeCubic.js';
-import { EdgeArrowProgram } from './programs/edgeArrow.js';
-import { EdgeLoopProgram } from './programs/edgeLoop.js';
-import { PickingManager } from './picking.js';
-import {
-  computeOrthogonalRoute,
-  applyRoundedCorners,
-  computeTreeRoutes,
-  computeIndentedRoutes,
-  computeFishboneRoute,
-} from '../routing/orthogonal.js';
-import type { Waypoint, NodeRect } from '../routing/orthogonal.js';
-import type { RenderParams } from './programs/program.js';
-import type { Program } from './programs/program.js';
-import type { GraphEdge, NodeConfig, EdgeConfig, ThemeTokens, LayoutNode } from '../types.js';
+import type { Program, RenderParams } from './programs/program.js';
+import type { ResolvedEdgeStyle } from './style.js';
+import { edgeConfigCache, nodeConfigCache, resolveEdgeStyle, resolveNodeStyle } from './style.js';
 
 export interface RendererData {
   nodes: LayoutNode[];
@@ -119,6 +118,10 @@ export class Renderer {
   private needHighlightUpdate = false;
   private needPickingRender = false;
   private pickingInitialized = false;
+  // Whether the last full process() emitted any arrows. Incremental paths
+  // (highlight delta, position patch) don't update the arrow buffer, so when
+  // arrows exist they must fall back to a full process() instead.
+  private hasArrows = false;
 
   // Before-draw callback (used by ComboRenderer underlay)
   private beforeDrawCallback: (() => void) | null = null;
@@ -188,10 +191,10 @@ export class Renderer {
     return this.activeEdgeType === 'arc'
       ? this.getProgram('edgeArc')
       : this.activeEdgeType === 'cubic'
-        ? this.getProgram('edgeCubic')
-        : this.activeEdgeType === 'rect'
-          ? this.getProgram('edgeRect')
-          : this.getProgram('edgeLine');
+      ? this.getProgram('edgeCubic')
+      : this.activeEdgeType === 'rect'
+      ? this.getProgram('edgeRect')
+      : this.getProgram('edgeLine');
   }
 
   updateData(renderData: RendererData): void {
@@ -445,6 +448,7 @@ export class Renderer {
     );
 
     this.picking.setNodeCount(nodes.length);
+    this.hasArrows = arrowCount > 0;
     this.needToProcess = false;
     this.needPickingRender = true;
 
@@ -635,14 +639,19 @@ export class Renderer {
               opacity,
               0,
               0,
+              0,
+              0,
             );
           }
         }
       } else {
-        const srcHalfW = nodeHalfWidths[srcIdx] * this.camera.zoom;
-        const tgtHalfW = nodeHalfWidths[tgtIdx] * this.camera.zoom;
-        const clampSource = srcHalfW + (style.startArrow ? style.arrowSize * 0.8 : 0);
-        const clampTarget = tgtHalfW + (style.endArrow ? style.arrowSize * 0.8 : 0);
+        // Endpoint insets passed to the shader in GRAPH coords (radius) + fixed
+        // pixels (arrow). The shader applies u_scale, so clamping stays correct
+        // on zoom (process() does not re-run on zoom).
+        const srcRadius = nodeHalfWidths[srcIdx];
+        const tgtRadius = nodeHalfWidths[tgtIdx];
+        const srcArrowPx = style.startArrow ? style.arrowSize : 0;
+        const tgtArrowPx = style.endArrow ? style.arrowSize : 0;
 
         if (this.activeEdgeType === 'arc') {
           (edgeProg as EdgeArcProgram).processEdge(
@@ -658,10 +667,14 @@ export class Renderer {
         } else if (this.activeEdgeType === 'cubic') {
           const curveOffset = style.curveOffset ?? 60;
           const direction = src.x < tgt.x ? 'LR' : 'RL';
-          // Calculate edge endpoints at node edges
-          const edgeSrcX = direction === 'LR' ? src.x + srcHalfW : src.x - srcHalfW;
+          // Endpoints at node edges. Radius is in graph coords (the shader applies
+          // u_scale), so use the unscaled half-width — NOT srcHalfW/tgtHalfW which
+          // are pre-multiplied by zoom for the pixel-space rect clamp.
+          const srcHW = nodeHalfWidths[srcIdx];
+          const tgtHW = nodeHalfWidths[tgtIdx];
+          const edgeSrcX = direction === 'LR' ? src.x + srcHW : src.x - srcHW;
           const edgeSrcY = src.y;
-          const edgeTgtX = direction === 'LR' ? tgt.x - tgtHalfW : tgt.x + tgtHalfW;
+          const edgeTgtX = direction === 'LR' ? tgt.x - tgtHW : tgt.x + tgtHW;
           const edgeTgtY = tgt.y;
           (edgeProg as EdgeCubicProgram).processEdge(
             ri,
@@ -686,11 +699,25 @@ export class Renderer {
             style.lineWidth,
             dashCycle,
             opacity,
-            clampSource,
-            clampTarget,
+            srcRadius,
+            tgtRadius,
+            srcArrowPx,
+            tgtArrowPx,
           );
         } else {
-          (edgeProg as EdgeLineProgram).processEdge(ri, src.x, src.y, tgt.x, tgt.y, color, pickIdx);
+          (edgeProg as EdgeLineProgram).processEdge(
+            ri,
+            src.x,
+            src.y,
+            tgt.x,
+            tgt.y,
+            color,
+            pickIdx,
+            srcRadius,
+            tgtRadius,
+            srcArrowPx,
+            tgtArrowPx,
+          );
         }
       }
 
@@ -699,14 +726,29 @@ export class Renderer {
         arrowSrcY = src.y;
       let arrowTgtSrcX = tgt.x,
         arrowTgtSrcY = tgt.y;
+      // Arrow tip points. Default to node centers (line edges), overridden per
+      // edge type. `*AtCenter` marks whether the tip needs a node-radius pullback
+      // to reach the boundary, or already sits on it (polyline/cubic).
+      let endTipX = tgt.x,
+        endTipY = tgt.y;
+      let startTipX = src.x,
+        startTipY = src.y;
+      let endTipAtCenter = true;
+      let startTipAtCenter = true;
       if (isPolyline) {
-        // Arrow direction from last segment of polyline
+        // Arrow direction & tips from polyline endpoints (already at boundary)
         const route = this.polylineRoutes.get(i);
         if (route && route.length >= 2) {
           arrowSrcX = route[route.length - 2].x;
           arrowSrcY = route[route.length - 2].y;
           arrowTgtSrcX = route[1].x;
           arrowTgtSrcY = route[1].y;
+          endTipX = route[route.length - 1].x;
+          endTipY = route[route.length - 1].y;
+          startTipX = route[0].x;
+          startTipY = route[0].y;
+          endTipAtCenter = false;
+          startTipAtCenter = false;
         }
       } else if (this.activeEdgeType === 'arc') {
         const mx = (src.x + tgt.x) * 0.5;
@@ -719,40 +761,56 @@ export class Renderer {
         arrowSrcY = cpy;
         arrowTgtSrcX = cpx;
         arrowTgtSrcY = cpy;
+      } else if (this.activeEdgeType === 'cubic') {
+        // S-curve: endpoints are on the node boundary with a horizontal tangent.
+        const curveOffset = style.curveOffset ?? 60;
+        const direction = src.x < tgt.x ? 'LR' : 'RL';
+        const srcHW = nodeHalfWidths[srcIdx];
+        const tgtHW = nodeHalfWidths[tgtIdx];
+        const edgeSrcX = direction === 'LR' ? src.x + srcHW : src.x - srcHW;
+        const edgeTgtX = direction === 'LR' ? tgt.x - tgtHW : tgt.x + tgtHW;
+        endTipX = edgeTgtX;
+        endTipY = tgt.y;
+        endTipAtCenter = false;
+        arrowSrcX = direction === 'LR' ? edgeTgtX - curveOffset : edgeTgtX + curveOffset;
+        arrowSrcY = tgt.y;
+        startTipX = edgeSrcX;
+        startTipY = src.y;
+        startTipAtCenter = false;
+        arrowTgtSrcX = direction === 'LR' ? edgeSrcX + curveOffset : edgeSrcX - curveOffset;
+        arrowTgtSrcY = src.y;
       }
       if (style.endArrow) {
-        const tgtRadius = nodeHalfWidths[tgtIdx];
-        const lastWp = isPolyline ? this.polylineRoutes.get(i) : undefined;
-        const arrowTgtX = lastWp && lastWp.length > 0 ? lastWp[lastWp.length - 1].x : tgt.x;
-        const arrowTgtY = lastWp && lastWp.length > 0 ? lastWp[lastWp.length - 1].y : tgt.y;
+        // Pull the tip back by the node radius only when it sits at the center.
+        const tgtRadius = endTipAtCenter ? nodeHalfWidths[tgtIdx] : 0;
         arrowProg.processArrow(
           arrowIdx++,
           arrowSrcX,
           arrowSrcY,
-          arrowTgtX,
-          arrowTgtY,
+          endTipX,
+          endTipY,
           style.arrowSize,
           style.lineWidth,
-          0,
+          tgtRadius,
           color,
           pickIdx,
+          opacity,
         );
       }
       if (style.startArrow) {
-        const srcRadius = nodeHalfWidths[srcIdx];
-        const arrowSrcPtX = isPolyline ? (this.polylineRoutes.get(i)?.[0]?.x ?? src.x) : src.x;
-        const arrowSrcPtY = isPolyline ? (this.polylineRoutes.get(i)?.[0]?.y ?? src.y) : src.y;
+        const srcRadius = startTipAtCenter ? nodeHalfWidths[srcIdx] : 0;
         arrowProg.processArrow(
           arrowIdx++,
           arrowTgtSrcX,
           arrowTgtSrcY,
-          arrowSrcPtX,
-          arrowSrcPtY,
+          startTipX,
+          startTipY,
           style.arrowSize,
           style.lineWidth,
-          0,
+          srcRadius,
           color,
           pickIdx,
+          opacity,
         );
       }
     }
@@ -770,7 +828,7 @@ export class Renderer {
       const node = nodes[nIdx];
       const style = useStaticEdgeStyle
         ? eCache.cachedStyle!
-        : (dynamicEdgeStyleCache?.[i] ?? resolveEdgeStyle(node, node, e, edgeConfig, theme));
+        : dynamicEdgeStyleCache?.[i] ?? resolveEdgeStyle(node, node, e, edgeConfig, theme);
       const active = !hasHighlight || this.highlightEdgeIndices.has(i);
       // Use pre-parsed colors if available (static optimization), otherwise parse on-the-fly
       const edgeBaseColor = style.strokeRGB ?? parseColor(style.stroke);
@@ -781,6 +839,7 @@ export class Renderer {
             edgeBaseColor[1] * 0.08 + bg[1] * 0.92,
             edgeBaseColor[2] * 0.08 + bg[2] * 0.92,
           ];
+      const loopOpacity = active ? style.opacity : Math.min(style.opacity, 0.08);
       const pickIdx = nodes.length + i;
 
       // Nested mode: all loops point upward (top), increasing distance
@@ -816,6 +875,7 @@ export class Renderer {
           0,
           color,
           pickIdx,
+          loopOpacity,
         );
       }
     }
@@ -825,6 +885,13 @@ export class Renderer {
 
   /** Incremental highlight: only patch color floats for nodes/edges whose highlight state changed. */
   private processHighlightDelta(): void {
+    // The incremental delta only patches node/edge colors, not the arrow buffer.
+    // When arrows exist, dimming would leave them at full color — rebuild fully.
+    if (this.hasArrows) {
+      this.needHighlightUpdate = false;
+      this.process();
+      return;
+    }
     this.needHighlightUpdate = false;
     const { nodes, edges, nodeConfig, edgeConfig, theme } = this;
     const bg = parseColor(theme.canvasBackground ?? '#fff');
@@ -937,7 +1004,10 @@ export class Renderer {
 
     // Re-compute affected edges
     const edgeProgram = this.activeEdgeProgram;
-    const isSimpleEdge = this.activeEdgeType === 'line' || this.activeEdgeType === 'rect';
+    // The fast endpoint patch below doesn't move arrows, so when arrows exist
+    // fall back to a full process to keep arrow tips on the node boundary.
+    const isSimpleEdge =
+      !this.hasArrows && (this.activeEdgeType === 'line' || this.activeEdgeType === 'rect');
     const affectedEdgeIndices: number[] = [];
 
     for (let i = 0; i < this.edges.length; i++) {
@@ -966,14 +1036,12 @@ export class Renderer {
           const style = resolveEdgeStyle(src, tgt, e, this.edgeConfig, this.theme);
           const srcStyle = resolveNodeStyle(src, this.nodeConfig, this.theme);
           const tgtStyle = resolveNodeStyle(tgt, this.nodeConfig, this.theme);
-          const srcHalfW =
-            ((this.activeNodeType === 'rect' ? srcStyle.width : srcStyle.size) / 2) *
-            this.camera.zoom;
-          const tgtHalfW =
-            ((this.activeNodeType === 'rect' ? tgtStyle.width : tgtStyle.size) / 2) *
-            this.camera.zoom;
-          const clampSource = srcHalfW + (style.startArrow ? style.arrowSize * 0.8 : 0);
-          const clampTarget = tgtHalfW + (style.endArrow ? style.arrowSize * 0.8 : 0);
+          // Graph-coord radii + fixed arrow pixels; the shader applies u_scale,
+          // so do NOT pre-multiply by camera.zoom (that would go stale on zoom).
+          const srcRadius = (this.activeNodeType === 'rect' ? srcStyle.width : srcStyle.size) / 2;
+          const tgtRadius = (this.activeNodeType === 'rect' ? tgtStyle.width : tgtStyle.size) / 2;
+          const srcArrowPx = style.startArrow ? style.arrowSize : 0;
+          const tgtArrowPx = style.endArrow ? style.arrowSize : 0;
           (edgeProgram as import('./programs/edgeRect.js').EdgeRectProgram).patchEdgeEndpoints(
             i,
             src.x,
@@ -982,8 +1050,10 @@ export class Renderer {
             tgt.y,
           );
           (edgeProgram as import('./programs/edgeRect.js').EdgeRectProgram).patchEdgeStyle(i, {
-            clampSource,
-            clampTarget,
+            srcRadius,
+            tgtRadius,
+            srcArrowPx,
+            tgtArrowPx,
           });
         } else {
           (edgeProgram as import('./programs/edgeLine.js').EdgeLineProgram).patchEdgeEndpoints(

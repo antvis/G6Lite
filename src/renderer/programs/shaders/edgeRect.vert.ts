@@ -8,8 +8,10 @@ attribute vec3 a_color;
 attribute vec3 a_pickingColor;
 attribute float a_dashCycle;
 attribute float a_opacity;
-attribute float a_clampSource;
-attribute float a_clampTarget;
+attribute float a_srcRadius;
+attribute float a_tgtRadius;
+attribute float a_srcArrowPx;
+attribute float a_tgtArrowPx;
 uniform vec2 u_translate;
 uniform float u_scale;
 uniform vec2 u_resolution;
@@ -24,9 +26,10 @@ void main() {
   vec2 dir = tgtPx - srcPx;
   float len = length(dir);
   vec2 unitDir = len > 0.001 ? dir / len : vec2(1.0, 0.0);
-  // Clamp endpoints to avoid overlap with arrows
-  srcPx += unitDir * a_clampSource;
-  tgtPx -= unitDir * a_clampTarget;
+  // Clamp endpoints to meet the arrow base: node radius (graph → px via u_scale)
+  // plus fixed arrow pixels. Shader-side so it stays correct on zoom.
+  srcPx += unitDir * (a_srcRadius * u_scale + a_srcArrowPx);
+  tgtPx -= unitDir * (a_tgtRadius * u_scale + a_tgtArrowPx);
   vec2 basePx = mix(srcPx, tgtPx, a_posCoef);
   vec2 clampedDir = tgtPx - srcPx;
   float clampedLen = length(clampedDir);

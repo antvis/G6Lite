@@ -68,6 +68,14 @@ export class Graph {
     this.renderer = new Renderer(this.canvas);
   }
 
+  /** Canvas viewport passed to layout so it sizes to the canvas, not the window. */
+  private getViewport(): { width: number; height: number } {
+    return {
+      width: this.containerEl.clientWidth || 800,
+      height: this.containerEl.clientHeight || 600,
+    };
+  }
+
   async render(): Promise<void> {
     const { data, node, edge, layout, behaviors, theme } = this.options;
     const themeTokens = resolveTheme((theme as ThemeOption) ?? 'light');
@@ -98,7 +106,7 @@ export class Graph {
 
       this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
       const t0 = performance.now();
-      const result = await runLayout(data, layout);
+      const result = await runLayout(data, layout, this.getViewport());
       const duration = performance.now() - t0;
       this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
       nodes = result.nodes;
@@ -668,7 +676,7 @@ export class Graph {
     if (layout && data.nodes.length > 0) {
       this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
       const t0 = performance.now();
-      const result = await runLayout(data, layout);
+      const result = await runLayout(data, layout, this.getViewport());
       const duration = performance.now() - t0;
       this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
       nodes = result.nodes;
@@ -732,7 +740,7 @@ export class Graph {
     if (data.nodes.length === 0) return;
     this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
     const t0 = performance.now();
-    const result = await runLayout(data, layout);
+    const result = await runLayout(data, layout, this.getViewport());
     const duration = performance.now() - t0;
     this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
     this.layoutNodes = result.nodes as LayoutNode[];

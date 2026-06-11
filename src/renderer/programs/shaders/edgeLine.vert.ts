@@ -1,5 +1,11 @@
 export const vertexShader = `
-attribute vec2 a_position;
+attribute vec2 a_source;
+attribute vec2 a_target;
+attribute float a_posCoef;
+attribute float a_srcRadius;
+attribute float a_tgtRadius;
+attribute float a_srcArrowPx;
+attribute float a_tgtArrowPx;
 attribute vec3 a_color;
 attribute vec3 a_pickingColor;
 uniform vec2 u_translate;
@@ -8,8 +14,18 @@ uniform vec2 u_resolution;
 varying vec3 v_color;
 varying vec3 v_pickingColor;
 void main() {
-  vec2 p = (a_position + u_translate) * u_scale;
-  vec2 ndc = vec2(p.x * 2.0 / u_resolution.x - 1.0, 1.0 - p.y * 2.0 / u_resolution.y);
+  vec2 srcPx = (a_source + u_translate) * u_scale;
+  vec2 tgtPx = (a_target + u_translate) * u_scale;
+  vec2 dir = tgtPx - srcPx;
+  float len = length(dir);
+  vec2 unitDir = len > 0.001 ? dir / len : vec2(1.0, 0.0);
+  // Clamp each end inward by node radius (graph coords → px via u_scale) plus a
+  // fixed arrow pixel offset. Done in the shader so it stays correct on zoom
+  // (zoom updates u_scale only; process() does not re-run).
+  srcPx += unitDir * (a_srcRadius * u_scale + a_srcArrowPx);
+  tgtPx -= unitDir * (a_tgtRadius * u_scale + a_tgtArrowPx);
+  vec2 posPx = mix(srcPx, tgtPx, a_posCoef);
+  vec2 ndc = vec2(posPx.x * 2.0 / u_resolution.x - 1.0, 1.0 - posPx.y * 2.0 / u_resolution.y);
   gl_Position = vec4(ndc, 0.0, 1.0);
   v_color = a_color;
   v_pickingColor = a_pickingColor;

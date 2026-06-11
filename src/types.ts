@@ -148,6 +148,12 @@ export interface LayoutConfig {
   type: string;
   /** Run layout in a Web Worker to avoid blocking the main thread. */
   worker?: boolean;
+  /** Layout viewport width; defaults to the canvas width (injected by Graph). */
+  width?: number;
+  /** Layout viewport height; defaults to the canvas height (injected by Graph). */
+  height?: number;
+  /** Layout center point; defaults to [width/2, height/2]. */
+  center?: [number, number];
   [key: string]: unknown;
 }
 

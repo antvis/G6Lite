@@ -7,16 +7,8 @@
  * - Dynamic configs fall back to per-node resolution
  */
 
+import type { EdgeConfig, GraphEdge, GraphNode, NodeConfig, ThemeTokens } from '../types.js';
 import { parseColor } from './color.js';
-import type {
-  GraphNode,
-  GraphEdge,
-  NodeConfig,
-  EdgeConfig,
-  ThemeTokens,
-  EdgeState,
-  NodeState,
-} from '../types.js';
 
 /**
  * State containers come in two shapes depending on the source: a plain array
@@ -237,6 +229,7 @@ export function analyzeEdgeConfig(config: EdgeConfig | undefined, theme: ThemeTo
   const lineWidth = (style?.lineWidth as number) ?? theme.edgeLineWidth ?? 1;
   const strokeValue =
     (style?.stroke as string) ?? theme.edgeStroke ?? theme.edgeDefaultColor ?? '#e2e2e2';
+  const userArrowSize = (style?.arrowSize as number) ?? 0;
   const cachedStyle: CachedEdgeStyle = {
     type: 'static',
     stroke: strokeValue,
@@ -246,7 +239,10 @@ export function analyzeEdgeConfig(config: EdgeConfig | undefined, theme: ThemeTo
     curveOffset: (style?.curveOffset as number) ?? 60,
     endArrow: (style?.endArrow as boolean) ?? theme.edgeArrow ?? false,
     startArrow: (style?.startArrow as boolean) ?? false,
-    arrowSize: (style?.arrowSize as number) ?? 0,
+    arrowSize:
+      userArrowSize > 0
+        ? userArrowSize
+        : getArrowSize(typeof lineWidth === 'number' ? lineWidth : 1),
     lineDash: (style?.lineDash as number[]) ?? [],
     opacity: (style?.opacity as number) ?? 1,
     radius: (style?.radius as number) ?? 0,

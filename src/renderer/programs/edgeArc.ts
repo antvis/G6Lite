@@ -4,14 +4,14 @@
  * Stride: 8 floats per vertex (position.xy, color.rgb, pickingColor.rgb).
  */
 
-import { Program } from './program.js';
-import type { RenderParams, AttributeLayout } from './program.js';
-import { vertexShader } from './shaders/edgeArc.vert.js';
-import { fragmentShader } from './shaders/edgeArc.frag.js';
 import { encodeId } from '../picking.js';
+import type { AttributeLayout, RenderParams } from './program.js';
+import { Program } from './program.js';
+import { fragmentShader } from './shaders/edgeArc.frag.js';
+import { vertexShader } from './shaders/edgeArc.vert.js';
 
 const FLOATS_PER_VERTEX = 8;
-const SEGMENTS = 8;
+const SEGMENTS = 16;
 const VERTICES_PER_ITEM = SEGMENTS * 2;
 
 export class EdgeArcProgram extends Program {

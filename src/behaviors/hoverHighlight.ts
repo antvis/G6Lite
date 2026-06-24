@@ -11,6 +11,7 @@
 
 import type { Graph } from '../graph.js';
 import type { Renderer } from '../renderer/renderer.js';
+import type { ElementState } from '../types.js';
 
 export interface HoverHighlightConfig {
   type: string;
@@ -28,14 +29,86 @@ export function hoverHighlight(
   const degree = config?.degree ?? 1;
   const inactiveState = config?.inactiveState;
   let inactiveApplied: string[] = [];
+  let highlightApplied: string[] = [];
+
+  const batchSetState = (
+    items: Array<{ id: string; state: ElementState; value: boolean }>,
+  ): void => {
+    if (items.length === 0) return;
+    if (typeof graph.batchSetState === 'function') {
+      graph.batchSetState(items);
+      return;
+    }
+    for (const item of items) {
+      graph.setItemState(item.id, item.state, item.value);
+    }
+  };
+
+  const clearHighlightState = () => {
+    if (highlightApplied.length === 0) return;
+    batchSetState(
+      highlightApplied.map((id) => ({
+        id,
+        state: 'highlight',
+        value: false,
+      })),
+    );
+    highlightApplied = [];
+  };
 
   const clearInactive = () => {
     if (inactiveState && inactiveApplied.length > 0) {
-      for (const id of inactiveApplied) {
-        graph.setItemState(id, inactiveState as any, false);
-      }
+      batchSetState(
+        inactiveApplied.map((id) => ({
+          id,
+          state: inactiveState as ElementState,
+          value: false,
+        })),
+      );
       inactiveApplied = [];
     }
+  };
+
+  const applyStateStyles = (nodeIds: Set<string>, edgeIndices: Set<number>) => {
+    clearHighlightState();
+    clearInactive();
+
+    const edges = renderer.getEdges();
+    const edgeIds = new Set<string>();
+    edgeIndices.forEach((edgeIndex) => {
+      const edgeId = (edges[edgeIndex] as { id?: string } | undefined)?.id;
+      if (edgeId) edgeIds.add(edgeId);
+    });
+
+    const items: Array<{ id: string; state: ElementState; value: boolean }> = [];
+    nodeIds.forEach((id) => {
+      items.push({ id, state: 'highlight', value: true });
+      highlightApplied.push(id);
+    });
+    edgeIds.forEach((id) => {
+      items.push({ id, state: 'highlight', value: true });
+      highlightApplied.push(id);
+    });
+
+    if (inactiveState) {
+      const inactiveItems: Array<{ id: string; state: ElementState; value: boolean }> = [];
+      for (const node of renderer.getNodes()) {
+        if (!nodeIds.has(node.id)) {
+          inactiveItems.push({ id: node.id, state: inactiveState as ElementState, value: true });
+          inactiveApplied.push(node.id);
+        }
+      }
+      edges.forEach((edge, index) => {
+        const edgeId = (edge as { id?: string }).id;
+        if (edgeId && !edgeIndices.has(index)) {
+          inactiveItems.push({ id: edgeId, state: inactiveState as ElementState, value: true });
+          inactiveApplied.push(edgeId);
+        }
+      });
+      items.push(...inactiveItems);
+    }
+
+    batchSetState(items);
   };
 
   const collectNeighbors = (startId: string, hops: number): Set<string> => {
@@ -60,18 +133,18 @@ export function hoverHighlight(
   };
 
   const clearHighlight = () => {
+    clearHighlightState();
     clearInactive();
     canvas.style.cursor = 'default';
     renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
   };
 
   const onEdgeOver = (payload: { source: string; target: string; edgeIndex: number }) => {
-    clearInactive();
     canvas.style.cursor = 'pointer';
-    renderer.setHighlight({
-      nodeIds: new Set([payload.source, payload.target]),
-      edgeIndices: new Set([payload.edgeIndex]),
-    });
+    const nodeIds = new Set([payload.source, payload.target]);
+    const edgeIndices = new Set([payload.edgeIndex]);
+    renderer.setHighlight({ nodeIds, edgeIndices });
+    applyStateStyles(nodeIds, edgeIndices);
   };
 
   const onNodeOver = (payload: { nodeId: string }) => {
@@ -93,18 +166,7 @@ export function hoverHighlight(
     });
 
     renderer.setHighlight({ nodeIds, edgeIndices });
-
-    if (inactiveState) {
-      const allNodes = renderer.getNodes();
-      const newInactive: string[] = [];
-      for (const n of allNodes) {
-        if (!nodeIds.has(n.id)) {
-          graph.setItemState(n.id, inactiveState as any, true);
-          newInactive.push(n.id);
-        }
-      }
-      inactiveApplied = newInactive;
-    }
+    applyStateStyles(nodeIds, edgeIndices);
   };
 
   graph.eventEmitter.on('edge:pointerover', onEdgeOver);

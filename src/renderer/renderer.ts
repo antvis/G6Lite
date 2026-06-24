@@ -238,7 +238,7 @@ export class Renderer {
     this.updateData(renderData);
   }
 
-  /** Determine edge program: polyline if type='polyline', arc if type='arc', cubic if type='cubic', rect if lineWidth>1, else line. */
+  /** Determine edge program: complex edge types first, rect when base or state styles require width/opacity/dash, else line. */
   private resolveEdgeType(config?: EdgeConfig): EdgeProgramType {
     if (config?.type === 'polyline') return 'polyline';
     if (config?.type === 'arc') return 'arc';
@@ -247,6 +247,15 @@ export class Renderer {
     if (typeof lw === 'number' && lw > 1) return 'rect';
     if (typeof lw === 'undefined' && (this.theme.edgeLineWidth ?? 1) > 1) return 'rect';
     if (typeof lw === 'function') return 'rect';
+    const stateStyles = config?.stateStyles;
+    if (stateStyles) {
+      for (const style of Object.values(stateStyles)) {
+        if (!style) continue;
+        if ((style.lineWidth ?? 1) > 1) return 'rect';
+        if (style.opacity !== undefined && style.opacity < 1) return 'rect';
+        if (style.lineDash && style.lineDash.length > 0) return 'rect';
+      }
+    }
     return 'line';
   }
 

@@ -445,70 +445,79 @@ function resolveEdgeStyleDynamic(
   config: EdgeConfig | undefined,
   theme: ThemeTokens,
 ): ResolvedEdgeStyle {
+  let stroke: string;
+  let lineWidth: number;
+  let curvature: number;
+  let curveOffset: number;
+  let endArrow: boolean;
+  let startArrow: boolean;
+  let userArrowSize: number;
+  let lineDash: number[];
+  let opacity: number;
+  let radius: number;
+
   // Handle case where config.style is a function that returns the entire style object
   if (typeof config?.style === 'function') {
     const styleFn = config.style as (e: GraphEdge) => Partial<ResolvedEdgeStyle>;
     const styleObj = styleFn(edge);
-    return {
-      stroke: styleObj.stroke ?? theme.edgeStroke ?? theme.edgeDefaultColor ?? '#e2e2e2',
-      lineWidth: styleObj.lineWidth ?? 1,
-      curvature: styleObj.curvature ?? 0.3,
-      curveOffset: styleObj.curveOffset ?? 60,
-      endArrow: styleObj.endArrow ?? false,
-      startArrow: styleObj.startArrow ?? false,
-      arrowSize: styleObj.arrowSize ?? 10,
-      lineDash: styleObj.lineDash ?? [],
-      opacity: styleObj.opacity ?? 1,
-      radius: styleObj.radius ?? 0,
-    };
+    stroke = styleObj.stroke ?? theme.edgeStroke ?? theme.edgeDefaultColor ?? '#e2e2e2';
+    lineWidth = styleObj.lineWidth ?? 1;
+    curvature = styleObj.curvature ?? 0.3;
+    curveOffset = styleObj.curveOffset ?? 60;
+    endArrow = styleObj.endArrow ?? false;
+    startArrow = styleObj.startArrow ?? false;
+    userArrowSize = styleObj.arrowSize ?? 10;
+    lineDash = styleObj.lineDash ?? [];
+    opacity = styleObj.opacity ?? 1;
+    radius = styleObj.radius ?? 0;
+  } else {
+    // Base style resolution
+    stroke = resolveEdgeStyleValue(
+      config?.style?.stroke,
+      source,
+      target,
+      edge,
+      theme.edgeStroke ?? theme.edgeDefaultColor ?? '#e2e2e2',
+    );
+    lineWidth = resolveEdgeStyleValue(
+      config?.style?.lineWidth,
+      source,
+      target,
+      edge,
+      theme.edgeLineWidth ?? 1,
+    );
+    curvature = resolveEdgeStyleValue(config?.style?.curvature, source, target, edge, 0.3);
+    curveOffset = resolveEdgeStyleValue(config?.style?.curveOffset, source, target, edge, 60);
+    endArrow = resolveEdgeStyleValue(
+      config?.style?.endArrow,
+      source,
+      target,
+      edge,
+      theme.edgeArrow ?? false,
+    );
+    startArrow = resolveEdgeStyleValue(config?.style?.startArrow, source, target, edge, false);
+    userArrowSize = resolveEdgeStyleValue(
+      config?.style?.arrowSize,
+      source,
+      target,
+      edge,
+      0 as number,
+    );
+    lineDash = resolveEdgeStyleValue(config?.style?.lineDash, source, target, edge, _emptyDash);
+    opacity = resolveEdgeStyleValue(config?.style?.opacity, source, target, edge, 1 as number);
+    radius = resolveEdgeStyleValue(config?.style?.radius, source, target, edge, 0 as number);
   }
-
-  // Base style resolution
-  let stroke = resolveEdgeStyleValue(
-    config?.style?.stroke,
-    source,
-    target,
-    edge,
-    theme.edgeStroke ?? theme.edgeDefaultColor ?? '#e2e2e2',
-  );
-  let lineWidth = resolveEdgeStyleValue(
-    config?.style?.lineWidth,
-    source,
-    target,
-    edge,
-    theme.edgeLineWidth ?? 1,
-  );
-  const curvature = resolveEdgeStyleValue(config?.style?.curvature, source, target, edge, 0.3);
-  const curveOffset = resolveEdgeStyleValue(config?.style?.curveOffset, source, target, edge, 60);
-  const endArrow = resolveEdgeStyleValue(
-    config?.style?.endArrow,
-    source,
-    target,
-    edge,
-    theme.edgeArrow ?? false,
-  );
-  const startArrow = resolveEdgeStyleValue(config?.style?.startArrow, source, target, edge, false);
-  const userArrowSize = resolveEdgeStyleValue(
-    config?.style?.arrowSize,
-    source,
-    target,
-    edge,
-    0 as number,
-  );
-  let lineDash = resolveEdgeStyleValue(config?.style?.lineDash, source, target, edge, _emptyDash);
-  let opacity = resolveEdgeStyleValue(config?.style?.opacity, source, target, edge, 1 as number);
-  const radius = resolveEdgeStyleValue(config?.style?.radius, source, target, edge, 0 as number);
 
   lineWidth = typeof lineWidth === 'number' ? lineWidth : 1;
   opacity = typeof opacity === 'number' ? opacity : 1;
 
   // Apply state style overrides (last state wins)
   const states = edge.states;
-  if (states && states.length > 0) {
-    if (states.includes('hidden' as any)) {
+  if (hasAnyState(states)) {
+    if (hasState(states, 'hidden')) {
       opacity = 0;
     } else {
-      for (const state of states) {
+      for (const state of states!) {
         if (state === 'default') continue;
         const override = config?.stateStyles?.[state] ?? theme.edgeStateStyles?.[state];
         if (!override) continue;

@@ -197,6 +197,8 @@ describe('hoverHighlight behavior', () => {
     expect(arg.nodeIds.has('a')).toBe(true);
     // edge e0 (a→b) is incident to 'a'
     expect(arg.edgeIndices.has(0)).toBe(true);
+    expect(graph.setItemState).toHaveBeenCalledWith('a', 'highlight', true);
+    expect(graph.setItemState).toHaveBeenCalledWith('e0', 'highlight', true);
   });
 
   it('highlights edge endpoints on edge:pointerover', async () => {
@@ -216,6 +218,9 @@ describe('hoverHighlight behavior', () => {
     expect(arg.nodeIds.has('a')).toBe(true);
     expect(arg.nodeIds.has('b')).toBe(true);
     expect(arg.edgeIndices.has(0)).toBe(true);
+    expect(graph.setItemState).toHaveBeenCalledWith('a', 'highlight', true);
+    expect(graph.setItemState).toHaveBeenCalledWith('b', 'highlight', true);
+    expect(graph.setItemState).toHaveBeenCalledWith('e0', 'highlight', true);
   });
 
   it('clears highlight on node:pointerleave', async () => {
@@ -230,6 +235,28 @@ describe('hoverHighlight behavior', () => {
     const lastArg = renderer.setHighlight.mock.calls.at(-1)![0];
     expect(lastArg.nodeIds.size).toBe(0);
     expect(lastArg.edgeIndices.size).toBe(0);
+    expect(graph.setItemState).toHaveBeenCalledWith('a', 'highlight', false);
+    expect(graph.setItemState).toHaveBeenCalledWith('e0', 'highlight', false);
+  });
+
+  it('applies inactive state to non-highlighted nodes and edges', async () => {
+    const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+
+    hoverHighlight(renderer as any, graph as any, {
+      type: 'hover-highlight',
+      inactiveState: 'inactive',
+    });
+    graph.eventEmitter.emit('edge:pointerover', {
+      edgeIndex: 0,
+      source: 'a',
+      target: 'b',
+      event: mouseEvent(),
+    });
+
+    expect(graph.setItemState).toHaveBeenCalledWith('c', 'inactive', true);
+    expect(graph.setItemState).toHaveBeenCalledWith('e1', 'inactive', true);
   });
 
   it('teardown unsubscribes', async () => {

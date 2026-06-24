@@ -3,7 +3,7 @@ import { encodeId } from '../renderer/picking.js';
 import { Renderer } from '../renderer/renderer.js';
 import { analyzeNodeConfig } from '../renderer/style.js';
 import { resolveTheme } from '../theme.js';
-import type { GraphEdge, LayoutNode, ThemeTokens } from '../types.js';
+import type { EdgeConfig, GraphEdge, LayoutNode, ThemeTokens } from '../types.js';
 
 // ============================================================
 // Q2 — Renderer regression (jsdom + WebGL stub).
@@ -163,6 +163,18 @@ describe('Renderer — data pipeline', () => {
     expect(map.get('b')).toBe(1);
     expect(map.get('c')).toBe(2);
     expect(map.has('missing')).toBe(false);
+  });
+
+  it('uses rect edges when state styles require non-line attributes', () => {
+    const config: EdgeConfig = {
+      type: 'line',
+      style: { lineWidth: 1 },
+      stateStyles: {
+        selected: { lineWidth: 2 },
+      },
+    };
+
+    expect((renderer as any).resolveEdgeType(config)).toBe('rect');
   });
 
   it('replaces data fully on a second setData (no stale nodes)', () => {

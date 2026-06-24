@@ -1,12 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  resolveNodeStyle,
-  resolveEdgeStyle,
-  analyzeNodeConfig,
   analyzeEdgeConfig,
+  analyzeNodeConfig,
+  resolveEdgeStyle,
+  resolveNodeStyle,
 } from '../renderer/style.js';
 import { resolveTheme } from '../theme.js';
-import type { NodeConfig, EdgeConfig } from '../types.js';
+import type { EdgeConfig, NodeConfig } from '../types.js';
 
 /**
  * Regression for the data-redundancy refactor (Phase 4): the Renderer now
@@ -93,6 +93,30 @@ describe('style state resolution: Set vs Array', () => {
       const edge = { source: 's', target: 't', states: new Set(['hidden']) as any };
       const style = resolveEdgeStyle(src, tgt, edge, config, theme);
       expect(style.opacity).toBe(0);
+    });
+
+    it('applies edge state override from a Set on the dynamic path', () => {
+      const dynamicConfig: EdgeConfig = {
+        style: { stroke: () => '#ccc' },
+        stateStyles: { selected: { stroke: '#1783ff', lineWidth: 2 } },
+      };
+      analyzeEdgeConfig(dynamicConfig, theme);
+      const edge = { source: 's', target: 't', states: new Set(['selected']) as any };
+      const style = resolveEdgeStyle(src, tgt, edge, dynamicConfig, theme);
+      expect(style.stroke).toBe('#1783ff');
+      expect(style.lineWidth).toBe(2);
+    });
+
+    it('applies edge state override when the whole edge style is a function', () => {
+      const dynamicConfig: EdgeConfig = {
+        style: () => ({ stroke: '#ccc', lineWidth: 1 }),
+        stateStyles: { selected: { stroke: '#1783ff', lineWidth: 2 } },
+      };
+      analyzeEdgeConfig(dynamicConfig, theme);
+      const edge = { source: 's', target: 't', states: new Set(['selected']) as any };
+      const style = resolveEdgeStyle(src, tgt, edge, dynamicConfig, theme);
+      expect(style.stroke).toBe('#1783ff');
+      expect(style.lineWidth).toBe(2);
     });
   });
 });

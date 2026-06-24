@@ -4,7 +4,7 @@
  */
 
 import { Graph } from '../src/index.js';
-import type { GraphData } from '../src/types.js';
+import type { GraphData, LayoutConfig } from '../src/types.js';
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -20,7 +20,14 @@ interface BenchResult {
 interface BenchTier {
   nodes: number;
   degree: number;
+  /** Real dataset URL; when set, data is fetched instead of generated. */
+  url?: string;
+  /** Display label (real datasets carry their own name). */
+  label?: string;
 }
+
+/** Whether real datasets should re-run force layout instead of reusing preset coords. */
+let relayoutReal = false;
 
 // ─── Data Generation ─────────────────────────────────────────────────
 
@@ -37,6 +44,35 @@ function generateData(nodeCount: number, degree: number): GraphData {
     }
   }
   return { nodes, edges };
+}
+
+/** Cache fetched real datasets so the 5 scenarios per tier don't refetch. */
+const datasetCache = new Map<string, GraphData>();
+
+async function loadDataset(url: string): Promise<GraphData> {
+  let data = datasetCache.get(url);
+  if (!data) {
+    data = (await fetch(url).then((r) => r.json())) as GraphData;
+    datasetCache.set(url, data);
+  }
+  return data;
+}
+
+/**
+ * Resolve a tier to its graph data. Synthetic tiers are generated; real
+ * datasets are fetched. Returns the data plus the layout option to use —
+ * real datasets reuse their sigma-preset ForceAtlas2 coords (no layout)
+ * unless the user opts into re-running force layout.
+ */
+async function resolveTier(
+  tier: BenchTier,
+): Promise<{ data: GraphData; layout: LayoutConfig | undefined }> {
+  const forceLayout = { type: 'force', maxIteration: 100, animate: false };
+  if (tier.url) {
+    const data = await loadDataset(tier.url);
+    return { data, layout: relayoutReal ? (forceLayout as LayoutConfig) : undefined };
+  }
+  return { data: generateData(tier.nodes, tier.degree), layout: forceLayout };
 }
 
 // ─── Stats Utilities ─────────────────────────────────────────────────
@@ -105,11 +141,15 @@ function fitView(graph: Graph): void {
 }
 
 /** Create a Graph, render it, fit to center, and return it. */
-async function makeGraph(graphData: GraphData, cont: HTMLElement): Promise<Graph> {
+async function makeGraph(
+  graphData: GraphData,
+  cont: HTMLElement,
+  layout: LayoutConfig | undefined,
+): Promise<Graph> {
   const graph = new Graph({
     container: cont,
     data: graphData,
-    layout: { type: 'force', maxIteration: 100, animate: false },
+    layout,
     theme: 'light',
   });
   await graph.render();
@@ -122,6 +162,7 @@ async function makeGraph(graphData: GraphData, cont: HTMLElement): Promise<Graph
 async function benchFirstRender(
   graphData: GraphData,
   cont: HTMLElement,
+  layout: LayoutConfig | undefined,
 ): Promise<{ total: number; layout: number; render: number }> {
   await cleanContainer(cont);
 
@@ -129,7 +170,7 @@ async function benchFirstRender(
   const graph = new Graph({
     container: cont,
     data: graphData,
-    layout: { type: 'force', maxIteration: 100, animate: false },
+    layout,
     theme: 'light',
   });
   graph.on('layout:end', (e: { duration: number }) => { layoutDuration = e.duration; });
@@ -139,20 +180,21 @@ async function benchFirstRender(
   fitView(graph);
   const total = performance.now() - t0;
 
-  const layout = layoutDuration || 0;
-  const render = total - layout;
+  const layoutMs = layoutDuration || 0;
+  const render = total - layoutMs;
 
   graph.destroy();
-  return { total, layout, render };
+  return { total, layout: layoutMs, render };
 }
 
 async function benchHighlight(
   graphData: GraphData,
   cont: HTMLElement,
+  layout: LayoutConfig | undefined,
   onMetric: (ms: number) => void,
 ): Promise<{ median: number; p95: number }> {
   await cleanContainer(cont);
-  const graph = await makeGraph(graphData, cont);
+  const graph = await makeGraph(graphData, cont, layout);
 
   const renderer = (graph as any).renderer;
   const nodes = renderer.getNodes();
@@ -194,10 +236,11 @@ async function benchHighlight(
 async function benchDragFPS(
   graphData: GraphData,
   cont: HTMLElement,
+  layout: LayoutConfig | undefined,
   onFPS: (fps: number) => void,
 ): Promise<number> {
   await cleanContainer(cont);
-  const graph = await makeGraph(graphData, cont);
+  const graph = await makeGraph(graphData, cont, layout);
   const renderer = (graph as any).renderer;
   const frames = 120;
   const intervals: number[] = [];
@@ -235,10 +278,11 @@ async function benchDragFPS(
 async function benchZoomFPS(
   graphData: GraphData,
   cont: HTMLElement,
+  layout: LayoutConfig | undefined,
   onFPS: (fps: number) => void,
 ): Promise<number> {
   await cleanContainer(cont);
-  const graph = await makeGraph(graphData, cont);
+  const graph = await makeGraph(graphData, cont, layout);
   const renderer = (graph as any).renderer;
   const frames = 120;
   const intervals: number[] = [];
@@ -277,9 +321,10 @@ async function benchZoomFPS(
 async function benchPickAt(
   graphData: GraphData,
   cont: HTMLElement,
+  layout: LayoutConfig | undefined,
 ): Promise<{ median: number }> {
   await cleanContainer(cont);
-  const graph = await makeGraph(graphData, cont);
+  const graph = await makeGraph(graphData, cont, layout);
   const renderer = (graph as any).renderer;
   const canvas = renderer.getCanvas() as HTMLCanvasElement;
   const rect = canvas.getBoundingClientRect();
@@ -316,6 +361,12 @@ function getSelectedTiers(): BenchTier[] {
   if (customNodes > 0) {
     tiers.push({ nodes: customNodes, degree });
   }
+
+  // Real datasets (sigma.js 同款),节点数填位用于展示,实际从 JSON 读取。
+  document.querySelectorAll('.ds-checkbox:checked').forEach((cb) => {
+    const el = cb as HTMLInputElement;
+    tiers.push({ nodes: 0, degree: 0, url: el.value, label: el.dataset.label || el.value });
+  });
 
   return tiers;
 }
@@ -360,6 +411,7 @@ async function runBenchmark(): Promise<void> {
   }
 
   aborted = false;
+  relayoutReal = (document.getElementById('ds-relayout') as HTMLInputElement)?.checked ?? false;
   results = [];
   getResultsBody().innerHTML = '';
   getBtnStart().disabled = true;
@@ -372,10 +424,19 @@ async function runBenchmark(): Promise<void> {
   for (const tier of tiers) {
     if (aborted) break;
 
-    const data = generateData(tier.nodes, tier.degree);
-    const label = `${tier.nodes.toLocaleString()} nodes`;
+    let data: GraphData;
+    let layout: LayoutConfig | undefined;
+    try {
+      ({ data, layout } = await resolveTier(tier));
+    } catch (err) {
+      getProgressText().textContent = `加载失败 ${tier.label ?? tier.url}: ${String(err)}`;
+      continue;
+    }
+    const label = tier.url
+      ? `${tier.label} (${layout ? 'force' : '预置坐标'})`
+      : `${tier.nodes.toLocaleString()} nodes`;
     const result: BenchResult = {
-      scale: { nodes: tier.nodes, edges: data.edges.length },
+      scale: { nodes: data.nodes.length, edges: data.edges.length },
       firstRender: { total: 0, layout: 0, render: 0 },
       highlight: { median: 0, p95: 0 },
       dragFPS: 0,
@@ -387,7 +448,7 @@ async function runBenchmark(): Promise<void> {
     getPreviewLabel().textContent = `${label} - First Render`;
     updateProgress(step, totalSteps, `${label} - First Render`);
     getLiveMetrics().textContent = '';
-    result.firstRender = await benchFirstRender(data, cont);
+    result.firstRender = await benchFirstRender(data, cont, layout);
     getLiveMetrics().textContent = `Total: ${formatNum(result.firstRender.total)}ms`;
     step++;
     if (aborted) break;
@@ -395,7 +456,7 @@ async function runBenchmark(): Promise<void> {
     // 2. Highlight
     getPreviewLabel().textContent = `${label} - Highlight`;
     updateProgress(step, totalSteps, `${label} - Highlight`);
-    result.highlight = await benchHighlight(data, cont, (ms) => {
+    result.highlight = await benchHighlight(data, cont, layout, (ms) => {
       getLiveMetrics().textContent = `Highlight: ${formatNum(ms)}ms`;
     });
     step++;
@@ -404,7 +465,7 @@ async function runBenchmark(): Promise<void> {
     // 3. Drag FPS
     getPreviewLabel().textContent = `${label} - Drag FPS`;
     updateProgress(step, totalSteps, `${label} - Drag FPS`);
-    result.dragFPS = await benchDragFPS(data, cont, (fps) => {
+    result.dragFPS = await benchDragFPS(data, cont, layout, (fps) => {
       getLiveMetrics().textContent = `FPS: ${formatNum(fps, 0)}`;
     });
     step++;
@@ -413,7 +474,7 @@ async function runBenchmark(): Promise<void> {
     // 4. Zoom FPS
     getPreviewLabel().textContent = `${label} - Zoom FPS`;
     updateProgress(step, totalSteps, `${label} - Zoom FPS`);
-    result.zoomFPS = await benchZoomFPS(data, cont, (fps) => {
+    result.zoomFPS = await benchZoomFPS(data, cont, layout, (fps) => {
       getLiveMetrics().textContent = `FPS: ${formatNum(fps, 0)}`;
     });
     step++;
@@ -423,7 +484,7 @@ async function runBenchmark(): Promise<void> {
     getPreviewLabel().textContent = `${label} - pickAt`;
     updateProgress(step, totalSteps, `${label} - pickAt`);
     getLiveMetrics().textContent = '';
-    result.pickAt = await benchPickAt(data, cont);
+    result.pickAt = await benchPickAt(data, cont, layout);
     getLiveMetrics().textContent = `Pick: ${formatNum(result.pickAt.median, 2)}ms`;
     step++;
 

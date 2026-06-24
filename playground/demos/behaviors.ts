@@ -1,5 +1,7 @@
 /**
- * Demo: 交互 — 缩放、拖拽、节点/边高亮
+ * Demo: 交互 — 缩放、拖拽、节点/边高亮、框选
+ *
+ * 操作:滚轮缩放、拖拽平移、悬停高亮;按住 Shift 拖拽框选节点(brush-select)。
  */
 import { Graph } from '../../src/index.ts';
 
@@ -31,7 +33,13 @@ export async function run(container: string | HTMLElement) {
     },
     edge: { type: 'line', style: { lineWidth: 2 } },
     layout: { type: 'circular', radius: 150 },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
+    behaviors: [
+      'zoom-canvas',
+      'drag-canvas',
+      'highlight-node',
+      'highlight-edge',
+      { type: 'brush-select', key: 'shift' },
+    ],
     theme: 'light',
   });
   await graph.render();

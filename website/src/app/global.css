@@ -6,39 +6,27 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
-/* G6Lite 品牌设计 token
- * 切换配色只需改下面这一组值。
- * 备选预设（浅色调，from→to 渐变）：
- *   青  cyan   : primary #06b6d4  from #22d3ee  to #2563eb
- *   紫  violet : primary #8b5cf6  from #a78bfa  to #6366f1
- *   蓝  blue   : primary #1677ff  from #38bdf8  to #4f46e5
- *   绿  green  : primary #10b981  from #34d399  to #0ea5e9
- *   粉  pink   : primary #ff356a  from #ff356a  to #6b75db
- *   Horizon 柔光: primary #ff6b4a  from #bcd4ff  to #f0d9ff（珊瑚橙强调 + 蓝紫粉柔光）
- */
 :root {
-  /* === 当前配色：紫 violet === */
-  --color-fd-primary: #8b5cf6;
-  --brand-from: #a78bfa;
-  --brand-to: #6366f1;
-
-  /* 柔光大背景：左上蓝 → 中粉 → 右上紫，极淡 */
-  --hero-aurora:
-    radial-gradient(60% 70% at 0% 0%, #cfe0ff 0%, transparent 55%),
-    radial-gradient(55% 65% at 100% 0%, #f3dcff 0%, transparent 55%),
-    radial-gradient(70% 60% at 50% 110%, #ffe2d6 0%, transparent 60%);
-
-  --brand-gradient: linear-gradient(135deg, var(--brand-from) 0%, var(--brand-to) 100%);
+  --color-fd-primary: #ff356a;
+  --brand-accent: #ff356a;
+  --brand-accent-soft: rgba(255, 53, 106, 0.11);
+  --brand-blue: #1677ff;
+  --brand-blue-soft: rgba(22, 119, 255, 0.1);
+  --brand-gradient: linear-gradient(135deg, #ff356a 0%, #6b75db 100%);
+  --home-muted-bg: #f6f8fb;
+  --home-card-shadow: 0 16px 34px -28px rgba(35, 39, 47, 0.34);
   --font-brand:
     'Alibaba PuHuiTi', var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .dark {
-  --color-fd-primary: #a78bfa;
-  --hero-aurora:
-    radial-gradient(60% 70% at 0% 0%, #1e293b 0%, transparent 55%),
-    radial-gradient(55% 65% at 100% 0%, #2a1e3b 0%, transparent 55%),
-    radial-gradient(70% 60% at 50% 110%, #3b261e 0%, transparent 60%);
+  --color-fd-primary: #ff6f95;
+  --brand-accent: #ff6f95;
+  --brand-accent-soft: rgba(255, 111, 149, 0.16);
+  --brand-blue: #69a7ff;
+  --brand-blue-soft: rgba(105, 167, 255, 0.16);
+  --home-muted-bg: #111318;
+  --home-card-shadow: 0 16px 34px -28px rgba(0, 0, 0, 0.8);
 }
 
 /* 浅色模式整页纯白:背景及所有静态承载面(卡片/次级/弱化/浮层)统一为纯白,
@@ -46,8 +34,8 @@
 html:not(.dark) {
   --color-fd-background: #ffffff;
   --color-fd-card: #ffffff;
-  --color-fd-secondary: #ffffff;
-  --color-fd-muted: #ffffff;
+  --color-fd-secondary: #f6f8fb;
+  --color-fd-muted: #f6f8fb;
   --color-fd-popover: #ffffff;
 }
 
@@ -79,32 +67,18 @@ html > body[data-scroll-locked] {
   margin-right: auto;
 }
 #nd-nav nav > ul > li > a {
-  font-size: 1rem; /* 14px → 16px */
+  border-radius: 9999px;
+  font-size: 0.9375rem;
   padding-left: 0.875rem;
   padding-right: 0.875rem;
   font-weight: 500;
 }
+#nd-nav nav > ul > li > a:hover {
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent);
+}
 
 /* ── 动画（对齐 AntV Infographic 站点） ── */
-
-/* 横向无限跑马灯：内容复制两份，滚动 -50% 实现无缝循环 */
-@keyframes marquee-x {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee-x 40s linear infinite;
-}
-.marquee-mask:hover .marquee-track {
-  animation-play-state: paused;
-}
 
 /* 入场动画 */
 @keyframes fade-in-up {
@@ -123,18 +97,111 @@ html > body[data-scroll-locked] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
-  }
   .animate-in-up {
     animation: none;
   }
 }
 
-/* 渐变文字工具类 */
-.text-gradient-brand {
-  background-image: var(--brand-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* ── Shiki 双主题代码高亮 ── */
+/* defaultColor:false 模式下,shiki 把浅色写到 --shiki-light、暗色写到 --shiki-dark,
+ * 由下面两条规则按 .dark 切换。背景透明,沿用容器的 bg-fd-secondary。 */
+.shiki-host .shiki,
+.shiki-host .shiki span {
+  color: var(--shiki-light);
+  background-color: transparent !important;
+}
+.dark .shiki-host .shiki,
+.dark .shiki-host .shiki span {
+  color: var(--shiki-dark);
+}
+.shiki-host pre {
+  margin: 0;
+  background: transparent !important;
+}
+
+/* ── 首页视觉工具类 ── */
+.home-hero {
+  background:
+    linear-gradient(180deg, rgba(255, 53, 106, 0.045), transparent 34rem),
+    linear-gradient(180deg, var(--color-fd-background) 0%, var(--color-fd-background) 70%, var(--home-muted-bg) 100%);
+}
+
+.home-kicker {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.home-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding-inline: 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.home-button:hover {
+  transform: translateY(-1px);
+}
+
+.home-button-primary {
+  background: var(--brand-accent);
+  color: #fff;
+  box-shadow: 0 12px 24px -14px rgba(255, 53, 106, 0.72);
+}
+
+.home-button-secondary {
+  border: 1px solid var(--color-fd-border);
+  background: var(--color-fd-card);
+  color: var(--color-fd-foreground);
+}
+
+.home-button-secondary:hover {
+  background: var(--color-fd-secondary);
+}
+
+.home-panel,
+.home-demo-card {
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.75rem;
+  background: var(--color-fd-card);
+  box-shadow: var(--home-card-shadow);
+}
+
+.home-panel {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.home-panel:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--brand-accent) 26%, var(--color-fd-border));
+  box-shadow: 0 18px 36px -28px rgba(255, 53, 106, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-button,
+  .home-panel {
+    transition: none;
+  }
+  .home-button:hover,
+  .home-panel:hover {
+    transform: none;
+  }
 }

@@ -186,16 +186,20 @@ html > body[data-scroll-locked] {
 .home-prompt-card {
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.92);
-  box-shadow: none;
+  box-shadow: 0 18px 42px -34px rgba(255, 53, 106, 0.58);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+}
+
+.home-hero-title {
+  color: #202632;
 }
 
 .home-case-strip {
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-inline: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
+  padding-inline: 1.25rem;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -206,16 +210,16 @@ html > body[data-scroll-locked] {
 
 .home-case-track {
   display: flex;
-  gap: clamp(1.5rem, 5.5vw, 6rem);
+  gap: clamp(2rem, 3vw, 3rem);
   width: max-content;
   min-width: max-content;
-  padding-right: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
+  padding-right: 1.25rem;
 }
 
 .home-case-card {
   position: relative;
-  flex: 0 0 clamp(18rem, 27vw, 24rem);
-  min-height: 16.5rem;
+  flex: 0 0 clamp(14.5rem, 21.5vw, 19.5rem);
+  min-height: 15rem;
   overflow: hidden;
   border-radius: 1rem;
   box-shadow: none;
@@ -241,6 +245,7 @@ html > body[data-scroll-locked] {
 
   .home-case-card {
     width: 18rem;
+    min-height: 13.5rem;
     flex-basis: 18rem;
   }
 }

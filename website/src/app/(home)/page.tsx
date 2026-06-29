@@ -137,7 +137,7 @@ export default function HomePage() {
   return (
     <main className="flex flex-col bg-fd-background">
       <section className="home-hero relative overflow-hidden">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 pb-14 pt-24 lg:grid-cols-[0.95fr_1fr] lg:pb-20 lg:pt-32">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 pb-16 pt-24 lg:grid-cols-[0.95fr_1fr] lg:pb-20 lg:pt-32">
           <div className="animate-in-up">
             <div className="flex items-center gap-3">
               <span className="grid size-12 place-items-center rounded-2xl bg-[var(--brand-accent)] text-white">
@@ -151,7 +151,7 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <h1 className="mt-7 max-w-2xl text-[2.5rem] font-semibold leading-[1.14] text-fd-foreground sm:text-[3.25rem]">
+            <h1 className="home-hero-title mt-7 max-w-2xl text-[2.25rem] font-medium leading-[1.2] text-fd-foreground sm:text-[2.95rem]">
               新一代高性能 WebGL 图可视化引擎
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-8 text-fd-muted-foreground">
@@ -173,7 +173,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="animate-in-up home-prompt-card" style={{ animationDelay: '0.12s' }}>
+          <div className="animate-in-up home-prompt-card lg:-mt-14" style={{ animationDelay: '0.12s' }}>
             <div className="flex items-center justify-between px-5 py-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-fd-foreground">
                 <Sparkles className="size-4 text-[var(--brand-accent)]" />
@@ -193,7 +193,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="home-case-strip pb-16">
+        <div className="home-case-strip pb-28">
           <div className="home-case-track">
             {heroCases.map((item, index) => (
               <Link
@@ -207,17 +207,10 @@ export default function HomePage() {
                     src={`/layouts/${item.type}.png`}
                     alt={`${item.title}布局示例`}
                     fill
-                    sizes="320px"
+                    sizes="300px"
                     loading={index < 2 ? 'eager' : 'lazy'}
-                    className="home-graph-image object-contain p-8 transition duration-200 group-hover:scale-[1.03]"
+                    className="home-graph-image object-contain p-6 transition duration-200 group-hover:scale-[1.025]"
                   />
-                </div>
-                <div className="absolute left-4 top-4 rounded-full bg-white/75 px-2.5 py-1 text-xs font-semibold text-fd-muted-foreground backdrop-blur">
-                  {item.kind}
-                </div>
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-white/85 to-transparent px-5 pb-4 pt-12">
-                  <h3 className="text-base font-semibold text-fd-foreground">{item.title}</h3>
-                  <p className="mt-1 text-sm text-fd-muted-foreground">{item.desc}</p>
                 </div>
               </Link>
             ))}

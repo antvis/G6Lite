@@ -25,6 +25,7 @@ const LAYOUTS = [
   { type: 'dagre', color: 'E1A416' },
   { type: 'grid', color: '1FA7C4' },
   { type: 'mindmap', color: '8B5CF6' },
+  { type: 'fishbone', color: 'FF6B4A' },
 ];
 
 async function main() {

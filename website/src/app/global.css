@@ -122,8 +122,9 @@ html > body[data-scroll-locked] {
 /* ── 首页视觉工具类 ── */
 .home-hero {
   background:
-    linear-gradient(180deg, rgba(255, 53, 106, 0.045), transparent 34rem),
-    linear-gradient(180deg, var(--color-fd-background) 0%, var(--color-fd-background) 70%, var(--home-muted-bg) 100%);
+    radial-gradient(circle at 23% 8%, rgba(255, 53, 106, 0.08), transparent 22rem),
+    radial-gradient(circle at 84% 8%, rgba(22, 119, 255, 0.06), transparent 24rem),
+    linear-gradient(180deg, #fff 0%, #fff 82%, var(--home-muted-bg) 100%);
 }
 
 .home-kicker {
@@ -161,7 +162,7 @@ html > body[data-scroll-locked] {
 .home-button-primary {
   background: var(--brand-accent);
   color: #fff;
-  box-shadow: 0 12px 24px -14px rgba(255, 53, 106, 0.72);
+  box-shadow: 0 10px 20px -16px rgba(255, 53, 106, 0.65);
 }
 
 .home-button-secondary {
@@ -179,7 +180,79 @@ html > body[data-scroll-locked] {
   border: 1px solid var(--color-fd-border);
   border-radius: 0.75rem;
   background: var(--color-fd-card);
-  box-shadow: var(--home-card-shadow);
+  box-shadow: none;
+}
+
+.home-prompt-card {
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: none;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.home-case-strip {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-inline: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.home-case-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.home-case-track {
+  display: flex;
+  gap: clamp(1.5rem, 5.5vw, 6rem);
+  width: max-content;
+  min-width: max-content;
+  padding-right: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
+}
+
+.home-case-card {
+  position: relative;
+  flex: 0 0 clamp(18rem, 27vw, 24rem);
+  min-height: 16.5rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  box-shadow: none;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.home-case-card:hover {
+  transform: translateY(-3px);
+  box-shadow: none;
+}
+
+@media (max-width: 767px) {
+  .home-case-strip {
+    padding-inline: 1.5rem;
+  }
+
+  .home-case-track {
+    gap: 1rem;
+    padding-right: 1.5rem;
+  }
+
+  .home-case-card {
+    width: 18rem;
+    flex-basis: 18rem;
+  }
+}
+
+.home-graph-preview {
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.9), transparent 8rem),
+    linear-gradient(135deg, #eef3ff 0%, #f7efff 58%, #fff3f5 100%);
+}
+
+.home-graph-image {
+  mix-blend-mode: multiply;
 }
 
 .home-panel {
@@ -192,7 +265,7 @@ html > body[data-scroll-locked] {
 .home-panel:hover {
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--brand-accent) 26%, var(--color-fd-border));
-  box-shadow: 0 18px 36px -28px rgba(255, 53, 106, 0.45);
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

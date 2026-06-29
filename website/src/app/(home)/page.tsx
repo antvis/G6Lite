@@ -17,13 +17,26 @@ import { StatsBand } from './stats-band';
 
 // 缩略图为真实 g6-lite(WebGL)渲染的截图,见 public/layouts/*.png。
 // 重新生成:npx vite --port 5179 --no-open & 然后 node scripts/capture-thumbnails.mjs。
-const gallery = [
-  { type: 'force', title: '力导向', desc: '社群结构自然展开', bg: '#f3f6ff' },
-  { type: 'circular', title: '环形', desc: '环状关系一览', bg: '#f0fbf6' },
-  { type: 'radial', title: '辐射', desc: '以中心向外发散', bg: '#fff3f5' },
-  { type: 'dagre', title: 'DAG / 层级', desc: '有向流程分层', bg: '#fff9ed' },
-  { type: 'grid', title: '网格', desc: '规整对齐排布', bg: '#effafd' },
-  { type: 'mindmap', title: '脑图', desc: '树状层级展开', bg: '#f8f2ff' },
+const relationshipLayouts = [
+  { type: 'force', title: '力导向', desc: '社群结构自然展开', bg: '#e8efff' },
+  { type: 'circular', title: '环形', desc: '环状关系一览', bg: '#dff9ef' },
+  { type: 'radial', title: '辐射', desc: '以中心向外发散', bg: '#ffe4ec' },
+  { type: 'dagre', title: 'DAG / 层级', desc: '有向流程分层', bg: '#fff1c9' },
+  { type: 'grid', title: '网格', desc: '规整对齐排布', bg: '#ddf7ff' },
+];
+
+const customLayouts = [
+  { type: 'mindmap', title: '脑图', desc: '树状层级双向展开', bg: '#efe5ff' },
+  { type: 'fishbone', title: '鱼骨图', desc: '因果分析定制布局', bg: '#ffe3da' },
+];
+
+const heroCases = [
+  { ...relationshipLayouts[0], kind: '基础布局' },
+  { ...relationshipLayouts[2], kind: '基础布局' },
+  { ...customLayouts[0], kind: '定制布局' },
+  { ...customLayouts[1], kind: '定制布局' },
+  { ...relationshipLayouts[4], kind: '基础布局' },
+  { ...relationshipLayouts[1], kind: '基础布局' },
 ];
 
 type Feature = {
@@ -124,16 +137,22 @@ export default function HomePage() {
   return (
     <main className="flex flex-col bg-fd-background">
       <section className="home-hero relative overflow-hidden">
-        <div className="mx-auto grid max-w-6xl items-center gap-8 px-6 pb-10 pt-16 sm:gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:pb-14 lg:pt-28">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 pb-14 pt-24 lg:grid-cols-[0.95fr_1fr] lg:pb-20 lg:pt-32">
           <div className="animate-in-up">
             <div className="flex items-center gap-3">
-              <span className="grid size-9 place-items-center rounded-full bg-[var(--brand-accent-soft)] text-[var(--brand-accent)]">
-                <Sparkles className="size-4" />
+              <span className="grid size-12 place-items-center rounded-2xl bg-[var(--brand-accent)] text-white">
+                <Sparkles className="size-6" />
               </span>
-              <span className="text-sm font-semibold text-fd-muted-foreground">G6Lite</span>
+              <div>
+                <div className="text-xs font-semibold uppercase text-fd-muted-foreground">AntV</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-semibold text-fd-foreground">G6Lite</span>
+                  <span className="rounded-full bg-fd-secondary px-2 py-0.5 text-xs text-fd-muted-foreground">v0.1.0</span>
+                </div>
+              </div>
             </div>
-            <h1 className="mt-6 max-w-2xl text-[2.75rem] font-semibold leading-[1.08] text-fd-foreground sm:text-[3.5rem]">
-              高性能 WebGL 图可视化引擎
+            <h1 className="mt-7 max-w-2xl text-[2.5rem] font-semibold leading-[1.14] text-fd-foreground sm:text-[3.25rem]">
+              新一代高性能 WebGL 图可视化引擎
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-8 text-fd-muted-foreground">
               面向大规模图分析的轻量引擎。万级节点流畅渲染，高频交互增量更新，布局、渲染与行为开箱组合。
@@ -154,85 +173,98 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="animate-in-up home-demo-card" style={{ animationDelay: '0.12s' }}>
-            <div className="flex items-center justify-between border-b border-fd-border px-4 py-3">
-              <div className="flex items-center gap-2">
-                <span className="size-2.5 rounded-full bg-[var(--brand-accent)]" />
-                <span className="text-xs font-semibold uppercase text-fd-muted-foreground">WebGL Renderer</span>
+          <div className="animate-in-up home-prompt-card" style={{ animationDelay: '0.12s' }}>
+            <div className="flex items-center justify-between px-5 py-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-fd-foreground">
+                <Sparkles className="size-4 text-[var(--brand-accent)]" />
+                渲染一张关系图
               </div>
-              <span className="rounded-full bg-[var(--brand-blue-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--brand-blue)]">
-                10k+ nodes
-              </span>
+              <span className="font-mono text-xs text-fd-muted-foreground">WebGL</span>
             </div>
-            <div className="grid gap-4 p-4 sm:grid-cols-[1.15fr_0.85fr]">
-              <div className="relative min-h-56 overflow-hidden rounded-xl bg-[#f3f6ff] sm:min-h-64">
-                <Image
-                  src="/layouts/force.png"
-                  alt="G6Lite 力导向布局渲染示例"
-                  fill
-                  loading="eager"
-                  sizes="(min-width: 1024px) 420px, 100vw"
-                  className="object-contain p-5"
-                />
-              </div>
-              <div className="hidden flex-col justify-between gap-4 sm:flex">
-                <div>
-                  <p className="text-sm font-semibold text-fd-foreground">实时交互性能</p>
-                  <div className="mt-4 space-y-3">
-                    {[
-                      ['highlight', '~0ms'],
-                      ['picking', '0.1ms'],
-                      ['core', '~28KB'],
-                    ].map(([label, value]) => (
-                      <div key={label}>
-                        <div className="flex items-baseline justify-between text-xs">
-                          <span className="font-medium text-fd-muted-foreground">{label}</span>
-                          <span className="font-mono font-semibold text-[var(--brand-accent)]">{value}</span>
-                        </div>
-                        <div className="mt-1.5 h-1.5 rounded-full bg-fd-secondary">
-                          <div className="h-full rounded-full bg-[var(--brand-accent)]" style={{ width: label === 'core' ? '38%' : '18%' }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="rounded-xl bg-fd-secondary px-3 py-3 font-mono text-xs leading-6 text-fd-muted-foreground">
-                  <span className="text-[var(--brand-blue)]">layout</span>: force
-                  <br />
-                  <span className="text-[var(--brand-blue)]">behavior</span>: highlight-node
-                </div>
+            <div className="px-5 pb-5">
+              <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3">
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--brand-blue-soft)] text-sm">🌐</span>
+                <div className="min-w-0 flex-1 truncate text-sm text-fd-foreground">10k 节点社群关系网络</div>
+                <Link href="/docs/guide/quick-start" className="shrink-0 rounded-full bg-[var(--brand-accent)] px-4 py-2 text-sm font-semibold text-white">
+                  快速开始
+                </Link>
               </div>
             </div>
           </div>
         </div>
 
-      </section>
-
-      <section className="bg-[var(--home-muted-bg)]">
-        <div className="mx-auto max-w-6xl px-6 py-8 sm:pb-16 sm:pt-0">
-          <div className="flex snap-x gap-4 overflow-x-auto pb-3 [-webkit-overflow-scrolling:touch] lg:grid lg:grid-cols-6 lg:overflow-visible lg:pb-0">
-            {gallery.map((g) => (
+        <div className="home-case-strip pb-16">
+          <div className="home-case-track">
+            {heroCases.map((item, index) => (
               <Link
-                key={g.type}
+                key={`${item.type}-${index}`}
                 href="/docs/guide/layout"
-                className="group w-44 shrink-0 snap-start overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md lg:w-auto"
+                className="home-case-card group"
+                style={{ backgroundColor: item.bg }}
               >
-                <div className="relative aspect-[1.45] overflow-hidden" style={{ backgroundColor: g.bg }}>
+                <div className="relative h-full min-h-56">
                   <Image
-                    src={`/layouts/${g.type}.png`}
-                    alt={`${g.title}布局示例`}
+                    src={`/layouts/${item.type}.png`}
+                    alt={`${item.title}布局示例`}
                     fill
-                    sizes="(min-width: 1024px) 176px, (min-width: 640px) 50vw, 100vw"
-                    loading="lazy"
-                    className="object-contain p-3 transition duration-200 group-hover:scale-[1.03]"
+                    sizes="320px"
+                    loading={index < 2 ? 'eager' : 'lazy'}
+                    className="home-graph-image object-contain p-8 transition duration-200 group-hover:scale-[1.03]"
                   />
                 </div>
-                <div className="px-3 py-3">
-                  <h3 className="text-sm font-semibold text-fd-foreground">{g.title}</h3>
-                  <p className="mt-1 text-xs leading-5 text-fd-muted-foreground">{g.desc}</p>
+                <div className="absolute left-4 top-4 rounded-full bg-white/75 px-2.5 py-1 text-xs font-semibold text-fd-muted-foreground backdrop-blur">
+                  {item.kind}
+                </div>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-white/85 to-transparent px-5 pb-4 pt-12">
+                  <h3 className="text-base font-semibold text-fd-foreground">{item.title}</h3>
+                  <p className="mt-1 text-sm text-fd-muted-foreground">{item.desc}</p>
                 </div>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[var(--home-muted-bg)]">
+        <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <span className="home-kicker">Layout Cases</span>
+              <h2 className="mt-3 text-3xl font-semibold text-fd-foreground sm:text-4xl">关系网络与定制图形，一套引擎承载</h2>
+            </div>
+            <p className="max-w-md text-sm leading-6 text-fd-muted-foreground">
+              基础布局服务通用关系网络，定制布局面向脑图、鱼骨图等业务表达，并可继续扩展到更多业务图形。
+            </p>
+          </div>
+
+          <div className="space-y-10">
+            <div>
+              <div className="mb-4 flex items-end justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-fd-foreground">基础布局</h3>
+                  <p className="mt-1 text-sm text-fd-muted-foreground">适合社群网络、层级关系、流程依赖等通用图分析。</p>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                {relationshipLayouts.map((g) => (
+                  <LayoutCard key={g.type} item={g} />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="mb-4 flex items-end justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-fd-foreground">定制布局</h3>
+                  <p className="mt-1 text-sm text-fd-muted-foreground">围绕业务结构设计，当前展示脑图、鱼骨图等示例，后续可扩展更多专用布局。</p>
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {customLayouts.map((g) => (
+                  <LayoutCard key={g.type} item={g} featured />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -341,6 +373,36 @@ export default function HomePage() {
         </div>
       </section>
     </main>
+  );
+}
+
+function LayoutCard({
+  item,
+  featured,
+}: {
+  item: (typeof relationshipLayouts)[number];
+  featured?: boolean;
+}) {
+  return (
+    <Link
+      href="/docs/guide/layout"
+      className="group overflow-hidden rounded-2xl bg-fd-card transition duration-200 hover:-translate-y-1"
+    >
+      <div className={featured ? 'relative aspect-[2.25] overflow-hidden' : 'relative aspect-[1.45] overflow-hidden'} style={{ backgroundColor: item.bg }}>
+        <Image
+          src={`/layouts/${item.type}.png`}
+          alt={`${item.title}布局示例`}
+          fill
+          sizes={featured ? '(min-width: 768px) 50vw, 100vw' : '(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw'}
+          loading="lazy"
+          className="home-graph-image object-contain p-4 transition duration-200 group-hover:scale-[1.03]"
+        />
+      </div>
+      <div className="px-4 py-4">
+        <h4 className="font-semibold text-fd-foreground">{item.title}</h4>
+        <p className="mt-1 text-sm leading-6 text-fd-muted-foreground">{item.desc}</p>
+      </div>
+    </Link>
   );
 }
 

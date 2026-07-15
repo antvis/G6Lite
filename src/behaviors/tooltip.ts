@@ -23,6 +23,7 @@ import type { Renderer } from '../renderer/renderer.js';
 export interface TooltipContext {
   itemType: 'node' | 'edge';
   nodeId?: string;
+  edgeId?: string;
   edgeIndex?: number;
   source?: string;
   target?: string;
@@ -47,6 +48,7 @@ export interface TooltipOptions {
 
 type NodePayload = { nodeId: string; data?: Record<string, unknown>; event: MouseEvent };
 type EdgePayload = {
+  edgeId?: string;
   edgeIndex: number;
   source: string;
   target: string;
@@ -136,6 +138,7 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
   });
   const edgeCtx = (p: EdgePayload): TooltipContext => ({
     itemType: 'edge',
+    edgeId: p.edgeId,
     edgeIndex: p.edgeIndex,
     source: p.source,
     target: p.target,
@@ -172,7 +175,7 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
     pinnedKey = key;
   };
   const onEdgeClick = (p: EdgePayload): void => {
-    const key = `edge:${p.edgeIndex}`;
+    const key = `edge:${p.edgeId ?? p.edgeIndex}`;
     if (pinnedKey === key) {
       hide();
       return;

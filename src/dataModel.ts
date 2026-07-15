@@ -6,17 +6,22 @@
  */
 
 import type {
-  ElementState,
-  NodeConfig,
-  EdgeConfig,
-  ThemeTokens,
   ComboData,
+  EdgeConfig,
+  ElementState,
+  GraphData,
+  GraphEdge,
+  GraphNode,
   InternalCombo,
+  NodeConfig,
+  ParallelEdgeMeta,
+  ThemeTokens,
 } from './types.js';
 
 /** Internal node model with resolved style cache. */
 export interface InternalNode {
   id: string;
+  name?: string;
   x: number;
   y: number;
   data?: Record<string, unknown>;
@@ -30,6 +35,7 @@ export interface InternalEdge {
   target: string;
   data?: Record<string, unknown>;
   states: Set<ElementState>;
+  parallel?: ParallelEdgeMeta;
 }
 
 /** Shared empty Set to avoid per-element allocation when no states are present. */
@@ -77,6 +83,10 @@ export class DataModel {
   // Combo storage
   private _combos = new Map<string, InternalCombo>();
   private _nodeToCombo = new Map<string, string>();
+  private _comboHiddenDepth = new Map<string, number>();
+  private _comboHiddenApplied = new Set<string>();
+  private _comboHiddenEdgeDepth = new Map<string, number>();
+  private _comboHiddenEdgeApplied = new Set<string>();
 
   // Config (may be updated via updateData)
   nodeConfig?: NodeConfig;
@@ -97,11 +107,18 @@ export class DataModel {
 
   // ──── Node operations ────
 
-  addNode(node: { id: string; x: number; y: number; data?: Record<string, unknown> }): void {
+  addNode(node: {
+    id: string;
+    name?: string;
+    x: number;
+    y: number;
+    data?: Record<string, unknown>;
+  }): void {
     if (this._nodeIdToIndex.has(node.id)) return;
     const index = this._nodes.length;
     this._nodes.push({
       id: node.id,
+      name: node.name,
       x: node.x,
       y: node.y,
       data: node.data, // Direct reference, no copy
@@ -112,7 +129,13 @@ export class DataModel {
   }
 
   addNodes(
-    nodes: Array<{ id: string; x: number; y: number; data?: Record<string, unknown> }>,
+    nodes: Array<{
+      id: string;
+      name?: string;
+      x: number;
+      y: number;
+      data?: Record<string, unknown>;
+    }>,
   ): void {
     const ids: string[] = [];
     for (const node of nodes) {
@@ -120,6 +143,7 @@ export class DataModel {
       const index = this._nodes.length;
       this._nodes.push({
         id: node.id,
+        name: node.name,
         x: node.x,
         y: node.y,
         data: node.data, // Direct reference, no copy
@@ -221,15 +245,35 @@ export class DataModel {
 
   // ──── Edge operations ────
 
-  addEdge(edge: { source: string; target: string; data?: Record<string, unknown> }): string {
-    const id = `e${this._edgeIdCounter++}`;
+  private allocateEdgeId(explicitId?: string): string {
+    if (explicitId !== undefined) {
+      if (this._edgeIdToIndex.has(explicitId)) {
+        throw new Error(`Duplicate edge id: ${explicitId}`);
+      }
+      return explicitId;
+    }
+    let id = `e${this._edgeIdCounter++}`;
+    while (this._edgeIdToIndex.has(id)) {
+      id = `e${this._edgeIdCounter++}`;
+    }
+    return id;
+  }
+
+  addEdge(edge: {
+    id?: string;
+    source: string;
+    target: string;
+    data?: Record<string, unknown>;
+    states?: ElementState[];
+  }): string {
+    const id = this.allocateEdgeId(edge.id);
     const index = this._edges.length;
     this._edges.push({
       id,
       source: edge.source,
       target: edge.target,
       data: edge.data, // Direct reference, no copy
-      states: EMPTY_SET,
+      states: edge.states && edge.states.length > 0 ? new Set(edge.states) : EMPTY_SET,
     });
     this._edgeIdToIndex.set(id, index);
     this._changes.push({ type: 'edgeAdded', ids: [id] });
@@ -237,18 +281,24 @@ export class DataModel {
   }
 
   addEdges(
-    edges: Array<{ source: string; target: string; data?: Record<string, unknown> }>,
+    edges: Array<{
+      id?: string;
+      source: string;
+      target: string;
+      data?: Record<string, unknown>;
+      states?: ElementState[];
+    }>,
   ): string[] {
     const ids: string[] = [];
     for (const edge of edges) {
-      const id = `e${this._edgeIdCounter++}`;
+      const id = this.allocateEdgeId(edge.id);
       const index = this._edges.length;
       this._edges.push({
         id,
         source: edge.source,
         target: edge.target,
         data: edge.data, // Direct reference, no copy
-        states: EMPTY_SET,
+        states: edge.states && edge.states.length > 0 ? new Set(edge.states) : EMPTY_SET,
       });
       this._edgeIdToIndex.set(id, index);
       ids.push(id);
@@ -310,6 +360,9 @@ export class DataModel {
   setNodeState(id: string, state: ElementState, value: boolean): void {
     const index = this._nodeIdToIndex.get(id);
     if (index === undefined) return;
+    if (state === 'hidden' && value && this._comboHiddenDepth.has(id)) {
+      this._comboHiddenApplied.delete(id);
+    }
     const node = this._nodes[index];
     // Lazily replace shared EMPTY_SET with a mutable Set on first state mutation
     if (value && node.states === EMPTY_SET) {
@@ -337,6 +390,9 @@ export class DataModel {
   setEdgeState(id: string, state: ElementState, value: boolean): void {
     const index = this._edgeIdToIndex.get(id);
     if (index === undefined) return;
+    if (state === 'hidden' && value && this._comboHiddenEdgeDepth.has(id)) {
+      this._comboHiddenEdgeApplied.delete(id);
+    }
     const edge = this._edges[index];
     // Lazily replace shared EMPTY_SET with a mutable Set on first state mutation
     if (value && edge.states === EMPTY_SET) {
@@ -366,12 +422,14 @@ export class DataModel {
   replaceData(
     nodes: Array<{
       id: string;
+      name?: string;
       x: number;
       y: number;
       data?: Record<string, unknown>;
       states?: ElementState[];
     }>,
     edges: Array<{
+      id?: string;
       source: string;
       target: string;
       data?: Record<string, unknown>;
@@ -384,12 +442,19 @@ export class DataModel {
     this._nodeIdToIndex.clear();
     this._edgeIdToIndex.clear();
     this._edgeIdCounter = 0;
+    this._combos.clear();
+    this._nodeToCombo.clear();
+    this._comboHiddenDepth.clear();
+    this._comboHiddenApplied.clear();
+    this._comboHiddenEdgeDepth.clear();
+    this._comboHiddenEdgeApplied.clear();
 
     // Add nodes directly (no conversion)
     for (const n of nodes) {
       const index = this._nodes.length;
       this._nodes.push({
         id: n.id,
+        name: n.name,
         x: n.x,
         y: n.y,
         data: n.data, // Direct reference
@@ -400,7 +465,7 @@ export class DataModel {
 
     // Add edges directly (auto-generate IDs)
     for (const e of edges) {
-      const id = `e${this._edgeIdCounter++}`;
+      const id = this.allocateEdgeId(e.id);
       const index = this._edges.length;
       this._edges.push({
         id,
@@ -537,6 +602,7 @@ export class DataModel {
   /** @deprecated Use getNodes() directly for better performance */
   toLayoutNodes(): Array<{
     id: string;
+    name?: string;
     x: number;
     y: number;
     data?: Record<string, unknown>;
@@ -544,6 +610,7 @@ export class DataModel {
   }> {
     return this._nodes.map((n) => ({
       id: n.id,
+      name: n.name,
       x: n.x,
       y: n.y,
       data: n.data,
@@ -568,24 +635,93 @@ export class DataModel {
     }));
   }
 
+  toData(): GraphData {
+    const nodes: GraphNode[] = this._nodes.map((n) => {
+      const node: GraphNode = {
+        id: n.id,
+        x: n.x,
+        y: n.y,
+      };
+      const states = this.toExportNodeStates(n.id, n.states);
+      const comboId = this._nodeToCombo.get(n.id);
+      if (n.name !== undefined) node.name = n.name;
+      if (n.data !== undefined) node.data = { ...n.data };
+      if (states.length > 0) node.states = states;
+      if (comboId !== undefined) node.comboId = comboId;
+      return node;
+    });
+
+    const edges: GraphEdge[] = this._edges.map((e) => {
+      const edge: GraphEdge = {
+        id: e.id,
+        source: e.source,
+        target: e.target,
+      };
+      if (e.data !== undefined) edge.data = { ...e.data };
+      const states = this.toExportEdgeStates(e.id, e.states);
+      if (states.length > 0) edge.states = states;
+      return edge;
+    });
+
+    const data: GraphData = { nodes, edges };
+    if (this._combos.size > 0) {
+      data.combos = Array.from(this._combos.values()).map((c) => {
+        const combo: ComboData = { id: c.id };
+        if (c.parentId !== undefined) combo.parentId = c.parentId;
+        if (c.collapsed) combo.collapsed = true;
+        if (c.style !== undefined) combo.style = { ...c.style };
+        if (c.data !== undefined) combo.data = { ...c.data };
+        if (c.states.size > 0) combo.states = Array.from(c.states);
+        return combo;
+      });
+    }
+    return data;
+  }
+
+  private toExportNodeStates(nodeId: string, states: Set<ElementState>): ElementState[] {
+    if (states.size === 0) return [];
+    const result: ElementState[] = [];
+    for (const state of states) {
+      if (state === 'hidden' && this._comboHiddenApplied.has(nodeId)) continue;
+      result.push(state);
+    }
+    return result;
+  }
+
+  private toExportEdgeStates(edgeId: string, states: Set<ElementState>): ElementState[] {
+    if (states.size === 0) return [];
+    const result: ElementState[] = [];
+    for (const state of states) {
+      if (state === 'hidden' && this._comboHiddenEdgeApplied.has(edgeId)) continue;
+      result.push(state);
+    }
+    return result;
+  }
+
   // ──── Combo operations ────
 
   initCombos(combos: ComboData[], nodes: Array<{ id: string; comboId?: string }>): void {
+    this.clearComboHidden();
     this._combos.clear();
     this._nodeToCombo.clear();
+    this._comboHiddenDepth.clear();
+    this._comboHiddenApplied.clear();
+    this._comboHiddenEdgeDepth.clear();
+    this._comboHiddenEdgeApplied.clear();
     for (const c of combos) {
       this._combos.set(c.id, {
         id: c.id,
         parentId: c.parentId,
         childNodeIds: new Set(),
         childComboIds: new Set(),
-        collapsed: false,
+        collapsed: c.collapsed ?? false,
         x: 0,
         y: 0,
         width: 0,
         height: 0,
+        style: c.style,
         data: c.data,
-        states: new Set(),
+        states: c.states && c.states.length > 0 ? new Set(c.states) : new Set(),
       });
     }
     // Build parent-child combo relationships
@@ -601,6 +737,11 @@ export class DataModel {
         this._nodeToCombo.set(n.id, n.comboId);
       }
     }
+    for (const combo of this._combos.values()) {
+      if (combo.collapsed) {
+        this.applyComboHidden(this.getComboAllNodeIds(combo.id));
+      }
+    }
   }
 
   addCombo(combo: ComboData): void {
@@ -610,13 +751,14 @@ export class DataModel {
       parentId: combo.parentId,
       childNodeIds: new Set(),
       childComboIds: new Set(),
-      collapsed: false,
+      collapsed: combo.collapsed ?? false,
       x: 0,
       y: 0,
       width: 0,
       height: 0,
+      style: combo.style,
       data: combo.data,
-      states: new Set(),
+      states: combo.states && combo.states.length > 0 ? new Set(combo.states) : new Set(),
     });
     if (combo.parentId && this._combos.has(combo.parentId)) {
       this._combos.get(combo.parentId)!.childComboIds.add(combo.id);
@@ -633,6 +775,10 @@ export class DataModel {
     // Remove node associations
     for (const nodeId of combo.childNodeIds) {
       this._nodeToCombo.delete(nodeId);
+    }
+    for (const childId of combo.childComboIds) {
+      const child = this._combos.get(childId);
+      if (child) child.parentId = undefined;
     }
     this._combos.delete(id);
   }
@@ -658,6 +804,10 @@ export class DataModel {
     return this._combos.get(id);
   }
 
+  hasCombo(id: string): boolean {
+    return this._combos.has(id);
+  }
+
   getCombos(): InternalCombo[] {
     return Array.from(this._combos.values());
   }
@@ -671,8 +821,135 @@ export class DataModel {
     if (combo) combo.collapsed = collapsed;
   }
 
+  applyComboHidden(nodeIds: string[], depth = 1): void {
+    if (depth <= 0) return;
+    const edgeIds = this.getAdjacentEdgeIds(nodeIds);
+    for (const nodeId of nodeIds) {
+      const index = this._nodeIdToIndex.get(nodeId);
+      if (index === undefined) continue;
+      const node = this._nodes[index];
+      const previousDepth = this._comboHiddenDepth.get(nodeId) ?? 0;
+      this._comboHiddenDepth.set(nodeId, previousDepth + depth);
+      if (node.states.has('hidden')) continue;
+      if (node.states === EMPTY_SET) node.states = new Set();
+      node.states.add('hidden');
+      this._comboHiddenApplied.add(nodeId);
+      this._changes.push({ type: 'nodeStateChanged', ids: [nodeId] });
+    }
+    for (const edgeId of edgeIds) {
+      const index = this._edgeIdToIndex.get(edgeId);
+      if (index === undefined) continue;
+      const edge = this._edges[index];
+      const previousDepth = this._comboHiddenEdgeDepth.get(edgeId) ?? 0;
+      this._comboHiddenEdgeDepth.set(edgeId, previousDepth + depth);
+      if (edge.states.has('hidden')) continue;
+      if (edge.states === EMPTY_SET) edge.states = new Set();
+      edge.states.add('hidden');
+      this._comboHiddenEdgeApplied.add(edgeId);
+      this._changes.push({ type: 'edgeStateChanged', ids: [edgeId] });
+    }
+  }
+
+  releaseComboHidden(nodeIds: string[], depth = 1): void {
+    if (depth <= 0) return;
+    const edgeIds = this.getAdjacentEdgeIds(nodeIds);
+    for (const nodeId of nodeIds) {
+      const previousDepth = this._comboHiddenDepth.get(nodeId) ?? 0;
+      if (previousDepth <= 0) continue;
+      const nextDepth = previousDepth - depth;
+      if (nextDepth > 0) {
+        this._comboHiddenDepth.set(nodeId, nextDepth);
+        continue;
+      }
+      this._comboHiddenDepth.delete(nodeId);
+      if (!this._comboHiddenApplied.delete(nodeId)) continue;
+      const index = this._nodeIdToIndex.get(nodeId);
+      if (index === undefined) continue;
+      const node = this._nodes[index];
+      if (!node.states.has('hidden')) continue;
+      node.states.delete('hidden');
+      this._changes.push({ type: 'nodeStateChanged', ids: [nodeId] });
+    }
+    for (const edgeId of edgeIds) {
+      const previousDepth = this._comboHiddenEdgeDepth.get(edgeId) ?? 0;
+      if (previousDepth <= 0) continue;
+      const nextDepth = previousDepth - depth;
+      if (nextDepth > 0) {
+        this._comboHiddenEdgeDepth.set(edgeId, nextDepth);
+        continue;
+      }
+      this._comboHiddenEdgeDepth.delete(edgeId);
+      if (!this._comboHiddenEdgeApplied.delete(edgeId)) continue;
+      const index = this._edgeIdToIndex.get(edgeId);
+      if (index === undefined) continue;
+      const edge = this._edges[index];
+      if (!edge.states.has('hidden')) continue;
+      edge.states.delete('hidden');
+      this._changes.push({ type: 'edgeStateChanged', ids: [edgeId] });
+    }
+  }
+
+  private clearComboHidden(): void {
+    for (const nodeId of this._comboHiddenApplied) {
+      const index = this._nodeIdToIndex.get(nodeId);
+      if (index === undefined) continue;
+      const node = this._nodes[index];
+      if (!node.states.has('hidden')) continue;
+      node.states.delete('hidden');
+      this._changes.push({ type: 'nodeStateChanged', ids: [nodeId] });
+    }
+    this._comboHiddenDepth.clear();
+    this._comboHiddenApplied.clear();
+    for (const edgeId of this._comboHiddenEdgeApplied) {
+      const index = this._edgeIdToIndex.get(edgeId);
+      if (index === undefined) continue;
+      const edge = this._edges[index];
+      if (!edge.states.has('hidden')) continue;
+      edge.states.delete('hidden');
+      this._changes.push({ type: 'edgeStateChanged', ids: [edgeId] });
+    }
+    this._comboHiddenEdgeDepth.clear();
+    this._comboHiddenEdgeApplied.clear();
+  }
+
+  private getAdjacentEdgeIds(nodeIds: string[]): string[] {
+    const nodeSet = new Set(nodeIds);
+    const edgeIds = new Set<string>();
+    for (const edge of this._edges) {
+      if (nodeSet.has(edge.source) || nodeSet.has(edge.target)) {
+        edgeIds.add(edge.id);
+      }
+    }
+    return Array.from(edgeIds);
+  }
+
+  setComboState(id: string, state: ElementState, value: boolean): void {
+    const combo = this._combos.get(id);
+    if (!combo) return;
+    const had = combo.states.has(state);
+    if (value) combo.states.add(state);
+    else combo.states.delete(state);
+    if (had !== value) {
+      // Combo rendering is a Canvas2D underlay, so Graph schedules draw-only.
+    }
+  }
+
+  clearComboStates(id: string): void {
+    const combo = this._combos.get(id);
+    if (!combo || combo.states.size === 0) return;
+    combo.states.clear();
+  }
+
+  findCombosByState(state: ElementState): string[] {
+    const result: string[] = [];
+    for (const combo of this._combos.values()) {
+      if (combo.states.has(state)) result.push(combo.id);
+    }
+    return result;
+  }
+
   /** Recompute combo bounding boxes based on child node positions. */
-  updateComboBounds(padding = 20): void {
+  updateComboBounds(padding: number | ((combo: InternalCombo) => number) = 20): void {
     // Process from leaf combos up to root combos
     const processed = new Set<string>();
     const visiting = new Set<string>();
@@ -726,7 +1003,7 @@ export class DataModel {
         combo.width = 0;
         combo.height = 0;
       } else {
-        const pad = typeof padding === 'number' ? padding : 20;
+        const pad = typeof padding === 'function' ? padding(combo) : padding;
         combo.x = (minX + maxX) / 2;
         combo.y = (minY + maxY) / 2;
         combo.width = maxX - minX + pad * 2;

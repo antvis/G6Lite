@@ -13,12 +13,16 @@ import { runLayout } from './layout/index.js';
 import { terminateLayoutWorker } from './layout/workerLayout.js';
 import type { Camera } from './renderer/camera.js';
 import { ComboRenderer } from './renderer/comboRenderer.js';
-import { LabelRenderer } from './renderer/labelRenderer.js';
+import { LabelLayerRenderer } from './renderer/labelRenderer.js';
 import type { RendererData } from './renderer/renderer.js';
 import { Renderer } from './renderer/renderer.js';
 import { analyzeEdgeConfig, analyzeNodeConfig } from './renderer/style.js';
 import { RefreshLevel, RenderScheduler } from './scheduler.js';
 import { resolveTheme } from './theme.js';
+import {
+  processParallelEdges,
+  resolveParallelEdgesConfig,
+} from './transforms/processParallelEdges.js';
 import type {
   ComboData,
   ElementState,
@@ -34,8 +38,10 @@ import type {
 /** Result of a pick operation at screen coordinates. */
 export interface PickResult {
   type: 'node' | 'edge';
-  /** Node ID (when type is 'node') or edge index (when type is 'edge'). */
+  /** Node ID (when type is 'node') or edge ID (when type is 'edge'). */
   id: string;
+  /** For edge results, the current edge array index. */
+  edgeIndex?: number;
   /** For edge results, the source and target node IDs. */
   source?: string;
   target?: string;
@@ -53,8 +59,9 @@ export class Graph {
   private resizeObserver: ResizeObserver | null = null;
   private layoutNodes: LayoutNode[] = [];
   private initialCamera: Camera | null = null;
-  private labelRenderer: LabelRenderer | null = null;
+  private labelRenderer: LabelLayerRenderer | null = null;
   private comboRenderer: ComboRenderer | null = null;
+  private comboBeforeDrawRegistered = false;
   /** Whether render() has been called at least once. */
   private initialized = false;
 
@@ -74,6 +81,12 @@ export class Graph {
       width: this.containerEl.clientWidth || 800,
       height: this.containerEl.clientHeight || 600,
     };
+  }
+
+  private applyTransforms(): void {
+    if (!this.dataModel) return;
+    const config = resolveParallelEdgesConfig(this.options.transforms, this.options.edge);
+    processParallelEdges(this.dataModel.getEdges() as InternalEdge[], config);
   }
 
   async render(): Promise<void> {
@@ -135,18 +148,24 @@ export class Graph {
     this.dataModel.replaceData(
       nodes as Array<{
         id: string;
+        name?: string;
         x: number;
         y: number;
         data?: Record<string, unknown>;
         states?: ElementState[];
       }>,
       data.edges as Array<{
+        id?: string;
         source: string;
         target: string;
         data?: Record<string, unknown>;
         states?: ElementState[];
       }>,
     );
+    if (data.combos?.length) {
+      this.dataModel.initCombos(data.combos, data.nodes);
+    }
+    this.applyTransforms();
     // Clear the dataReplaced change since we'll do a full process immediately
     this.dataModel.getChanges();
 
@@ -169,11 +188,6 @@ export class Graph {
       polylineRouter,
     });
 
-    // Initialize combos if present
-    if (data.combos?.length) {
-      this.dataModel.initCombos(data.combos, data.nodes);
-    }
-
     // Initialize RenderScheduler
     this.scheduler = new RenderScheduler(this.renderer, this.dataModel);
 
@@ -190,22 +204,12 @@ export class Graph {
 
     // Initialize combo renderer (Canvas2D underlay for combo backgrounds)
     if (this.dataModel.hasCombos()) {
-      this.comboRenderer = new ComboRenderer(this.containerEl, this.canvas);
-      this.dataModel.updateComboBounds(this.getComboStylePadding());
-      this.renderer.onBeforeDraw(() => {
-        if (this.comboRenderer && this.dataModel?.hasCombos()) {
-          this.dataModel.updateComboBounds(this.getComboStylePadding());
-          this.comboRenderer.draw(
-            this.dataModel.getCombos(),
-            this.renderer.getCamera(),
-            this.options.combo,
-          );
-        }
-      });
+      this.ensureComboRenderer();
+      this.dataModel.updateComboBounds((combo) => this.getComboStylePadding(combo));
     }
 
     // Initialize label renderer (Canvas2D overlay for labels and icons)
-    this.labelRenderer = new LabelRenderer(this.containerEl, this.canvas);
+    this.labelRenderer = new LabelLayerRenderer(this.containerEl, this.canvas);
     this.labelRenderer.setScheduleRedraw(() => this.renderer.scheduleRender());
     this.renderer.onAfterDraw(() => {
       this.labelRenderer?.draw(
@@ -215,6 +219,7 @@ export class Graph {
         this.options.node,
         this.options.edge,
         this.renderer.getNodeIdToIndex(),
+        this.renderer.getEdgePathCache(),
       );
     });
 
@@ -323,7 +328,11 @@ export class Graph {
   }
 
   getData(): GraphData {
-    return this.options.data;
+    return this.toData();
+  }
+
+  toData(): GraphData {
+    return this.dataModel?.toData() ?? this.options.data;
   }
 
   getCanvas(): HTMLCanvasElement {
@@ -357,7 +366,14 @@ export class Graph {
     const edges = this.renderer.getEdges();
     const edge = edges[result.index];
     if (!edge) return null;
-    return { type: 'edge', id: String(result.index), source: edge.source, target: edge.target };
+    const edgeId = (edge as { id?: string }).id ?? String(result.index);
+    return {
+      type: 'edge',
+      id: edgeId,
+      edgeIndex: result.index,
+      source: edge.source,
+      target: edge.target,
+    };
   }
 
   setHighlight(option: { nodeIds?: Set<string>; edgeIndices?: Set<number> }): void {
@@ -437,6 +453,7 @@ export class Graph {
   removeNode(id: string): void {
     this.ensureInitialized();
     this.dataModel!.removeNode(id);
+    this.applyTransforms();
     this.scheduler!.schedule();
     this.eventEmitter.emit('afterremoveitem', { type: 'node', id });
   }
@@ -447,6 +464,7 @@ export class Graph {
   removeNodes(ids: string[]): void {
     this.ensureInitialized();
     this.dataModel!.removeNodes(ids);
+    this.applyTransforms();
     this.scheduler!.schedule();
     for (const id of ids) {
       this.eventEmitter.emit('afterremoveitem', { type: 'node', id });
@@ -479,9 +497,16 @@ export class Graph {
   /**
    * Add an edge between two existing nodes. Returns the auto-generated edge ID.
    */
-  addEdge(edge: { source: string; target: string; data?: Record<string, unknown> }): string {
+  addEdge(edge: {
+    id?: string;
+    source: string;
+    target: string;
+    data?: Record<string, unknown>;
+    states?: ElementState[];
+  }): string {
     this.ensureInitialized();
     const id = this.dataModel!.addEdge(edge);
+    this.applyTransforms();
     this.scheduler!.schedule();
     this.eventEmitter.emit('afteradditem', {
       type: 'edge',
@@ -496,10 +521,17 @@ export class Graph {
    * Add multiple edges in one batch. Returns the auto-generated edge IDs.
    */
   addEdges(
-    edges: Array<{ source: string; target: string; data?: Record<string, unknown> }>,
+    edges: Array<{
+      id?: string;
+      source: string;
+      target: string;
+      data?: Record<string, unknown>;
+      states?: ElementState[];
+    }>,
   ): string[] {
     this.ensureInitialized();
     const ids = this.dataModel!.addEdges(edges);
+    this.applyTransforms();
     this.scheduler!.schedule();
     for (let i = 0; i < ids.length; i++) {
       this.eventEmitter.emit('afteradditem', {
@@ -518,6 +550,7 @@ export class Graph {
   removeEdge(id: string): void {
     this.ensureInitialized();
     this.dataModel!.removeEdge(id);
+    this.applyTransforms();
     this.scheduler!.schedule();
     this.eventEmitter.emit('afterremoveitem', { type: 'edge', id });
   }
@@ -528,6 +561,7 @@ export class Graph {
   removeEdges(ids: string[]): void {
     this.ensureInitialized();
     this.dataModel!.removeEdges(ids);
+    this.applyTransforms();
     this.scheduler!.schedule();
     for (const id of ids) {
       this.eventEmitter.emit('afterremoveitem', { type: 'edge', id });
@@ -552,6 +586,11 @@ export class Graph {
     if (this.dataModel!.hasEdge(id)) {
       this.dataModel!.setEdgeState(id, state, value);
       this.scheduler!.schedule();
+      return;
+    }
+    if (this.dataModel!.hasCombo(id)) {
+      this.dataModel!.setComboState(id, state, value);
+      this.renderer.scheduleRender();
     }
   }
 
@@ -568,6 +607,11 @@ export class Graph {
     if (this.dataModel!.hasEdge(id)) {
       this.dataModel!.clearEdgeStates(id);
       this.scheduler!.schedule();
+      return;
+    }
+    if (this.dataModel!.hasCombo(id)) {
+      this.dataModel!.clearComboStates(id);
+      this.renderer.scheduleRender();
     }
   }
 
@@ -631,6 +675,14 @@ export class Graph {
   }
 
   /**
+   * Find all combo IDs that have the given state.
+   */
+  findCombosByState(state: ElementState): string[] {
+    if (!this.dataModel) return [];
+    return this.dataModel.findCombosByState(state);
+  }
+
+  /**
    * Get a node's current position. Returns null if node not found.
    */
   getNodePosition(id: string): { x: number; y: number } | null {
@@ -683,6 +735,11 @@ export class Graph {
     }
     this.layoutNodes = nodes as LayoutNode[];
     this.dataModel!.replaceData(nodes as any[], data.edges as any[]);
+    if (data.combos?.length) {
+      this.dataModel!.initCombos(data.combos, data.nodes);
+      this.ensureComboRenderer();
+    }
+    this.applyTransforms();
     this.options.data = data;
     this.fitView();
     this.scheduler!.schedule();
@@ -719,6 +776,7 @@ export class Graph {
     this.dataModel!.theme = themeTokens;
     analyzeNodeConfig(this.options.node, themeTokens);
     analyzeEdgeConfig(this.options.edge, themeTokens);
+    this.applyTransforms();
     this.scheduler!.forceFlush(RefreshLevel.FULL_PROCESS);
   }
 
@@ -736,7 +794,7 @@ export class Graph {
     this.ensureInitialized();
     const layout = this.options.layout;
     if (!layout) return;
-    const data = this.options.data;
+    const data = this.toData();
     if (data.nodes.length === 0) return;
     this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
     const t0 = performance.now();
@@ -745,6 +803,11 @@ export class Graph {
     this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
     this.layoutNodes = result.nodes as LayoutNode[];
     this.dataModel!.replaceData(result.nodes as any[], data.edges as any[]);
+    if (data.combos?.length) {
+      this.dataModel!.initCombos(data.combos, data.nodes);
+      this.ensureComboRenderer();
+    }
+    this.applyTransforms();
     this.scheduler!.schedule();
   }
 
@@ -774,9 +837,12 @@ export class Graph {
         this.dataModel!.setNodeState(id, state, value);
       } else if (this.dataModel!.hasEdge(id)) {
         this.dataModel!.setEdgeState(id, state, value);
+      } else if (this.dataModel!.hasCombo(id)) {
+        this.dataModel!.setComboState(id, state, value);
       }
     }
     this.scheduler!.schedule();
+    this.renderer.scheduleRender();
   }
 
   /**
@@ -788,6 +854,8 @@ export class Graph {
     if (node) return Array.from(node.states);
     const edge = this.dataModel.getEdge(id);
     if (edge) return Array.from(edge.states);
+    const combo = this.dataModel.getCombo(id);
+    if (combo) return Array.from(combo.states);
     return [];
   }
 
@@ -839,22 +907,20 @@ export class Graph {
 
   collapseCombo(comboId: string): void {
     if (!this.dataModel) return;
+    const combo = this.dataModel.getCombo(comboId);
+    if (!combo || combo.collapsed) return;
     this.dataModel.setComboCollapsed(comboId, true);
-    const nodeIds = this.dataModel.getComboAllNodeIds(comboId);
-    for (const id of nodeIds) {
-      this.dataModel.setNodeState(id, 'hidden', true);
-    }
+    this.dataModel.applyComboHidden(this.dataModel.getComboAllNodeIds(comboId));
     this.scheduler?.schedule();
     this.eventEmitter.emit('combo:collapse', { comboId });
   }
 
   expandCombo(comboId: string): void {
     if (!this.dataModel) return;
+    const combo = this.dataModel.getCombo(comboId);
+    if (!combo || !combo.collapsed) return;
     this.dataModel.setComboCollapsed(comboId, false);
-    const nodeIds = this.dataModel.getComboAllNodeIds(comboId);
-    for (const id of nodeIds) {
-      this.dataModel.setNodeState(id, 'hidden', false);
-    }
+    this.dataModel.releaseComboHidden(this.dataModel.getComboAllNodeIds(comboId));
     this.scheduler?.schedule();
     this.eventEmitter.emit('combo:expand', { comboId });
   }
@@ -874,6 +940,23 @@ export class Graph {
     return this.dataModel?.getCombo(id);
   }
 
+  setComboState(comboId: string, state: ElementState, value: boolean): void {
+    if (!this.dataModel) return;
+    this.dataModel.setComboState(comboId, state, value);
+    this.renderer.scheduleRender();
+  }
+
+  clearComboStates(comboId: string): void {
+    if (!this.dataModel) return;
+    this.dataModel.clearComboStates(comboId);
+    this.renderer.scheduleRender();
+  }
+
+  getComboStates(comboId: string): ElementState[] {
+    const combo = this.dataModel?.getCombo(comboId);
+    return combo ? Array.from(combo.states) : [];
+  }
+
   getComboChildren(id: string): { nodes: string[]; combos: string[] } {
     const combo = this.dataModel?.getCombo(id);
     if (!combo) return { nodes: [], combos: [] };
@@ -889,12 +972,21 @@ export class Graph {
 
   addToCombo(nodeId: string, comboId: string): void {
     if (!this.dataModel) return;
+    const oldComboId = this.dataModel.getNodeCombo(nodeId);
+    if (oldComboId) {
+      this.dataModel.releaseComboHidden([nodeId], this.getCollapsedAncestorCount(oldComboId));
+    }
     this.dataModel.setNodeCombo(nodeId, comboId);
+    this.dataModel.applyComboHidden([nodeId], this.getCollapsedAncestorCount(comboId));
     this.scheduler?.schedule();
   }
 
   removeFromCombo(nodeId: string): void {
     if (!this.dataModel) return;
+    const oldComboId = this.dataModel.getNodeCombo(nodeId);
+    if (oldComboId) {
+      this.dataModel.releaseComboHidden([nodeId], this.getCollapsedAncestorCount(oldComboId));
+    }
     this.dataModel.setNodeCombo(nodeId, undefined);
     this.scheduler?.schedule();
   }
@@ -907,25 +999,21 @@ export class Graph {
         this.dataModel.setNodeCombo(nodeId, combo.id);
       }
     }
-    // Initialize combo renderer if first combo
-    if (!this.comboRenderer) {
-      this.comboRenderer = new ComboRenderer(this.containerEl, this.canvas);
-      this.renderer.onBeforeDraw(() => {
-        if (this.comboRenderer && this.dataModel?.hasCombos()) {
-          this.dataModel.updateComboBounds(this.getComboStylePadding());
-          this.comboRenderer.draw(
-            this.dataModel.getCombos(),
-            this.renderer.getCamera(),
-            this.options.combo,
-          );
-        }
-      });
+    const collapsedAncestorCount = this.getCollapsedAncestorCount(combo.id);
+    if (collapsedAncestorCount > 0 && childNodeIds?.length) {
+      this.dataModel.applyComboHidden(childNodeIds, collapsedAncestorCount);
     }
+    // Initialize combo renderer if first combo
+    this.ensureComboRenderer();
     this.scheduler?.schedule();
   }
 
   removeCombo(comboId: string): void {
     if (!this.dataModel) return;
+    const hiddenDepth = this.getCollapsedAncestorCount(comboId);
+    if (hiddenDepth > 0) {
+      this.dataModel.releaseComboHidden(this.dataModel.getComboAllNodeIds(comboId), hiddenDepth);
+    }
     this.dataModel.removeCombo(comboId);
     this.scheduler?.schedule();
   }
@@ -946,11 +1034,42 @@ export class Graph {
       this.renderer.getCamera(),
       w,
       h,
+      this.options.combo,
     );
   }
 
-  private getComboStylePadding(): number {
-    const p = this.options.combo?.style?.padding;
+  private ensureComboRenderer(): void {
+    if (!this.comboRenderer) {
+      this.comboRenderer = new ComboRenderer(this.containerEl, this.canvas);
+    }
+    if (this.comboBeforeDrawRegistered) return;
+    this.comboBeforeDrawRegistered = true;
+    this.renderer.onBeforeDraw(() => {
+      if (!this.comboRenderer || !this.dataModel) return;
+      this.dataModel.updateComboBounds((combo) => this.getComboStylePadding(combo));
+      this.comboRenderer.draw(
+        this.dataModel.getCombos(),
+        this.renderer.getCamera(),
+        this.options.combo,
+      );
+    });
+  }
+
+  private getCollapsedAncestorCount(comboId: string): number {
+    if (!this.dataModel) return 0;
+    let count = 0;
+    let current = this.dataModel.getCombo(comboId);
+    const visited = new Set<string>();
+    while (current && !visited.has(current.id)) {
+      visited.add(current.id);
+      if (current.collapsed) count++;
+      current = current.parentId ? this.dataModel.getCombo(current.parentId) : undefined;
+    }
+    return count;
+  }
+
+  private getComboStylePadding(combo?: InternalCombo): number {
+    const p = combo?.style?.padding ?? this.options.combo?.style?.padding;
     if (typeof p === 'number') return p;
     if (Array.isArray(p)) return Math.max(...p);
     return 20;

@@ -3,9 +3,34 @@
  * Layered beneath the WebGL canvas with pointer-events: none.
  */
 
-import { graphToNDC } from './camera.js';
+import type {
+  ComboConfig,
+  ComboStateStyleOverride,
+  ComboStyleConfig,
+  ElementState,
+  InternalCombo,
+} from '../types.js';
 import type { Camera } from './camera.js';
-import type { InternalCombo, ComboConfig, ComboStyleConfig } from '../types.js';
+import { graphToNDC } from './camera.js';
+
+type ComboSize = number | [number, number];
+
+interface ResolvedComboStyle {
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
+  opacity: number;
+  borderRadius: number;
+  label?: string | false;
+  labelFontSize: number;
+  labelColor: string;
+  labelPlacement: 'top' | 'bottom' | 'inside' | 'center';
+  collapsedType: 'circle' | 'rect';
+  collapsedSize: ComboSize;
+  count: boolean | string;
+}
+
+const STATE_ORDER: ElementState[] = ['active', 'highlight', 'selected', 'disabled', 'inactive'];
 
 function resolveComboStyle<T>(
   val: T | ((combo: InternalCombo) => T) | undefined,
@@ -14,6 +39,14 @@ function resolveComboStyle<T>(
 ): T {
   if (val === undefined) return fallback;
   return typeof val === 'function' ? (val as (c: InternalCombo) => T)(combo) : val;
+}
+
+function mergeDefined(target: Record<string, unknown>, source: object | undefined): void {
+  if (!source) return;
+  for (const [key, value] of Object.entries(source)) {
+    if (key === 'stateStyles' || value === undefined) continue;
+    (target as Record<string, unknown>)[key] = value;
+  }
 }
 
 export class ComboRenderer {
@@ -54,10 +87,9 @@ export class ComboRenderer {
 
     if (!combos.length) return;
 
-    const style = config?.style;
-
     // Sort combos: parent first, children on top (render order)
     const sorted = this.sortByDepth(combos);
+    const comboMap = new Map(combos.map((combo) => [combo.id, combo]));
 
     for (const combo of sorted) {
       // Skip combos with no bounds
@@ -66,29 +98,83 @@ export class ComboRenderer {
       // Skip hidden combos
       if (combo.states.has('hidden')) continue;
 
+      const style = this.resolveStyle(combo, config);
+      const hasExplicitSelectedStyle = this.hasStateStyle(combo, config, 'selected');
+      const hasExplicitActiveStyle =
+        this.hasStateStyle(combo, config, 'active') ||
+        this.hasStateStyle(combo, config, 'highlight');
+
       if (combo.collapsed) {
-        this.drawCollapsed(ctx, combo, camera, style, w, h, dpr);
+        this.drawCollapsed(ctx, combo, camera, style, comboMap, w, h, dpr);
       } else {
         this.drawExpanded(ctx, combo, camera, style, w, h, dpr);
       }
+
+      this.drawStateOverlay(
+        ctx,
+        combo,
+        camera,
+        style,
+        w,
+        h,
+        dpr,
+        hasExplicitSelectedStyle,
+        hasExplicitActiveStyle,
+      );
     }
+  }
+
+  private resolveStyle(combo: InternalCombo, config?: ComboConfig): ResolvedComboStyle {
+    const merged: Partial<ComboStyleConfig> = {};
+    mergeDefined(merged, config?.style);
+    mergeDefined(merged, combo.style);
+
+    for (const state of STATE_ORDER) {
+      if (!combo.states.has(state)) continue;
+      mergeDefined(merged, config?.style?.stateStyles?.[state] as ComboStateStyleOverride);
+      mergeDefined(merged, combo.style?.stateStyles?.[state] as ComboStateStyleOverride);
+    }
+
+    const collapsedSize = resolveComboStyle(
+      merged.collapsedSize ?? merged.size,
+      combo,
+      30 as ComboSize,
+    );
+    const count = resolveComboStyle(merged.count, combo, true);
+
+    return {
+      fill: resolveComboStyle(merged.fill, combo, 'rgba(100, 150, 255, 0.08)'),
+      stroke: resolveComboStyle(merged.stroke, combo, 'rgba(100, 150, 255, 0.3)'),
+      strokeWidth: resolveComboStyle(merged.strokeWidth, combo, 1),
+      opacity: resolveComboStyle(merged.opacity, combo, 1),
+      borderRadius: resolveComboStyle(merged.borderRadius, combo, 8),
+      label: resolveComboStyle(merged.label, combo, undefined),
+      labelFontSize: resolveComboStyle(merged.labelFontSize, combo, 12),
+      labelColor: resolveComboStyle(merged.labelColor, combo, 'rgba(0, 0, 0, 0.65)'),
+      labelPlacement: merged.labelPlacement ?? 'top',
+      collapsedType: merged.collapsedType ?? 'circle',
+      collapsedSize,
+      count,
+    };
+  }
+
+  private hasStateStyle(
+    combo: InternalCombo,
+    config: ComboConfig | undefined,
+    state: ElementState,
+  ): boolean {
+    return Boolean(config?.style?.stateStyles?.[state] || combo.style?.stateStyles?.[state]);
   }
 
   private drawExpanded(
     ctx: CanvasRenderingContext2D,
     combo: InternalCombo,
     camera: Camera,
-    style: ComboStyleConfig | undefined,
+    style: ResolvedComboStyle,
     w: number,
     h: number,
     dpr: number,
   ): void {
-    const fill = resolveComboStyle(style?.fill, combo, 'rgba(100, 150, 255, 0.08)');
-    const stroke = resolveComboStyle(style?.stroke, combo, 'rgba(100, 150, 255, 0.3)');
-    const strokeWidth = style?.strokeWidth ?? 1;
-    const borderRadius = style?.borderRadius ?? 8;
-    const opacity = style?.opacity ?? 1;
-
     // Compute screen-space bounding box
     const halfW = combo.width / 2;
     const halfH = combo.height / 2;
@@ -103,43 +189,27 @@ export class ComboRenderer {
     // Skip if entirely outside viewport
     if (sx > w || sy > h || sx + sw < 0 || sy + sh < 0) return;
 
-    const r = borderRadius * dpr * camera.zoom;
+    const r = style.borderRadius * dpr * camera.zoom;
 
     ctx.save();
-    ctx.globalAlpha = opacity;
+    ctx.globalAlpha = style.opacity;
 
     // Draw rounded rectangle
     ctx.beginPath();
     this.roundRect(ctx, sx, sy, sw, sh, Math.min(r, sw / 2, sh / 2));
 
-    if (fill) {
-      ctx.fillStyle = fill;
+    if (style.fill) {
+      ctx.fillStyle = style.fill;
       ctx.fill();
     }
-    if (stroke) {
-      ctx.strokeStyle = stroke;
-      ctx.lineWidth = strokeWidth * dpr;
+    if (style.stroke) {
+      ctx.strokeStyle = style.stroke;
+      ctx.lineWidth = style.strokeWidth * dpr;
       ctx.stroke();
     }
 
-    // Draw label
-    const labelVal = style?.label;
-    if (labelVal !== undefined) {
-      const text = resolveComboStyle(labelVal, combo, combo.id);
-      if (text) {
-        this.drawLabel(ctx, text, sx, sy, sw, sh, style, dpr, camera.zoom);
-      }
-    }
-
-    // State highlights
-    if (combo.states.has('selected')) {
-      ctx.strokeStyle = 'rgba(24, 144, 255, 0.8)';
-      ctx.lineWidth = 2 * dpr;
-      ctx.stroke();
-    } else if (combo.states.has('active') || combo.states.has('highlight')) {
-      ctx.strokeStyle = 'rgba(24, 144, 255, 0.5)';
-      ctx.lineWidth = 1.5 * dpr;
-      ctx.stroke();
+    if (style.label) {
+      this.drawLabel(ctx, style.label, sx, sy, sw, sh, style, dpr, camera.zoom);
     }
 
     ctx.restore();
@@ -149,49 +219,144 @@ export class ComboRenderer {
     ctx: CanvasRenderingContext2D,
     combo: InternalCombo,
     camera: Camera,
-    style: ComboStyleConfig | undefined,
+    style: ResolvedComboStyle,
+    comboMap: Map<string, InternalCombo>,
     w: number,
     h: number,
     dpr: number,
   ): void {
-    const fill = resolveComboStyle(style?.fill, combo, 'rgba(100, 150, 255, 0.15)');
-    const stroke = resolveComboStyle(style?.stroke, combo, 'rgba(100, 150, 255, 0.5)');
-    const strokeWidth = style?.strokeWidth ?? 1;
-    const collapsedSize = style?.collapsedSize ?? 30;
-
     const [px, py] = this.graphToScreen(combo.x, combo.y, camera, w, h);
-    const radius = (collapsedSize / 2) * dpr * camera.zoom;
+    const [cw, ch] = this.getCollapsedScreenSize(style, camera, dpr);
+    const radius = Math.min(cw, ch) / 2;
 
     // Skip if outside viewport
-    if (px + radius < 0 || px - radius > w || py + radius < 0 || py - radius > h) return;
+    if (px + cw / 2 < 0 || px - cw / 2 > w || py + ch / 2 < 0 || py - ch / 2 > h) return;
 
     ctx.save();
-    ctx.globalAlpha = style?.opacity ?? 1;
+    ctx.globalAlpha = style.opacity;
     ctx.beginPath();
-    ctx.arc(px, py, radius, 0, Math.PI * 2);
 
-    if (fill) {
-      ctx.fillStyle = fill;
+    if (style.collapsedType === 'rect') {
+      this.roundRect(ctx, px - cw / 2, py - ch / 2, cw, ch, Math.min(8 * dpr, cw / 2, ch / 2));
+    } else {
+      ctx.arc(px, py, radius, 0, Math.PI * 2);
+    }
+
+    if (style.fill) {
+      ctx.fillStyle = style.fill;
       ctx.fill();
     }
-    if (stroke) {
-      ctx.strokeStyle = stroke;
-      ctx.lineWidth = strokeWidth * dpr;
+    if (style.stroke) {
+      ctx.strokeStyle = style.stroke;
+      ctx.lineWidth = style.strokeWidth * dpr;
       ctx.stroke();
     }
 
-    // Draw collapsed icon (a small "+" or node count)
-    const nodeCount = combo.childNodeIds.size;
-    if (nodeCount > 0 && radius > 8) {
-      const fontSize = Math.max(10, Math.min(14, radius * 0.7));
+    const text = this.getCollapsedText(combo, comboMap, style);
+    if (text && radius > 8) {
+      const fontSize = Math.max(10 * dpr, Math.min(style.labelFontSize * dpr, radius * 0.7));
       ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+      ctx.fillStyle = style.labelColor;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(String(nodeCount), px, py);
+      ctx.fillText(text, px, py);
     }
 
     ctx.restore();
+  }
+
+  private drawStateOverlay(
+    ctx: CanvasRenderingContext2D,
+    combo: InternalCombo,
+    camera: Camera,
+    style: ResolvedComboStyle,
+    w: number,
+    h: number,
+    dpr: number,
+    hasExplicitSelectedStyle: boolean,
+    hasExplicitActiveStyle: boolean,
+  ): void {
+    if (combo.states.has('selected') && !hasExplicitSelectedStyle) {
+      this.strokeComboOutline(ctx, combo, camera, style, w, h, dpr, 'rgba(24, 144, 255, 0.85)', 2);
+      return;
+    }
+    if ((combo.states.has('active') || combo.states.has('highlight')) && !hasExplicitActiveStyle) {
+      this.strokeComboOutline(ctx, combo, camera, style, w, h, dpr, 'rgba(24, 144, 255, 0.5)', 1.5);
+    }
+  }
+
+  private strokeComboOutline(
+    ctx: CanvasRenderingContext2D,
+    combo: InternalCombo,
+    camera: Camera,
+    style: ResolvedComboStyle,
+    w: number,
+    h: number,
+    dpr: number,
+    stroke: string,
+    strokeWidth: number,
+  ): void {
+    ctx.save();
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = strokeWidth * dpr;
+    ctx.beginPath();
+    if (combo.collapsed) {
+      const [px, py] = this.graphToScreen(combo.x, combo.y, camera, w, h);
+      const [cw, ch] = this.getCollapsedScreenSize(style, camera, dpr);
+      if (style.collapsedType === 'rect') {
+        this.roundRect(ctx, px - cw / 2, py - ch / 2, cw, ch, Math.min(8 * dpr, cw / 2, ch / 2));
+      } else {
+        ctx.arc(px, py, Math.min(cw, ch) / 2, 0, Math.PI * 2);
+      }
+    } else {
+      const halfW = combo.width / 2;
+      const halfH = combo.height / 2;
+      const [sx, sy] = this.graphToScreen(combo.x - halfW, combo.y - halfH, camera, w, h);
+      const [ex, ey] = this.graphToScreen(combo.x + halfW, combo.y + halfH, camera, w, h);
+      const sw = ex - sx;
+      const sh = ey - sy;
+      const r = style.borderRadius * dpr * camera.zoom;
+      this.roundRect(ctx, sx, sy, sw, sh, Math.min(r, sw / 2, sh / 2));
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  private getCollapsedText(
+    combo: InternalCombo,
+    comboMap: Map<string, InternalCombo>,
+    style: ResolvedComboStyle,
+  ): string | null {
+    if (style.label !== undefined) return style.label === false ? null : style.label;
+    if (style.count === false) return null;
+    if (typeof style.count === 'string') return style.count;
+    return String(this.countChildNodes(combo, comboMap));
+  }
+
+  private countChildNodes(combo: InternalCombo, comboMap: Map<string, InternalCombo>): number {
+    const visited = new Set<string>();
+    const visit = (current: InternalCombo): number => {
+      if (visited.has(current.id)) return 0;
+      visited.add(current.id);
+      let count = current.childNodeIds.size;
+      for (const childId of current.childComboIds) {
+        const child = comboMap.get(childId);
+        if (child) count += visit(child);
+      }
+      return count;
+    };
+    return visit(combo);
+  }
+
+  private getCollapsedScreenSize(
+    style: ResolvedComboStyle,
+    camera: Camera,
+    dpr: number,
+  ): [number, number] {
+    const size = style.collapsedSize;
+    const width = Array.isArray(size) ? size[0] : size;
+    const height = Array.isArray(size) ? size[1] : size;
+    return [width * dpr * camera.zoom, height * dpr * camera.zoom];
   }
 
   private drawLabel(
@@ -201,13 +366,13 @@ export class ComboRenderer {
     sy: number,
     sw: number,
     _sh: number,
-    style: ComboStyleConfig | undefined,
+    style: ResolvedComboStyle,
     dpr: number,
     zoom: number,
   ): void {
-    const placement = style?.labelPlacement ?? 'top';
-    const fontSize = (style?.labelFontSize ?? 12) * dpr * Math.min(zoom, 1.5);
-    const color = style?.labelColor ?? 'rgba(0, 0, 0, 0.65)';
+    const placement = style.labelPlacement;
+    const fontSize = style.labelFontSize * dpr * Math.min(zoom, 1.5);
+    const color = style.labelColor;
 
     if (fontSize < 6) return; // Too small to read
 
@@ -224,6 +389,9 @@ export class ComboRenderer {
     } else if (placement === 'bottom') {
       ly = sy + _sh + fontSize * 0.5;
       ctx.textBaseline = 'top';
+    } else if (placement === 'center') {
+      ly = sy + _sh / 2;
+      ctx.textBaseline = 'middle';
     } else {
       // inside
       ly = sy + fontSize * 1.2;
@@ -312,16 +480,25 @@ export class ComboRenderer {
     camera: Camera,
     w: number,
     h: number,
+    config?: ComboConfig,
   ): string | null {
     // Check from deepest to shallowest
     const sorted = this.sortByDepth(combos).reverse();
+    const dpr = window.devicePixelRatio || 1;
     for (const combo of sorted) {
+      if (combo.states.has('hidden')) continue;
+      const style = this.resolveStyle(combo, config);
       if (combo.collapsed) {
         const [px, py] = this.graphToScreen(combo.x, combo.y, camera, w, h);
-        const r = 15 * camera.zoom;
+        const [cw, ch] = this.getCollapsedScreenSize(style, camera, dpr);
         const dx = screenX - px;
         const dy = screenY - py;
-        if (dx * dx + dy * dy <= r * r) return combo.id;
+        if (style.collapsedType === 'rect') {
+          if (Math.abs(dx) <= cw / 2 && Math.abs(dy) <= ch / 2) return combo.id;
+        } else {
+          const r = Math.min(cw, ch) / 2;
+          if (dx * dx + dy * dy <= r * r) return combo.id;
+        }
       } else {
         if (combo.width === 0 && combo.height === 0) continue;
         const halfW = combo.width / 2;

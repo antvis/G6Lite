@@ -577,4 +577,142 @@ describe('DataModel combo operations', () => {
     expect(() => model.updateComboBounds()).not.toThrow();
     expect(() => model.getComboAllNodeIds('a')).not.toThrow();
   });
+
+  it('should export current nodes, edges, and runtime combos through toData', () => {
+    const model = createModel();
+    model.replaceData(
+      [
+        { id: 'n1', name: 'Node 1', x: 10, y: 20, data: { label: 'A' }, states: ['selected'] },
+        { id: 'n2', x: 30, y: 40 },
+      ],
+      [{ id: 'edge-1', source: 'n1', target: 'n2', data: { weight: 2 }, states: ['active'] }],
+    );
+    model.initCombos(
+      [
+        {
+          id: 'combo-1',
+          collapsed: true,
+          style: { collapsedSize: 48, fill: '#DEE8FF', stroke: '#2F7DF6', label: 'Group' },
+          data: { source: 'graphx-group' },
+          states: ['selected'],
+        },
+      ],
+      [{ id: 'n1', comboId: 'combo-1' }],
+    );
+
+    const data = model.toData();
+
+    expect(data.nodes.find((node) => node.id === 'n1')).toEqual({
+      id: 'n1',
+      name: 'Node 1',
+      x: 10,
+      y: 20,
+      data: { label: 'A' },
+      states: ['selected'],
+      comboId: 'combo-1',
+    });
+    expect(data.edges[0]).toEqual({
+      id: 'edge-1',
+      source: 'n1',
+      target: 'n2',
+      data: { weight: 2 },
+      states: ['active'],
+    });
+    expect(data.combos?.[0]).toEqual({
+      id: 'combo-1',
+      collapsed: true,
+      style: { collapsedSize: 48, fill: '#DEE8FF', stroke: '#2F7DF6', label: 'Group' },
+      data: { source: 'graphx-group' },
+      states: ['selected'],
+    });
+  });
+
+  it('should preserve business hidden while filtering combo-derived hidden on export', () => {
+    const model = createModel();
+    model.replaceData(
+      [
+        { id: 'business-hidden', x: 0, y: 0, states: ['hidden'] },
+        { id: 'combo-hidden', x: 10, y: 10 },
+        { id: 'outside', x: 20, y: 20 },
+      ],
+      [
+        { id: 'combo-edge', source: 'combo-hidden', target: 'outside' },
+        {
+          id: 'business-edge-hidden',
+          source: 'business-hidden',
+          target: 'outside',
+          states: ['hidden'],
+        },
+      ],
+    );
+    model.initCombos(
+      [{ id: 'combo-1', collapsed: true }],
+      [
+        { id: 'business-hidden', comboId: 'combo-1' },
+        { id: 'combo-hidden', comboId: 'combo-1' },
+      ],
+    );
+
+    const data = model.toData();
+
+    expect(data.nodes.find((node) => node.id === 'business-hidden')?.states).toEqual(['hidden']);
+    expect(data.nodes.find((node) => node.id === 'combo-hidden')?.states).toBeUndefined();
+    expect(model.getEdge('combo-edge')!.states.has('hidden')).toBe(true);
+    expect(data.edges.find((edge) => edge.id === 'combo-edge')?.states).toBeUndefined();
+    expect(data.edges.find((edge) => edge.id === 'business-edge-hidden')?.states).toEqual([
+      'hidden',
+    ]);
+  });
+
+  it('should restore combo-derived hidden edges when combo expands', () => {
+    const model = createModel();
+    model.replaceData(
+      [
+        { id: 'n1', x: 0, y: 0 },
+        { id: 'n2', x: 10, y: 10 },
+        { id: 'outside', x: 20, y: 20 },
+      ],
+      [
+        { id: 'internal-edge', source: 'n1', target: 'n2' },
+        { id: 'external-edge', source: 'n1', target: 'outside' },
+      ],
+    );
+    model.initCombos(
+      [{ id: 'combo-1', collapsed: true }],
+      [
+        { id: 'n1', comboId: 'combo-1' },
+        { id: 'n2', comboId: 'combo-1' },
+      ],
+    );
+
+    expect(model.getEdge('internal-edge')!.states.has('hidden')).toBe(true);
+    expect(model.getEdge('external-edge')!.states.has('hidden')).toBe(true);
+
+    model.releaseComboHidden(model.getComboAllNodeIds('combo-1'));
+
+    expect(model.getEdge('internal-edge')!.states.has('hidden')).toBe(false);
+    expect(model.getEdge('external-edge')!.states.has('hidden')).toBe(false);
+  });
+
+  it('should support per-combo padding while computing bounds', () => {
+    const model = createModel();
+    model.addNodes([
+      { id: 'n1', x: 0, y: 0 },
+      { id: 'n2', x: 100, y: 50 },
+    ]);
+    model.initCombos(
+      [{ id: 'c1', style: { padding: 40 } }],
+      [
+        { id: 'n1', comboId: 'c1' },
+        { id: 'n2', comboId: 'c1' },
+      ],
+    );
+    model.updateComboBounds((combo) => {
+      const padding = combo.style?.padding;
+      return typeof padding === 'number' ? padding : 20;
+    });
+
+    expect(model.getCombo('c1')!.width).toBe(180);
+    expect(model.getCombo('c1')!.height).toBe(130);
+  });
 });

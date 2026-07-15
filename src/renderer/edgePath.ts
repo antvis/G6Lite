@@ -1,0 +1,204 @@
+import type { GraphEdge, LayoutNode } from '../types.js';
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export interface QuadraticEdgePath {
+  type: 'quadratic';
+  p0: Point;
+  cp: Point;
+  p1: Point;
+}
+
+export interface LineEdgePath {
+  type: 'line';
+  p0: Point;
+  p1: Point;
+}
+
+export type EdgePath = LineEdgePath | QuadraticEdgePath;
+
+export interface BoundarySample {
+  point: Point;
+  tangent: Point;
+  t: number;
+}
+
+interface ParallelLike {
+  groupSize: number;
+  offset: number;
+  directionSign: 1 | -1;
+}
+
+export function getParallelEdgeCurvature(
+  edge: GraphEdge,
+  source: LayoutNode,
+  target: LayoutNode,
+  fallback: number,
+): number {
+  const parallel = (edge as GraphEdge & { parallel?: ParallelLike }).parallel;
+  if (!parallel) return fallback;
+  if (parallel.groupSize <= 1) return 0;
+  const dx = target.x - source.x;
+  const dy = target.y - source.y;
+  const length = Math.hypot(dx, dy);
+  if (length <= 1e-6) return 0;
+  return (parallel.offset * parallel.directionSign) / length;
+}
+
+export function createQuadraticPath(
+  source: Point,
+  target: Point,
+  curvature: number,
+): QuadraticEdgePath {
+  const mx = (source.x + target.x) * 0.5;
+  const my = (source.y + target.y) * 0.5;
+  const dx = target.x - source.x;
+  const dy = target.y - source.y;
+  return {
+    type: 'quadratic',
+    p0: source,
+    cp: {
+      x: mx - dy * curvature,
+      y: my + dx * curvature,
+    },
+    p1: target,
+  };
+}
+
+export function createLinePath(source: Point, target: Point): LineEdgePath {
+  return { type: 'line', p0: source, p1: target };
+}
+
+export function sampleEdgePath(path: EdgePath, t: number): { point: Point; tangent: Point } {
+  const tt = Math.max(0, Math.min(1, t));
+  if (path.type === 'line') {
+    return {
+      point: {
+        x: path.p0.x + (path.p1.x - path.p0.x) * tt,
+        y: path.p0.y + (path.p1.y - path.p0.y) * tt,
+      },
+      tangent: {
+        x: path.p1.x - path.p0.x,
+        y: path.p1.y - path.p0.y,
+      },
+    };
+  }
+
+  const mt = 1 - tt;
+  return {
+    point: {
+      x: mt * mt * path.p0.x + 2 * mt * tt * path.cp.x + tt * tt * path.p1.x,
+      y: mt * mt * path.p0.y + 2 * mt * tt * path.cp.y + tt * tt * path.p1.y,
+    },
+    tangent: {
+      x: 2 * mt * (path.cp.x - path.p0.x) + 2 * tt * (path.p1.x - path.cp.x),
+      y: 2 * mt * (path.cp.y - path.p0.y) + 2 * tt * (path.p1.y - path.cp.y),
+    },
+  };
+}
+
+function distanceTo(point: Point, center: Point): number {
+  return Math.hypot(point.x - center.x, point.y - center.y);
+}
+
+function normalizeOrFallback(tangent: Point, fallback: Point): Point {
+  const len = Math.hypot(tangent.x, tangent.y);
+  if (len > 1e-6) return { x: tangent.x / len, y: tangent.y / len };
+  const fallbackLen = Math.hypot(fallback.x, fallback.y);
+  if (fallbackLen > 1e-6) return { x: fallback.x / fallbackLen, y: fallback.y / fallbackLen };
+  return { x: 1, y: 0 };
+}
+
+function fallbackBoundarySample(
+  path: EdgePath,
+  center: Point,
+  radius: number,
+  end: 'source' | 'target',
+): BoundarySample {
+  const t = end === 'target' ? 1 : 0;
+  const sample = sampleEdgePath(path, t);
+  const unit = normalizeOrFallback(sample.tangent, {
+    x: path.type === 'line' ? path.p1.x - path.p0.x : path.p1.x - path.p0.x,
+    y: path.type === 'line' ? path.p1.y - path.p0.y : path.p1.y - path.p0.y,
+  });
+  const sign = end === 'target' ? -1 : 1;
+  return {
+    point: {
+      x: center.x + unit.x * radius * sign,
+      y: center.y + unit.y * radius * sign,
+    },
+    tangent: sample.tangent,
+    t,
+  };
+}
+
+/**
+ * Finds where an edge path exits a circular node boundary near either endpoint.
+ *
+ * Arc edges are rendered center-to-center and visually clipped by the node fill.
+ * For high-curvature or very short parallel edges, projecting the endpoint
+ * tangent by the node radius can miss the actual visible curve. This returns
+ * the nearest path/circle intersection to the requested endpoint.
+ */
+export function findPathBoundarySample(
+  path: EdgePath,
+  center: Point,
+  radius: number,
+  end: 'source' | 'target',
+): BoundarySample {
+  if (radius <= 0) {
+    const t = end === 'target' ? 1 : 0;
+    return { ...sampleEdgePath(path, t), t };
+  }
+
+  const steps = 64;
+  let insideT = end === 'target' ? 1 : 0;
+  let outsideT: number | null = null;
+
+  if (end === 'target') {
+    for (let step = steps - 1; step >= 0; step--) {
+      const t = step / steps;
+      const sample = sampleEdgePath(path, t);
+      if (distanceTo(sample.point, center) >= radius) {
+        outsideT = t;
+        break;
+      }
+      insideT = t;
+    }
+  } else {
+    for (let step = 1; step <= steps; step++) {
+      const t = step / steps;
+      const sample = sampleEdgePath(path, t);
+      if (distanceTo(sample.point, center) >= radius) {
+        outsideT = t;
+        break;
+      }
+      insideT = t;
+    }
+  }
+
+  if (outsideT === null) {
+    return fallbackBoundarySample(path, center, radius, end);
+  }
+
+  let low = end === 'target' ? outsideT : insideT;
+  let high = end === 'target' ? insideT : outsideT;
+  for (let i = 0; i < 24; i++) {
+    const mid = (low + high) * 0.5;
+    const dist = distanceTo(sampleEdgePath(path, mid).point, center);
+    if (end === 'target') {
+      if (dist >= radius) low = mid;
+      else high = mid;
+    } else if (dist >= radius) {
+      high = mid;
+    } else {
+      low = mid;
+    }
+  }
+
+  const t = (low + high) * 0.5;
+  return { ...sampleEdgePath(path, t), t };
+}

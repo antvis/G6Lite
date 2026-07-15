@@ -1,16 +1,16 @@
 /**
  * EdgeLoop: renders self-loop edges as cubic bezier arcs around the node.
- * Reuses EdgeArc's vertex layout (8 floats/vertex) and shaders.
+ * Reuses EdgeArc's vertex layout (9 floats/vertex) and shaders.
  * Each loop: SEGMENTS line segments → SEGMENTS*2 vertices.
  */
 
-import { Program } from './program.js';
-import type { RenderParams, AttributeLayout } from './program.js';
-import { vertexShader } from './shaders/edgeArc.vert.js';
-import { fragmentShader } from './shaders/edgeArc.frag.js';
 import { encodeId } from '../picking.js';
+import type { AttributeLayout, RenderParams } from './program.js';
+import { Program } from './program.js';
+import { fragmentShader } from './shaders/edgeArc.frag.js';
+import { vertexShader } from './shaders/edgeArc.vert.js';
 
-const FLOATS_PER_VERTEX = 8;
+const FLOATS_PER_VERTEX = 9;
 const SEGMENTS = 12;
 const VERTICES_PER_ITEM = SEGMENTS * 2;
 
@@ -42,6 +42,7 @@ export class EdgeLoopProgram extends Program {
       { name: 'a_position', size: 2 },
       { name: 'a_color', size: 3 },
       { name: 'a_pickingColor', size: 3 },
+      { name: 'a_opacity', size: 1 },
     ];
   }
 
@@ -71,6 +72,7 @@ export class EdgeLoopProgram extends Program {
     loopSize: number,
     color: [number, number, number],
     pickingIndex: number,
+    opacity = 1,
   ): void {
     const [pr, pg, pb] = encodeId(pickingIndex);
     const pR = pr / 255,
@@ -116,15 +118,17 @@ export class EdgeLoopProgram extends Program {
       this.array[o + 5] = pR;
       this.array[o + 6] = pG;
       this.array[o + 7] = pB;
+      this.array[o + 8] = opacity;
       // End vertex
-      this.array[o + 8] = x1;
-      this.array[o + 9] = y1;
-      this.array[o + 10] = color[0];
-      this.array[o + 11] = color[1];
-      this.array[o + 12] = color[2];
-      this.array[o + 13] = pR;
-      this.array[o + 14] = pG;
-      this.array[o + 15] = pB;
+      this.array[o + 9] = x1;
+      this.array[o + 10] = y1;
+      this.array[o + 11] = color[0];
+      this.array[o + 12] = color[1];
+      this.array[o + 13] = color[2];
+      this.array[o + 14] = pR;
+      this.array[o + 15] = pG;
+      this.array[o + 16] = pB;
+      this.array[o + 17] = opacity;
     }
   }
 }

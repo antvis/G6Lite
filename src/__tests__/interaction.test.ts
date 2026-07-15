@@ -118,7 +118,7 @@ describe('InteractionDispatcher — hover state machine', () => {
     t.teardown();
   });
 
-  it('emits edge:pointerover with source/target/edgeIndex', () => {
+  it('emits edge:pointerover with source/target/edgeId/edgeIndex', () => {
     const t = setup({ type: 'edge', index: 0 });
     const over = vi.fn();
     t.emitter.on('edge:pointerover', over);
@@ -126,7 +126,12 @@ describe('InteractionDispatcher — hover state machine', () => {
     fire(t.canvas, 'mousemove');
 
     expect(over).toHaveBeenCalledTimes(1);
-    expect(over.mock.calls[0][0]).toMatchObject({ edgeIndex: 0, source: 'a', target: 'b' });
+    expect(over.mock.calls[0][0]).toMatchObject({
+      edgeId: 'e0',
+      edgeIndex: 0,
+      source: 'a',
+      target: 'b',
+    });
     t.teardown();
   });
 

@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { DataModel } from '../dataModel.js';
+import { createQuadraticPath, findPathBoundarySample } from '../renderer/edgePath.js';
 import { encodeId } from '../renderer/picking.js';
 import { Renderer } from '../renderer/renderer.js';
-import { analyzeNodeConfig } from '../renderer/style.js';
+import { analyzeEdgeConfig, analyzeNodeConfig } from '../renderer/style.js';
 import { resolveTheme } from '../theme.js';
 import type { EdgeConfig, GraphEdge, LayoutNode, ThemeTokens } from '../types.js';
 
@@ -195,6 +197,218 @@ describe('Renderer — data pipeline', () => {
     expect(renderer.getEdges()).toHaveLength(0);
     expect(renderer.getNodeIdToIndex().has('old1')).toBe(false);
     expect(renderer.getNodeIdToIndex().get('new1')).toBe(0);
+  });
+
+  it('omits hidden line edges and arrows during full processing with static styles', () => {
+    const edgeConfig: EdgeConfig = {
+      type: 'line',
+      style: { stroke: '#999', lineWidth: 1, endArrow: true, arrowSize: 10 },
+    };
+    analyzeEdgeConfig(edgeConfig, theme);
+
+    renderer.resize(800, 600);
+    renderer.setData({
+      nodes: [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 100, y: 0 },
+      ],
+      edges: [{ source: 'a', target: 'b', states: new Set(['hidden']) as any }],
+      edgeConfig,
+      theme,
+    });
+    renderer.draw();
+
+    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
+      ._programs;
+    expect((programs.edgeLine as any).itemCount).toBe(0);
+    expect((programs.edgeArrow as any).itemCount).toBe(0);
+  });
+
+  it('omits hidden arc edges and arrows during full processing', () => {
+    const edgeConfig: EdgeConfig = {
+      type: 'arc',
+      style: { stroke: '#999', lineWidth: 1, endArrow: true, arrowSize: 10 },
+    };
+    analyzeEdgeConfig(edgeConfig, theme);
+
+    renderer.resize(800, 600);
+    renderer.setData({
+      nodes: [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 100, y: 0 },
+      ],
+      edges: [{ source: 'a', target: 'b', states: new Set(['hidden']) as any }],
+      edgeConfig,
+      theme,
+    });
+    renderer.draw();
+
+    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
+      ._programs;
+    expect((programs.edgeArc as any).itemCount).toBe(0);
+    expect((programs.edgeArrow as any).itemCount).toBe(0);
+  });
+
+  it('omits hidden arrows when edge style is dynamic', () => {
+    const edgeConfig: EdgeConfig = {
+      type: 'line',
+      style: {
+        stroke: (_s, _t, edge) => edge.data?.stroke ?? '#999',
+        lineWidth: 1,
+        endArrow: true,
+        arrowSize: 10,
+      },
+    };
+    analyzeEdgeConfig(edgeConfig, theme);
+
+    renderer.resize(800, 600);
+    renderer.setData({
+      nodes: [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 100, y: 0 },
+      ],
+      edges: [{ source: 'a', target: 'b', states: new Set(['hidden']) as any }],
+      edgeConfig,
+      theme,
+    });
+    renderer.draw();
+
+    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
+      ._programs;
+    expect((programs.edgeLine as any).itemCount).toBe(0);
+    expect((programs.edgeArrow as any).itemCount).toBe(0);
+  });
+
+  it('shrinks arrow itemCount to actual writes for mixed dynamic hidden edges', () => {
+    const edgeConfig: EdgeConfig = {
+      type: 'line',
+      style: {
+        stroke: (_s, _t, edge) => edge.data?.stroke ?? '#999',
+        lineWidth: 1,
+        endArrow: true,
+        arrowSize: 10,
+      },
+    };
+    analyzeEdgeConfig(edgeConfig, theme);
+
+    const nodes: LayoutNode[] = [
+      { id: 'a', x: 0, y: 0 },
+      { id: 'b', x: 100, y: 0 },
+      { id: 'c', x: 200, y: 0 },
+    ];
+    renderer.resize(800, 600);
+    renderer.setData({
+      nodes,
+      edges: [
+        { source: 'a', target: 'b' },
+        { source: 'b', target: 'c' },
+      ],
+      edgeConfig,
+      theme,
+    });
+    renderer.draw();
+
+    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
+      ._programs;
+    expect((programs.edgeArrow as any).itemCount).toBe(2);
+
+    renderer.setData({
+      nodes,
+      edges: [
+        { source: 'a', target: 'b', states: new Set(['hidden']) as any },
+        { source: 'b', target: 'c' },
+      ],
+      edgeConfig,
+      theme,
+    });
+    renderer.draw();
+
+    expect((programs.edgeLine as any).itemCount).toBe(1);
+    expect((programs.edgeArrow as any).itemCount).toBe(1);
+
+    renderer.setData({
+      nodes,
+      edges: [
+        { source: 'a', target: 'b' },
+        { source: 'b', target: 'c' },
+      ],
+      edgeConfig,
+      theme,
+    });
+    renderer.draw();
+
+    expect((programs.edgeLine as any).itemCount).toBe(2);
+    expect((programs.edgeArrow as any).itemCount).toBe(2);
+  });
+
+  it('rebuilds arrow buffers immediately when patching positions for arrow edges', () => {
+    const edgeConfig: EdgeConfig = {
+      type: 'line',
+      style: { stroke: '#999', lineWidth: 1, endArrow: true, arrowSize: 10 },
+    };
+    analyzeEdgeConfig(edgeConfig, theme);
+
+    const dataModel = new DataModel({ theme });
+    dataModel.addNode({ id: 'a', x: 0, y: 0 });
+    dataModel.addNode({ id: 'b', x: 100, y: 0 });
+    dataModel.addEdge({ id: 'ab', source: 'a', target: 'b' });
+
+    renderer.resize(800, 600);
+    renderer.setData({
+      nodes: dataModel.getNodes() as LayoutNode[],
+      edges: dataModel.getEdges() as GraphEdge[],
+      edgeConfig,
+      theme,
+    });
+    renderer.draw();
+
+    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
+      ._programs;
+    expect(programs.edgeArrow.array[2]).toBeCloseTo(100);
+
+    dataModel.updateNodePosition('b', 40, 0);
+    renderer.patchPositions(dataModel, new Set(['b']));
+
+    expect(programs.edgeLine.array[2]).toBeCloseTo(40);
+    expect(programs.edgeArrow.array[2]).toBeCloseTo(40);
+  });
+
+  it('places close arc edge arrows on the visible curve/node boundary', () => {
+    const nodeConfig = { type: 'circle' as const, style: { size: 68 } };
+    const edgeConfig: EdgeConfig = {
+      type: 'arc',
+      style: { stroke: '#999', lineWidth: 1, curvature: 0.55, endArrow: true, arrowSize: 10 },
+    };
+    analyzeNodeConfig(nodeConfig, theme);
+    analyzeEdgeConfig(edgeConfig, theme);
+
+    const source: LayoutNode = { id: 'source', x: 0, y: 48 };
+    const target: LayoutNode = { id: 'target', x: 0, y: 0 };
+    renderer.resize(800, 600);
+    renderer.setData({
+      nodes: [source, target],
+      edges: [{ source: 'source', target: 'target' }],
+      nodeConfig,
+      edgeConfig,
+      theme,
+    });
+    renderer.draw();
+
+    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
+      ._programs;
+    const expected = findPathBoundarySample(
+      createQuadraticPath(source, target, 0.55),
+      target,
+      34,
+      'target',
+    );
+
+    expect((programs.edgeArrow as any).itemCount).toBe(1);
+    expect(programs.edgeArrow.array[2]).toBeCloseTo(expected.point.x, 4);
+    expect(programs.edgeArrow.array[3]).toBeCloseTo(expected.point.y, 4);
+    expect(
+      Math.hypot(programs.edgeArrow.array[2] - target.x, programs.edgeArrow.array[3] - target.y),
+    ).toBeCloseTo(34, 4);
   });
 });
 

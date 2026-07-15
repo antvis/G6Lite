@@ -9,7 +9,7 @@
  * need not re-query):
  *   node:pointerover / node:pointermove / node:pointerleave
  *   node:pointerdown / node:click / node:dblclick / node:contextmenu / node:wheel
- *   edge:* (same set, payload { edgeIndex, source, target, data, event })
+ *   edge:* (same set, payload { edgeId, edgeIndex, source, target, data, event })
  *   combo:pointerdown / combo:click / combo:dblclick / combo:contextmenu
  *   canvas:pointermove / canvas:pointerdown / canvas:pointerup
  *   canvas:click / canvas:dblclick / canvas:contextmenu / canvas:wheel
@@ -22,13 +22,17 @@
 import type { Graph } from '../graph.js';
 import type { Renderer } from '../renderer/renderer.js';
 
-type HoverTarget = { kind: 'node'; id: string } | { kind: 'edge'; index: number } | null;
+type HoverTarget =
+  | { kind: 'node'; id: string }
+  | { kind: 'edge'; id: string; index: number }
+  | null;
 
 /** A node/edge/combo/canvas hit, resolved once per DOM event. */
 type Hit =
   | { kind: 'node'; nodeId: string; data?: Record<string, unknown> }
   | {
       kind: 'edge';
+      edgeId: string;
       edgeIndex: number;
       source: string;
       target: string;
@@ -62,6 +66,7 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
       if (edge) {
         return {
           kind: 'edge',
+          edgeId: (edge as { id?: string }).id ?? String(result.index),
           edgeIndex: result.index,
           source: edge.source,
           target: edge.target,
@@ -84,6 +89,7 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
       emitter.emit(`node:${kind}`, { nodeId: hit.nodeId, data: hit.data, event: e });
     } else if (hit.kind === 'edge') {
       emitter.emit(`edge:${kind}`, {
+        edgeId: hit.edgeId,
         edgeIndex: hit.edgeIndex,
         source: hit.source,
         target: hit.target,
@@ -109,6 +115,7 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
       const edge = renderer.getEdges()[lastHover.index];
       if (edge) {
         emitter.emit('edge:pointerleave', {
+          edgeId: (edge as { id?: string }).id ?? String(lastHover.index),
           edgeIndex: lastHover.index,
           source: edge.source,
           target: edge.target,
@@ -135,19 +142,21 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
     }
 
     if (hit.kind === 'edge') {
-      const same = lastHover?.kind === 'edge' && lastHover.index === hit.edgeIndex;
+      const same = lastHover?.kind === 'edge' && lastHover.id === hit.edgeId;
       if (!same) {
         emitLeave(e);
         emitter.emit('edge:pointerover', {
+          edgeId: hit.edgeId,
           edgeIndex: hit.edgeIndex,
           source: hit.source,
           target: hit.target,
           data: hit.data,
           event: e,
         });
-        lastHover = { kind: 'edge', index: hit.edgeIndex };
+        lastHover = { kind: 'edge', id: hit.edgeId, index: hit.edgeIndex };
       }
       emitter.emit('edge:pointermove', {
+        edgeId: hit.edgeId,
         edgeIndex: hit.edgeIndex,
         source: hit.source,
         target: hit.target,

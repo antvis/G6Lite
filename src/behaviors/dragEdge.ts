@@ -18,6 +18,7 @@ import type { Renderer } from '../renderer/renderer.js';
 
 export function dragEdge(renderer: Renderer, graph: Graph): () => void {
   let dragging: {
+    edgeId?: string;
     edgeIndex: number;
     source: string;
     target: string;
@@ -27,6 +28,7 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
   } | null = null;
 
   const onDown = (payload: {
+    edgeId?: string;
     edgeIndex: number;
     source: string;
     target: string;
@@ -48,6 +50,7 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
     const dragEnd = distToSource < distToTarget ? 'source' : 'target';
 
     dragging = {
+      edgeId: payload.edgeId,
       edgeIndex: payload.edgeIndex,
       source: payload.source,
       target: payload.target,
@@ -57,6 +60,7 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
     };
 
     graph.eventEmitter.emit('edge:dragstart', {
+      edgeId: payload.edgeId,
       edgeIndex: payload.edgeIndex,
       source: payload.source,
       target: payload.target,
@@ -69,6 +73,7 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
     if (!dragging) return;
     graph.eventEmitter.emit('edge:drag', {
       edgeIndex: dragging.edgeIndex,
+      edgeId: dragging.edgeId,
       source: dragging.source,
       target: dragging.target,
       dragEnd: dragging.dragEnd,
@@ -91,6 +96,7 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
         reconnected = true;
         graph.eventEmitter.emit('edge:dragend', {
           edgeIndex: dragging.edgeIndex,
+          edgeId: dragging.edgeId,
           source: dragging.dragEnd === 'source' ? newNodeId : dragging.originalSource,
           target: dragging.dragEnd === 'target' ? newNodeId : dragging.originalTarget,
           originalSource: dragging.originalSource,
@@ -105,6 +111,7 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
     if (!reconnected) {
       graph.eventEmitter.emit('edge:dragend', {
         edgeIndex: dragging.edgeIndex,
+        edgeId: dragging.edgeId,
         source: dragging.originalSource,
         target: dragging.originalTarget,
         originalSource: dragging.originalSource,

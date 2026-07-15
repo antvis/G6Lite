@@ -5,6 +5,13 @@ import { demos } from './demos/index.ts';
 
 let currentInstance: { destroy?: () => void } | null = null;
 let currentDemoId = '';
+const demoAliases: Record<string, string> = {
+  'g6-v5-compat': 'custom-node-extension',
+};
+
+function normalizeDemoId(id: string) {
+  return demoAliases[id] ?? id;
+}
 
 // ---- Sidebar ----
 function renderSidebar() {
@@ -97,6 +104,7 @@ function initResize() {
 
 // ---- Demo Runner ----
 async function activateDemo(id: string) {
+  id = normalizeDemoId(id);
   if (id === currentDemoId) return;
   const demo = demos.find((d) => d.id === id);
   if (!demo) return;
@@ -157,11 +165,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load from hash or default to first
   const hash = window.location.hash.slice(1);
-  const id = hash && demos.some((d) => d.id === hash) ? hash : demos[0]?.id;
+  const normalizedHash = normalizeDemoId(hash);
+  const id = normalizedHash && demos.some((d) => d.id === normalizedHash) ? normalizedHash : demos[0]?.id;
   if (id) activateDemo(id);
 
   window.addEventListener('hashchange', () => {
-    const h = window.location.hash.slice(1);
+    const h = normalizeDemoId(window.location.hash.slice(1));
     if (h) activateDemo(h);
   });
 });

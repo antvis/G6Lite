@@ -7,6 +7,7 @@
  * - Dynamic configs fall back to per-node resolution
  */
 
+import { getNodeExtension } from '../extensions/node.js';
 import type { EdgeConfig, GraphEdge, GraphNode, NodeConfig, ThemeTokens } from '../types.js';
 import { parseColor } from './color.js';
 
@@ -141,6 +142,11 @@ const _emptyDash: number[] = [];
  */
 export function analyzeNodeConfig(config: NodeConfig | undefined, theme: ThemeTokens): void {
   if (!config) return;
+
+  if (getNodeExtension(config.type)) {
+    nodeConfigCache.set(config, { styleType: 'dynamic' });
+    return;
+  }
 
   // If style is a function, it's definitely dynamic
   if (typeof config.style === 'function') {
@@ -287,9 +293,10 @@ export function resolveNodeStyle(
           if (override.stroke !== undefined) stroke = override.stroke;
           if (override.strokeWidth !== undefined) strokeWidth = override.strokeWidth;
           if (override.opacity !== undefined) opacity = override.opacity;
+          if (override.haloWidth !== undefined) haloWidth = override.haloWidth;
         }
-        if (hasState(states, 'active')) haloWidth = 8;
-        if (hasState(states, 'selected')) haloWidth = 12;
+        if (hasState(states, 'active') && haloWidth === 0) haloWidth = 8;
+        if (hasState(states, 'selected') && haloWidth < 12) haloWidth = 12;
       }
     }
 
@@ -317,6 +324,14 @@ function resolveNodeStyleDynamic(
   config: NodeConfig | undefined,
   theme: ThemeTokens,
 ): ResolvedNodeStyle {
+  const extension = getNodeExtension(config?.type);
+  const extensionStyle = {
+    ...extension?.style,
+    ...(extension?.getStyle ? extension.getStyle(node) : undefined),
+  };
+  const userStyle = typeof config?.style === 'object' ? config.style : undefined;
+  const style = { ...extensionStyle, ...userStyle };
+
   // Handle case where config.style is a function that returns the entire style object
   if (typeof config?.style === 'function') {
     const styleFn = config.style as (n: GraphNode) => Partial<ResolvedNodeStyle>;
@@ -334,15 +349,15 @@ function resolveNodeStyleDynamic(
     };
   }
 
-  let fill = resolveStyleValue(config?.style?.fill, node, theme.nodeFill ?? '#5B8FF9');
-  const size = resolveStyleValue(config?.style?.size, node, theme.nodeSize ?? 8);
+  let fill = resolveStyleValue(style.fill, node, theme.nodeFill ?? '#5B8FF9');
+  const size = resolveStyleValue(style.size, node, theme.nodeSize ?? 8);
   const sizeNum = typeof size === 'number' ? size : 8;
-  const width = resolveStyleValue(config?.style?.width, node, sizeNum);
-  const height = resolveStyleValue(config?.style?.height, node, sizeNum);
-  let stroke = resolveStyleValue(config?.style?.stroke, node, theme.nodeStroke ?? '#fff');
-  let strokeWidth = resolveStyleValue(config?.style?.strokeWidth, node, theme.nodeStrokeWidth ?? 0);
-  let opacity = resolveStyleValue(config?.style?.opacity, node, 1 as number);
-  const borderRadius = resolveStyleValue(config?.style?.borderRadius, node, 0 as number);
+  const width = resolveStyleValue(style.width, node, sizeNum);
+  const height = resolveStyleValue(style.height, node, sizeNum);
+  let stroke = resolveStyleValue(style.stroke, node, theme.nodeStroke ?? '#fff');
+  let strokeWidth = resolveStyleValue(style.strokeWidth, node, theme.nodeStrokeWidth ?? 0);
+  let opacity = resolveStyleValue(style.opacity, node, 1 as number);
+  const borderRadius = resolveStyleValue(style.borderRadius, node, 0 as number);
 
   strokeWidth = typeof strokeWidth === 'number' ? strokeWidth : 0;
   opacity = typeof opacity === 'number' ? opacity : 1;
@@ -358,16 +373,20 @@ function resolveNodeStyleDynamic(
     } else {
       for (const state of states!) {
         if (state === 'default') continue;
-        const override = config?.stateStyles?.[state] ?? theme.nodeStateStyles?.[state];
+        const override =
+          config?.stateStyles?.[state] ??
+          extension?.stateStyles?.[state] ??
+          theme.nodeStateStyles?.[state];
         if (!override) continue;
         if (override.fill !== undefined) fill = override.fill;
         if (override.stroke !== undefined) stroke = override.stroke;
         if (override.strokeWidth !== undefined) strokeWidth = override.strokeWidth;
         if (override.opacity !== undefined) opacity = override.opacity;
+        if (override.haloWidth !== undefined) haloWidth = override.haloWidth;
       }
       // Halo for active/selected states
-      if (hasState(states, 'active')) haloWidth = 8;
-      if (hasState(states, 'selected')) haloWidth = 12;
+      if (hasState(states, 'active') && haloWidth === 0) haloWidth = 8;
+      if (hasState(states, 'selected') && haloWidth < 12) haloWidth = 12;
     }
   }
 

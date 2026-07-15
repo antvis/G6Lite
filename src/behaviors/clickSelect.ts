@@ -73,15 +73,17 @@ export function clickSelect(
   };
 
   const onEdgeClick = (payload: {
+    edgeId?: string;
     edgeIndex: number;
     source: string;
     target: string;
     event: MouseEvent;
   }) => {
-    const { edgeIndex, source, target, event: e } = payload;
+    const { edgeId: payloadEdgeId, edgeIndex, source, target, event: e } = payload;
     const edge = renderer.getEdges()[edgeIndex];
-    if (!edge || !(edge as any).id) return;
-    const edgeId = (edge as any).id as string;
+    const edgeId =
+      payloadEdgeId ?? ((edge as { id?: string } | undefined)?.id as string | undefined);
+    if (!edgeId) return;
     const isSelected = graph.findEdgesByState('selected').includes(edgeId);
 
     if (isSelected) {

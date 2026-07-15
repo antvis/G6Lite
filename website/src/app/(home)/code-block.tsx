@@ -2,8 +2,7 @@ import { codeToHtml } from 'shiki';
 
 /**
  * 服务端语法高亮代码块(构建时渲染,零客户端 JS)。
- * 双主题:浅色 github-light / 暗色 github-dark,跟随 .dark class 切换。
- * 外层套 mac 窗口标题栏,与首页轻卡片风格统一。
+ * 首页 terminal 风格跟随站点主题:浅色页用浅色代码面板,深色页用深色面板。
  */
 export async function CodeBlock({
   code,
@@ -21,15 +20,22 @@ export async function CodeBlock({
   });
 
   return (
-    <div className="overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-sm">
-      <div className="flex items-center gap-2 border-b border-fd-border bg-fd-background px-4 py-3">
-        <span className="size-3 rounded-full bg-[#ff5f57]" />
-        <span className="size-3 rounded-full bg-[#febc2e]" />
-        <span className="size-3 rounded-full bg-[#28c840]" />
-        <span className="ml-2 font-mono text-xs text-fd-muted-foreground">{filename}</span>
+    <div className="home-terminal">
+      <div className="home-terminal-glow" />
+      <div className="home-terminal-bar">
+        <div className="home-terminal-dots" aria-hidden>
+          <span />
+          <span />
+          <span />
+        </div>
+        <span className="home-terminal-title">{filename}</span>
+        <span className="home-terminal-status">
+          <span aria-hidden />
+          WebGL ready
+        </span>
       </div>
       <div
-        className="shiki-host overflow-x-auto bg-fd-secondary p-5 text-sm leading-relaxed sm:p-6"
+        className="shiki-host home-terminal-code overflow-x-auto text-sm leading-relaxed"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </div>

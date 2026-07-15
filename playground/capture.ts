@@ -19,7 +19,12 @@ HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, kind
 
 type Node = { id: string; name?: string; data: Record<string, unknown> & { color?: string; size?: number } };
 type Edge = { source: string; target: string };
-type Cfg = { layout: Record<string, unknown>; data: { nodes: Node[]; edges: Edge[] }; kind?: 'relationship' | 'fishbone' };
+type Cfg = {
+  layout: Record<string, unknown>;
+  data: { nodes: Node[]; edges: Edge[] };
+  kind?: 'relationship' | 'fishbone';
+  fit?: number;
+};
 
 // AntV 分类色板(10 色),用于社群着色,让缩略图饱满有层次。
 const PALETTE = [
@@ -196,22 +201,39 @@ function fishboneColor(node: Node) {
 
 const CONFIGS: Record<string, Cfg> = {
   // 力导向:7 社群约 180 节点,自然聚类,最能体现"大规模图"的饱满感
-  force: { layout: { type: 'd3-force', linkDistance: 40, nodeStrength: -30 }, data: communityGraph({ clusters: 7, perCluster: 26, seed: 7 }) },
+  force: {
+    layout: { type: 'd3-force', linkDistance: 40, nodeStrength: -30 },
+    data: communityGraph({ clusters: 7, perCluster: 26, seed: 7 }),
+    fit: 0.95,
+  },
   // 环形:48 节点彩色环
-  circular: { layout: { type: 'circular', radius: 150 }, data: ringGraph({ count: 48, seed: 3 }) },
+  circular: { layout: { type: 'circular', radius: 150 }, data: ringGraph({ count: 48, seed: 3 }), fit: 0.9 },
   // 辐射:多层树单根向外辐射,层次清晰
-  radial: { layout: { type: 'radial', unitRadius: 70, linkDistance: 50 }, data: treeGraph({ branching: 3, depth: 3, seed: 11 }) },
+  radial: {
+    layout: { type: 'radial', unitRadius: 70, linkDistance: 50 },
+    data: treeGraph({ branching: 3, depth: 3, seed: 11 }),
+    fit: 0.8,
+  },
   // 层级 DAG:分叉树
-  dagre: { layout: { type: 'dagre', rankdir: 'TB', nodesep: 14, ranksep: 28 }, data: treeGraph({ branching: 2.4, depth: 4, seed: 5 }) },
+  dagre: {
+    layout: { type: 'dagre', rankdir: 'TB', nodesep: 18, ranksep: 34 },
+    data: treeGraph({ branching: 2.4, depth: 4, seed: 5 }),
+    fit: 0.9,
+  },
   // 网格:60 节点彩色网格
-  grid: { layout: { type: 'grid', rows: 6, cols: 10 }, data: ringGraph({ count: 60, seed: 9 }) },
+  grid: { layout: { type: 'grid', rows: 6, cols: 10 }, data: ringGraph({ count: 60, seed: 9 }), fit: 0.82 },
   // 脑图:横向分叉树
-  mindmap: { layout: { type: 'mindmap', direction: 'H', levelGap: 60, nodeGap: 12 }, data: treeGraph({ branching: 2.6, depth: 3, seed: 2 }) },
+  mindmap: {
+    layout: { type: 'mindmap', direction: 'H', levelGap: 64, nodeGap: 14 },
+    data: treeGraph({ branching: 2.6, depth: 3, seed: 2 }),
+    fit: 0.76,
+  },
   // 鱼骨图:定制业务图布局,单独使用鱼骨数据结构与路由
   fishbone: {
     kind: 'fishbone',
     layout: { type: 'fishbone', direction: 'LR', categoryGap: 150, itemGap: 40, itemHStep: 44, categoryDistance: 150 },
     data: fishboneGraph(),
+    fit: 0.82,
   },
 };
 
@@ -241,10 +263,16 @@ async function main() {
       },
       edge: {
         type: 'polyline',
-        style: (edge: Edge) => {
-          const target = cfg.data.nodes.find((node) => node.id === edge.target);
-          const stroke = target ? fishboneColor(target) : '#b8c4d6';
-          return { stroke, opacity: 0.72, lineWidth: 1.8, router: 'fishbone', endArrow: false, startArrow: false };
+        style: {
+          stroke: (_source, target) => {
+            const targetNode = fishboneNodeById.get(target.id);
+            return targetNode ? fishboneColor(targetNode) : '#b8c4d6';
+          },
+          opacity: 0.72,
+          lineWidth: 1.8,
+          router: 'fishbone',
+          endArrow: false,
+          startArrow: false,
         },
       },
       layout: cfg.layout,
@@ -252,7 +280,7 @@ async function main() {
     });
     await graph.render();
     await new Promise((r) => requestAnimationFrame(() => r(null)));
-    graph.fitView(0.68);
+    graph.fitView(cfg.fit ?? 0.8);
     graph.scheduleRender();
     attachLabelsCanvas(stage, graph as unknown as GraphInstanceWithTools, {
       nodeLabel: (node) => fishboneNodeById.get(node.id)?.name ?? node.id,
@@ -293,7 +321,7 @@ async function main() {
   // render 内部会画一帧默认相机、再 fitView 改相机;preserveDrawingBuffer 下两帧叠加成重影。
   // 等一帧后强制重绘一次,WebGL 会先 clear 再画,只保留最终干净帧。
   await new Promise((r) => requestAnimationFrame(() => r(null)));
-  graph.fitView();
+  graph.fitView(cfg.fit ?? 1.05);
   graph.scheduleRender();
   await new Promise((r) => requestAnimationFrame(() => r(null)));
   await new Promise((r) => requestAnimationFrame(() => r(null)));

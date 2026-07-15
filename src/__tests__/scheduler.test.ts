@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { RenderScheduler, RefreshLevel } from '../scheduler.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DataModel } from '../dataModel.js';
+import { RefreshLevel, RenderScheduler } from '../scheduler.js';
 import type { ThemeTokens } from '../types.js';
 
 const mockTheme: ThemeTokens = {
@@ -25,6 +25,7 @@ function createMockRenderer() {
     patchPositions: vi.fn(),
     partialProcess: vi.fn(),
     updateData: vi.fn(),
+    hasRenderedArrows: vi.fn(() => false),
   };
 }
 
@@ -102,6 +103,28 @@ describe('RenderScheduler', () => {
     vi.runAllTimers();
 
     expect(renderer.patchStyles).toHaveBeenCalled();
+    expect(renderer.draw).toHaveBeenCalled();
+  });
+
+  it('should schedule FULL_PROCESS for edge state changes when arrows are rendered', () => {
+    const renderer = createMockRenderer();
+    renderer.hasRenderedArrows.mockReturnValue(true);
+    const dataModel = new DataModel({ theme: mockTheme });
+    const scheduler = new RenderScheduler(renderer as any, dataModel);
+
+    dataModel.addEdge({ id: 'edge-1', source: 'a', target: 'b' });
+    scheduler.schedule();
+    vi.runAllTimers();
+    renderer.partialProcess.mockClear();
+    renderer.updateData.mockClear();
+    renderer.draw.mockClear();
+
+    dataModel.setEdgeState('edge-1', 'hidden', true);
+    scheduler.schedule();
+    vi.runAllTimers();
+
+    expect(renderer.updateData).toHaveBeenCalled();
+    expect(renderer.patchStyles).not.toHaveBeenCalled();
     expect(renderer.draw).toHaveBeenCalled();
   });
 

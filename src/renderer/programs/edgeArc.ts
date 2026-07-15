@@ -1,7 +1,7 @@
 /**
  * EdgeArc: renders curved edges as tessellated GL_LINES (quadratic bezier).
  * CPU computes curve points; each edge → SEGMENTS line segments → SEGMENTS*2 vertices.
- * Stride: 8 floats per vertex (position.xy, color.rgb, pickingColor.rgb).
+ * Stride: 9 floats per vertex (position.xy, color.rgb, pickingColor.rgb, opacity).
  */
 
 import { encodeId } from '../picking.js';
@@ -10,7 +10,7 @@ import { Program } from './program.js';
 import { fragmentShader } from './shaders/edgeArc.frag.js';
 import { vertexShader } from './shaders/edgeArc.vert.js';
 
-const FLOATS_PER_VERTEX = 8;
+const FLOATS_PER_VERTEX = 9;
 const SEGMENTS = 16;
 const VERTICES_PER_ITEM = SEGMENTS * 2;
 
@@ -36,6 +36,7 @@ export class EdgeArcProgram extends Program {
       { name: 'a_position', size: 2 },
       { name: 'a_color', size: 3 },
       { name: 'a_pickingColor', size: 3 },
+      { name: 'a_opacity', size: 1 },
     ];
   }
 
@@ -55,6 +56,7 @@ export class EdgeArcProgram extends Program {
     color: [number, number, number],
     pickingIndex: number,
     curvature: number,
+    opacity = 1,
   ): void {
     const [pr, pg, pb] = encodeId(pickingIndex);
     const pR = pr / 255,
@@ -91,15 +93,17 @@ export class EdgeArcProgram extends Program {
       this.array[o + 5] = pR;
       this.array[o + 6] = pG;
       this.array[o + 7] = pB;
+      this.array[o + 8] = opacity;
       // End vertex
-      this.array[o + 8] = x1;
-      this.array[o + 9] = y1;
-      this.array[o + 10] = color[0];
-      this.array[o + 11] = color[1];
-      this.array[o + 12] = color[2];
-      this.array[o + 13] = pR;
-      this.array[o + 14] = pG;
-      this.array[o + 15] = pB;
+      this.array[o + 9] = x1;
+      this.array[o + 10] = y1;
+      this.array[o + 11] = color[0];
+      this.array[o + 12] = color[1];
+      this.array[o + 13] = color[2];
+      this.array[o + 14] = pR;
+      this.array[o + 15] = pG;
+      this.array[o + 16] = pB;
+      this.array[o + 17] = opacity;
     }
   }
 }

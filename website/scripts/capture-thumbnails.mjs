@@ -9,16 +9,16 @@
  * 用纯 node(非 tsx)运行:tsx/esbuild 会向页面注入 __name 辅助函数,
  * 在 page.evaluate / screenshot 的页面上下文里会报 ReferenceError。
  */
-import { chromium } from 'playwright';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
 import { mkdirSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { chromium } from 'playwright';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = resolve(__dirname, '../public/layouts');
 const BASE = process.env.CAPTURE_BASE ?? 'http://localhost:5179';
 
-const LAYOUTS = [
+const DEFAULT_LAYOUTS = [
   { type: 'force', color: '5B8FF9' },
   { type: 'circular', color: '33B681' },
   { type: 'radial', color: 'E8684A' },
@@ -28,6 +28,20 @@ const LAYOUTS = [
   { type: 'fishbone', color: 'FF6B4A' },
 ];
 
+const requestedLayouts = process.argv.slice(2);
+const unknownLayouts = requestedLayouts.filter(
+  (type) => !DEFAULT_LAYOUTS.some((layout) => layout.type === type),
+);
+
+if (unknownLayouts.length > 0) {
+  throw new Error(`Unknown layout type: ${unknownLayouts.join(', ')}`);
+}
+
+const LAYOUTS =
+  requestedLayouts.length > 0
+    ? requestedLayouts.map((type) => DEFAULT_LAYOUTS.find((layout) => layout.type === type))
+    : DEFAULT_LAYOUTS;
+
 async function main() {
   mkdirSync(OUT_DIR, { recursive: true });
   const browser = await chromium.launch();
@@ -35,7 +49,10 @@ async function main() {
   for (const { type, color } of LAYOUTS) {
     // 每个布局用全新 context:WebGL 截图在同一 page 跨次导航会复用上一帧的 GPU surface,
     // 导致所有截图字节级相同。新 context 保证拿到干净的渲染结果。
-    const ctx = await browser.newContext({ viewport: { width: 640, height: 480 }, deviceScaleFactor: 2 });
+    const ctx = await browser.newContext({
+      viewport: { width: 640, height: 480 },
+      deviceScaleFactor: 2,
+    });
     const page = await ctx.newPage();
     await page.goto(`${BASE}/capture.html#${type}|${color}`, { waitUntil: 'load' });
     let ready = false;

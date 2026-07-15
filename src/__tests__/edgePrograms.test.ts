@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { encodeId } from '../renderer/picking.js';
+import { EdgeArcProgram } from '../renderer/programs/edgeArc.js';
 import { EdgeLineProgram } from '../renderer/programs/edgeLine.js';
 import { EdgeRectProgram } from '../renderer/programs/edgeRect.js';
 
@@ -50,9 +51,15 @@ class TestEdgeRect extends EdgeRectProgram {
     return (this as unknown as { array: Float32Array }).array;
   }
 }
+class TestEdgeArc extends EdgeArcProgram {
+  peek(): Float32Array {
+    return (this as unknown as { array: Float32Array }).array;
+  }
+}
 
-const STRIDE_LINE = 15;
+const STRIDE_LINE = 16;
 const STRIDE_RECT = 19;
+const STRIDE_ARC = 9;
 
 describe('EdgeLine processEdge buffer encoding', () => {
   it('encodes both endpoints + clamp inputs, with a_posCoef selecting the end', () => {
@@ -78,9 +85,10 @@ describe('EdgeLine processEdge buffer encoding', () => {
     expect(a[9]).toBeCloseTo(0.1); // a_color
     expect(a[10]).toBeCloseTo(0.2);
     expect(a[11]).toBeCloseTo(0.3);
-    expect(a[12]).toBeCloseTo(pr / 255); // a_pickingColor
-    expect(a[13]).toBeCloseTo(pg / 255);
-    expect(a[14]).toBeCloseTo(pb / 255);
+    expect(a[12]).toBeCloseTo(1); // a_opacity
+    expect(a[13]).toBeCloseTo(pr / 255); // a_pickingColor
+    expect(a[14]).toBeCloseTo(pg / 255);
+    expect(a[15]).toBeCloseTo(pb / 255);
 
     // Vertex 1 (target end): identical except a_posCoef = 1
     const v1 = STRIDE_LINE;
@@ -89,7 +97,8 @@ describe('EdgeLine processEdge buffer encoding', () => {
     expect(a[v1 + 2]).toBeCloseTo(110);
     expect(a[v1 + 5]).toBeCloseTo(5);
     expect(a[v1 + 8]).toBeCloseTo(10);
-    expect(a[v1 + 12]).toBeCloseTo(pr / 255);
+    expect(a[v1 + 12]).toBeCloseTo(1);
+    expect(a[v1 + 13]).toBeCloseTo(pr / 255);
   });
 
   it('patchEdgeEndpoints rewrites only positions, leaving clamp/color intact', () => {
@@ -110,6 +119,18 @@ describe('EdgeLine processEdge buffer encoding', () => {
     expect(a[5]).toBeCloseTo(5); // a_srcRadius
     expect(a[8]).toBeCloseTo(10); // a_tgtArrowPx
     expect(a[9]).toBeCloseTo(0.1); // a_color
+  });
+
+  it('patchEdgeStyle updates opacity for hidden line edges', () => {
+    const prog = new TestEdgeLine(makeGLStub());
+    prog.reallocate(1);
+    prog.processEdge(0, 10, 20, 110, 220, [0.1, 0.2, 0.3], 42, 5, 7, 0, 10);
+
+    prog.patchEdgeStyle(0, { opacity: 0 });
+
+    const a = prog.peek();
+    expect(a[12]).toBeCloseTo(0);
+    expect(a[STRIDE_LINE + 12]).toBeCloseTo(0);
   });
 });
 
@@ -134,6 +155,18 @@ describe('EdgeRect processEdge buffer encoding', () => {
     expect(a[6]).toBeCloseTo(4); // a_lineWidth
     expect(a[7]).toBeCloseTo(0.4); // a_color
     expect(a[14]).toBeCloseTo(0.8); // a_opacity
+  });
+});
+
+describe('EdgeArc processEdge buffer encoding', () => {
+  it('encodes opacity for hidden arc edges', () => {
+    const prog = new TestEdgeArc(makeGLStub());
+    prog.reallocate(1);
+    prog.processEdge(0, 0, 0, 100, 0, [0.2, 0.3, 0.4], 9, 0.3, 0);
+
+    const a = prog.peek();
+    expect(a[8]).toBeCloseTo(0);
+    expect(a[STRIDE_ARC + 8]).toBeCloseTo(0);
   });
 });
 

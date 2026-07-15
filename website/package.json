@@ -9,7 +9,8 @@
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
     "postinstall": "fumadocs-mdx",
     "lint": "eslint",
-    "thumbnails:capture": "vite --config ../vite.config.ts --port 5179 --no-open & sleep 5 && node scripts/capture-thumbnails.mjs; kill %1"
+    "thumbnails:capture": "(cd .. && vite --config vite.config.ts --port 5179 --no-open) & sleep 5 && node scripts/capture-thumbnails.mjs; kill %1",
+    "examples:capture": "(cd .. && vite --config vite.config.ts --port 5179 --no-open) & sleep 5 && node scripts/capture-demo-thumbnails.mjs; kill %1"
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.198",

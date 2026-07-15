@@ -1,0 +1,39 @@
+---
+title: 自定义节点
+description: 使用 BaseNode、BreathingNode 和 registerNode 扩展节点表现
+---
+
+G6Lite 导出 `BaseNode`、`BreathingNode`、`registerNode` 等扩展接口，用于在内置节点能力之外扩展节点表现。
+
+```ts
+import { BaseNode, registerNode } from '@antv/g6-lite';
+```
+
+## 适用场景
+
+- 需要复用一类业务节点视觉。
+- 需要在 WebGL 节点之外增加轻量 overlay。
+- 需要对节点样式或动画做统一封装。
+
+## 内置扩展
+
+`BreathingNode` 是一个内置扩展示例，可用于呼吸态节点效果。
+
+```ts
+import { BreathingNode, registerNode } from '@antv/g6-lite';
+
+registerNode('breathing-node', BreathingNode);
+```
+
+具体可参考：
+
+- `src/extensions/node.ts`
+- `playground/demos/breathing-node.ts`
+
+## 注意事项
+
+- 自定义节点应避免破坏 WebGL 批量渲染优势。
+- 大图中不要给所有节点叠加昂贵的自定义绘制。
+- 如果只是颜色、尺寸、描边、标签变化，优先使用 `node.style` 和 `stateStyles`。
+
+更多类型见 [API 总览](/docs/api/overview)。

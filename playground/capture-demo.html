@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>G6Lite Demo Capture</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; min-height: 100%; background: transparent; }
+    #stage {
+      width: 960px;
+      height: 600px;
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .g6lite-tooltip {
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.78);
+      color: #fff;
+      font-size: 12px;
+      pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+  </style>
+</head>
+<body>
+  <div id="stage"></div>
+  <script type="module" src="./capture-demo.ts"></script>
+</body>
+</html>

@@ -9,6 +9,8 @@
 
 // ──── Core ────
 export { EventEmitter } from './events.js';
+export { register } from './extensions/index.js';
+export { BaseNode, BreathingNode, registerNode } from './extensions/node.js';
 export { Graph } from './graph.js';
 export type { PickResult } from './graph.js';
 export { runLayout } from './layout/index.js';
@@ -22,6 +24,7 @@ export type {
   ComboData,
   ComboStyleConfig,
   EdgeConfig,
+  EdgeLabelParams,
   EdgeLabelPlacement,
   EdgeState,
   ElementState,
@@ -29,11 +32,21 @@ export type {
   GraphEdge,
   GraphNode,
   GraphOptions,
+  LabelDrawParams,
+  LabelLayout,
+  LabelMeasureParams,
   LabelPlacement,
+  LabelRenderer,
+  LabelType,
   LayoutConfig,
   NodeConfig,
+  NodeLabelParams,
   NodeState,
+  ParallelEdgeMeta,
+  ParallelEdgesConfig,
+  ResolvedLabelStyle,
   ThemeOption,
+  TransformOption,
 } from './types.js';
 
 // ──── Behavior config types ────
@@ -54,5 +67,10 @@ export type { InternalCombo } from './types.js';
 // loops, but are not covered by the 0.1.0 stability guarantee.
 export { DataModel } from './dataModel.js';
 export type { ChangeRecord, ChangeType, DataModelOptions } from './dataModel.js';
+export type {
+  NodeExtension,
+  NodeExtensionInput,
+  NodeOverlayDrawParams,
+} from './extensions/node.js';
 export type { RendererData } from './renderer/renderer.js';
 export { RefreshLevel, RenderScheduler } from './scheduler.js';

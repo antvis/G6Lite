@@ -1,6 +1,6 @@
 # G6Lite Demos
 
-This directory holds the runnable examples that power the G6Lite playground. There are **28 demos** in total; the table below marks **8 featured demos (⭐)** curated as the external showcase for the 0.1.0 release.
+This directory holds the runnable examples that power the G6Lite playground. There are **32 demos** in total; the table below marks **8 featured demos (⭐)** curated as the external showcase for the 0.1.0 release.
 
 Every demo is a standalone ES module exporting a single `run(container)` function:
 
@@ -46,8 +46,11 @@ The playground opens at **http://localhost:5173** with a G6-website-style layout
 ### Nodes
 - `node-style` — 节点样式
 - `node-states` — 节点状态 (6 态)
+- `breathing-node` — 呼吸节点
 - `node-border` — 节点边框 + 圆角
 - `labels` — 标签 + 图标
+- `custom-label-renderer` — 节点和边共用的自定义 Label Renderer
+- `custom-node-extension` — 自定义节点 + 显式边 ID：BaseNode/registerNode、Combo 状态
 
 ### Edges
 - `edge-types` — 边类型 (直线 / 虚线 / 弧线)
@@ -55,6 +58,7 @@ The playground opens at **http://localhost:5173** with a G6-website-style layout
 - `edge-arrows` — 箭头方向
 - `edge-states` — 边状态 + 权重矩阵
 - `edge-loops` — 自环边 (嵌套)
+- `parallel-edges` — 平行边自动错开
 
 ### Layouts & diagrams
 - `layouts` — 布局切换 ⭐

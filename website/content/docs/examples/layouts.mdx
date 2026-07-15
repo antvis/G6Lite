@@ -1,0 +1,47 @@
+---
+title: 布局切换
+description: 在同一份数据上切换 circular、force、grid 和 dagre
+---
+
+<div className="example-hero">
+  <img src="/examples/layouts.png" alt="布局切换截图" />
+</div>
+
+这个示例展示运行时重新创建图或调用布局 API 的常见模式。不同布局适合不同数据结构：环形适合总览，force 适合网络探索，dagre 适合层级关系。
+
+<div className="example-actions">
+  <a href="http://localhost:5179/#layouts" target="_blank" rel="noreferrer">本地运行</a>
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/layouts.ts" target="_blank" rel="noreferrer">完整源码</a>
+</div>
+
+## 代码
+
+```ts
+const layouts = [
+  { type: 'circular', radius: 180 },
+  { type: 'force', linkDistance: 80 },
+  { type: 'grid', rows: 2, cols: 5 },
+  { type: 'dagre', rankdir: 'TB', nodesep: 30, ranksep: 40 },
+] as const;
+
+async function renderLayout(index: number) {
+  currentGraph?.destroy();
+
+  currentGraph = new Graph({
+    container,
+    data,
+    node: { type: 'circle', style: { size: 10 } },
+    edge: { type: 'line', style: { endArrow: true } },
+    layout: { ...layouts[index] },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+    theme: 'light',
+  });
+
+  await currentGraph.render();
+}
+```
+
+## 相关文档
+
+- [布局总览](/docs/layouts/overview)
+- [Graph 生命周期](/docs/concepts/graph-lifecycle)

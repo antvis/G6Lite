@@ -1,0 +1,46 @@
+---
+title: 平行边自动错开
+description: 处理同源同目标的多条边和反向边
+---
+
+<div className="example-hero">
+  <img src="/examples/parallel-edges.png" alt="平行边自动错开截图" />
+</div>
+
+这个示例展示 `process-parallel-edges` transform 和 `edge.parallelEdges` 配置。它会把同一对节点之间的多条边错开，避免互相覆盖。
+
+<div className="example-actions">
+  <a href="http://localhost:5179/#parallel-edges" target="_blank" rel="noreferrer">本地运行</a>
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/parallel-edges.ts" target="_blank" rel="noreferrer">完整源码</a>
+</div>
+
+## 代码
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  transforms: ['process-parallel-edges'],
+  edge: {
+    parallelEdges: {
+      enabled: true,
+      offset: 26,
+      includeReverse: true,
+    },
+    style: {
+      endArrow: true,
+      label: (_source, _target, edge) => String(edge.data?.label ?? ''),
+      labelBackground: 'rgba(255,255,255,0.92)',
+      labelAutoRotate: true,
+    },
+  },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight', 'click-select'],
+});
+
+await graph.render();
+```
+
+## 相关文档
+
+- [平行边与自环](/docs/advanced/parallel-edges)
+- [边](/docs/guides/edge)

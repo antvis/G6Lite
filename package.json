@@ -1,6 +1,6 @@
 {
   "name": "@antv/g6-lite",
-  "version": "0.1.0",
+  "version": "0.1.0-beta.12",
   "description": "A high-performance graph analysis engine based on WebGL, designed for large-scale graph data analysis.",
   "type": "module",
   "main": "dist/index.js",

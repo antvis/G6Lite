@@ -20,6 +20,7 @@ website/content/docs/api/
 *.sh
 *.backup.*
 CLAUDE.md
+AGENTS.md
 design/
 
 # npm pack output

@@ -3,8 +3,10 @@ title: 最简示例
 description: 使用 G6Lite 渲染一个最小关系图
 ---
 
+import { withBasePath } from '@/lib/shared';
+
 <div className="example-hero">
-  <img src="/examples/basic.png" alt="最简示例截图" />
+  <img src={withBasePath('/examples/basic.png')} alt="最简示例截图" />
 </div>
 
 这个示例展示 G6Lite 的最小使用链路：传入节点和边，配置一个环形布局，启用缩放和拖拽。

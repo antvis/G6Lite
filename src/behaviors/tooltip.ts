@@ -34,7 +34,11 @@ export interface TooltipContext {
 export interface TooltipOptions {
   /** Trigger mode. Default: 'hover'. */
   trigger?: 'hover' | 'click';
-  /** Build the tooltip body. String → injected as HTML; HTMLElement → appended. */
+  /**
+   * Build the tooltip body. A custom string is treated as trusted HTML for
+   * backward compatibility; escape untrusted values or return an HTMLElement
+   * whose textContent you control.
+   */
   getContent?: (ctx: TooltipContext) => string | HTMLElement;
   /** Gate display per element. Return false to suppress. Default: always show. */
   enable?: (ctx: TooltipContext) => boolean;
@@ -67,7 +71,9 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
   if (!graph) return () => {};
 
   const trigger = options?.trigger ?? 'hover';
-  const getContent = options?.getContent ?? defaultContent;
+  const customGetContent = options?.getContent;
+  const getContent = customGetContent ?? defaultContent;
+  const allowHtml = customGetContent !== undefined;
   const enable = options?.enable;
   const [offsetX, offsetY] = options?.offset ?? [10, 10];
   const delay = options?.delay ?? 80;
@@ -93,9 +99,14 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
     return div;
   };
 
-  const setBody = (content: string | HTMLElement, target: HTMLDivElement): void => {
+  const setBody = (
+    content: string | HTMLElement,
+    target: HTMLDivElement,
+    trustedHtml: boolean,
+  ): void => {
     if (typeof content === 'string') {
-      target.innerHTML = content;
+      if (trustedHtml) target.innerHTML = content;
+      else target.textContent = content;
     } else {
       target.replaceChildren(content);
     }
@@ -116,7 +127,7 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
   const show = (ctx: TooltipContext): void => {
     if (enable && !enable(ctx)) return;
     const target = ensureEl();
-    setBody(getContent(ctx), target);
+    setBody(getContent(ctx), target, allowHtml);
     target.style.visibility = 'visible';
     place(ctx.event, target);
   };

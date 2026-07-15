@@ -82,6 +82,24 @@ describe('tooltip — hover trigger', () => {
     teardown();
   });
 
+  it('renders the default data label as text instead of executable HTML', () => {
+    const { renderer, graph } = setup();
+    const teardown = tooltip(renderer as any, graph as any);
+    const label = '<img src=x onerror="globalThis.__tooltipXss = true">Unsafe';
+
+    graph.eventEmitter.emit('node:pointerover', {
+      nodeId: 'unsafe',
+      data: { label },
+      event: mouseEvent(),
+    });
+    vi.advanceTimersByTime(80);
+
+    const overlay = getOverlay();
+    expect(overlay?.textContent).toBe(label);
+    expect(overlay?.querySelector('img')).toBeNull();
+    teardown();
+  });
+
   it('hides on node:pointerleave', () => {
     const { renderer, graph } = setup();
     const teardown = tooltip(renderer as any, graph as any);
@@ -190,6 +208,24 @@ describe('tooltip — custom content & class', () => {
     const el = getOverlay('custom-tip');
     expect(el).not.toBeNull();
     expect(el?.innerHTML).toBe('<b>n7</b>');
+    teardown();
+  });
+
+  it('accepts an HTMLElement for safely constructed custom content', () => {
+    const { renderer, graph } = setup();
+    const teardown = tooltip(renderer as any, graph as any, {
+      getContent: (ctx) => {
+        const strong = document.createElement('strong');
+        strong.textContent = `<${ctx.nodeId}>`;
+        return strong;
+      },
+    });
+
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'n8', data: {}, event: mouseEvent() });
+    vi.advanceTimersByTime(80);
+
+    const overlay = getOverlay();
+    expect(overlay?.querySelector('strong')?.textContent).toBe('<n8>');
     teardown();
   });
 

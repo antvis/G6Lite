@@ -360,10 +360,24 @@ export class DataModel {
   setNodeState(id: string, state: ElementState, value: boolean): void {
     const index = this._nodeIdToIndex.get(id);
     if (index === undefined) return;
-    if (state === 'hidden' && value && this._comboHiddenDepth.has(id)) {
-      this._comboHiddenApplied.delete(id);
-    }
     const node = this._nodes[index];
+    if (state === 'hidden' && this._comboHiddenDepth.has(id)) {
+      if (value) {
+        // Explicit business hidden takes ownership from the collapsed Combo, so
+        // expanding the Combo must not make the node visible again.
+        this._comboHiddenApplied.delete(id);
+      } else {
+        // A collapsed Combo is structural visibility. Clearing the business
+        // hidden flag transfers ownership back to the Combo instead of exposing
+        // the node before the Combo expands.
+        const had = node.states.has('hidden');
+        if (node.states === EMPTY_SET) node.states = new Set();
+        node.states.add('hidden');
+        this._comboHiddenApplied.add(id);
+        if (!had) this._changes.push({ type: 'nodeStateChanged', ids: [id] });
+        return;
+      }
+    }
     // Lazily replace shared EMPTY_SET with a mutable Set on first state mutation
     if (value && node.states === EMPTY_SET) {
       node.states = new Set([state]);
@@ -382,18 +396,60 @@ export class DataModel {
     const index = this._nodeIdToIndex.get(id);
     if (index === undefined) return;
     const node = this._nodes[index];
+    if (this._comboHiddenDepth.has(id)) {
+      const changed = node.states.size !== 1 || !node.states.has('hidden');
+      if (node.states === EMPTY_SET) node.states = new Set();
+      node.states.clear();
+      node.states.add('hidden');
+      this._comboHiddenApplied.add(id);
+      if (changed) this._changes.push({ type: 'nodeStateChanged', ids: [id] });
+      return;
+    }
     if (node.states === EMPTY_SET || node.states.size === 0) return;
     node.states.clear();
     this._changes.push({ type: 'nodeStateChanged', ids: [id] });
   }
 
+  replaceNodeStates(id: string, states: ElementState[]): boolean {
+    const index = this._nodeIdToIndex.get(id);
+    if (index === undefined) return false;
+    const node = this._nodes[index];
+    const next = states.filter((state) => state !== 'default');
+    if (this._comboHiddenDepth.has(id)) {
+      const hiddenIndex = next.indexOf('hidden');
+      if (hiddenIndex >= 0) {
+        this._comboHiddenApplied.delete(id);
+      } else {
+        next.push('hidden');
+        this._comboHiddenApplied.add(id);
+      }
+    }
+    if (node.states.size === next.length && next.every((state) => node.states.has(state)))
+      return true;
+    node.states = next.length > 0 ? new Set(next) : EMPTY_SET;
+    this._changes.push({ type: 'nodeStateChanged', ids: [id] });
+    return true;
+  }
+
   setEdgeState(id: string, state: ElementState, value: boolean): void {
     const index = this._edgeIdToIndex.get(id);
     if (index === undefined) return;
-    if (state === 'hidden' && value && this._comboHiddenEdgeDepth.has(id)) {
-      this._comboHiddenEdgeApplied.delete(id);
-    }
     const edge = this._edges[index];
+    if (state === 'hidden' && this._comboHiddenEdgeDepth.has(id)) {
+      if (value) {
+        // Explicit business hidden survives Combo expansion.
+        this._comboHiddenEdgeApplied.delete(id);
+      } else {
+        // Keep the effective hidden state while the collapsed Combo still owns
+        // visibility, but release it once the final hidden depth reaches zero.
+        const had = edge.states.has('hidden');
+        if (edge.states === EMPTY_SET) edge.states = new Set();
+        edge.states.add('hidden');
+        this._comboHiddenEdgeApplied.add(id);
+        if (!had) this._changes.push({ type: 'edgeStateChanged', ids: [id] });
+        return;
+      }
+    }
     // Lazily replace shared EMPTY_SET with a mutable Set on first state mutation
     if (value && edge.states === EMPTY_SET) {
       edge.states = new Set([state]);
@@ -412,9 +468,39 @@ export class DataModel {
     const index = this._edgeIdToIndex.get(id);
     if (index === undefined) return;
     const edge = this._edges[index];
+    if (this._comboHiddenEdgeDepth.has(id)) {
+      const changed = edge.states.size !== 1 || !edge.states.has('hidden');
+      if (edge.states === EMPTY_SET) edge.states = new Set();
+      edge.states.clear();
+      edge.states.add('hidden');
+      this._comboHiddenEdgeApplied.add(id);
+      if (changed) this._changes.push({ type: 'edgeStateChanged', ids: [id] });
+      return;
+    }
     if (edge.states === EMPTY_SET || edge.states.size === 0) return;
     edge.states.clear();
     this._changes.push({ type: 'edgeStateChanged', ids: [id] });
+  }
+
+  replaceEdgeStates(id: string, states: ElementState[]): boolean {
+    const index = this._edgeIdToIndex.get(id);
+    if (index === undefined) return false;
+    const edge = this._edges[index];
+    const next = states.filter((state) => state !== 'default');
+    if (this._comboHiddenEdgeDepth.has(id)) {
+      const hiddenIndex = next.indexOf('hidden');
+      if (hiddenIndex >= 0) {
+        this._comboHiddenEdgeApplied.delete(id);
+      } else {
+        next.push('hidden');
+        this._comboHiddenEdgeApplied.add(id);
+      }
+    }
+    if (edge.states.size === next.length && next.every((state) => edge.states.has(state)))
+      return true;
+    edge.states = next.length > 0 ? new Set(next) : EMPTY_SET;
+    this._changes.push({ type: 'edgeStateChanged', ids: [id] });
+    return true;
   }
 
   // ──── Bulk replace ────
@@ -840,8 +926,7 @@ export class DataModel {
       const index = this._edgeIdToIndex.get(edgeId);
       if (index === undefined) continue;
       const edge = this._edges[index];
-      const previousDepth = this._comboHiddenEdgeDepth.get(edgeId) ?? 0;
-      this._comboHiddenEdgeDepth.set(edgeId, previousDepth + depth);
+      this._comboHiddenEdgeDepth.set(edgeId, this.getEdgeComboHiddenDepth(edge));
       if (edge.states.has('hidden')) continue;
       if (edge.states === EMPTY_SET) edge.states = new Set();
       edge.states.add('hidden');
@@ -871,18 +956,16 @@ export class DataModel {
       this._changes.push({ type: 'nodeStateChanged', ids: [nodeId] });
     }
     for (const edgeId of edgeIds) {
-      const previousDepth = this._comboHiddenEdgeDepth.get(edgeId) ?? 0;
-      if (previousDepth <= 0) continue;
-      const nextDepth = previousDepth - depth;
+      const index = this._edgeIdToIndex.get(edgeId);
+      if (index === undefined) continue;
+      const edge = this._edges[index];
+      const nextDepth = this.getEdgeComboHiddenDepth(edge);
       if (nextDepth > 0) {
         this._comboHiddenEdgeDepth.set(edgeId, nextDepth);
         continue;
       }
       this._comboHiddenEdgeDepth.delete(edgeId);
       if (!this._comboHiddenEdgeApplied.delete(edgeId)) continue;
-      const index = this._edgeIdToIndex.get(edgeId);
-      if (index === undefined) continue;
-      const edge = this._edges[index];
       if (!edge.states.has('hidden')) continue;
       edge.states.delete('hidden');
       this._changes.push({ type: 'edgeStateChanged', ids: [edgeId] });
@@ -910,6 +993,15 @@ export class DataModel {
     }
     this._comboHiddenEdgeDepth.clear();
     this._comboHiddenEdgeApplied.clear();
+  }
+
+  private getEdgeComboHiddenDepth(edge: InternalEdge): number {
+    // Edge visibility follows its endpoints. Deriving this value avoids counting
+    // one collapsed Combo twice when its two endpoints are attached separately.
+    return Math.max(
+      this._comboHiddenDepth.get(edge.source) ?? 0,
+      this._comboHiddenDepth.get(edge.target) ?? 0,
+    );
   }
 
   private getAdjacentEdgeIds(nodeIds: string[]): string[] {

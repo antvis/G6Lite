@@ -3,8 +3,10 @@ title: Combo 分组容器
 description: 用固定坐标的应用架构图演示嵌套分组、折叠展开和动态归属
 ---
 
+import { withBasePath } from '@/lib/shared';
+
 <div className="example-hero">
-  <img src="/examples/combo.png" alt="应用架构 Combo 分组容器截图" />
+  <img src={withBasePath('/examples/combo.png')} alt="应用架构 Combo 分组容器截图" />
 </div>
 
 这个示例用固定坐标展示一张应用架构图：客户端连接业务平台，业务平台内部嵌套服务层与数据层。稳定的三列结构可以更清楚地观察 Combo 的包围框、父子层级和跨组连线。

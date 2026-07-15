@@ -3,8 +3,10 @@ title: 节点样式
 description: 按业务字段动态设置节点颜色和大小
 ---
 
+import { withBasePath } from '@/lib/shared';
+
 <div className="example-hero">
-  <img src="/examples/node-style.png" alt="节点样式截图" />
+  <img src={withBasePath('/examples/node-style.png')} alt="节点样式截图" />
 </div>
 
 这个示例展示 `node.style` 的函数式写法。颜色和尺寸可以从节点业务字段中读取，适合按集群、类型、风险等级等维度编码。

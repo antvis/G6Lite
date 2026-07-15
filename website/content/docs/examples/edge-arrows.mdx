@@ -3,8 +3,10 @@ title: 箭头方向
 description: 配置无箭头、单向箭头、双向箭头和粗边箭头
 ---
 
+import { withBasePath } from '@/lib/shared';
+
 <div className="example-hero">
-  <img src="/examples/edge-arrows.png" alt="箭头方向截图" />
+  <img src={withBasePath('/examples/edge-arrows.png')} alt="箭头方向截图" />
 </div>
 
 这个示例展示 `startArrow`、`endArrow` 和 `arrowSize` 的组合方式，可用于表达调用方向、依赖方向和双向关系。

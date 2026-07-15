@@ -26,6 +26,14 @@ export interface BoundarySample {
   t: number;
 }
 
+export interface RectBoundary {
+  halfWidth: number;
+  halfHeight: number;
+}
+
+/** A circle radius, or the half-extents of an axis-aligned rectangle. */
+export type NodeBoundary = number | RectBoundary;
+
 interface ParallelLike {
   groupSize: number;
   offset: number;
@@ -100,8 +108,54 @@ export function sampleEdgePath(path: EdgePath, t: number): { point: Point; tange
   };
 }
 
-function distanceTo(point: Point, center: Point): number {
-  return Math.hypot(point.x - center.x, point.y - center.y);
+function isRectBoundary(boundary: NodeBoundary): boundary is RectBoundary {
+  return typeof boundary !== 'number';
+}
+
+/**
+ * Distance from a node center to its boundary along `direction`.
+ *
+ * Rectangles use the ray/AABB intersection formula. Keeping this in graph
+ * coordinates lets edge shaders apply zoom without rebuilding their buffers.
+ */
+export function getBoundaryDistance(direction: Point, boundary: NodeBoundary): number {
+  if (!isRectBoundary(boundary)) return Math.max(0, boundary);
+
+  return getRectBoundaryDistance(direction.x, direction.y, boundary.halfWidth, boundary.halfHeight);
+}
+
+/** Numeric hot-path variant used while filling edge buffers. */
+export function getRectBoundaryDistance(
+  directionX: number,
+  directionY: number,
+  halfWidth: number,
+  halfHeight: number,
+): number {
+  const length = Math.hypot(directionX, directionY);
+  if (length <= 1e-6) return 0;
+
+  halfWidth = Math.max(0, halfWidth);
+  halfHeight = Math.max(0, halfHeight);
+  if (halfWidth <= 0 || halfHeight <= 0) return 0;
+
+  const ux = directionX / length;
+  const uy = directionY / length;
+  const inverseDistance = Math.max(Math.abs(ux) / halfWidth, Math.abs(uy) / halfHeight);
+  return inverseDistance > 1e-12 ? 1 / inverseDistance : 0;
+}
+
+function boundaryLevel(point: Point, center: Point, boundary: NodeBoundary): number {
+  const dx = point.x - center.x;
+  const dy = point.y - center.y;
+  if (!isRectBoundary(boundary)) {
+    const radius = Math.max(0, boundary);
+    return radius > 0 ? Math.hypot(dx, dy) / radius : Infinity;
+  }
+
+  const halfWidth = Math.max(0, boundary.halfWidth);
+  const halfHeight = Math.max(0, boundary.halfHeight);
+  if (halfWidth <= 0 || halfHeight <= 0) return Infinity;
+  return Math.max(Math.abs(dx) / halfWidth, Math.abs(dy) / halfHeight);
 }
 
 function normalizeOrFallback(tangent: Point, fallback: Point): Point {
@@ -115,7 +169,7 @@ function normalizeOrFallback(tangent: Point, fallback: Point): Point {
 function fallbackBoundarySample(
   path: EdgePath,
   center: Point,
-  radius: number,
+  boundary: NodeBoundary,
   end: 'source' | 'target',
 ): BoundarySample {
   const t = end === 'target' ? 1 : 0;
@@ -125,10 +179,11 @@ function fallbackBoundarySample(
     y: path.type === 'line' ? path.p1.y - path.p0.y : path.p1.y - path.p0.y,
   });
   const sign = end === 'target' ? -1 : 1;
+  const distance = getBoundaryDistance({ x: unit.x * sign, y: unit.y * sign }, boundary);
   return {
     point: {
-      x: center.x + unit.x * radius * sign,
-      y: center.y + unit.y * radius * sign,
+      x: center.x + unit.x * distance * sign,
+      y: center.y + unit.y * distance * sign,
     },
     tangent: sample.tangent,
     t,
@@ -136,20 +191,25 @@ function fallbackBoundarySample(
 }
 
 /**
- * Finds where an edge path exits a circular node boundary near either endpoint.
+ * Finds where an edge path exits a node boundary near either endpoint.
  *
  * Arc edges are rendered center-to-center and visually clipped by the node fill.
  * For high-curvature or very short parallel edges, projecting the endpoint
- * tangent by the node radius can miss the actual visible curve. This returns
- * the nearest path/circle intersection to the requested endpoint.
+ * tangent by a scalar radius can miss the actual visible curve. This returns
+ * the nearest path/boundary intersection to the requested endpoint. A number
+ * keeps the legacy circular-node behavior; rect half-extents support
+ * axis-aligned rectangular nodes.
  */
 export function findPathBoundarySample(
   path: EdgePath,
   center: Point,
-  radius: number,
+  boundary: NodeBoundary,
   end: 'source' | 'target',
 ): BoundarySample {
-  if (radius <= 0) {
+  const hasBoundary = isRectBoundary(boundary)
+    ? boundary.halfWidth > 0 && boundary.halfHeight > 0
+    : boundary > 0;
+  if (!hasBoundary) {
     const t = end === 'target' ? 1 : 0;
     return { ...sampleEdgePath(path, t), t };
   }
@@ -162,7 +222,7 @@ export function findPathBoundarySample(
     for (let step = steps - 1; step >= 0; step--) {
       const t = step / steps;
       const sample = sampleEdgePath(path, t);
-      if (distanceTo(sample.point, center) >= radius) {
+      if (boundaryLevel(sample.point, center, boundary) >= 1) {
         outsideT = t;
         break;
       }
@@ -172,7 +232,7 @@ export function findPathBoundarySample(
     for (let step = 1; step <= steps; step++) {
       const t = step / steps;
       const sample = sampleEdgePath(path, t);
-      if (distanceTo(sample.point, center) >= radius) {
+      if (boundaryLevel(sample.point, center, boundary) >= 1) {
         outsideT = t;
         break;
       }
@@ -181,18 +241,18 @@ export function findPathBoundarySample(
   }
 
   if (outsideT === null) {
-    return fallbackBoundarySample(path, center, radius, end);
+    return fallbackBoundarySample(path, center, boundary, end);
   }
 
   let low = end === 'target' ? outsideT : insideT;
   let high = end === 'target' ? insideT : outsideT;
   for (let i = 0; i < 24; i++) {
     const mid = (low + high) * 0.5;
-    const dist = distanceTo(sampleEdgePath(path, mid).point, center);
+    const level = boundaryLevel(sampleEdgePath(path, mid).point, center, boundary);
     if (end === 'target') {
-      if (dist >= radius) low = mid;
+      if (level >= 1) low = mid;
       else high = mid;
-    } else if (dist >= radius) {
+    } else if (level >= 1) {
       high = mid;
     } else {
       low = mid;

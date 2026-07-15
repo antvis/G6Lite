@@ -3,8 +3,10 @@ title: 平行边自动错开
 description: 处理同源同目标的多条边和反向边
 ---
 
+import { withBasePath } from '@/lib/shared';
+
 <div className="example-hero">
-  <img src="/examples/parallel-edges.png" alt="平行边自动错开截图" />
+  <img src={withBasePath('/examples/parallel-edges.png')} alt="平行边自动错开截图" />
 </div>
 
 这个示例展示 `process-parallel-edges` transform 和 `edge.parallelEdges` 配置。它会把同一对节点之间的多条边错开，避免互相覆盖。

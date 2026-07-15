@@ -3,8 +3,10 @@ title: Tooltip 浮层
 description: 悬停节点或边时展示自定义业务信息
 ---
 
+import { withBasePath } from '@/lib/shared';
+
 <div className="example-hero">
-  <img src="/examples/tooltip.png" alt="Tooltip 浮层截图" />
+  <img src={withBasePath('/examples/tooltip.png')} alt="Tooltip 浮层截图" />
 </div>
 
 这个示例展示内置 `tooltip` behavior。Tooltip 内容通过 `getContent` 生成，可以针对节点和边分别返回不同 HTML。

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { CSSProperties } from 'react';
 
 import { AntVLogo } from '@/components/antv-logo';
+import { withBasePath } from '@/lib/shared';
 
 import { CodeBlock } from './code-block';
 // import { StatsBand } from './stats-band';
@@ -26,77 +27,77 @@ const customLayouts = [
 
 const heroShowcases = [
   {
-    src: '/examples/large.png',
+    src: withBasePath('/examples/large.png'),
     title: '较大规模（200 节点）',
     desc: '200 节点、800 边的力导向关系网络',
     href: '/docs/metrics/performance',
     bg: '#f8fbff',
   },
   {
-    src: '/examples/large-labeled.png',
+    src: withBasePath('/examples/large-labeled.png'),
     title: '5000 节点 + 标签（力导布局）',
     desc: '高密度节点与标签的力导向性能示例',
     href: '/docs/guide/label',
     bg: '#f7fbf8',
   },
   {
-    src: '/examples/combo.png',
+    src: withBasePath('/examples/combo.png'),
     title: 'Combo 分组',
     desc: '用分组容器组织节点与嵌套关系',
     href: '/docs/examples/combo',
     bg: '#fffaf5',
   },
   {
-    src: '/layouts/force.png',
+    src: withBasePath('/layouts/force.png'),
     title: '力导向布局',
     desc: '让关系网络按连接强度自然展开',
     href: '/docs/guide/layout',
     bg: '#f7faff',
   },
   {
-    src: '/layouts/fishbone.png',
+    src: withBasePath('/layouts/fishbone.png'),
     title: '鱼骨图布局',
     desc: '沿主骨与分支梳理问题原因',
     href: '/docs/guide/layout',
     bg: '#fff8f4',
   },
   {
-    src: '/layouts/mindmap.png',
+    src: withBasePath('/layouts/mindmap.png'),
     title: '脑图布局',
     desc: '从中心主题向两侧展开层级',
     href: '/docs/guide/layout',
     bg: '#faf8ff',
   },
   {
-    src: '/layouts/dagre.png',
+    src: withBasePath('/layouts/dagre.png'),
     title: 'DAG / 层级布局',
     desc: '按方向分层展示流程与依赖',
     href: '/docs/guide/layout',
     bg: '#fffaf2',
   },
   {
-    src: '/layouts/circular.png',
+    src: withBasePath('/layouts/circular.png'),
     title: '环形布局',
     desc: '沿圆周排列节点，突出整体关系',
     href: '/docs/guide/layout',
     bg: '#f7fbf8',
   },
   {
-    src: '/layouts/grid.png',
+    src: withBasePath('/layouts/grid.png'),
     title: '网格布局',
     desc: '规则网格排布，便于对比与浏览',
     href: '/docs/guide/layout',
     bg: '#f7fcff',
   },
   {
-    src: '/layouts/radial.png',
+    src: withBasePath('/layouts/radial.png'),
     title: '辐射布局',
     desc: '围绕中心节点向外分层展开',
     href: '/docs/guide/layout',
     bg: '#fff8fb',
   },
   {
-    src: '/examples/basic.png',
+    src: withBasePath('/examples/basic.png'),
     title: '最简示例',
     desc: '用最少配置渲染第一张关系图',
     href: '/docs/examples/basic',
@@ -648,7 +649,7 @@ function LayoutCard({
         style={{ backgroundColor: item.bg }}
       >
         <Image
-          src={`/layouts/${item.type}.png`}
+          src={withBasePath(`/layouts/${item.type}.png`)}
           alt={`${item.title}布局示例`}
           fill
           sizes={

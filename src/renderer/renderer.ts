@@ -21,7 +21,9 @@ import {
   createQuadraticPath,
   findPathBoundarySample,
   getParallelEdgeCurvature,
+  getRectBoundaryDistance,
   type EdgePath,
+  type NodeBoundary,
 } from './edgePath.js';
 import { getGL } from './gl.js';
 import { PickingManager } from './picking.js';
@@ -109,6 +111,11 @@ export class Renderer {
   // Parallel index arrays for edges — avoid Map.get in hot loops
   private edgeSourceIdx: Int32Array = new Int32Array(0);
   private edgeTargetIdx: Int32Array = new Int32Array(0);
+  // Original edge index → dense GPU item span. Hidden/unrenderable edges use
+  // start=-1/count=0; self-loops live in their own program and use loopSlot.
+  private edgeDrawStart: Int32Array = new Int32Array(0);
+  private edgeDrawCount: Int32Array = new Int32Array(0);
+  private edgeLoopSlot: Int32Array = new Int32Array(0);
   private nodeConfig: NodeConfig | undefined;
   private edgeConfig: EdgeConfig | undefined;
   private theme: ThemeTokens = {
@@ -333,6 +340,43 @@ export class Renderer {
     return false;
   }
 
+  private resetEdgeDrawMapping(edgeCount: number): void {
+    if (this.edgeDrawStart.length < edgeCount) {
+      this.edgeDrawStart = new Int32Array(edgeCount);
+      this.edgeDrawCount = new Int32Array(edgeCount);
+      this.edgeLoopSlot = new Int32Array(edgeCount);
+    }
+    this.edgeDrawStart.fill(-1, 0, edgeCount);
+    this.edgeDrawCount.fill(0, 0, edgeCount);
+    this.edgeLoopSlot.fill(-1, 0, edgeCount);
+  }
+
+  private getNodeBoundary(
+    nodeIndex: number,
+    nodeHalfWidths: Float64Array,
+    nodeHeights: Float64Array,
+  ): NodeBoundary {
+    return this.activeNodeType === 'rect'
+      ? { halfWidth: nodeHalfWidths[nodeIndex], halfHeight: nodeHeights[nodeIndex] / 2 }
+      : nodeHalfWidths[nodeIndex];
+  }
+
+  private getNodeBoundaryDistance(
+    nodeIndex: number,
+    directionX: number,
+    directionY: number,
+    nodeHalfWidths: Float64Array,
+    nodeHeights: Float64Array,
+  ): number {
+    if (this.activeNodeType !== 'rect') return nodeHalfWidths[nodeIndex];
+    return getRectBoundaryDistance(
+      directionX,
+      directionY,
+      nodeHalfWidths[nodeIndex],
+      nodeHeights[nodeIndex] / 2,
+    );
+  }
+
   /** Build GPU buffers from current state. */
   private process(): void {
     const { nodes, edges, nodeConfig, edgeConfig, theme } = this;
@@ -495,6 +539,7 @@ export class Renderer {
     nodeProgram.upload();
 
     // -- Classify edges in a single pass (no style resolution) --
+    this.resetEdgeDrawMapping(edges.length);
     const regularIndices: number[] = [];
     const selfLoopIndices: number[] = [];
     const loopsPerNode = new Map<string, number>();
@@ -712,6 +757,7 @@ export class Renderer {
     }
 
     let polySegIdx = 0; // running segment index for polyline buffer
+    let regularDrawIdx = 0; // dense item index for non-polyline edge buffers
 
     // Fast path: static edge config with no highlight/states — use cached style directly.
     // State-bearing edges must go through resolveEdgeStyle so hidden/selected
@@ -759,11 +805,28 @@ export class Renderer {
         this.activeEdgeType === 'arc'
           ? getParallelEdgeCurvature(e, src, tgt, style.curvature)
           : style.curvature;
+      const directionX = tgt.x - src.x;
+      const directionY = tgt.y - src.y;
+      const srcRadius = this.getNodeBoundaryDistance(
+        srcIdx,
+        directionX,
+        directionY,
+        nodeHalfWidths,
+        nodeHeights,
+      );
+      const tgtRadius = this.getNodeBoundaryDistance(
+        tgtIdx,
+        -directionX,
+        -directionY,
+        nodeHalfWidths,
+        nodeHeights,
+      );
 
       if (isPolyline) {
         // Polyline: write each segment as a separate EdgeRect item
         const route = this.polylineRoutes.get(i);
         if (route && route.length >= 2) {
+          const drawStart = polySegIdx;
           for (let s = 0; s < route.length - 1; s++) {
             (edgeProg as EdgeRectProgram).processEdge(
               polySegIdx++,
@@ -782,15 +845,18 @@ export class Renderer {
               0,
             );
           }
+          this.edgeDrawStart[i] = drawStart;
+          this.edgeDrawCount[i] = polySegIdx - drawStart;
         }
       } else {
         // Endpoint insets passed to the shader in GRAPH coords (radius) + fixed
         // pixels (arrow). The shader applies u_scale, so clamping stays correct
         // on zoom (process() does not re-run on zoom).
-        const srcRadius = nodeHalfWidths[srcIdx];
-        const tgtRadius = nodeHalfWidths[tgtIdx];
         const srcArrowPx = style.startArrow ? style.arrowSize : 0;
         const tgtArrowPx = style.endArrow ? style.arrowSize : 0;
+        const drawIdx = regularDrawIdx++;
+        this.edgeDrawStart[i] = drawIdx;
+        this.edgeDrawCount[i] = 1;
 
         if (this.activeEdgeType === 'arc') {
           const path = createQuadraticPath(src, tgt, arcCurvature);
@@ -798,7 +864,7 @@ export class Renderer {
             this.edgePathCache.set(i, path);
           }
           (edgeProg as EdgeArcProgram).processEdge(
-            ri,
+            drawIdx,
             src.x,
             src.y,
             tgt.x,
@@ -806,6 +872,8 @@ export class Renderer {
             color,
             pickIdx,
             arcCurvature,
+            style.lineWidth,
+            dashCycle,
             opacity,
           );
         } else if (this.activeEdgeType === 'cubic') {
@@ -821,7 +889,7 @@ export class Renderer {
           const edgeTgtX = direction === 'LR' ? tgt.x - tgtHW : tgt.x + tgtHW;
           const edgeTgtY = tgt.y;
           (edgeProg as EdgeCubicProgram).processEdge(
-            ri,
+            drawIdx,
             edgeSrcX,
             edgeSrcY,
             edgeTgtX,
@@ -837,7 +905,7 @@ export class Renderer {
             this.edgePathCache.set(i, createLinePath(src, tgt));
           }
           (edgeProg as EdgeRectProgram).processEdge(
-            ri,
+            drawIdx,
             src.x,
             src.y,
             tgt.x,
@@ -857,7 +925,7 @@ export class Renderer {
             this.edgePathCache.set(i, createLinePath(src, tgt));
           }
           (edgeProg as EdgeLineProgram).processEdge(
-            ri,
+            drawIdx,
             src.x,
             src.y,
             tgt.x,
@@ -904,7 +972,12 @@ export class Renderer {
         }
       } else if (this.activeEdgeType === 'arc') {
         const path = createQuadraticPath(src, tgt, arcCurvature);
-        const endSample = findPathBoundarySample(path, tgt, nodeHalfWidths[tgtIdx], 'target');
+        const endSample = findPathBoundarySample(
+          path,
+          tgt,
+          this.getNodeBoundary(tgtIdx, nodeHalfWidths, nodeHeights),
+          'target',
+        );
         const endLen = Math.hypot(endSample.tangent.x, endSample.tangent.y) || 1;
         const endUx = endSample.tangent.x / endLen;
         const endUy = endSample.tangent.y / endLen;
@@ -914,7 +987,12 @@ export class Renderer {
         arrowSrcX = endTipX - endUx;
         arrowSrcY = endTipY - endUy;
 
-        const startSample = findPathBoundarySample(path, src, nodeHalfWidths[srcIdx], 'source');
+        const startSample = findPathBoundarySample(
+          path,
+          src,
+          this.getNodeBoundary(srcIdx, nodeHalfWidths, nodeHeights),
+          'source',
+        );
         const startLen = Math.hypot(startSample.tangent.x, startSample.tangent.y) || 1;
         const startUx = startSample.tangent.x / startLen;
         const startUy = startSample.tangent.y / startLen;
@@ -944,7 +1022,7 @@ export class Renderer {
       }
       if (style.endArrow) {
         // Pull the tip back by the node radius only when it sits at the center.
-        const tgtRadius = endTipAtCenter ? nodeHalfWidths[tgtIdx] : 0;
+        const arrowTargetRadius = endTipAtCenter ? tgtRadius : 0;
         arrowProg.processArrow(
           arrowIdx++,
           arrowSrcX,
@@ -953,14 +1031,14 @@ export class Renderer {
           endTipY,
           style.arrowSize,
           style.lineWidth,
-          tgtRadius,
+          arrowTargetRadius,
           color,
           pickIdx,
           opacity,
         );
       }
       if (style.startArrow) {
-        const srcRadius = startTipAtCenter ? nodeHalfWidths[srcIdx] : 0;
+        const arrowSourceRadius = startTipAtCenter ? srcRadius : 0;
         arrowProg.processArrow(
           arrowIdx++,
           arrowTgtSrcX,
@@ -969,21 +1047,22 @@ export class Renderer {
           startTipY,
           style.arrowSize,
           style.lineWidth,
-          srcRadius,
+          arrowSourceRadius,
           color,
           pickIdx,
           opacity,
         );
       }
     }
+    edgeProg.setItemCount(isPolyline ? polySegIdx : regularDrawIdx);
     edgeProg.upload();
 
     // -- Process self-loop edges --
     const loopProg = this.getProgram('edgeLoop');
     loopProg.reallocate(selfLoopIndices.length);
     const loopNodeCounter = new Map<string, number>();
-    for (let li = 0; li < selfLoopIndices.length; li++) {
-      const i = selfLoopIndices[li];
+    let loopDrawIdx = 0;
+    for (const i of selfLoopIndices) {
       const e = edges[i];
       const nIdx = this.edgeSourceIdx[i];
       if (nIdx < 0) continue;
@@ -1009,12 +1088,21 @@ export class Renderer {
       loopNodeCounter.set(e.source, loopIndex + 1);
       const angle = -Math.PI / 2; // always top
 
-      const nodeRadius = nodeHalfWidths[nIdx];
+      const spread = 0.5;
+      const endAngle = angle + spread;
+      const nodeRadius = this.getNodeBoundaryDistance(
+        nIdx,
+        Math.cos(endAngle),
+        Math.sin(endAngle),
+        nodeHalfWidths,
+        nodeHeights,
+      );
       const baseLoopDist = 35;
       const loopSpacing = 15;
       const loopSize = baseLoopDist + loopIndex * loopSpacing;
+      this.edgeLoopSlot[i] = loopDrawIdx;
       loopProg.processLoop(
-        li,
+        loopDrawIdx++,
         node.x,
         node.y,
         nodeRadius,
@@ -1027,8 +1115,6 @@ export class Renderer {
 
       // Arrow at end of self-loop (tangent direction: CP2 → P3)
       if (style.endArrow) {
-        const spread = 0.5;
-        const endAngle = angle + spread;
         const ext = nodeRadius + loopSize;
         // CP2 (control point near end)
         const cp2x = node.x + ext * Math.cos(endAngle);
@@ -1051,6 +1137,7 @@ export class Renderer {
         );
       }
     }
+    loopProg.setItemCount(loopDrawIdx);
     loopProg.upload();
     arrowProg.setItemCount(arrowIdx);
     arrowProg.upload();
@@ -1117,8 +1204,15 @@ export class Renderer {
       for (let i = 0; i < edges.length; i++) changedEdgeIndices.add(i);
     }
 
+    let regularEdgesPatched = false;
+    let loopEdgesPatched = false;
+    const loopProgram = this.getProgram('edgeLoop');
     for (const i of changedEdgeIndices) {
       if (i < 0 || i >= edges.length) continue;
+      const drawStart = this.edgeDrawStart[i] ?? -1;
+      const drawCount = this.edgeDrawCount[i] ?? 0;
+      const loopSlot = this.edgeLoopSlot[i] ?? -1;
+      if (drawStart < 0 && loopSlot < 0) continue;
       const e = edges[i];
       const srcIdx = this.nodeIdToIndex.get(e.source);
       const tgtIdx = this.nodeIdToIndex.get(e.target);
@@ -1136,12 +1230,21 @@ export class Renderer {
             edgeBaseColor[1] * 0.08 + bg[1] * 0.92,
             edgeBaseColor[2] * 0.08 + bg[2] * 0.92,
           ];
-      edgeProgram.patchItemColor(i, color);
+      if (loopSlot >= 0) {
+        loopProgram.patchItemColor(loopSlot, color);
+        loopEdgesPatched = true;
+      } else {
+        for (let slot = drawStart; slot < drawStart + drawCount; slot++) {
+          edgeProgram.patchItemColor(slot, color);
+        }
+        regularEdgesPatched = drawCount > 0 || regularEdgesPatched;
+      }
     }
 
     // Re-upload only if something changed
     if (changedNodeIds.size > 0) nodeProgram.reupload();
-    if (changedEdgeIndices.size > 0) edgeProgram.reupload();
+    if (regularEdgesPatched) edgeProgram.reupload();
+    if (loopEdgesPatched) loopProgram.reupload();
 
     // Save current state as previous
     this.prevHighlightNodeIds = new Set(this.highlightNodeIds);
@@ -1191,62 +1294,90 @@ export class Renderer {
       }
     }
 
-    if (affectedEdgeIndices.length > 0 && isSimpleEdge) {
-      // For line/rect edges, use patchEdgeEndpoints + patchEdgeStyle
-      for (const i of affectedEdgeIndices) {
-        const e = this.edges[i];
-        const srcNode = dataModel.getNode(e.source);
-        const tgtNode = dataModel.getNode(e.target);
-        if (!srcNode || !tgtNode) continue;
+    const hasRenderableAffectedEdge = affectedEdgeIndices.some(
+      (i) => (this.edgeDrawStart[i] ?? -1) >= 0 || (this.edgeLoopSlot[i] ?? -1) >= 0,
+    );
+    const needsFullEdgeProcess =
+      hasRenderableAffectedEdge &&
+      (!isSimpleEdge ||
+        affectedEdgeIndices.some(
+          (i) =>
+            (this.edgeLoopSlot[i] ?? -1) >= 0 ||
+            ((this.edgeDrawStart[i] ?? -1) >= 0 && (this.edgeDrawCount[i] ?? 0) !== 1),
+        ));
 
+    if (needsFullEdgeProcess) {
+      // Arrow/arc/cubic/polyline/self-loop geometry cannot be patched safely.
+      // Rebuild in this PATCH_POSITION cycle so every buffer sees the same
+      // node positions. Hidden-only affected edges intentionally do no work.
+      this.needToProcess = false;
+      this.needPickingRender = true;
+      this.process();
+      return;
+    }
+
+    if (hasRenderableAffectedEdge && isSimpleEdge) {
+      let patchedEdge = false;
+      // For line/rect edges, patch the dense GPU slot rather than the original
+      // edge index. Direction changes also require recomputing rect boundary
+      // distances, even for the GL_LINES backend.
+      for (const i of affectedEdgeIndices) {
+        const drawSlot = this.edgeDrawStart[i] ?? -1;
+        if (drawSlot < 0) continue;
+
+        const e = this.edges[i];
         const srcIdx = this.edgeSourceIdx[i];
         const tgtIdx = this.edgeTargetIdx[i];
         if (srcIdx < 0 || tgtIdx < 0) continue;
 
         const src = this.nodes[srcIdx];
         const tgt = this.nodes[tgtIdx];
+        const srcStyle = resolveNodeStyle(src, this.nodeConfig, this.theme);
+        const tgtStyle = resolveNodeStyle(tgt, this.nodeConfig, this.theme);
+        const directionX = tgt.x - src.x;
+        const directionY = tgt.y - src.y;
+        const srcRadius =
+          this.activeNodeType === 'rect'
+            ? getRectBoundaryDistance(
+                directionX,
+                directionY,
+                srcStyle.width / 2,
+                srcStyle.height / 2,
+              )
+            : srcStyle.size / 2;
+        const tgtRadius =
+          this.activeNodeType === 'rect'
+            ? getRectBoundaryDistance(
+                -directionX,
+                -directionY,
+                tgtStyle.width / 2,
+                tgtStyle.height / 2,
+              )
+            : tgtStyle.size / 2;
+        const style = resolveEdgeStyle(src, tgt, e, this.edgeConfig, this.theme);
+        const srcArrowPx = style.startArrow ? style.arrowSize : 0;
+        const tgtArrowPx = style.endArrow ? style.arrowSize : 0;
 
         if (this.activeEdgeType === 'rect') {
-          const style = resolveEdgeStyle(src, tgt, e, this.edgeConfig, this.theme);
-          const srcStyle = resolveNodeStyle(src, this.nodeConfig, this.theme);
-          const tgtStyle = resolveNodeStyle(tgt, this.nodeConfig, this.theme);
-          // Graph-coord radii + fixed arrow pixels; the shader applies u_scale,
-          // so do NOT pre-multiply by camera.zoom (that would go stale on zoom).
-          const srcRadius = (this.activeNodeType === 'rect' ? srcStyle.width : srcStyle.size) / 2;
-          const tgtRadius = (this.activeNodeType === 'rect' ? tgtStyle.width : tgtStyle.size) / 2;
-          const srcArrowPx = style.startArrow ? style.arrowSize : 0;
-          const tgtArrowPx = style.endArrow ? style.arrowSize : 0;
-          (edgeProgram as import('./programs/edgeRect.js').EdgeRectProgram).patchEdgeEndpoints(
-            i,
-            src.x,
-            src.y,
-            tgt.x,
-            tgt.y,
-          );
-          (edgeProgram as import('./programs/edgeRect.js').EdgeRectProgram).patchEdgeStyle(i, {
+          (edgeProgram as EdgeRectProgram).patchEdgeEndpoints(drawSlot, src.x, src.y, tgt.x, tgt.y);
+          (edgeProgram as EdgeRectProgram).patchEdgeStyle(drawSlot, {
             srcRadius,
             tgtRadius,
             srcArrowPx,
             tgtArrowPx,
           });
         } else {
-          (edgeProgram as import('./programs/edgeLine.js').EdgeLineProgram).patchEdgeEndpoints(
-            i,
-            src.x,
-            src.y,
-            tgt.x,
-            tgt.y,
-          );
+          (edgeProgram as EdgeLineProgram).patchEdgeEndpoints(drawSlot, src.x, src.y, tgt.x, tgt.y);
+          (edgeProgram as EdgeLineProgram).patchEdgeStyle(drawSlot, {
+            srcRadius,
+            tgtRadius,
+            srcArrowPx,
+            tgtArrowPx,
+          });
         }
+        patchedEdge = true;
       }
-      edgeProgram.upload();
-    } else if (affectedEdgeIndices.length > 0) {
-      // For arrow/arc/cubic/polyline edges, rebuild in this same PATCH_POSITION
-      // cycle so edge lines and arrowheads consume the same node positions.
-      this.needToProcess = false;
-      this.needPickingRender = true;
-      this.process();
-      return;
+      if (patchedEdge) edgeProgram.upload();
     }
 
     this.needPickingRender = true;
@@ -1298,7 +1429,15 @@ export class Renderer {
         const effectiveStrokeWidth = isStrokeTransparent ? 0 : style.strokeWidth;
 
         if (this.activeNodeType === 'rect') {
-          (nodeProgram as import('./programs/nodeRect.js').NodeRectProgram).patchNodeStyle(idx, {
+          if (
+            this._nodeHalfWidths &&
+            this._nodeHeights &&
+            (Math.abs(this._nodeHalfWidths[idx] - style.width / 2) > 1e-6 ||
+              Math.abs(this._nodeHeights[idx] - style.height) > 1e-6)
+          ) {
+            nodeSizeChanged = true;
+          }
+          (nodeProgram as NodeRectProgram).patchNodeStyle(idx, {
             color,
             width: style.width,
             height: style.height,
@@ -1341,6 +1480,7 @@ export class Renderer {
     // Patch edge styles
     if (changedEdgeIds.size > 0) {
       const isSimpleEdge = this.activeEdgeType === 'line' || this.activeEdgeType === 'rect';
+      let simpleEdgePatched = false;
       for (const edgeId of changedEdgeIds) {
         const idx = this.edgeIdToIndex.get(edgeId);
         if (idx === undefined || idx >= this.edges.length) continue;
@@ -1355,6 +1495,28 @@ export class Renderer {
         // rewrite this.edges[idx] — that would replace the shared object.
         const dmEdge = dataModel.getEdge(edgeId);
         const edgeForStyle = (dmEdge ?? e) as any;
+        const drawStart = this.edgeDrawStart[idx] ?? -1;
+        const drawCount = this.edgeDrawCount[idx] ?? 0;
+        const loopSlot = this.edgeLoopSlot[idx] ?? -1;
+        const isMapped = drawStart >= 0 || loopSlot >= 0;
+        const shouldRender = !edgeHasState(edgeForStyle, 'hidden');
+
+        // Visibility changes insert/remove dense buffer items, so the mapping
+        // itself must be rebuilt. Hidden edges that remain hidden need no GPU
+        // write at all.
+        if (isMapped !== shouldRender) {
+          this.needToProcess = true;
+          continue;
+        }
+        if (!shouldRender) continue;
+
+        // Self-loops and multi-item spans (polyline) cannot use the regular
+        // single-item style patch APIs. Complex programs also require
+        // re-tessellation for style changes.
+        if (!isSimpleEdge || loopSlot >= 0 || drawStart < 0 || drawCount !== 1) {
+          this.needToProcess = true;
+          continue;
+        }
 
         const src = this.nodes[srcIdx];
         const tgt = this.nodes[tgtIdx];
@@ -1375,25 +1537,23 @@ export class Renderer {
           if (this.activeEdgeType === 'rect') {
             const dashCycle =
               style.lineDash.length >= 2 ? style.lineDash[0] + style.lineDash[1] : 0;
-            (edgeProgram as import('./programs/edgeRect.js').EdgeRectProgram).patchEdgeStyle(idx, {
+            (edgeProgram as EdgeRectProgram).patchEdgeStyle(drawStart, {
               color,
               lineWidth: style.lineWidth,
               dashCycle,
               opacity,
             });
           } else {
-            (edgeProgram as import('./programs/edgeLine.js').EdgeLineProgram).patchEdgeStyle(idx, {
+            (edgeProgram as EdgeLineProgram).patchEdgeStyle(drawStart, {
               color,
               opacity,
             });
           }
+          simpleEdgePatched = true;
         }
-        // For arc/cubic/polyline, style patching requires full re-tessellation — skip, will trigger PARTIAL_PROCESS
       }
-      if (isSimpleEdge) {
+      if (simpleEdgePatched && !this.needToProcess) {
         edgeProgram.reupload();
-      } else {
-        this.needToProcess = true;
       }
     }
 
@@ -1881,6 +2041,9 @@ export class Renderer {
     this.nodeIdToIndex.clear();
     this.edgeSourceIdx = new Int32Array(0);
     this.edgeTargetIdx = new Int32Array(0);
+    this.edgeDrawStart = new Int32Array(0);
+    this.edgeDrawCount = new Int32Array(0);
+    this.edgeLoopSlot = new Int32Array(0);
     this.highlightNodeIds.clear();
     this.highlightEdgeIndices.clear();
     this.prevHighlightNodeIds.clear();

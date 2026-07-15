@@ -1,14 +1,14 @@
 /**
  * EdgeLoop: renders self-loop edges as cubic bezier arcs around the node.
- * Reuses EdgeArc's vertex layout (9 floats/vertex) and shaders.
+ * Uses its own compact GL_LINES shader and 9-float vertex layout.
  * Each loop: SEGMENTS line segments → SEGMENTS*2 vertices.
  */
 
 import { encodeId } from '../picking.js';
 import type { AttributeLayout, RenderParams } from './program.js';
 import { Program } from './program.js';
-import { fragmentShader } from './shaders/edgeArc.frag.js';
-import { vertexShader } from './shaders/edgeArc.vert.js';
+import { fragmentShader } from './shaders/edgeLoop.frag.js';
+import { vertexShader } from './shaders/edgeLoop.vert.js';
 
 const FLOATS_PER_VERTEX = 9;
 const SEGMENTS = 12;

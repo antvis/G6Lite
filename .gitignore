@@ -5,7 +5,7 @@ performance/
 
 # Test coverage
 coverage/
-openspec/*
+openspec/
 
 # docs website (Next.js)
 website/node_modules

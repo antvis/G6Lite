@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { DEFAULT_BEHAVIORS, resolveBehaviorOptions } from '../behaviors/index.js';
 import { EventEmitter } from '../events.js';
+import { GESTURE_CONSUME_EVENT } from '../interaction/gesture.js';
 
 describe('default canvas navigation behaviors', () => {
   it('enables zoom and canvas drag when behaviors is omitted', () => {
@@ -318,6 +319,68 @@ describe('hoverHighlight behavior', () => {
     expect(graph.setItemState).toHaveBeenCalledWith('e1', 'inactive', true);
   });
 
+  it('freezes hover changes while a node is being dragged', async () => {
+    const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+
+    hoverHighlight(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:dragstart', { nodeId: 'a', nodeIds: ['a'] });
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'b', event: mouseEvent() });
+    graph.eventEmitter.emit('edge:pointerover', {
+      edgeIndex: 1,
+      source: 'b',
+      target: 'c',
+      event: mouseEvent(),
+    });
+
+    expect(renderer.setHighlight).not.toHaveBeenCalled();
+    expect(graph.setItemState).not.toHaveBeenCalled();
+
+    graph.eventEmitter.emit('node:dragend', { nodeId: 'a', nodeIds: ['a'] });
+    expect(renderer.setHighlight).not.toHaveBeenCalled();
+
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'b', event: mouseEvent() });
+    expect(renderer.setHighlight).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the same hover freeze semantics for combo dragging', async () => {
+    const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+
+    hoverHighlight(renderer as any, graph as any);
+    graph.eventEmitter.emit('combo:dragstart', { comboId: 'combo-a' });
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'b', event: mouseEvent() });
+    expect(renderer.setHighlight).not.toHaveBeenCalled();
+
+    graph.eventEmitter.emit('combo:dragend', { comboId: 'combo-a' });
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'b', event: mouseEvent() });
+    expect(renderer.setHighlight).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not clear an existing hover until the drag ends and the pointer moves again', async () => {
+    const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+
+    hoverHighlight(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: mouseEvent() });
+    graph.eventEmitter.emit('node:dragstart', { nodeId: 'a', nodeIds: ['a'] });
+    graph.eventEmitter.emit('node:pointerleave', { nodeId: 'a', event: mouseEvent() });
+
+    expect(renderer.setHighlight).toHaveBeenCalledTimes(1);
+
+    graph.eventEmitter.emit('node:dragend', { nodeId: 'a', nodeIds: ['a'] });
+    expect(renderer.setHighlight).toHaveBeenCalledTimes(1);
+
+    graph.eventEmitter.emit('node:pointerleave', { nodeId: 'a', event: mouseEvent() });
+    expect(renderer.setHighlight).toHaveBeenCalledTimes(2);
+    const lastArg = renderer.setHighlight.mock.calls.at(-1)![0];
+    expect(lastArg.nodeIds.size).toBe(0);
+    expect(lastArg.edgeIndices.size).toBe(0);
+  });
+
   it('teardown unsubscribes', async () => {
     const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
     const renderer = createMockRenderer();
@@ -349,6 +412,21 @@ describe('dragNode behavior', () => {
     expect(startHandler).toHaveBeenCalledTimes(1);
     expect(startHandler.mock.calls[0][0].nodeId).toBe('a');
     expect(startHandler.mock.calls[0][0].nodeIds).toEqual(['a']);
+  });
+
+  it('consumes the pointer gesture when node dragging starts', async () => {
+    const { dragNode } = await import('../behaviors/dragNode.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const consumeHandler = vi.fn();
+    graph.eventEmitter.on(GESTURE_CONSUME_EVENT, consumeHandler);
+
+    const teardown = dragNode(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 100 }));
+
+    expect(consumeHandler).toHaveBeenCalledTimes(1);
+    teardown();
   });
 
   it('does not emit dragend for a plain click', async () => {

@@ -9,6 +9,7 @@
  */
 
 import type { Graph } from '../graph.js';
+import { GESTURE_CONSUME_EVENT } from '../interaction/gesture.js';
 import type { Renderer } from '../renderer/renderer.js';
 
 export function dragNode(renderer: Renderer, graph: Graph): () => void {
@@ -70,6 +71,9 @@ export function dragNode(renderer: Renderer, graph: Graph): () => void {
     if (!dragStarted) {
       if (Math.hypot(e.clientX - startMouse.x, e.clientY - startMouse.y) <= dragThreshold) return;
       dragStarted = true;
+      // Match G6's preventClick semantics: once dragstart is real, the
+      // pointer gesture must not produce a click on the element under mouseup.
+      graph.eventEmitter.emit(GESTURE_CONSUME_EVENT);
       if (draggingComboId) {
         graph.eventEmitter.emit('combo:dragstart', { comboId: draggingComboId, event: e });
       } else {

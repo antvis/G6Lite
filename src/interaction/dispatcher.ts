@@ -22,6 +22,7 @@
 import type { Graph } from '../graph.js';
 import type { Renderer } from '../renderer/renderer.js';
 import type { GraphElementEvent } from '../types.js';
+import { GESTURE_CONSUME_EVENT } from './gesture.js';
 
 type HoverTarget =
   | { kind: 'node'; id: string }
@@ -46,7 +47,7 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
   const canvas = renderer.getCanvas();
   const emitter = graph.eventEmitter;
   let lastHover: HoverTarget = null;
-  let pressStart: { x: number; y: number } | null = null;
+  let gesture: { x: number; y: number; consumed: boolean } | null = null;
   let suppressNextClick = false;
   const clickThreshold = 3;
 
@@ -252,8 +253,11 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
 
   // --- Press / click / wheel ----------------------------------------------
 
+  const consumeGesture = (): void => {
+    if (gesture) gesture.consumed = true;
+  };
   const onMouseDown = (e: MouseEvent): void => {
-    pressStart = { x: e.clientX, y: e.clientY };
+    gesture = { x: e.clientX, y: e.clientY, consumed: false };
     suppressNextClick = false;
     dispatchHit(e, 'pointerdown');
   };
@@ -271,14 +275,16 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
   };
   const onWheel = (e: WheelEvent): void => dispatchHit(e, 'wheel');
   const onMouseUp = (e: MouseEvent): void => {
-    if (pressStart) {
+    if (gesture) {
       suppressNextClick =
-        Math.hypot(e.clientX - pressStart.x, e.clientY - pressStart.y) > clickThreshold;
-      pressStart = null;
+        gesture.consumed ||
+        Math.hypot(e.clientX - gesture.x, e.clientY - gesture.y) > clickThreshold;
+      gesture = null;
     }
     emitter.emit('canvas:pointerup', createPayload(e, 'canvas'));
   };
 
+  emitter.on(GESTURE_CONSUME_EVENT, consumeGesture);
   canvas.addEventListener('mousemove', onMouseMove);
   canvas.addEventListener('mouseleave', onMouseLeave);
   canvas.addEventListener('mousedown', onMouseDown);
@@ -289,6 +295,7 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
   window.addEventListener('mouseup', onMouseUp);
 
   return () => {
+    emitter.off(GESTURE_CONSUME_EVENT, consumeGesture);
     canvas.removeEventListener('mousemove', onMouseMove);
     canvas.removeEventListener('mouseleave', onMouseLeave);
     canvas.removeEventListener('mousedown', onMouseDown);

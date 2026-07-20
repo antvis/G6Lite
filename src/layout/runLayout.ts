@@ -16,6 +16,8 @@ import {
   RadialLayout,
   RandomLayout,
 } from '@antv/layout';
+import type { ExtensionContext, LayoutExtension } from '../extensions/contracts.js';
+import { createExtension, safeExtensionCall } from '../extensions/registry.js';
 import type { GraphData, GraphNode, LayoutConfig } from '../types.js';
 import { FishboneLayout } from './fishboneLayout.js';
 import { IndentedLayout } from './indentedLayout.js';
@@ -57,6 +59,7 @@ export async function runLayout(
   data: GraphData,
   config: LayoutConfig,
   viewport?: { width: number; height: number },
+  runtime: { signal?: AbortSignal; extensionContext?: ExtensionContext } = {},
 ): Promise<LayoutResult> {
   // Inject canvas viewport (width/height/center) so @antv/layout sizes the
   // graph to the CANVAS, not window.innerWidth/innerHeight. Without this its
@@ -74,6 +77,43 @@ export async function runLayout(
   }
 
   const useWorker = config.worker ?? false;
+
+  const customLayout = createExtension<LayoutExtension>('layout', config.type);
+  if (customLayout) {
+    try {
+      if (runtime.signal?.aborted) throw new DOMException('Layout aborted', 'AbortError');
+      if (runtime.extensionContext) {
+        safeExtensionCall(
+          'layout',
+          config.type,
+          'init',
+          () => customLayout.init?.(runtime.extensionContext!, config),
+          undefined,
+        );
+      }
+      return await customLayout.execute(data, {
+        width: viewport?.width ?? Number(config.width ?? 800),
+        height: viewport?.height ?? Number(config.height ?? 600),
+        signal: runtime.signal,
+      });
+    } catch (error) {
+      if (runtime.signal?.aborted) {
+        return { nodes: data.nodes.map((node) => ({ ...node, x: node.x ?? 0, y: node.y ?? 0 })) };
+      }
+      console.error(`[G6Lite] layout extension "${config.type}" failed during execute`, error);
+      return {
+        nodes: data.nodes.map((node) => ({ ...node, x: node.x ?? 0, y: node.y ?? 0 })),
+      };
+    } finally {
+      safeExtensionCall(
+        'layout',
+        config.type,
+        'destroy',
+        () => customLayout.destroy?.(),
+        undefined,
+      );
+    }
+  }
 
   if (useWorker) {
     try {

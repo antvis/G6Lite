@@ -41,6 +41,13 @@ The playground opens at **http://localhost:5173** with a G6-website-style layout
 ### Getting started
 - `basic` — 最简示例 ⭐
 - `set-data` — `setData` + `layout()` lifecycle
+- `incremental-nodes` — 使用 `addNodes()` 增量新增可见、可选择的孤立节点
+- `drag-node-threshold` — 验证单击不触发拖拽，超过阈值才发出 drag 事件
+- `brush-click-select` — 验证 Shift 框选结果不会被同一手势的 click 清空
+- `fit-incremental-nodes` — 验证完整替换后的增量节点参与 `fitView()`
+- `batch-node-positions` — 使用 `updateNodePositions()` 批量同步坐标
+- `set-data-fit-options` — 验证 `setData()` 的 `maxZoom` 与 `fitView:false`
+- `self-loop-labels` — 验证自环标签沿真实曲线定位
 - `shapes` — 图形类型 (circle / rect / …)
 
 ### Nodes

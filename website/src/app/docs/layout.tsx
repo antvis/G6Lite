@@ -2,10 +2,6 @@ import { source } from '@/lib/source';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { baseOptions } from '@/lib/layout.shared';
-import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
-import { MessageCircleIcon } from 'lucide-react';
-import { cn } from '@/lib/cn';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { getDocsNavigationTree } from '@/lib/docs-tree';
 
 export default function Layout({ children }: LayoutProps<'/docs'>) {
@@ -22,22 +18,6 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
         searchToggle={{ enabled: false }}
         themeSwitch={{ enabled: false }}
       >
-        <AISearch>
-          <AISearchPanel />
-          <AISearchTrigger
-            position="float"
-            className={cn(
-              buttonVariants({
-                variant: 'secondary',
-                className: 'text-fd-muted-foreground rounded-2xl',
-              }),
-            )}
-          >
-            <MessageCircleIcon className="size-4.5" />
-            Ask AI
-          </AISearchTrigger>
-        </AISearch>
-
         {children}
       </DocsLayout>
     </HomeLayout>

@@ -1,9 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { DecorationRenderer } from '../extensions/contracts.js';
+import { registerDecoration } from '../extensions/decoration.js';
 import { registerLabelRenderer } from '../extensions/label.js';
+import { registerNode } from '../extensions/node.js';
 import { createQuadraticPath } from '../renderer/edgePath.js';
 import {
+  getBuiltInNodeBoundaryAnchor,
   getCustomNodeLabelAnchor,
   getLabelZoom,
+  getNodeDecorationAnchor,
   isValidLabelLayout,
   LabelLayerRenderer,
   resolveEdgeLabelStyle,
@@ -53,6 +58,9 @@ function createLayer(ctx: CanvasRenderingContext2D, dpr = 1) {
     } as DOMRect;
   };
   const mainCanvas = document.createElement('canvas');
+  const backingScale = Math.min(2, dpr);
+  mainCanvas.width = 400 * backingScale;
+  mainCanvas.height = 300 * backingScale;
   container.appendChild(mainCanvas);
   return new LabelLayerRenderer(container, mainCanvas);
 }
@@ -73,14 +81,114 @@ describe('LabelRenderer zoom scaling helpers', () => {
   });
 
   it('converts label dimensions through dpr and clamped zoom', () => {
-    expect(toLabelScreenPx(12, 2, 1)).toBe(24);
-    expect(toLabelScreenPx(12, 2, 2)).toBe(48);
+    expect(toLabelScreenPx(12, 2, 1)).toBe(12);
+    expect(toLabelScreenPx(12, 2, 2)).toBe(24);
     expect(toLabelScreenPx(12, 2, 4)).toBe(48);
     expect(toLabelScreenPx(12, 2, 0.1)).toBe(6);
   });
 });
 
 describe('custom label helpers', () => {
+  it('computes circle and rounded-rect decoration anchors from the real outline', () => {
+    const circle = getBuiltInNodeBoundaryAnchor('circle', 'right', 40, 40, 0.25);
+    expect(circle.x).toBeCloseTo(Math.sqrt(300));
+    expect(circle.y).toBe(10);
+
+    const rounded = getBuiltInNodeBoundaryAnchor('rect', 'right', 40, 40, 0.45, 5);
+    expect(rounded.x).toBeCloseTo(19);
+    expect(rounded.y).toBe(18);
+  });
+
+  it('positions decorations on the node boundary by default', () => {
+    expect(
+      getNodeDecorationAnchor(
+        100,
+        100,
+        40,
+        30,
+        { width: 20, height: 10 },
+        'top',
+        'boundary',
+        'center',
+        4,
+      ),
+    ).toEqual({ x: 100, y: 85 });
+    expect(
+      getNodeDecorationAnchor(
+        100,
+        100,
+        40,
+        30,
+        { width: 20, height: 10 },
+        'right',
+        'boundary',
+        'center',
+        4,
+      ),
+    ).toEqual({ x: 120, y: 100 });
+  });
+
+  it('supports outside and inside decoration attachment', () => {
+    expect(
+      getNodeDecorationAnchor(
+        100,
+        100,
+        40,
+        30,
+        { width: 20, height: 10 },
+        'top',
+        'outside',
+        'center',
+        4,
+      ),
+    ).toEqual({ x: 100, y: 76 });
+    expect(
+      getNodeDecorationAnchor(
+        100,
+        100,
+        40,
+        30,
+        { width: 20, height: 10 },
+        'right',
+        'inside',
+        'center',
+        4,
+      ),
+    ).toEqual({ x: 110, y: 100 });
+  });
+
+  it('aligns a right-side decoration start edge to the node boundary', () => {
+    expect(
+      getNodeDecorationAnchor(
+        100,
+        100,
+        40,
+        30,
+        { width: 20, height: 10 },
+        'right',
+        'boundary',
+        'start',
+        4,
+        -0.2,
+      ),
+    ).toEqual({ x: 130, y: 94 });
+    expect(
+      getNodeDecorationAnchor(
+        100,
+        100,
+        40,
+        30,
+        { width: 20, height: 10 },
+        'right',
+        'boundary',
+        'start',
+        4,
+        -0.2,
+        4,
+      ),
+    ).toEqual({ x: 126, y: 94 });
+  });
+
   it('resolves node function styles into final Canvas pixels', () => {
     const node: LayoutNode = { id: 'n1', x: 0, y: 0, data: { size: 14 } };
     const style: NonNullable<NodeConfig['style']> = {
@@ -188,6 +296,493 @@ describe('custom label helpers', () => {
 });
 
 describe('LabelLayerRenderer custom lifecycle', () => {
+  it('uses the main WebGL backing scale and does not double-apply DPR to node geometry', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx, 3);
+    const measure = vi.fn(() => ({ width: 10, height: 10 }));
+    registerDecoration('dpr-badge', { measure, draw: vi.fn() });
+
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 2 },
+      { style: { size: 20 }, decorations: [{ renderer: 'dpr-badge' }] },
+    );
+
+    expect(measure).toHaveBeenCalledWith(
+      expect.objectContaining({ dpr: 2, zoom: 2, nodeWidth: 40, nodeHeight: 40 }),
+    );
+    layer.destroy();
+  });
+
+  it('keeps half-badge caps on both side boundaries at 32px and 68px while preserving numeric overlap', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    registerDecoration('responsive-boundary-overlap-badge', {
+      measure: ({ nodeWidth }) => ({ width: nodeWidth * 0.75, height: nodeWidth / 3 }),
+      draw: vi.fn(),
+    });
+
+    const renderAt = (
+      size: number,
+      overlap: number | 'half-badge',
+      placement: 'left' | 'right' = 'right',
+    ) => {
+      vi.mocked(ctx.translate).mockClear();
+      layer.draw(
+        [{ id: 'n1', x: 100, y: 100, data: { size } }],
+        [],
+        { x: 0, y: 0, zoom: 1 },
+        {
+          style: (node) => ({ size: Number(node.data?.size) }),
+          decorations: [
+            {
+              renderer: 'responsive-boundary-overlap-badge',
+              placement,
+              attachment: 'boundary',
+              anchor: 'start',
+              boundaryOverlap: () => overlap,
+              data: {},
+            },
+          ],
+        },
+      );
+      return vi.mocked(ctx.translate).mock.calls[0][0];
+    };
+
+    for (const size of [32, 68]) {
+      const badgeWidth = size * 0.75;
+      const badgeHeight = size / 3;
+      const nodeBoundary = 100 + size / 2;
+      const centerX = renderAt(size, 'half-badge');
+      const leftCapCenter = centerX - badgeWidth / 2 + badgeHeight / 2;
+      expect(leftCapCenter).toBeCloseTo(nodeBoundary);
+
+      const leftNodeBoundary = 100 - size / 2;
+      const leftCenterX = renderAt(size, 'half-badge', 'left');
+      const rightCapCenter = leftCenterX + badgeWidth / 2 - badgeHeight / 2;
+      expect(rightCapCenter).toBeCloseTo(leftNodeBoundary);
+    }
+
+    const size = 68;
+    const badgeWidth = size * 0.75;
+    const nodeBoundary = 100 + size / 2;
+    const centerX = renderAt(size, 4);
+    expect(centerX - badgeWidth / 2).toBeCloseTo(nodeBoundary - 4);
+    layer.destroy();
+  });
+
+  it('uses the height of the boundary-adjacent stack item for top and bottom half-badge overlap', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    type BadgeBox = { width: number; height: number };
+    registerDecoration('mixed-height-boundary-badges', {
+      measure: ({ data }: { data: BadgeBox }) => data,
+      draw: vi.fn(),
+    } as DecorationRenderer<BadgeBox>);
+    const items: BadgeBox[] = [
+      { width: 50, height: 10 },
+      { width: 80, height: 20 },
+    ];
+    const makeConfig = (placement: 'top' | 'bottom'): NodeConfig => ({
+      style: { size: 40 },
+      decorations: [
+        {
+          renderer: 'mixed-height-boundary-badges',
+          placement,
+          attachment: 'boundary',
+          anchor: 'start',
+          boundaryOverlap: 'half-badge',
+          layout: 'stack',
+          itemGap: 0,
+          items,
+        },
+      ],
+    });
+
+    layer.draw(
+      [{ id: 'top-node', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      makeConfig('top'),
+    );
+    const topStackY = vi.mocked(ctx.translate).mock.calls[0][1];
+    const stackHeight = items.reduce((sum, item) => sum + item.height, 0);
+    const lastItemCenter = topStackY + stackHeight / 2 - items[items.length - 1].height / 2;
+    expect(lastItemCenter).toBeCloseTo(80);
+
+    vi.mocked(ctx.translate).mockClear();
+    layer.draw(
+      [{ id: 'bottom-node', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      makeConfig('bottom'),
+    );
+    const bottomStackY = vi.mocked(ctx.translate).mock.calls[0][1];
+    const firstItemCenter = bottomStackY - stackHeight / 2 + items[0].height / 2;
+    expect(firstItemCenter).toBeCloseTo(120);
+    layer.destroy();
+  });
+
+  it('repositions decorations from the same resolved size used by function-style nodes', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    registerDecoration('resized-node-badge', {
+      measure: () => ({ width: 20, height: 10 }),
+      draw: vi.fn(),
+    });
+    const config: NodeConfig = {
+      style: (node) => ({ size: Number(node.data?.size ?? 20) }),
+      decorations: [
+        {
+          renderer: 'resized-node-badge',
+          placement: 'right',
+          attachment: 'boundary',
+          anchor: 'start',
+        },
+      ],
+    };
+
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100, data: { size: 20 } }],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      config,
+    );
+    expect(vi.mocked(ctx.translate).mock.calls[0][0]).toBeCloseTo(120);
+
+    vi.mocked(ctx.translate).mockClear();
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100, data: { size: 60 } }],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      config,
+    );
+    expect(vi.mocked(ctx.translate).mock.calls[0][0]).toBeCloseTo(140);
+    layer.destroy();
+  });
+
+  it('prefers dimensions captured by the WebGL renderer over re-running style size logic', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    registerDecoration('renderer-size-badge', {
+      measure: () => ({ width: 20, height: 10 }),
+      draw: vi.fn(),
+    });
+    const config: NodeConfig = {
+      style: () => ({ size: 20 }),
+      decorations: [
+        {
+          renderer: 'renderer-size-badge',
+          placement: 'right',
+          attachment: 'boundary',
+          anchor: 'start',
+        },
+      ],
+    };
+
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      config,
+      undefined,
+      undefined,
+      undefined,
+      {},
+      () => ({ width: 80, height: 80 }),
+    );
+
+    expect(vi.mocked(ctx.translate).mock.calls[0][0]).toBeCloseTo(150);
+    layer.destroy();
+  });
+
+  it('uses a node extension boundary anchor when provided', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const getBoundaryAnchor = vi.fn(() => ({ x: 12, y: -6 }));
+    const draw = vi.fn();
+    registerNode('custom-boundary-node', { base: 'rect', getBoundaryAnchor });
+    registerDecoration('custom-boundary-badge', {
+      measure: () => ({ width: 20, height: 10 }),
+      draw,
+    });
+
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      {
+        type: 'custom-boundary-node',
+        style: { width: 40, height: 30 },
+        decorations: [
+          {
+            renderer: 'custom-boundary-badge',
+            placement: 'right',
+            attachment: 'boundary',
+          },
+        ],
+      },
+    );
+
+    expect(getBoundaryAnchor).toHaveBeenCalledWith(
+      expect.objectContaining({ placement: 'right', width: 40, height: 30 }),
+    );
+    const [translateX, translateY] = vi.mocked(ctx.translate).mock.calls[0];
+    expect(translateX).toBeCloseTo(112);
+    expect(translateY).toBeCloseTo(94);
+    expect(draw).toHaveBeenCalledOnce();
+    layer.destroy();
+  });
+
+  it('allows multiple decorations on the same node to coexist', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const topDraw = vi.fn();
+    const bottomDraw = vi.fn();
+    registerDecoration('same-node-top', {
+      measure: () => ({ width: 30, height: 12 }),
+      draw: topDraw,
+    });
+    registerDecoration('same-node-bottom', {
+      measure: () => ({ width: 30, height: 12 }),
+      draw: bottomDraw,
+    });
+
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      {
+        style: { size: 40 },
+        decorations: [
+          { renderer: 'same-node-top', placement: 'top' },
+          { renderer: 'same-node-bottom', placement: 'bottom' },
+        ],
+      },
+    );
+
+    expect(topDraw).toHaveBeenCalledOnce();
+    expect(bottomDraw).toHaveBeenCalledOnce();
+    layer.destroy();
+  });
+
+  it('sorts, folds, and hover-expands engine-managed decoration stacks', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const draw = vi.fn();
+    registerDecoration('stack-badge', {
+      measure: ({ data }: { data: { text: string } }) => ({
+        width: data.text.length * 10,
+        height: 10,
+      }),
+      draw,
+    } as DecorationRenderer<{ text: string }>);
+    const config: NodeConfig = {
+      style: { size: 20 },
+      decorations: [
+        {
+          renderer: 'stack-badge',
+          placement: 'right',
+          attachment: 'boundary',
+          anchor: 'start',
+          layout: 'stack',
+          items: [{ text: 'a' }, { text: 'longest' }, { text: 'medium' }, { text: 'tiny' }],
+          sort: 'width-desc',
+          maxVisible: 3,
+          overflow: 'hover-expand',
+          overflowData: { text: '...' },
+        },
+      ],
+    };
+
+    layer.draw([{ id: 'n1', x: 100, y: 100 }], [], { x: 0, y: 0, zoom: 1 }, config);
+    expect(draw.mock.calls.map(([params]) => params.data.text)).toEqual([
+      'longest',
+      'medium',
+      '...',
+    ]);
+
+    const mainCanvas = (layer as unknown as { mainCanvas: HTMLCanvasElement }).mainCanvas;
+    mainCanvas.dispatchEvent(new MouseEvent('mousemove', { clientX: 100, clientY: 100 }));
+    draw.mockClear();
+    layer.draw([{ id: 'n1', x: 100, y: 100 }], [], { x: 0, y: 0, zoom: 1 }, config);
+    expect(draw.mock.calls.map(([params]) => params.data.text)).toEqual([
+      'longest',
+      'medium',
+      '...',
+    ]);
+
+    mainCanvas.dispatchEvent(new MouseEvent('mousemove', { clientX: 120, clientY: 110 }));
+    draw.mockClear();
+    layer.draw([{ id: 'n1', x: 100, y: 100 }], [], { x: 0, y: 0, zoom: 1 }, config);
+    expect(draw.mock.calls.map(([params]) => params.data.text)).toEqual([
+      'longest',
+      'medium',
+      'tiny',
+      'a',
+    ]);
+    layer.destroy();
+  });
+
+  it('renders a KGBase-style external label and multiple source badges as one decoration', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    type SourceTag = { text: string; color: string; bg: string };
+    type KGBaseDecorationData = { displayName: string; sourceTags: SourceTag[] };
+
+    registerDecoration('kgbase-source-tags', {
+      measure({
+        ctx: measureContext,
+        data,
+      }: {
+        ctx: CanvasRenderingContext2D;
+        data: KGBaseDecorationData;
+      }) {
+        const labelWidth = measureContext.measureText(data.displayName).width;
+        const badgeWidth = Math.max(
+          0,
+          ...data.sourceTags.map((tag) => measureContext.measureText(tag.text).width + 8),
+        );
+        return {
+          width: Math.max(labelWidth, badgeWidth),
+          height: 18 + data.sourceTags.length * 15,
+        };
+      },
+      draw({
+        ctx: drawContext,
+        data,
+      }: {
+        ctx: CanvasRenderingContext2D;
+        data: KGBaseDecorationData;
+      }) {
+        drawContext.fillText(data.displayName, 0, 0);
+        data.sourceTags.forEach((tag, index) => {
+          drawContext.fillStyle = tag.bg;
+          drawContext.fillRect(0, 10 + index * 15, 30, 12);
+          drawContext.fillStyle = tag.color;
+          drawContext.fillText(tag.text, 15, 16 + index * 15);
+        });
+      },
+    } as DecorationRenderer<KGBaseDecorationData>);
+
+    const data: KGBaseDecorationData = {
+      displayName: '知识图谱节点',
+      sourceTags: [
+        { text: '向量召回', color: '#0958d9', bg: '#e6f4ff' },
+        { text: '图召回', color: '#389e0d', bg: '#f6ffed' },
+        { text: '手工标注', color: '#d46b08', bg: '#fff7e6' },
+      ],
+    };
+
+    layer.draw(
+      [{ id: 'entity-1', x: 100, y: 100, data }],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      {
+        style: { size: 40, label: 'Entity', labelPlacement: 'center' },
+        decorations: [
+          {
+            renderer: 'kgbase-source-tags',
+            placement: 'right',
+            data: (node) => node.data as unknown as KGBaseDecorationData,
+          },
+        ],
+      },
+    );
+
+    expect(ctx.fillText).toHaveBeenCalledWith('Entity', expect.any(Number), expect.any(Number));
+    expect(ctx.fillText).toHaveBeenCalledWith('知识图谱节点', 0, 0);
+    expect(ctx.fillText).toHaveBeenCalledWith('向量召回', 15, 16);
+    expect(ctx.fillText).toHaveBeenCalledWith('图召回', 15, 31);
+    expect(ctx.fillText).toHaveBeenCalledWith('手工标注', 15, 46);
+    layer.destroy();
+  });
+
+  it('renders registered node decorations through the shared overlay lifecycle', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const measure = vi.fn(() => ({ width: 20, height: 10, data: 'badge' }));
+    const draw = vi.fn();
+    registerDecoration('test-badge', { measure, draw });
+    const node: LayoutNode = { id: 'n1', x: 100, y: 100, data: { count: 3 } };
+
+    layer.draw(
+      [node],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      {
+        style: { size: 20 },
+        decorations: [
+          {
+            renderer: 'test-badge',
+            placement: 'top',
+            data: (current) => current.data?.count,
+          },
+        ],
+      },
+    );
+
+    expect(measure).toHaveBeenCalledWith(
+      expect.objectContaining({ node, data: 3, dpr: 1, zoom: 1 }),
+    );
+    expect(draw).toHaveBeenCalledWith(
+      expect.objectContaining({ layout: { width: 20, height: 10, data: 'badge' } }),
+    );
+    const [translateX, translateY] = vi.mocked(ctx.translate).mock.calls[0];
+    expect(translateX).toBeCloseTo(100);
+    expect(translateY).toBeCloseTo(90);
+    layer.destroy();
+  });
+
+  it('keeps outside decorations fully separated from the node', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    registerDecoration('outside-badge', {
+      measure: () => ({ width: 20, height: 10 }),
+      draw: vi.fn(),
+    });
+
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      {
+        style: { size: 20 },
+        decorations: [{ renderer: 'outside-badge', placement: 'top', attachment: 'outside' }],
+      },
+    );
+
+    const [, translateY] = vi.mocked(ctx.translate).mock.calls[0];
+    expect(translateY).toBeCloseTo(81);
+    layer.destroy();
+  });
+
+  it('isolates decoration renderer errors without blocking node labels', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    registerDecoration('broken-badge', {
+      measure: () => {
+        throw new Error('broken');
+      },
+      draw: vi.fn(),
+    });
+
+    expect(() =>
+      layer.draw(
+        [{ id: 'n1', x: 100, y: 100 }],
+        [],
+        { x: 0, y: 0, zoom: 1 },
+        {
+          style: { size: 20, label: 'Node' },
+          decorations: [{ renderer: 'broken-badge' }],
+        },
+      ),
+    ).not.toThrow();
+    expect(ctx.fillText).toHaveBeenCalled();
+    layer.destroy();
+  });
+
   it('passes resolved node context and layout data from measure to draw', () => {
     const ctx = makeContext();
     const layer = createLayer(ctx, 2);
@@ -217,7 +812,7 @@ describe('LabelLayerRenderer custom lifecycle', () => {
     });
     expect(draw).toHaveBeenCalledTimes(1);
     expect(draw.mock.calls[0][0].layout.data).toEqual(['cached']);
-    expect(ctx.translate).toHaveBeenCalledWith(100, 132.4);
+    expect(ctx.translate).toHaveBeenCalledWith(100, 122.4);
     layer.destroy();
   });
 
@@ -468,6 +1063,33 @@ describe('LabelLayerRenderer custom lifecycle', () => {
     expect(fallbackCalls[1][1]).toBeCloseTo(200);
     expect(fallbackCalls[1][2]).toBeCloseTo(111.2);
     expect(warn).toHaveBeenCalledTimes(2);
+    layer.destroy();
+  });
+
+  it('draws the default node label without changing canvas shadow styles', () => {
+    const ctx = makeContext();
+    ctx.shadowColor = 'magenta';
+    ctx.shadowBlur = 9;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 4;
+    const layer = createLayer(ctx);
+
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      { style: { label: 'plain-label' } },
+    );
+
+    expect(ctx.fillText).toHaveBeenCalledWith(
+      'plain-label',
+      expect.any(Number),
+      expect.any(Number),
+    );
+    expect(ctx.shadowColor).toBe('magenta');
+    expect(ctx.shadowBlur).toBe(9);
+    expect(ctx.shadowOffsetX).toBe(3);
+    expect(ctx.shadowOffsetY).toBe(4);
     layer.destroy();
   });
 

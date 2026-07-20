@@ -1,10 +1,9 @@
-import type { LucideIcon } from 'lucide-react';
 import { CheckCircle2, Layers3, MousePointerClick, Network, Zap } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { CSSProperties } from 'react';
 
 import { AntVLogo } from '@/components/antv-logo';
+import { withBasePath } from '@/lib/shared';
 
 import { CodeBlock } from './code-block';
 // import { StatsBand } from './stats-band';
@@ -26,77 +25,77 @@ const customLayouts = [
 
 const heroShowcases = [
   {
-    src: '/examples/large.png',
+    src: withBasePath('/examples/large.png'),
     title: '较大规模（200 节点）',
     desc: '200 节点、800 边的力导向关系网络',
     href: '/docs/metrics/performance',
     bg: '#f8fbff',
   },
   {
-    src: '/examples/large-labeled.png',
+    src: withBasePath('/examples/large-labeled.png'),
     title: '5000 节点 + 标签（力导布局）',
     desc: '高密度节点与标签的力导向性能示例',
     href: '/docs/guide/label',
     bg: '#f7fbf8',
   },
   {
-    src: '/examples/combo.png',
+    src: withBasePath('/examples/combo.png'),
     title: 'Combo 分组',
     desc: '用分组容器组织节点与嵌套关系',
     href: '/docs/examples/combo',
     bg: '#fffaf5',
   },
   {
-    src: '/layouts/force.png',
+    src: withBasePath('/layouts/force.png'),
     title: '力导向布局',
     desc: '让关系网络按连接强度自然展开',
     href: '/docs/guide/layout',
     bg: '#f7faff',
   },
   {
-    src: '/layouts/fishbone.png',
+    src: withBasePath('/layouts/fishbone.png'),
     title: '鱼骨图布局',
     desc: '沿主骨与分支梳理问题原因',
     href: '/docs/guide/layout',
     bg: '#fff8f4',
   },
   {
-    src: '/layouts/mindmap.png',
+    src: withBasePath('/layouts/mindmap.png'),
     title: '脑图布局',
     desc: '从中心主题向两侧展开层级',
     href: '/docs/guide/layout',
     bg: '#faf8ff',
   },
   {
-    src: '/layouts/dagre.png',
+    src: withBasePath('/layouts/dagre.png'),
     title: 'DAG / 层级布局',
     desc: '按方向分层展示流程与依赖',
     href: '/docs/guide/layout',
     bg: '#fffaf2',
   },
   {
-    src: '/layouts/circular.png',
+    src: withBasePath('/layouts/circular.png'),
     title: '环形布局',
     desc: '沿圆周排列节点，突出整体关系',
     href: '/docs/guide/layout',
     bg: '#f7fbf8',
   },
   {
-    src: '/layouts/grid.png',
+    src: withBasePath('/layouts/grid.png'),
     title: '网格布局',
     desc: '规则网格排布，便于对比与浏览',
     href: '/docs/guide/layout',
     bg: '#f7fcff',
   },
   {
-    src: '/layouts/radial.png',
+    src: withBasePath('/layouts/radial.png'),
     title: '辐射布局',
     desc: '围绕中心节点向外分层展开',
     href: '/docs/guide/layout',
     bg: '#fff8fb',
   },
   {
-    src: '/examples/basic.png',
+    src: withBasePath('/examples/basic.png'),
     title: '最简示例',
     desc: '用最少配置渲染第一张关系图',
     href: '/docs/examples/basic',
@@ -105,161 +104,6 @@ const heroShowcases = [
 ];
 
 const heroMarqueeCases = [...heroShowcases, ...heroShowcases];
-
-type FeatureSceneCard = {
-  id: 'update' | 'picking' | 'kernel' | 'capability';
-  icon: LucideIcon;
-  index: string;
-  title: string;
-  proof: string;
-  lines: string[];
-};
-
-const featureSceneCards: FeatureSceneCard[] = [
-  {
-    id: 'update',
-    icon: Zap,
-    index: '01',
-    title: '实时交互',
-    proof: '~0ms update',
-    lines: ['高亮 / 选中 / 聚焦', '只更新变化部分'],
-  },
-  {
-    id: 'picking',
-    icon: MousePointerClick,
-    index: '02',
-    title: '精准命中',
-    proof: '0.1ms picking',
-    lines: ['节点 / 边快速命中', '交互反馈更及时'],
-  },
-  {
-    id: 'kernel',
-    icon: Network,
-    index: '03',
-    title: '轻量渲染',
-    proof: '28KB core',
-    lines: ['WebGL 批渲染', '按需更新缓冲区'],
-  },
-  {
-    id: 'capability',
-    icon: Layers3,
-    index: '04',
-    title: '图分析能力',
-    proof: '14 layouts',
-    lines: ['常用布局开箱即用', 'combo / label 支持'],
-  },
-];
-
-type MiniGraphNode = {
-  id: string;
-  x: number;
-  y: number;
-  radius: number;
-  core: boolean;
-  activeOrder?: number;
-};
-
-type MiniGraphEdge = {
-  id: string;
-  source: string;
-  target: string;
-  active: boolean;
-};
-
-function createMiniGraph(): { nodes: MiniGraphNode[]; edges: MiniGraphEdge[] } {
-  let seed = 20260721;
-  const random = () => {
-    seed = (seed * 1664525 + 1013904223) >>> 0;
-    return seed / 4294967296;
-  };
-  const activePath = [
-    'node-7',
-    'node-16',
-    'node-25',
-    'node-0',
-    'node-11',
-    'node-23',
-    'node-36',
-    'node-45',
-  ];
-  const activeOrder = new Map(activePath.map((id, index) => [id, index]));
-  const nodes: MiniGraphNode[] = [];
-  const edges: MiniGraphEdge[] = [];
-
-  for (let index = 0; index < 48; index += 1) {
-    const id = `node-${index}`;
-    const angle = index * 2.399963 + random() * 0.26;
-    const distance = index === 0 ? 0 : Math.sqrt(index / 48);
-    const x = 144 + Math.cos(angle) * 112 * distance * (0.54 + random() * 0.32);
-    const y = 76 + Math.sin(angle) * 58 * distance * (0.58 + random() * 0.3);
-    nodes.push({
-      id,
-      x,
-      y,
-      radius: index === 0 ? 3.6 : 1.15 + random() * 1.05,
-      core: index === 0,
-      activeOrder: activeOrder.get(id),
-    });
-
-    if (index > 0) {
-      edges.push({
-        id: `edge-${Math.floor((index - 1) / 2)}-${index}`,
-        source: `node-${Math.floor((index - 1) / 2)}`,
-        target: id,
-        active: false,
-      });
-    }
-    if (index > 6 && index % 3 === 0) {
-      edges.push({
-        id: `edge-${index - 5}-${index}-mesh`,
-        source: `node-${index - 5}`,
-        target: id,
-        active: false,
-      });
-    }
-    if (index > 9 && index % 4 === 0) {
-      edges.push({
-        id: `edge-${index - 7}-${index}-cross`,
-        source: `node-${index - 7}`,
-        target: id,
-        active: false,
-      });
-    }
-  }
-
-  for (let index = 1; index < activePath.length; index += 1) {
-    edges.push({
-      id: `active-${index}`,
-      source: activePath[index - 1],
-      target: activePath[index],
-      active: true,
-    });
-  }
-
-  return { nodes, edges };
-}
-
-const miniGraph = createMiniGraph();
-const miniGraphNodeById = new Map(miniGraph.nodes.map((node) => [node.id, node]));
-
-function getMiniGraphEdgePath(edge: MiniGraphEdge): string {
-  const source = miniGraphNodeById.get(edge.source)!;
-  const target = miniGraphNodeById.get(edge.target)!;
-  const dx = target.x - source.x;
-  const dy = target.y - source.y;
-  const length = Math.hypot(dx, dy) || 1;
-  let hash = 0;
-  for (let index = 0; index < edge.id.length; index += 1) {
-    hash = (hash * 31 + edge.id.charCodeAt(index)) >>> 0;
-  }
-  const direction = hash % 2 === 0 ? 1 : -1;
-  const offset = edge.active
-    ? Math.min(13, length * 0.12)
-    : Math.min(9, 2 + (hash % 5) * 1.2 + length * 0.025);
-  const controlX = (source.x + target.x) / 2 - (dy / length) * offset * direction;
-  const controlY = (source.y + target.y) / 2 + (dx / length) * offset * direction;
-  return `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}`;
-}
 
 // 高频交互指标：聚焦 G6Lite 渲染后的增量更新路径。
 const perf = [
@@ -648,7 +492,7 @@ function LayoutCard({
         style={{ backgroundColor: item.bg }}
       >
         <Image
-          src={`/layouts/${item.type}.png`}
+          src={withBasePath(`/layouts/${item.type}.png`)}
           alt={`${item.title}布局示例`}
           fill
           sizes={
@@ -685,134 +529,118 @@ function PerformanceRow({ item }: { item: (typeof perf)[number] }) {
 
 function FeatureGraphShowcase() {
   return (
-    <div className="home-live-graph">
-      <svg
-        className="home-live-graph-backdrop"
-        viewBox="0 0 760 520"
-        preserveAspectRatio="none"
-        aria-hidden
-      >
-        <defs>
-          <linearGradient id="home-live-scene-line" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#1c7dff" stopOpacity="0.08" />
-            <stop offset="48%" stopColor="#5bb7ff" stopOpacity="0.34" />
-            <stop offset="100%" stopColor="#36e2c0" stopOpacity="0.08" />
-          </linearGradient>
-        </defs>
-        <g className="home-live-graph-backdrop-lines">
-          <path d="M -40 410 C 96 300 152 350 248 224 S 434 96 612 260 S 788 436 850 326" />
-          <path d="M 62 538 C 154 390 248 422 342 290 S 548 128 774 184" />
-          <path d="M 334 -42 C 458 72 454 210 592 292 S 692 402 824 386" />
-          <path d="M -30 118 C 122 184 196 112 328 188 S 518 350 642 334" />
-          <path d="M 114 -34 C 244 84 302 170 406 292 S 536 478 692 552" />
-        </g>
-        <g className="home-live-graph-backdrop-flow">
-          <path d="M 416 292 C 480 360 520 410 604 438" />
-          <path d="M 586 170 C 648 224 694 284 744 320" />
-          <path d="M 182 366 C 250 302 306 268 382 246" />
-        </g>
-      </svg>
+    <div className="home-graph-process">
+      <div className="home-graph-process-title">
+        <span>FROM DATA TO INTERACTION</span>
+        <strong>复杂关系数据，转化为流畅可交互的图</strong>
+      </div>
 
-      <svg
-        className="home-live-graph-constellation"
-        viewBox="0 0 760 520"
-        preserveAspectRatio="none"
-        aria-hidden
-      >
-        <circle cx="98" cy="86" r="1.5" />
-        <circle cx="164" cy="154" r="1.2" />
-        <circle cx="606" cy="94" r="1.4" />
-        <circle cx="682" cy="210" r="1.1" />
-        <circle cx="152" cy="418" r="1.3" />
-        <circle cx="670" cy="430" r="1.2" />
-      </svg>
-
-      <div className="home-live-graph-card home-live-graph-card-map">
-        <div className="home-live-graph-card-head">
-          <span>G6</span>
-          <strong>G6Lite 图可视化引擎</strong>
-          <Network className="size-4" />
+      <div className="home-graph-process-stage home-graph-process-before">
+        <div className="home-graph-process-stage-label">
+          <span>01 · INPUT</span>
+          <strong>复杂原始关系</strong>
+          <small>5K NODES · RAW DATA</small>
         </div>
-        <p className="home-live-graph-card-summary">
-          面向大规模关系图的 WebGL 渲染、布局与交互底座。
-        </p>
-        <div className="home-live-graph-mini-window">
-          <svg
-            className="home-live-graph-mini"
-            viewBox="0 0 288 152"
-            role="img"
-            aria-label="局部路径更新关系图"
-          >
-            <defs>
-              <linearGradient id="home-live-graph-signal" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#5bb7ff" />
-                <stop offset="54%" stopColor="#7a8cff" />
-                <stop offset="100%" stopColor="#31e0bd" />
-              </linearGradient>
-            </defs>
+        <svg viewBox="0 0 220 240" aria-label="尚未布局的复杂原始关系数据">
+          <g className="home-graph-before-edges">
+            <path d="M28 116 L68 42 L176 72 L54 194 L192 160 L104 24 L138 212 L28 116" />
+            <path d="M48 68 L184 112 L86 178 L118 56 L166 192 L48 68" />
+            <path d="M34 154 L154 38 L198 138 L72 116 L124 204 L34 154" />
+            <path d="M68 42 L86 178 M176 72 L34 154 M54 194 L184 112 M104 24 L166 192" />
+            <path d="M18 88 L94 96 L146 22 L206 82 L152 126 L206 182" />
+            <path d="M22 178 L74 156 L132 76 L188 38 M42 28 L118 56 L178 214" />
+            <path d="M18 132 L112 220 L152 126 L210 118 M94 96 L124 204 M74 156 L176 72" />
+            <path d="M42 28 L48 68 M146 22 L154 38 M206 82 L184 112 M206 182 L166 192 M22 178 L34 154" />
+          </g>
+          <g className="home-graph-before-nodes">
+            {[
+              [28,116],[68,42],[176,72],[54,194],[192,160],[104,24],[138,212],
+              [48,68],[184,112],[86,178],[118,56],[166,192],[34,154],[154,38],
+              [198,138],[72,116],[124,204],[18,88],[94,96],[146,22],[206,82],
+              [152,126],[206,182],[22,178],[74,156],[132,76],[188,38],[42,28],
+              [178,214],[18,132],[112,220],[210,118],
+            ].map(([cx, cy], index) => (
+              <circle
+                key={index}
+                className={index === 19 || index === 22 || index === 25 ? 'is-hub' : undefined}
+                cx={cx}
+                cy={cy}
+                r={index === 19 || index === 22 || index === 25 ? 5.8 : index % 5 === 0 ? 4.8 : 3.1}
+              />
+            ))}
+          </g>
+        </svg>
+      </div>
 
-            <g className="home-live-graph-mini-edges">
-              {miniGraph.edges.map((edge) => (
-                <path
-                  key={edge.id}
-                  className={edge.active ? 'is-active' : undefined}
-                  d={getMiniGraphEdgePath(edge)}
-                />
-              ))}
-            </g>
+      <div className="home-graph-process-flow home-graph-process-flow-in" aria-hidden>
+        <span />
+      </div>
 
-            <g className="home-live-graph-mini-nodes">
-              {miniGraph.nodes.map((node) => (
-                <circle
-                  key={node.id}
-                  className={`${node.core ? 'is-core' : ''} ${node.activeOrder !== undefined ? 'is-active' : ''}`}
-                  cx={node.x}
-                  cy={node.y}
-                  r={node.radius}
-                  style={
-                    node.activeOrder === undefined
-                      ? undefined
-                      : ({ '--signal-order': node.activeOrder } as CSSProperties)
-                  }
-                />
-              ))}
-            </g>
-          </svg>
-          <div className="home-live-graph-mini-metrics" aria-hidden>
-            <span>
-              <strong>~0ms</strong>
-              state patch
-            </span>
-            <span>
-              <strong>0.1ms</strong>
-              gpu picking
-            </span>
-          </div>
+      <div className="home-graph-process-core">
+        <div className="home-graph-process-core-head">
+          <Network className="size-5" />
+          <div><strong>G6Lite</strong><small>WEBGL GRAPH ENGINE</small></div>
+        </div>
+        <div className="home-graph-process-steps">
+          <span><Layers3 className="size-3.5" /><b>Layout</b><small>自动布局</small></span>
+          <span><Network className="size-3.5" /><b>WebGL</b><small>批量渲染</small></span>
+          <span><MousePointerClick className="size-3.5" /><b>Picking</b><small>精准命中</small></span>
+          <span><Zap className="size-3.5" /><b>Patch</b><small>增量更新</small></span>
         </div>
       </div>
 
-      {featureSceneCards.map((card) => (
-        <FeatureScenePanel key={card.id} card={card} />
-      ))}
-    </div>
-  );
-}
-
-function FeatureScenePanel({ card }: { card: FeatureSceneCard }) {
-  const Icon = card.icon;
-  return (
-    <div className={`home-live-graph-card home-live-graph-card-${card.id}`}>
-      <div className="home-live-graph-card-head">
-        <span>{card.index}</span>
-        <strong>{card.title}</strong>
-        <Icon className="size-4" />
+      <div className="home-graph-process-flow home-graph-process-flow-out" aria-hidden>
+        <span />
       </div>
-      <ul className="home-live-graph-card-lines">
-        {card.lines.map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-      </ul>
-      <em>{card.proof}</em>
+
+      <div className="home-graph-process-stage home-graph-process-after">
+        <div className="home-graph-process-stage-label">
+          <span>03 · OUTPUT</span>
+          <strong>清晰、流畅、可交互</strong>
+          <small>0.1MS PICKING · ~0MS UPDATE</small>
+        </div>
+        <svg viewBox="0 0 220 240" aria-label="完成布局并支持实时交互的关系图">
+          <defs>
+            <linearGradient id="home-engine-flow" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#ff477e" />
+              <stop offset="52%" stopColor="#786cff" />
+              <stop offset="100%" stopColor="#20d5bc" />
+            </linearGradient>
+          </defs>
+          <g className="home-graph-after-edges">
+            <path className="is-trunk" d="M110 116 L62 72 M110 116 L58 152 M110 116 L112 48 M110 116 L164 72 M110 116 L166 150" />
+            <path d="M62 72 L36 46 M62 72 L30 86 M62 72 L48 112 M36 46 L18 62 M30 86 L14 108 M48 112 L22 136" />
+            <path d="M58 152 L28 142 M58 152 L42 188 M58 152 L78 204 M28 142 L14 166 M42 188 L22 212 M78 204 L58 226" />
+            <path d="M112 48 L90 24 M112 48 L134 20 M112 48 L150 42 M90 24 L68 34 M134 20 L158 16" />
+            <path d="M164 72 L190 44 M164 72 L198 82 M164 72 L178 112 M190 44 L210 26 M198 82 L216 62" />
+            <path d="M166 150 L198 132 M166 150 L194 176 M166 150 L152 204 M198 132 L216 150 M194 176 L210 202 M152 204 L174 224" />
+            <path className="is-active" d="M18 62 L36 46 L62 72 L110 116 L164 72 L198 82 L216 62" />
+          </g>
+          <g className="home-graph-after-nodes">
+            {[
+              [110,116,8],[62,72,5.5],[58,152,5.5],[112,48,5.5],[164,72,5.5],[166,150,5.5],
+              [36,46,3.7],[30,86,3.7],[48,112,3.7],[18,62,3],[14,108,3],[22,136,3],
+              [28,142,3.7],[42,188,3.7],[78,204,3.7],[14,166,3],[22,212,3],[58,226,3],
+              [90,24,3.7],[134,20,3.7],[150,42,3.7],[68,34,3],[158,16,3],
+              [190,44,3.7],[198,82,3.7],[178,112,3.7],[210,26,3],[216,62,3],
+              [198,132,3.7],[194,176,3.7],[152,204,3.7],[216,150,3],[210,202,3],[174,224,3],
+            ].map(([cx, cy, r], index) => (
+              <circle
+                key={index}
+                className={`${index > 0 && index < 6 ? 'is-community-hub' : ''} ${index === 27 ? 'is-picked' : ''}`}
+                cx={cx}
+                cy={cy}
+                r={r}
+              />
+            ))}
+          </g>
+          <circle className="home-graph-picking-ring" cx="216" cy="62" r="11" />
+        </svg>
+        <div className="home-graph-process-result-badges">
+          <span><strong>0.1ms</strong> GPU Picking</span>
+          <span><strong>~0ms</strong> State Patch</span>
+        </div>
+      </div>
     </div>
   );
 }

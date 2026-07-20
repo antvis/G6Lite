@@ -82,6 +82,24 @@ describe('tooltip — hover trigger', () => {
     teardown();
   });
 
+  it('renders the default data label as text instead of executable HTML', () => {
+    const { renderer, graph } = setup();
+    const teardown = tooltip(renderer as any, graph as any);
+    const label = '<img src=x onerror="globalThis.__tooltipXss = true">Unsafe';
+
+    graph.eventEmitter.emit('node:pointerover', {
+      nodeId: 'unsafe',
+      data: { label },
+      event: mouseEvent(),
+    });
+    vi.advanceTimersByTime(80);
+
+    const overlay = getOverlay();
+    expect(overlay?.textContent).toBe(label);
+    expect(overlay?.querySelector('img')).toBeNull();
+    teardown();
+  });
+
   it('hides on node:pointerleave', () => {
     const { renderer, graph } = setup();
     const teardown = tooltip(renderer as any, graph as any);
@@ -179,6 +197,28 @@ describe('tooltip — click trigger', () => {
 });
 
 describe('tooltip — custom content & class', () => {
+  it('positions an overlay in custom-container local coordinates', () => {
+    const { renderer, graph } = setup();
+    const container = document.createElement('div');
+    container.getBoundingClientRect = () =>
+      ({ left: 40, top: 30, right: 340, bottom: 230, width: 300, height: 200 } as DOMRect);
+    document.body.appendChild(container);
+    const teardown = tooltip(renderer as any, graph as any, { container, delay: 0 });
+
+    graph.eventEmitter.emit('node:pointerover', {
+      nodeId: 'a',
+      data: { label: 'A' },
+      event: mouseEvent({ clientX: 100, clientY: 80 }),
+    });
+    vi.advanceTimersByTime(0);
+
+    const overlay = container.querySelector<HTMLElement>('.g6lite-tooltip');
+    expect(overlay?.style.left).toBe('70px');
+    expect(overlay?.style.top).toBe('60px');
+    teardown();
+    container.remove();
+  });
+
   it('uses a custom getContent and className', () => {
     const { renderer, graph } = setup();
     const teardown = tooltip(renderer as any, graph as any, {
@@ -190,6 +230,24 @@ describe('tooltip — custom content & class', () => {
     const el = getOverlay('custom-tip');
     expect(el).not.toBeNull();
     expect(el?.innerHTML).toBe('<b>n7</b>');
+    teardown();
+  });
+
+  it('accepts an HTMLElement for safely constructed custom content', () => {
+    const { renderer, graph } = setup();
+    const teardown = tooltip(renderer as any, graph as any, {
+      getContent: (ctx) => {
+        const strong = document.createElement('strong');
+        strong.textContent = `<${ctx.nodeId}>`;
+        return strong;
+      },
+    });
+
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'n8', data: {}, event: mouseEvent() });
+    vi.advanceTimersByTime(80);
+
+    const overlay = getOverlay();
+    expect(overlay?.querySelector('strong')?.textContent).toBe('<n8>');
     teardown();
   });
 

@@ -1,0 +1,134 @@
+---
+title: 扩展体系
+description: 通过配置、函数式映射和公开扩展 API 完成业务定制
+---
+
+G6Lite 的定制能力分为三层：配置优先，函数式映射解决差异化需求，只有配置无法表达时才注册扩展。
+
+## 先使用配置
+
+颜色、尺寸、标签、状态和 Tooltip 等常见需求直接通过配置完成：
+
+```ts
+const graph = new Graph({
+  node: {
+    style: {
+      fill: (node) => getColor(node),
+      label: (node) => String(node.data?.label ?? node.id),
+    },
+    stateStyles: {
+      invalid: { stroke: '#ff4d4f', strokeWidth: 2 },
+    },
+  },
+});
+```
+
+## 注册扩展
+
+配置无法表达时，从包主入口使用统一的 `register()`：
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+
+register('edge', 'business-relation', {
+  base: 'arc',
+  style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
+});
+```
+
+目前支持以下类别：
+
+- `node`：在 circle/rect 基型上扩展样式和轻量 overlay。
+- `edge`：选择内置边基型，提供默认样式、函数式样式和状态样式。
+- `label`：测量并绘制节点或边的自定义 Label 内容。
+- `decoration`：绘制 badge 等节点装饰内容。
+- `layout`：输入 GraphData，返回节点坐标。
+- `behavior`：消费统一事件，通过 Graph 公开 API 修改状态和数据。
+- `transform`：在渲染前完成通用数据转换。
+- `plugin`：管理 Toolbar、Minimap 等独立 DOM 与状态生命周期。
+
+## 扩展实例
+
+有内部状态的 Layout、Behavior、Transform 和 Plugin 应使用工厂或构造器注册，确保每个 Graph 获得独立实例：
+
+```ts
+register('behavior', 'business-click', () => new BusinessClickBehavior());
+```
+
+对象注册仍然兼容，但只适合无内部可变状态的扩展描述。
+
+## Decoration Renderer
+
+Decoration 只负责内容测量和绘制，G6Lite 负责定位、碰撞、裁剪和调度：
+
+```ts
+register('decoration', 'score-badge', {
+  measure({ ctx, data }) {
+    return { width: ctx.measureText(String(data)).width + 12, height: 20 };
+  },
+  draw({ ctx, data, layout }) {
+    ctx.fillRect(-layout.width / 2, -layout.height / 2, layout.width, layout.height);
+    ctx.fillText(String(data), 0, 0);
+  },
+});
+
+const graph = new Graph({
+  node: {
+    decorations: [
+      {
+        renderer: 'score-badge',
+        placement: 'top',
+        attachment: 'boundary',
+        data: (node) => node.data?.score,
+      },
+    ],
+  },
+});
+```
+
+`attachment` 控制 Decoration 如何挂载到节点：`boundary`（默认）把装饰中心贴在节点边界，适合 badge；`outside` 将装饰完整放在节点外，适合外部名称；`inside` 将装饰完整收进节点内部。
+
+多个 badge 可交给 G6Lite 统一排列、排序和折叠：
+
+```ts
+{
+  renderer: 'builtin-badge',
+  placement: 'right',
+  attachment: 'boundary',
+  anchor: 'start',
+  boundaryOverlap: 'half-badge',
+  layout: 'stack',
+  items: (node) => node.data?.badges ?? [],
+  sort: 'width-desc',
+  maxVisible: 3,
+  overflow: 'hover-expand',
+  overflowData: { kind: 'text', text: '···' },
+}
+```
+
+`boundaryOverlap` 可传 CSS 像素数值，也可传 `half-badge`。后者配合 `attachment: 'boundary'` 和 `anchor: 'start'`，按靠节点 Badge 的半高自动重叠，使圆头或 Badge 中心落在节点轮廓上；`top` 纵向栈使用末项，其余方向使用首项。
+
+`builtin-badge` 支持以下数据类型：
+
+```ts
+type NodeBadgeItem =
+  | { kind: 'count'; value: number | string }
+  | { kind: 'lock' | 'warning' | 'favorite' }
+  | { kind: 'text'; text: string }
+  | { kind: 'icon'; icon: string; iconFontFamily?: string };
+```
+
+圆形 Badge 直径为节点尺寸的 `1/3`，图标占圆形的 `2/3`；文本 Badge 高度相同，最大宽度为节点尺寸的 `1.5` 倍，超长自动省略。业务可通过 `fill/color` 覆盖默认颜色。
+
+引擎负责逐项测量、左对齐纵向排列、稳定排序、折叠和 hover 展开；使用内置 Badge 时业务只需提供数据。
+
+未注册、非法测量结果和业务异常会被隔离，不会导致主图层白屏。
+
+## 职责边界
+
+- 扩展不直接访问 Renderer、DataModel、WebGL context 或 GPU buffer。
+- Behavior、Transform 和 Plugin 只能通过 Graph 公开 API 修改引擎状态。
+- Edge Extension 复用内置 WebGL 边基型，保留批处理、拾取和箭头能力。
+- Label 与 Decoration 只负责内容，定位、旋转、碰撞和刷新由 G6Lite 管理。
+
+完整可运行代码见 `playground/demos/extension-system.ts`。

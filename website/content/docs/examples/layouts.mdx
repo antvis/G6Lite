@@ -3,8 +3,10 @@ title: 布局切换
 description: 在同一份数据上切换 circular、force、grid 和 dagre
 ---
 
+import { withBasePath } from '@/lib/shared';
+
 <div className="example-hero">
-  <img src="/examples/layouts.png" alt="布局切换截图" />
+  <img src={withBasePath('/examples/layouts.png')} alt="布局切换截图" />
 </div>
 
 这个示例展示运行时重新创建图或调用布局 API 的常见模式。不同布局适合不同数据结构：环形适合总览，force 适合网络探索，dagre 适合层级关系。

@@ -9,7 +9,24 @@
 
 // ──── Core ────
 export { EventEmitter } from './events.js';
+export type { Handler } from './events.js';
 export { register } from './extensions/index.js';
+export type {
+  BehaviorExtension,
+  DecorationDrawParams,
+  DecorationMeasureParams,
+  DecorationRenderer,
+  EdgeExtension,
+  Extension,
+  ExtensionCategory,
+  ExtensionConstructor,
+  ExtensionContext,
+  ExtensionFactory,
+  ExtensionInput,
+  LayoutExtension,
+  PluginExtension,
+  TransformExtension,
+} from './extensions/index.js';
 export { BaseNode, BreathingNode, registerNode } from './extensions/node.js';
 export { Graph } from './graph.js';
 export type { PickResult } from './graph.js';
@@ -20,18 +37,29 @@ export { resolveTheme } from './theme.js';
 // ──── Configuration & data types ────
 export type { Camera } from './renderer/camera.js';
 export type {
+  BehaviorOption,
+  BuiltInElementState,
   ComboConfig,
   ComboData,
+  ComboStateStyleOverride,
   ComboStyleConfig,
+  ComboStyleValue,
   EdgeConfig,
+  EdgeData,
+  EdgeDataUpdate,
   EdgeLabelParams,
   EdgeLabelPlacement,
   EdgeState,
+  EdgeStateStyleOverride,
+  EdgeStyleValue,
   ElementState,
+  FitViewOptions,
   GraphData,
   GraphEdge,
+  GraphElementEvent,
   GraphNode,
   GraphOptions,
+  GraphPoint,
   LabelDrawParams,
   LabelLayout,
   LabelMeasureParams,
@@ -39,17 +67,35 @@ export type {
   LabelRenderer,
   LabelType,
   LayoutConfig,
+  NodeBadgeItem,
+  NodeBadgeKind,
   NodeConfig,
+  NodeData,
+  NodeDataUpdate,
+  NodeDecorationAnchor,
+  NodeDecorationAttachment,
+  NodeDecorationConfig,
+  NodeDecorationPlacement,
   NodeLabelParams,
+  NodePositionUpdate,
   NodeState,
+  NodeStateStyleOverride,
+  NodeStyleConfig,
+  NodeStyleValue,
   ParallelEdgeMeta,
   ParallelEdgesConfig,
+  PluginOption,
   ResolvedLabelStyle,
+  SetDataOptions,
   ThemeOption,
+  ThemeTokens,
   TransformOption,
+  ViewportPoint,
+  ZoomOptions,
 } from './types.js';
 
 // ──── Behavior config types ────
+export type { DragCanvasOptions } from './behaviors/dragCanvas.js';
 export type { HoverHighlightConfig } from './behaviors/hoverHighlight.js';
 export type { BehaviorConfig, BehaviorName } from './behaviors/index.js';
 export type { LassoSelectOptions } from './behaviors/lassoSelect.js';
@@ -68,6 +114,7 @@ export type { InternalCombo } from './types.js';
 export { DataModel } from './dataModel.js';
 export type { ChangeRecord, ChangeType, DataModelOptions } from './dataModel.js';
 export type {
+  NodeBoundaryAnchorParams,
   NodeExtension,
   NodeExtensionInput,
   NodeOverlayDrawParams,

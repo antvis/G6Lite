@@ -1,5 +1,65 @@
 import { describe, expect, it, vi } from 'vitest';
+import { DEFAULT_BEHAVIORS, resolveBehaviorOptions } from '../behaviors/index.js';
 import { EventEmitter } from '../events.js';
+import { GESTURE_CONSUME_EVENT } from '../interaction/gesture.js';
+
+describe('default canvas navigation behaviors', () => {
+  it('enables zoom and canvas drag when behaviors is omitted', () => {
+    expect(resolveBehaviorOptions()).toEqual(['zoom-canvas', 'drag-canvas']);
+    expect(DEFAULT_BEHAVIORS).toEqual(['zoom-canvas', 'drag-canvas']);
+  });
+
+  it('respects an explicit empty behavior list', () => {
+    expect(resolveBehaviorOptions([])).toEqual([]);
+  });
+
+  it('does not merge defaults into an explicit behavior list', () => {
+    expect(resolveBehaviorOptions(['tooltip'])).toEqual(['tooltip']);
+    expect(resolveBehaviorOptions(['zoom-canvas'])).toEqual(['zoom-canvas']);
+  });
+
+  it('returns a fresh default list for each graph', () => {
+    const first = resolveBehaviorOptions();
+    first.push('tooltip');
+    expect(resolveBehaviorOptions()).toEqual(['zoom-canvas', 'drag-canvas']);
+  });
+});
+
+describe('dragCanvas behavior', () => {
+  it('does not pan for Shift gestures reserved by brush-select', async () => {
+    const { dragCanvas } = await import('../behaviors/dragCanvas.js');
+    const renderer = {
+      getCamera: vi.fn(() => ({ x: 0, y: 0, zoom: 1 })),
+      setCamera: vi.fn(),
+      scheduleRender: vi.fn(),
+    };
+    const graph = { eventEmitter: new EventEmitter() };
+    const teardown = dragCanvas(renderer as any, graph as any);
+
+    graph.eventEmitter.emit('canvas:pointerdown', { event: mouseEvent({ shiftKey: true }) });
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 140, clientY: 140 }));
+
+    expect(renderer.setCamera).not.toHaveBeenCalled();
+    teardown();
+  });
+
+  it('still pans for an unmodified canvas drag', async () => {
+    const { dragCanvas } = await import('../behaviors/dragCanvas.js');
+    const renderer = {
+      getCamera: vi.fn(() => ({ x: 0, y: 0, zoom: 1 })),
+      setCamera: vi.fn(),
+      scheduleRender: vi.fn(),
+    };
+    const graph = { eventEmitter: new EventEmitter() };
+    const teardown = dragCanvas(renderer as any, graph as any);
+
+    graph.eventEmitter.emit('canvas:pointerdown', { event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 140, clientY: 140 }));
+
+    expect(renderer.setCamera).toHaveBeenCalled();
+    teardown();
+  });
+});
 
 // ============================================================
 // Behavior tests — post-dispatcher architecture.
@@ -259,6 +319,68 @@ describe('hoverHighlight behavior', () => {
     expect(graph.setItemState).toHaveBeenCalledWith('e1', 'inactive', true);
   });
 
+  it('freezes hover changes while a node is being dragged', async () => {
+    const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+
+    hoverHighlight(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:dragstart', { nodeId: 'a', nodeIds: ['a'] });
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'b', event: mouseEvent() });
+    graph.eventEmitter.emit('edge:pointerover', {
+      edgeIndex: 1,
+      source: 'b',
+      target: 'c',
+      event: mouseEvent(),
+    });
+
+    expect(renderer.setHighlight).not.toHaveBeenCalled();
+    expect(graph.setItemState).not.toHaveBeenCalled();
+
+    graph.eventEmitter.emit('node:dragend', { nodeId: 'a', nodeIds: ['a'] });
+    expect(renderer.setHighlight).not.toHaveBeenCalled();
+
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'b', event: mouseEvent() });
+    expect(renderer.setHighlight).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the same hover freeze semantics for combo dragging', async () => {
+    const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+
+    hoverHighlight(renderer as any, graph as any);
+    graph.eventEmitter.emit('combo:dragstart', { comboId: 'combo-a' });
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'b', event: mouseEvent() });
+    expect(renderer.setHighlight).not.toHaveBeenCalled();
+
+    graph.eventEmitter.emit('combo:dragend', { comboId: 'combo-a' });
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'b', event: mouseEvent() });
+    expect(renderer.setHighlight).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not clear an existing hover until the drag ends and the pointer moves again', async () => {
+    const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+
+    hoverHighlight(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: mouseEvent() });
+    graph.eventEmitter.emit('node:dragstart', { nodeId: 'a', nodeIds: ['a'] });
+    graph.eventEmitter.emit('node:pointerleave', { nodeId: 'a', event: mouseEvent() });
+
+    expect(renderer.setHighlight).toHaveBeenCalledTimes(1);
+
+    graph.eventEmitter.emit('node:dragend', { nodeId: 'a', nodeIds: ['a'] });
+    expect(renderer.setHighlight).toHaveBeenCalledTimes(1);
+
+    graph.eventEmitter.emit('node:pointerleave', { nodeId: 'a', event: mouseEvent() });
+    expect(renderer.setHighlight).toHaveBeenCalledTimes(2);
+    const lastArg = renderer.setHighlight.mock.calls.at(-1)![0];
+    expect(lastArg.nodeIds.size).toBe(0);
+    expect(lastArg.edgeIndices.size).toBe(0);
+  });
+
   it('teardown unsubscribes', async () => {
     const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
     const renderer = createMockRenderer();
@@ -275,7 +397,7 @@ describe('hoverHighlight behavior', () => {
 // dragNode — gesture start from node:pointerdown / combo:pointerdown
 // ============================================================
 describe('dragNode behavior', () => {
-  it('emits node:dragstart on node:pointerdown', async () => {
+  it('waits for movement beyond the threshold before emitting node:dragstart', async () => {
     const { dragNode } = await import('../behaviors/dragNode.js');
     const renderer = createMockRenderer();
     const graph = createMockGraph();
@@ -285,9 +407,95 @@ describe('dragNode behavior', () => {
     dragNode(renderer as any, graph as any);
     graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
 
+    expect(startHandler).not.toHaveBeenCalled();
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 10, clientY: 0 }));
     expect(startHandler).toHaveBeenCalledTimes(1);
     expect(startHandler.mock.calls[0][0].nodeId).toBe('a');
     expect(startHandler.mock.calls[0][0].nodeIds).toEqual(['a']);
+  });
+
+  it('consumes the pointer gesture when node dragging starts', async () => {
+    const { dragNode } = await import('../behaviors/dragNode.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const consumeHandler = vi.fn();
+    graph.eventEmitter.on(GESTURE_CONSUME_EVENT, consumeHandler);
+
+    const teardown = dragNode(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 100 }));
+
+    expect(consumeHandler).toHaveBeenCalledTimes(1);
+    teardown();
+  });
+
+  it('drags all selected nodes and emits dragend with the selected node ids', async () => {
+    const { dragNode } = await import('../behaviors/dragNode.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    graph.setItemState('a', 'selected', true);
+    graph.setItemState('b', 'selected', true);
+    const endHandler = vi.fn();
+    graph.eventEmitter.on('node:dragend', endHandler);
+
+    const teardown = dragNode(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 105 }));
+    window.dispatchEvent(new MouseEvent('mouseup'));
+
+    expect(graph.findNodesByState).toHaveBeenCalledWith('selected');
+    expect(graph.updateNodePosition).toHaveBeenNthCalledWith(1, 'a', 10, 5);
+    expect(graph.updateNodePosition).toHaveBeenNthCalledWith(2, 'b', 20, 5);
+    expect(endHandler).toHaveBeenCalledWith({ nodeId: 'a', nodeIds: ['a', 'b'] });
+    teardown();
+  });
+
+  it('drags nested combo nodes and emits the combo drag lifecycle', async () => {
+    const { dragNode } = await import('../behaviors/dragNode.js');
+    const renderer = createMockRenderer();
+    renderer.getCamera.mockReturnValue({ zoom: 2, x: 0, y: 0 });
+    const graph = createMockGraph();
+    graph.getComboData.mockReturnValue({ id: 'root' });
+    graph.getComboChildren.mockImplementation((comboId: string) =>
+      comboId === 'root' ? { nodes: ['a'], combos: ['child'] } : { nodes: ['b'], combos: [] },
+    );
+    const startHandler = vi.fn();
+    const dragHandler = vi.fn();
+    const endHandler = vi.fn();
+    graph.eventEmitter.on('combo:dragstart', startHandler);
+    graph.eventEmitter.on('combo:drag', dragHandler);
+    graph.eventEmitter.on('combo:dragend', endHandler);
+
+    const teardown = dragNode(renderer as any, graph as any);
+    graph.eventEmitter.emit('combo:pointerdown', { comboId: 'root', event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 106 }));
+    window.dispatchEvent(new MouseEvent('mouseup'));
+
+    expect(graph.getComboChildren).toHaveBeenCalledWith('root');
+    expect(graph.getComboChildren).toHaveBeenCalledWith('child');
+    expect(graph.updateNodePosition).toHaveBeenNthCalledWith(1, 'a', 5, 3);
+    expect(graph.updateNodePosition).toHaveBeenNthCalledWith(2, 'b', 15, 3);
+    expect(startHandler).toHaveBeenCalledTimes(1);
+    expect(dragHandler).toHaveBeenCalledWith(
+      expect.objectContaining({ comboId: 'root', dx: 5, dy: 3 }),
+    );
+    expect(endHandler).toHaveBeenCalledWith({ comboId: 'root' });
+    teardown();
+  });
+
+  it('does not emit dragend for a plain click', async () => {
+    const { dragNode } = await import('../behaviors/dragNode.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const endHandler = vi.fn();
+    graph.eventEmitter.on('node:dragend', endHandler);
+
+    const teardown = dragNode(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mouseup'));
+
+    expect(endHandler).not.toHaveBeenCalled();
+    teardown();
   });
 
   it('ignores non-left-button pointerdown', async () => {

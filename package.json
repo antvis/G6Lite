@@ -1,6 +1,6 @@
 {
   "name": "@antv/g6-lite",
-  "version": "0.1.0-beta.12",
+  "version": "0.1.0-beta.21",
   "description": "A high-performance graph analysis engine based on WebGL, designed for large-scale graph data analysis.",
   "type": "module",
   "main": "dist/index.js",
@@ -35,7 +35,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "npm run build && changeset publish",
-    "ci": "npm run lint && npm run typecheck && npm run test && npm run build"
+    "ci": "npm run lint && npm run typecheck && npm run test:cov && npm run build && npm run size"
   },
   "keywords": [
     "graph",

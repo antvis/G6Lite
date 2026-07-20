@@ -694,6 +694,129 @@ describe('DataModel combo operations', () => {
     expect(model.getEdge('external-edge')!.states.has('hidden')).toBe(false);
   });
 
+  it('should release an edge after both endpoints are added to one collapsed combo separately', () => {
+    const model = createModel();
+    model.replaceData(
+      [
+        { id: 'n1', x: 0, y: 0 },
+        { id: 'n2', x: 10, y: 10 },
+      ],
+      [{ id: 'edge-1', source: 'n1', target: 'n2' }],
+    );
+    model.initCombos([{ id: 'combo-1', collapsed: true }], []);
+
+    // Mirror two separate Graph.addToCombo calls while the Combo is collapsed.
+    model.setNodeCombo('n1', 'combo-1');
+    model.applyComboHidden(['n1']);
+    model.setNodeCombo('n2', 'combo-1');
+    model.applyComboHidden(['n2']);
+
+    expect(model.getEdge('edge-1')!.states.has('hidden')).toBe(true);
+
+    model.releaseComboHidden(model.getComboAllNodeIds('combo-1'));
+
+    expect(model.getNode('n1')!.states.has('hidden')).toBe(false);
+    expect(model.getNode('n2')!.states.has('hidden')).toBe(false);
+    expect(model.getEdge('edge-1')!.states.has('hidden')).toBe(false);
+  });
+
+  it('should keep combo-derived node and edge hidden through show and clear operations', () => {
+    const model = createModel();
+    model.replaceData(
+      [
+        { id: 'n1', x: 0, y: 0 },
+        { id: 'outside', x: 100, y: 0 },
+      ],
+      [{ id: 'e1', source: 'n1', target: 'outside' }],
+    );
+    model.initCombos([{ id: 'combo-1', collapsed: true }], [{ id: 'n1', comboId: 'combo-1' }]);
+
+    model.replaceNodeStates('n1', ['selected']);
+    model.replaceEdgeStates('e1', ['active']);
+    expect(model.getNode('n1')!.states).toEqual(new Set(['selected', 'hidden']));
+    expect(model.getEdge('e1')!.states).toEqual(new Set(['active', 'hidden']));
+
+    model.setNodeState('n1', 'hidden', false);
+    model.setNodeState('n1', 'selected', true);
+    model.clearNodeStates('n1');
+    model.setEdgeState('e1', 'hidden', false);
+    model.setEdgeState('e1', 'selected', true);
+    model.clearEdgeStates('e1');
+
+    expect(model.getNode('n1')!.states).toEqual(new Set(['hidden']));
+    expect(model.getEdge('e1')!.states).toEqual(new Set(['hidden']));
+    expect(model.toData().nodes.find((node) => node.id === 'n1')?.states).toBeUndefined();
+    expect(model.toData().edges.find((edge) => edge.id === 'e1')?.states).toBeUndefined();
+
+    model.releaseComboHidden(model.getComboAllNodeIds('combo-1'));
+
+    expect(model.getNode('n1')!.states.has('hidden')).toBe(false);
+    expect(model.getEdge('e1')!.states.has('hidden')).toBe(false);
+  });
+
+  it('should preserve explicit business hidden but transfer a cleared hidden back to the Combo', () => {
+    const model = createModel();
+    model.replaceData(
+      [
+        { id: 'business', x: 0, y: 0 },
+        { id: 'cleared', x: 20, y: 0, states: ['hidden'] },
+        { id: 'outside', x: 100, y: 0 },
+      ],
+      [
+        { id: 'business-edge', source: 'business', target: 'outside' },
+        { id: 'cleared-edge', source: 'cleared', target: 'outside', states: ['hidden'] },
+      ],
+    );
+    model.initCombos(
+      [{ id: 'combo-1', collapsed: true }],
+      [
+        { id: 'business', comboId: 'combo-1' },
+        { id: 'cleared', comboId: 'combo-1' },
+      ],
+    );
+
+    model.setNodeState('business', 'hidden', true);
+    model.setEdgeState('business-edge', 'hidden', true);
+    model.setNodeState('cleared', 'hidden', false);
+    model.setEdgeState('cleared-edge', 'hidden', false);
+
+    expect(model.getNode('cleared')!.states.has('hidden')).toBe(true);
+    expect(model.getEdge('cleared-edge')!.states.has('hidden')).toBe(true);
+
+    model.releaseComboHidden(model.getComboAllNodeIds('combo-1'));
+
+    expect(model.getNode('business')!.states.has('hidden')).toBe(true);
+    expect(model.getEdge('business-edge')!.states.has('hidden')).toBe(true);
+    expect(model.getNode('cleared')!.states.has('hidden')).toBe(false);
+    expect(model.getEdge('cleared-edge')!.states.has('hidden')).toBe(false);
+  });
+
+  it('should release nested combo hidden only after the final depth is removed', () => {
+    const model = createModel();
+    model.replaceData(
+      [
+        { id: 'n1', x: 0, y: 0 },
+        { id: 'outside', x: 100, y: 0 },
+      ],
+      [{ id: 'e1', source: 'n1', target: 'outside' }],
+    );
+    model.initCombos(
+      [
+        { id: 'parent', collapsed: true },
+        { id: 'child', parentId: 'parent', collapsed: true },
+      ],
+      [{ id: 'n1', comboId: 'child' }],
+    );
+
+    model.releaseComboHidden(model.getComboAllNodeIds('child'));
+    expect(model.getNode('n1')!.states.has('hidden')).toBe(true);
+    expect(model.getEdge('e1')!.states.has('hidden')).toBe(true);
+
+    model.releaseComboHidden(model.getComboAllNodeIds('parent'));
+    expect(model.getNode('n1')!.states.has('hidden')).toBe(false);
+    expect(model.getEdge('e1')!.states.has('hidden')).toBe(false);
+  });
+
   it('should support per-combo padding while computing bounds', () => {
     const model = createModel();
     model.addNodes([

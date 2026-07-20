@@ -30,6 +30,7 @@ export function hoverHighlight(
   const inactiveState = config?.inactiveState;
   let inactiveApplied: string[] = [];
   let highlightApplied: string[] = [];
+  let isFrozen = false;
 
   const batchSetState = (
     items: Array<{ id: string; state: ElementState; value: boolean }>,
@@ -139,7 +140,13 @@ export function hoverHighlight(
     renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
   };
 
+  const onPointerLeave = () => {
+    if (isFrozen) return;
+    clearHighlight();
+  };
+
   const onEdgeOver = (payload: { source: string; target: string; edgeIndex: number }) => {
+    if (isFrozen) return;
     canvas.style.cursor = 'pointer';
     const nodeIds = new Set([payload.source, payload.target]);
     const edgeIndices = new Set([payload.edgeIndex]);
@@ -148,6 +155,7 @@ export function hoverHighlight(
   };
 
   const onNodeOver = (payload: { nodeId: string }) => {
+    if (isFrozen) return;
     clearInactive();
     const nodeId = payload.nodeId;
     canvas.style.cursor = 'pointer';
@@ -169,15 +177,31 @@ export function hoverHighlight(
     applyStateStyles(nodeIds, edgeIndices);
   };
 
+  const freeze = () => {
+    isFrozen = true;
+  };
+
+  const unfreeze = () => {
+    isFrozen = false;
+  };
+
   graph.eventEmitter.on('edge:pointerover', onEdgeOver);
-  graph.eventEmitter.on('edge:pointerleave', clearHighlight);
+  graph.eventEmitter.on('edge:pointerleave', onPointerLeave);
   graph.eventEmitter.on('node:pointerover', onNodeOver);
-  graph.eventEmitter.on('node:pointerleave', clearHighlight);
+  graph.eventEmitter.on('node:pointerleave', onPointerLeave);
+  graph.eventEmitter.on('node:dragstart', freeze);
+  graph.eventEmitter.on('combo:dragstart', freeze);
+  graph.eventEmitter.on('node:dragend', unfreeze);
+  graph.eventEmitter.on('combo:dragend', unfreeze);
 
   return () => {
     graph.eventEmitter.off('edge:pointerover', onEdgeOver);
-    graph.eventEmitter.off('edge:pointerleave', clearHighlight);
+    graph.eventEmitter.off('edge:pointerleave', onPointerLeave);
     graph.eventEmitter.off('node:pointerover', onNodeOver);
-    graph.eventEmitter.off('node:pointerleave', clearHighlight);
+    graph.eventEmitter.off('node:pointerleave', onPointerLeave);
+    graph.eventEmitter.off('node:dragstart', freeze);
+    graph.eventEmitter.off('combo:dragstart', freeze);
+    graph.eventEmitter.off('node:dragend', unfreeze);
+    graph.eventEmitter.off('combo:dragend', unfreeze);
   };
 }

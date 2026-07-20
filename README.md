@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@antv/g6-lite.svg)](https://www.npmjs.com/package/@antv/g6-lite)
 [![CI](https://github.com/antvis/G6Lite/actions/workflows/ci.yml/badge.svg)](https://github.com/antvis/G6Lite/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![bundle size](https://img.shields.io/badge/gzip-~117%20KB-brightgreen.svg)](./docs/metrics/bundle-size.md)
+[![bundle size](https://img.shields.io/badge/gzip-~117%20KB-brightgreen.svg)](./website/content/docs/metrics/bundle-size.mdx)
 
 > 基于 WebGL 的高性能图可视化与分析引擎，为大规模图数据而生。
 >
@@ -53,21 +53,21 @@ await graph.render();
 
 ## 📖 文档 / Documentation
 
-完整文档以官网站点形式提供（基于 [dumi](https://d.umijs.org/)）。本地预览：
+完整文档以官网站点形式提供（基于 [Next.js](https://nextjs.org/) + [Fumadocs](https://fumadocs.dev/)）。本地预览：
 
 ```bash
-npm run docs:dev      # 启动文档站点
-npm run docs:build    # 构建静态站点到 site/
+npm run site:dev      # 启动文档站点
+npm run site:build    # 构建静态站点到 website/out/
 ```
 
 站点内容：
 
 - **指南 / Guide** — 项目介绍、快速开始、数据格式、节点 / 边样式、布局、交互、主题（建设中，逐步补全）。
 - **指标 / Metrics**：
-  - [包大小](./docs/metrics/bundle-size.md) — 真实打包体积与同类库对比。
-  - [浏览器兼容性](./docs/metrics/browser-compatibility.md) — WebGL 支持矩阵与最低版本。
-  - [性能指标](./docs/metrics/performance.md) — 指标定义、测试环境与核心数据。
-- **完整指南** — 现有 [docs/guide.md](./docs/guide.md) 覆盖数据 / 配置 / 布局 / 交互 / 主题与 API。
+  - [包大小](./website/content/docs/metrics/bundle-size.mdx) — 真实打包体积与同类库对比。
+  - [浏览器兼容性](./website/content/docs/metrics/browser-compatibility.mdx) — WebGL 支持矩阵与最低版本。
+  - [性能指标](./website/content/docs/metrics/performance.mdx) — 指标定义、测试环境与核心数据。
+- **完整指南** — 从 [快速开始](./website/content/docs/getting-started/quick-start.mdx) 进入，覆盖数据、配置、布局、交互、主题与 API。
 
 > 公网文档站点（GitHub Pages）将在 `0.1.0` 正式发布时上线。
 
@@ -102,7 +102,7 @@ npm run size     # 检查打包体积
 
 - ✅ 核心引擎、渲染、15+ 布局、P0–P3 交互行为
 - ✅ 治理文件（CONTRIBUTING / CODE_OF_CONDUCT / Issue & PR 模板）
-- ✅ 文档站点骨架（dumi）+ 三份指标文档
+- ✅ 文档站点骨架（Next.js + Fumadocs）+ 三份指标文档
 - 🚧 Guide 各章节正文、Combo / Label 文档与示例
 - 🚧 测试覆盖率门槛、独立 examples、API 文档
 - 🚧 GitHub Pages 部署、changesets 发布流程

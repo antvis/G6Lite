@@ -3,8 +3,10 @@ title: 真实数据集
 description: 使用 sigma 同款真实数据验证 G6Lite 的大图渲染
 ---
 
+import { withBasePath } from '@/lib/shared';
+
 <div className="example-hero">
-  <img src="/examples/real-dataset.png" alt="真实数据集截图" />
+  <img src={withBasePath('/examples/real-dataset.png')} alt="真实数据集截图" />
 </div>
 
 这个示例使用真实网络数据集，复用数据内置坐标，不重新运行布局。它适合验证大图渲染、拖拽、缩放和邻居高亮的真实表现。

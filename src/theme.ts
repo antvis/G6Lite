@@ -30,18 +30,18 @@ const light: ThemeTokens = {
   edgeDefaultColor: '#99ADD1',
   edgeCategoryPalette: CATEGORY_PALETTE,
   edgeStateStyles: {
-    active: { lineWidth: 2, opacity: 1 },
-    selected: { lineWidth: 3, opacity: 1, stroke: '#1783FF' },
-    disabled: { opacity: 0.45, lineDash: [4, 4] },
-    highlight: { lineWidth: 3, opacity: 1 },
-    inactive: { opacity: 0.15 },
+    active: { stroke: '#5B8FF9', opacity: 1 },
+    selected: { stroke: '#5B8FF9', opacity: 1 },
+    disabled: { opacity: 0.15, lineDash: [4, 4] },
+    highlight: { stroke: '#5B8FF9', opacity: 1 },
+    inactive: { opacity: 0.25 },
   },
   nodeStateStyles: {
-    active: { strokeWidth: 2, stroke: '#5B8FF9', opacity: 1 },
-    selected: { strokeWidth: 3, stroke: '#1783FF', opacity: 1 },
-    disabled: { opacity: 0.25 },
-    highlight: { strokeWidth: 2, opacity: 1 },
-    inactive: { opacity: 0.15 },
+    active: { haloWidth: 8, opacity: 1 },
+    selected: { strokeWidth: 2, stroke: '#163B65', haloWidth: 12, opacity: 1 },
+    disabled: { opacity: 0.15 },
+    highlight: { strokeWidth: 1, stroke: '#163B65', opacity: 1 },
+    inactive: { opacity: 0.25 },
   },
 };
 
@@ -57,18 +57,18 @@ const dark: ThemeTokens = {
   edgeDefaultColor: '#4a4a4a',
   edgeCategoryPalette: CATEGORY_PALETTE,
   edgeStateStyles: {
-    active: { lineWidth: 2, opacity: 1 },
-    selected: { lineWidth: 3, opacity: 1, stroke: '#5B8FF9' },
-    disabled: { opacity: 0.45, lineDash: [4, 4] },
-    highlight: { lineWidth: 3, opacity: 1 },
-    inactive: { opacity: 0.15 },
+    active: { stroke: '#5B8FF9', opacity: 1 },
+    selected: { stroke: '#5B8FF9', opacity: 1 },
+    disabled: { opacity: 0.15, lineDash: [4, 4] },
+    highlight: { stroke: '#5B8FF9', opacity: 1 },
+    inactive: { opacity: 0.25 },
   },
   nodeStateStyles: {
-    active: { strokeWidth: 2, stroke: '#5B8FF9', opacity: 1 },
-    selected: { strokeWidth: 3, stroke: '#5B8FF9', opacity: 1 },
-    disabled: { opacity: 0.25 },
-    highlight: { strokeWidth: 2, opacity: 1 },
-    inactive: { opacity: 0.15 },
+    active: { haloWidth: 8, opacity: 1 },
+    selected: { strokeWidth: 2, stroke: '#B7D3FF', haloWidth: 12, opacity: 1 },
+    disabled: { opacity: 0.15 },
+    highlight: { strokeWidth: 1, stroke: '#B7D3FF', opacity: 1 },
+    inactive: { opacity: 0.25 },
   },
 };
 
@@ -88,4 +88,4 @@ export function resolveTheme(
   return { ...base, ...theme };
 }
 
-export { light, dark, presets };
+export { dark, light, presets };

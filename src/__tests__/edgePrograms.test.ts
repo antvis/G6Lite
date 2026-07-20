@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { encodeId } from '../renderer/picking.js';
 import { EdgeArcProgram } from '../renderer/programs/edgeArc.js';
 import { EdgeLineProgram } from '../renderer/programs/edgeLine.js';
+import { EdgeLoopProgram } from '../renderer/programs/edgeLoop.js';
 import { EdgeRectProgram } from '../renderer/programs/edgeRect.js';
 
 // ============================================================
@@ -19,6 +20,9 @@ import { EdgeRectProgram } from '../renderer/programs/edgeRect.js';
 /** Minimal no-op WebGL stub — enough for Program's constructor + createProgram. */
 function makeGLStub(): WebGLRenderingContext {
   const overrides: Record<string, unknown> = {
+    LINES: 1,
+    TRIANGLES: 4,
+    TRIANGLE_STRIP: 5,
     getShaderParameter: () => true,
     getProgramParameter: () => true,
     getShaderInfoLog: () => '',
@@ -56,10 +60,20 @@ class TestEdgeArc extends EdgeArcProgram {
     return (this as unknown as { array: Float32Array }).array;
   }
 }
+class TestEdgeLoop extends EdgeLoopProgram {
+  peek(): Float32Array {
+    return (this as unknown as { array: Float32Array }).array;
+  }
+}
 
 const STRIDE_LINE = 16;
 const STRIDE_RECT = 19;
-const STRIDE_ARC = 9;
+const STRIDE_ARC = 13;
+const ARC_SEGMENTS = 24;
+const ARC_VERTICES_PER_ITEM = (ARC_SEGMENTS + 1) * 2 + 2;
+const STRIDE_LOOP = 13;
+const LOOP_SEGMENTS = 24;
+const LOOP_VERTICES_PER_ITEM = (LOOP_SEGMENTS + 1) * 2 + 2;
 
 describe('EdgeLine processEdge buffer encoding', () => {
   it('encodes both endpoints + clamp inputs, with a_posCoef selecting the end', () => {
@@ -183,17 +197,214 @@ describe('EdgeRect processEdge buffer encoding', () => {
     expect(a[7]).toBeCloseTo(0.4); // a_color
     expect(a[14]).toBeCloseTo(0.8); // a_opacity
   });
+
+  it('patchEdgeStyle updates every optional rect style attribute', () => {
+    const prog = new TestEdgeRect(makeGLStub());
+    prog.reallocate(1);
+    prog.processEdge(0, 0, 0, 100, 0, [0.1, 0.2, 0.3], 7, 2);
+
+    prog.patchEdgeStyle(0, {
+      color: [0.7, 0.8, 0.9],
+      lineWidth: 6,
+      dashCycle: 12,
+      opacity: 0.4,
+      srcRadius: 11,
+      tgtRadius: 13,
+      srcArrowPx: 17,
+      tgtArrowPx: 19,
+    });
+
+    const a = prog.peek();
+    for (let vertex = 0; vertex < 6; vertex++) {
+      const offset = vertex * STRIDE_RECT;
+      expect(a[offset + 6]).toBeCloseTo(6);
+      expect(a[offset + 7]).toBeCloseTo(0.7);
+      expect(a[offset + 8]).toBeCloseTo(0.8);
+      expect(a[offset + 9]).toBeCloseTo(0.9);
+      expect(a[offset + 13]).toBeCloseTo(12);
+      expect(a[offset + 14]).toBeCloseTo(0.4);
+      expect(a[offset + 15]).toBeCloseTo(11);
+      expect(a[offset + 16]).toBeCloseTo(13);
+      expect(a[offset + 17]).toBeCloseTo(17);
+      expect(a[offset + 18]).toBeCloseTo(19);
+    }
+  });
 });
 
 describe('EdgeArc processEdge buffer encoding', () => {
-  it('encodes opacity for hidden arc edges', () => {
+  it('tessellates the curve into a compact thick strip with style and picking attributes', () => {
     const prog = new TestEdgeArc(makeGLStub());
     prog.reallocate(1);
-    prog.processEdge(0, 0, 0, 100, 0, [0.2, 0.3, 0.4], 9, 0.3, 0);
+    const color: [number, number, number] = [0.2, 0.3, 0.4];
+    const pickingIndex = 9;
+    prog.processEdge(0, 0, 0, 100, 0, color, pickingIndex, 0.3, 4, 12, 0.6);
 
     const a = prog.peek();
-    expect(a[8]).toBeCloseTo(0);
-    expect(a[STRIDE_ARC + 8]).toBeCloseTo(0);
+
+    expect(prog.getDrawMethod()).toBe(makeGLStub().TRIANGLE_STRIP);
+    expect(prog.getVerticesPerItem()).toBe(ARC_VERTICES_PER_ITEM);
+    expect(prog.getFloatsPerVertex()).toBe(STRIDE_ARC);
+
+    // The leading left vertex is duplicated to isolate this edge's strip.
+    expect(a[0]).toBeCloseTo(0);
+    expect(a[1]).toBeCloseTo(0);
+    expect(a[4]).toBe(-1);
+    expect(a[5]).toBeCloseTo(4);
+    expect(a[6]).toBeCloseTo(12);
+    expect(a[7]).toBeCloseTo(0);
+    expect(a[8]).toBeCloseTo(0.6);
+    expect(a[9]).toBeCloseTo(color[0]);
+    expect(a[10]).toBeCloseTo(color[1]);
+    expect(a[11]).toBeCloseTo(color[2]);
+    expect(a[12]).toBeCloseTo(pickingIndex);
+    expect(Array.from(a.slice(0, STRIDE_ARC))).toEqual(
+      Array.from(a.slice(STRIDE_ARC, STRIDE_ARC * 2)),
+    );
+
+    const oppositeSource = 2 * STRIDE_ARC;
+    expect(a[oppositeSource]).toBeCloseTo(0);
+    expect(a[oppositeSource + 1]).toBeCloseTo(0);
+    expect(a[oppositeSource + 2]).toBeCloseTo(a[2]);
+    expect(a[oppositeSource + 3]).toBeCloseTo(a[3]);
+    expect(a[oppositeSource + 4]).toBe(1);
+
+    // Analytic normals are normalized, so lineWidth is measured in pixels.
+    expect(Math.hypot(a[2], a[3])).toBeCloseTo(1);
+  });
+
+  it('accumulates a continuous path distance across segment boundaries', () => {
+    const prog = new TestEdgeArc(makeGLStub());
+    prog.reallocate(1);
+    prog.processEdge(0, 10, 20, 110, 220, [0.1, 0.2, 0.3], 42, 0.45, 3, 10, 0.8);
+
+    const a = prog.peek();
+    let previousDistance = 0;
+    for (let sample = 0; sample <= ARC_SEGMENTS; sample++) {
+      const leftVertex = sample === 0 ? 1 : 3 + (sample - 1) * 2;
+      const rightVertex = leftVertex + 1;
+      const leftOffset = leftVertex * STRIDE_ARC;
+      const rightOffset = rightVertex * STRIDE_ARC;
+      const distance = a[leftOffset + 7];
+
+      expect(distance).toBeGreaterThanOrEqual(previousDistance);
+      if (sample > 0) expect(distance).toBeGreaterThan(previousDistance);
+      expect(a[rightOffset]).toBeCloseTo(a[leftOffset]);
+      expect(a[rightOffset + 1]).toBeCloseTo(a[leftOffset + 1]);
+      expect(a[rightOffset + 2]).toBeCloseTo(a[leftOffset + 2]);
+      expect(a[rightOffset + 3]).toBeCloseTo(a[leftOffset + 3]);
+      expect(a[leftOffset + 4]).toBe(-1);
+      expect(a[rightOffset + 4]).toBe(1);
+      expect(a[rightOffset + 7]).toBeCloseTo(distance, 5);
+      previousDistance = distance;
+    }
+
+    const trailingOffset = (ARC_VERTICES_PER_ITEM - 1) * STRIDE_ARC;
+    const lastRightOffset = (ARC_VERTICES_PER_ITEM - 2) * STRIDE_ARC;
+    expect(Array.from(a.slice(trailingOffset, trailingOffset + STRIDE_ARC))).toEqual(
+      Array.from(a.slice(lastRightOffset, lastRightOffset + STRIDE_ARC)),
+    );
+    expect(previousDistance).toBeGreaterThan(Math.hypot(100, 200));
+  });
+
+  it('keeps long high-curvature arc chord error below the visual threshold', () => {
+    const prog = new TestEdgeArc(makeGLStub());
+    prog.reallocate(1);
+    prog.processEdge(0, 0, 0, 1000, 0, [0.1, 0.2, 0.3], 42, 0.4, 1, 0, 1);
+
+    const a = prog.peek();
+    const cpx = 500;
+    const cpy = 400;
+    let maxMidpointError = 0;
+    for (let segment = 0; segment < ARC_SEGMENTS; segment++) {
+      const startVertex = segment === 0 ? 1 : 3 + (segment - 1) * 2;
+      const endVertex = 3 + segment * 2;
+      const startOffset = startVertex * STRIDE_ARC;
+      const endOffset = endVertex * STRIDE_ARC;
+      const chordMidX = (a[startOffset] + a[endOffset]) * 0.5;
+      const chordMidY = (a[startOffset + 1] + a[endOffset + 1]) * 0.5;
+      const t = (segment + 0.5) / ARC_SEGMENTS;
+      const mt = 1 - t;
+      const curveMidX = mt * mt * 0 + 2 * mt * t * cpx + t * t * 1000;
+      const curveMidY = mt * mt * 0 + 2 * mt * t * cpy + t * t * 0;
+      maxMidpointError = Math.max(
+        maxMidpointError,
+        Math.hypot(chordMidX - curveMidX, chordMidY - curveMidY),
+      );
+    }
+
+    expect(maxMidpointError).toBeLessThan(0.5);
+  });
+
+  it('keeps degenerate arc vertices finite', () => {
+    const prog = new TestEdgeArc(makeGLStub());
+    prog.reallocate(1);
+    prog.processEdge(0, 5, 5, 5, 5, [1, 0, 0], 3, 0.5, 2, 0, 0);
+
+    const usedLength = prog.getVerticesPerItem() * prog.getFloatsPerVertex();
+    expect(Array.from(prog.peek().subarray(0, usedLength)).every(Number.isFinite)).toBe(true);
+    expect(prog.peek()[8]).toBeCloseTo(0);
+  });
+});
+
+describe('EdgeLoop processLoop buffer encoding', () => {
+  it('tessellates loops into a finite continuous thick strip', () => {
+    const prog = new TestEdgeLoop(makeGLStub());
+    prog.reallocate(1);
+    const color: [number, number, number] = [0.2, 0.4, 0.6];
+    const pickingIndex = 17;
+    const angle = -Math.PI / 2;
+    const radius = 10;
+    prog.processLoop(0, 30, 40, radius, angle, 25, color, pickingIndex, 3, 10, 0.35);
+
+    expect(prog.getDrawMethod()).toBe(makeGLStub().TRIANGLE_STRIP);
+    expect(prog.getVerticesPerItem()).toBe(LOOP_VERTICES_PER_ITEM);
+    expect(prog.getFloatsPerVertex()).toBe(STRIDE_LOOP);
+    expect(prog.getAttributeLayout()).toEqual([
+      { name: 'a_position', size: 2 },
+      { name: 'a_normalSide', size: 3 },
+      { name: 'a_style', size: 4 },
+      { name: 'a_color', size: 3 },
+      { name: 'a_pickingIndex', size: 1 },
+    ]);
+    expect(prog.getVertexShader()).toContain('attribute vec3 a_normalSide;');
+
+    const a = prog.peek();
+    const usedLength = LOOP_VERTICES_PER_ITEM * STRIDE_LOOP;
+    expect(Array.from(a.subarray(0, usedLength)).every(Number.isFinite)).toBe(true);
+    for (let vertex = 0; vertex < LOOP_VERTICES_PER_ITEM; vertex++) {
+      const offset = vertex * STRIDE_LOOP;
+      expect(Math.hypot(a[offset + 2], a[offset + 3])).toBeCloseTo(1);
+      expect(Math.abs(a[offset + 4])).toBe(1);
+      expect(a[offset + 5]).toBeCloseTo(3);
+      expect(a[offset + 6]).toBeCloseTo(10);
+      expect(a[offset + 8]).toBeCloseTo(0.35);
+      expect(a[offset + 9]).toBeCloseTo(color[0]);
+      expect(a[offset + 10]).toBeCloseTo(color[1]);
+      expect(a[offset + 11]).toBeCloseTo(color[2]);
+      expect(a[offset + 12]).toBe(pickingIndex);
+    }
+
+    const spread = 0.5;
+    expect(a[0]).toBeCloseTo(30 + radius * Math.cos(angle - spread));
+    expect(a[1]).toBeCloseTo(40 + radius * Math.sin(angle - spread));
+    const finalOffset = (LOOP_VERTICES_PER_ITEM - 1) * STRIDE_LOOP;
+    expect(a[finalOffset]).toBeCloseTo(30 + radius * Math.cos(angle + spread));
+    expect(a[finalOffset + 1]).toBeCloseTo(40 + radius * Math.sin(angle + spread));
+    expect(Array.from(a.slice(0, STRIDE_LOOP))).toEqual(
+      Array.from(a.slice(STRIDE_LOOP, STRIDE_LOOP * 2)),
+    );
+    expect(Array.from(a.slice(finalOffset, finalOffset + STRIDE_LOOP))).toEqual(
+      Array.from(a.slice(finalOffset - STRIDE_LOOP, finalOffset)),
+    );
+  });
+
+  it('keeps degenerate loop geometry finite', () => {
+    const prog = new TestEdgeLoop(makeGLStub());
+    prog.reallocate(1);
+    prog.processLoop(0, 5, 5, 0, 0, 0, [1, 0, 0], 3, 2, 0, 0);
+
+    const usedLength = prog.getVerticesPerItem() * prog.getFloatsPerVertex();
+    expect(Array.from(prog.peek().subarray(0, usedLength)).every(Number.isFinite)).toBe(true);
   });
 });
 

@@ -1,18 +1,54 @@
 /**
- * EdgeArc: renders curved edges as tessellated GL_LINES (quadratic bezier).
- * CPU computes curve points; each edge → SEGMENTS line segments → SEGMENTS*2 vertices.
- * Stride: 9 floats per vertex (position.xy, color.rgb, pickingColor.rgb, opacity).
+ * EdgeArc: renders a quadratic bezier as one triangle strip per edge.
+ * Degenerate vertices isolate adjacent edge strips inside a single draw call.
+ * Adjacent curve samples reuse the analytic normal, avoiding cracks at joins.
+ *
+ * Stride: 13 floats per vertex (position.xy, normalSide.xyz,
+ * style[lineWidth,dashCycle,pathDistance,opacity], color.rgb, pickingIndex).
+ * pathDistance is accumulated in graph coordinates and converted to pixels in
+ * the vertex shader so dash phase remains continuous across every segment.
+ * Twenty-four segments keep long, highly curved edges visually smooth while
+ * retaining a fixed per-edge allocation and zoom-independent geometry.
  */
 
-import { encodeId } from '../picking.js';
 import type { AttributeLayout, RenderParams } from './program.js';
 import { Program } from './program.js';
 import { fragmentShader } from './shaders/edgeArc.frag.js';
 import { vertexShader } from './shaders/edgeArc.vert.js';
 
-const FLOATS_PER_VERTEX = 9;
-const SEGMENTS = 16;
-const VERTICES_PER_ITEM = SEGMENTS * 2;
+const FLOATS_PER_VERTEX = 13;
+const SEGMENTS = 24;
+const VERTICES_PER_ITEM = (SEGMENTS + 1) * 2 + 2;
+
+function writeVertex(
+  array: Float32Array,
+  offset: number,
+  x: number,
+  y: number,
+  normalX: number,
+  normalY: number,
+  normalCoef: number,
+  lineWidth: number,
+  dashCycle: number,
+  pathDistance: number,
+  opacity: number,
+  color: [number, number, number],
+  pickingIndex: number,
+): void {
+  array[offset] = x;
+  array[offset + 1] = y;
+  array[offset + 2] = normalX;
+  array[offset + 3] = normalY;
+  array[offset + 4] = normalCoef;
+  array[offset + 5] = lineWidth;
+  array[offset + 6] = dashCycle;
+  array[offset + 7] = pathDistance;
+  array[offset + 8] = opacity;
+  array[offset + 9] = color[0];
+  array[offset + 10] = color[1];
+  array[offset + 11] = color[2];
+  array[offset + 12] = pickingIndex;
+}
 
 export class EdgeArcProgram extends Program {
   getVertexShader() {
@@ -28,15 +64,16 @@ export class EdgeArcProgram extends Program {
     return VERTICES_PER_ITEM;
   }
   getDrawMethod() {
-    return this.gl.LINES;
+    return this.gl.TRIANGLE_STRIP;
   }
 
   getAttributeLayout(): AttributeLayout[] {
     return [
       { name: 'a_position', size: 2 },
+      { name: 'a_normalSide', size: 3 },
+      { name: 'a_style', size: 4 },
       { name: 'a_color', size: 3 },
-      { name: 'a_pickingColor', size: 3 },
-      { name: 'a_opacity', size: 1 },
+      { name: 'a_pickingIndex', size: 1 },
     ];
   }
 
@@ -56,55 +93,159 @@ export class EdgeArcProgram extends Program {
     color: [number, number, number],
     pickingIndex: number,
     curvature: number,
-    opacity = 1,
+    lineWidth: number = 1,
+    dashCycle: number = 0,
+    opacity: number = 1,
   ): void {
-    const [pr, pg, pb] = encodeId(pickingIndex);
-    const pR = pr / 255,
-      pG = pg / 255,
-      pB = pb / 255;
-
-    // Quadratic bezier control point: perpendicular offset from midpoint
+    // Quadratic bezier control point: perpendicular offset from midpoint.
     const mx = (sx + tx) * 0.5;
     const my = (sy + ty) * 0.5;
     const dx = tx - sx;
     const dy = ty - sy;
-    // Perpendicular direction
     const cpx = mx - dy * curvature;
     const cpy = my + dx * curvature;
 
     const base = index * VERTICES_PER_ITEM * FLOATS_PER_VERTEX;
+    let x0 = sx;
+    let y0 = sy;
+    let pathDistance0 = 0;
 
-    for (let i = 0; i < SEGMENTS; i++) {
-      const t0 = i / SEGMENTS;
-      const t1 = (i + 1) / SEGMENTS;
+    // The factor 2 in the quadratic derivative cancels during normalization.
+    let tangentX0 = cpx - sx;
+    let tangentY0 = cpy - sy;
+    let tangentLength0 = Math.hypot(tangentX0, tangentY0);
+    if (tangentLength0 < 1e-8) {
+      tangentX0 = dx;
+      tangentY0 = dy;
+      tangentLength0 = Math.hypot(tangentX0, tangentY0);
+    }
+    let normalX0 = tangentLength0 > 1e-8 ? -tangentY0 / tangentLength0 : 0;
+    let normalY0 = tangentLength0 > 1e-8 ? tangentX0 / tangentLength0 : 1;
 
-      const x0 = bezier(sx, cpx, tx, t0);
-      const y0 = bezier(sy, cpy, ty, t0);
+    let vertex = 0;
+
+    // Duplicate the first left vertex so this edge starts with a degenerate
+    // triangle and does not connect to the previous edge's strip.
+    writeVertex(
+      this.array,
+      base + vertex++ * FLOATS_PER_VERTEX,
+      x0,
+      y0,
+      normalX0,
+      normalY0,
+      -1,
+      lineWidth,
+      dashCycle,
+      pathDistance0,
+      opacity,
+      color,
+      pickingIndex,
+    );
+    writeVertex(
+      this.array,
+      base + vertex++ * FLOATS_PER_VERTEX,
+      x0,
+      y0,
+      normalX0,
+      normalY0,
+      -1,
+      lineWidth,
+      dashCycle,
+      pathDistance0,
+      opacity,
+      color,
+      pickingIndex,
+    );
+    writeVertex(
+      this.array,
+      base + vertex++ * FLOATS_PER_VERTEX,
+      x0,
+      y0,
+      normalX0,
+      normalY0,
+      1,
+      lineWidth,
+      dashCycle,
+      pathDistance0,
+      opacity,
+      color,
+      pickingIndex,
+    );
+
+    for (let segment = 0; segment < SEGMENTS; segment++) {
+      const t1 = (segment + 1) / SEGMENTS;
       const x1 = bezier(sx, cpx, tx, t1);
       const y1 = bezier(sy, cpy, ty, t1);
+      const segmentDx = x1 - x0;
+      const segmentDy = y1 - y0;
+      const pathDistance1 = pathDistance0 + Math.hypot(segmentDx, segmentDy);
 
-      const o = base + i * 2 * FLOATS_PER_VERTEX;
-      // Start vertex
-      this.array[o] = x0;
-      this.array[o + 1] = y0;
-      this.array[o + 2] = color[0];
-      this.array[o + 3] = color[1];
-      this.array[o + 4] = color[2];
-      this.array[o + 5] = pR;
-      this.array[o + 6] = pG;
-      this.array[o + 7] = pB;
-      this.array[o + 8] = opacity;
-      // End vertex
-      this.array[o + 9] = x1;
-      this.array[o + 10] = y1;
-      this.array[o + 11] = color[0];
-      this.array[o + 12] = color[1];
-      this.array[o + 13] = color[2];
-      this.array[o + 14] = pR;
-      this.array[o + 15] = pG;
-      this.array[o + 16] = pB;
-      this.array[o + 17] = opacity;
+      let tangentX1 = (1 - t1) * (cpx - sx) + t1 * (tx - cpx);
+      let tangentY1 = (1 - t1) * (cpy - sy) + t1 * (ty - cpy);
+      let tangentLength1 = Math.hypot(tangentX1, tangentY1);
+      if (tangentLength1 < 1e-8) {
+        tangentX1 = segmentDx;
+        tangentY1 = segmentDy;
+        tangentLength1 = Math.hypot(tangentX1, tangentY1);
+      }
+      const normalX1 = tangentLength1 > 1e-8 ? -tangentY1 / tangentLength1 : normalX0;
+      const normalY1 = tangentLength1 > 1e-8 ? tangentX1 / tangentLength1 : normalY0;
+
+      writeVertex(
+        this.array,
+        base + vertex++ * FLOATS_PER_VERTEX,
+        x1,
+        y1,
+        normalX1,
+        normalY1,
+        -1,
+        lineWidth,
+        dashCycle,
+        pathDistance1,
+        opacity,
+        color,
+        pickingIndex,
+      );
+      writeVertex(
+        this.array,
+        base + vertex++ * FLOATS_PER_VERTEX,
+        x1,
+        y1,
+        normalX1,
+        normalY1,
+        1,
+        lineWidth,
+        dashCycle,
+        pathDistance1,
+        opacity,
+        color,
+        pickingIndex,
+      );
+
+      x0 = x1;
+      y0 = y1;
+      normalX0 = normalX1;
+      normalY0 = normalY1;
+      pathDistance0 = pathDistance1;
     }
+
+    // Duplicate the last right vertex so the bridge to the next edge is also
+    // degenerate. The fixed item size lets Program draw every edge in one call.
+    writeVertex(
+      this.array,
+      base + vertex * FLOATS_PER_VERTEX,
+      x0,
+      y0,
+      normalX0,
+      normalY0,
+      1,
+      lineWidth,
+      dashCycle,
+      pathDistance0,
+      opacity,
+      color,
+      pickingIndex,
+    );
   }
 }
 

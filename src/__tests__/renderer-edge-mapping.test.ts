@@ -255,8 +255,8 @@ describe('Renderer dense edge-slot mapping', () => {
 
     expect(Array.from(internals.edgeDrawStart.slice(0, 3))).toEqual([-1, 0, 1]);
     expect(firstVisibleColor[0]).toBeCloseTo(1);
-    expect(firstVisibleColor[1]).toBeCloseTo(0.92);
-    expect(firstVisibleColor[2]).toBeCloseTo(0.92);
+    expect(firstVisibleColor[1]).toBeCloseTo(0.75);
+    expect(firstVisibleColor[2]).toBeCloseTo(0.75);
     expect(highlightedColor).toEqual([1, 0, 0]);
   });
 
@@ -279,8 +279,8 @@ describe('Renderer dense edge-slot mapping', () => {
 
     const internals = renderer as unknown as RendererInternals;
     const edgeLoop = internals._programs.edgeLoop!;
-    const floatsPerLoop = 12 * 2 * 9;
-    const colorOffset = 2;
+    const floatsPerLoop = ((24 + 1) * 2 + 2) * 13;
+    const colorOffset = 9;
     const firstVisibleColor = Array.from(edgeLoop.array.slice(colorOffset, colorOffset + 3));
     const highlightedColor = Array.from(
       edgeLoop.array.slice(floatsPerLoop + colorOffset, floatsPerLoop + colorOffset + 3),
@@ -288,8 +288,8 @@ describe('Renderer dense edge-slot mapping', () => {
 
     expect(Array.from(internals.edgeLoopSlot.slice(0, 3))).toEqual([-1, 0, 1]);
     expect(firstVisibleColor[0]).toBeCloseTo(1);
-    expect(firstVisibleColor[1]).toBeCloseTo(0.92);
-    expect(firstVisibleColor[2]).toBeCloseTo(0.92);
+    expect(firstVisibleColor[1]).toBeCloseTo(0.75);
+    expect(firstVisibleColor[2]).toBeCloseTo(0.75);
     expect(highlightedColor).toEqual([1, 0, 0]);
   });
 

@@ -8,13 +8,24 @@
 import type { Graph } from '../graph.js';
 import type { Renderer } from '../renderer/renderer.js';
 
-export function dragCanvas(renderer: Renderer, graph?: Graph): () => void {
+export interface DragCanvasOptions {
+  /** Keep modifier-key gestures available for brush/lasso selection. Default: true. */
+  ignoreModifierKeys?: boolean;
+}
+
+export function dragCanvas(
+  renderer: Renderer,
+  graph?: Graph,
+  options?: DragCanvasOptions,
+): () => void {
   if (!graph) return () => {};
+  const ignoreModifierKeys = options?.ignoreModifierKeys ?? true;
   let down: { x: number; y: number; camX: number; camY: number } | null = null;
 
   const onDown = (payload: { event: MouseEvent }) => {
     const e = payload.event;
     if (e.button !== 0) return;
+    if (ignoreModifierKeys && (e.shiftKey || e.ctrlKey || e.metaKey)) return;
     const cam = renderer.getCamera();
     down = { x: e.clientX, y: e.clientY, camX: cam.x, camY: cam.y };
   };

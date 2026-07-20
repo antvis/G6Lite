@@ -16,6 +16,8 @@ export function dragNode(renderer: Renderer, graph: Graph): () => void {
   let draggingComboId: string | null = null;
   let startMouse = { x: 0, y: 0 };
   let startPositions: Array<{ x: number; y: number }> = [];
+  let dragStarted = false;
+  const dragThreshold = 3;
 
   const beginNodeDrag = (nodeId: string, e: MouseEvent) => {
     e.preventDefault();
@@ -30,7 +32,7 @@ export function dragNode(renderer: Renderer, graph: Graph): () => void {
     });
 
     draggingComboId = null;
-    graph.eventEmitter.emit('node:dragstart', { nodeId, nodeIds: draggingIds, event: e });
+    dragStarted = false;
   };
 
   const beginComboDrag = (comboId: string, e: MouseEvent) => {
@@ -47,8 +49,7 @@ export function dragNode(renderer: Renderer, graph: Graph): () => void {
       const pos = graph.getNodePosition(id);
       return pos ? { x: pos.x, y: pos.y } : { x: 0, y: 0 };
     });
-
-    graph.eventEmitter.emit('combo:dragstart', { comboId, event: e });
+    dragStarted = false;
   };
 
   const onNodeDown = (payload: { nodeId: string; event: MouseEvent }) => {
@@ -66,6 +67,19 @@ export function dragNode(renderer: Renderer, graph: Graph): () => void {
     const camera = renderer.getCamera();
     const dx = (e.clientX - startMouse.x) / camera.zoom;
     const dy = (e.clientY - startMouse.y) / camera.zoom;
+    if (!dragStarted) {
+      if (Math.hypot(e.clientX - startMouse.x, e.clientY - startMouse.y) <= dragThreshold) return;
+      dragStarted = true;
+      if (draggingComboId) {
+        graph.eventEmitter.emit('combo:dragstart', { comboId: draggingComboId, event: e });
+      } else {
+        graph.eventEmitter.emit('node:dragstart', {
+          nodeId: draggingIds[0],
+          nodeIds: draggingIds,
+          event: e,
+        });
+      }
+    }
 
     for (let i = 0; i < draggingIds.length; i++) {
       graph.updateNodePosition(draggingIds[i], startPositions[i].x + dx, startPositions[i].y + dy);
@@ -86,15 +100,18 @@ export function dragNode(renderer: Renderer, graph: Graph): () => void {
 
   const onUp = () => {
     if (draggingComboId) {
-      graph.eventEmitter.emit('combo:dragend', { comboId: draggingComboId });
+      if (dragStarted) graph.eventEmitter.emit('combo:dragend', { comboId: draggingComboId });
       draggingComboId = null;
       draggingIds = [];
       startPositions = [];
     } else if (draggingIds.length) {
-      graph.eventEmitter.emit('node:dragend', { nodeId: draggingIds[0], nodeIds: draggingIds });
+      if (dragStarted) {
+        graph.eventEmitter.emit('node:dragend', { nodeId: draggingIds[0], nodeIds: draggingIds });
+      }
       draggingIds = [];
       startPositions = [];
     }
+    dragStarted = false;
   };
 
   graph.eventEmitter.on('node:pointerdown', onNodeDown);

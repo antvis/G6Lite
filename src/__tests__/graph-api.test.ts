@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { DataModel } from '../dataModel.js';
 import { EventEmitter } from '../events.js';
+import { Graph } from '../graph.js';
 
 // ============================================================
 // P0/P1 API tests using DataModel directly (no WebGL needed)
@@ -121,6 +122,137 @@ describe('P0: replaceData (backing setData)', () => {
   });
 });
 
+describe('P0: batch data updates', () => {
+  it('updates multiple node positions with one change record', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.addNodes([
+      { id: 'n1', x: 0, y: 0 },
+      { id: 'n2', x: 1, y: 1 },
+    ]);
+    dm.getChanges();
+
+    const ids = dm.updateNodePositions([
+      { id: 'n1', x: 10, y: 20 },
+      { id: 'n2', x: 1, y: 1 },
+    ]);
+
+    expect(ids).toEqual(['n1']);
+    expect(dm.getNode('n1')).toMatchObject({ x: 10, y: 20 });
+    expect(dm.getChanges()).toEqual([{ type: 'nodePositionChanged', ids: ['n1'] }]);
+  });
+
+  it('updates multiple nodes with one change record', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.addNodes([
+      { id: 'n1', x: 0, y: 0, data: { value: 1 } },
+      { id: 'n2', x: 1, y: 1, data: { value: 2 } },
+    ]);
+    dm.getChanges();
+
+    const ids = dm.updateNodeDataBatch([
+      { id: 'n1', data: { value: 10 } },
+      { id: 'n2', data: { extra: true } },
+    ]);
+
+    expect(ids).toEqual(['n1', 'n2']);
+    expect(dm.getNode('n1')?.data).toEqual({ value: 10 });
+    expect(dm.getNode('n2')?.data).toEqual({ value: 2, extra: true });
+    expect(dm.getChanges()).toEqual([{ type: 'nodeDataChanged', ids: ['n1', 'n2'] }]);
+  });
+
+  it('updates edge data and endpoints in one batch', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.addNodes([
+      { id: 'a', x: 0, y: 0 },
+      { id: 'b', x: 1, y: 1 },
+      { id: 'c', x: 2, y: 2 },
+    ]);
+    dm.addEdge({ id: 'e1', source: 'a', target: 'b', data: { weight: 1 } });
+    dm.getChanges();
+
+    dm.updateEdgeDataBatch([{ id: 'e1', source: 'c', data: { weight: 2 } }]);
+
+    expect(dm.getEdge('e1')).toMatchObject({ source: 'c', target: 'b', data: { weight: 2 } });
+    expect(dm.getChanges()).toEqual([{ type: 'edgeDataChanged', ids: ['e1'] }]);
+  });
+
+  it('rejects an edge endpoint that references a missing node', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.addNode({ id: 'a', x: 0, y: 0 });
+    dm.addEdge({ id: 'e1', source: 'a', target: 'a' });
+
+    expect(() => dm.updateEdgeDataBatch([{ id: 'e1', target: 'missing' }])).toThrow(
+      'Edge e1 references missing target node: missing',
+    );
+  });
+
+  it('keeps batch edge updates atomic when a later endpoint is invalid', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.addNodes([
+      { id: 'a', x: 0, y: 0 },
+      { id: 'b', x: 1, y: 1 },
+    ]);
+    dm.addEdges([
+      { id: 'e1', source: 'a', target: 'b', data: { weight: 1 } },
+      { id: 'e2', source: 'b', target: 'a' },
+    ]);
+    dm.getChanges();
+
+    expect(() =>
+      dm.updateEdgeDataBatch([
+        { id: 'e1', data: { weight: 2 }, source: 'b' },
+        { id: 'e2', target: 'missing' },
+      ]),
+    ).toThrow('Edge e2 references missing target node: missing');
+
+    expect(dm.getEdge('e1')).toMatchObject({ source: 'a', target: 'b', data: { weight: 1 } });
+    expect(dm.getChanges()).toEqual([]);
+  });
+});
+
+describe('P0: destroyed Graph API safety', () => {
+  it('turns mutation and renderer APIs into safe no-ops after destroy', () => {
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    const addNode = vi.fn();
+    const addEdge = vi.fn();
+    const setCamera = vi.fn();
+    const pickAt = vi.fn();
+    Object.assign(graph, {
+      _destroyed: true,
+      initialized: true,
+      dataModel: { addNode, addEdge },
+      scheduler: { schedule: vi.fn() },
+      renderer: { setCamera, pickAt },
+      eventEmitter: new EventEmitter(),
+      layoutNodes: [],
+    });
+
+    expect(() => graph.addNode({ id: 'n1', x: 0, y: 0 })).not.toThrow();
+    expect(graph.addEdge({ source: 'a', target: 'b' })).toBe('');
+    expect(graph.pickAt(10, 10)).toBeNull();
+    expect(graph.screenToGraph(10, 10)).toEqual({ x: 0, y: 0 });
+    graph.zoomTo(2);
+
+    expect(addNode).not.toHaveBeenCalled();
+    expect(addEdge).not.toHaveBeenCalled();
+    expect(setCamera).not.toHaveBeenCalled();
+    expect(pickAt).not.toHaveBeenCalled();
+  });
+
+  it('does not allow listeners to be reattached after destroy', () => {
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    const eventEmitter = new EventEmitter();
+    const handler = vi.fn();
+    Object.assign(graph, { _destroyed: true, eventEmitter });
+
+    graph.on('node:click', handler);
+    graph.once('node:click', handler);
+    eventEmitter.emit('node:click');
+
+    expect(handler).not.toHaveBeenCalled();
+  });
+});
+
 describe('P0: Combo state API backing model', () => {
   it('should set, query, find, and clear combo states', () => {
     const dm = new DataModel({ theme: {} });
@@ -164,6 +296,31 @@ describe('P1: batchSetState (via DataModel)', () => {
     dm.setNodeState('n1', 'active', true);
     const changes = dm.getChanges();
     expect(changes.filter((c) => c.type === 'nodeStateChanged').length).toBe(2);
+  });
+});
+
+describe('P1: replace complete state sets', () => {
+  it('supports custom node and edge states', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.addNode({ id: 'n1', x: 0, y: 0 });
+    dm.addEdge({ id: 'e1', source: 'n1', target: 'n1' });
+    dm.getChanges();
+
+    dm.replaceNodeStates('n1', ['selected', 'connect-source']);
+    dm.replaceEdgeStates('e1', ['invalid']);
+
+    expect(Array.from(dm.getNode('n1')!.states)).toEqual(['selected', 'connect-source']);
+    expect(Array.from(dm.getEdge('e1')!.states)).toEqual(['invalid']);
+  });
+
+  it('treats default as an empty state marker', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.addNode({ id: 'n1', x: 0, y: 0 });
+    dm.setNodeState('n1', 'selected', true);
+
+    dm.replaceNodeStates('n1', ['default']);
+
+    expect(Array.from(dm.getNode('n1')!.states)).toEqual([]);
   });
 });
 

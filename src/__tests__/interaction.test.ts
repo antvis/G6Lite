@@ -34,6 +34,7 @@ function setup(initialPick: Pick = null) {
   return {
     canvas,
     renderer,
+    graph,
     emitter: graph.eventEmitter,
     teardown,
     setPick(p: Pick) {
@@ -150,6 +151,40 @@ describe('InteractionDispatcher — hover state machine', () => {
 });
 
 describe('InteractionDispatcher — press / click / wheel', () => {
+  it('uses graph and renderer coordinate converters in event payloads', () => {
+    const graphCoordinates = setup({ type: 'node', id: 'a' });
+    const graphScreenToGraph = vi.fn(() => ({ x: 7, y: 8 }));
+    (
+      graphCoordinates.graph as typeof graphCoordinates.graph & {
+        screenToGraph: typeof graphScreenToGraph;
+      }
+    ).screenToGraph = graphScreenToGraph;
+    const graphClick = vi.fn();
+    graphCoordinates.emitter.on('node:click', graphClick);
+
+    fire(graphCoordinates.canvas, 'click', { clientX: 30, clientY: 40 });
+
+    expect(graphScreenToGraph).toHaveBeenCalledWith(30, 40);
+    expect(graphClick.mock.calls[0][0].graph).toEqual({ x: 7, y: 8 });
+    graphCoordinates.teardown();
+
+    const rendererCoordinates = setup({ type: 'node', id: 'a' });
+    const rendererScreenToGraph = vi.fn(() => [9, 10] as [number, number]);
+    (
+      rendererCoordinates.renderer as typeof rendererCoordinates.renderer & {
+        screenToGraph: typeof rendererScreenToGraph;
+      }
+    ).screenToGraph = rendererScreenToGraph;
+    const rendererClick = vi.fn();
+    rendererCoordinates.emitter.on('node:click', rendererClick);
+
+    fire(rendererCoordinates.canvas, 'click', { clientX: 60, clientY: 70 });
+
+    expect(rendererScreenToGraph).toHaveBeenCalledWith(60, 70);
+    expect(rendererClick.mock.calls[0][0].graph).toEqual({ x: 9, y: 10 });
+    rendererCoordinates.teardown();
+  });
+
   it('emits node:pointerdown when pressing on a node', () => {
     const t = setup({ type: 'node', id: 'a' });
     const down = vi.fn();
@@ -190,6 +225,32 @@ describe('InteractionDispatcher — press / click / wheel', () => {
     fire(blank.canvas, 'click');
     expect(canvasClick).toHaveBeenCalledTimes(1);
     blank.teardown();
+  });
+
+  it('suppresses the click generated after a drag gesture', () => {
+    const t = setup(null);
+    const canvasClick = vi.fn();
+    t.emitter.on('canvas:click', canvasClick);
+
+    fire(t.canvas, 'mousedown', { clientX: 10, clientY: 10 });
+    window.dispatchEvent(new MouseEvent('mouseup', { clientX: 30, clientY: 30 }));
+    fire(t.canvas, 'click', { clientX: 30, clientY: 30 });
+
+    expect(canvasClick).not.toHaveBeenCalled();
+    t.teardown();
+  });
+
+  it('keeps click dispatch for movement within the click threshold', () => {
+    const t = setup(null);
+    const canvasClick = vi.fn();
+    t.emitter.on('canvas:click', canvasClick);
+
+    fire(t.canvas, 'mousedown', { clientX: 10, clientY: 10 });
+    window.dispatchEvent(new MouseEvent('mouseup', { clientX: 12, clientY: 11 }));
+    fire(t.canvas, 'click', { clientX: 12, clientY: 11 });
+
+    expect(canvasClick).toHaveBeenCalledTimes(1);
+    t.teardown();
   });
 
   it('emits node:wheel over a node and canvas:wheel over empty space', () => {

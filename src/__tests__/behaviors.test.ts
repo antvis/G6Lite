@@ -1,5 +1,64 @@
 import { describe, expect, it, vi } from 'vitest';
+import { DEFAULT_BEHAVIORS, resolveBehaviorOptions } from '../behaviors/index.js';
 import { EventEmitter } from '../events.js';
+
+describe('default canvas navigation behaviors', () => {
+  it('enables zoom and canvas drag when behaviors is omitted', () => {
+    expect(resolveBehaviorOptions()).toEqual(['zoom-canvas', 'drag-canvas']);
+    expect(DEFAULT_BEHAVIORS).toEqual(['zoom-canvas', 'drag-canvas']);
+  });
+
+  it('respects an explicit empty behavior list', () => {
+    expect(resolveBehaviorOptions([])).toEqual([]);
+  });
+
+  it('does not merge defaults into an explicit behavior list', () => {
+    expect(resolveBehaviorOptions(['tooltip'])).toEqual(['tooltip']);
+    expect(resolveBehaviorOptions(['zoom-canvas'])).toEqual(['zoom-canvas']);
+  });
+
+  it('returns a fresh default list for each graph', () => {
+    const first = resolveBehaviorOptions();
+    first.push('tooltip');
+    expect(resolveBehaviorOptions()).toEqual(['zoom-canvas', 'drag-canvas']);
+  });
+});
+
+describe('dragCanvas behavior', () => {
+  it('does not pan for Shift gestures reserved by brush-select', async () => {
+    const { dragCanvas } = await import('../behaviors/dragCanvas.js');
+    const renderer = {
+      getCamera: vi.fn(() => ({ x: 0, y: 0, zoom: 1 })),
+      setCamera: vi.fn(),
+      scheduleRender: vi.fn(),
+    };
+    const graph = { eventEmitter: new EventEmitter() };
+    const teardown = dragCanvas(renderer as any, graph as any);
+
+    graph.eventEmitter.emit('canvas:pointerdown', { event: mouseEvent({ shiftKey: true }) });
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 140, clientY: 140 }));
+
+    expect(renderer.setCamera).not.toHaveBeenCalled();
+    teardown();
+  });
+
+  it('still pans for an unmodified canvas drag', async () => {
+    const { dragCanvas } = await import('../behaviors/dragCanvas.js');
+    const renderer = {
+      getCamera: vi.fn(() => ({ x: 0, y: 0, zoom: 1 })),
+      setCamera: vi.fn(),
+      scheduleRender: vi.fn(),
+    };
+    const graph = { eventEmitter: new EventEmitter() };
+    const teardown = dragCanvas(renderer as any, graph as any);
+
+    graph.eventEmitter.emit('canvas:pointerdown', { event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 140, clientY: 140 }));
+
+    expect(renderer.setCamera).toHaveBeenCalled();
+    teardown();
+  });
+});
 
 // ============================================================
 // Behavior tests — post-dispatcher architecture.
@@ -275,7 +334,7 @@ describe('hoverHighlight behavior', () => {
 // dragNode — gesture start from node:pointerdown / combo:pointerdown
 // ============================================================
 describe('dragNode behavior', () => {
-  it('emits node:dragstart on node:pointerdown', async () => {
+  it('waits for movement beyond the threshold before emitting node:dragstart', async () => {
     const { dragNode } = await import('../behaviors/dragNode.js');
     const renderer = createMockRenderer();
     const graph = createMockGraph();
@@ -285,9 +344,26 @@ describe('dragNode behavior', () => {
     dragNode(renderer as any, graph as any);
     graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
 
+    expect(startHandler).not.toHaveBeenCalled();
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 10, clientY: 0 }));
     expect(startHandler).toHaveBeenCalledTimes(1);
     expect(startHandler.mock.calls[0][0].nodeId).toBe('a');
     expect(startHandler.mock.calls[0][0].nodeIds).toEqual(['a']);
+  });
+
+  it('does not emit dragend for a plain click', async () => {
+    const { dragNode } = await import('../behaviors/dragNode.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const endHandler = vi.fn();
+    graph.eventEmitter.on('node:dragend', endHandler);
+
+    const teardown = dragNode(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mouseup'));
+
+    expect(endHandler).not.toHaveBeenCalled();
+    teardown();
   });
 
   it('ignores non-left-button pointerdown', async () => {

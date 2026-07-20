@@ -1,5 +1,5 @@
 import type { Camera } from '../renderer/camera.js';
-import type { GraphNode, NodeConfig, NodeStateStyleOverride } from '../types.js';
+import type { GraphNode, NodeConfig, NodeStateStyleOverride, NodeStyleConfig } from '../types.js';
 
 export interface NodeOverlayDrawParams {
   node: GraphNode & { x: number; y: number };
@@ -12,20 +12,32 @@ export interface NodeOverlayDrawParams {
   time: number;
 }
 
+export interface NodeBoundaryAnchorParams {
+  node: GraphNode;
+  placement: 'left' | 'right' | 'top' | 'bottom';
+  crossOffsetRatio: number;
+  width: number;
+  height: number;
+  borderRadius: number;
+}
+
 export interface NodeExtension {
   base?: 'circle' | 'rect';
-  style?: Partial<NonNullable<NodeConfig['style']>>;
+  style?: Partial<NodeStyleConfig>;
   stateStyles?: Partial<Record<string, NodeStateStyleOverride>>;
-  getStyle?: (node: GraphNode) => Partial<NonNullable<NodeConfig['style']>>;
+  getStyle?: (node: GraphNode) => Partial<NodeStyleConfig>;
+  /** Returns a screen-space offset from the node center to its visual boundary. */
+  getBoundaryAnchor?: (params: NodeBoundaryAnchorParams) => { x: number; y: number };
   drawOverlay?: (ctx: CanvasRenderingContext2D, params: NodeOverlayDrawParams) => boolean | void;
 }
 
 export abstract class BaseNode implements NodeExtension {
   base: 'circle' | 'rect' = 'circle';
-  style?: Partial<NonNullable<NodeConfig['style']>>;
+  style?: Partial<NodeStyleConfig>;
   stateStyles?: Partial<Record<string, NodeStateStyleOverride>>;
 
-  getStyle?(_node: GraphNode): Partial<NonNullable<NodeConfig['style']>>;
+  getStyle?(_node: GraphNode): Partial<NodeStyleConfig>;
+  getBoundaryAnchor?(_params: NodeBoundaryAnchorParams): { x: number; y: number };
   drawOverlay?(_ctx: CanvasRenderingContext2D, _params: NodeOverlayDrawParams): boolean | void;
 }
 
@@ -90,7 +102,7 @@ export class BreathingNode extends BaseNode {
 
     const t = params.time / 700;
     const pulse = (Math.sin(t) + 1) / 2;
-    const radius = Math.max(8, params.nodeSize * params.zoom * params.dpr * 0.5);
+    const radius = Math.max(8 * params.dpr, params.nodeSize * params.zoom * 0.5);
     const outerRadius = radius + (8 + pulse * 8) * params.dpr;
 
     ctx.save();

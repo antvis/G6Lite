@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { resolveTheme, light, dark, presets } from '../theme.js';
+import { describe, expect, it } from 'vitest';
+import { dark, light, presets, resolveTheme } from '../theme.js';
 
 describe('resolveTheme', () => {
   it('should return light preset for "light" string', () => {
@@ -57,6 +57,40 @@ describe('presets', () => {
     expect(presets.light.nodeStateStyles).toBeDefined();
     expect(presets.dark.edgeStateStyles).toBeDefined();
     expect(presets.dark.nodeStateStyles).toBeDefined();
+  });
+
+  it.each([light, dark])('keeps default edge widths stable across interaction states', (theme) => {
+    expect(theme.edgeStateStyles?.active?.lineWidth).toBeUndefined();
+    expect(theme.edgeStateStyles?.selected?.lineWidth).toBeUndefined();
+    expect(theme.edgeStateStyles?.highlight?.lineWidth).toBeUndefined();
+  });
+
+  it('maps light node interaction states to halo, outline, and weakening styles', () => {
+    expect(light.nodeStateStyles?.active).toMatchObject({ haloWidth: 8, opacity: 1 });
+    expect(light.nodeStateStyles?.selected).toMatchObject({
+      stroke: '#163B65',
+      strokeWidth: 2,
+      haloWidth: 12,
+      opacity: 1,
+    });
+    expect(light.nodeStateStyles?.highlight).toMatchObject({
+      stroke: '#163B65',
+      strokeWidth: 1,
+      opacity: 1,
+    });
+    expect(light.nodeStateStyles?.disabled?.opacity).toBe(0.15);
+    expect(light.nodeStateStyles?.inactive?.opacity).toBe(0.25);
+  });
+
+  it('uses visible light outlines for selected and highlighted nodes in dark theme', () => {
+    expect(dark.nodeStateStyles?.selected?.stroke).toBe('#B7D3FF');
+    expect(dark.nodeStateStyles?.highlight?.stroke).toBe('#B7D3FF');
+  });
+
+  it.each([light, dark])('uses the primary blue for emphasized edges', (theme) => {
+    expect(theme.edgeStateStyles?.active?.stroke).toBe('#5B8FF9');
+    expect(theme.edgeStateStyles?.selected?.stroke).toBe('#5B8FF9');
+    expect(theme.edgeStateStyles?.highlight?.stroke).toBe('#5B8FF9');
   });
 
   it('light and dark should have different backgrounds', () => {

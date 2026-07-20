@@ -197,6 +197,28 @@ describe('tooltip — click trigger', () => {
 });
 
 describe('tooltip — custom content & class', () => {
+  it('positions an overlay in custom-container local coordinates', () => {
+    const { renderer, graph } = setup();
+    const container = document.createElement('div');
+    container.getBoundingClientRect = () =>
+      ({ left: 40, top: 30, right: 340, bottom: 230, width: 300, height: 200 } as DOMRect);
+    document.body.appendChild(container);
+    const teardown = tooltip(renderer as any, graph as any, { container, delay: 0 });
+
+    graph.eventEmitter.emit('node:pointerover', {
+      nodeId: 'a',
+      data: { label: 'A' },
+      event: mouseEvent({ clientX: 100, clientY: 80 }),
+    });
+    vi.advanceTimersByTime(0);
+
+    const overlay = container.querySelector<HTMLElement>('.g6lite-tooltip');
+    expect(overlay?.style.left).toBe('70px');
+    expect(overlay?.style.top).toBe('60px');
+    teardown();
+    container.remove();
+  });
+
   it('uses a custom getContent and className', () => {
     const { renderer, graph } = setup();
     const teardown = tooltip(renderer as any, graph as any, {

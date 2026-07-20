@@ -7,8 +7,8 @@
  * style[lineWidth,dashCycle,pathDistance,opacity], color.rgb, pickingIndex).
  * pathDistance is accumulated in graph coordinates and converted to pixels in
  * the vertex shader so dash phase remains continuous across every segment.
- * Eight segments keep the per-edge CPU/GPU footprint near the previous
- * GL_LINES implementation while adding width and dash support.
+ * Twenty-four segments keep long, highly curved edges visually smooth while
+ * retaining a fixed per-edge allocation and zoom-independent geometry.
  */
 
 import type { AttributeLayout, RenderParams } from './program.js';
@@ -17,7 +17,7 @@ import { fragmentShader } from './shaders/edgeArc.frag.js';
 import { vertexShader } from './shaders/edgeArc.vert.js';
 
 const FLOATS_PER_VERTEX = 13;
-const SEGMENTS = 8;
+const SEGMENTS = 24;
 const VERTICES_PER_ITEM = (SEGMENTS + 1) * 2 + 2;
 
 function writeVertex(

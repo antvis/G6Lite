@@ -3,8 +3,10 @@
  * Layered on top of the WebGL canvas with pointer-events: none.
  */
 
+import type { DecorationRenderer } from '../extensions/contracts.js';
+import { getDecorationRenderer } from '../extensions/decoration.js';
 import { getLabelRenderer } from '../extensions/label.js';
-import { getNodeExtension } from '../extensions/node.js';
+import { getNodeBaseType, getNodeExtension } from '../extensions/node.js';
 import type {
   EdgeConfig,
   EdgeLabelParams,
@@ -17,14 +19,20 @@ import type {
   LabelRenderer,
   LayoutNode,
   NodeConfig,
+  NodeDecorationAnchor,
+  NodeDecorationAttachment,
+  NodeDecorationPlacement,
   NodeLabelParams,
+  NodeStyleConfig,
   NodeStyleValue,
   ResolvedLabelStyle,
+  ThemeTokens,
 } from '../types.js';
 import type { Camera } from './camera.js';
 import { graphToNDC } from './camera.js';
 import { sampleEdgePath, type EdgePath } from './edgePath.js';
 import { LabelGrid } from './labelGrid.js';
+import { resolveNodeStyle } from './style.js';
 
 const DEFAULT_FONT_FAMILY =
   '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
@@ -35,7 +43,7 @@ export function getLabelZoom(zoom: number): number {
 }
 
 export function toLabelScreenPx(value: number, dpr: number, zoom: number): number {
-  return value * dpr * getLabelZoom(zoom);
+  return value * dpr * getLabelZoom(zoom / Math.max(dpr, Number.EPSILON));
 }
 
 function resolveNodeValue<T>(val: NodeStyleValue<T> | undefined, node: GraphNode, fallback: T): T {
@@ -75,7 +83,7 @@ export function isValidLabelLayout(layout: unknown): layout is LabelLayout {
 }
 
 export function resolveNodeLabelStyle(
-  style: NonNullable<NodeConfig['style']>,
+  style: NodeStyleConfig,
   node: GraphNode,
   dpr: number,
   zoom: number,
@@ -168,16 +176,149 @@ export function getCustomNodeLabelAnchor(
   return { x, y };
 }
 
+export function getNodeDecorationAnchor(
+  px: number,
+  py: number,
+  nodeWidth: number,
+  nodeHeight: number,
+  layout: LabelLayout,
+  placement: LabelPlacement,
+  attachment: NodeDecorationAttachment,
+  anchor: NodeDecorationAnchor,
+  gap: number,
+  crossOffsetRatio = 0,
+  boundaryOverlap = 0,
+  boundaryAnchor?: { x: number; y: number },
+): { x: number; y: number } {
+  let x = px + (boundaryAnchor?.x ?? 0);
+  let y = py + (boundaryAnchor?.y ?? 0);
+  let widthOffset = 0;
+  let heightOffset = 0;
+  if (attachment === 'outside') {
+    widthOffset = layout.width / 2 + gap;
+    heightOffset = layout.height / 2 + gap;
+  } else if (attachment === 'inside') {
+    widthOffset = -layout.width / 2;
+    heightOffset = -layout.height / 2;
+  }
+
+  if (!boundaryAnchor) {
+    if (placement === 'top') y -= nodeHeight / 2 + heightOffset;
+    else if (placement === 'bottom') y += nodeHeight / 2 + heightOffset;
+    else if (placement === 'left') x -= nodeWidth / 2 + widthOffset;
+    else if (placement === 'right') x += nodeWidth / 2 + widthOffset;
+  } else if (attachment === 'outside') {
+    if (placement === 'top') y -= heightOffset;
+    else if (placement === 'bottom') y += heightOffset;
+    else if (placement === 'left') x -= widthOffset;
+    else if (placement === 'right') x += widthOffset;
+  } else if (attachment === 'inside') {
+    if (placement === 'top') y -= heightOffset;
+    else if (placement === 'bottom') y += heightOffset;
+    else if (placement === 'left') x -= widthOffset;
+    else if (placement === 'right') x += widthOffset;
+  }
+
+  if (anchor !== 'center') {
+    const direction = anchor === 'start' ? 1 : -1;
+    if (placement === 'right') x += (layout.width / 2) * direction;
+    else if (placement === 'left') x -= (layout.width / 2) * direction;
+    else if (placement === 'bottom') y += (layout.height / 2) * direction;
+    else if (placement === 'top') y -= (layout.height / 2) * direction;
+  }
+
+  if (anchor === 'start' && boundaryOverlap) {
+    if (placement === 'right') x -= boundaryOverlap;
+    else if (placement === 'left') x += boundaryOverlap;
+    else if (placement === 'bottom') y -= boundaryOverlap;
+    else if (placement === 'top') y += boundaryOverlap;
+  }
+
+  if (!boundaryAnchor) {
+    if (placement === 'left' || placement === 'right') y += nodeHeight * crossOffsetRatio;
+    else if (placement === 'top' || placement === 'bottom') x += nodeWidth * crossOffsetRatio;
+  }
+  return { x, y };
+}
+
+export function getBuiltInNodeBoundaryAnchor(
+  base: 'circle' | 'rect',
+  placement: 'left' | 'right' | 'top' | 'bottom',
+  width: number,
+  height: number,
+  crossOffsetRatio: number,
+  borderRadius = 0,
+): { x: number; y: number } {
+  const rx = width / 2;
+  const ry = height / 2;
+  if (placement === 'left' || placement === 'right') {
+    const y = Math.max(-ry, Math.min(ry, height * crossOffsetRatio));
+    let x = rx;
+    if (base === 'circle' && ry > 0) {
+      x = rx * Math.sqrt(Math.max(0, 1 - (y * y) / (ry * ry)));
+    } else if (base === 'rect' && borderRadius > 0 && Math.abs(y) > ry - borderRadius) {
+      const cornerY = Math.abs(y) - (ry - borderRadius);
+      x = rx - borderRadius + Math.sqrt(Math.max(0, borderRadius ** 2 - cornerY ** 2));
+    }
+    return { x: placement === 'right' ? x : -x, y };
+  }
+
+  const x = Math.max(-rx, Math.min(rx, width * crossOffsetRatio));
+  let y = ry;
+  if (base === 'circle' && rx > 0) {
+    y = ry * Math.sqrt(Math.max(0, 1 - (x * x) / (rx * rx)));
+  } else if (base === 'rect' && borderRadius > 0 && Math.abs(x) > rx - borderRadius) {
+    const cornerX = Math.abs(x) - (rx - borderRadius);
+    y = ry - borderRadius + Math.sqrt(Math.max(0, borderRadius ** 2 - cornerX ** 2));
+  }
+  return { x, y: placement === 'bottom' ? y : -y };
+}
+
 export class LabelLayerRenderer {
   private canvas: HTMLCanvasElement;
+  private mainCanvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private imageCache = new Map<string, HTMLImageElement | null>();
   private grid = new LabelGrid();
+  private decorationGrid = new LabelGrid();
   private redrawScheduled = false;
   private scheduleRedrawFn: (() => void) | null = null;
   private warnedRendererIssues = new Set<string>();
+  private hoveredNodeId: string | null = null;
+  private decorationHoverRegions: Array<{
+    nodeId: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }> = [];
+
+  private onDecorationPointerMove = (event: MouseEvent): void => {
+    const rect = this.mainCanvas.getBoundingClientRect();
+    const scaleX = rect.width ? this.canvas.width / rect.width : 1;
+    const scaleY = rect.height ? this.canvas.height / rect.height : 1;
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
+    const hit = this.decorationHoverRegions.find(
+      (region) =>
+        x >= region.x &&
+        x <= region.x + region.width &&
+        y >= region.y &&
+        y <= region.y + region.height,
+    );
+    this.setHoveredNode(hit?.nodeId ?? null);
+  };
+
+  private onDecorationPointerLeave = (): void => this.setHoveredNode(null);
+
+  setHoveredNode(id: string | null): void {
+    if (this.hoveredNodeId === id) return;
+    this.hoveredNodeId = id;
+    this.requestRedraw();
+  }
 
   constructor(container: HTMLElement, mainCanvas: HTMLCanvasElement) {
+    this.mainCanvas = mainCanvas;
     this.canvas = document.createElement('canvas');
     this.canvas.style.position = 'absolute';
     this.canvas.style.left = '0';
@@ -192,6 +333,8 @@ export class LabelLayerRenderer {
       container.appendChild(this.canvas);
     }
     this.ctx = this.canvas.getContext('2d')!;
+    mainCanvas.addEventListener('mousemove', this.onDecorationPointerMove);
+    mainCanvas.addEventListener('mouseleave', this.onDecorationPointerLeave);
   }
 
   setScheduleRedraw(fn: () => void): void {
@@ -210,9 +353,10 @@ export class LabelLayerRenderer {
     const rect = this.canvas.parentElement?.getBoundingClientRect();
     const cssW = rect?.width || 800;
     const cssH = rect?.height || 600;
-    const dpr = window.devicePixelRatio || 1;
-    const w = Math.round(cssW * dpr);
-    const h = Math.round(cssH * dpr);
+    const w = this.mainCanvas.width || Math.round(cssW * Math.min(2, window.devicePixelRatio || 1));
+    const h =
+      this.mainCanvas.height || Math.round(cssH * Math.min(2, window.devicePixelRatio || 1));
+    const dpr = cssW > 0 ? w / cssW : 1;
     if (this.canvas.width !== w || this.canvas.height !== h) {
       this.canvas.width = w;
       this.canvas.height = h;
@@ -228,8 +372,11 @@ export class LabelLayerRenderer {
     edgeConfig?: EdgeConfig,
     nodeIdToIndex?: Map<string, number>,
     edgePathCache?: Map<number, EdgePath>,
+    theme: ThemeTokens = {},
+    getNodeDimensions?: (id: string) => { width: number; height: number } | undefined,
   ): void {
     this.redrawScheduled = false;
+    this.decorationHoverRegions = [];
     const { w, h, dpr } = this.syncSize();
     const ctx = this.ctx;
     ctx.clearRect(0, 0, w, h);
@@ -237,28 +384,34 @@ export class LabelLayerRenderer {
     if (!nodes.length) return;
 
     const nodeStyle = nodeConfig?.style;
+    const dynamicNodeStyle = typeof nodeStyle === 'function';
     const edgeStyle = edgeConfig?.style;
     const nodeExtension = getNodeExtension(nodeConfig?.type);
     const extensionStyle = nodeExtension?.style;
     const hasNodeLabels =
-      nodeStyle?.label !== undefined ||
+      dynamicNodeStyle ||
+      (typeof nodeStyle === 'object' && nodeStyle.label !== undefined) ||
       extensionStyle?.label !== undefined ||
       !!nodeExtension?.getStyle;
     const hasNodeIcons =
-      nodeStyle?.icon !== undefined ||
+      dynamicNodeStyle ||
+      (typeof nodeStyle === 'object' && nodeStyle.icon !== undefined) ||
       extensionStyle?.icon !== undefined ||
       !!nodeExtension?.getStyle;
     const hasNodeOverlay = !!nodeExtension?.drawOverlay;
+    const hasNodeDecorations = (nodeConfig?.decorations?.length ?? 0) > 0;
     const hasEdgeLabels = edgeStyle?.label !== undefined;
 
-    if (!hasNodeLabels && !hasNodeIcons && !hasNodeOverlay && !hasEdgeLabels) return;
+    if (!hasNodeLabels && !hasNodeIcons && !hasNodeOverlay && !hasNodeDecorations && !hasEdgeLabels)
+      return;
 
     this.grid.reset(w, h);
+    this.decorationGrid.reset(w, h);
     const zoom = camera.zoom;
 
     // Draw node icons and labels
-    if (hasNodeLabels || hasNodeIcons || hasNodeOverlay) {
-      this.drawNodes(nodes, camera, nodeConfig, w, h, dpr, zoom);
+    if (hasNodeLabels || hasNodeIcons || hasNodeOverlay || hasNodeDecorations) {
+      this.drawNodes(nodes, camera, nodeConfig, w, h, dpr, zoom, theme, getNodeDimensions);
     }
 
     // Draw edge labels
@@ -286,9 +439,11 @@ export class LabelLayerRenderer {
     h: number,
     dpr: number,
     zoom: number,
+    theme: ThemeTokens,
+    getNodeDimensions?: (id: string) => { width: number; height: number } | undefined,
   ): void {
     const ctx = this.ctx;
-    const userStyle = nodeConfig?.style ?? {};
+    const configuredStyle = nodeConfig?.style;
     const nodeExtension = getNodeExtension(nodeConfig?.type);
     const customRendererName = nodeConfig?.labelRenderer;
     const customRenderer = customRendererName
@@ -310,10 +465,27 @@ export class LabelLayerRenderer {
       // Viewport culling
       if (px < -100 || px > w + 100 || py < -100 || py > h + 100) continue;
 
+      const userStyle =
+        typeof configuredStyle === 'function' ? configuredStyle(node) : configuredStyle ?? {};
+      const resolvedVisualStyle = resolveNodeStyle(
+        node as GraphNode & { x: number; y: number },
+        nodeConfig,
+        theme,
+      );
+      const nodeBaseType = getNodeBaseType(nodeConfig);
+      const renderedDimensions = getNodeDimensions?.(node.id);
       const style = {
         ...nodeExtension?.style,
         ...(nodeExtension?.getStyle ? nodeExtension.getStyle(node) : undefined),
         ...userStyle,
+        size: resolvedVisualStyle.size,
+        width:
+          renderedDimensions?.width ??
+          (nodeBaseType === 'circle' ? resolvedVisualStyle.size : resolvedVisualStyle.width),
+        height:
+          renderedDimensions?.height ??
+          (nodeBaseType === 'circle' ? resolvedVisualStyle.size : resolvedVisualStyle.height),
+        borderRadius: resolvedVisualStyle.borderRadius,
       };
 
       if (nodeExtension?.drawOverlay) {
@@ -348,7 +520,7 @@ export class LabelLayerRenderer {
       if (style.label !== undefined && zoom >= 0.3) {
         const text = resolveNodeValue(style.label, node, false as string | false);
         if (text && typeof text === 'string') {
-          if (
+          const renderedByCustomRenderer =
             customRendererName &&
             customRenderer &&
             this.drawCustomNodeLabel(
@@ -364,13 +536,286 @@ export class LabelLayerRenderer {
               zoom,
               w,
               h,
-            )
-          ) {
-            continue;
-          }
-          this.drawNodeLabel(ctx, text, px, py, node, style, dpr, zoom);
+            );
+          if (!renderedByCustomRenderer)
+            this.drawNodeLabel(ctx, text, px, py, node, style, dpr, zoom);
         }
       }
+
+      // Decorations use their own collision layer so a node's badge cannot suppress its label.
+      if (nodeConfig?.decorations?.length) {
+        this.drawNodeDecorations(ctx, node, px, py, style, nodeConfig, dpr, zoom, w, h);
+      }
+    }
+  }
+
+  private drawNodeDecorations(
+    ctx: CanvasRenderingContext2D,
+    node: GraphNode,
+    px: number,
+    py: number,
+    style: NodeStyleConfig,
+    nodeConfig: NodeConfig,
+    dpr: number,
+    zoom: number,
+    viewW: number,
+    viewH: number,
+  ): void {
+    const nodeSize = resolveNodeValue(style.size, node, 8);
+    const nodeWidth = resolveNodeValue(style.width, node, nodeSize) * zoom;
+    const nodeHeight = resolveNodeValue(style.height, node, nodeSize) * zoom;
+    const drawnBounds: Array<{ x: number; y: number; width: number; height: number }> = [];
+
+    for (const decoration of nodeConfig.decorations ?? []) {
+      const renderer = getDecorationRenderer(decoration.renderer);
+      if (!renderer) {
+        this.warnOnce(
+          `decoration:${decoration.renderer}:missing`,
+          `[G6Lite] Decoration renderer "${decoration.renderer}" is not registered; skipping it.`,
+        );
+        continue;
+      }
+      const isStack = decoration.layout === 'stack';
+      const rawItems = isStack
+        ? typeof decoration.items === 'function'
+          ? decoration.items(node)
+          : decoration.items ?? []
+        : [typeof decoration.data === 'function' ? decoration.data(node) : decoration.data];
+      if (!rawItems.length) continue;
+      const measuredItems: Array<{
+        data: unknown;
+        layout: LabelLayout;
+        index: number;
+        isOverflow?: boolean;
+      }> = [];
+      for (let index = 0; index < rawItems.length; index++) {
+        const data = rawItems[index];
+        ctx.save();
+        try {
+          const itemLayout = (renderer as DecorationRenderer).measure({
+            ctx,
+            node,
+            data,
+            dpr,
+            zoom,
+            nodeWidth,
+            nodeHeight,
+          });
+          if (isValidLabelLayout(itemLayout))
+            measuredItems.push({ data, layout: itemLayout, index });
+        } catch (error) {
+          this.warnOnce(
+            `decoration:${decoration.renderer}:measure`,
+            `[G6Lite] Decoration renderer "${decoration.renderer}" threw during measure; skipping it.`,
+            error,
+          );
+        } finally {
+          ctx.restore();
+        }
+      }
+      if (!measuredItems.length) continue;
+      if (decoration.sort === 'width-desc') {
+        measuredItems.sort((a, b) => b.layout.width - a.layout.width || a.index - b.index);
+      }
+
+      const maxVisible = Math.max(1, decoration.maxVisible ?? measuredItems.length);
+      const expanded = decoration.overflow === 'hover-expand' && this.hoveredNodeId === node.id;
+      let visibleItems = measuredItems;
+      if (!expanded && measuredItems.length > maxVisible) {
+        visibleItems = measuredItems.slice(0, Math.max(0, maxVisible - 1));
+        if (decoration.overflowData !== undefined) {
+          const hiddenCount = measuredItems.length - visibleItems.length;
+          const overflowData =
+            typeof decoration.overflowData === 'function'
+              ? decoration.overflowData(hiddenCount, node)
+              : decoration.overflowData;
+          ctx.save();
+          try {
+            const overflowLayout = (renderer as DecorationRenderer).measure({
+              ctx,
+              node,
+              data: overflowData,
+              dpr,
+              zoom,
+              nodeWidth,
+              nodeHeight,
+            });
+            if (isValidLabelLayout(overflowLayout)) {
+              visibleItems.push({
+                data: overflowData,
+                layout: overflowLayout,
+                index: Number.MAX_VALUE,
+                isOverflow: true,
+              });
+            }
+          } catch (error) {
+            this.warnOnce(
+              `decoration:${decoration.renderer}:overflow-measure`,
+              `[G6Lite] Decoration renderer "${decoration.renderer}" threw while measuring overflow; clipping it.`,
+              error,
+            );
+          } finally {
+            ctx.restore();
+          }
+        }
+      }
+
+      const itemGap = (decoration.itemGap ?? 2) * dpr;
+      const layout: LabelLayout = isStack
+        ? {
+            width: Math.max(...visibleItems.map((item) => item.layout.width)),
+            height:
+              visibleItems.reduce((sum, item) => sum + item.layout.height, 0) +
+              itemGap * Math.max(0, visibleItems.length - 1),
+          }
+        : visibleItems[0].layout;
+      const data = visibleItems[0].data;
+      const params = { ctx, node, data, dpr, zoom, nodeWidth, nodeHeight };
+
+      const requestedPlacement = resolveNodeValue(
+        decoration.placement,
+        node,
+        'top' as NodeDecorationPlacement,
+      );
+      const labelPlacement = resolveNodeValue(
+        style.labelPlacement,
+        node,
+        'bottom' as LabelPlacement,
+      );
+      const placement: LabelPlacement =
+        requestedPlacement === 'follow-label'
+          ? labelPlacement === 'left'
+            ? 'left'
+            : 'right'
+          : requestedPlacement;
+      const attachment = decoration.attachment ?? 'boundary';
+      const anchor = decoration.anchor ?? 'center';
+      const gap = 4 * dpr * getLabelZoom(zoom / Math.max(dpr, Number.EPSILON));
+      const borderRadius = resolveNodeValue(style.borderRadius, node, 0) * zoom;
+      const crossOffsetRatio = resolveNodeValue(decoration.crossOffsetRatio, node, 0);
+      const boundaryOverlapValue = resolveNodeValue(decoration.boundaryOverlap, node, 0);
+      const boundaryAdjacentItem =
+        placement === 'top' && isStack ? visibleItems[visibleItems.length - 1] : visibleItems[0];
+      const boundaryOverlap =
+        boundaryOverlapValue === 'half-badge'
+          ? boundaryAdjacentItem.layout.height / 2
+          : boundaryOverlapValue * dpr;
+      const nodeExtension = getNodeExtension(nodeConfig.type);
+      const boundaryPlacement =
+        placement === 'left' ||
+        placement === 'right' ||
+        placement === 'top' ||
+        placement === 'bottom'
+          ? placement
+          : undefined;
+      const boundaryAnchor = boundaryPlacement
+        ? nodeExtension?.getBoundaryAnchor?.({
+            node,
+            placement: boundaryPlacement,
+            crossOffsetRatio,
+            width: nodeWidth,
+            height: nodeHeight,
+            borderRadius,
+          }) ??
+          getBuiltInNodeBoundaryAnchor(
+            getNodeBaseType(nodeConfig),
+            boundaryPlacement,
+            nodeWidth,
+            nodeHeight,
+            crossOffsetRatio,
+            borderRadius,
+          )
+        : undefined;
+      let { x, y } = getNodeDecorationAnchor(
+        px,
+        py,
+        nodeWidth,
+        nodeHeight,
+        layout,
+        placement,
+        attachment,
+        anchor,
+        gap,
+        crossOffsetRatio,
+        boundaryOverlap,
+        boundaryAnchor,
+      );
+      x += (decoration.offsetX ?? 0) * dpr;
+      y += (decoration.offsetY ?? 0) * dpr;
+
+      const bboxX = x - layout.width / 2;
+      const bboxY = y - layout.height / 2;
+      if (bboxX + layout.width < 0 || bboxX > viewW || bboxY + layout.height < 0 || bboxY > viewH)
+        continue;
+      if (this.decorationGrid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) continue;
+
+      let drawn = false;
+      ctx.save();
+      try {
+        ctx.translate(x, y);
+        if (isStack) {
+          let itemY = -layout.height / 2;
+          for (const item of visibleItems) {
+            ctx.save();
+            const itemX =
+              placement === 'left'
+                ? layout.width / 2 - item.layout.width / 2
+                : -layout.width / 2 + item.layout.width / 2;
+            ctx.translate(itemX, itemY + item.layout.height / 2);
+            (renderer as DecorationRenderer).draw({
+              ...params,
+              data: item.data,
+              layout: item.layout,
+            });
+            ctx.restore();
+            itemY += item.layout.height + itemGap;
+          }
+        } else {
+          (renderer as DecorationRenderer).draw({ ...params, layout });
+        }
+        drawn = true;
+      } catch (error) {
+        this.warnOnce(
+          `decoration:${decoration.renderer}:draw`,
+          `[G6Lite] Decoration renderer "${decoration.renderer}" threw during draw; skipping it.`,
+          error,
+        );
+      } finally {
+        ctx.restore();
+      }
+      if (drawn) {
+        drawnBounds.push({ x: bboxX, y: bboxY, width: layout.width, height: layout.height });
+        if (isStack && decoration.overflow === 'hover-expand') {
+          if (expanded) {
+            this.decorationHoverRegions.push({
+              nodeId: node.id,
+              x: bboxX,
+              y: bboxY,
+              width: layout.width,
+              height: layout.height,
+            });
+          } else {
+            let itemY = bboxY;
+            for (const item of visibleItems) {
+              if (item.isOverflow) {
+                this.decorationHoverRegions.push({
+                  nodeId: node.id,
+                  x: placement === 'left' ? bboxX + layout.width - item.layout.width : bboxX,
+                  y: itemY,
+                  width: item.layout.width,
+                  height: item.layout.height,
+                });
+                break;
+              }
+              itemY += item.layout.height + itemGap;
+            }
+          }
+        }
+      }
+    }
+
+    for (const bounds of drawnBounds) {
+      this.decorationGrid.register(bounds.x, bounds.y, bounds.width, bounds.height);
     }
   }
 
@@ -400,7 +845,7 @@ export class LabelLayerRenderer {
     px: number,
     py: number,
     node: GraphNode,
-    style: NonNullable<NodeConfig['style']>,
+    style: NodeStyleConfig,
     dpr: number,
     zoom: number,
     viewW: number,
@@ -442,8 +887,8 @@ export class LabelLayerRenderer {
     }
 
     const nodeSize = resolveNodeValue(style.size, node, 8);
-    const nodeWidth = resolveNodeValue(style.width, node, nodeSize) * zoom * dpr;
-    const nodeHeight = resolveNodeValue(style.height, node, nodeSize) * zoom * dpr;
+    const nodeWidth = resolveNodeValue(style.width, node, nodeSize) * zoom;
+    const nodeHeight = resolveNodeValue(style.height, node, nodeSize) * zoom;
     const horizontalGap = 4 * dpr * getLabelZoom(zoom);
     const anchor = getCustomNodeLabelAnchor(
       px,
@@ -489,7 +934,7 @@ export class LabelLayerRenderer {
     px: number,
     py: number,
     node: GraphNode,
-    style: NonNullable<NodeConfig['style']>,
+    style: NodeStyleConfig,
     dpr: number,
     zoom: number,
   ): void {
@@ -520,7 +965,7 @@ export class LabelLayerRenderer {
 
     // Compute node size in screen space
     const nodeSize = resolveNodeValue(style.size, node, 8);
-    const nodeSizeScreen = nodeSize * zoom * dpr;
+    const nodeSizeScreen = nodeSize * zoom;
 
     // Position based on placement
     let labelX = px + offsetX * dpr * labelZoom;
@@ -566,17 +1011,11 @@ export class LabelLayerRenderer {
       );
     }
 
-    // Draw text with shadow for readability
+    // Draw text
     ctx.textAlign = textAlign;
     ctx.textBaseline = textBaseline;
-    ctx.shadowColor = 'rgba(255,255,255,0.8)';
-    ctx.shadowBlur = Math.max(2, fontSizePx * 0.3);
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
     ctx.fillStyle = color;
     ctx.fillText(displayText, labelX, labelY);
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
   }
 
   private drawIcon(
@@ -584,7 +1023,7 @@ export class LabelLayerRenderer {
     px: number,
     py: number,
     node: GraphNode,
-    style: NonNullable<NodeConfig['style']>,
+    style: NodeStyleConfig,
     dpr: number,
     zoom: number,
   ): void {
@@ -593,8 +1032,8 @@ export class LabelLayerRenderer {
 
     const nodeSize = resolveNodeValue(style.size, node, 8);
     const defaultIconSize = nodeSize * 0.6;
-    const iconW = resolveNodeValue(style.iconWidth, node, defaultIconSize) * zoom * dpr;
-    const iconH = resolveNodeValue(style.iconHeight, node, defaultIconSize) * zoom * dpr;
+    const iconW = resolveNodeValue(style.iconWidth, node, defaultIconSize) * zoom;
+    const iconH = resolveNodeValue(style.iconHeight, node, defaultIconSize) * zoom;
     const offsetX = resolveNodeValue(style.iconOffsetX, node, 0) * dpr;
     const offsetY = resolveNodeValue(style.iconOffsetY, node, 0) * dpr;
 
@@ -606,13 +1045,13 @@ export class LabelLayerRenderer {
     px: number,
     py: number,
     node: GraphNode,
-    style: NonNullable<NodeConfig['style']>,
+    style: NodeStyleConfig,
     dpr: number,
     zoom: number,
   ): void {
     const nodeSize = resolveNodeValue(style.size, node, 8);
     const defaultFontSize = nodeSize * 0.6;
-    const fontSize = resolveNodeValue(style.iconFontSize, node, defaultFontSize) * zoom * dpr;
+    const fontSize = resolveNodeValue(style.iconFontSize, node, defaultFontSize) * zoom;
     if (fontSize < 4) return;
     const fontFamily = resolveNodeValue(style.iconFontFamily, node, DEFAULT_FONT_FAMILY);
     const color = resolveNodeValue(style.iconColor, node, '#fff');
@@ -932,6 +1371,8 @@ export class LabelLayerRenderer {
   }
 
   destroy(): void {
+    this.mainCanvas.removeEventListener('mousemove', this.onDecorationPointerMove);
+    this.mainCanvas.removeEventListener('mouseleave', this.onDecorationPointerLeave);
     this.canvas.remove();
     this.imageCache.clear();
   }

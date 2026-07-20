@@ -33,6 +33,14 @@ import * as customLabelRenderer from './custom-label-renderer.ts';
 import * as combo from './combo.ts';
 import * as customNodeExtension from './g6-v5-compat.ts';
 import * as realDataset from './real-dataset.ts';
+import * as extensionSystem from './extension-system.ts';
+import * as incrementalNodes from './incremental-nodes.ts';
+import * as dragNodeThreshold from './drag-node-threshold.ts';
+import * as brushClickSelect from './brush-click-select.ts';
+import * as fitIncrementalNodes from './fit-incremental-nodes.ts';
+import * as batchNodePositions from './batch-node-positions.ts';
+import * as setDataFitOptions from './set-data-fit-options.ts';
+import * as selfLoopLabels from './self-loop-labels.ts';
 import basicSource from './basic.ts?raw';
 import nodeStyleSource from './node-style.ts?raw';
 import layoutsSource from './layouts.ts?raw';
@@ -65,6 +73,14 @@ import customLabelRendererSource from './custom-label-renderer.ts?raw';
 import comboSource from './combo.ts?raw';
 import customNodeExtensionSource from './g6-v5-compat.ts?raw';
 import realDatasetSource from './real-dataset.ts?raw';
+import extensionSystemSource from './extension-system.ts?raw';
+import incrementalNodesSource from './incremental-nodes.ts?raw';
+import dragNodeThresholdSource from './drag-node-threshold.ts?raw';
+import brushClickSelectSource from './brush-click-select.ts?raw';
+import fitIncrementalNodesSource from './fit-incremental-nodes.ts?raw';
+import batchNodePositionsSource from './batch-node-positions.ts?raw';
+import setDataFitOptionsSource from './set-data-fit-options.ts?raw';
+import selfLoopLabelsSource from './self-loop-labels.ts?raw';
 
 export interface DemoItem {
   id: string;
@@ -106,6 +122,48 @@ export const demos: DemoItem[] = [
   { id: 'fishbone', name: '鱼骨图', run: fishbone.run, source: fishboneSource },
   { id: 'performance', name: '性能测试', run: performanceTest.run, source: performanceTestSource },
   { id: 'set-data', name: 'setData + layout()', run: setData.run, source: setDataSource },
+  {
+    id: 'incremental-nodes',
+    name: '增量新增节点',
+    run: incrementalNodes.run,
+    source: incrementalNodesSource,
+  },
+  {
+    id: 'drag-node-threshold',
+    name: '节点拖拽阈值',
+    run: dragNodeThreshold.run,
+    source: dragNodeThresholdSource,
+  },
+  {
+    id: 'brush-click-select',
+    name: '框选与点击选择',
+    run: brushClickSelect.run,
+    source: brushClickSelectSource,
+  },
+  {
+    id: 'fit-incremental-nodes',
+    name: '增量节点视口适配',
+    run: fitIncrementalNodes.run,
+    source: fitIncrementalNodesSource,
+  },
+  {
+    id: 'batch-node-positions',
+    name: '批量更新节点坐标',
+    run: batchNodePositions.run,
+    source: batchNodePositionsSource,
+  },
+  {
+    id: 'set-data-fit-options',
+    name: 'setData 视口策略',
+    run: setDataFitOptions.run,
+    source: setDataFitOptionsSource,
+  },
+  {
+    id: 'self-loop-labels',
+    name: '自环边标签',
+    run: selfLoopLabels.run,
+    source: selfLoopLabelsSource,
+  },
   { id: 'labels', name: '标签 + 图标', run: labels.run, source: labelsSource },
   {
     id: 'custom-label-renderer',
@@ -121,4 +179,10 @@ export const demos: DemoItem[] = [
     source: customNodeExtensionSource,
   },
   { id: 'real-dataset', name: '真实数据集 (sigma 同款 8.8K 节点)', run: realDataset.run, source: realDatasetSource },
+  {
+    id: 'extension-system',
+    name: '公开扩展 API 综合示例',
+    run: extensionSystem.run,
+    source: extensionSystemSource,
+  },
 ];

@@ -18,7 +18,15 @@ export interface LineEdgePath {
   p1: Point;
 }
 
-export type EdgePath = LineEdgePath | QuadraticEdgePath;
+export interface CubicEdgePath {
+  type: 'cubic';
+  p0: Point;
+  cp1: Point;
+  cp2: Point;
+  p1: Point;
+}
+
+export type EdgePath = LineEdgePath | QuadraticEdgePath | CubicEdgePath;
 
 export interface BoundarySample {
   point: Point;
@@ -80,6 +88,10 @@ export function createLinePath(source: Point, target: Point): LineEdgePath {
   return { type: 'line', p0: source, p1: target };
 }
 
+export function createCubicPath(p0: Point, cp1: Point, cp2: Point, p1: Point): CubicEdgePath {
+  return { type: 'cubic', p0, cp1, cp2, p1 };
+}
+
 export function sampleEdgePath(path: EdgePath, t: number): { point: Point; tangent: Point } {
   const tt = Math.max(0, Math.min(1, t));
   if (path.type === 'line') {
@@ -91,6 +103,34 @@ export function sampleEdgePath(path: EdgePath, t: number): { point: Point; tange
       tangent: {
         x: path.p1.x - path.p0.x,
         y: path.p1.y - path.p0.y,
+      },
+    };
+  }
+
+  if (path.type === 'cubic') {
+    const mt = 1 - tt;
+    return {
+      point: {
+        x:
+          mt * mt * mt * path.p0.x +
+          3 * mt * mt * tt * path.cp1.x +
+          3 * mt * tt * tt * path.cp2.x +
+          tt * tt * tt * path.p1.x,
+        y:
+          mt * mt * mt * path.p0.y +
+          3 * mt * mt * tt * path.cp1.y +
+          3 * mt * tt * tt * path.cp2.y +
+          tt * tt * tt * path.p1.y,
+      },
+      tangent: {
+        x:
+          3 * mt * mt * (path.cp1.x - path.p0.x) +
+          6 * mt * tt * (path.cp2.x - path.cp1.x) +
+          3 * tt * tt * (path.p1.x - path.cp2.x),
+        y:
+          3 * mt * mt * (path.cp1.y - path.p0.y) +
+          6 * mt * tt * (path.cp2.y - path.cp1.y) +
+          3 * tt * tt * (path.p1.y - path.cp2.y),
       },
     };
   }

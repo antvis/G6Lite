@@ -1,9 +1,26 @@
 import { describe, expect, it } from 'vitest';
 import {
+  createCubicPath,
   createQuadraticPath,
   findPathBoundarySample,
   getRectBoundaryDistance,
+  sampleEdgePath,
 } from '../renderer/edgePath.js';
+
+describe('cubic edge paths', () => {
+  it('samples a self-loop away from its node center', () => {
+    const path = createCubicPath(
+      { x: -5, y: 0 },
+      { x: -20, y: -30 },
+      { x: 20, y: -30 },
+      { x: 5, y: 0 },
+    );
+
+    const sample = sampleEdgePath(path, 0.5);
+    expect(sample.point.y).toBeLessThan(0);
+    expect(sample.point).not.toEqual({ x: 0, y: 0 });
+  });
+});
 
 describe('rectangular node edge boundaries', () => {
   it('computes horizontal, vertical, and diagonal ray intersections', () => {

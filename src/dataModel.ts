@@ -230,6 +230,21 @@ export class DataModel {
     this._changes.push({ type: 'nodePositionChanged', ids: [id] });
   }
 
+  updateNodePositions(updates: Array<{ id: string; x: number; y: number }>): string[] {
+    const ids: string[] = [];
+    for (const update of updates) {
+      const index = this._nodeIdToIndex.get(update.id);
+      if (index === undefined) continue;
+      const node = this._nodes[index];
+      if (node.x === update.x && node.y === update.y) continue;
+      node.x = update.x;
+      node.y = update.y;
+      ids.push(update.id);
+    }
+    if (ids.length > 0) this._changes.push({ type: 'nodePositionChanged', ids });
+    return ids;
+  }
+
   updateNodeData(id: string, data: Record<string, unknown>): void {
     const index = this._nodeIdToIndex.get(id);
     if (index === undefined) return;
@@ -241,6 +256,20 @@ export class DataModel {
       node.data = data;
     }
     this._changes.push({ type: 'nodeDataChanged', ids: [id] });
+  }
+
+  updateNodeDataBatch(updates: Array<{ id: string; data: Record<string, unknown> }>): string[] {
+    const ids: string[] = [];
+    for (const update of updates) {
+      const index = this._nodeIdToIndex.get(update.id);
+      if (index === undefined) continue;
+      const node = this._nodes[index];
+      if (node.data) Object.assign(node.data, update.data);
+      else node.data = update.data;
+      ids.push(update.id);
+    }
+    if (ids.length > 0) this._changes.push({ type: 'nodeDataChanged', ids });
+    return ids;
   }
 
   // ──── Edge operations ────
@@ -353,6 +382,41 @@ export class DataModel {
       edge.data = data;
     }
     this._changes.push({ type: 'edgeDataChanged', ids: [id] });
+  }
+
+  updateEdgeDataBatch(
+    updates: Array<{
+      id: string;
+      data?: Record<string, unknown>;
+      source?: string;
+      target?: string;
+    }>,
+  ): string[] {
+    for (const update of updates) {
+      if (!this._edgeIdToIndex.has(update.id)) continue;
+      if (update.source !== undefined && !this._nodeIdToIndex.has(update.source)) {
+        throw new Error(`Edge ${update.id} references missing source node: ${update.source}`);
+      }
+      if (update.target !== undefined && !this._nodeIdToIndex.has(update.target)) {
+        throw new Error(`Edge ${update.id} references missing target node: ${update.target}`);
+      }
+    }
+
+    const ids: string[] = [];
+    for (const update of updates) {
+      const index = this._edgeIdToIndex.get(update.id);
+      if (index === undefined) continue;
+      const edge = this._edges[index];
+      if (update.data !== undefined) {
+        if (edge.data) Object.assign(edge.data, update.data);
+        else edge.data = update.data;
+      }
+      if (update.source !== undefined) edge.source = update.source;
+      if (update.target !== undefined) edge.target = update.target;
+      ids.push(update.id);
+    }
+    if (ids.length > 0) this._changes.push({ type: 'edgeDataChanged', ids });
+    return ids;
   }
 
   // ──── State management ────

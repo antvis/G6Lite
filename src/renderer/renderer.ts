@@ -3,6 +3,7 @@
  * and framebuffer picking for O(1) hit detection.
  */
 
+import { getEdgeBaseType } from '../extensions/edge.js';
 import { getNodeBaseType } from '../extensions/node.js';
 import type { NodeRect, Waypoint } from '../routing/orthogonal.js';
 import {
@@ -17,6 +18,7 @@ import type { Camera } from './camera.js';
 import { createCamera } from './camera.js';
 import { parseColor } from './color.js';
 import {
+  createCubicPath,
   createLinePath,
   createQuadraticPath,
   findPathBoundarySample,
@@ -39,6 +41,8 @@ import { NodeRectProgram } from './programs/nodeRect.js';
 import type { Program, RenderParams } from './programs/program.js';
 import type { ResolvedEdgeStyle } from './style.js';
 import { edgeConfigCache, nodeConfigCache, resolveEdgeStyle, resolveNodeStyle } from './style.js';
+
+const HOVER_DIM_STRENGTH = 0.25;
 
 export interface RendererData {
   nodes: LayoutNode[];
@@ -151,6 +155,8 @@ export class Renderer {
   private polylineRoutes = new Map<number, Waypoint[]>();
   private maxPolylineRoutesCache = 5000; // Don't cache routes for very large graphs
   private edgePathCache = new Map<number, EdgePath>();
+  /** Number of nodes whose attributes have been written to the active GPU program. */
+  private processedNodeCount = 0;
 
   // Render scheduling
   private renderFrame: number | null = null;
@@ -313,9 +319,10 @@ export class Renderer {
 
   /** Determine edge program: complex edge types first, rect when base or state styles require width/opacity/dash, else line. */
   private resolveEdgeType(config?: EdgeConfig): EdgeProgramType {
-    if (config?.type === 'polyline') return 'polyline';
-    if (config?.type === 'arc') return 'arc';
-    if (config?.type === 'cubic') return 'cubic' as EdgeProgramType;
+    const baseType = getEdgeBaseType(config);
+    if (baseType === 'polyline') return 'polyline';
+    if (baseType === 'arc') return 'arc';
+    if (baseType === 'cubic') return 'cubic' as EdgeProgramType;
     if (this.hasParallelEdges()) return 'arc';
     const lw = config?.style?.lineWidth;
     if (typeof lw === 'number' && lw > 1) return 'rect';
@@ -481,11 +488,11 @@ export class Renderer {
         const color: [number, number, number] = active
           ? baseColor
           : [
-              baseColor[0] * 0.25 + bg[0] * 0.75,
-              baseColor[1] * 0.25 + bg[1] * 0.75,
-              baseColor[2] * 0.25 + bg[2] * 0.75,
+              baseColor[0] * HOVER_DIM_STRENGTH + bg[0] * (1 - HOVER_DIM_STRENGTH),
+              baseColor[1] * HOVER_DIM_STRENGTH + bg[1] * (1 - HOVER_DIM_STRENGTH),
+              baseColor[2] * HOVER_DIM_STRENGTH + bg[2] * (1 - HOVER_DIM_STRENGTH),
             ];
-        const opacity = active ? style.opacity : Math.min(style.opacity, 0.25);
+        const opacity = active ? style.opacity : Math.min(style.opacity, HOVER_DIM_STRENGTH);
         const effectiveOpacity = isFillTransparent ? 0 : opacity;
         const effectiveStrokeWidth = isStrokeTransparent ? 0 : style.strokeWidth;
 
@@ -622,6 +629,7 @@ export class Renderer {
 
     this.picking.setNodeCount(nodes.length);
     this.hasArrows = renderedArrowCount > 0;
+    this.processedNodeCount = nodes.length;
     this.needToProcess = false;
     this.needPickingRender = true;
 
@@ -793,11 +801,11 @@ export class Renderer {
       const color: [number, number, number] = active
         ? edgeBaseColor
         : [
-            edgeBaseColor[0] * 0.08 + bg[0] * 0.92,
-            edgeBaseColor[1] * 0.08 + bg[1] * 0.92,
-            edgeBaseColor[2] * 0.08 + bg[2] * 0.92,
+            edgeBaseColor[0] * HOVER_DIM_STRENGTH + bg[0] * (1 - HOVER_DIM_STRENGTH),
+            edgeBaseColor[1] * HOVER_DIM_STRENGTH + bg[1] * (1 - HOVER_DIM_STRENGTH),
+            edgeBaseColor[2] * HOVER_DIM_STRENGTH + bg[2] * (1 - HOVER_DIM_STRENGTH),
           ];
-      if (!active) opacity = Math.min(opacity, 0.08);
+      if (!active) opacity = Math.min(opacity, HOVER_DIM_STRENGTH);
 
       const pickIdx = nodes.length + i;
       const dashCycle = style.lineDash.length >= 2 ? style.lineDash[0] + style.lineDash[1] : 0;
@@ -1076,11 +1084,11 @@ export class Renderer {
       const color: [number, number, number] = active
         ? edgeBaseColor
         : [
-            edgeBaseColor[0] * 0.08 + bg[0] * 0.92,
-            edgeBaseColor[1] * 0.08 + bg[1] * 0.92,
-            edgeBaseColor[2] * 0.08 + bg[2] * 0.92,
+            edgeBaseColor[0] * HOVER_DIM_STRENGTH + bg[0] * (1 - HOVER_DIM_STRENGTH),
+            edgeBaseColor[1] * HOVER_DIM_STRENGTH + bg[1] * (1 - HOVER_DIM_STRENGTH),
+            edgeBaseColor[2] * HOVER_DIM_STRENGTH + bg[2] * (1 - HOVER_DIM_STRENGTH),
           ];
-      const loopOpacity = active ? style.opacity : Math.min(style.opacity, 0.08);
+      const loopOpacity = active ? style.opacity : Math.min(style.opacity, HOVER_DIM_STRENGTH);
       const pickIdx = nodes.length + i;
 
       // Nested mode: all loops point upward (top), increasing distance
@@ -1100,6 +1108,32 @@ export class Renderer {
       const baseLoopDist = 35;
       const loopSpacing = 15;
       const loopSize = baseLoopDist + loopIndex * loopSpacing;
+      if (edges.length <= this.maxPolylineRoutesCache) {
+        const startAngle = angle - spread;
+        const ext = nodeRadius + loopSize;
+        this.edgePathCache.set(
+          i,
+          createCubicPath(
+            {
+              x: node.x + nodeRadius * Math.cos(startAngle),
+              y: node.y + nodeRadius * Math.sin(startAngle),
+            },
+            {
+              x: node.x + ext * Math.cos(startAngle),
+              y: node.y + ext * Math.sin(startAngle),
+            },
+            {
+              x: node.x + ext * Math.cos(endAngle),
+              y: node.y + ext * Math.sin(endAngle),
+            },
+            {
+              x: node.x + nodeRadius * Math.cos(endAngle),
+              y: node.y + nodeRadius * Math.sin(endAngle),
+            },
+          ),
+        );
+      }
+      const dashCycle = style.lineDash.length >= 2 ? style.lineDash[0] + style.lineDash[1] : 0;
       this.edgeLoopSlot[i] = loopDrawIdx;
       loopProg.processLoop(
         loopDrawIdx++,
@@ -1110,6 +1144,8 @@ export class Renderer {
         loopSize,
         color,
         pickIdx,
+        style.lineWidth,
+        dashCycle,
         loopOpacity,
       );
 
@@ -1185,9 +1221,9 @@ export class Renderer {
       const color: [number, number, number] = active
         ? baseColor
         : [
-            baseColor[0] * 0.25 + bg[0] * 0.75,
-            baseColor[1] * 0.25 + bg[1] * 0.75,
-            baseColor[2] * 0.25 + bg[2] * 0.75,
+            baseColor[0] * HOVER_DIM_STRENGTH + bg[0] * (1 - HOVER_DIM_STRENGTH),
+            baseColor[1] * HOVER_DIM_STRENGTH + bg[1] * (1 - HOVER_DIM_STRENGTH),
+            baseColor[2] * HOVER_DIM_STRENGTH + bg[2] * (1 - HOVER_DIM_STRENGTH),
           ];
       nodeProgram.patchItemColor(idx, color);
     }
@@ -1226,9 +1262,9 @@ export class Renderer {
       const color: [number, number, number] = active
         ? edgeBaseColor
         : [
-            edgeBaseColor[0] * 0.08 + bg[0] * 0.92,
-            edgeBaseColor[1] * 0.08 + bg[1] * 0.92,
-            edgeBaseColor[2] * 0.08 + bg[2] * 0.92,
+            edgeBaseColor[0] * HOVER_DIM_STRENGTH + bg[0] * (1 - HOVER_DIM_STRENGTH),
+            edgeBaseColor[1] * HOVER_DIM_STRENGTH + bg[1] * (1 - HOVER_DIM_STRENGTH),
+            edgeBaseColor[2] * HOVER_DIM_STRENGTH + bg[2] * (1 - HOVER_DIM_STRENGTH),
           ];
       if (loopSlot >= 0) {
         loopProgram.patchItemColor(loopSlot, color);
@@ -1417,11 +1453,11 @@ export class Renderer {
         const color: [number, number, number] = active
           ? baseColor
           : [
-              baseColor[0] * 0.25 + bg[0] * 0.75,
-              baseColor[1] * 0.25 + bg[1] * 0.75,
-              baseColor[2] * 0.25 + bg[2] * 0.75,
+              baseColor[0] * HOVER_DIM_STRENGTH + bg[0] * (1 - HOVER_DIM_STRENGTH),
+              baseColor[1] * HOVER_DIM_STRENGTH + bg[1] * (1 - HOVER_DIM_STRENGTH),
+              baseColor[2] * HOVER_DIM_STRENGTH + bg[2] * (1 - HOVER_DIM_STRENGTH),
             ];
-        const opacity = active ? style.opacity : Math.min(style.opacity, 0.25);
+        const opacity = active ? style.opacity : Math.min(style.opacity, HOVER_DIM_STRENGTH);
         const strokeColor = style.strokeRGB ?? parseColor(style.stroke);
         const isFillTransparent = style.fill === 'transparent' || style.fill === 'none';
         const isStrokeTransparent = style.stroke === 'transparent' || style.stroke === 'none';
@@ -1527,11 +1563,11 @@ export class Renderer {
         const color: [number, number, number] = active
           ? edgeBaseColor
           : [
-              edgeBaseColor[0] * 0.08 + bg[0] * 0.92,
-              edgeBaseColor[1] * 0.08 + bg[1] * 0.92,
-              edgeBaseColor[2] * 0.08 + bg[2] * 0.92,
+              edgeBaseColor[0] * HOVER_DIM_STRENGTH + bg[0] * (1 - HOVER_DIM_STRENGTH),
+              edgeBaseColor[1] * HOVER_DIM_STRENGTH + bg[1] * (1 - HOVER_DIM_STRENGTH),
+              edgeBaseColor[2] * HOVER_DIM_STRENGTH + bg[2] * (1 - HOVER_DIM_STRENGTH),
             ];
-        const opacity = active ? style.opacity : Math.min(style.opacity, 0.08);
+        const opacity = active ? style.opacity : Math.min(style.opacity, HOVER_DIM_STRENGTH);
 
         if (isSimpleEdge) {
           if (this.activeEdgeType === 'rect') {
@@ -1569,7 +1605,10 @@ export class Renderer {
     addedNodeIds?: string[],
     addedEdgeIds?: string[],
   ): void {
-    const prevNodeCount = this.nodes.length;
+    // this.nodes aliases DataModel's mutable array, so its length already includes
+    // additions by the time the scheduler flushes. Track the processed boundary
+    // independently instead of treating the shared array length as the old count.
+    const prevNodeCount = this.processedNodeCount;
     const prevEdgeCount = this.edges.length;
 
     this.nodes = dataModel.getNodes() as unknown as LayoutNode[];
@@ -1680,11 +1719,11 @@ export class Renderer {
       const color: [number, number, number] = active
         ? baseColor
         : [
-            baseColor[0] * 0.25 + bg[0] * 0.75,
-            baseColor[1] * 0.25 + bg[1] * 0.75,
-            baseColor[2] * 0.25 + bg[2] * 0.75,
+            baseColor[0] * HOVER_DIM_STRENGTH + bg[0] * (1 - HOVER_DIM_STRENGTH),
+            baseColor[1] * HOVER_DIM_STRENGTH + bg[1] * (1 - HOVER_DIM_STRENGTH),
+            baseColor[2] * HOVER_DIM_STRENGTH + bg[2] * (1 - HOVER_DIM_STRENGTH),
           ];
-      const opacity = active ? style.opacity : Math.min(style.opacity, 0.25);
+      const opacity = active ? style.opacity : Math.min(style.opacity, HOVER_DIM_STRENGTH);
       const effectiveOpacity = isFillTransparent ? 0 : opacity;
       const effectiveStrokeWidth = isStrokeTransparent ? 0 : style.strokeWidth;
 
@@ -1728,6 +1767,7 @@ export class Renderer {
       }
     }
     nodeProgram.upload();
+    this.processedNodeCount = this.nodes.length;
 
     // For edges, fall back to full process for now (edge processing is more complex)
     if (addedEdgeIds.length > 0) {
@@ -1999,6 +2039,20 @@ export class Renderer {
   }
   getNodeIdToIndex(): Map<string, number> {
     return this.nodeIdToIndex;
+  }
+
+  getNodeDimensions(id: string): { width: number; height: number } | undefined {
+    const index = this.nodeIdToIndex.get(id);
+    if (
+      index === undefined ||
+      !this._nodeHalfWidths ||
+      !this._nodeHeights ||
+      index >= this._nodeHalfWidths.length ||
+      index >= this._nodeHeights.length
+    ) {
+      return undefined;
+    }
+    return { width: this._nodeHalfWidths[index] * 2, height: this._nodeHeights[index] };
   }
 
   setHighlight(option: { nodeIds?: Set<string>; edgeIndices?: Set<number> }): void {

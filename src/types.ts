@@ -15,6 +15,8 @@ export interface GraphNode {
   data?: NodeData;
   x?: number;
   y?: number;
+  fx?: number;
+  fy?: number;
   states?: NodeState[];
   comboId?: string;
 }
@@ -23,7 +25,7 @@ export interface GraphNode {
 export type EdgeData = Record<string, unknown>;
 
 /** Shared state type for nodes and edges. */
-export type ElementState =
+export type BuiltInElementState =
   | 'default'
   | 'active'
   | 'selected'
@@ -31,6 +33,75 @@ export type ElementState =
   | 'highlight'
   | 'inactive'
   | 'hidden';
+
+/** Built-in states plus application-defined state names. */
+export type ElementState = BuiltInElementState | (string & {});
+
+export interface NodeDataUpdate {
+  id: string;
+  data: Record<string, unknown>;
+}
+
+export interface EdgeDataUpdate {
+  id: string;
+  data?: Record<string, unknown>;
+  source?: string;
+  target?: string;
+}
+
+export interface ViewportPoint {
+  x: number;
+  y: number;
+}
+
+export interface ZoomOptions {
+  /** Client/screen coordinate that remains visually fixed while zooming. */
+  center?: ViewportPoint;
+  minZoom?: number;
+  maxZoom?: number;
+}
+
+export interface FitViewOptions {
+  /** CSS-like padding in viewport pixels. */
+  padding?: number | [number, number, number, number];
+  minZoom?: number;
+  maxZoom?: number;
+}
+
+export interface SetDataOptions {
+  /** Auto-fit after replacement. false preserves the current camera. */
+  fitView?: boolean | number | FitViewOptions;
+}
+
+export interface NodePositionUpdate {
+  id: string;
+  x: number;
+  y: number;
+}
+
+export interface GraphPoint {
+  x: number;
+  y: number;
+}
+
+export interface GraphElementEvent<T = Record<string, unknown>> {
+  targetType: 'node' | 'edge' | 'combo' | 'canvas';
+  targetId?: string;
+  data?: T;
+  client: GraphPoint;
+  canvas: GraphPoint;
+  graph: GraphPoint;
+  nativeEvent: MouseEvent | WheelEvent;
+  /** @deprecated Use nativeEvent. */
+  event: MouseEvent | WheelEvent;
+  /** Compatibility fields for existing consumers. */
+  nodeId?: string;
+  edgeId?: string;
+  comboId?: string;
+  edgeIndex?: number;
+  source?: string;
+  target?: string;
+}
 
 /** Node states for visual differentiation. */
 export type NodeState = ElementState;
@@ -96,6 +167,23 @@ export interface NodeStateStyleOverride {
 
 /** Label placement relative to node. */
 export type LabelPlacement = 'center' | 'top' | 'bottom' | 'left' | 'right';
+
+/** How a node decoration is attached relative to the selected node side. */
+export type NodeDecorationAttachment = 'boundary' | 'outside' | 'inside';
+export type NodeDecorationAnchor = 'start' | 'center' | 'end';
+export type NodeDecorationPlacement = LabelPlacement | 'follow-label';
+
+export type NodeBadgeKind = 'count' | 'lock' | 'warning' | 'favorite' | 'text' | 'icon';
+
+export interface NodeBadgeItem {
+  kind: NodeBadgeKind;
+  value?: number | string;
+  text?: string;
+  icon?: string;
+  iconFontFamily?: string;
+  fill?: string;
+  color?: string;
+}
 
 /** Edge label placement along the edge. */
 export type EdgeLabelPlacement = 'start' | 'center' | 'end';
@@ -171,43 +259,70 @@ export interface LabelRenderer<T = unknown> {
   draw(params: LabelDrawParams<T>): void;
 }
 
+export interface NodeDecorationConfig<T = unknown> {
+  renderer: string;
+  placement?: NodeStyleValue<NodeDecorationPlacement>;
+  /** Defaults to `boundary`, which centers the decoration on the node edge. */
+  attachment?: NodeDecorationAttachment;
+  /** Which edge of the decoration box is aligned to the node-side anchor. */
+  anchor?: NodeDecorationAnchor;
+  /** Cross-axis offset relative to the node width/height. */
+  crossOffsetRatio?: NodeStyleValue<number>;
+  /** With `anchor: start`, overlap by CSS pixels or half the boundary-adjacent badge height. */
+  boundaryOverlap?: NodeStyleValue<number | 'half-badge'>;
+  /** Enables engine-managed vertical item stacking. */
+  layout?: 'single' | 'stack';
+  items?: T[] | ((node: GraphNode) => T[]);
+  sort?: 'none' | 'width-desc';
+  maxVisible?: number;
+  overflow?: 'clip' | 'hover-expand';
+  overflowData?: T | ((hiddenCount: number, node: GraphNode) => T);
+  itemGap?: number;
+  offsetX?: number;
+  offsetY?: number;
+  data?: T | ((node: GraphNode) => T);
+}
+
+export interface NodeStyleConfig {
+  fill?: NodeStyleValue<string>;
+  size?: NodeStyleValue<number>;
+  width?: NodeStyleValue<number>;
+  height?: NodeStyleValue<number>;
+  stroke?: NodeStyleValue<string>;
+  strokeWidth?: NodeStyleValue<number>;
+  opacity?: NodeStyleValue<number>;
+  borderRadius?: NodeStyleValue<number>;
+  label?: NodeStyleValue<string | false>;
+  labelFontSize?: NodeStyleValue<number>;
+  labelFontFamily?: NodeStyleValue<string>;
+  labelFontWeight?: NodeStyleValue<string>;
+  labelColor?: NodeStyleValue<string>;
+  labelPlacement?: NodeStyleValue<LabelPlacement>;
+  labelOffsetX?: NodeStyleValue<number>;
+  labelOffsetY?: NodeStyleValue<number>;
+  labelBackground?: NodeStyleValue<string | false>;
+  labelBackgroundPadding?: NodeStyleValue<number>;
+  labelMaxWidth?: NodeStyleValue<number>;
+  icon?: NodeStyleValue<string | false>;
+  iconWidth?: NodeStyleValue<number>;
+  iconHeight?: NodeStyleValue<number>;
+  iconType?: NodeStyleValue<'image' | 'text'>;
+  iconFontFamily?: NodeStyleValue<string>;
+  iconFontSize?: NodeStyleValue<number>;
+  iconColor?: NodeStyleValue<string>;
+  iconOffsetX?: NodeStyleValue<number>;
+  iconOffsetY?: NodeStyleValue<number>;
+}
+
 /** Node config: type and style (WebGL-capable only). */
 export interface NodeConfig {
   type?: 'circle' | 'rect' | (string & {});
   /** Registered custom label renderer name. */
   labelRenderer?: string;
-  style?: {
-    fill?: NodeStyleValue<string>;
-    size?: NodeStyleValue<number>;
-    width?: NodeStyleValue<number>;
-    height?: NodeStyleValue<number>;
-    stroke?: NodeStyleValue<string>;
-    strokeWidth?: NodeStyleValue<number>;
-    opacity?: NodeStyleValue<number>;
-    borderRadius?: NodeStyleValue<number>;
-    // Label
-    label?: NodeStyleValue<string | false>;
-    labelFontSize?: NodeStyleValue<number>;
-    labelFontFamily?: NodeStyleValue<string>;
-    labelFontWeight?: NodeStyleValue<string>;
-    labelColor?: NodeStyleValue<string>;
-    labelPlacement?: NodeStyleValue<LabelPlacement>;
-    labelOffsetX?: NodeStyleValue<number>;
-    labelOffsetY?: NodeStyleValue<number>;
-    labelBackground?: NodeStyleValue<string | false>;
-    labelBackgroundPadding?: NodeStyleValue<number>;
-    labelMaxWidth?: NodeStyleValue<number>;
-    // Icon
-    icon?: NodeStyleValue<string | false>;
-    iconWidth?: NodeStyleValue<number>;
-    iconHeight?: NodeStyleValue<number>;
-    iconType?: NodeStyleValue<'image' | 'text'>;
-    iconFontFamily?: NodeStyleValue<string>;
-    iconFontSize?: NodeStyleValue<number>;
-    iconColor?: NodeStyleValue<string>;
-    iconOffsetX?: NodeStyleValue<number>;
-    iconOffsetY?: NodeStyleValue<number>;
-  };
+  decorations?: NodeDecorationConfig[];
+  /** Keeps the default node label below decorated nodes unless labelPlacement is explicit. */
+  autoExternalLabelPlacement?: boolean;
+  style?: NodeStyleConfig | ((node: GraphNode) => Partial<NodeStyleConfig>);
   stateStyles?: Partial<Record<NodeState, NodeStateStyleOverride>>;
 }
 
@@ -224,7 +339,7 @@ export interface EdgeStateStyleOverride {
 
 /** Edge config: type and style (WebGL-capable only). */
 export interface EdgeConfig {
-  type?: 'line' | 'arc' | 'polyline' | 'cubic';
+  type?: 'line' | 'arc' | 'polyline' | 'cubic' | (string & {});
   /** Registered custom label renderer name. */
   labelRenderer?: string;
   parallelEdges?: ParallelEdgesConfig | boolean;
@@ -275,7 +390,13 @@ export type BehaviorOption = string | { type: string; [key: string]: unknown };
 /** Data transform config. */
 export type TransformOption =
   | 'process-parallel-edges'
-  | { type: 'process-parallel-edges'; options?: ParallelEdgesConfig };
+  | (string & {})
+  | { type: string; options?: Record<string, unknown> | ParallelEdgesConfig };
+
+export interface PluginOption {
+  type: string;
+  [key: string]: unknown;
+}
 
 /** Theme tokens (partial list; extend as needed). */
 export interface ThemeTokens {
@@ -371,6 +492,7 @@ export interface GraphOptions {
   layout?: LayoutConfig;
   behaviors?: BehaviorOption[];
   transforms?: TransformOption[];
+  plugins?: PluginOption[];
   theme?: ThemeOption;
 }
 

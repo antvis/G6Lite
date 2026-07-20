@@ -69,10 +69,11 @@ class TestEdgeLoop extends EdgeLoopProgram {
 const STRIDE_LINE = 16;
 const STRIDE_RECT = 19;
 const STRIDE_ARC = 13;
-const ARC_SEGMENTS = 8;
+const ARC_SEGMENTS = 24;
 const ARC_VERTICES_PER_ITEM = (ARC_SEGMENTS + 1) * 2 + 2;
-const STRIDE_LOOP = 9;
-const LOOP_SEGMENTS = 12;
+const STRIDE_LOOP = 13;
+const LOOP_SEGMENTS = 24;
+const LOOP_VERTICES_PER_ITEM = (LOOP_SEGMENTS + 1) * 2 + 2;
 
 describe('EdgeLine processEdge buffer encoding', () => {
   it('encodes both endpoints + clamp inputs, with a_posCoef selecting the end', () => {
@@ -305,6 +306,35 @@ describe('EdgeArc processEdge buffer encoding', () => {
     expect(previousDistance).toBeGreaterThan(Math.hypot(100, 200));
   });
 
+  it('keeps long high-curvature arc chord error below the visual threshold', () => {
+    const prog = new TestEdgeArc(makeGLStub());
+    prog.reallocate(1);
+    prog.processEdge(0, 0, 0, 1000, 0, [0.1, 0.2, 0.3], 42, 0.4, 1, 0, 1);
+
+    const a = prog.peek();
+    const cpx = 500;
+    const cpy = 400;
+    let maxMidpointError = 0;
+    for (let segment = 0; segment < ARC_SEGMENTS; segment++) {
+      const startVertex = segment === 0 ? 1 : 3 + (segment - 1) * 2;
+      const endVertex = 3 + segment * 2;
+      const startOffset = startVertex * STRIDE_ARC;
+      const endOffset = endVertex * STRIDE_ARC;
+      const chordMidX = (a[startOffset] + a[endOffset]) * 0.5;
+      const chordMidY = (a[startOffset + 1] + a[endOffset + 1]) * 0.5;
+      const t = (segment + 0.5) / ARC_SEGMENTS;
+      const mt = 1 - t;
+      const curveMidX = mt * mt * 0 + 2 * mt * t * cpx + t * t * 1000;
+      const curveMidY = mt * mt * 0 + 2 * mt * t * cpy + t * t * 0;
+      maxMidpointError = Math.max(
+        maxMidpointError,
+        Math.hypot(chordMidX - curveMidX, chordMidY - curveMidY),
+      );
+    }
+
+    expect(maxMidpointError).toBeLessThan(0.5);
+  });
+
   it('keeps degenerate arc vertices finite', () => {
     const prog = new TestEdgeArc(makeGLStub());
     prog.reallocate(1);
@@ -317,48 +347,64 @@ describe('EdgeArc processEdge buffer encoding', () => {
 });
 
 describe('EdgeLoop processLoop buffer encoding', () => {
-  it('keeps the compact GL_LINES layout aligned with its dedicated shader', () => {
+  it('tessellates loops into a finite continuous thick strip', () => {
     const prog = new TestEdgeLoop(makeGLStub());
     prog.reallocate(1);
     const color: [number, number, number] = [0.2, 0.4, 0.6];
     const pickingIndex = 17;
     const angle = -Math.PI / 2;
     const radius = 10;
-    prog.processLoop(0, 30, 40, radius, angle, 25, color, pickingIndex, 0.35);
+    prog.processLoop(0, 30, 40, radius, angle, 25, color, pickingIndex, 3, 10, 0.35);
 
-    expect(prog.getDrawMethod()).toBe(makeGLStub().LINES);
-    expect(prog.getVerticesPerItem()).toBe(LOOP_SEGMENTS * 2);
+    expect(prog.getDrawMethod()).toBe(makeGLStub().TRIANGLE_STRIP);
+    expect(prog.getVerticesPerItem()).toBe(LOOP_VERTICES_PER_ITEM);
     expect(prog.getFloatsPerVertex()).toBe(STRIDE_LOOP);
     expect(prog.getAttributeLayout()).toEqual([
       { name: 'a_position', size: 2 },
+      { name: 'a_normalSide', size: 3 },
+      { name: 'a_style', size: 4 },
       { name: 'a_color', size: 3 },
-      { name: 'a_pickingColor', size: 3 },
-      { name: 'a_opacity', size: 1 },
+      { name: 'a_pickingIndex', size: 1 },
     ]);
-    expect(prog.getVertexShader()).toContain('attribute vec3 a_pickingColor;');
-    expect(prog.getVertexShader()).not.toContain('a_normalSide');
+    expect(prog.getVertexShader()).toContain('attribute vec3 a_normalSide;');
 
     const a = prog.peek();
-    const [pr, pg, pb] = encodeId(pickingIndex);
-    const usedLength = LOOP_SEGMENTS * 2 * STRIDE_LOOP;
+    const usedLength = LOOP_VERTICES_PER_ITEM * STRIDE_LOOP;
     expect(Array.from(a.subarray(0, usedLength)).every(Number.isFinite)).toBe(true);
-    for (let vertex = 0; vertex < LOOP_SEGMENTS * 2; vertex++) {
+    for (let vertex = 0; vertex < LOOP_VERTICES_PER_ITEM; vertex++) {
       const offset = vertex * STRIDE_LOOP;
-      expect(a[offset + 2]).toBeCloseTo(color[0]);
-      expect(a[offset + 3]).toBeCloseTo(color[1]);
-      expect(a[offset + 4]).toBeCloseTo(color[2]);
-      expect(a[offset + 5]).toBeCloseTo(pr / 255);
-      expect(a[offset + 6]).toBeCloseTo(pg / 255);
-      expect(a[offset + 7]).toBeCloseTo(pb / 255);
+      expect(Math.hypot(a[offset + 2], a[offset + 3])).toBeCloseTo(1);
+      expect(Math.abs(a[offset + 4])).toBe(1);
+      expect(a[offset + 5]).toBeCloseTo(3);
+      expect(a[offset + 6]).toBeCloseTo(10);
       expect(a[offset + 8]).toBeCloseTo(0.35);
+      expect(a[offset + 9]).toBeCloseTo(color[0]);
+      expect(a[offset + 10]).toBeCloseTo(color[1]);
+      expect(a[offset + 11]).toBeCloseTo(color[2]);
+      expect(a[offset + 12]).toBe(pickingIndex);
     }
 
     const spread = 0.5;
     expect(a[0]).toBeCloseTo(30 + radius * Math.cos(angle - spread));
     expect(a[1]).toBeCloseTo(40 + radius * Math.sin(angle - spread));
-    const finalOffset = (LOOP_SEGMENTS * 2 - 1) * STRIDE_LOOP;
+    const finalOffset = (LOOP_VERTICES_PER_ITEM - 1) * STRIDE_LOOP;
     expect(a[finalOffset]).toBeCloseTo(30 + radius * Math.cos(angle + spread));
     expect(a[finalOffset + 1]).toBeCloseTo(40 + radius * Math.sin(angle + spread));
+    expect(Array.from(a.slice(0, STRIDE_LOOP))).toEqual(
+      Array.from(a.slice(STRIDE_LOOP, STRIDE_LOOP * 2)),
+    );
+    expect(Array.from(a.slice(finalOffset, finalOffset + STRIDE_LOOP))).toEqual(
+      Array.from(a.slice(finalOffset - STRIDE_LOOP, finalOffset)),
+    );
+  });
+
+  it('keeps degenerate loop geometry finite', () => {
+    const prog = new TestEdgeLoop(makeGLStub());
+    prog.reallocate(1);
+    prog.processLoop(0, 5, 5, 0, 0, 0, [1, 0, 0], 3, 2, 0, 0);
+
+    const usedLength = prog.getVerticesPerItem() * prog.getFloatsPerVertex();
+    expect(Array.from(prog.peek().subarray(0, usedLength)).every(Number.isFinite)).toBe(true);
   });
 });
 

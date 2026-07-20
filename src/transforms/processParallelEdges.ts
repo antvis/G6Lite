@@ -31,9 +31,9 @@ export function resolveParallelEdgesConfig(
       enabledByTransform = true;
       continue;
     }
-    if (transform?.type === 'process-parallel-edges') {
+    if (typeof transform !== 'string' && transform.type === 'process-parallel-edges') {
       enabledByTransform = true;
-      transformConfig = transform.options;
+      transformConfig = transform.options as ParallelEdgesConfig | undefined;
     }
   }
 

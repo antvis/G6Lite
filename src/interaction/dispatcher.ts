@@ -21,6 +21,7 @@
 
 import type { Graph } from '../graph.js';
 import type { Renderer } from '../renderer/renderer.js';
+import type { GraphElementEvent } from '../types.js';
 
 type HoverTarget =
   | { kind: 'node'; id: string }
@@ -45,6 +46,37 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
   const canvas = renderer.getCanvas();
   const emitter = graph.eventEmitter;
   let lastHover: HoverTarget = null;
+  let pressStart: { x: number; y: number } | null = null;
+  let suppressNextClick = false;
+  const clickThreshold = 3;
+
+  const createPayload = (
+    e: MouseEvent | WheelEvent,
+    targetType: GraphElementEvent['targetType'],
+    extra: Partial<GraphElementEvent> = {},
+  ): GraphElementEvent => {
+    const rect = canvas.getBoundingClientRect();
+    const canvasPoint = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    const graphPoint =
+      typeof (graph as { screenToGraph?: unknown }).screenToGraph === 'function'
+        ? graph.screenToGraph(e.clientX, e.clientY)
+        : typeof (renderer as { screenToGraph?: unknown }).screenToGraph === 'function'
+        ? (() => {
+            const [x, y] = renderer.screenToGraph(e.clientX, e.clientY);
+            return { x, y };
+          })()
+        : canvasPoint;
+    return {
+      targetType,
+      targetId: extra.targetId,
+      client: { x: e.clientX, y: e.clientY },
+      canvas: canvasPoint,
+      graph: graphPoint,
+      nativeEvent: e,
+      event: e,
+      ...extra,
+    };
+  };
 
   /** Combo pick tolerant of hosts without pickComboAt (e.g. test mocks). */
   const pickCombo = (e: MouseEvent): string | null =>
@@ -86,20 +118,36 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
   ): void => {
     const hit = resolveHit(e);
     if (hit.kind === 'node') {
-      emitter.emit(`node:${kind}`, { nodeId: hit.nodeId, data: hit.data, event: e });
+      emitter.emit(
+        `node:${kind}`,
+        createPayload(e, 'node', {
+          targetId: hit.nodeId,
+          nodeId: hit.nodeId,
+          data: hit.data,
+        }),
+      );
     } else if (hit.kind === 'edge') {
-      emitter.emit(`edge:${kind}`, {
-        edgeId: hit.edgeId,
-        edgeIndex: hit.edgeIndex,
-        source: hit.source,
-        target: hit.target,
-        data: hit.data,
-        event: e,
-      });
+      emitter.emit(
+        `edge:${kind}`,
+        createPayload(e, 'edge', {
+          targetId: hit.edgeId,
+          edgeId: hit.edgeId,
+          edgeIndex: hit.edgeIndex,
+          source: hit.source,
+          target: hit.target,
+          data: hit.data,
+        }),
+      );
     } else if (hit.kind === 'combo' && kind !== 'wheel') {
-      emitter.emit(`combo:${kind}`, { comboId: hit.comboId, event: e });
+      emitter.emit(
+        `combo:${kind}`,
+        createPayload(e, 'combo', {
+          targetId: hit.comboId,
+          comboId: hit.comboId,
+        }),
+      );
     } else {
-      emitter.emit(`canvas:${kind}`, { event: e });
+      emitter.emit(`canvas:${kind}`, createPayload(e, 'canvas'));
     }
   };
 
@@ -110,18 +158,27 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
     if (lastHover.kind === 'node') {
       const idx = renderer.getNodeIdToIndex().get(lastHover.id);
       const node = idx !== undefined ? renderer.getNodes()[idx] : undefined;
-      emitter.emit('node:pointerleave', { nodeId: lastHover.id, data: node?.data, event: e });
+      const payload = createPayload(e, 'node', {
+        targetId: lastHover.id,
+        nodeId: lastHover.id,
+        data: node?.data,
+      });
+      emitter.emit('node:pointerleave', payload);
     } else {
       const edge = renderer.getEdges()[lastHover.index];
       if (edge) {
-        emitter.emit('edge:pointerleave', {
-          edgeId: (edge as { id?: string }).id ?? String(lastHover.index),
-          edgeIndex: lastHover.index,
-          source: edge.source,
-          target: edge.target,
-          data: edge.data,
-          event: e,
-        });
+        const edgeId = (edge as { id?: string }).id ?? String(lastHover.index);
+        emitter.emit(
+          'edge:pointerleave',
+          createPayload(e, 'edge', {
+            targetId: edgeId,
+            edgeId,
+            edgeIndex: lastHover.index,
+            source: edge.source,
+            target: edge.target,
+            data: edge.data,
+          }),
+        );
       }
     }
     lastHover = null;
@@ -134,10 +191,23 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
       const same = lastHover?.kind === 'node' && lastHover.id === hit.nodeId;
       if (!same) {
         emitLeave(e);
-        emitter.emit('node:pointerover', { nodeId: hit.nodeId, data: hit.data, event: e });
+        const payload = createPayload(e, 'node', {
+          targetId: hit.nodeId,
+          nodeId: hit.nodeId,
+          data: hit.data,
+        });
+        emitter.emit('node:pointerover', payload);
+        emitter.emit('node:pointerenter', payload);
         lastHover = { kind: 'node', id: hit.nodeId };
       }
-      emitter.emit('node:pointermove', { nodeId: hit.nodeId, data: hit.data, event: e });
+      emitter.emit(
+        'node:pointermove',
+        createPayload(e, 'node', {
+          targetId: hit.nodeId,
+          nodeId: hit.nodeId,
+          data: hit.data,
+        }),
+      );
       return;
     }
 
@@ -145,30 +215,35 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
       const same = lastHover?.kind === 'edge' && lastHover.id === hit.edgeId;
       if (!same) {
         emitLeave(e);
-        emitter.emit('edge:pointerover', {
+        const payload = createPayload(e, 'edge', {
+          targetId: hit.edgeId,
           edgeId: hit.edgeId,
           edgeIndex: hit.edgeIndex,
           source: hit.source,
           target: hit.target,
           data: hit.data,
-          event: e,
         });
+        emitter.emit('edge:pointerover', payload);
+        emitter.emit('edge:pointerenter', payload);
         lastHover = { kind: 'edge', id: hit.edgeId, index: hit.edgeIndex };
       }
-      emitter.emit('edge:pointermove', {
-        edgeId: hit.edgeId,
-        edgeIndex: hit.edgeIndex,
-        source: hit.source,
-        target: hit.target,
-        data: hit.data,
-        event: e,
-      });
+      emitter.emit(
+        'edge:pointermove',
+        createPayload(e, 'edge', {
+          targetId: hit.edgeId,
+          edgeId: hit.edgeId,
+          edgeIndex: hit.edgeIndex,
+          source: hit.source,
+          target: hit.target,
+          data: hit.data,
+        }),
+      );
       return;
     }
 
     // combo or canvas background — leave any hovered element
     emitLeave(e);
-    emitter.emit('canvas:pointermove', { event: e });
+    emitter.emit('canvas:pointermove', createPayload(e, 'canvas'));
   };
 
   const onMouseLeave = (e: MouseEvent): void => {
@@ -177,8 +252,18 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
 
   // --- Press / click / wheel ----------------------------------------------
 
-  const onMouseDown = (e: MouseEvent): void => dispatchHit(e, 'pointerdown');
-  const onClick = (e: MouseEvent): void => dispatchHit(e, 'click');
+  const onMouseDown = (e: MouseEvent): void => {
+    pressStart = { x: e.clientX, y: e.clientY };
+    suppressNextClick = false;
+    dispatchHit(e, 'pointerdown');
+  };
+  const onClick = (e: MouseEvent): void => {
+    if (suppressNextClick) {
+      suppressNextClick = false;
+      return;
+    }
+    dispatchHit(e, 'click');
+  };
   const onDblClick = (e: MouseEvent): void => dispatchHit(e, 'dblclick');
   const onContextMenu = (e: MouseEvent): void => {
     e.preventDefault();
@@ -186,7 +271,12 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
   };
   const onWheel = (e: WheelEvent): void => dispatchHit(e, 'wheel');
   const onMouseUp = (e: MouseEvent): void => {
-    emitter.emit('canvas:pointerup', { event: e });
+    if (pressStart) {
+      suppressNextClick =
+        Math.hypot(e.clientX - pressStart.x, e.clientY - pressStart.y) > clickThreshold;
+      pressStart = null;
+    }
+    emitter.emit('canvas:pointerup', createPayload(e, 'canvas'));
   };
 
   canvas.addEventListener('mousemove', onMouseMove);

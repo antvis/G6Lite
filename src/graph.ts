@@ -4,10 +4,16 @@
  * P4: EventEmitter for interaction events, GPU-picking behaviors, drag-node support.
  */
 
-import { registerBehaviors } from './behaviors/index.js';
+import { registerBehaviors, resolveBehaviorOptions } from './behaviors/index.js';
 import type { InternalEdge, InternalNode } from './dataModel.js';
 import { DataModel } from './dataModel.js';
 import { EventEmitter } from './events.js';
+import type { PluginExtension, TransformExtension } from './extensions/contracts.js';
+import {
+  createExtension,
+  createExtensionContext,
+  safeExtensionCall,
+} from './extensions/registry.js';
 import { attachInteraction } from './interaction/dispatcher.js';
 import { runLayout } from './layout/index.js';
 import { terminateLayoutWorker } from './layout/workerLayout.js';
@@ -25,14 +31,20 @@ import {
 } from './transforms/processParallelEdges.js';
 import type {
   ComboData,
+  EdgeDataUpdate,
   ElementState,
+  FitViewOptions,
   GraphData,
   GraphEdge,
   GraphOptions,
   InternalCombo,
   LayoutConfig,
   LayoutNode,
+  NodeDataUpdate,
+  NodePositionUpdate,
+  SetDataOptions,
   ThemeOption,
+  ZoomOptions,
 } from './types.js';
 
 /** Result of a pick operation at screen coordinates. */
@@ -56,6 +68,8 @@ export class Graph {
   private scheduler: RenderScheduler | null = null;
   private behaviorTeardown: (() => void) | null = null;
   private interactionTeardown: (() => void) | null = null;
+  private pluginTeardowns: Array<() => void> = [];
+  private transformInstances = new Map<string, TransformExtension>();
   private resizeObserver: ResizeObserver | null = null;
   private layoutNodes: LayoutNode[] = [];
   private initialCamera: Camera | null = null;
@@ -64,9 +78,20 @@ export class Graph {
   private comboBeforeDrawRegistered = false;
   /** Whether render() has been called at least once. */
   private initialized = false;
+  private _destroyed = false;
+  private layoutGeneration = 0;
+  private layoutAbortController: AbortController | null = null;
 
   /** Event emitter for interaction events (node:click, node:hover, node:drag, etc.) */
   readonly eventEmitter = new EventEmitter();
+
+  get destroyed(): boolean {
+    return this._destroyed;
+  }
+
+  isDestroyed(): boolean {
+    return this._destroyed;
+  }
 
   constructor(options: GraphOptions) {
     this.options = options;
@@ -89,8 +114,92 @@ export class Graph {
     processParallelEdges(this.dataModel.getEdges() as InternalEdge[], config);
   }
 
+  private applyRegisteredTransforms(data: GraphData): GraphData {
+    let transformed = data;
+    for (const option of this.options.transforms ?? []) {
+      const name = typeof option === 'string' ? option : option.type;
+      if (name === 'process-parallel-edges') continue;
+      let extension = this.transformInstances.get(name);
+      const isNew = !extension;
+      if (!extension) {
+        extension = createExtension<TransformExtension>('transform', name);
+        if (extension) this.transformInstances.set(name, extension);
+      }
+      if (!extension?.beforeRender) continue;
+      const config = typeof option === 'string' ? {} : option.options ?? {};
+      if (isNew) {
+        safeExtensionCall(
+          'transform',
+          name,
+          'init',
+          () => extension!.init?.(createExtensionContext(this), config as Record<string, unknown>),
+          undefined,
+        );
+      } else {
+        safeExtensionCall(
+          'transform',
+          name,
+          'update',
+          () => extension!.update?.(config as Record<string, unknown>),
+          undefined,
+        );
+      }
+      transformed = safeExtensionCall(
+        'transform',
+        name,
+        'beforeRender',
+        () => extension.beforeRender!(transformed),
+        transformed,
+      );
+    }
+    return transformed;
+  }
+
+  private mountPlugins(): void {
+    this.pluginTeardowns.forEach((teardown) => teardown());
+    this.pluginTeardowns = [];
+    for (const option of this.options.plugins ?? []) {
+      const extension = createExtension<PluginExtension>('plugin', option.type);
+      if (!extension) continue;
+      safeExtensionCall(
+        'plugin',
+        option.type,
+        'init',
+        () => extension.init?.(createExtensionContext(this), option),
+        undefined,
+      );
+      safeExtensionCall(
+        'plugin',
+        option.type,
+        'mount',
+        () => extension.mount?.(this.containerEl),
+        undefined,
+      );
+      this.pluginTeardowns.push(() =>
+        safeExtensionCall('plugin', option.type, 'destroy', () => extension.destroy?.(), undefined),
+      );
+    }
+  }
+
+  private async executeLayout(data: GraphData, layout: LayoutConfig) {
+    this.layoutAbortController?.abort();
+    const controller = new AbortController();
+    this.layoutAbortController = controller;
+    try {
+      return await runLayout(data, layout, this.getViewport(), {
+        signal: controller.signal,
+        extensionContext: createExtensionContext(this),
+      });
+    } finally {
+      if (this.layoutAbortController === controller) this.layoutAbortController = null;
+    }
+  }
+
   async render(): Promise<void> {
-    const { data, node, edge, layout, behaviors, theme } = this.options;
+    if (this._destroyed) return;
+    const generation = ++this.layoutGeneration;
+    const { node, edge, layout, behaviors, theme } = this.options;
+    const data = this.applyRegisteredTransforms(this.options.data);
     const themeTokens = resolveTheme((theme as ThemeOption) ?? 'light');
 
     // First, set up canvas with correct dimensions before any drawing.
@@ -117,12 +226,15 @@ export class Graph {
         layout.worker = true;
       }
 
+      this.eventEmitter.emit('beforelayout', { nodeCount: data.nodes.length });
       this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
       const t0 = performance.now();
-      const result = await runLayout(data, layout, this.getViewport());
+      const result = await this.executeLayout(data, layout);
+      if (this._destroyed || generation !== this.layoutGeneration) return;
       const duration = performance.now() - t0;
       this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
-      nodes = result.nodes;
+      this.eventEmitter.emit('afterlayout', { duration, nodeCount: data.nodes.length });
+      nodes = applyFixedPositions(result.nodes, data.nodes);
     }
     this.layoutNodes = nodes as LayoutNode[];
 
@@ -197,10 +309,11 @@ export class Graph {
     this.interactionTeardown?.();
     this.interactionTeardown = attachInteraction(this.renderer, this);
 
-    if (behaviors?.length) {
-      this.behaviorTeardown?.();
-      this.behaviorTeardown = registerBehaviors(this.renderer, behaviors, this);
-    }
+    const resolvedBehaviors = resolveBehaviorOptions(behaviors);
+    this.behaviorTeardown?.();
+    this.behaviorTeardown = resolvedBehaviors.length
+      ? registerBehaviors(this.renderer, resolvedBehaviors, this)
+      : null;
 
     // Initialize combo renderer (Canvas2D underlay for combo backgrounds)
     if (this.dataModel.hasCombos()) {
@@ -220,7 +333,14 @@ export class Graph {
         this.options.edge,
         this.renderer.getNodeIdToIndex(),
         this.renderer.getEdgePathCache(),
+        this.dataModel?.theme,
+        (id) => this.renderer.getNodeDimensions(id),
       );
+    });
+
+    this.eventEmitter.emit('beforerender', {
+      nodeCount: nodes.length,
+      edgeCount: data.edges.length,
     });
 
     // Auto fit view
@@ -258,13 +378,25 @@ export class Graph {
     this.resizeObserver.observe(this.containerEl);
 
     this.initialized = true;
+    this.mountPlugins();
     return undefined;
   }
 
   destroy(): void {
+    if (this._destroyed) return;
+    this._destroyed = true;
+    this.layoutGeneration++;
+    this.layoutAbortController?.abort();
+    this.layoutAbortController = null;
     this.eventEmitter.emit('destroy');
     this.behaviorTeardown?.();
     this.interactionTeardown?.();
+    this.pluginTeardowns.forEach((teardown) => teardown());
+    this.pluginTeardowns = [];
+    for (const [name, extension] of this.transformInstances) {
+      safeExtensionCall('transform', name, 'destroy', () => extension.destroy?.(), undefined);
+    }
+    this.transformInstances.clear();
     this.resizeObserver?.disconnect();
     this.scheduler?.destroy();
     this.labelRenderer?.destroy();
@@ -272,6 +404,7 @@ export class Graph {
     this.renderer.destroy();
     terminateLayoutWorker();
     this.canvas.remove();
+    this.eventEmitter.removeAllListeners();
   }
 
   // ──── Camera ────
@@ -281,18 +414,22 @@ export class Graph {
   }
 
   setCamera(partial: Partial<Camera>): void {
+    if (this._destroyed) return;
     this.renderer.setCamera(partial);
     const rect = this.containerEl.getBoundingClientRect();
     this.renderer.resize(rect.width || 800, rect.height || 600);
   }
 
   resetCamera(): void {
+    if (this._destroyed) return;
     if (!this.initialCamera) return;
     this.setCamera(this.initialCamera);
   }
 
-  fitView(padding = 0.9): void {
-    const nodes = this.layoutNodes;
+  fitView(options: number | FitViewOptions = 0.9): void {
+    if (this._destroyed) return;
+    const nodes =
+      (this.dataModel?.getNodes() as unknown as LayoutNode[] | undefined) ?? this.layoutNodes;
     if (!nodes.length) return;
     let minX = Infinity,
       maxX = -Infinity,
@@ -311,20 +448,95 @@ export class Graph {
       this.canvas.width || (this.containerEl.clientWidth || 800) * (window.devicePixelRatio ?? 1);
     const viewH =
       this.canvas.height || (this.containerEl.clientHeight || 600) * (window.devicePixelRatio ?? 1);
-    const scaleX = viewW / graphW;
-    const scaleY = viewH / graphH;
-    const zoom = Math.min(scaleX, scaleY) * padding;
+    const dpr = Math.min(2, window.devicePixelRatio ?? 1);
+    const legacyScale = typeof options === 'number' ? options : 1;
+    const padding = typeof options === 'number' ? 0 : options.padding ?? 0;
+    const [pt, pr, pb, pl] = Array.isArray(padding)
+      ? padding
+      : [padding, padding, padding, padding];
+    const availableW = Math.max(1, viewW - (pl + pr) * dpr);
+    const availableH = Math.max(1, viewH - (pt + pb) * dpr);
+    const scaleX = availableW / graphW;
+    const scaleY = availableH / graphH;
+    const rawZoom = Math.min(scaleX, scaleY) * legacyScale;
+    const minZoom = typeof options === 'number' ? 0.1 : options.minZoom ?? 0.1;
+    const maxZoom = typeof options === 'number' ? 20 : options.maxZoom ?? 20;
+    const zoom = Math.max(minZoom, Math.min(maxZoom, rawZoom));
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
-    const camX = viewW / (2 * zoom) - centerX;
-    const camY = viewH / (2 * zoom) - centerY;
+    const targetX = (pl * dpr + availableW / 2) / zoom;
+    const targetY = (pt * dpr + availableH / 2) / zoom;
+    const camX = targetX - centerX;
+    const camY = targetY - centerY;
     this.renderer.setCamera({ zoom, x: camX, y: camY });
+  }
+
+  setSize(width: number, height: number): void {
+    if (this._destroyed) return;
+    this.renderer.resize(width, height);
+    this.eventEmitter.emit('resize', { width, height });
+  }
+
+  getZoom(): number {
+    return this.renderer.getCamera().zoom;
+  }
+
+  zoomTo(zoom: number, options: ZoomOptions = {}): void {
+    if (this._destroyed) return;
+    const minZoom = options.minZoom ?? 0.1;
+    const maxZoom = options.maxZoom ?? 20;
+    const nextZoom = Math.max(minZoom, Math.min(maxZoom, zoom));
+    const rect = this.canvas.getBoundingClientRect();
+    const center = options.center ?? {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    };
+    const graphPoint = this.screenToGraph(center.x, center.y);
+    const dpr = Math.min(2, window.devicePixelRatio ?? 1);
+    const px = (center.x - rect.left) * dpr;
+    const py = (center.y - rect.top) * dpr;
+    this.renderer.setCamera({
+      zoom: nextZoom,
+      x: px / nextZoom - graphPoint.x,
+      y: py / nextZoom - graphPoint.y,
+    });
+  }
+
+  zoomBy(ratio: number, options?: ZoomOptions): void {
+    if (this._destroyed) return;
+    this.zoomTo(this.getZoom() * ratio, options);
+  }
+
+  fitCenter(): void {
+    if (this._destroyed) return;
+    const nodes =
+      (this.dataModel?.getNodes() as unknown as LayoutNode[] | undefined) ?? this.layoutNodes;
+    if (nodes.length === 0) return;
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity;
+    for (const node of nodes) {
+      minX = Math.min(minX, node.x);
+      maxX = Math.max(maxX, node.x);
+      minY = Math.min(minY, node.y);
+      maxY = Math.max(maxY, node.y);
+    }
+    const zoom = this.getZoom();
+    const viewW = this.canvas.width || 800;
+    const viewH = this.canvas.height || 600;
+    this.renderer.setCamera({
+      x: viewW / (2 * zoom) - (minX + maxX) / 2,
+      y: viewH / (2 * zoom) - (minY + maxY) / 2,
+    });
   }
 
   // ──── Data queries ────
 
   getLayoutNodes(): LayoutNode[] {
-    return this.layoutNodes.slice();
+    return (
+      (this.dataModel?.getNodes() as unknown as LayoutNode[] | undefined) ?? this.layoutNodes
+    ).slice();
   }
 
   getData(): GraphData {
@@ -340,10 +552,12 @@ export class Graph {
   }
 
   getNodes(): LayoutNode[] {
+    if (this._destroyed) return this.layoutNodes.slice();
     return this.renderer.getNodes();
   }
 
   getEdges(): GraphEdge[] {
+    if (this._destroyed) return this.dataModel?.toData().edges ?? [];
     return this.renderer.getEdges();
   }
 
@@ -358,6 +572,7 @@ export class Graph {
   // ──── P0: Expose existing Renderer capabilities ────
 
   pickAt(screenX: number, screenY: number): PickResult | null {
+    if (this._destroyed) return null;
     const result = this.renderer.pickAt(screenX, screenY);
     if (!result) return null;
     if (result.type === 'node') {
@@ -377,6 +592,7 @@ export class Graph {
   }
 
   setHighlight(option: { nodeIds?: Set<string>; edgeIndices?: Set<number> }): void {
+    if (this._destroyed) return;
     this.renderer.setHighlight({
       nodeIds: option.nodeIds ?? new Set(),
       edgeIndices: option.edgeIndices ?? new Set(),
@@ -384,21 +600,25 @@ export class Graph {
   }
 
   clearHighlight(): void {
+    if (this._destroyed) return;
     this.renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
   }
 
   updateData(renderData: RendererData): void {
+    if (this._destroyed) return;
     this.renderer.updateData(renderData);
     const rect = this.containerEl.getBoundingClientRect();
     this.renderer.resize(rect.width || 800, rect.height || 600);
   }
 
   screenToGraph(screenX: number, screenY: number): { x: number; y: number } {
+    if (this._destroyed) return { x: 0, y: 0 };
     const [gx, gy] = this.renderer.screenToGraph(screenX, screenY);
     return { x: gx, y: gy };
   }
 
   graphToScreen(graphX: number, graphY: number): { x: number; y: number } {
+    if (this._destroyed) return { x: 0, y: 0 };
     const rect = this.canvas.getBoundingClientRect();
     const cam = this.renderer.getCamera();
     const dpr = Math.min(2, window.devicePixelRatio ?? 1);
@@ -408,17 +628,20 @@ export class Graph {
   }
 
   scheduleRender(): void {
+    if (this._destroyed) return;
     this.renderer.scheduleRender();
   }
 
   // ──── P1: Incremental data operations ────
 
-  private ensureInitialized(): void {
+  private ensureInitialized(): boolean {
+    if (this._destroyed) return false;
     if (!this.initialized || !this.dataModel || !this.scheduler) {
       throw new Error(
         'Graph must be rendered before calling data operations. Call render() first.',
       );
     }
+    return true;
   }
 
   /**
@@ -426,7 +649,7 @@ export class Graph {
    * The node must have a unique id and x,y coordinates.
    */
   addNode(node: { id: string; x: number; y: number; data?: Record<string, unknown> }): void {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return;
     this.dataModel!.addNode(node);
     this.scheduler!.schedule();
     this.eventEmitter.emit('afteradditem', { type: 'node', id: node.id });
@@ -439,7 +662,7 @@ export class Graph {
   addNodes(
     nodes: Array<{ id: string; x: number; y: number; data?: Record<string, unknown> }>,
   ): void {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return;
     this.dataModel!.addNodes(nodes);
     this.scheduler!.schedule();
     for (const n of nodes) {
@@ -451,7 +674,7 @@ export class Graph {
    * Remove a node and all its connected edges. Triggers partial process on next frame.
    */
   removeNode(id: string): void {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return;
     this.dataModel!.removeNode(id);
     this.applyTransforms();
     this.scheduler!.schedule();
@@ -462,7 +685,7 @@ export class Graph {
    * Remove multiple nodes and their connected edges in one batch.
    */
   removeNodes(ids: string[]): void {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return;
     this.dataModel!.removeNodes(ids);
     this.applyTransforms();
     this.scheduler!.schedule();
@@ -477,21 +700,50 @@ export class Graph {
    * in the GPU buffer.
    */
   updateNodePosition(id: string, x: number, y: number): void {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return;
     this.dataModel!.updateNodePosition(id, x, y);
     this.scheduler!.schedule();
     this.eventEmitter.emit('afterupdateitem', { type: 'node', id, action: 'position' });
+  }
+
+  updateNodePositions(updates: NodePositionUpdate[]): void {
+    if (!this.ensureInitialized()) return;
+    const ids = this.dataModel!.updateNodePositions(updates);
+    this.scheduler!.schedule();
+    for (const id of ids) {
+      this.eventEmitter.emit('afterupdateitem', { type: 'node', id, action: 'position' });
+    }
   }
 
   /**
    * Update a node's custom data. May affect style if the style function depends on data.
    * Triggers partial process on next frame.
    */
-  updateNodeData(id: string, data: Record<string, unknown>): void {
-    this.ensureInitialized();
-    this.dataModel!.updateNodeData(id, data);
+  updateNodeData(id: string, data: Record<string, unknown>): void;
+  updateNodeData(updates: NodeDataUpdate[]): void;
+  updateNodeData(idOrUpdates: string | NodeDataUpdate[], data?: Record<string, unknown>): void {
+    if (!this.ensureInitialized()) return;
+    const updates =
+      typeof idOrUpdates === 'string' ? [{ id: idOrUpdates, data: data ?? {} }] : idOrUpdates;
+    const ids = this.dataModel!.updateNodeDataBatch(updates);
     this.scheduler!.schedule();
-    this.eventEmitter.emit('afterupdateitem', { type: 'node', id, action: 'data' });
+    for (const id of ids) {
+      this.eventEmitter.emit('afterupdateitem', { type: 'node', id, action: 'data' });
+    }
+  }
+
+  updateEdgeData(id: string, data: Record<string, unknown>): void;
+  updateEdgeData(updates: EdgeDataUpdate[]): void;
+  updateEdgeData(idOrUpdates: string | EdgeDataUpdate[], data?: Record<string, unknown>): void {
+    if (!this.ensureInitialized()) return;
+    const updates =
+      typeof idOrUpdates === 'string' ? [{ id: idOrUpdates, data: data ?? {} }] : idOrUpdates;
+    const ids = this.dataModel!.updateEdgeDataBatch(updates);
+    this.applyTransforms();
+    this.scheduler!.schedule();
+    for (const id of ids) {
+      this.eventEmitter.emit('afterupdateitem', { type: 'edge', id, action: 'data' });
+    }
   }
 
   /**
@@ -504,7 +756,7 @@ export class Graph {
     data?: Record<string, unknown>;
     states?: ElementState[];
   }): string {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return '';
     const id = this.dataModel!.addEdge(edge);
     this.applyTransforms();
     this.scheduler!.schedule();
@@ -529,7 +781,7 @@ export class Graph {
       states?: ElementState[];
     }>,
   ): string[] {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return [];
     const ids = this.dataModel!.addEdges(edges);
     this.applyTransforms();
     this.scheduler!.schedule();
@@ -548,7 +800,7 @@ export class Graph {
    * Remove an edge by its auto-generated ID.
    */
   removeEdge(id: string): void {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return;
     this.dataModel!.removeEdge(id);
     this.applyTransforms();
     this.scheduler!.schedule();
@@ -559,7 +811,7 @@ export class Graph {
    * Remove multiple edges by their IDs.
    */
   removeEdges(ids: string[]): void {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return;
     this.dataModel!.removeEdges(ids);
     this.applyTransforms();
     this.scheduler!.schedule();
@@ -576,7 +828,7 @@ export class Graph {
    * Triggers partial process on next frame to re-resolve styles.
    */
   setItemState(id: string, state: ElementState, value: boolean): void {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return;
     // Try node first, then edge
     if (this.dataModel!.hasNode(id)) {
       this.dataModel!.setNodeState(id, state, value);
@@ -598,7 +850,7 @@ export class Graph {
    * Clear all states on a node or edge.
    */
   clearItemStates(id: string): void {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return;
     if (this.dataModel!.hasNode(id)) {
       this.dataModel!.clearNodeStates(id);
       this.scheduler!.schedule();
@@ -638,6 +890,29 @@ export class Graph {
    */
   hasNode(id: string): boolean {
     return this.dataModel?.hasNode(id) ?? false;
+  }
+
+  hasEdge(id: string): boolean {
+    return this.dataModel?.hasEdge(id) ?? false;
+  }
+
+  hasElement(id: string): boolean {
+    return Boolean(
+      this.dataModel?.hasNode(id) || this.dataModel?.hasEdge(id) || this.dataModel?.hasCombo(id),
+    );
+  }
+
+  getElementData(id: string): InternalNode | InternalEdge | InternalCombo | undefined {
+    return (
+      this.dataModel?.getNode(id) ?? this.dataModel?.getEdge(id) ?? this.dataModel?.getCombo(id)
+    );
+  }
+
+  getElementPosition(id: string): { x: number; y: number } | null {
+    const node = this.dataModel?.getNode(id);
+    if (node) return { x: node.x, y: node.y };
+    const combo = this.dataModel?.getCombo(id);
+    return combo ? { x: combo.x, y: combo.y } : null;
   }
 
   /**
@@ -695,6 +970,7 @@ export class Graph {
    * Force a full re-render. Use sparingly — the scheduler handles this automatically.
    */
   refresh(): void {
+    if (this._destroyed) return;
     if (!this.scheduler) return;
     this.scheduler.forceFlush(RefreshLevel.FULL_PROCESS);
   }
@@ -703,6 +979,7 @@ export class Graph {
 
   /** Subscribe to an event. */
   on(event: string, handler: (...args: any[]) => void): void {
+    if (this._destroyed) return;
     this.eventEmitter.on(event, handler);
   }
 
@@ -713,6 +990,7 @@ export class Graph {
 
   /** Subscribe to an event once. */
   once(event: string, handler: (...args: any[]) => void): void {
+    if (this._destroyed) return;
     this.eventEmitter.once(event, handler);
   }
 
@@ -721,27 +999,38 @@ export class Graph {
   /**
    * Replace all graph data at runtime. Runs layout if configured, then triggers full re-render.
    */
-  async setData(data: GraphData): Promise<void> {
-    this.ensureInitialized();
+  async setData(data: GraphData, options: SetDataOptions = {}): Promise<void> {
+    if (this._destroyed) return;
+    if (!this.ensureInitialized()) return;
+    const generation = ++this.layoutGeneration;
+    data = this.applyRegisteredTransforms(data);
     let nodes = data.nodes.map((n) => ({ ...n, x: n.x ?? 0, y: n.y ?? 0 }));
     const layout = this.options.layout;
     if (layout && data.nodes.length > 0) {
+      this.eventEmitter.emit('beforelayout', { nodeCount: data.nodes.length });
       this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
       const t0 = performance.now();
-      const result = await runLayout(data, layout, this.getViewport());
+      const result = await this.executeLayout(data, layout);
+      if (this._destroyed || generation !== this.layoutGeneration) return;
       const duration = performance.now() - t0;
       this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
-      nodes = result.nodes;
+      this.eventEmitter.emit('afterlayout', { duration, nodeCount: data.nodes.length });
+      nodes = applyFixedPositions(result.nodes, data.nodes);
     }
     this.layoutNodes = nodes as LayoutNode[];
     this.dataModel!.replaceData(nodes as any[], data.edges as any[]);
+    this.layoutNodes = this.dataModel!.getNodes() as unknown as LayoutNode[];
     if (data.combos?.length) {
       this.dataModel!.initCombos(data.combos, data.nodes);
       this.ensureComboRenderer();
     }
     this.applyTransforms();
     this.options.data = data;
-    this.fitView();
+    if (options.fitView !== false) {
+      this.fitView(
+        options.fitView === true || options.fitView === undefined ? 0.9 : options.fitView,
+      );
+    }
     this.scheduler!.schedule();
     this.eventEmitter.emit('datachange', {
       nodeCount: nodes.length,
@@ -754,12 +1043,20 @@ export class Graph {
    * Triggers a full re-process to apply new styles.
    */
   updateOptions(opts: Partial<Pick<GraphOptions, 'node' | 'edge' | 'theme'>>): void {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return;
     if (opts.node) {
+      const previousStyle = this.options.node?.style;
+      const nextStyle = opts.node.style;
+      const mergedStyle =
+        nextStyle === undefined
+          ? previousStyle
+          : typeof nextStyle === 'function' || typeof previousStyle === 'function'
+          ? nextStyle
+          : { ...previousStyle, ...nextStyle };
       this.options.node = {
         ...this.options.node,
         ...opts.node,
-        style: { ...this.options.node?.style, ...opts.node.style },
+        style: mergedStyle,
       };
     }
     if (opts.edge) {
@@ -784,6 +1081,7 @@ export class Graph {
    * Set the layout configuration. Does not execute layout — call layout() after.
    */
   setLayout(config: LayoutConfig): void {
+    if (this._destroyed) return;
     this.options.layout = config;
   }
 
@@ -791,24 +1089,39 @@ export class Graph {
    * Execute the current layout algorithm and update node positions.
    */
   async layout(): Promise<void> {
-    this.ensureInitialized();
+    if (this._destroyed) return;
+    if (!this.ensureInitialized()) return;
+    const generation = ++this.layoutGeneration;
     const layout = this.options.layout;
     if (!layout) return;
     const data = this.toData();
     if (data.nodes.length === 0) return;
+    this.eventEmitter.emit('beforelayout', { nodeCount: data.nodes.length });
     this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
     const t0 = performance.now();
-    const result = await runLayout(data, layout, this.getViewport());
+    const result = await this.executeLayout(data, layout);
+    if (this._destroyed || generation !== this.layoutGeneration) return;
     const duration = performance.now() - t0;
     this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
-    this.layoutNodes = result.nodes as LayoutNode[];
-    this.dataModel!.replaceData(result.nodes as any[], data.edges as any[]);
+    this.eventEmitter.emit('afterlayout', { duration, nodeCount: data.nodes.length });
+    const nodes = applyFixedPositions(result.nodes, data.nodes);
+    this.layoutNodes = nodes as LayoutNode[];
+    this.dataModel!.replaceData(nodes as any[], data.edges as any[]);
+    this.layoutNodes = this.dataModel!.getNodes() as unknown as LayoutNode[];
     if (data.combos?.length) {
       this.dataModel!.initCombos(data.combos, data.nodes);
       this.ensureComboRenderer();
     }
     this.applyTransforms();
     this.scheduler!.schedule();
+  }
+
+  cancelLayout(): void {
+    if (this._destroyed) return;
+    this.layoutGeneration++;
+    this.layoutAbortController?.abort();
+    this.layoutAbortController = null;
+    terminateLayoutWorker();
   }
 
   /**
@@ -831,7 +1144,7 @@ export class Graph {
    * Set states on multiple items in a single batch, triggering only one render.
    */
   batchSetState(items: Array<{ id: string; state: ElementState; value: boolean }>): void {
-    this.ensureInitialized();
+    if (!this.ensureInitialized()) return;
     for (const { id, state, value } of items) {
       if (this.dataModel!.hasNode(id)) {
         this.dataModel!.setNodeState(id, state, value);
@@ -843,6 +1156,31 @@ export class Graph {
     }
     this.scheduler!.schedule();
     this.renderer.scheduleRender();
+  }
+
+  setElementStates(id: string, states: ElementState[]): void;
+  setElementStates(stateMap: Record<string, ElementState[]>): void;
+  setElementStates(
+    idOrMap: string | Record<string, ElementState[]>,
+    states?: ElementState[],
+  ): void {
+    if (!this.ensureInitialized()) return;
+    const entries =
+      typeof idOrMap === 'string' ? [[idOrMap, states ?? []] as const] : Object.entries(idOrMap);
+    let comboChanged = false;
+    for (const [id, nextStates] of entries) {
+      if (this.dataModel!.replaceNodeStates(id, nextStates)) continue;
+      if (this.dataModel!.replaceEdgeStates(id, nextStates)) continue;
+      if (this.dataModel!.hasCombo(id)) {
+        this.dataModel!.clearComboStates(id);
+        for (const state of nextStates) {
+          if (state !== 'default') this.dataModel!.setComboState(id, state, true);
+        }
+        comboChanged = true;
+      }
+    }
+    this.scheduler!.schedule();
+    if (comboChanged) this.renderer.scheduleRender();
   }
 
   /**
@@ -877,7 +1215,7 @@ export class Graph {
    * Move the viewport to center on the specified node(s).
    */
   focusItem(id: string | string[], padding = 20): void {
-    if (!this.dataModel) return;
+    if (this._destroyed || !this.dataModel) return;
     const ids = Array.isArray(id) ? id : [id];
     let minX = Infinity,
       maxX = -Infinity,
@@ -906,7 +1244,7 @@ export class Graph {
   // ──── Combo operations ────
 
   collapseCombo(comboId: string): void {
-    if (!this.dataModel) return;
+    if (this._destroyed || !this.dataModel) return;
     const combo = this.dataModel.getCombo(comboId);
     if (!combo || combo.collapsed) return;
     this.dataModel.setComboCollapsed(comboId, true);
@@ -916,7 +1254,7 @@ export class Graph {
   }
 
   expandCombo(comboId: string): void {
-    if (!this.dataModel) return;
+    if (this._destroyed || !this.dataModel) return;
     const combo = this.dataModel.getCombo(comboId);
     if (!combo || !combo.collapsed) return;
     this.dataModel.setComboCollapsed(comboId, false);
@@ -926,7 +1264,7 @@ export class Graph {
   }
 
   toggleCombo(comboId: string): void {
-    if (!this.dataModel) return;
+    if (this._destroyed || !this.dataModel) return;
     const combo = this.dataModel.getCombo(comboId);
     if (!combo) return;
     if (combo.collapsed) {
@@ -941,13 +1279,13 @@ export class Graph {
   }
 
   setComboState(comboId: string, state: ElementState, value: boolean): void {
-    if (!this.dataModel) return;
+    if (this._destroyed || !this.dataModel) return;
     this.dataModel.setComboState(comboId, state, value);
     this.renderer.scheduleRender();
   }
 
   clearComboStates(comboId: string): void {
-    if (!this.dataModel) return;
+    if (this._destroyed || !this.dataModel) return;
     this.dataModel.clearComboStates(comboId);
     this.renderer.scheduleRender();
   }
@@ -971,7 +1309,7 @@ export class Graph {
   }
 
   addToCombo(nodeId: string, comboId: string): void {
-    if (!this.dataModel) return;
+    if (this._destroyed || !this.dataModel) return;
     const oldComboId = this.dataModel.getNodeCombo(nodeId);
     if (oldComboId) {
       this.dataModel.releaseComboHidden([nodeId], this.getCollapsedAncestorCount(oldComboId));
@@ -982,7 +1320,7 @@ export class Graph {
   }
 
   removeFromCombo(nodeId: string): void {
-    if (!this.dataModel) return;
+    if (this._destroyed || !this.dataModel) return;
     const oldComboId = this.dataModel.getNodeCombo(nodeId);
     if (oldComboId) {
       this.dataModel.releaseComboHidden([nodeId], this.getCollapsedAncestorCount(oldComboId));
@@ -992,7 +1330,7 @@ export class Graph {
   }
 
   createCombo(combo: ComboData, childNodeIds?: string[]): void {
-    if (!this.dataModel) return;
+    if (this._destroyed || !this.dataModel) return;
     this.dataModel.addCombo(combo);
     if (childNodeIds) {
       for (const nodeId of childNodeIds) {
@@ -1009,7 +1347,7 @@ export class Graph {
   }
 
   removeCombo(comboId: string): void {
-    if (!this.dataModel) return;
+    if (this._destroyed || !this.dataModel) return;
     const hiddenDepth = this.getCollapsedAncestorCount(comboId);
     if (hiddenDepth > 0) {
       this.dataModel.releaseComboHidden(this.dataModel.getComboAllNodeIds(comboId), hiddenDepth);
@@ -1020,7 +1358,7 @@ export class Graph {
 
   /** Pick a combo at screen coordinates. Returns combo ID or null. */
   pickComboAt(screenX: number, screenY: number): string | null {
-    if (!this.comboRenderer || !this.dataModel?.hasCombos()) return null;
+    if (this._destroyed || !this.comboRenderer || !this.dataModel?.hasCombos()) return null;
     const rect = this.canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     const x = (screenX - rect.left) * dpr;
@@ -1092,4 +1430,20 @@ function ensureCanvas(container: HTMLElement): HTMLCanvasElement {
     container.appendChild(canvas);
   }
   return canvas;
+}
+
+function applyFixedPositions(
+  layoutNodes: Array<{ id: string; x: number; y: number }>,
+  sourceNodes: GraphData['nodes'],
+): LayoutNode[] {
+  const sourceById = new Map(sourceNodes.map((node) => [node.id, node]));
+  return layoutNodes.map((node) => {
+    const source = sourceById.get(node.id);
+    return {
+      ...source,
+      ...node,
+      x: source?.fx ?? node.x,
+      y: source?.fy ?? node.y,
+    } as LayoutNode;
+  });
 }

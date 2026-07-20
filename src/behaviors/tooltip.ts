@@ -48,6 +48,8 @@ export interface TooltipOptions {
   delay?: number;
   /** Overlay class name. Default: 'g6lite-tooltip'. */
   className?: string;
+  /** DOM mount and collision boundary. Defaults to document.body. */
+  container?: HTMLElement;
 }
 
 type NodePayload = { nodeId: string; data?: Record<string, unknown>; event: MouseEvent };
@@ -78,6 +80,7 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
   const [offsetX, offsetY] = options?.offset ?? [10, 10];
   const delay = options?.delay ?? 80;
   const className = options?.className ?? 'g6lite-tooltip';
+  const container = options?.container ?? document.body;
 
   let el: HTMLDivElement | null = null;
   let showTimer: ReturnType<typeof setTimeout> | null = null;
@@ -94,7 +97,7 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
     div.style.visibility = 'hidden';
     div.style.top = '0';
     div.style.left = '0';
-    document.body.appendChild(div);
+    container.appendChild(div);
     el = div;
     return div;
   };
@@ -114,14 +117,21 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
 
   /** Position the overlay near the pointer, flipping at the viewport edges. */
   const place = (event: MouseEvent, target: HTMLDivElement): void => {
-    const { innerWidth, innerHeight } = window;
+    const boundary =
+      container === document.body
+        ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight }
+        : container.getBoundingClientRect();
     const rect = target.getBoundingClientRect();
     let x = event.clientX + offsetX;
     let y = event.clientY + offsetY;
-    if (x + rect.width > innerWidth) x = event.clientX - offsetX - rect.width;
-    if (y + rect.height > innerHeight) y = event.clientY - offsetY - rect.height;
-    target.style.left = `${Math.max(0, x)}px`;
-    target.style.top = `${Math.max(0, y)}px`;
+    if (x + rect.width > boundary.right) x = event.clientX - offsetX - rect.width;
+    if (y + rect.height > boundary.bottom) y = event.clientY - offsetY - rect.height;
+    x = Math.max(boundary.left, x);
+    y = Math.max(boundary.top, y);
+    const localX = container === document.body ? x : x - boundary.left + container.scrollLeft;
+    const localY = container === document.body ? y : y - boundary.top + container.scrollTop;
+    target.style.left = `${localX}px`;
+    target.style.top = `${localY}px`;
   };
 
   const show = (ctx: TooltipContext): void => {
@@ -168,10 +178,10 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
     showTimer = setTimeout(() => show(edgeCtx(p)), delay);
   };
   const onNodeMove = (p: NodePayload): void => {
-    if (el && el.style.visibility === 'visible') place(p.event, el);
+    if (el && el.style.visibility === 'visible') show(nodeCtx(p));
   };
   const onEdgeMove = (p: EdgePayload): void => {
-    if (el && el.style.visibility === 'visible') place(p.event, el);
+    if (el && el.style.visibility === 'visible') show(edgeCtx(p));
   };
 
   // --- Click trigger -------------------------------------------------------

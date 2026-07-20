@@ -2,7 +2,7 @@
  * Lightweight typed event emitter.
  */
 
-type Handler = (...args: any[]) => void;
+export type Handler = (...args: any[]) => void;
 
 export class EventEmitter {
   private _handlers = new Map<string, Set<Handler>>();

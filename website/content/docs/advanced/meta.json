@@ -5,6 +5,7 @@
     "parallel-edges",
     "custom-node",
     "custom-label-renderer",
+    "extensions",
     "g6-v5-migration"
   ]
 }

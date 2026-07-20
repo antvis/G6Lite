@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { DataModel } from '../dataModel.js';
-import { createQuadraticPath, findPathBoundarySample } from '../renderer/edgePath.js';
+import {
+  createQuadraticPath,
+  findPathBoundarySample,
+  sampleEdgePath,
+} from '../renderer/edgePath.js';
 import { encodeId } from '../renderer/picking.js';
 import { Renderer } from '../renderer/renderer.js';
 import { analyzeEdgeConfig, analyzeNodeConfig } from '../renderer/style.js';
@@ -150,6 +154,59 @@ describe('Renderer — data pipeline', () => {
 
     expect(renderer.getNodes()).toHaveLength(3);
     expect(renderer.getEdges()).toHaveLength(2);
+  });
+
+  it('writes appended nodes when renderer and DataModel share the same array', () => {
+    const dm = new DataModel({ theme });
+    dm.addNode({ id: 'a', x: 1, y: 2 });
+    dm.getChanges();
+    renderer.setData(rendererData(dm.getNodes() as any, dm.getEdges() as any));
+    renderer.draw();
+
+    dm.addNode({ id: 'b', x: 30, y: 40 });
+    renderer.partialProcess(dm, ['b'], []);
+
+    const program = (renderer as any).activeNodeProgram;
+    expect(program.itemCount).toBe(2);
+    expect(Array.from(program.array.slice(15, 17))).toEqual([30, 40]);
+  });
+
+  it('caches the rendered cubic path for self-loop labels', () => {
+    renderer.setData(
+      rendererData([{ id: 'a', x: 0, y: 0 }], [{ id: 'loop', source: 'a', target: 'a' }]),
+    );
+    renderer.draw();
+
+    const path = renderer.getEdgePathCache().get(0);
+    expect(path?.type).toBe('cubic');
+    expect(sampleEdgePath(path!, 0.5).point).not.toEqual({ x: 0, y: 0 });
+  });
+
+  it('keeps non-highlighted edges visible with the same dim strength as nodes', () => {
+    renderer.setData(
+      rendererData(
+        [
+          { id: 'a', x: 0, y: 0 },
+          { id: 'b', x: 100, y: 0 },
+          { id: 'c', x: 200, y: 0 },
+        ],
+        [
+          { source: 'a', target: 'b' },
+          { source: 'b', target: 'c' },
+        ],
+      ),
+    );
+    renderer.draw();
+
+    renderer.setHighlight({ nodeIds: new Set(['a', 'b']), edgeIndices: new Set([0]) });
+    renderer.draw();
+
+    const program = (renderer as any).activeEdgeProgram;
+    const secondEdgeOffset = 2 * 16;
+    expect(program.array[secondEdgeOffset + 9]).toBeCloseTo(0.9);
+    expect(program.array[secondEdgeOffset + 10]).toBeCloseTo(0.9196, 3);
+    expect(program.array[secondEdgeOffset + 11]).toBeCloseTo(0.9549, 3);
+    expect(program.array[secondEdgeOffset + 12]).toBeCloseTo(0.25);
   });
 
   it('builds an id→index map covering every node', () => {

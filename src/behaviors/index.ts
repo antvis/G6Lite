@@ -7,8 +7,15 @@
  * When both highlight-node and highlight-edge are used, one combined hover handler runs (edge takes precedence).
  */
 
+import type { BehaviorExtension } from '../extensions/contracts.js';
+import {
+  createExtension,
+  createExtensionContext,
+  safeExtensionCall,
+} from '../extensions/registry.js';
 import type { Graph } from '../graph.js';
 import type { Renderer } from '../renderer/renderer.js';
+import type { BehaviorOption } from '../types.js';
 import { brushSelect } from './brushSelect.js';
 import { clickSelect } from './clickSelect.js';
 import { dragCanvas } from './dragCanvas.js';
@@ -43,7 +50,11 @@ type BehaviorFactory = (renderer: Renderer, graph: Graph, config?: BehaviorConfi
 
 const BEHAVIORS: Record<string, BehaviorFactory> = {
   'zoom-canvas': (r) => zoomCanvas(r),
-  'drag-canvas': (r, g) => dragCanvas(r, g),
+  'drag-canvas': (r, g, config) =>
+    dragCanvas(r, g, {
+      ignoreModifierKeys:
+        typeof config?.ignoreModifierKeys === 'boolean' ? config.ignoreModifierKeys : undefined,
+    }),
   'highlight-node': (r, g) => highlightNode(r, g),
   'highlight-edge': (r, g) => highlightEdge(r, g),
   'drag-node': (r, g) => dragNode(r, g),
@@ -56,6 +67,16 @@ const BEHAVIORS: Record<string, BehaviorFactory> = {
     lassoSelect(r, g, config?.key ? { key: config.key as 'shift' | 'ctrl' | null } : undefined),
   tooltip: (r, g, config) => tooltip(r, g, config as any),
 };
+
+export const DEFAULT_BEHAVIORS: readonly BehaviorName[] = ['zoom-canvas', 'drag-canvas'];
+
+/**
+ * Default viewport navigation is enabled only when behaviors is omitted.
+ * An explicit array, including an empty one, is treated as the complete list.
+ */
+export function resolveBehaviorOptions(behaviors?: BehaviorOption[]): BehaviorOption[] {
+  return behaviors === undefined ? [...DEFAULT_BEHAVIORS] : behaviors;
+}
 
 export function registerBehaviors(
   renderer: Renderer,
@@ -79,6 +100,30 @@ export function registerBehaviors(
     const fn = BEHAVIORS[name];
     if (fn) {
       teardowns.push(fn(renderer, graph as Graph, config));
+      continue;
+    }
+    const extension = createExtension<BehaviorExtension>('behavior', name);
+    if (extension && graph) {
+      const context = createExtensionContext(graph);
+      safeExtensionCall(
+        'behavior',
+        name,
+        'init',
+        () => extension.init?.(context, config ?? {}),
+        undefined,
+      );
+      const events = safeExtensionCall(
+        'behavior',
+        name,
+        'getEvents',
+        () => extension.getEvents(),
+        {},
+      );
+      for (const [event, handler] of Object.entries(events)) graph.on(event, handler);
+      teardowns.push(() => {
+        for (const [event, handler] of Object.entries(events)) graph.off(event, handler);
+        safeExtensionCall('behavior', name, 'destroy', () => extension.destroy?.(), undefined);
+      });
     }
   }
 

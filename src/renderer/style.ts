@@ -7,6 +7,7 @@
  * - Dynamic configs fall back to per-node resolution
  */
 
+import { getEdgeExtension } from '../extensions/edge.js';
 import { getNodeExtension } from '../extensions/node.js';
 import type { EdgeConfig, GraphEdge, GraphNode, NodeConfig, ThemeTokens } from '../types.js';
 import { parseColor } from './color.js';
@@ -110,30 +111,6 @@ function getArrowSize(lineWidth: number): number {
   return Math.round(lineWidth * 2.5);
 }
 
-// Scratch objects reused across calls — callers must NOT store references
-const _nodeScratch: ResolvedNodeStyle = {
-  fill: '',
-  size: 0,
-  width: 0,
-  height: 0,
-  stroke: '',
-  strokeWidth: 0,
-  opacity: 1,
-  borderRadius: 0,
-  haloWidth: 0,
-};
-const _edgeScratch: ResolvedEdgeStyle = {
-  stroke: '',
-  lineWidth: 0,
-  curvature: 0,
-  curveOffset: 60,
-  endArrow: false,
-  startArrow: false,
-  arrowSize: 10,
-  lineDash: [],
-  opacity: 1,
-  radius: 0,
-};
 const _emptyDash: number[] = [];
 
 /**
@@ -203,6 +180,11 @@ export function analyzeNodeConfig(config: NodeConfig | undefined, theme: ThemeTo
  */
 export function analyzeEdgeConfig(config: EdgeConfig | undefined, theme: ThemeTokens): void {
   if (!config) return;
+
+  if (getEdgeExtension(config.type)) {
+    edgeConfigCache.set(config, { styleType: 'dynamic' });
+    return;
+  }
 
   // If style is a function, it's definitely dynamic
   if (typeof config.style === 'function') {
@@ -300,18 +282,19 @@ export function resolveNodeStyle(
       }
     }
 
-    _nodeScratch.fill = fill;
-    _nodeScratch.fillRGB = base.fillRGB; // Use pre-parsed color
-    _nodeScratch.size = base.size;
-    _nodeScratch.width = base.width;
-    _nodeScratch.height = base.height;
-    _nodeScratch.stroke = stroke;
-    _nodeScratch.strokeRGB = base.strokeRGB; // Use pre-parsed color
-    _nodeScratch.strokeWidth = strokeWidth;
-    _nodeScratch.opacity = opacity;
-    _nodeScratch.borderRadius = base.borderRadius;
-    _nodeScratch.haloWidth = haloWidth;
-    return _nodeScratch;
+    return {
+      fill,
+      fillRGB: fill === base.fill ? base.fillRGB : undefined,
+      size: base.size,
+      width: base.width,
+      height: base.height,
+      stroke,
+      strokeRGB: stroke === base.stroke ? base.strokeRGB : undefined,
+      strokeWidth,
+      opacity,
+      borderRadius: base.borderRadius,
+      haloWidth,
+    };
   }
 
   // Slow path: dynamic config or not yet analyzed
@@ -390,16 +373,17 @@ function resolveNodeStyleDynamic(
     }
   }
 
-  _nodeScratch.fill = fill;
-  _nodeScratch.size = sizeNum;
-  _nodeScratch.width = typeof width === 'number' ? width : sizeNum;
-  _nodeScratch.height = typeof height === 'number' ? height : sizeNum;
-  _nodeScratch.stroke = stroke;
-  _nodeScratch.strokeWidth = strokeWidth;
-  _nodeScratch.opacity = opacity;
-  _nodeScratch.borderRadius = typeof borderRadius === 'number' ? borderRadius : 0;
-  _nodeScratch.haloWidth = haloWidth;
-  return _nodeScratch;
+  return {
+    fill,
+    size: sizeNum,
+    width: typeof width === 'number' ? width : sizeNum,
+    height: typeof height === 'number' ? height : sizeNum,
+    stroke,
+    strokeWidth,
+    opacity,
+    borderRadius: typeof borderRadius === 'number' ? borderRadius : 0,
+    haloWidth,
+  };
 }
 
 export function resolveEdgeStyle(
@@ -438,18 +422,19 @@ export function resolveEdgeStyle(
       }
     }
 
-    _edgeScratch.stroke = stroke;
-    _edgeScratch.strokeRGB = base.strokeRGB; // Use pre-parsed color
-    _edgeScratch.lineWidth = lineWidth;
-    _edgeScratch.curvature = base.curvature;
-    _edgeScratch.curveOffset = base.curveOffset;
-    _edgeScratch.endArrow = base.endArrow;
-    _edgeScratch.startArrow = base.startArrow;
-    _edgeScratch.arrowSize = base.arrowSize > 0 ? base.arrowSize : getArrowSize(lineWidth);
-    _edgeScratch.lineDash = lineDash;
-    _edgeScratch.opacity = opacity;
-    _edgeScratch.radius = base.radius;
-    return _edgeScratch;
+    return {
+      stroke,
+      strokeRGB: stroke === base.stroke ? base.strokeRGB : undefined,
+      lineWidth,
+      curvature: base.curvature,
+      curveOffset: base.curveOffset,
+      endArrow: base.endArrow,
+      startArrow: base.startArrow,
+      arrowSize: base.arrowSize > 0 ? base.arrowSize : getArrowSize(lineWidth),
+      lineDash,
+      opacity,
+      radius: base.radius,
+    };
   }
 
   // Slow path: dynamic config or not yet analyzed
@@ -464,6 +449,11 @@ function resolveEdgeStyleDynamic(
   config: EdgeConfig | undefined,
   theme: ThemeTokens,
 ): ResolvedEdgeStyle {
+  const extension = getEdgeExtension(config?.type);
+  const extensionStyle = {
+    ...extension?.style,
+    ...(extension?.getStyle ? extension.getStyle(source, target, edge) : undefined),
+  };
   let stroke: string;
   let lineWidth: number;
   let curvature: number;
@@ -492,39 +482,75 @@ function resolveEdgeStyleDynamic(
   } else {
     // Base style resolution
     stroke = resolveEdgeStyleValue(
-      config?.style?.stroke,
+      config?.style?.stroke ?? extensionStyle.stroke,
       source,
       target,
       edge,
       theme.edgeStroke ?? theme.edgeDefaultColor ?? '#e2e2e2',
     );
     lineWidth = resolveEdgeStyleValue(
-      config?.style?.lineWidth,
+      config?.style?.lineWidth ?? extensionStyle.lineWidth,
       source,
       target,
       edge,
       theme.edgeLineWidth ?? 1,
     );
-    curvature = resolveEdgeStyleValue(config?.style?.curvature, source, target, edge, 0.3);
-    curveOffset = resolveEdgeStyleValue(config?.style?.curveOffset, source, target, edge, 60);
+    curvature = resolveEdgeStyleValue(
+      config?.style?.curvature ?? extensionStyle.curvature,
+      source,
+      target,
+      edge,
+      0.3,
+    );
+    curveOffset = resolveEdgeStyleValue(
+      config?.style?.curveOffset ?? extensionStyle.curveOffset,
+      source,
+      target,
+      edge,
+      60,
+    );
     endArrow = resolveEdgeStyleValue(
-      config?.style?.endArrow,
+      config?.style?.endArrow ?? extensionStyle.endArrow,
       source,
       target,
       edge,
       theme.edgeArrow ?? false,
     );
-    startArrow = resolveEdgeStyleValue(config?.style?.startArrow, source, target, edge, false);
+    startArrow = resolveEdgeStyleValue(
+      config?.style?.startArrow ?? extensionStyle.startArrow,
+      source,
+      target,
+      edge,
+      false,
+    );
     userArrowSize = resolveEdgeStyleValue(
-      config?.style?.arrowSize,
+      config?.style?.arrowSize ?? extensionStyle.arrowSize,
       source,
       target,
       edge,
       0 as number,
     );
-    lineDash = resolveEdgeStyleValue(config?.style?.lineDash, source, target, edge, _emptyDash);
-    opacity = resolveEdgeStyleValue(config?.style?.opacity, source, target, edge, 1 as number);
-    radius = resolveEdgeStyleValue(config?.style?.radius, source, target, edge, 0 as number);
+    lineDash = resolveEdgeStyleValue(
+      config?.style?.lineDash ?? extensionStyle.lineDash,
+      source,
+      target,
+      edge,
+      _emptyDash,
+    );
+    opacity = resolveEdgeStyleValue(
+      config?.style?.opacity ?? extensionStyle.opacity,
+      source,
+      target,
+      edge,
+      1 as number,
+    );
+    radius = resolveEdgeStyleValue(
+      config?.style?.radius ?? extensionStyle.radius,
+      source,
+      target,
+      edge,
+      0 as number,
+    );
   }
 
   lineWidth = typeof lineWidth === 'number' ? lineWidth : 1;
@@ -538,7 +564,10 @@ function resolveEdgeStyleDynamic(
     } else {
       for (const state of states!) {
         if (state === 'default') continue;
-        const override = config?.stateStyles?.[state] ?? theme.edgeStateStyles?.[state];
+        const override =
+          config?.stateStyles?.[state] ??
+          extension?.stateStyles?.[state] ??
+          theme.edgeStateStyles?.[state];
         if (!override) continue;
         if (override.stroke !== undefined) stroke = override.stroke;
         if (override.lineWidth !== undefined) lineWidth = override.lineWidth;
@@ -548,17 +577,18 @@ function resolveEdgeStyleDynamic(
     }
   }
 
-  _edgeScratch.stroke = stroke;
-  _edgeScratch.lineWidth = lineWidth;
-  _edgeScratch.curvature = typeof curvature === 'number' ? curvature : 0.3;
-  _edgeScratch.curveOffset = typeof curveOffset === 'number' ? curveOffset : 60;
-  _edgeScratch.endArrow = !!endArrow;
-  _edgeScratch.startArrow = !!startArrow;
-  _edgeScratch.arrowSize = userArrowSize > 0 ? userArrowSize : getArrowSize(lineWidth);
-  _edgeScratch.lineDash = lineDash;
-  _edgeScratch.opacity = opacity;
-  _edgeScratch.radius = typeof radius === 'number' ? radius : 0;
-  return _edgeScratch;
+  return {
+    stroke,
+    lineWidth,
+    curvature: typeof curvature === 'number' ? curvature : 0.3,
+    curveOffset: typeof curveOffset === 'number' ? curveOffset : 60,
+    endArrow: !!endArrow,
+    startArrow: !!startArrow,
+    arrowSize: userArrowSize > 0 ? userArrowSize : getArrowSize(lineWidth),
+    lineDash,
+    opacity,
+    radius: typeof radius === 'number' ? radius : 0,
+  };
 }
 
 function resolveStyleValue<T>(

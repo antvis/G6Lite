@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DataModel } from '../dataModel.js';
 import {
   createQuadraticPath,
@@ -418,6 +418,8 @@ describe('Renderer — data pipeline', () => {
       theme,
     });
     renderer.draw();
+    const processSpy = vi.spyOn(renderer as unknown as { process: () => void }, 'process');
+    processSpy.mockClear();
 
     const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
       ._programs;
@@ -426,8 +428,88 @@ describe('Renderer — data pipeline', () => {
     dataModel.updateNodePosition('b', 40, 0);
     renderer.patchPositions(dataModel, new Set(['b']));
 
+    expect(processSpy).toHaveBeenCalledTimes(1);
     expect(programs.edgeLine.array[2]).toBeCloseTo(40);
     expect(programs.edgeArrow.array[2]).toBeCloseTo(40);
+  });
+
+  it('keeps unrelated arrow edges out of a simple position patch', () => {
+    const edgeConfig: EdgeConfig = {
+      type: 'line',
+      style: {
+        stroke: '#999',
+        lineWidth: 1,
+        endArrow: (_source, _target, edge) => edge.id === 'cd',
+        arrowSize: 10,
+      },
+    };
+    analyzeEdgeConfig(edgeConfig, theme);
+
+    const dataModel = new DataModel({ edgeConfig, theme });
+    dataModel.replaceData(
+      [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 100, y: 0 },
+        { id: 'c', x: 200, y: 0 },
+        { id: 'd', x: 300, y: 0 },
+      ],
+      [
+        { id: 'ab', source: 'a', target: 'b' },
+        { id: 'cd', source: 'c', target: 'd' },
+      ],
+    );
+
+    renderer.resize(800, 600);
+    renderer.setData({
+      nodes: dataModel.getNodes() as LayoutNode[],
+      edges: dataModel.getEdges() as GraphEdge[],
+      edgeConfig,
+      theme,
+    });
+    renderer.draw();
+
+    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
+      ._programs;
+    const processSpy = vi.spyOn(renderer as unknown as { process: () => void }, 'process');
+    processSpy.mockClear();
+
+    dataModel.updateNodePosition('a', 20, 10);
+    renderer.patchPositions(dataModel, new Set(['a']));
+
+    expect(processSpy).not.toHaveBeenCalled();
+    expect(Array.from(programs.edgeLine.array.slice(0, 4))).toEqual([20, 10, 100, 0]);
+    expect(programs.edgeArrow.array[0]).toBeCloseTo(200);
+    expect(programs.edgeArrow.array[2]).toBeCloseTo(300);
+  });
+
+  it('defers automatic picking-buffer redraws while picking is suspended', () => {
+    const dataModel = new DataModel({ theme });
+    dataModel.addNode({ id: 'a', x: 0, y: 0 });
+
+    renderer.resize(800, 600);
+    renderer.setData({
+      nodes: dataModel.getNodes() as LayoutNode[],
+      edges: [],
+      theme,
+    });
+    renderer.draw();
+    renderer.pickAt(0, 0);
+
+    const pickingSpy = vi.spyOn(
+      renderer as unknown as { renderPickingPass: () => void },
+      'renderPickingPass',
+    );
+    pickingSpy.mockClear();
+
+    renderer.setPickingSuspended(true);
+    dataModel.updateNodePosition('a', 20, 10);
+    renderer.patchPositions(dataModel, new Set(['a']));
+    renderer.draw();
+    expect(pickingSpy).not.toHaveBeenCalled();
+
+    renderer.setPickingSuspended(false);
+    renderer.draw();
+    expect(pickingSpy).toHaveBeenCalledTimes(1);
   });
 
   it('places close arc edge arrows on the visible curve/node boundary', () => {

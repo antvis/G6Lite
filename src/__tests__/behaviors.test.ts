@@ -429,6 +429,60 @@ describe('dragNode behavior', () => {
     teardown();
   });
 
+  it('drags all selected nodes and emits dragend with the selected node ids', async () => {
+    const { dragNode } = await import('../behaviors/dragNode.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    graph.setItemState('a', 'selected', true);
+    graph.setItemState('b', 'selected', true);
+    const endHandler = vi.fn();
+    graph.eventEmitter.on('node:dragend', endHandler);
+
+    const teardown = dragNode(renderer as any, graph as any);
+    graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 105 }));
+    window.dispatchEvent(new MouseEvent('mouseup'));
+
+    expect(graph.findNodesByState).toHaveBeenCalledWith('selected');
+    expect(graph.updateNodePosition).toHaveBeenNthCalledWith(1, 'a', 10, 5);
+    expect(graph.updateNodePosition).toHaveBeenNthCalledWith(2, 'b', 20, 5);
+    expect(endHandler).toHaveBeenCalledWith({ nodeId: 'a', nodeIds: ['a', 'b'] });
+    teardown();
+  });
+
+  it('drags nested combo nodes and emits the combo drag lifecycle', async () => {
+    const { dragNode } = await import('../behaviors/dragNode.js');
+    const renderer = createMockRenderer();
+    renderer.getCamera.mockReturnValue({ zoom: 2, x: 0, y: 0 });
+    const graph = createMockGraph();
+    graph.getComboData.mockReturnValue({ id: 'root' });
+    graph.getComboChildren.mockImplementation((comboId: string) =>
+      comboId === 'root' ? { nodes: ['a'], combos: ['child'] } : { nodes: ['b'], combos: [] },
+    );
+    const startHandler = vi.fn();
+    const dragHandler = vi.fn();
+    const endHandler = vi.fn();
+    graph.eventEmitter.on('combo:dragstart', startHandler);
+    graph.eventEmitter.on('combo:drag', dragHandler);
+    graph.eventEmitter.on('combo:dragend', endHandler);
+
+    const teardown = dragNode(renderer as any, graph as any);
+    graph.eventEmitter.emit('combo:pointerdown', { comboId: 'root', event: mouseEvent() });
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 106 }));
+    window.dispatchEvent(new MouseEvent('mouseup'));
+
+    expect(graph.getComboChildren).toHaveBeenCalledWith('root');
+    expect(graph.getComboChildren).toHaveBeenCalledWith('child');
+    expect(graph.updateNodePosition).toHaveBeenNthCalledWith(1, 'a', 5, 3);
+    expect(graph.updateNodePosition).toHaveBeenNthCalledWith(2, 'b', 15, 3);
+    expect(startHandler).toHaveBeenCalledTimes(1);
+    expect(dragHandler).toHaveBeenCalledWith(
+      expect.objectContaining({ comboId: 'root', dx: 5, dy: 3 }),
+    );
+    expect(endHandler).toHaveBeenCalledWith({ comboId: 'root' });
+    teardown();
+  });
+
   it('does not emit dragend for a plain click', async () => {
     const { dragNode } = await import('../behaviors/dragNode.js');
     const renderer = createMockRenderer();

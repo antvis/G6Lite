@@ -115,6 +115,13 @@ export class Renderer {
   // Parallel index arrays for edges — avoid Map.get in hot loops
   private edgeSourceIdx: Int32Array = new Int32Array(0);
   private edgeTargetIdx: Int32Array = new Int32Array(0);
+  // CSR adjacency: incident edges for node i occupy
+  // nodeEdgeIndices[nodeEdgeOffsets[i]..nodeEdgeOffsets[i + 1]).
+  private nodeEdgeOffsets: Uint32Array = new Uint32Array(0);
+  private nodeEdgeIndices: Uint32Array = new Uint32Array(0);
+  private affectedEdgeMarks: Uint32Array = new Uint32Array(0);
+  private affectedEdgeGeneration = 0;
+  private affectedEdgeScratch: number[] = [];
   // Original edge index → dense GPU item span. Hidden/unrenderable edges use
   // start=-1/count=0; self-loops live in their own program and use loopSlot.
   private edgeDrawStart: Int32Array = new Int32Array(0);
@@ -164,6 +171,7 @@ export class Renderer {
   private needHighlightUpdate = false;
   private needPickingRender = false;
   private pickingInitialized = false;
+  private pickingSuspended = false;
   // Whether the last full process() emitted any arrows. Incremental paths
   // (highlight delta, position patch) don't update the arrow buffer, so when
   // arrows exist they must fall back to a full process() instead.
@@ -303,6 +311,7 @@ export class Renderer {
       const edgeId = (e as any).id;
       if (edgeId) this.edgeIdToIndex.set(edgeId, i);
     }
+    this.rebuildEdgeAdjacency(edgeCount);
 
     // Resolve active program types
     this.activeNodeType = getNodeBaseType(renderData.nodeConfig);
@@ -315,6 +324,34 @@ export class Renderer {
   /** Alias for backward compat. */
   setData(renderData: RendererData): void {
     this.updateData(renderData);
+  }
+
+  private rebuildEdgeAdjacency(edgeCount: number): void {
+    const nodeCount = this.nodes.length;
+    const offsets = new Uint32Array(nodeCount + 1);
+    for (let i = 0; i < edgeCount; i++) {
+      const sourceIndex = this.edgeSourceIdx[i];
+      const targetIndex = this.edgeTargetIdx[i];
+      if (sourceIndex >= 0) offsets[sourceIndex + 1]++;
+      if (targetIndex >= 0 && targetIndex !== sourceIndex) offsets[targetIndex + 1]++;
+    }
+    for (let i = 1; i < offsets.length; i++) offsets[i] += offsets[i - 1];
+
+    const indices = new Uint32Array(offsets[nodeCount]);
+    const cursors = offsets.slice(0, nodeCount);
+    for (let i = 0; i < edgeCount; i++) {
+      const sourceIndex = this.edgeSourceIdx[i];
+      const targetIndex = this.edgeTargetIdx[i];
+      if (sourceIndex >= 0) indices[cursors[sourceIndex]++] = i;
+      if (targetIndex >= 0 && targetIndex !== sourceIndex) indices[cursors[targetIndex]++] = i;
+    }
+
+    this.nodeEdgeOffsets = offsets;
+    this.nodeEdgeIndices = indices;
+    if (this.affectedEdgeMarks.length < edgeCount) {
+      this.affectedEdgeMarks = new Uint32Array(edgeCount);
+      this.affectedEdgeGeneration = 0;
+    }
   }
 
   /** Determine edge program: complex edge types first, rect when base or state styles require width/opacity/dash, else line. */
@@ -1295,6 +1332,13 @@ export class Renderer {
     if (movedNodeIds.size === 0) return;
 
     const nodeProgram = this.activeNodeProgram;
+    const affectedEdgeIndices = this.affectedEdgeScratch;
+    affectedEdgeIndices.length = 0;
+    if (this.affectedEdgeGeneration >= 0xffffffff) {
+      this.affectedEdgeMarks.fill(0);
+      this.affectedEdgeGeneration = 0;
+    }
+    const affectedEdgeGeneration = ++this.affectedEdgeGeneration;
 
     // Patch node positions using Program.patchItemPosition
     for (const id of movedNodeIds) {
@@ -1302,6 +1346,15 @@ export class Renderer {
       if (!node) continue;
       const idx = this.nodeIdToIndex.get(id);
       if (idx === undefined) continue;
+
+      const incidentStart = this.nodeEdgeOffsets[idx] ?? 0;
+      const incidentEnd = this.nodeEdgeOffsets[idx + 1] ?? incidentStart;
+      for (let cursor = incidentStart; cursor < incidentEnd; cursor++) {
+        const edgeIndex = this.nodeEdgeIndices[cursor];
+        if (this.affectedEdgeMarks[edgeIndex] === affectedEdgeGeneration) continue;
+        this.affectedEdgeMarks[edgeIndex] = affectedEdgeGeneration;
+        affectedEdgeIndices.push(edgeIndex);
+      }
 
       // Update internal nodes array in place (avoid per-frame object allocation)
       if (idx < this.nodes.length) {
@@ -1317,25 +1370,32 @@ export class Renderer {
 
     // Re-compute affected edges
     const edgeProgram = this.activeEdgeProgram;
-    // The fast endpoint patch below doesn't move arrows, so when arrows exist
-    // fall back to a full process to keep arrow tips on the node boundary.
-    const isSimpleEdge =
-      !this.hasArrows && (this.activeEdgeType === 'line' || this.activeEdgeType === 'rect');
-    const affectedEdgeIndices: number[] = [];
-
-    for (let i = 0; i < this.edges.length; i++) {
-      const e = this.edges[i];
-      if (movedNodeIds.has(e.source) || movedNodeIds.has(e.target)) {
-        affectedEdgeIndices.push(i);
-      }
-    }
+    const isSimpleEdgeType = this.activeEdgeType === 'line' || this.activeEdgeType === 'rect';
 
     const hasRenderableAffectedEdge = affectedEdgeIndices.some(
       (i) => (this.edgeDrawStart[i] ?? -1) >= 0 || (this.edgeLoopSlot[i] ?? -1) >= 0,
     );
+    let affectedHasArrows = false;
+    if (hasRenderableAffectedEdge && isSimpleEdgeType && this.hasArrows) {
+      affectedHasArrows = affectedEdgeIndices.some((i) => {
+        if ((this.edgeDrawStart[i] ?? -1) < 0 && (this.edgeLoopSlot[i] ?? -1) < 0) return false;
+        const sourceIndex = this.edgeSourceIdx[i];
+        const targetIndex = this.edgeTargetIdx[i];
+        if (sourceIndex < 0 || targetIndex < 0) return false;
+        const style = resolveEdgeStyle(
+          this.nodes[sourceIndex],
+          this.nodes[targetIndex],
+          this.edges[i],
+          this.edgeConfig,
+          this.theme,
+        );
+        return style.startArrow || style.endArrow;
+      });
+    }
+    const canPatchSimpleEdges = isSimpleEdgeType && !affectedHasArrows;
     const needsFullEdgeProcess =
       hasRenderableAffectedEdge &&
-      (!isSimpleEdge ||
+      (!canPatchSimpleEdges ||
         affectedEdgeIndices.some(
           (i) =>
             (this.edgeLoopSlot[i] ?? -1) >= 0 ||
@@ -1352,7 +1412,7 @@ export class Renderer {
       return;
     }
 
-    if (hasRenderableAffectedEdge && isSimpleEdge) {
+    if (hasRenderableAffectedEdge && canPatchSimpleEdges) {
       let patchedEdge = false;
       // For line/rect edges, patch the dense GPU slot rather than the original
       // edge index. Direction changes also require recomputing rect boundary
@@ -1660,6 +1720,7 @@ export class Renderer {
       this.edgeSourceIdx[i] = this.nodeIdToIndex.get(e.source) ?? -1;
       this.edgeTargetIdx[i] = this.nodeIdToIndex.get(e.target) ?? -1;
     }
+    this.rebuildEdgeAdjacency(edgeCount);
 
     // Update config if changed
     if (dataModel.nodeConfig !== this.nodeConfig) this.nodeConfig = dataModel.nodeConfig;
@@ -1823,7 +1884,12 @@ export class Renderer {
     const edgeProgram = this.activeEdgeProgram;
 
     // Picking pass (deferred until first interaction, and not during continuous movement)
-    if (this.needPickingRender && this.pickingInitialized && !this.hideEdges) {
+    if (
+      this.needPickingRender &&
+      this.pickingInitialized &&
+      !this.pickingSuspended &&
+      !this.hideEdges
+    ) {
       this.renderPickingPass(w, h, nodeProgram, edgeProgram);
     }
 
@@ -1853,6 +1919,13 @@ export class Renderer {
 
   onAfterDraw(cb: () => void): void {
     this.afterDrawCallback = cb;
+  }
+
+  /** Pause automatic picking-buffer redraws during continuous drag gestures. */
+  setPickingSuspended(suspended: boolean): void {
+    if (this.pickingSuspended === suspended) return;
+    this.pickingSuspended = suspended;
+    if (!suspended) this.needPickingRender = true;
   }
 
   private renderPickingPass(
@@ -2095,6 +2168,10 @@ export class Renderer {
     this.nodeIdToIndex.clear();
     this.edgeSourceIdx = new Int32Array(0);
     this.edgeTargetIdx = new Int32Array(0);
+    this.nodeEdgeOffsets = new Uint32Array(0);
+    this.nodeEdgeIndices = new Uint32Array(0);
+    this.affectedEdgeMarks = new Uint32Array(0);
+    this.affectedEdgeScratch = [];
     this.edgeDrawStart = new Int32Array(0);
     this.edgeDrawCount = new Int32Array(0);
     this.edgeLoopSlot = new Int32Array(0);

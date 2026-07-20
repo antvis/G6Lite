@@ -33,6 +33,7 @@ function setup(initialPick: Pick = null) {
         ]),
     ),
     getCamera: vi.fn(() => ({ zoom: 1, x: 0, y: 0 })),
+    setPickingSuspended: vi.fn(),
   };
   const graph = {
     eventEmitter: new EventEmitter(),
@@ -273,6 +274,29 @@ describe('InteractionDispatcher — press / click / wheel', () => {
 
     expect(nodeClick).not.toHaveBeenCalled();
     expect(t.renderer.pickAt).toHaveBeenCalledTimes(1);
+    t.teardown();
+  });
+
+  it('skips hover picking after drag consumes the gesture and resumes after mouseup', () => {
+    const t = setup({ type: 'node', id: 'a' });
+    const over = vi.fn();
+    t.emitter.on('node:pointerover', over);
+
+    fire(t.canvas, 'mousedown', { clientX: 10, clientY: 10 });
+    expect(t.renderer.pickAt).toHaveBeenCalledTimes(1);
+
+    t.emitter.emit(GESTURE_CONSUME_EVENT);
+    expect(t.renderer.setPickingSuspended).toHaveBeenCalledWith(true);
+    fire(t.canvas, 'mousemove', { clientX: 20, clientY: 20 });
+    fire(t.canvas, 'mousemove', { clientX: 30, clientY: 30 });
+    expect(t.renderer.pickAt).toHaveBeenCalledTimes(1);
+    expect(over).not.toHaveBeenCalled();
+
+    window.dispatchEvent(new MouseEvent('mouseup', { clientX: 30, clientY: 30 }));
+    expect(t.renderer.setPickingSuspended).toHaveBeenLastCalledWith(false);
+    fire(t.canvas, 'mousemove', { clientX: 31, clientY: 31 });
+    expect(t.renderer.pickAt).toHaveBeenCalledTimes(2);
+    expect(over).toHaveBeenCalledTimes(1);
     t.teardown();
   });
 

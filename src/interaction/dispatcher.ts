@@ -186,6 +186,10 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
   };
 
   const onMouseMove = (e: MouseEvent): void => {
+    // Drag behaviors already own their in-flight pointer tracking. Once the
+    // gesture is consumed, hover Picking would only rebuild/read a framebuffer
+    // whose result is ignored by the frozen hover behavior.
+    if (gesture?.consumed) return;
     const hit = resolveHit(e);
 
     if (hit.kind === 'node') {
@@ -248,13 +252,16 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
   };
 
   const onMouseLeave = (e: MouseEvent): void => {
+    if (gesture?.consumed) return;
     emitLeave(e);
   };
 
   // --- Press / click / wheel ----------------------------------------------
 
   const consumeGesture = (): void => {
-    if (gesture) gesture.consumed = true;
+    if (!gesture) return;
+    gesture.consumed = true;
+    renderer.setPickingSuspended(true);
   };
   const onMouseDown = (e: MouseEvent): void => {
     gesture = { x: e.clientX, y: e.clientY, consumed: false };
@@ -276,10 +283,12 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
   const onWheel = (e: WheelEvent): void => dispatchHit(e, 'wheel');
   const onMouseUp = (e: MouseEvent): void => {
     if (gesture) {
+      const wasConsumed = gesture.consumed;
       suppressNextClick =
         gesture.consumed ||
         Math.hypot(e.clientX - gesture.x, e.clientY - gesture.y) > clickThreshold;
       gesture = null;
+      if (wasConsumed) renderer.setPickingSuspended(false);
     }
     emitter.emit('canvas:pointerup', createPayload(e, 'canvas'));
   };
@@ -295,6 +304,7 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
   window.addEventListener('mouseup', onMouseUp);
 
   return () => {
+    if (gesture?.consumed) renderer.setPickingSuspended(false);
     emitter.off(GESTURE_CONSUME_EVENT, consumeGesture);
     canvas.removeEventListener('mousemove', onMouseMove);
     canvas.removeEventListener('mouseleave', onMouseLeave);

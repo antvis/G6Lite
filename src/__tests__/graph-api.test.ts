@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DataModel } from '../dataModel.js';
 import { EventEmitter } from '../events.js';
 
@@ -38,6 +38,41 @@ describe('P0: getNodeData / getEdgeData', () => {
     expect(edge!.data).toEqual({ weight: 5 });
   });
 
+  it('should preserve explicit edge IDs', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.addNode({ id: 'a', x: 0, y: 0 });
+    dm.addNode({ id: 'b', x: 1, y: 1 });
+
+    const edgeId = dm.addEdge({ id: 'business-edge', source: 'a', target: 'b' });
+
+    expect(edgeId).toBe('business-edge');
+    expect(dm.getEdge('business-edge')).toMatchObject({
+      id: 'business-edge',
+      source: 'a',
+      target: 'b',
+    });
+  });
+
+  it('should reject duplicate explicit edge IDs', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.addEdge({ id: 'edge-1', source: 'a', target: 'b' });
+
+    expect(() => dm.addEdge({ id: 'edge-1', source: 'b', target: 'c' })).toThrow(
+      'Duplicate edge id: edge-1',
+    );
+  });
+
+  it('should avoid generated ID collisions with explicit IDs', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.addEdge({ id: 'e0', source: 'a', target: 'b' });
+
+    const generatedId = dm.addEdge({ source: 'b', target: 'c' });
+
+    expect(generatedId).toBe('e1');
+    expect(dm.hasEdge('e0')).toBe(true);
+    expect(dm.hasEdge('e1')).toBe(true);
+  });
+
   it('should return undefined for missing edge', () => {
     const dm = new DataModel({ theme: {} });
     expect(dm.getEdge('e999')).toBeUndefined();
@@ -65,11 +100,39 @@ describe('P0: replaceData (backing setData)', () => {
     expect(dm.hasNode('new2')).toBe(true);
   });
 
+  it('should preserve explicit edge IDs during replaceData', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.replaceData(
+      [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 1, y: 1 },
+      ],
+      [{ id: 'edge-ab', source: 'a', target: 'b' }],
+    );
+
+    expect(dm.getEdge('edge-ab')).toMatchObject({ id: 'edge-ab', source: 'a', target: 'b' });
+  });
+
   it('should emit dataReplaced change', () => {
     const dm = new DataModel({ theme: {} });
     dm.replaceData([{ id: 'n1', x: 0, y: 0 }], []);
     const changes = dm.getChanges();
     expect(changes.some((c) => c.type === 'dataReplaced')).toBe(true);
+  });
+});
+
+describe('P0: Combo state API backing model', () => {
+  it('should set, query, find, and clear combo states', () => {
+    const dm = new DataModel({ theme: {} });
+    dm.initCombos([{ id: 'combo-a' }], []);
+
+    dm.setComboState('combo-a', 'selected', true);
+
+    expect(dm.getCombo('combo-a')!.states.has('selected')).toBe(true);
+    expect(dm.findCombosByState('selected')).toEqual(['combo-a']);
+
+    dm.clearComboStates('combo-a');
+    expect(dm.getCombo('combo-a')!.states.size).toBe(0);
   });
 });
 
@@ -156,19 +219,8 @@ describe('P1: click-select multiple', () => {
   it('should support multi-select with shift key', async () => {
     const { clickSelect } = await import('../behaviors/clickSelect.js');
 
-    let currentPickResult: any = { type: 'node', id: 'n1' };
-    const handlers: Record<string, EventListener[]> = {};
-    const canvas = {
-      addEventListener: vi.fn((event: string, handler: EventListener) => {
-        if (!handlers[event]) handlers[event] = [];
-        handlers[event].push(handler);
-      }),
-      removeEventListener: vi.fn(),
-      style: { cursor: 'default' },
-    };
     const renderer = {
-      getCanvas: () => canvas,
-      pickAt: vi.fn(() => currentPickResult),
+      getCanvas: () => ({ style: { cursor: 'default' } }),
       getEdges: vi.fn(() => []),
     };
 
@@ -193,21 +245,16 @@ describe('P1: click-select multiple', () => {
     });
 
     // Click n1 without shift — selects n1
-    const e1 = { clientX: 10, clientY: 10, shiftKey: false } as any;
-    handlers['click'][0](e1);
+    eventEmitter.emit('node:click', { nodeId: 'n1', event: { shiftKey: false } as any });
     expect(stateMap.get('selected')?.has('n1')).toBe(true);
 
     // Click n2 with shift — adds n2, keeps n1
-    currentPickResult = { type: 'node', id: 'n2' };
-    const e2 = { clientX: 20, clientY: 20, shiftKey: true } as any;
-    handlers['click'][0](e2);
+    eventEmitter.emit('node:click', { nodeId: 'n2', event: { shiftKey: true } as any });
     expect(stateMap.get('selected')?.has('n1')).toBe(true);
     expect(stateMap.get('selected')?.has('n2')).toBe(true);
 
     // Click n3 without shift — clears previous, selects only n3
-    currentPickResult = { type: 'node', id: 'n3' };
-    const e3 = { clientX: 30, clientY: 30, shiftKey: false } as any;
-    handlers['click'][0](e3);
+    eventEmitter.emit('node:click', { nodeId: 'n3', event: { shiftKey: false } as any });
     expect(stateMap.get('selected')?.has('n1')).toBe(false);
     expect(stateMap.get('selected')?.has('n2')).toBe(false);
     expect(stateMap.get('selected')?.has('n3')).toBe(true);
@@ -218,19 +265,9 @@ describe('P1: hover-highlight degree', () => {
   it('should highlight multi-hop neighbors', async () => {
     const { hoverHighlight } = await import('../behaviors/hoverHighlight.js');
 
-    const handlers: Record<string, EventListener[]> = {};
-    const canvas = {
-      addEventListener: vi.fn((event: string, handler: EventListener) => {
-        if (!handlers[event]) handlers[event] = [];
-        handlers[event].push(handler);
-      }),
-      removeEventListener: vi.fn(),
-      style: { cursor: 'default' },
-    };
     const highlightArg = { nodeIds: new Set<string>(), edgeIndices: new Set<number>() };
     const renderer = {
-      getCanvas: () => canvas,
-      pickAt: vi.fn(() => ({ type: 'node', id: 'n1' })),
+      getCanvas: () => ({ style: { cursor: 'default' } }),
       getEdges: vi.fn(() => [
         { source: 'n1', target: 'n2' },
         { source: 'n2', target: 'n3' },
@@ -268,9 +305,8 @@ describe('P1: hover-highlight degree', () => {
       degree: 2,
     });
 
-    // Simulate mousemove hitting n1
-    const e = { clientX: 10, clientY: 10 } as MouseEvent;
-    handlers['mousemove'][0](e);
+    // Pointer enters n1 (emitted by the dispatcher)
+    eventEmitter.emit('node:pointerover', { nodeId: 'n1', event: {} as MouseEvent });
 
     // With degree=2, starting from n1: hop1=n2, hop2=n3
     // So highlighted nodes should include n1, n2, n3

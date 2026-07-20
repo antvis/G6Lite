@@ -1,0 +1,67 @@
+---
+title: 在 React 中使用
+description: 用 useRef 和 useEffect 在 React 组件中挂载 G6Lite
+---
+
+React 中推荐在 `useEffect` 内创建 `Graph`，通过 `ref` 传入真实 DOM，并在 cleanup 中销毁实例。
+
+```tsx
+import { useEffect, useRef } from 'react';
+import { Graph } from '@antv/g6-lite';
+
+export function GraphView() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: {
+        nodes: [
+          { id: 'a', data: { label: 'A' } },
+          { id: 'b', data: { label: 'B' } },
+        ],
+        edges: [{ source: 'a', target: 'b' }],
+      },
+      node: {
+        style: {
+          size: 18,
+          label: (node) => (node.data?.label as string) ?? node.id,
+          labelPlacement: 'bottom',
+        },
+      },
+      edge: { style: { endArrow: true } },
+      layout: { type: 'circular', radius: 120 },
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+    });
+
+    graph.render();
+
+    return () => {
+      graph.destroy();
+    };
+  }, []);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 480 }} />;
+}
+```
+
+## 注意事项
+
+- 容器需要有明确高度，只有 `width: 100%` 不够。
+- React Strict Mode 在开发环境可能会重复执行 effect，cleanup 中调用 `graph.destroy()` 可以避免残留 canvas 和事件监听。
+- 如果数据来自请求，建议在拿到数据后创建实例；或先创建空图，再调用 `await graph.setData(data)`。
+- 如果父容器尺寸会变化，G6Lite 会通过 ResizeObserver 同步 canvas 尺寸。
+
+## 数据变化
+
+若数据会随 props 更新，保留 `graph` 引用并在 effect 中调用 `setData()`：
+
+```tsx
+useEffect(() => {
+  graphRef.current?.setData(data);
+}, [data]);
+```
+
+如果只是高亮、选中、隐藏元素，优先使用 `setItemState()`、`hideItem()`、`showItem()` 等增量 API，避免频繁替换整份数据。

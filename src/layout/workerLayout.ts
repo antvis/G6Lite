@@ -23,7 +23,7 @@ export function runLayoutInWorker(
   return new Promise((resolve, reject) => {
     try {
       if (!worker) {
-        worker = new Worker(new URL('./layoutWorker.ts', import.meta.url), { type: 'module' });
+        worker = new Worker(new URL('./layoutWorker.js', import.meta.url), { type: 'module' });
       }
     } catch (err) {
       reject(new Error(`Failed to create layout worker: ${err}`));

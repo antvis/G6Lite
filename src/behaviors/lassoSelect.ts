@@ -13,8 +13,8 @@
  * Point-in-polygon test uses ray-casting algorithm.
  */
 
-import type { Renderer } from '../renderer/renderer.js';
 import type { Graph } from '../graph.js';
+import type { Renderer } from '../renderer/renderer.js';
 
 export interface LassoSelectOptions {
   /** Modifier key to activate. Default: null (always active) */
@@ -42,7 +42,6 @@ export function lassoSelect(
   graph: Graph,
   options?: LassoSelectOptions,
 ): () => void {
-  const canvas = renderer.getCanvas();
   const modifierKey = options?.key ?? null;
 
   let selecting = false;
@@ -113,14 +112,13 @@ export function lassoSelect(
     }
   };
 
-  const onMouseDown = (e: MouseEvent): void => {
+  const onPointerDown = (payload: { event: MouseEvent }): void => {
+    const e = payload.event;
     if (e.button !== 0) return;
     if (!isModifierHeld(e)) return;
 
-    // Don't start lasso if clicking on a node
-    const hit = renderer.pickAt(e.clientX, e.clientY);
-    if (hit && hit.type === 'node') return;
-
+    // Started from a non-node pointerdown (canvas/edge/combo); node hits never
+    // reach here, so the former pick guard is unnecessary.
     selecting = true;
     lastSelectTime = 0;
     const [gx, gy] = renderer.screenToGraph(e.clientX, e.clientY);
@@ -163,12 +161,16 @@ export function lassoSelect(
     path = [];
   };
 
-  canvas.addEventListener('mousedown', onMouseDown);
+  graph.eventEmitter.on('canvas:pointerdown', onPointerDown);
+  graph.eventEmitter.on('edge:pointerdown', onPointerDown);
+  graph.eventEmitter.on('combo:pointerdown', onPointerDown);
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('mouseup', onMouseUp);
 
   return () => {
-    canvas.removeEventListener('mousedown', onMouseDown);
+    graph.eventEmitter.off('canvas:pointerdown', onPointerDown);
+    graph.eventEmitter.off('edge:pointerdown', onPointerDown);
+    graph.eventEmitter.off('combo:pointerdown', onPointerDown);
     window.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('mouseup', onMouseUp);
     if (svgOverlay) {

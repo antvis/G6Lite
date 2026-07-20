@@ -1,5 +1,6 @@
 /**
  * click-select: click to select/deselect nodes and edges.
+ * Consumes click events from the InteractionDispatcher (no own picking).
  * Supports single-select (default) and multi-select (with modifier key).
  *
  * Config options:
@@ -7,8 +8,8 @@
  * - trigger: 'shift' | 'ctrl' | 'meta' — modifier key for multi-select (default: 'shift')
  */
 
-import type { Renderer } from '../renderer/renderer.js';
 import type { Graph } from '../graph.js';
+import type { Renderer } from '../renderer/renderer.js';
 
 export interface ClickSelectConfig {
   type: string;
@@ -21,18 +22,16 @@ export function clickSelect(
   graph: Graph,
   config?: ClickSelectConfig,
 ): () => void {
-  const canvas = renderer.getCanvas();
   const multiple = config?.multiple ?? false;
   const trigger = config?.trigger ?? 'shift';
 
   const isModifierPressed = (e: MouseEvent): boolean => {
     switch (trigger) {
-      case 'shift':
-        return e.shiftKey;
       case 'ctrl':
         return e.ctrlKey;
       case 'meta':
         return e.metaKey;
+      case 'shift':
       default:
         return e.shiftKey;
     }
@@ -57,68 +56,72 @@ export function clickSelect(
     }
   };
 
-  const onClick = (e: MouseEvent) => {
-    const result = renderer.pickAt(e.clientX, e.clientY);
+  const onNodeClick = (payload: { nodeId: string; event: MouseEvent }) => {
+    const { nodeId, event: e } = payload;
+    const isSelected = graph.findNodesByState('selected').includes(nodeId);
 
-    if (result && result.type === 'node') {
-      const nodeId = result.id;
-      const isSelected = graph.findNodesByState('selected').includes(nodeId);
-
-      if (isSelected) {
-        graph.setItemState(nodeId, 'selected', false);
-        graph.eventEmitter.emit('node:selectchange', {
-          nodeId,
-          selected: false,
-          event: e,
-        });
-      } else {
-        if (!multiple || !isModifierPressed(e)) {
-          clearAllSelections(e);
-        }
-        graph.setItemState(nodeId, 'selected', true);
-        graph.eventEmitter.emit('node:selectchange', {
-          nodeId,
-          selected: true,
-          event: e,
-        });
-      }
-    } else if (result && result.type === 'edge') {
-      const edges = renderer.getEdges();
-      const edge = edges[result.index];
-      if (edge && (edge as any).id) {
-        const edgeId = (edge as any).id as string;
-        const isSelected = graph.findEdgesByState('selected').includes(edgeId);
-
-        if (isSelected) {
-          graph.setItemState(edgeId, 'selected', false);
-          graph.eventEmitter.emit('edge:selectchange', {
-            edgeId,
-            edgeIndex: result.index,
-            source: edge.source,
-            target: edge.target,
-            selected: false,
-            event: e,
-          });
-        } else {
-          if (!multiple || !isModifierPressed(e)) {
-            clearAllSelections(e);
-          }
-          graph.setItemState(edgeId, 'selected', true);
-          graph.eventEmitter.emit('edge:selectchange', {
-            edgeId,
-            edgeIndex: result.index,
-            source: edge.source,
-            target: edge.target,
-            selected: true,
-            event: e,
-          });
-        }
-      }
+    if (isSelected) {
+      graph.setItemState(nodeId, 'selected', false);
+      graph.eventEmitter.emit('node:selectchange', { nodeId, selected: false, event: e });
     } else {
-      clearAllSelections(e);
+      if (!multiple || !isModifierPressed(e)) {
+        clearAllSelections(e);
+      }
+      graph.setItemState(nodeId, 'selected', true);
+      graph.eventEmitter.emit('node:selectchange', { nodeId, selected: true, event: e });
     }
   };
 
-  canvas.addEventListener('click', onClick);
-  return () => canvas.removeEventListener('click', onClick);
+  const onEdgeClick = (payload: {
+    edgeId?: string;
+    edgeIndex: number;
+    source: string;
+    target: string;
+    event: MouseEvent;
+  }) => {
+    const { edgeId: payloadEdgeId, edgeIndex, source, target, event: e } = payload;
+    const edge = renderer.getEdges()[edgeIndex];
+    const edgeId =
+      payloadEdgeId ?? ((edge as { id?: string } | undefined)?.id as string | undefined);
+    if (!edgeId) return;
+    const isSelected = graph.findEdgesByState('selected').includes(edgeId);
+
+    if (isSelected) {
+      graph.setItemState(edgeId, 'selected', false);
+      graph.eventEmitter.emit('edge:selectchange', {
+        edgeId,
+        edgeIndex,
+        source,
+        target,
+        selected: false,
+        event: e,
+      });
+    } else {
+      if (!multiple || !isModifierPressed(e)) {
+        clearAllSelections(e);
+      }
+      graph.setItemState(edgeId, 'selected', true);
+      graph.eventEmitter.emit('edge:selectchange', {
+        edgeId,
+        edgeIndex,
+        source,
+        target,
+        selected: true,
+        event: e,
+      });
+    }
+  };
+
+  const onCanvasClick = (payload: { event: MouseEvent }) => {
+    clearAllSelections(payload.event);
+  };
+
+  graph.eventEmitter.on('node:click', onNodeClick);
+  graph.eventEmitter.on('edge:click', onEdgeClick);
+  graph.eventEmitter.on('canvas:click', onCanvasClick);
+  return () => {
+    graph.eventEmitter.off('node:click', onNodeClick);
+    graph.eventEmitter.off('edge:click', onEdgeClick);
+    graph.eventEmitter.off('canvas:click', onCanvasClick);
+  };
 }

@@ -1,75 +1,64 @@
 /**
  * drag-node: drag nodes by updating their position via DataModel + PATCH_POSITION.
- * Uses O(1) GPU framebuffer picking for hit detection.
+ * Gesture start (which node/combo) comes from the InteractionDispatcher's
+ * pointerdown events; the in-flight move/up tracking is owned here (it computes
+ * a per-drag position delta that does not belong on the global event bus).
  * Supports multi-select dragging: if the dragged node is selected, all selected nodes move.
  * Supports combo dragging: clicking combo background drags all its child nodes.
  * Emits node:dragstart, node:drag, node:dragend, combo:dragstart, combo:drag, combo:dragend events.
  */
 
-import type { Renderer } from '../renderer/renderer.js';
 import type { Graph } from '../graph.js';
+import type { Renderer } from '../renderer/renderer.js';
 
 export function dragNode(renderer: Renderer, graph: Graph): () => void {
-  const canvas = renderer.getCanvas();
   let draggingIds: string[] = [];
   let draggingComboId: string | null = null;
   let startMouse = { x: 0, y: 0 };
   let startPositions: Array<{ x: number; y: number }> = [];
 
-  const onDown = (e: MouseEvent) => {
-    if (e.button !== 0) return;
-    const result = renderer.pickAt(e.clientX, e.clientY);
+  const beginNodeDrag = (nodeId: string, e: MouseEvent) => {
+    e.preventDefault();
+    startMouse = { x: e.clientX, y: e.clientY };
 
-    if (result && result.type === 'node') {
-      e.preventDefault();
-      const nodeId = result.id;
-      startMouse = { x: e.clientX, y: e.clientY };
+    const states = graph.getItemStates(nodeId);
+    draggingIds = states.includes('selected') ? graph.findNodesByState('selected') : [nodeId];
 
-      const states = graph.getItemStates(nodeId);
-      if (states.includes('selected')) {
-        draggingIds = graph.findNodesByState('selected');
-      } else {
-        draggingIds = [nodeId];
-      }
+    startPositions = draggingIds.map((id) => {
+      const pos = graph.getNodePosition(id);
+      return pos ? { x: pos.x, y: pos.y } : { x: 0, y: 0 };
+    });
 
-      startPositions = draggingIds.map((id) => {
-        const pos = graph.getNodePosition(id);
-        return pos ? { x: pos.x, y: pos.y } : { x: 0, y: 0 };
-      });
+    draggingComboId = null;
+    graph.eventEmitter.emit('node:dragstart', { nodeId, nodeIds: draggingIds, event: e });
+  };
 
-      draggingComboId = null;
-      graph.eventEmitter.emit('node:dragstart', {
-        nodeId,
-        nodeIds: draggingIds,
-        event: e,
-      });
-      return;
-    }
+  const beginComboDrag = (comboId: string, e: MouseEvent) => {
+    e.preventDefault();
+    startMouse = { x: e.clientX, y: e.clientY };
+    draggingComboId = comboId;
 
-    // No node hit — check if we hit a combo background
-    const comboId = graph.pickComboAt(e.clientX, e.clientY);
-    if (comboId) {
-      e.preventDefault();
-      startMouse = { x: e.clientX, y: e.clientY };
-      draggingComboId = comboId;
+    // A collapsed combo's bounds are still computed from its child node
+    // positions, so dragging it must move those children regardless of state.
+    const comboData = graph.getComboData(comboId);
+    draggingIds = comboData ? getAllComboNodeIds(graph, comboId) : [];
 
-      // Get all nodes in this combo (including nested). A collapsed combo's
-      // bounds are still computed from its child node positions, so dragging it
-      // must move those children regardless of collapsed state.
-      const comboData = graph.getComboData(comboId);
-      if (comboData) {
-        draggingIds = getAllComboNodeIds(graph, comboId);
-      } else {
-        draggingIds = [];
-      }
+    startPositions = draggingIds.map((id) => {
+      const pos = graph.getNodePosition(id);
+      return pos ? { x: pos.x, y: pos.y } : { x: 0, y: 0 };
+    });
 
-      startPositions = draggingIds.map((id) => {
-        const pos = graph.getNodePosition(id);
-        return pos ? { x: pos.x, y: pos.y } : { x: 0, y: 0 };
-      });
+    graph.eventEmitter.emit('combo:dragstart', { comboId, event: e });
+  };
 
-      graph.eventEmitter.emit('combo:dragstart', { comboId, event: e });
-    }
+  const onNodeDown = (payload: { nodeId: string; event: MouseEvent }) => {
+    if (payload.event.button !== 0) return;
+    beginNodeDrag(payload.nodeId, payload.event);
+  };
+
+  const onComboDown = (payload: { comboId: string; event: MouseEvent }) => {
+    if (payload.event.button !== 0) return;
+    beginComboDrag(payload.comboId, payload.event);
   };
 
   const onMove = (e: MouseEvent) => {
@@ -79,18 +68,11 @@ export function dragNode(renderer: Renderer, graph: Graph): () => void {
     const dy = (e.clientY - startMouse.y) / camera.zoom;
 
     for (let i = 0; i < draggingIds.length; i++) {
-      const newX = startPositions[i].x + dx;
-      const newY = startPositions[i].y + dy;
-      graph.updateNodePosition(draggingIds[i], newX, newY);
+      graph.updateNodePosition(draggingIds[i], startPositions[i].x + dx, startPositions[i].y + dy);
     }
 
     if (draggingComboId) {
-      graph.eventEmitter.emit('combo:drag', {
-        comboId: draggingComboId,
-        dx,
-        dy,
-        event: e,
-      });
+      graph.eventEmitter.emit('combo:drag', { comboId: draggingComboId, dx, dy, event: e });
     } else {
       graph.eventEmitter.emit('node:drag', {
         nodeId: draggingIds[0],
@@ -109,20 +91,19 @@ export function dragNode(renderer: Renderer, graph: Graph): () => void {
       draggingIds = [];
       startPositions = [];
     } else if (draggingIds.length) {
-      graph.eventEmitter.emit('node:dragend', {
-        nodeId: draggingIds[0],
-        nodeIds: draggingIds,
-      });
+      graph.eventEmitter.emit('node:dragend', { nodeId: draggingIds[0], nodeIds: draggingIds });
       draggingIds = [];
       startPositions = [];
     }
   };
 
-  canvas.addEventListener('mousedown', onDown);
+  graph.eventEmitter.on('node:pointerdown', onNodeDown);
+  graph.eventEmitter.on('combo:pointerdown', onComboDown);
   window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseup', onUp);
   return () => {
-    canvas.removeEventListener('mousedown', onDown);
+    graph.eventEmitter.off('node:pointerdown', onNodeDown);
+    graph.eventEmitter.off('combo:pointerdown', onComboDown);
     window.removeEventListener('mousemove', onMove);
     window.removeEventListener('mouseup', onUp);
   };

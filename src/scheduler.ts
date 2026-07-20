@@ -11,7 +11,7 @@
  *   FULL_PROCESS      — full data replacement or config change, rebuild everything
  */
 
-import { DataModel, ChangeType, ChangeRecord } from './dataModel.js';
+import { ChangeRecord, DataModel } from './dataModel.js';
 import type { Renderer } from './renderer/renderer.js';
 
 export enum RefreshLevel {
@@ -50,10 +50,15 @@ export class RenderScheduler {
           break;
         case 'nodeDataChanged':
         case 'nodeStateChanged':
-        case 'edgeDataChanged':
-        case 'edgeStateChanged':
           // State/data changes affect style → patch style attributes only
           level = Math.max(level, RefreshLevel.PATCH_STYLE);
+          break;
+        case 'edgeDataChanged':
+        case 'edgeStateChanged':
+          // Hidden edge states remove/reinsert edge draw items during full processing.
+          // Rebuild for all edge state/data changes so line, arc, cubic, loop, and
+          // arrow programs stay structurally aligned.
+          level = Math.max(level, RefreshLevel.FULL_PROCESS);
           break;
         case 'nodeAdded':
         case 'nodeRemoved':

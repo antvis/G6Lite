@@ -4,8 +4,8 @@
  * Supports both normal rendering and picking mode (via u_picking uniform).
  */
 
-import { createProgram } from '../gl.js';
 import type { Camera } from '../camera.js';
+import { createProgram } from '../gl.js';
 
 export interface RenderParams {
   width: number;
@@ -70,6 +70,16 @@ export abstract class Program {
       }
       this.array = newArray;
     }
+  }
+
+  setItemCount(count: number): void {
+    const normalized = Math.max(0, count);
+    const needed = normalized * this.getVerticesPerItem() * this.getFloatsPerVertex();
+    if (this.array.length < needed) {
+      this.reallocate(normalized);
+      return;
+    }
+    this.itemCount = normalized;
   }
 
   /**

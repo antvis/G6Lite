@@ -1,136 +1,396 @@
 /**
  * Combo (Group Container) Demo
- * Demonstrates: combo backgrounds, multi-select drag, collapse/expand, nested combos.
+ * Demonstrates: nested application groups, fixed positioning, collapse/expand,
+ * membership changes, runtime combo creation, and data export.
  */
 
 import { Graph } from '../../src/index.ts';
 
+const NODE_COLORS: Record<string, string> = {
+  client: '#7D9FD3',
+  service: '#70A991',
+  data: '#C89C5D',
+  observability: '#9299A8',
+};
+
 export async function run(container: string | HTMLElement) {
+  const containerEl =
+    typeof container === 'string'
+      ? (document.querySelector(container) as HTMLElement)
+      : container;
+  containerEl.style.position = 'relative';
+
   const graph = new Graph({
-    container,
+    container: containerEl,
     data: {
       nodes: [
-        { id: 'n1', comboId: 'frontend', data: { cluster: 'frontend' } },
-        { id: 'n2', comboId: 'frontend', data: { cluster: 'frontend' } },
-        { id: 'n3', comboId: 'frontend', data: { cluster: 'frontend' } },
-        { id: 'n4', comboId: 'backend', data: { cluster: 'backend' } },
-        { id: 'n5', comboId: 'backend', data: { cluster: 'backend' } },
-        { id: 'n6', comboId: 'backend', data: { cluster: 'backend' } },
-        { id: 'n7', comboId: 'database', data: { cluster: 'database' } },
-        { id: 'n8', comboId: 'database', data: { cluster: 'database' } },
-        { id: 'n9' },
+        {
+          id: 'web',
+          name: 'Web 端',
+          x: 100,
+          y: 150,
+          comboId: 'client-apps',
+          data: { layer: 'client' },
+        },
+        {
+          id: 'mobile',
+          name: '移动端',
+          x: 100,
+          y: 255,
+          comboId: 'client-apps',
+          data: { layer: 'client' },
+        },
+        {
+          id: 'console',
+          name: '运营控制台',
+          x: 100,
+          y: 360,
+          comboId: 'client-apps',
+          data: { layer: 'client' },
+        },
+        {
+          id: 'gateway',
+          name: 'API 网关',
+          x: 335,
+          y: 255,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'auth',
+          name: '认证服务',
+          x: 500,
+          y: 150,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'order',
+          name: '订单服务',
+          x: 500,
+          y: 255,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'worker',
+          name: '异步任务',
+          x: 500,
+          y: 360,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'cache',
+          name: 'Redis 缓存',
+          x: 720,
+          y: 150,
+          comboId: 'data-layer',
+          data: { layer: 'data' },
+        },
+        {
+          id: 'mysql',
+          name: 'MySQL',
+          x: 720,
+          y: 255,
+          comboId: 'data-layer',
+          data: { layer: 'data' },
+        },
+        {
+          id: 'mq',
+          name: '消息队列',
+          x: 720,
+          y: 360,
+          comboId: 'data-layer',
+          data: { layer: 'data' },
+        },
       ],
       edges: [
-        { source: 'n1', target: 'n4' },
-        { source: 'n2', target: 'n5' },
-        { source: 'n3', target: 'n6' },
-        { source: 'n4', target: 'n7' },
-        { source: 'n5', target: 'n8' },
-        { source: 'n6', target: 'n7' },
-        { source: 'n9', target: 'n1' },
-        { source: 'n9', target: 'n4' },
+        { source: 'web', target: 'gateway' },
+        { source: 'mobile', target: 'gateway' },
+        { source: 'console', target: 'gateway' },
+        { source: 'gateway', target: 'auth' },
+        { source: 'gateway', target: 'order' },
+        { source: 'gateway', target: 'worker' },
+        { source: 'auth', target: 'cache' },
+        { source: 'order', target: 'mysql' },
+        { source: 'worker', target: 'mq' },
       ],
       combos: [
-        { id: 'frontend', data: { name: 'Frontend' } },
-        { id: 'backend', data: { name: 'Backend' } },
-        { id: 'database', parentId: 'backend', data: { name: 'Database' } },
+        {
+          id: 'client-apps',
+          data: { name: '客户端' },
+          style: {
+            fill: 'rgba(104, 145, 205, 0.08)',
+            stroke: 'rgba(104, 145, 205, 0.42)',
+            padding: 38,
+          },
+        },
+        {
+          id: 'business-platform',
+          data: { name: '业务平台' },
+          style: {
+            fill: 'rgba(112, 132, 160, 0.045)',
+            stroke: 'rgba(112, 132, 160, 0.28)',
+            padding: 24,
+            labelFontSize: 13,
+          },
+        },
+        {
+          id: 'service-layer',
+          parentId: 'business-platform',
+          data: { name: '服务层' },
+          style: {
+            fill: 'rgba(91, 158, 130, 0.08)',
+            stroke: 'rgba(91, 158, 130, 0.4)',
+            padding: 38,
+          },
+        },
+        {
+          id: 'data-layer',
+          parentId: 'business-platform',
+          data: { name: '数据层' },
+          style: {
+            fill: 'rgba(205, 155, 82, 0.09)',
+            stroke: 'rgba(205, 155, 82, 0.42)',
+            padding: 38,
+          },
+        },
       ],
     },
     node: {
       type: 'circle',
       style: {
-        size: 20,
-        fill: (node) => {
-          const cluster = node.data?.cluster;
-          if (cluster === 'frontend') return '#5B8FF9';
-          if (cluster === 'backend') return '#5AD8A6';
-          if (cluster === 'database') return '#F6BD16';
-          return '#aaa';
-        },
-        label: (node) => node.id,
+        size: 18,
+        fill: (node) => NODE_COLORS[String(node.data?.layer)] ?? '#9CA3AF',
+        stroke: '#FFFFFF',
+        strokeWidth: 2,
+        label: (node) =>
+          node.name ?? (node.data?.label as string | undefined) ?? node.id,
         labelPlacement: 'bottom',
+        labelOffsetY: 4,
         labelFontSize: 11,
+        labelColor: '#475569',
       },
       stateStyles: {
-        selected: { stroke: '#1890ff', strokeWidth: 3 },
+        selected: { stroke: '#3B82F6', strokeWidth: 3 },
       },
     },
     edge: {
+      type: 'cubic',
       style: {
-        stroke: '#ccc',
-        lineWidth: 1,
-        endArrow: true,
+        stroke: 'rgba(115, 137, 166, 0.58)',
+        lineWidth: 1.2,
+        endArrow: false,
       },
     },
     combo: {
       style: {
-        fill: 'rgba(100, 150, 255, 0.06)',
-        stroke: 'rgba(100, 150, 255, 0.3)',
-        strokeWidth: 1,
         borderRadius: 12,
-        padding: 30,
-        label: (combo) => (combo.data as Record<string, string>)?.name ?? combo.id,
-        labelPlacement: 'top',
-        labelFontSize: 13,
-        labelColor: 'rgba(0, 0, 0, 0.65)',
+        label: (combo) =>
+          (combo.data as Record<string, string> | undefined)?.name ?? combo.id,
+        labelPlacement: 'inside',
+        labelFontSize: 12,
+        labelColor: '#526071',
+        collapsedType: 'rect',
+        collapsedSize: [72, 38],
+        count: false,
+        stateStyles: {
+          selected: { stroke: '#3B82F6', strokeWidth: 2 },
+          active: { stroke: '#60A5FA', strokeWidth: 2 },
+        },
       },
     },
-    layout: { type: 'd3-force' },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
   });
 
   await graph.render();
+  graph.fitView(0.82);
 
-  // Control panel
-  const panel = document.createElement('div');
-  panel.style.cssText =
-    'position:absolute;top:10px;right:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);font-size:13px;z-index:10;';
-  panel.innerHTML = `
-    <div style="font-weight:600;margin-bottom:8px">Combo Controls</div>
-    <button id="btn-collapse-fe">Collapse Frontend</button><br/>
-    <button id="btn-expand-fe" style="margin-top:4px">Expand Frontend</button><br/>
-    <button id="btn-collapse-be" style="margin-top:4px">Collapse Backend</button><br/>
-    <button id="btn-expand-be" style="margin-top:4px">Expand Backend</button><br/>
-    <button id="btn-toggle-db" style="margin-top:4px">Toggle Database</button><br/>
-    <button id="btn-add-combo" style="margin-top:4px">Move n9 → Frontend</button><br/>
-    <button id="btn-remove-combo" style="margin-top:4px">Remove n9 from combo</button>
-    <div style="margin-top:8px;color:#666;font-size:11px">
-      Tip: Select multiple nodes (click+select),<br/>then drag to move them together.
-    </div>
+  const toolbarStyle = document.createElement('style');
+  toolbarStyle.textContent = `
+    .combo-demo-toolbar {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      max-width: calc(100% - 24px);
+      padding: 7px;
+      border: 1px solid rgba(148, 163, 184, 0.26);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+      color: #475569;
+      font: 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      backdrop-filter: blur(6px);
+    }
+    .combo-demo-toolbar button {
+      height: 26px;
+      padding: 0 9px;
+      border: 1px solid #dbe3ee;
+      border-radius: 6px;
+      background: #fff;
+      color: #475569;
+      font: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    }
+    .combo-demo-toolbar button:hover {
+      border-color: #8fb3e8;
+      background: #f4f8fd;
+      color: #315f9e;
+    }
+    .combo-demo-toolbar button:focus-visible {
+      outline: 2px solid rgba(59, 130, 246, 0.36);
+      outline-offset: 1px;
+    }
+    .combo-demo-toolbar button:disabled {
+      cursor: default;
+      opacity: 0.55;
+    }
+    .combo-demo-toolbar__status {
+      min-width: 72px;
+      color: #7c8798;
+      font-size: 11px;
+      white-space: nowrap;
+    }
   `;
-  const containerEl =
-    typeof container === 'string' ? document.querySelector(container)! : container;
-  containerEl.style.position = 'relative';
-  containerEl.appendChild(panel);
+  containerEl.appendChild(toolbarStyle);
 
-  panel.querySelector('#btn-collapse-fe')!.addEventListener('click', () => {
-    graph.collapseCombo('frontend');
+  const toolbar = document.createElement('div');
+  toolbar.className = 'combo-demo-toolbar';
+  toolbar.setAttribute('data-capture-ignore', '');
+  toolbar.setAttribute('aria-label', 'Combo 示例工具条');
+  toolbar.innerHTML = `
+    <button type="button" data-action="collapse-all">全部折叠</button>
+    <button type="button" data-action="expand-all">全部展开</button>
+    <button type="button" data-action="toggle-data">切换数据层</button>
+    <button type="button" data-action="move-console">控制台加入服务层</button>
+    <button type="button" data-action="create-runtime">创建可观测分组</button>
+    <button type="button" data-action="export">导出数据</button>
+    <output class="combo-demo-toolbar__status" aria-live="polite">固定坐标 · 可拖拽</output>
+  `;
+  containerEl.appendChild(toolbar);
+
+  const status = toolbar.querySelector<HTMLOutputElement>(
+    '.combo-demo-toolbar__status',
+  )!;
+  const consoleButton = toolbar.querySelector<HTMLButtonElement>(
+    '[data-action="move-console"]',
+  )!;
+  const runtimeButton = toolbar.querySelector<HTMLButtonElement>(
+    '[data-action="create-runtime"]',
+  )!;
+  let consoleInService = false;
+  let runtimeCreated = false;
+
+  const setStatus = (message: string) => {
+    status.textContent = message;
+  };
+
+  toolbar.querySelector('[data-action="collapse-all"]')!.addEventListener('click', () => {
+    graph.collapseCombo('client-apps');
+    graph.collapseCombo('business-platform');
+    if (runtimeCreated) graph.collapseCombo('observability');
+    setStatus('已折叠顶层分组');
   });
-  panel.querySelector('#btn-expand-fe')!.addEventListener('click', () => {
-    graph.expandCombo('frontend');
+
+  toolbar.querySelector('[data-action="expand-all"]')!.addEventListener('click', () => {
+    graph.expandCombo('business-platform');
+    graph.expandCombo('client-apps');
+    graph.expandCombo('service-layer');
+    graph.expandCombo('data-layer');
+    if (runtimeCreated) graph.expandCombo('observability');
+    setStatus('已展开全部分组');
   });
-  panel.querySelector('#btn-collapse-be')!.addEventListener('click', () => {
-    graph.collapseCombo('backend');
+
+  toolbar.querySelector('[data-action="toggle-data"]')!.addEventListener('click', () => {
+    graph.expandCombo('business-platform');
+    graph.toggleCombo('data-layer');
+    const collapsed = graph.getComboData('data-layer')?.collapsed;
+    setStatus(collapsed ? '数据层已折叠' : '数据层已展开');
   });
-  panel.querySelector('#btn-expand-be')!.addEventListener('click', () => {
-    graph.expandCombo('backend');
-  });
-  panel.querySelector('#btn-toggle-db')!.addEventListener('click', () => {
-    graph.toggleCombo('database');
-  });
-  panel.querySelector('#btn-add-combo')!.addEventListener('click', () => {
-    graph.addToCombo('n9', 'frontend');
+
+  consoleButton.addEventListener('click', () => {
+    graph.expandCombo('business-platform');
+    graph.expandCombo('service-layer');
+    if (consoleInService) {
+      graph.addToCombo('console', 'client-apps');
+      consoleButton.textContent = '控制台加入服务层';
+      setStatus('运营控制台已回到客户端');
+    } else {
+      graph.addToCombo('console', 'service-layer');
+      consoleButton.textContent = '控制台回到客户端';
+      setStatus('运营控制台已加入服务层');
+    }
+    consoleInService = !consoleInService;
     graph.scheduleRender();
   });
-  panel.querySelector('#btn-remove-combo')!.addEventListener('click', () => {
-    graph.removeFromCombo('n9');
-    graph.scheduleRender();
+
+  runtimeButton.addEventListener('click', () => {
+    if (runtimeCreated) return;
+    graph.addNodes([
+      {
+        id: 'logs',
+        x: 570,
+        y: 455,
+        data: { layer: 'observability', label: '日志采集' },
+      },
+      {
+        id: 'metrics',
+        x: 720,
+        y: 455,
+        data: { layer: 'observability', label: '指标监控' },
+      },
+    ]);
+    graph.createCombo(
+      {
+        id: 'observability',
+        data: { name: '可观测性', source: 'createCombo' },
+        style: {
+          fill: 'rgba(134, 126, 176, 0.08)',
+          stroke: 'rgba(134, 126, 176, 0.42)',
+          padding: 32,
+          label: '可观测性',
+          labelPlacement: 'inside',
+          labelColor: '#645F83',
+          collapsedType: 'rect',
+          collapsedSize: [84, 38],
+          count: false,
+        },
+      },
+      ['logs', 'metrics'],
+    );
+    runtimeCreated = true;
+    runtimeButton.disabled = true;
+    runtimeButton.textContent = '已创建可观测分组';
+    graph.fitView(0.78);
+    setStatus('createCombo() 已执行');
+  });
+
+  toolbar.querySelector('[data-action="export"]')!.addEventListener('click', () => {
+    const data = graph.getData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'g6lite-combo-data.json';
+    link.click();
+    URL.revokeObjectURL(url);
+    setStatus(`${data.nodes.length} 节点 · ${data.combos?.length ?? 0} 分组`);
   });
 
   return {
     destroy() {
       graph.destroy();
-      panel.remove();
+      toolbar.remove();
+      toolbarStyle.remove();
     },
   };
 }

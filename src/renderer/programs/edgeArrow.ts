@@ -5,13 +5,13 @@
  * Stride: 15 floats per vertex.
  */
 
-import { Program } from './program.js';
-import type { RenderParams, AttributeLayout } from './program.js';
-import { vertexShader } from './shaders/edgeArrow.vert.js';
-import { fragmentShader } from './shaders/edgeArrow.frag.js';
 import { encodeId } from '../picking.js';
+import type { AttributeLayout, RenderParams } from './program.js';
+import { Program } from './program.js';
+import { fragmentShader } from './shaders/edgeArrow.frag.js';
+import { vertexShader } from './shaders/edgeArrow.vert.js';
 
-const FLOATS_PER_VERTEX = 15;
+const FLOATS_PER_VERTEX = 16;
 const VERTICES_PER_ITEM = 6;
 
 // Indent depth: 20% of arrowLength from base toward tip
@@ -56,6 +56,7 @@ export class EdgeArrowProgram extends Program {
       { name: 'a_nodeRadius', size: 1 },
       { name: 'a_color', size: 3 },
       { name: 'a_pickingColor', size: 3 },
+      { name: 'a_opacity', size: 1 },
     ];
   }
 
@@ -77,6 +78,7 @@ export class EdgeArrowProgram extends Program {
     nodeRadius: number,
     color: [number, number, number],
     pickingIndex: number,
+    opacity = 1,
   ): void {
     const [pr, pg, pb] = encodeId(pickingIndex);
     const pR = pr / 255,
@@ -101,6 +103,7 @@ export class EdgeArrowProgram extends Program {
       this.array[o + 12] = pR;
       this.array[o + 13] = pG;
       this.array[o + 14] = pB;
+      this.array[o + 15] = opacity;
     }
   }
 }

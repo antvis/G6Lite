@@ -4,11 +4,11 @@
  * Stride: 15 floats per vertex.
  */
 
-import { Program } from './program.js';
-import type { RenderParams, AttributeLayout } from './program.js';
-import { vertexShader } from './shaders/nodeCircle.vert.js';
-import { fragmentShader } from './shaders/nodeCircle.frag.js';
 import { encodeId } from '../picking.js';
+import type { AttributeLayout, RenderParams } from './program.js';
+import { Program } from './program.js';
+import { fragmentShader } from './shaders/nodeCircle.frag.js';
+import { vertexShader } from './shaders/nodeCircle.vert.js';
 
 const FLOATS_PER_VERTEX = 15;
 
@@ -123,6 +123,20 @@ export class NodeCircleProgram extends Program {
     t[13] = opacity;
     t[14] = haloWidth;
     return t;
+  }
+
+  /** Return the full rendered diameter (node size + halo on both sides) in graph coords. */
+  getNodeExtent(index: number): number {
+    const offset = index * FLOATS_PER_VERTEX;
+    return this.array[offset + 2] + this.array[offset + 14] * 2;
+  }
+
+  getNodeSize(index: number): number {
+    return this.array[index * FLOATS_PER_VERTEX + 2];
+  }
+
+  getNodeHaloWidth(index: number): number {
+    return this.array[index * FLOATS_PER_VERTEX + 14];
   }
 
   /** Patch style attributes for a single node without full reprocess. */

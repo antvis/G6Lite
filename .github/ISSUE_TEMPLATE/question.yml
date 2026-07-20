@@ -1,0 +1,41 @@
+name: ❓ 使用咨询 / Question
+description: 提问使用方法或寻求帮助 / Ask a usage question or get help
+title: "[Question] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        在提问前，建议先查阅 [文档](https://github.com/antvis/G6Lite#readme) 与已有 Issue。
+        如果是用法讨论，也欢迎使用 GitHub Discussions。
+        Before asking, please check the docs and existing issues. For open-ended
+        discussion, GitHub Discussions is also welcome.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: 提交前确认 / Prerequisites
+      options:
+        - label: 我已查阅文档与 [现有 Issue](https://github.com/antvis/G6Lite/issues)，仍未找到答案 / I have checked the docs and existing issues without finding an answer.
+          required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 你的问题 / Your Question
+      description: 清晰描述你想做什么、卡在哪里。 / Describe what you are trying to do and where you are stuck.
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: 相关代码 / Relevant Code
+      description: 粘贴相关代码片段（如有）。 / Paste relevant code, if any.
+      render: typescript
+
+  - type: input
+    id: version
+    attributes:
+      label: G6Lite 版本 / Version
+      placeholder: e.g. 0.1.0-beta.4

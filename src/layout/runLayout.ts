@@ -6,20 +6,20 @@
 import {
   CircularLayout,
   ConcentricLayout,
-  DagreLayout,
   D3ForceLayout,
-  ForceLayout,
+  DagreLayout,
   ForceAtlas2Layout,
+  ForceLayout,
   FruchtermanLayout,
   GridLayout,
   MDSLayout,
-  RandomLayout,
   RadialLayout,
+  RandomLayout,
 } from '@antv/layout';
+import type { GraphData, GraphNode, LayoutConfig } from '../types.js';
+import { FishboneLayout } from './fishboneLayout.js';
 import { IndentedLayout } from './indentedLayout.js';
 import { MindmapLayout } from './mindmapLayout.js';
-import { FishboneLayout } from './fishboneLayout.js';
-import type { GraphData, GraphNode, LayoutConfig } from '../types.js';
 import { runLayoutInWorker } from './workerLayout.js';
 
 export type LayoutResult = { nodes: Array<GraphNode & { x: number; y: number }> };
@@ -53,7 +53,26 @@ const LAYOUT_MAP = {
  * in a Web Worker to avoid blocking the main thread. Falls back to main-thread
  * layout if the Worker fails.
  */
-export async function runLayout(data: GraphData, config: LayoutConfig): Promise<LayoutResult> {
+export async function runLayout(
+  data: GraphData,
+  config: LayoutConfig,
+  viewport?: { width: number; height: number },
+): Promise<LayoutResult> {
+  // Inject canvas viewport (width/height/center) so @antv/layout sizes the
+  // graph to the CANVAS, not window.innerWidth/innerHeight. Without this its
+  // normalizeViewport() falls back to the browser window (or 0×0 in a worker),
+  // distorting force/circular/radial/etc. by the window aspect ratio. Only fill
+  // fields the user did not provide. Merge into config BEFORE the worker branch
+  // so the worker inherits the same dimensions.
+  if (viewport) {
+    const merged = { ...config } as Record<string, unknown>;
+    if (merged.width === undefined) merged.width = viewport.width;
+    if (merged.height === undefined) merged.height = viewport.height;
+    if (merged.center === undefined)
+      merged.center = [(merged.width as number) / 2, (merged.height as number) / 2];
+    config = merged as LayoutConfig;
+  }
+
   const useWorker = config.worker ?? false;
 
   if (useWorker) {

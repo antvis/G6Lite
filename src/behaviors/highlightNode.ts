@@ -1,61 +1,39 @@
 /**
  * highlight-node: hover node highlights it and adjacent nodes/edges.
- * Uses O(1) GPU framebuffer picking via renderer.pickAt().
- * Emits node:hover (enter) and node:mouseleave (leave).
+ * Consumes pointer events from the InteractionDispatcher (no own picking).
  */
 
-import type { Renderer } from '../renderer/renderer.js';
 import type { Graph } from '../graph.js';
+import type { Renderer } from '../renderer/renderer.js';
 
 export function highlightNode(renderer: Renderer, graph?: Graph): () => void {
+  if (!graph) return () => {};
   const canvas = renderer.getCanvas();
-  let lastNodeId: string | null = null;
 
-  const onMove = (e: MouseEvent) => {
-    const result = renderer.pickAt(e.clientX, e.clientY);
-    if (result && result.type === 'node') {
-      const nodeId = result.id;
-      // Emit leave if previous node differs
-      if (lastNodeId !== null && lastNodeId !== nodeId) {
-        graph?.eventEmitter.emit('node:mouseleave', { nodeId: lastNodeId, event: e });
+  const onOver = (payload: { nodeId: string }) => {
+    const nodeId = payload.nodeId;
+    canvas.style.cursor = 'pointer';
+    const nodeIds = new Set<string>([nodeId]);
+    const edgeIndices = new Set<number>();
+    const edges = renderer.getEdges();
+    edges.forEach((edge, i) => {
+      if (edge.source === nodeId || edge.target === nodeId) {
+        nodeIds.add(edge.source).add(edge.target);
+        edgeIndices.add(i);
       }
-      canvas.style.cursor = 'pointer';
-      const nodeIds = new Set<string>([nodeId]);
-      const edgeIndices = new Set<number>();
-      const edges = renderer.getEdges();
-      edges.forEach((edge, i) => {
-        if (edge.source === nodeId || edge.target === nodeId) {
-          nodeIds.add(edge.source).add(edge.target);
-          edgeIndices.add(i);
-        }
-      });
-      renderer.setHighlight({ nodeIds, edgeIndices });
-      lastNodeId = nodeId;
-      graph?.eventEmitter.emit('node:hover', { nodeId, event: e });
-    } else {
-      // Nothing hit — emit leave
-      if (lastNodeId !== null) {
-        graph?.eventEmitter.emit('node:mouseleave', { nodeId: lastNodeId, event: e });
-        lastNodeId = null;
-      }
-      canvas.style.cursor = 'default';
-      renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
-    }
+    });
+    renderer.setHighlight({ nodeIds, edgeIndices });
   };
 
-  const onLeave = (e: MouseEvent) => {
-    if (lastNodeId !== null) {
-      graph?.eventEmitter.emit('node:mouseleave', { nodeId: lastNodeId, event: e });
-      lastNodeId = null;
-    }
+  const onLeave = () => {
     canvas.style.cursor = 'default';
     renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
   };
 
-  canvas.addEventListener('mousemove', onMove);
-  canvas.addEventListener('mouseleave', onLeave);
+  graph.eventEmitter.on('node:pointerover', onOver);
+  graph.eventEmitter.on('node:pointerleave', onLeave);
   return () => {
-    canvas.removeEventListener('mousemove', onMove);
-    canvas.removeEventListener('mouseleave', onLeave);
+    graph.eventEmitter.off('node:pointerover', onOver);
+    graph.eventEmitter.off('node:pointerleave', onLeave);
   };
 }

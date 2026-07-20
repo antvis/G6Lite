@@ -1,15 +1,17 @@
 /**
  * Combined hover: highlight edge (and its nodes) or highlight node (and adjacent).
- * Uses O(1) GPU framebuffer picking via renderer.pickAt(). Edge takes precedence.
- * Emits node:hover / edge:hover (enter) and node:mouseleave / edge:mouseleave (leave).
+ * Consumes pointer events from the InteractionDispatcher (no own picking).
+ * Edge takes precedence — the dispatcher already resolves node-over-edge hit
+ * priority, so node and edge pointer streams are mutually exclusive here.
  *
  * Config options:
  * - degree: number — how many hops of neighbors to highlight (default: 1)
  * - inactiveState: string — optional state to apply to non-highlighted elements
  */
 
-import type { Renderer } from '../renderer/renderer.js';
 import type { Graph } from '../graph.js';
+import type { Renderer } from '../renderer/renderer.js';
+import type { ElementState } from '../types.js';
 
 export interface HoverHighlightConfig {
   type: string;
@@ -17,35 +19,101 @@ export interface HoverHighlightConfig {
   inactiveState?: string;
 }
 
-/** Track the last hovered item to emit leave events when hover target changes. */
-type HoverTarget =
-  | { kind: 'node'; id: string }
-  | { kind: 'edge'; index: number; source: string; target: string }
-  | null;
-
 export function hoverHighlight(
   renderer: Renderer,
   graph?: Graph,
   config?: HoverHighlightConfig,
 ): () => void {
+  if (!graph) return () => {};
   const canvas = renderer.getCanvas();
   const degree = config?.degree ?? 1;
   const inactiveState = config?.inactiveState;
-  let lastHover: HoverTarget = null;
   let inactiveApplied: string[] = [];
+  let highlightApplied: string[] = [];
+
+  const batchSetState = (
+    items: Array<{ id: string; state: ElementState; value: boolean }>,
+  ): void => {
+    if (items.length === 0) return;
+    if (typeof graph.batchSetState === 'function') {
+      graph.batchSetState(items);
+      return;
+    }
+    for (const item of items) {
+      graph.setItemState(item.id, item.state, item.value);
+    }
+  };
+
+  const clearHighlightState = () => {
+    if (highlightApplied.length === 0) return;
+    batchSetState(
+      highlightApplied.map((id) => ({
+        id,
+        state: 'highlight',
+        value: false,
+      })),
+    );
+    highlightApplied = [];
+  };
 
   const clearInactive = () => {
-    if (inactiveState && graph && inactiveApplied.length > 0) {
-      for (const id of inactiveApplied) {
-        graph.setItemState(id, inactiveState as any, false);
-      }
+    if (inactiveState && inactiveApplied.length > 0) {
+      batchSetState(
+        inactiveApplied.map((id) => ({
+          id,
+          state: inactiveState as ElementState,
+          value: false,
+        })),
+      );
       inactiveApplied = [];
     }
   };
 
+  const applyStateStyles = (nodeIds: Set<string>, edgeIndices: Set<number>) => {
+    clearHighlightState();
+    clearInactive();
+
+    const edges = renderer.getEdges();
+    const edgeIds = new Set<string>();
+    edgeIndices.forEach((edgeIndex) => {
+      const edgeId = (edges[edgeIndex] as { id?: string } | undefined)?.id;
+      if (edgeId) edgeIds.add(edgeId);
+    });
+
+    const items: Array<{ id: string; state: ElementState; value: boolean }> = [];
+    nodeIds.forEach((id) => {
+      items.push({ id, state: 'highlight', value: true });
+      highlightApplied.push(id);
+    });
+    edgeIds.forEach((id) => {
+      items.push({ id, state: 'highlight', value: true });
+      highlightApplied.push(id);
+    });
+
+    if (inactiveState) {
+      const inactiveItems: Array<{ id: string; state: ElementState; value: boolean }> = [];
+      for (const node of renderer.getNodes()) {
+        if (!nodeIds.has(node.id)) {
+          inactiveItems.push({ id: node.id, state: inactiveState as ElementState, value: true });
+          inactiveApplied.push(node.id);
+        }
+      }
+      edges.forEach((edge, index) => {
+        const edgeId = (edge as { id?: string }).id;
+        if (edgeId && !edgeIndices.has(index)) {
+          inactiveItems.push({ id: edgeId, state: inactiveState as ElementState, value: true });
+          inactiveApplied.push(edgeId);
+        }
+      });
+      items.push(...inactiveItems);
+    }
+
+    batchSetState(items);
+  };
+
   const collectNeighbors = (startId: string, hops: number): Set<string> => {
     const nodeIds = new Set<string>([startId]);
-    if (!graph || hops <= 0 || typeof graph.getNeighborNodes !== 'function') return nodeIds;
+    if (hops <= 0 || typeof graph.getNeighborNodes !== 'function') return nodeIds;
     let frontier = [startId];
     for (let d = 0; d < hops; d++) {
       const nextFrontier: string[] = [];
@@ -64,108 +132,52 @@ export function hoverHighlight(
     return nodeIds;
   };
 
-  const emitLeave = (e: MouseEvent) => {
-    if (!lastHover) return;
-    if (lastHover.kind === 'node') {
-      graph?.eventEmitter.emit('node:mouseleave', { nodeId: lastHover.id, event: e });
-    } else if (lastHover.kind === 'edge') {
-      graph?.eventEmitter.emit('edge:mouseleave', {
-        edgeIndex: lastHover.index,
-        source: lastHover.source,
-        target: lastHover.target,
-        event: e,
-      });
-    }
-    lastHover = null;
-  };
-
-  const onMove = (e: MouseEvent) => {
-    const result = renderer.pickAt(e.clientX, e.clientY);
-
-    // Edge takes precedence
-    if (result && result.type === 'edge') {
-      const edges = renderer.getEdges();
-      const edge = edges[result.index];
-      if (edge) {
-        if (lastHover?.kind !== 'edge' || lastHover.index !== result.index) {
-          emitLeave(e);
-          clearInactive();
-        }
-        canvas.style.cursor = 'pointer';
-        renderer.setHighlight({
-          nodeIds: new Set([edge.source, edge.target]),
-          edgeIndices: new Set([result.index]),
-        });
-        lastHover = { kind: 'edge', index: result.index, source: edge.source, target: edge.target };
-        graph?.eventEmitter.emit('edge:hover', {
-          edgeIndex: result.index,
-          source: edge.source,
-          target: edge.target,
-          event: e,
-        });
-        return;
-      }
-    }
-
-    // Node hit
-    if (result && result.type === 'node') {
-      const nodeId = result.id;
-      if (lastHover?.kind !== 'node' || lastHover.id !== nodeId) {
-        emitLeave(e);
-        clearInactive();
-      }
-      canvas.style.cursor = 'pointer';
-
-      const nodeIds = collectNeighbors(nodeId, degree);
-      const edgeIndices = new Set<number>();
-      const edges = renderer.getEdges();
-      edges.forEach((edge, i) => {
-        if (nodeIds.has(edge.source) && nodeIds.has(edge.target)) {
-          edgeIndices.add(i);
-        } else if (edge.source === nodeId || edge.target === nodeId) {
-          nodeIds.add(edge.source);
-          nodeIds.add(edge.target);
-          edgeIndices.add(i);
-        }
-      });
-
-      renderer.setHighlight({ nodeIds, edgeIndices });
-
-      if (inactiveState && graph) {
-        const allNodes = renderer.getNodes();
-        const newInactive: string[] = [];
-        for (const n of allNodes) {
-          if (!nodeIds.has(n.id)) {
-            graph.setItemState(n.id, inactiveState as any, true);
-            newInactive.push(n.id);
-          }
-        }
-        inactiveApplied = newInactive;
-      }
-
-      lastHover = { kind: 'node', id: nodeId };
-      graph?.eventEmitter.emit('node:hover', { nodeId, event: e });
-      return;
-    }
-
-    // Nothing hit — emit leave and clear highlight
-    emitLeave(e);
+  const clearHighlight = () => {
+    clearHighlightState();
     clearInactive();
     canvas.style.cursor = 'default';
     renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
   };
 
-  const onLeave = (e: MouseEvent) => {
-    emitLeave(e);
-    clearInactive();
-    canvas.style.cursor = 'default';
-    renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
+  const onEdgeOver = (payload: { source: string; target: string; edgeIndex: number }) => {
+    canvas.style.cursor = 'pointer';
+    const nodeIds = new Set([payload.source, payload.target]);
+    const edgeIndices = new Set([payload.edgeIndex]);
+    renderer.setHighlight({ nodeIds, edgeIndices });
+    applyStateStyles(nodeIds, edgeIndices);
   };
 
-  canvas.addEventListener('mousemove', onMove);
-  canvas.addEventListener('mouseleave', onLeave);
+  const onNodeOver = (payload: { nodeId: string }) => {
+    clearInactive();
+    const nodeId = payload.nodeId;
+    canvas.style.cursor = 'pointer';
+
+    const nodeIds = collectNeighbors(nodeId, degree);
+    const edgeIndices = new Set<number>();
+    const edges = renderer.getEdges();
+    edges.forEach((edge, i) => {
+      if (nodeIds.has(edge.source) && nodeIds.has(edge.target)) {
+        edgeIndices.add(i);
+      } else if (edge.source === nodeId || edge.target === nodeId) {
+        nodeIds.add(edge.source);
+        nodeIds.add(edge.target);
+        edgeIndices.add(i);
+      }
+    });
+
+    renderer.setHighlight({ nodeIds, edgeIndices });
+    applyStateStyles(nodeIds, edgeIndices);
+  };
+
+  graph.eventEmitter.on('edge:pointerover', onEdgeOver);
+  graph.eventEmitter.on('edge:pointerleave', clearHighlight);
+  graph.eventEmitter.on('node:pointerover', onNodeOver);
+  graph.eventEmitter.on('node:pointerleave', clearHighlight);
+
   return () => {
-    canvas.removeEventListener('mousemove', onMove);
-    canvas.removeEventListener('mouseleave', onLeave);
+    graph.eventEmitter.off('edge:pointerover', onEdgeOver);
+    graph.eventEmitter.off('edge:pointerleave', clearHighlight);
+    graph.eventEmitter.off('node:pointerover', onNodeOver);
+    graph.eventEmitter.off('node:pointerleave', clearHighlight);
   };
 }

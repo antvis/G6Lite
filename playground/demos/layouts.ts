@@ -42,9 +42,9 @@ export async function run(container: string | HTMLElement) {
       container: canvasParent,
       data,
       node: { type: 'circle', style: { size: 10 } },
-      edge: { type: 'line' },
+      edge: { type: 'line', style: { endArrow: true } },
       layout: { ...layout },
-      behaviors: ['zoom-canvas', 'drag-canvas'],
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
       theme: 'light',
     });
     await currentGraph.render();

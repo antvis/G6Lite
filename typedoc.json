@@ -1,0 +1,28 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts"],
+  "tsconfig": "tsconfig.json",
+  "out": "website/content/docs/api",
+  "plugin": ["typedoc-plugin-markdown", "typedoc-plugin-frontmatter"],
+  "readme": "none",
+  "githubPages": false,
+  "hideGenerator": true,
+  "excludeInternal": false,
+  "excludePrivate": true,
+  "sort": ["source-order"],
+  "outputFileStrategy": "modules",
+  "entryFileName": "index",
+  "fileExtension": ".mdx",
+  "useCodeBlocks": true,
+  "expandObjects": true,
+  "expandParameters": true,
+  "parametersFormat": "table",
+  "indexFormat": "table",
+  "hidePageHeader": true,
+  "hideBreadcrumbs": true,
+  "useHTMLAnchors": false,
+  "frontmatterGlobals": {
+    "title": "API 参考",
+    "description": "由 TypeDoc 从 src/index.ts 的公共 API 类型自动生成"
+  }
+}

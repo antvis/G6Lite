@@ -40,10 +40,39 @@ export type EdgeState = ElementState;
 
 /** Edge: at least source and target (node ids); optional data and states. */
 export interface GraphEdge {
+  id?: string;
   source: string;
   target: string;
   data?: EdgeData;
   states?: EdgeState[];
+}
+
+/** Configuration for automatic same-endpoint edge separation. */
+export interface ParallelEdgesConfig {
+  enabled?: boolean;
+  /** Offset step in graph coordinates. Defaults to 20. */
+  offset?: number;
+  /** Grouping fields. Currently only source/target grouping is supported. */
+  mergeBy?: Array<'source' | 'target'>;
+  /** Whether A->B and B->A belong to the same separation group. Defaults to true. */
+  includeReverse?: boolean;
+  /** Clamp minimum absolute offset for non-center parallel edges. Defaults to 0. */
+  minOffset?: number;
+  /** Clamp maximum absolute offset. Defaults to 80. */
+  maxOffset?: number;
+}
+
+/** Internal metadata attached to edges after process-parallel-edges runs. */
+export interface ParallelEdgeMeta {
+  groupKey: string;
+  groupSize: number;
+  groupIndex: number;
+  sameDirectionIndex: number;
+  sameDirectionSize: number;
+  directionSign: 1 | -1;
+  offset: number;
+  curvature: number;
+  isReversedInGroup: boolean;
 }
 
 /** Graph data: nodes, edges, and optional combos. */
@@ -62,6 +91,7 @@ export interface NodeStateStyleOverride {
   stroke?: string;
   strokeWidth?: number;
   opacity?: number;
+  haloWidth?: number;
 }
 
 /** Label placement relative to node. */
@@ -70,9 +100,82 @@ export type LabelPlacement = 'center' | 'top' | 'bottom' | 'left' | 'right';
 /** Edge label placement along the edge. */
 export type EdgeLabelPlacement = 'start' | 'center' | 'end';
 
+/** Label owner type shared by node and edge label renderers. */
+export type LabelType = 'node' | 'edge';
+
+/** Final, function-free label style passed to a custom label renderer. */
+export interface ResolvedLabelStyle {
+  /** Canvas backing-store pixels after DPR/zoom conversion. */
+  labelFontSize: number;
+  labelFontFamily: string;
+  labelFontWeight: string;
+  labelColor: string;
+  labelPlacement: LabelPlacement | EdgeLabelPlacement;
+  /** Canvas backing-store pixels after DPR/zoom conversion. */
+  labelOffsetX: number;
+  /** Canvas backing-store pixels after DPR/zoom conversion. */
+  labelOffsetY: number;
+  labelBackground: string | false;
+  /** Canvas backing-store pixels after DPR/zoom conversion. */
+  labelBackgroundPadding: number;
+  /** Canvas backing-store pixels after DPR/zoom conversion; 0 means unlimited. */
+  labelMaxWidth: number;
+  labelAutoRotate: boolean;
+}
+
+/** Measurement result returned by a custom label renderer. */
+export interface LabelLayout<T = unknown> {
+  /** Full visual width in Canvas backing-store pixels. */
+  width: number;
+  /** Full visual height in Canvas backing-store pixels. */
+  height: number;
+  /** Renderer-owned data passed from measure() to draw() for the same label. */
+  data?: T;
+}
+
+interface LabelParamsBase {
+  ctx: CanvasRenderingContext2D;
+  text: string;
+  style: Readonly<ResolvedLabelStyle>;
+  dpr: number;
+  zoom: number;
+}
+
+/** Custom label renderer context for a node label. */
+export interface NodeLabelParams extends LabelParamsBase {
+  type: 'node';
+  item: GraphNode;
+  node: GraphNode;
+}
+
+/** Custom label renderer context for an edge label. */
+export interface EdgeLabelParams extends LabelParamsBase {
+  type: 'edge';
+  item: GraphEdge;
+  edge: GraphEdge;
+  source: GraphNode;
+  target: GraphNode;
+}
+
+/** Parameters passed to LabelRenderer.measure(). */
+export type LabelMeasureParams = NodeLabelParams | EdgeLabelParams;
+
+/** Parameters passed to LabelRenderer.draw(). */
+export type LabelDrawParams<T = unknown> =
+  | (NodeLabelParams & { layout: Readonly<LabelLayout<T>> })
+  | (EdgeLabelParams & { layout: Readonly<LabelLayout<T>> });
+
+/** Shared custom label renderer protocol for node and edge labels. */
+export interface LabelRenderer<T = unknown> {
+  measure(params: LabelMeasureParams): LabelLayout<T>;
+  draw(params: LabelDrawParams<T>): void;
+}
+
 /** Node config: type and style (WebGL-capable only). */
 export interface NodeConfig {
-  type?: 'circle' | 'rect';
+  type?: 'circle' | 'rect' | (string & {});
+  /** Registered custom label renderer name. */
+  labelRenderer?: string;
   style?: {
     fill?: NodeStyleValue<string>;
     size?: NodeStyleValue<number>;
@@ -98,6 +201,12 @@ export interface NodeConfig {
     icon?: NodeStyleValue<string | false>;
     iconWidth?: NodeStyleValue<number>;
     iconHeight?: NodeStyleValue<number>;
+    iconType?: NodeStyleValue<'image' | 'text'>;
+    iconFontFamily?: NodeStyleValue<string>;
+    iconFontSize?: NodeStyleValue<number>;
+    iconColor?: NodeStyleValue<string>;
+    iconOffsetX?: NodeStyleValue<number>;
+    iconOffsetY?: NodeStyleValue<number>;
   };
   stateStyles?: Partial<Record<NodeState, NodeStateStyleOverride>>;
 }
@@ -116,6 +225,9 @@ export interface EdgeStateStyleOverride {
 /** Edge config: type and style (WebGL-capable only). */
 export interface EdgeConfig {
   type?: 'line' | 'arc' | 'polyline' | 'cubic';
+  /** Registered custom label renderer name. */
+  labelRenderer?: string;
+  parallelEdges?: ParallelEdgesConfig | boolean;
   style?: {
     stroke?: EdgeStyleValue<string>;
     lineWidth?: EdgeStyleValue<number>;
@@ -148,11 +260,22 @@ export interface LayoutConfig {
   type: string;
   /** Run layout in a Web Worker to avoid blocking the main thread. */
   worker?: boolean;
+  /** Layout viewport width; defaults to the canvas width (injected by Graph). */
+  width?: number;
+  /** Layout viewport height; defaults to the canvas height (injected by Graph). */
+  height?: number;
+  /** Layout center point; defaults to [width/2, height/2]. */
+  center?: [number, number];
   [key: string]: unknown;
 }
 
 /** Behavior: string name or config object. */
 export type BehaviorOption = string | { type: string; [key: string]: unknown };
+
+/** Data transform config. */
+export type TransformOption =
+  | 'process-parallel-edges'
+  | { type: 'process-parallel-edges'; options?: ParallelEdgesConfig };
 
 /** Theme tokens (partial list; extend as needed). */
 export interface ThemeTokens {
@@ -177,23 +300,44 @@ export type ThemeOption = 'light' | 'dark' | ({ type: 'light' | 'dark' } & Parti
 export interface ComboData {
   id: string;
   parentId?: string;
+  collapsed?: boolean;
   style?: Partial<ComboStyleConfig>;
   data?: Record<string, unknown>;
+  states?: ElementState[];
+}
+
+/** Style value or function for combo. */
+export type ComboStyleValue<T> = T | ((combo: InternalCombo) => T);
+
+/** Style overrides applied per combo state. */
+export interface ComboStateStyleOverride {
+  fill?: ComboStyleValue<string>;
+  stroke?: ComboStyleValue<string>;
+  strokeWidth?: ComboStyleValue<number>;
+  opacity?: ComboStyleValue<number>;
+  borderRadius?: ComboStyleValue<number>;
+  label?: ComboStyleValue<string | false>;
+  labelFontSize?: ComboStyleValue<number>;
+  labelColor?: ComboStyleValue<string>;
 }
 
 /** Combo style configuration. */
 export interface ComboStyleConfig {
-  fill?: string | ((combo: InternalCombo) => string);
-  stroke?: string | ((combo: InternalCombo) => string);
-  strokeWidth?: number;
-  opacity?: number;
-  borderRadius?: number;
+  fill?: ComboStyleValue<string>;
+  stroke?: ComboStyleValue<string>;
+  strokeWidth?: ComboStyleValue<number>;
+  opacity?: ComboStyleValue<number>;
+  borderRadius?: ComboStyleValue<number>;
   padding?: number | [number, number, number, number];
-  label?: string | ((combo: InternalCombo) => string);
-  labelFontSize?: number;
-  labelColor?: string;
-  labelPlacement?: 'top' | 'bottom' | 'inside';
-  collapsedSize?: number;
+  label?: ComboStyleValue<string | false>;
+  labelFontSize?: ComboStyleValue<number>;
+  labelColor?: ComboStyleValue<string>;
+  labelPlacement?: 'top' | 'bottom' | 'inside' | 'center';
+  collapsedType?: 'circle' | 'rect';
+  collapsedSize?: ComboStyleValue<number | [number, number]>;
+  size?: ComboStyleValue<number | [number, number]>;
+  count?: boolean | string | ((combo: InternalCombo) => boolean | string);
+  stateStyles?: Partial<Record<ElementState, ComboStateStyleOverride>>;
 }
 
 /** Combo config in GraphOptions. */
@@ -212,6 +356,7 @@ export interface InternalCombo {
   y: number;
   width: number;
   height: number;
+  style?: Partial<ComboStyleConfig>;
   data?: Record<string, unknown>;
   states: Set<ElementState>;
 }
@@ -225,6 +370,7 @@ export interface GraphOptions {
   combo?: ComboConfig;
   layout?: LayoutConfig;
   behaviors?: BehaviorOption[];
+  transforms?: TransformOption[];
   theme?: ThemeOption;
 }
 

@@ -1,0 +1,237 @@
+import { describe, expect, it, vi } from 'vitest';
+import { EventEmitter } from '../events.js';
+import { attachInteraction } from '../interaction/dispatcher.js';
+
+// ============================================================
+// InteractionDispatcher — the single source of pointer hit-testing
+// and element-event dispatch. Tests drive a real jsdom canvas and a
+// mock renderer whose pickAt result we steer per event.
+// ============================================================
+
+type Pick = { type: 'node'; id: string } | { type: 'edge'; index: number } | null;
+
+function setup(initialPick: Pick = null) {
+  let pick: Pick = initialPick;
+  const canvas = document.createElement('canvas');
+  const renderer = {
+    getCanvas: () => canvas,
+    pickAt: vi.fn(() => pick),
+    getNodes: vi.fn(() => [
+      { id: 'a', x: 0, y: 0, data: { label: 'A' } },
+      { id: 'b', x: 10, y: 0, data: { label: 'B' } },
+    ]),
+    getEdges: vi.fn(() => [{ id: 'e0', source: 'a', target: 'b', data: { label: 'E0' } }]),
+    getNodeIdToIndex: vi.fn(
+      () =>
+        new Map([
+          ['a', 0],
+          ['b', 1],
+        ]),
+    ),
+  };
+  const graph = { eventEmitter: new EventEmitter() };
+  const teardown = attachInteraction(renderer as any, graph as any);
+  return {
+    canvas,
+    renderer,
+    emitter: graph.eventEmitter,
+    teardown,
+    setPick(p: Pick) {
+      pick = p;
+    },
+  };
+}
+
+function fire(canvas: HTMLCanvasElement, type: string, init: Partial<MouseEvent> = {}) {
+  const Ctor = type === 'wheel' ? WheelEvent : MouseEvent;
+  const ev = new Ctor(type, {
+    clientX: 50,
+    clientY: 50,
+    button: 0,
+    bubbles: true,
+    ...(init as any),
+  });
+  canvas.dispatchEvent(ev);
+  return ev;
+}
+
+describe('InteractionDispatcher — hover state machine', () => {
+  it('emits node:pointerover with nodeId + data when entering a node', () => {
+    const t = setup({ type: 'node', id: 'a' });
+    const over = vi.fn();
+    t.emitter.on('node:pointerover', over);
+
+    fire(t.canvas, 'mousemove');
+
+    expect(over).toHaveBeenCalledTimes(1);
+    expect(over.mock.calls[0][0].nodeId).toBe('a');
+    expect(over.mock.calls[0][0].data).toEqual({ label: 'A' });
+    t.teardown();
+  });
+
+  it('emits pointermove (not a second pointerover) on the same node', () => {
+    const t = setup({ type: 'node', id: 'a' });
+    const over = vi.fn();
+    const move = vi.fn();
+    t.emitter.on('node:pointerover', over);
+    t.emitter.on('node:pointermove', move);
+
+    fire(t.canvas, 'mousemove');
+    fire(t.canvas, 'mousemove');
+
+    expect(over).toHaveBeenCalledTimes(1);
+    expect(move).toHaveBeenCalledTimes(2);
+    t.teardown();
+  });
+
+  it('leaves the old node and enters the new when switching nodes', () => {
+    const t = setup({ type: 'node', id: 'a' });
+    const leave = vi.fn();
+    const over = vi.fn();
+    t.emitter.on('node:pointerleave', leave);
+    t.emitter.on('node:pointerover', over);
+
+    fire(t.canvas, 'mousemove'); // enter a
+    t.setPick({ type: 'node', id: 'b' });
+    fire(t.canvas, 'mousemove'); // leave a, enter b
+
+    expect(leave).toHaveBeenCalledTimes(1);
+    expect(leave.mock.calls[0][0].nodeId).toBe('a');
+    expect(over).toHaveBeenCalledTimes(2);
+    expect(over.mock.calls[1][0].nodeId).toBe('b');
+    t.teardown();
+  });
+
+  it('emits canvas:pointermove and leaves the node when moving to empty space', () => {
+    const t = setup({ type: 'node', id: 'a' });
+    const leave = vi.fn();
+    const canvasMove = vi.fn();
+    t.emitter.on('node:pointerleave', leave);
+    t.emitter.on('canvas:pointermove', canvasMove);
+
+    fire(t.canvas, 'mousemove'); // enter a
+    t.setPick(null);
+    fire(t.canvas, 'mousemove'); // to empty
+
+    expect(leave).toHaveBeenCalledTimes(1);
+    expect(canvasMove).toHaveBeenCalledTimes(1);
+    t.teardown();
+  });
+
+  it('emits edge:pointerover with source/target/edgeId/edgeIndex', () => {
+    const t = setup({ type: 'edge', index: 0 });
+    const over = vi.fn();
+    t.emitter.on('edge:pointerover', over);
+
+    fire(t.canvas, 'mousemove');
+
+    expect(over).toHaveBeenCalledTimes(1);
+    expect(over.mock.calls[0][0]).toMatchObject({
+      edgeId: 'e0',
+      edgeIndex: 0,
+      source: 'a',
+      target: 'b',
+    });
+    t.teardown();
+  });
+
+  it('leaves the hovered element on canvas mouseleave', () => {
+    const t = setup({ type: 'node', id: 'a' });
+    const leave = vi.fn();
+    t.emitter.on('node:pointerleave', leave);
+
+    fire(t.canvas, 'mousemove');
+    t.canvas.dispatchEvent(new MouseEvent('mouseleave'));
+
+    expect(leave).toHaveBeenCalledTimes(1);
+    expect(leave.mock.calls[0][0].nodeId).toBe('a');
+    t.teardown();
+  });
+});
+
+describe('InteractionDispatcher — press / click / wheel', () => {
+  it('emits node:pointerdown when pressing on a node', () => {
+    const t = setup({ type: 'node', id: 'a' });
+    const down = vi.fn();
+    t.emitter.on('node:pointerdown', down);
+    fire(t.canvas, 'mousedown');
+    expect(down).toHaveBeenCalledTimes(1);
+    expect(down.mock.calls[0][0].nodeId).toBe('a');
+    t.teardown();
+  });
+
+  it('emits canvas:pointerdown when pressing empty space', () => {
+    const t = setup(null);
+    const down = vi.fn();
+    t.emitter.on('canvas:pointerdown', down);
+    fire(t.canvas, 'mousedown');
+    expect(down).toHaveBeenCalledTimes(1);
+    t.teardown();
+  });
+
+  it('emits node:click / edge:click / canvas:click by hit priority', () => {
+    const node = setup({ type: 'node', id: 'a' });
+    const nodeClick = vi.fn();
+    node.emitter.on('node:click', nodeClick);
+    fire(node.canvas, 'click');
+    expect(nodeClick).toHaveBeenCalledTimes(1);
+    node.teardown();
+
+    const edge = setup({ type: 'edge', index: 0 });
+    const edgeClick = vi.fn();
+    edge.emitter.on('edge:click', edgeClick);
+    fire(edge.canvas, 'click');
+    expect(edgeClick).toHaveBeenCalledTimes(1);
+    edge.teardown();
+
+    const blank = setup(null);
+    const canvasClick = vi.fn();
+    blank.emitter.on('canvas:click', canvasClick);
+    fire(blank.canvas, 'click');
+    expect(canvasClick).toHaveBeenCalledTimes(1);
+    blank.teardown();
+  });
+
+  it('emits node:wheel over a node and canvas:wheel over empty space', () => {
+    const t = setup({ type: 'node', id: 'a' });
+    const nodeWheel = vi.fn();
+    t.emitter.on('node:wheel', nodeWheel);
+    fire(t.canvas, 'wheel');
+    expect(nodeWheel).toHaveBeenCalledTimes(1);
+    t.teardown();
+
+    const blank = setup(null);
+    const canvasWheel = vi.fn();
+    blank.emitter.on('canvas:wheel', canvasWheel);
+    fire(blank.canvas, 'wheel');
+    expect(canvasWheel).toHaveBeenCalledTimes(1);
+    blank.teardown();
+  });
+
+  it('emits canvas:pointerup on window mouseup', () => {
+    const t = setup(null);
+    const up = vi.fn();
+    t.emitter.on('canvas:pointerup', up);
+    window.dispatchEvent(new MouseEvent('mouseup'));
+    expect(up).toHaveBeenCalledTimes(1);
+    t.teardown();
+  });
+});
+
+describe('InteractionDispatcher — teardown', () => {
+  it('stops dispatching after teardown', () => {
+    const t = setup({ type: 'node', id: 'a' });
+    const over = vi.fn();
+    const click = vi.fn();
+    t.emitter.on('node:pointerover', over);
+    t.emitter.on('node:click', click);
+
+    t.teardown();
+    fire(t.canvas, 'mousemove');
+    fire(t.canvas, 'click');
+    window.dispatchEvent(new MouseEvent('mouseup'));
+
+    expect(over).not.toHaveBeenCalled();
+    expect(click).not.toHaveBeenCalled();
+  });
+});

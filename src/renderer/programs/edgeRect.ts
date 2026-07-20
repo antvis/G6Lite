@@ -2,16 +2,19 @@
  * EdgeRect: renders thick edges as rectangles via 2 triangles (6 vertices).
  * Line width is computed in the vertex shader via normal offset in pixel space.
  * Supports dash pattern and opacity.
- * Stride: 15 floats per vertex (source.xy, target.xy, posCoef, normalCoef, lineWidth, color.rgb, pickingColor.rgb, dashCycle, opacity).
+ * Stride: 19 floats per vertex (source.xy, target.xy, posCoef, normalCoef,
+ * lineWidth, color.rgb, pickingColor.rgb, dashCycle, opacity, srcRadius,
+ * tgtRadius, srcArrowPx, tgtArrowPx). Endpoint clamping is shader-side (uses
+ * u_scale) so it stays correct on zoom.
  */
 
-import { Program } from './program.js';
-import type { RenderParams, AttributeLayout } from './program.js';
-import { vertexShader } from './shaders/edgeRect.vert.js';
-import { fragmentShader } from './shaders/edgeRect.frag.js';
 import { encodeId } from '../picking.js';
+import type { AttributeLayout, RenderParams } from './program.js';
+import { Program } from './program.js';
+import { fragmentShader } from './shaders/edgeRect.frag.js';
+import { vertexShader } from './shaders/edgeRect.vert.js';
 
-const FLOATS_PER_VERTEX = 17;
+const FLOATS_PER_VERTEX = 19;
 const VERTICES_PER_ITEM = 6;
 
 // 6 vertices: (posCoef, normalCoef)
@@ -53,8 +56,10 @@ export class EdgeRectProgram extends Program {
       { name: 'a_pickingColor', size: 3 },
       { name: 'a_dashCycle', size: 1 },
       { name: 'a_opacity', size: 1 },
-      { name: 'a_clampSource', size: 1 },
-      { name: 'a_clampTarget', size: 1 },
+      { name: 'a_srcRadius', size: 1 },
+      { name: 'a_tgtRadius', size: 1 },
+      { name: 'a_srcArrowPx', size: 1 },
+      { name: 'a_tgtArrowPx', size: 1 },
     ];
   }
 
@@ -76,8 +81,10 @@ export class EdgeRectProgram extends Program {
     lineWidth: number,
     dashCycle: number = 0,
     opacity: number = 1,
-    clampSource: number = 0,
-    clampTarget: number = 0,
+    srcRadius: number = 0,
+    tgtRadius: number = 0,
+    srcArrowPx: number = 0,
+    tgtArrowPx: number = 0,
   ): void {
     const [pr, pg, pb] = encodeId(pickingIndex);
     const pR = pr / 255,
@@ -102,8 +109,10 @@ export class EdgeRectProgram extends Program {
     this.array[base + 12] = pB;
     this.array[base + 13] = dashCycle;
     this.array[base + 14] = opacity;
-    this.array[base + 15] = clampSource;
-    this.array[base + 16] = clampTarget;
+    this.array[base + 15] = srcRadius;
+    this.array[base + 16] = tgtRadius;
+    this.array[base + 17] = srcArrowPx;
+    this.array[base + 18] = tgtArrowPx;
 
     // Copy first vertex to remaining 5 vertices, then patch a_posCoef and a_normalCoef
     for (let v = 1; v < VERTICES_PER_ITEM; v++) {
@@ -134,17 +143,21 @@ export class EdgeRectProgram extends Program {
       lineWidth?: number;
       dashCycle?: number;
       opacity?: number;
-      clampSource?: number;
-      clampTarget?: number;
+      srcRadius?: number;
+      tgtRadius?: number;
+      srcArrowPx?: number;
+      tgtArrowPx?: number;
     },
   ): void {
     if (patch.color) this.patchAttribute(index, 'a_color', patch.color);
     if (patch.lineWidth !== undefined) this.patchAttribute(index, 'a_lineWidth', [patch.lineWidth]);
     if (patch.dashCycle !== undefined) this.patchAttribute(index, 'a_dashCycle', [patch.dashCycle]);
     if (patch.opacity !== undefined) this.patchAttribute(index, 'a_opacity', [patch.opacity]);
-    if (patch.clampSource !== undefined)
-      this.patchAttribute(index, 'a_clampSource', [patch.clampSource]);
-    if (patch.clampTarget !== undefined)
-      this.patchAttribute(index, 'a_clampTarget', [patch.clampTarget]);
+    if (patch.srcRadius !== undefined) this.patchAttribute(index, 'a_srcRadius', [patch.srcRadius]);
+    if (patch.tgtRadius !== undefined) this.patchAttribute(index, 'a_tgtRadius', [patch.tgtRadius]);
+    if (patch.srcArrowPx !== undefined)
+      this.patchAttribute(index, 'a_srcArrowPx', [patch.srcArrowPx]);
+    if (patch.tgtArrowPx !== undefined)
+      this.patchAttribute(index, 'a_tgtArrowPx', [patch.tgtArrowPx]);
   }
 }

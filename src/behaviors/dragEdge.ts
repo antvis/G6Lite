@@ -1,8 +1,10 @@
 /**
  * drag-edge: drag edges by re-connecting their source or target endpoint.
- * Uses O(1) GPU framebuffer picking for hit detection.
+ * Gesture start comes from the InteractionDispatcher's edge:pointerdown event;
+ * the drop target is resolved here on canvas:pointerup (a single pickAt at
+ * release, which the dispatcher intentionally leaves to consumers).
  *
- * On mousedown over an edge:
+ * On edge pointerdown:
  *   - The closer endpoint (source or target) becomes the "drag endpoint".
  *   - On mousemove, the endpoint follows the cursor.
  *   - On mouseup over a node, the edge reconnects to that node.
@@ -11,12 +13,12 @@
  * Emits: edge:dragstart, edge:drag, edge:dragend
  */
 
-import type { Renderer } from '../renderer/renderer.js';
 import type { Graph } from '../graph.js';
+import type { Renderer } from '../renderer/renderer.js';
 
 export function dragEdge(renderer: Renderer, graph: Graph): () => void {
-  const canvas = renderer.getCanvas();
   let dragging: {
+    edgeId?: string;
     edgeIndex: number;
     source: string;
     target: string;
@@ -25,22 +27,22 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
     originalTarget: string;
   } | null = null;
 
-  const onDown = (e: MouseEvent) => {
+  const onDown = (payload: {
+    edgeId?: string;
+    edgeIndex: number;
+    source: string;
+    target: string;
+    event: MouseEvent;
+  }) => {
+    const e = payload.event;
     if (e.button !== 0) return;
-    const result = renderer.pickAt(e.clientX, e.clientY);
-    if (!result || result.type !== 'edge') return;
-
-    // Check if drag-node should take priority (node is under cursor)
-    const edges = renderer.getEdges();
-    const edge = edges[result.index];
-    if (!edge) return;
 
     e.preventDefault();
 
-    // Determine which endpoint is closer to the click position
+    // Determine which endpoint is closer to the click position.
     const [gx, gy] = renderer.screenToGraph(e.clientX, e.clientY);
-    const sourcePos = graph.getNodePosition(edge.source);
-    const targetPos = graph.getNodePosition(edge.target);
+    const sourcePos = graph.getNodePosition(payload.source);
+    const targetPos = graph.getNodePosition(payload.target);
     if (!sourcePos || !targetPos) return;
 
     const distToSource = Math.hypot(gx - sourcePos.x, gy - sourcePos.y);
@@ -48,18 +50,20 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
     const dragEnd = distToSource < distToTarget ? 'source' : 'target';
 
     dragging = {
-      edgeIndex: result.index,
-      source: edge.source,
-      target: edge.target,
+      edgeId: payload.edgeId,
+      edgeIndex: payload.edgeIndex,
+      source: payload.source,
+      target: payload.target,
       dragEnd,
-      originalSource: edge.source,
-      originalTarget: edge.target,
+      originalSource: payload.source,
+      originalTarget: payload.target,
     };
 
     graph.eventEmitter.emit('edge:dragstart', {
-      edgeIndex: result.index,
-      source: edge.source,
-      target: edge.target,
+      edgeId: payload.edgeId,
+      edgeIndex: payload.edgeIndex,
+      source: payload.source,
+      target: payload.target,
       dragEnd,
       event: e,
     });
@@ -67,9 +71,9 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
 
   const onMove = (e: MouseEvent) => {
     if (!dragging) return;
-
     graph.eventEmitter.emit('edge:drag', {
       edgeIndex: dragging.edgeIndex,
+      edgeId: dragging.edgeId,
       source: dragging.source,
       target: dragging.target,
       dragEnd: dragging.dragEnd,
@@ -77,21 +81,22 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
     });
   };
 
-  const onUp = (e: MouseEvent) => {
+  const onUp = (payload: { event: MouseEvent }) => {
     if (!dragging) return;
+    const e = payload.event;
 
-    // Check if dropped on a node
+    // Resolve the drop target with a single pickAt at release.
     const result = renderer.pickAt(e.clientX, e.clientY);
     let reconnected = false;
 
     if (result && result.type === 'node') {
       const newNodeId = result.id;
-      // Don't reconnect to self (source == target for non-loop edges)
       const otherEnd = dragging.dragEnd === 'source' ? dragging.target : dragging.source;
       if (newNodeId !== otherEnd) {
         reconnected = true;
         graph.eventEmitter.emit('edge:dragend', {
           edgeIndex: dragging.edgeIndex,
+          edgeId: dragging.edgeId,
           source: dragging.dragEnd === 'source' ? newNodeId : dragging.originalSource,
           target: dragging.dragEnd === 'target' ? newNodeId : dragging.originalTarget,
           originalSource: dragging.originalSource,
@@ -104,9 +109,9 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
     }
 
     if (!reconnected) {
-      // Snap back — emit dragend with original positions
       graph.eventEmitter.emit('edge:dragend', {
         edgeIndex: dragging.edgeIndex,
+        edgeId: dragging.edgeId,
         source: dragging.originalSource,
         target: dragging.originalTarget,
         originalSource: dragging.originalSource,
@@ -119,12 +124,12 @@ export function dragEdge(renderer: Renderer, graph: Graph): () => void {
     dragging = null;
   };
 
-  canvas.addEventListener('mousedown', onDown);
+  graph.eventEmitter.on('edge:pointerdown', onDown);
   window.addEventListener('mousemove', onMove);
-  window.addEventListener('mouseup', onUp);
+  graph.eventEmitter.on('canvas:pointerup', onUp);
   return () => {
-    canvas.removeEventListener('mousedown', onDown);
+    graph.eventEmitter.off('edge:pointerdown', onDown);
     window.removeEventListener('mousemove', onMove);
-    window.removeEventListener('mouseup', onUp);
+    graph.eventEmitter.off('canvas:pointerup', onUp);
   };
 }

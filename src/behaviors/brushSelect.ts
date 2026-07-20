@@ -13,8 +13,8 @@
  * The selected nodes have their 'selected' state set via graph.setItemState.
  */
 
-import type { Renderer } from '../renderer/renderer.js';
 import type { Graph } from '../graph.js';
+import type { Renderer } from '../renderer/renderer.js';
 
 export interface BrushSelectOptions {
   /** Modifier key to activate. null = always active. Default: null */
@@ -28,7 +28,6 @@ export function brushSelect(
   graph: Graph,
   options?: BrushSelectOptions,
 ): () => void {
-  const canvas = renderer.getCanvas();
   const modifierKey = options?.key ?? null;
   const throttleMs = options?.throttleMs ?? 100;
 
@@ -111,26 +110,23 @@ export function brushSelect(
       pendingSelect = false;
     } else if (!pendingSelect) {
       pendingSelect = true;
-      setTimeout(
-        () => {
-          if (selecting) {
-            selectNodesInRect(startX, startY, currentMouseX, currentMouseY);
-            lastSelectTime = performance.now();
-          }
-          pendingSelect = false;
-        },
-        throttleMs - (now - lastSelectTime),
-      );
+      setTimeout(() => {
+        if (selecting) {
+          selectNodesInRect(startX, startY, currentMouseX, currentMouseY);
+          lastSelectTime = performance.now();
+        }
+        pendingSelect = false;
+      }, throttleMs - (now - lastSelectTime));
     }
   };
 
-  const onMouseDown = (e: MouseEvent): void => {
+  const onPointerDown = (payload: { event: MouseEvent }): void => {
+    const e = payload.event;
     if (e.button !== 0) return;
     if (!isModifierHeld(e)) return;
 
-    const hit = renderer.pickAt(e.clientX, e.clientY);
-    if (hit && hit.type === 'node') return;
-
+    // Started from a non-node pointerdown (canvas/edge/combo) — node hits never
+    // reach here, so the former pick guard is unnecessary.
     selecting = true;
     startX = e.clientX;
     startY = e.clientY;
@@ -151,7 +147,7 @@ export function brushSelect(
     throttledSelect();
   };
 
-  const onMouseUp = (e: MouseEvent): void => {
+  const onMouseUp = (): void => {
     if (!selecting) return;
     selecting = false;
 
@@ -166,12 +162,16 @@ export function brushSelect(
     graph.eventEmitter.emit('brush:end', { nodeIds: selectedIds });
   };
 
-  canvas.addEventListener('mousedown', onMouseDown);
+  graph.eventEmitter.on('canvas:pointerdown', onPointerDown);
+  graph.eventEmitter.on('edge:pointerdown', onPointerDown);
+  graph.eventEmitter.on('combo:pointerdown', onPointerDown);
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('mouseup', onMouseUp);
 
   return () => {
-    canvas.removeEventListener('mousedown', onMouseDown);
+    graph.eventEmitter.off('canvas:pointerdown', onPointerDown);
+    graph.eventEmitter.off('edge:pointerdown', onPointerDown);
+    graph.eventEmitter.off('combo:pointerdown', onPointerDown);
     window.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('mouseup', onMouseUp);
     if (overlay) {

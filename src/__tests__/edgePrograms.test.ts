@@ -132,6 +132,33 @@ describe('EdgeLine processEdge buffer encoding', () => {
     expect(a[12]).toBeCloseTo(0);
     expect(a[STRIDE_LINE + 12]).toBeCloseTo(0);
   });
+
+  it('patchEdgeStyle updates every optional line style attribute', () => {
+    const prog = new TestEdgeLine(makeGLStub());
+    prog.reallocate(1);
+    prog.processEdge(0, 10, 20, 110, 220, [0.1, 0.2, 0.3], 42, 5, 7, 0, 10);
+
+    prog.patchEdgeStyle(0, {
+      color: [0.7, 0.8, 0.9],
+      opacity: 0.4,
+      srcRadius: 11,
+      tgtRadius: 13,
+      srcArrowPx: 17,
+      tgtArrowPx: 19,
+    });
+
+    const a = prog.peek();
+    for (const v of [0, STRIDE_LINE]) {
+      expect(a[v + 5]).toBeCloseTo(11);
+      expect(a[v + 6]).toBeCloseTo(13);
+      expect(a[v + 7]).toBeCloseTo(17);
+      expect(a[v + 8]).toBeCloseTo(19);
+      expect(a[v + 9]).toBeCloseTo(0.7);
+      expect(a[v + 10]).toBeCloseTo(0.8);
+      expect(a[v + 11]).toBeCloseTo(0.9);
+      expect(a[v + 12]).toBeCloseTo(0.4);
+    }
+  });
 });
 
 describe('EdgeRect processEdge buffer encoding', () => {

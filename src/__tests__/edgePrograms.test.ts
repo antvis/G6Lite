@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { encodeId } from '../renderer/picking.js';
 import { EdgeArcProgram } from '../renderer/programs/edgeArc.js';
 import { EdgeLineProgram } from '../renderer/programs/edgeLine.js';
@@ -18,7 +18,7 @@ import { EdgeRectProgram } from '../renderer/programs/edgeRect.js';
 // ============================================================
 
 /** Minimal no-op WebGL stub — enough for Program's constructor + createProgram. */
-function makeGLStub(): WebGLRenderingContext {
+function makeGLStub(extraOverrides: Record<string, unknown> = {}): WebGLRenderingContext {
   const overrides: Record<string, unknown> = {
     LINES: 1,
     TRIANGLES: 4,
@@ -33,6 +33,7 @@ function makeGLStub(): WebGLRenderingContext {
     createShader: () => ({}),
     createProgram: () => ({}),
     createBuffer: () => ({}),
+    ...extraOverrides,
   };
   const handler: ProxyHandler<Record<string, unknown>> = {
     get(_t, prop: string) {
@@ -133,6 +134,44 @@ describe('EdgeLine processEdge buffer encoding', () => {
     expect(a[5]).toBeCloseTo(5); // a_srcRadius
     expect(a[8]).toBeCloseTo(10); // a_tgtArrowPx
     expect(a[9]).toBeCloseTo(0.1); // a_color
+  });
+
+  it('reuploads only dirty item ranges without reallocating the GPU buffer', () => {
+    const bufferData = vi.fn();
+    const bufferSubData = vi.fn();
+    const prog = new TestEdgeLine(makeGLStub({ bufferData, bufferSubData }));
+    prog.reallocate(3);
+    for (let i = 0; i < 3; i++) {
+      prog.processEdge(i, i * 10, 0, i * 10 + 5, 0, [0.1, 0.2, 0.3], i);
+    }
+    prog.upload();
+    bufferData.mockClear();
+    bufferSubData.mockClear();
+
+    prog.patchEdgeEndpoints(1, 20, 1, 30, 1);
+    prog.reupload();
+
+    expect(bufferData).not.toHaveBeenCalled();
+    expect(bufferSubData).toHaveBeenCalledTimes(1);
+    expect(bufferSubData.mock.calls[0][1]).toBe(2 * STRIDE_LINE * 4);
+    expect((bufferSubData.mock.calls[0][2] as Float32Array).length).toBe(2 * STRIDE_LINE);
+
+    bufferSubData.mockClear();
+    prog.patchEdgeEndpoints(0, 0, 2, 5, 2);
+    prog.patchEdgeEndpoints(1, 20, 2, 30, 2);
+    prog.reupload();
+
+    expect(bufferSubData).toHaveBeenCalledTimes(1);
+    expect(bufferSubData.mock.calls[0][1]).toBe(0);
+    expect((bufferSubData.mock.calls[0][2] as Float32Array).length).toBe(4 * STRIDE_LINE);
+
+    bufferSubData.mockClear();
+    prog.patchEdgeEndpoints(0, 0, 2, 5, 2);
+    prog.patchEdgeEndpoints(2, 40, 2, 50, 2);
+    prog.reupload();
+
+    expect(bufferSubData).toHaveBeenCalledTimes(2);
+    expect(bufferSubData.mock.calls.map((call) => call[1])).toEqual([0, 2 * 2 * STRIDE_LINE * 4]);
   });
 
   it('patchEdgeStyle updates opacity for hidden line edges', () => {

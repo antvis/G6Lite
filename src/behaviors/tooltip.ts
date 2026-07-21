@@ -128,6 +128,8 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
     if (y + rect.height > boundary.bottom) y = event.clientY - offsetY - rect.height;
     x = Math.max(boundary.left, x);
     y = Math.max(boundary.top, y);
+    // The body-mounted overlay is fixed, so x/y are already viewport-relative.
+    // Adding window.scrollX/scrollY would incorrectly shift it after page scroll.
     const localX = container === document.body ? x : x - boundary.left + container.scrollLeft;
     const localY = container === document.body ? y : y - boundary.top + container.scrollTop;
     target.style.left = `${localX}px`;

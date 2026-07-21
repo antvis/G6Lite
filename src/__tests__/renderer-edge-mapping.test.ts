@@ -18,6 +18,8 @@ interface RendererInternals {
   edgeDrawStart: Int32Array;
   edgeDrawCount: Int32Array;
   edgeLoopSlot: Int32Array;
+  edgeArrowStart: Int32Array;
+  edgeArrowCount: Int32Array;
   nodeEdgeOffsets: Uint32Array;
   nodeEdgeIndices: Uint32Array;
 }
@@ -165,6 +167,8 @@ describe('Renderer dense edge-slot mapping', () => {
     const edgeLine = internals._programs.edgeLine!;
     expect(Array.from(internals.edgeDrawStart.slice(0, 2))).toEqual([-1, 0]);
     expect(Array.from(internals.edgeDrawCount.slice(0, 2))).toEqual([0, 1]);
+    expect(Array.from(internals.edgeArrowStart.slice(0, 2))).toEqual([-1, -1]);
+    expect(Array.from(internals.edgeArrowCount.slice(0, 2))).toEqual([0, 0]);
     expect(Array.from(internals.nodeEdgeOffsets)).toEqual([0, 1, 3, 4]);
     expect(Array.from(internals.nodeEdgeIndices)).toEqual([0, 0, 1, 1]);
     expect(edgeLine.itemCount).toBe(1);

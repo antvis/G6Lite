@@ -106,4 +106,34 @@ export class EdgeArrowProgram extends Program {
       this.array[o + 15] = opacity;
     }
   }
+
+  /** Rewrite one existing arrow slot and mark only that item for GPU upload. */
+  patchArrow(
+    index: number,
+    sx: number,
+    sy: number,
+    tx: number,
+    ty: number,
+    arrowSize: number,
+    lineWidth: number,
+    nodeRadius: number,
+    color: [number, number, number],
+    pickingIndex: number,
+    opacity = 1,
+  ): void {
+    this.processArrow(
+      index,
+      sx,
+      sy,
+      tx,
+      ty,
+      arrowSize,
+      lineWidth,
+      nodeRadius,
+      color,
+      pickingIndex,
+      opacity,
+    );
+    this.markItemDirty(index);
+  }
 }

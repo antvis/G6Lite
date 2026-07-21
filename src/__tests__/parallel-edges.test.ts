@@ -10,7 +10,7 @@ import {
   processParallelEdges,
   resolveParallelEdgesConfig,
 } from '../transforms/processParallelEdges.js';
-import type { GraphEdge, LayoutNode, ParallelEdgeMeta } from '../types.js';
+import type { GraphEdge, LayoutNode, ParallelEdgeMeta, TransformOption } from '../types.js';
 
 function makeDataModel() {
   const dm = new DataModel({ theme: {} });
@@ -27,6 +27,20 @@ function makeDataModel() {
 }
 
 describe('processParallelEdges', () => {
+  it('ignores null transform entries from runtime config', () => {
+    const nullOnlyConfig = resolveParallelEdgesConfig(
+      [null] as unknown as TransformOption[],
+      undefined,
+    );
+    const mixedConfig = resolveParallelEdgesConfig(
+      [null, 'process-parallel-edges'] as unknown as TransformOption[],
+      undefined,
+    );
+
+    expect(nullOnlyConfig.enabled).toBe(false);
+    expect(mixedConfig.enabled).toBe(true);
+  });
+
   it('keeps a single edge centered', () => {
     const dm = makeDataModel();
     const id = dm.addEdge({ source: 'a', target: 'b' });

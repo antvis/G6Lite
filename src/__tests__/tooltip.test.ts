@@ -29,6 +29,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.unstubAllGlobals();
   document.querySelectorAll('.g6lite-tooltip, .custom-tip').forEach((el) => el.remove());
 });
 
@@ -197,6 +198,26 @@ describe('tooltip — click trigger', () => {
 });
 
 describe('tooltip — custom content & class', () => {
+  it('keeps a fixed body overlay in viewport coordinates when the page is scrolled', () => {
+    vi.stubGlobal('scrollX', 240);
+    vi.stubGlobal('scrollY', 160);
+    const { renderer, graph } = setup();
+    const teardown = tooltip(renderer as any, graph as any, { delay: 0 });
+
+    graph.eventEmitter.emit('node:pointerover', {
+      nodeId: 'a',
+      data: { label: 'A' },
+      event: mouseEvent({ clientX: 100, clientY: 80 }),
+    });
+    vi.advanceTimersByTime(0);
+
+    const overlay = getOverlay();
+    expect(overlay?.style.position).toBe('fixed');
+    expect(overlay?.style.left).toBe('110px');
+    expect(overlay?.style.top).toBe('90px');
+    teardown();
+  });
+
   it('positions an overlay in custom-container local coordinates', () => {
     const { renderer, graph } = setup();
     const container = document.createElement('div');

@@ -4,7 +4,7 @@
  * 依赖 playground 的 vite dev server + capture.html。
  * 运行(在仓库根目录):
  *   npx vite --port 5179 --no-open &
- *   node website/scripts/capture-thumbnails.mjs
+ *   node site/scripts/capture-thumbnails.mjs
  *
  * 用纯 node(非 tsx)运行:tsx/esbuild 会向页面注入 __name 辅助函数,
  * 在 page.evaluate / screenshot 的页面上下文里会报 ReferenceError。

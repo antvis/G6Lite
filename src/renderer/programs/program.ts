@@ -25,6 +25,9 @@ export abstract class Program {
   protected buffer: WebGLBuffer;
   protected array: Float32Array = new Float32Array(0);
   protected itemCount = 0;
+  private gpuByteLength = 0;
+  private dirtyItemMarks: Uint8Array = new Uint8Array(0);
+  private dirtyItemIndices: number[] = [];
   private uniforms = new Map<string, WebGLUniformLocation | null>();
   private attributes = new Map<string, number>();
 
@@ -58,6 +61,7 @@ export abstract class Program {
 
   reallocate(count: number): void {
     this.itemCount = count;
+    this.ensureDirtyItemCapacity(count);
     const needed = count * this.getVerticesPerItem() * this.getFloatsPerVertex();
     if (this.array.length < needed) {
       // Exponential growth to reduce reallocation frequency.
@@ -74,6 +78,7 @@ export abstract class Program {
 
   setItemCount(count: number): void {
     const normalized = Math.max(0, count);
+    this.ensureDirtyItemCapacity(normalized);
     const needed = normalized * this.getVerticesPerItem() * this.getFloatsPerVertex();
     if (this.array.length < needed) {
       this.reallocate(normalized);
@@ -111,9 +116,33 @@ export abstract class Program {
       const usedBytes = usedFloats * 4;
       gl.bufferData(gl.ARRAY_BUFFER, usedBytes, gl.STATIC_DRAW);
       gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.array.subarray(0, usedFloats));
+      this.gpuByteLength = usedBytes;
     } else {
       gl.bufferData(gl.ARRAY_BUFFER, 0, gl.STATIC_DRAW);
+      this.gpuByteLength = 0;
     }
+    this.clearDirtyItems();
+  }
+
+  private ensureDirtyItemCapacity(count: number): void {
+    if (this.dirtyItemMarks.length >= count) return;
+    const marks = new Uint8Array(count);
+    marks.set(this.dirtyItemMarks);
+    this.dirtyItemMarks = marks;
+  }
+
+  /** Mark one logical item for a later range-limited GPU upload. */
+  protected markItemDirty(itemIndex: number): void {
+    if (itemIndex < 0 || itemIndex >= this.itemCount) return;
+    this.ensureDirtyItemCapacity(this.itemCount);
+    if (this.dirtyItemMarks[itemIndex] !== 0) return;
+    this.dirtyItemMarks[itemIndex] = 1;
+    this.dirtyItemIndices.push(itemIndex);
+  }
+
+  private clearDirtyItems(): void {
+    for (const itemIndex of this.dirtyItemIndices) this.dirtyItemMarks[itemIndex] = 0;
+    this.dirtyItemIndices.length = 0;
   }
 
   render(params: RenderParams): void {
@@ -213,6 +242,7 @@ export abstract class Program {
       this.array[o] = x;
       this.array[o + 1] = y;
     }
+    this.markItemDirty(itemIndex);
   }
 
   /**
@@ -232,6 +262,7 @@ export abstract class Program {
         this.array[o + i] = values[i];
       }
     }
+    this.markItemDirty(itemIndex);
   }
 
   /**
@@ -242,9 +273,38 @@ export abstract class Program {
     this.patchAttribute(itemIndex, 'a_color', color);
   }
 
-  /** Re-upload buffer data to GPU after patching. */
+  /** Upload only dirty logical items after patching. */
   reupload(): void {
-    this.upload();
+    const itemFloats = this.getVerticesPerItem() * this.getFloatsPerVertex();
+    const usedBytes = this.itemCount * itemFloats * 4;
+    if (usedBytes !== this.gpuByteLength) {
+      this.upload();
+      return;
+    }
+    if (this.dirtyItemIndices.length === 0) return;
+
+    this.dirtyItemIndices.sort((a, b) => a - b);
+    const gl = this.gl;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+
+    let rangeStart = this.dirtyItemIndices[0];
+    let rangeEnd = rangeStart + 1;
+    for (let i = 1; i <= this.dirtyItemIndices.length; i++) {
+      const itemIndex = this.dirtyItemIndices[i];
+      if (i < this.dirtyItemIndices.length && itemIndex === rangeEnd) {
+        rangeEnd++;
+        continue;
+      }
+
+      const startFloat = rangeStart * itemFloats;
+      const endFloat = rangeEnd * itemFloats;
+      gl.bufferSubData(gl.ARRAY_BUFFER, startFloat * 4, this.array.subarray(startFloat, endFloat));
+      if (i < this.dirtyItemIndices.length) {
+        rangeStart = itemIndex;
+        rangeEnd = itemIndex + 1;
+      }
+    }
+    this.clearDirtyItems();
   }
 
   /** Expose array for direct reads (e.g., to check current color values). */

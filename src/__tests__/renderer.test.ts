@@ -398,7 +398,7 @@ describe('Renderer — data pipeline', () => {
     expect((programs.edgeArrow as any).itemCount).toBe(2);
   });
 
-  it('rebuilds arrow buffers immediately when patching positions for arrow edges', () => {
+  it('patches arrow slots without a full process when moving a simple arrow edge', () => {
     const edgeConfig: EdgeConfig = {
       type: 'line',
       style: { stroke: '#999', lineWidth: 1, endArrow: true, arrowSize: 10 },
@@ -428,9 +428,47 @@ describe('Renderer — data pipeline', () => {
     dataModel.updateNodePosition('b', 40, 0);
     renderer.patchPositions(dataModel, new Set(['b']));
 
-    expect(processSpy).toHaveBeenCalledTimes(1);
+    expect(processSpy).not.toHaveBeenCalled();
     expect(programs.edgeLine.array[2]).toBeCloseTo(40);
     expect(programs.edgeArrow.array[2]).toBeCloseTo(40);
+  });
+
+  it('falls back to a full process when a dynamic arrow callback changes slot count', () => {
+    const edgeConfig: EdgeConfig = {
+      type: 'line',
+      style: {
+        stroke: '#999',
+        lineWidth: 1,
+        endArrow: (_source, target) => target.x >= 50,
+        arrowSize: 10,
+      },
+    };
+    analyzeEdgeConfig(edgeConfig, theme);
+
+    const dataModel = new DataModel({ edgeConfig, theme });
+    dataModel.addNode({ id: 'a', x: 0, y: 0 });
+    dataModel.addNode({ id: 'b', x: 100, y: 0 });
+    dataModel.addEdge({ id: 'ab', source: 'a', target: 'b' });
+
+    renderer.resize(800, 600);
+    renderer.setData({
+      nodes: dataModel.getNodes() as LayoutNode[],
+      edges: dataModel.getEdges() as GraphEdge[],
+      edgeConfig,
+      theme,
+    });
+    renderer.draw();
+    const processSpy = vi.spyOn(renderer as unknown as { process: () => void }, 'process');
+    processSpy.mockClear();
+    const programs = (renderer as unknown as { _programs: Record<string, { itemCount: number }> })
+      ._programs;
+    expect(programs.edgeArrow.itemCount).toBe(1);
+
+    dataModel.updateNodePosition('b', 40, 0);
+    renderer.patchPositions(dataModel, new Set(['b']));
+
+    expect(processSpy).toHaveBeenCalledTimes(1);
+    expect(programs.edgeArrow.itemCount).toBe(0);
   });
 
   it('keeps unrelated arrow edges out of a simple position patch', () => {

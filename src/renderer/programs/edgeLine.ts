@@ -129,6 +129,7 @@ export class EdgeLineProgram extends Program {
       this.array[o + 2] = tx; // a_target.x
       this.array[o + 3] = ty; // a_target.y
     }
+    this.markItemDirty(index);
   }
 
   /** Patch style attributes for a single edge. */

@@ -127,6 +127,8 @@ export class Renderer {
   private edgeDrawStart: Int32Array = new Int32Array(0);
   private edgeDrawCount: Int32Array = new Int32Array(0);
   private edgeLoopSlot: Int32Array = new Int32Array(0);
+  private edgeArrowStart: Int32Array = new Int32Array(0);
+  private edgeArrowCount: Int32Array = new Int32Array(0);
   private nodeConfig: NodeConfig | undefined;
   private edgeConfig: EdgeConfig | undefined;
   private theme: ThemeTokens = {
@@ -172,9 +174,8 @@ export class Renderer {
   private needPickingRender = false;
   private pickingInitialized = false;
   private pickingSuspended = false;
-  // Whether the last full process() emitted any arrows. Incremental paths
-  // (highlight delta, position patch) don't update the arrow buffer, so when
-  // arrows exist they must fall back to a full process() instead.
+  // Whether the last full process() emitted any arrows. Position patches can
+  // update mapped simple-edge arrows; highlight deltas still rebuild fully.
   private hasArrows = false;
 
   // Before-draw callback (used by ComboRenderer underlay)
@@ -389,10 +390,14 @@ export class Renderer {
       this.edgeDrawStart = new Int32Array(edgeCount);
       this.edgeDrawCount = new Int32Array(edgeCount);
       this.edgeLoopSlot = new Int32Array(edgeCount);
+      this.edgeArrowStart = new Int32Array(edgeCount);
+      this.edgeArrowCount = new Int32Array(edgeCount);
     }
     this.edgeDrawStart.fill(-1, 0, edgeCount);
     this.edgeDrawCount.fill(0, 0, edgeCount);
     this.edgeLoopSlot.fill(-1, 0, edgeCount);
+    this.edgeArrowStart.fill(-1, 0, edgeCount);
+    this.edgeArrowCount.fill(0, 0, edgeCount);
   }
 
   private getNodeBoundary(
@@ -1065,6 +1070,7 @@ export class Renderer {
         arrowTgtSrcX = direction === 'LR' ? edgeSrcX + curveOffset : edgeSrcX - curveOffset;
         arrowTgtSrcY = src.y;
       }
+      const arrowStart = arrowIdx;
       if (style.endArrow) {
         // Pull the tip back by the node radius only when it sits at the center.
         const arrowTargetRadius = endTipAtCenter ? tgtRadius : 0;
@@ -1097,6 +1103,10 @@ export class Renderer {
           pickIdx,
           opacity,
         );
+      }
+      if (arrowIdx > arrowStart) {
+        this.edgeArrowStart[i] = arrowStart;
+        this.edgeArrowCount[i] = arrowIdx - arrowStart;
       }
     }
     edgeProg.setItemCount(isPolyline ? polySegIdx : regularDrawIdx);
@@ -1187,6 +1197,7 @@ export class Renderer {
       );
 
       // Arrow at end of self-loop (tangent direction: CP2 → P3)
+      const arrowStart = arrowIdx;
       if (style.endArrow) {
         const ext = nodeRadius + loopSize;
         // CP2 (control point near end)
@@ -1208,6 +1219,10 @@ export class Renderer {
           pickIdx,
           loopOpacity,
         );
+      }
+      if (arrowIdx > arrowStart) {
+        this.edgeArrowStart[i] = arrowStart;
+        this.edgeArrowCount[i] = arrowIdx - arrowStart;
       }
     }
     loopProg.setItemCount(loopDrawIdx);
@@ -1366,8 +1381,6 @@ export class Renderer {
       // Patch position in GPU buffer via Program method (handles all vertices)
       nodeProgram.patchItemPosition(idx, node.x, node.y);
     }
-    nodeProgram.upload();
-
     // Re-compute affected edges
     const edgeProgram = this.activeEdgeProgram;
     const isSimpleEdgeType = this.activeEdgeType === 'line' || this.activeEdgeType === 'rect';
@@ -1375,27 +1388,9 @@ export class Renderer {
     const hasRenderableAffectedEdge = affectedEdgeIndices.some(
       (i) => (this.edgeDrawStart[i] ?? -1) >= 0 || (this.edgeLoopSlot[i] ?? -1) >= 0,
     );
-    let affectedHasArrows = false;
-    if (hasRenderableAffectedEdge && isSimpleEdgeType && this.hasArrows) {
-      affectedHasArrows = affectedEdgeIndices.some((i) => {
-        if ((this.edgeDrawStart[i] ?? -1) < 0 && (this.edgeLoopSlot[i] ?? -1) < 0) return false;
-        const sourceIndex = this.edgeSourceIdx[i];
-        const targetIndex = this.edgeTargetIdx[i];
-        if (sourceIndex < 0 || targetIndex < 0) return false;
-        const style = resolveEdgeStyle(
-          this.nodes[sourceIndex],
-          this.nodes[targetIndex],
-          this.edges[i],
-          this.edgeConfig,
-          this.theme,
-        );
-        return style.startArrow || style.endArrow;
-      });
-    }
-    const canPatchSimpleEdges = isSimpleEdgeType && !affectedHasArrows;
     const needsFullEdgeProcess =
       hasRenderableAffectedEdge &&
-      (!canPatchSimpleEdges ||
+      (!isSimpleEdgeType ||
         affectedEdgeIndices.some(
           (i) =>
             (this.edgeLoopSlot[i] ?? -1) >= 0 ||
@@ -1403,7 +1398,7 @@ export class Renderer {
         ));
 
     if (needsFullEdgeProcess) {
-      // Arrow/arc/cubic/polyline/self-loop geometry cannot be patched safely.
+      // Complex, multi-segment, and self-loop geometry cannot be patched safely.
       // Rebuild in this PATCH_POSITION cycle so every buffer sees the same
       // node positions. Hidden-only affected edges intentionally do no work.
       this.needToProcess = false;
@@ -1412,11 +1407,16 @@ export class Renderer {
       return;
     }
 
-    if (hasRenderableAffectedEdge && canPatchSimpleEdges) {
+    if (hasRenderableAffectedEdge && isSimpleEdgeType) {
       let patchedEdge = false;
+      let patchedArrow = false;
+      const arrowProgram = this.getProgram('edgeArrow');
+      const bg = parseColor(this.theme.canvasBackground ?? '#fff');
+      const hasHighlight = this.highlightNodeIds.size > 0;
       // For line/rect edges, patch the dense GPU slot rather than the original
       // edge index. Direction changes also require recomputing rect boundary
-      // distances, even for the GL_LINES backend.
+      // distances, even for the GL_LINES backend. Arrow slots use the same
+      // end-then-start order established by the full process() path.
       for (const i of affectedEdgeIndices) {
         const drawSlot = this.edgeDrawStart[i] ?? -1;
         if (drawSlot < 0) continue;
@@ -1453,6 +1453,17 @@ export class Renderer {
         const style = resolveEdgeStyle(src, tgt, e, this.edgeConfig, this.theme);
         const srcArrowPx = style.startArrow ? style.arrowSize : 0;
         const tgtArrowPx = style.endArrow ? style.arrowSize : 0;
+        const expectedArrowCount = Number(style.endArrow) + Number(style.startArrow);
+        const mappedArrowCount = this.edgeArrowCount[i] ?? 0;
+        const arrowStart = this.edgeArrowStart[i] ?? -1;
+        if (expectedArrowCount !== mappedArrowCount || (expectedArrowCount > 0 && arrowStart < 0)) {
+          // A dynamic arrow callback changed buffer topology. Rebuild so dense
+          // arrow slots and itemCount stay consistent.
+          this.needToProcess = false;
+          this.needPickingRender = true;
+          this.process();
+          return;
+        }
 
         if (this.activeEdgeType === 'rect') {
           (edgeProgram as EdgeRectProgram).patchEdgeEndpoints(drawSlot, src.x, src.y, tgt.x, tgt.y);
@@ -1471,11 +1482,59 @@ export class Renderer {
             tgtArrowPx,
           });
         }
+
+        if (expectedArrowCount > 0) {
+          const active = !hasHighlight || this.highlightEdgeIndices.has(i);
+          const edgeBaseColor = style.strokeRGB ?? parseColor(style.stroke);
+          const color: [number, number, number] = active
+            ? edgeBaseColor
+            : [
+                edgeBaseColor[0] * HOVER_DIM_STRENGTH + bg[0] * (1 - HOVER_DIM_STRENGTH),
+                edgeBaseColor[1] * HOVER_DIM_STRENGTH + bg[1] * (1 - HOVER_DIM_STRENGTH),
+                edgeBaseColor[2] * HOVER_DIM_STRENGTH + bg[2] * (1 - HOVER_DIM_STRENGTH),
+              ];
+          const opacity = active ? style.opacity : Math.min(style.opacity, HOVER_DIM_STRENGTH);
+          const pickIdx = this.nodes.length + i;
+          let arrowSlot = arrowStart;
+          if (style.endArrow) {
+            arrowProgram.patchArrow(
+              arrowSlot++,
+              src.x,
+              src.y,
+              tgt.x,
+              tgt.y,
+              style.arrowSize,
+              style.lineWidth,
+              tgtRadius,
+              color,
+              pickIdx,
+              opacity,
+            );
+          }
+          if (style.startArrow) {
+            arrowProgram.patchArrow(
+              arrowSlot,
+              tgt.x,
+              tgt.y,
+              src.x,
+              src.y,
+              style.arrowSize,
+              style.lineWidth,
+              srcRadius,
+              color,
+              pickIdx,
+              opacity,
+            );
+          }
+          patchedArrow = true;
+        }
         patchedEdge = true;
       }
-      if (patchedEdge) edgeProgram.upload();
+      if (patchedEdge) edgeProgram.reupload();
+      if (patchedArrow) arrowProgram.reupload();
     }
 
+    nodeProgram.reupload();
     this.needPickingRender = true;
   }
 
@@ -2175,6 +2234,8 @@ export class Renderer {
     this.edgeDrawStart = new Int32Array(0);
     this.edgeDrawCount = new Int32Array(0);
     this.edgeLoopSlot = new Int32Array(0);
+    this.edgeArrowStart = new Int32Array(0);
+    this.edgeArrowCount = new Int32Array(0);
     this.highlightNodeIds.clear();
     this.highlightEdgeIndices.clear();
     this.prevHighlightNodeIds.clear();

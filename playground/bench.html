@@ -87,6 +87,13 @@
       padding: 8px 10px; text-align: center; border-bottom: 1px solid #eee;
     }
     #results-table tr:hover { background: #f8f8ff; }
+    .table-scroll { overflow-x: auto; }
+    .micro-results { margin-top: 20px; }
+    #micro-results-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    #micro-results-table th, #micro-results-table td {
+      padding: 8px 10px; text-align: center; border-bottom: 1px solid #eee; white-space: nowrap;
+    }
+    #micro-results-table th { background: #f0f0f0; font-weight: 500; border-bottom: 2px solid #d0d0d0; }
     .cell-good { color: #27ae60; }
     .cell-warn { color: #f39c12; }
     .cell-bad { color: #e74c3c; }
@@ -143,7 +150,8 @@
           </label>
         </div>
         <div class="btn-row">
-          <button class="btn btn-primary" id="btn-start">Start Benchmark</button>
+          <button class="btn btn-primary" id="btn-start">Run Scenarios</button>
+          <button class="btn btn-primary" id="btn-micro">Run Benchmark.js</button>
           <button class="btn btn-stop" id="btn-stop" disabled>Stop</button>
         </div>
       </div>
@@ -157,22 +165,46 @@
       </div>
 
       <div class="results">
-        <h3>Results</h3>
-        <table id="results-table">
-          <thead>
-            <tr>
-              <th>Scale</th>
-              <th>Layout</th>
-              <th>Render</th>
-              <th>First Render</th>
-              <th>Highlight</th>
-              <th>Drag FPS</th>
-              <th>Zoom FPS</th>
-              <th>Pick</th>
-            </tr>
-          </thead>
-          <tbody id="results-body"></tbody>
-        </table>
+        <h3>Scenario Results</h3>
+        <div class="table-scroll">
+          <table id="results-table">
+            <thead>
+              <tr>
+                <th>Scale</th>
+                <th>Layout</th>
+                <th>Render</th>
+                <th>First Render</th>
+                <th>First p95</th>
+                <th>Highlight</th>
+                <th>Drag FPS</th>
+                <th>Drag p95</th>
+                <th>Zoom FPS</th>
+                <th>Zoom p95</th>
+                <th>Pick</th>
+                <th>Post-destroy Heap</th>
+              </tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </div>
+        <div class="micro-results">
+          <h3>Benchmark.js Micro Results</h3>
+          <div class="table-scroll">
+            <table id="micro-results-table">
+              <thead>
+                <tr>
+                  <th>Case</th>
+                  <th>Scope</th>
+                  <th>Ops/sec</th>
+                  <th>Mean</th>
+                  <th>RME</th>
+                  <th>Samples</th>
+                </tr>
+              </thead>
+              <tbody id="micro-results-body"></tbody>
+            </table>
+          </div>
+        </div>
         <div class="export-row">
           <button class="btn-sm" id="btn-copy">Copy Markdown</button>
           <button class="btn-sm" id="btn-export">Export JSON</button>

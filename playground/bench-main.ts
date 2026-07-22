@@ -4,16 +4,57 @@
  */
 
 import { Graph, type GraphData, type LayoutConfig } from '../src/index.js';
+import {
+  collectBrowserEnvironment,
+  runBrowserMicroBenchmarks,
+  type BrowserMicroResult,
+} from '../perf/browser/micro.js';
+import { generateGraphData } from '../perf/datasets/generate.mjs';
+
+interface BrowserPerfReport {
+  schemaVersion: 1;
+  environment: Record<string, unknown>;
+  micro: BrowserMicroResult[];
+  scenarios: BenchResult[];
+  warnings: string[];
+}
+
+declare global {
+  interface Window {
+    __G6LITE_PERF_REPORT__?: BrowserPerfReport;
+  }
+}
 
 // ─── Types ───────────────────────────────────────────────────────────
 
 interface BenchResult {
   scale: { nodes: number; edges: number };
-  firstRender: { total: number; layout: number; render: number };
+  firstRender: { total: number; layout: number; render: number; p95: number; samples: number };
   highlight: { median: number; p95: number };
   dragFPS: number;
   zoomFPS: number;
+  dragFrame: FrameDiagnostics;
+  zoomFrame: FrameDiagnostics;
   pickAt: { median: number };
+  memory: MemoryDiagnostics;
+}
+
+interface FrameDiagnostics {
+  fpsMedian: number;
+  p95FrameMs: number;
+  droppedFrameRatio: number;
+  longTaskCount: number;
+  longTaskTotalMs: number;
+}
+
+interface MemoryDiagnostics {
+  supported: boolean;
+  source?: string;
+  before?: number;
+  afterRender?: number;
+  afterDestroy?: number;
+  delta?: number;
+  postDestroyDelta?: number;
 }
 
 interface BenchTier {
@@ -31,18 +72,7 @@ let relayoutReal = false;
 // ─── Data Generation ─────────────────────────────────────────────────
 
 function generateData(nodeCount: number, degree: number): GraphData {
-  const nodes = Array.from({ length: nodeCount }, (_, i) => ({
-    id: String(i),
-    data: { cluster: String(i % 5) },
-  }));
-  const edges: { source: string; target: string }[] = [];
-  for (let i = 0; i < nodeCount; i++) {
-    for (let j = 0; j < degree; j++) {
-      const t = (i + 1 + j * 13) % nodeCount;
-      if (t !== i) edges.push({ source: String(i), target: String(t) });
-    }
-  }
-  return { nodes, edges };
+  return generateGraphData(nodeCount, degree, 0x6a09e667) as GraphData;
 }
 
 /** Cache fetched real datasets so the 5 scenarios per tier don't refetch. */
@@ -98,13 +128,32 @@ const getProgressText = () => $('#progress-text') as HTMLElement;
 const getLiveMetrics = () => $('#live-metrics') as HTMLElement;
 const getPreviewLabel = () => $('#preview-label') as HTMLElement;
 const getResultsBody = () => $('#results-body') as HTMLElement;
+const getMicroResultsBody = () => $('#micro-results-body') as HTMLElement;
 const getBtnStart = () => $('#btn-start') as HTMLButtonElement;
+const getBtnMicro = () => $('#btn-micro') as HTMLButtonElement;
 const getBtnStop = () => $('#btn-stop') as HTMLButtonElement;
 
 // ─── State ───────────────────────────────────────────────────────────
 
 let aborted = false;
 let results: BenchResult[] = [];
+let microResults: BrowserMicroResult[] = [];
+
+function buildBrowserReport(): BrowserPerfReport {
+  return {
+    schemaVersion: 1,
+    environment: collectBrowserEnvironment(),
+    micro: microResults,
+    scenarios: results,
+    warnings: microResults
+      .filter((result) => result.status !== 'pass')
+      .map((result) => `${result.id}: ${result.error ?? `RME ${formatNum(result.rme, 2)}%`}`),
+  };
+}
+
+function syncBrowserReport(): void {
+  window.__G6LITE_PERF_REPORT__ = buildBrowserReport();
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
@@ -137,28 +186,42 @@ async function benchFirstRender(
   graphData: GraphData,
   cont: HTMLElement,
   layout: LayoutConfig | undefined,
-): Promise<{ total: number; layout: number; render: number }> {
-  await cleanContainer(cont);
+): Promise<{ total: number; layout: number; render: number; p95: number; samples: number }> {
+  const sampleCount = graphData.nodes.length <= 1000 ? 3 : graphData.nodes.length <= 5000 ? 2 : 1;
+  const totals: number[] = [];
+  const layouts: number[] = [];
+  const renders: number[] = [];
 
-  let layoutDuration = 0;
-  const graph = new Graph({
-    container: cont,
-    data: graphData,
-    layout,
-    theme: 'light',
-  });
-  graph.on('layout:end', (e: { duration: number }) => { layoutDuration = e.duration; });
+  for (let sample = 0; sample < sampleCount; sample++) {
+    await cleanContainer(cont);
+    let layoutDuration = 0;
+    const graph = new Graph({
+      container: cont,
+      data: graphData,
+      layout,
+      theme: 'light',
+    });
+    graph.on('layout:end', (e: { duration: number }) => {
+      layoutDuration = e.duration;
+    });
+    const t0 = performance.now();
+    await graph.render();
+    graph.fitView(0.85);
+    const total = performance.now() - t0;
+    const layoutMs = layoutDuration || 0;
+    totals.push(total);
+    layouts.push(layoutMs);
+    renders.push(total - layoutMs);
+    graph.destroy();
+  }
 
-  const t0 = performance.now();
-  await graph.render();
-  graph.fitView(0.85);
-  const total = performance.now() - t0;
-
-  const layoutMs = layoutDuration || 0;
-  const render = total - layoutMs;
-
-  graph.destroy();
-  return { total, layout: layoutMs, render };
+  return {
+    total: median(totals),
+    layout: median(layouts),
+    render: median(renders),
+    p95: p95(totals),
+    samples: sampleCount,
+  };
 }
 
 /**
@@ -213,19 +276,56 @@ async function benchHighlight(
 }
 
 /** @internal benchmark — directly measures renderer camera-update throughput. */
+function createLongTaskTracker(): () => { count: number; totalMs: number } {
+  let count = 0;
+  let totalMs = 0;
+  let observer: PerformanceObserver | undefined;
+  if (
+    typeof PerformanceObserver !== 'undefined' &&
+    PerformanceObserver.supportedEntryTypes?.includes('longtask')
+  ) {
+    observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        count++;
+        totalMs += entry.duration;
+      }
+    });
+    observer.observe({ entryTypes: ['longtask'] });
+  }
+  return () => {
+    observer?.disconnect();
+    return { count, totalMs };
+  };
+}
+
+function summarizeFrames(intervals: number[], longTasks: { count: number; totalMs: number }): FrameDiagnostics {
+  const droppedThresholdMs = (1000 / 60) * 1.5;
+  return {
+    fpsMedian: intervals.length > 0 ? median(intervals.map((dt) => 1000 / dt)) : 0,
+    p95FrameMs: p95(intervals),
+    droppedFrameRatio:
+      intervals.length > 0
+        ? intervals.filter((interval) => interval > droppedThresholdMs).length / intervals.length
+        : 0,
+    longTaskCount: longTasks.count,
+    longTaskTotalMs: longTasks.totalMs,
+  };
+}
+
 async function benchDragFPS(
   graphData: GraphData,
   cont: HTMLElement,
   layout: LayoutConfig | undefined,
   onFPS: (fps: number) => void,
-): Promise<number> {
+): Promise<FrameDiagnostics> {
   await cleanContainer(cont);
   const graph = await makeGraph(graphData, cont, layout);
   const renderer = (graph as any).renderer;
   const frames = 120;
   const intervals: number[] = [];
+  const stopLongTaskTracker = createLongTaskTracker();
 
-  return new Promise<number>((resolve) => {
+  return new Promise<FrameDiagnostics>((resolve) => {
     let count = 0;
     let lastTime = performance.now();
 
@@ -233,7 +333,7 @@ async function benchDragFPS(
       if (aborted || count >= frames) {
         renderer.setMoving(false);
         graph.destroy();
-        resolve(intervals.length > 0 ? median(intervals.map((dt) => 1000 / dt)) : 0);
+        resolve(summarizeFrames(intervals, stopLongTaskTracker()));
         return;
       }
 
@@ -261,14 +361,15 @@ async function benchZoomFPS(
   cont: HTMLElement,
   layout: LayoutConfig | undefined,
   onFPS: (fps: number) => void,
-): Promise<number> {
+): Promise<FrameDiagnostics> {
   await cleanContainer(cont);
   const graph = await makeGraph(graphData, cont, layout);
   const renderer = (graph as any).renderer;
   const frames = 120;
   const intervals: number[] = [];
+  const stopLongTaskTracker = createLongTaskTracker();
 
-  return new Promise<number>((resolve) => {
+  return new Promise<FrameDiagnostics>((resolve) => {
     let count = 0;
     let lastTime = performance.now();
 
@@ -276,7 +377,7 @@ async function benchZoomFPS(
       if (aborted || count >= frames) {
         renderer.setMoving(false);
         graph.destroy();
-        resolve(intervals.length > 0 ? median(intervals.map((dt) => 1000 / dt)) : 0);
+        resolve(summarizeFrames(intervals, stopLongTaskTracker()));
         return;
       }
 
@@ -317,8 +418,8 @@ async function benchPickAt(
   const times: number[] = [];
   for (let i = 0; i < 100; i++) {
     if (aborted) break;
-    const sx = rect.left + Math.random() * rect.width;
-    const sy = rect.top + Math.random() * rect.height;
+    const sx = rect.left + ((i * 37 + 17) % Math.max(1, rect.width));
+    const sy = rect.top + ((i * 53 + 29) % Math.max(1, rect.height));
     const t0 = performance.now();
     renderer.pickAt(sx, sy);
     times.push(performance.now() - t0);
@@ -326,6 +427,57 @@ async function benchPickAt(
 
   graph.destroy();
   return { median: median(times) };
+}
+
+async function readMemoryBytes(): Promise<{ bytes?: number; source?: string }> {
+  const perf = performance as Performance & {
+    memory?: { usedJSHeapSize: number };
+    measureUserAgentSpecificMemory?: () => Promise<{ bytes: number }>;
+  };
+  if (crossOriginIsolated && typeof perf.measureUserAgentSpecificMemory === 'function') {
+    try {
+      const result = await perf.measureUserAgentSpecificMemory();
+      return { bytes: result.bytes, source: 'measureUserAgentSpecificMemory' };
+    } catch {
+      // Fall through to the less precise Chromium heap metric.
+    }
+  }
+  if (perf.memory?.usedJSHeapSize !== undefined) {
+    return { bytes: perf.memory.usedJSHeapSize, source: 'performance.memory' };
+  }
+  return {};
+}
+
+async function benchMemory(
+  graphData: GraphData,
+  cont: HTMLElement,
+  layout: LayoutConfig | undefined,
+): Promise<MemoryDiagnostics> {
+  await cleanContainer(cont);
+  const before = await readMemoryBytes();
+  const graph = await makeGraph(graphData, cont, layout);
+  await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
+  const afterRender = await readMemoryBytes();
+  graph.destroy();
+  cont.innerHTML = '';
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const afterDestroy = await readMemoryBytes();
+  if (
+    before.bytes === undefined ||
+    afterRender.bytes === undefined ||
+    afterDestroy.bytes === undefined
+  ) {
+    return { supported: false };
+  }
+  return {
+    supported: true,
+    source: afterRender.source ?? before.source,
+    before: before.bytes,
+    afterRender: afterRender.bytes,
+    afterDestroy: afterDestroy.bytes,
+    delta: afterRender.bytes - before.bytes,
+    postDestroyDelta: afterDestroy.bytes - before.bytes,
+  };
 }
 
 // ─── Runner ──────────────────────────────────────────────────────────
@@ -363,6 +515,12 @@ function formatScale(nodes: number, edges: number): string {
   return `${fmtN} / ${fmtE}`;
 }
 
+function formatBytes(bytes: number | undefined): string {
+  if (bytes === undefined) return 'n/a';
+  const sign = bytes >= 0 ? '+' : '-';
+  return `${sign}${formatNum(Math.abs(bytes) / 1024 / 1024, 1)}MB`;
+}
+
 function addResultRow(result: BenchResult): void {
   const body = getResultsBody();
   const tr = document.createElement('tr');
@@ -371,12 +529,29 @@ function addResultRow(result: BenchResult): void {
     <td>${formatNum(result.firstRender.layout)}ms</td>
     <td>${formatNum(result.firstRender.render)}ms</td>
     <td>${formatNum(result.firstRender.total)}ms</td>
+    <td>${formatNum(result.firstRender.p95)}ms</td>
     <td>${formatNum(result.highlight.median)}ms</td>
     <td class="${result.dragFPS >= 50 ? 'cell-good' : result.dragFPS >= 30 ? 'cell-warn' : 'cell-bad'}">${formatNum(result.dragFPS, 0)} FPS</td>
+    <td>${formatNum(result.dragFrame.p95FrameMs, 1)}ms</td>
     <td class="${result.zoomFPS >= 50 ? 'cell-good' : result.zoomFPS >= 30 ? 'cell-warn' : 'cell-bad'}">${formatNum(result.zoomFPS, 0)} FPS</td>
+    <td>${formatNum(result.zoomFrame.p95FrameMs, 1)}ms</td>
     <td>${formatNum(result.pickAt.median, 2)}ms</td>
+    <td>${result.memory.supported ? formatBytes(result.memory.postDestroyDelta) : 'unsupported'}</td>
   `;
   body.appendChild(tr);
+}
+
+function addMicroResultRow(result: BrowserMicroResult): void {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><strong>${result.name}</strong></td>
+    <td>${result.scope}</td>
+    <td>${formatNum(result.hz, 0)}</td>
+    <td>${formatNum(result.meanMs, 4)}ms</td>
+    <td class="${result.status === 'pass' ? 'cell-good' : result.status === 'warning' ? 'cell-warn' : 'cell-bad'}">±${formatNum(result.rme, 2)}%</td>
+    <td>${result.sampleSize}</td>
+  `;
+  getMicroResultsBody().appendChild(tr);
 }
 
 function updateProgress(current: number, total: number, stage: string): void {
@@ -397,9 +572,10 @@ async function runBenchmark(): Promise<void> {
   results = [];
   getResultsBody().innerHTML = '';
   getBtnStart().disabled = true;
+  getBtnMicro().disabled = true;
   getBtnStop().disabled = false;
 
-  const totalSteps = tiers.length * 5;
+  const totalSteps = tiers.length * 6;
   let step = 0;
   const cont = getContainer();
 
@@ -419,11 +595,14 @@ async function runBenchmark(): Promise<void> {
       : `${tier.nodes.toLocaleString()} nodes`;
     const result: BenchResult = {
       scale: { nodes: data.nodes.length, edges: data.edges.length },
-      firstRender: { total: 0, layout: 0, render: 0 },
+      firstRender: { total: 0, layout: 0, render: 0, p95: 0, samples: 0 },
       highlight: { median: 0, p95: 0 },
       dragFPS: 0,
       zoomFPS: 0,
+      dragFrame: { fpsMedian: 0, p95FrameMs: 0, droppedFrameRatio: 0, longTaskCount: 0, longTaskTotalMs: 0 },
+      zoomFrame: { fpsMedian: 0, p95FrameMs: 0, droppedFrameRatio: 0, longTaskCount: 0, longTaskTotalMs: 0 },
       pickAt: { median: 0 },
+      memory: { supported: false },
     };
 
     // 1. First Render
@@ -447,18 +626,20 @@ async function runBenchmark(): Promise<void> {
     // 3. Drag FPS
     getPreviewLabel().textContent = `${label} - Drag FPS`;
     updateProgress(step, totalSteps, `${label} - Drag FPS`);
-    result.dragFPS = await benchDragFPS(data, cont, layout, (fps) => {
+    result.dragFrame = await benchDragFPS(data, cont, layout, (fps) => {
       getLiveMetrics().textContent = `FPS: ${formatNum(fps, 0)}`;
     });
+    result.dragFPS = result.dragFrame.fpsMedian;
     step++;
     if (aborted) break;
 
     // 4. Zoom FPS
     getPreviewLabel().textContent = `${label} - Zoom FPS`;
     updateProgress(step, totalSteps, `${label} - Zoom FPS`);
-    result.zoomFPS = await benchZoomFPS(data, cont, layout, (fps) => {
+    result.zoomFrame = await benchZoomFPS(data, cont, layout, (fps) => {
       getLiveMetrics().textContent = `FPS: ${formatNum(fps, 0)}`;
     });
+    result.zoomFPS = result.zoomFrame.fpsMedian;
     step++;
     if (aborted) break;
 
@@ -470,8 +651,18 @@ async function runBenchmark(): Promise<void> {
     getLiveMetrics().textContent = `Pick: ${formatNum(result.pickAt.median, 2)}ms`;
     step++;
 
+    // 6. Memory lifecycle
+    getPreviewLabel().textContent = `${label} - Memory`;
+    updateProgress(step, totalSteps, `${label} - Memory`);
+    result.memory = await benchMemory(data, cont, layout);
+    getLiveMetrics().textContent = result.memory.supported
+      ? `Post-destroy delta: ${formatBytes(result.memory.postDestroyDelta)}`
+      : 'Memory API unsupported';
+    step++;
+
     results.push(result);
     addResultRow(result);
+    syncBrowserReport();
   }
 
   // Done
@@ -480,26 +671,67 @@ async function runBenchmark(): Promise<void> {
   getPreviewLabel().textContent = 'Graph Preview';
   getLiveMetrics().textContent = '';
   getBtnStart().disabled = false;
+  getBtnMicro().disabled = false;
   getBtnStop().disabled = true;
+}
+
+async function runMicroBenchmark(): Promise<void> {
+  aborted = false;
+  microResults = [];
+  getMicroResultsBody().innerHTML = '';
+  getBtnStart().disabled = true;
+  getBtnMicro().disabled = true;
+  getBtnStop().disabled = true;
+  getProgressBar().style.width = '0%';
+  getProgressText().textContent = 'Running Benchmark.js micro suites';
+  getPreviewLabel().textContent = 'Benchmark.js — 1K preset graph';
+
+  try {
+    microResults = await runBrowserMicroBenchmarks(getContainer(), (result, formatted) => {
+      addMicroResultRow(result);
+      getLiveMetrics().textContent = formatted;
+      getProgressText().textContent = `${result.name} (${result.status})`;
+    });
+    getProgressBar().style.width = '100%';
+    getProgressText().textContent = 'Benchmark.js complete';
+    syncBrowserReport();
+  } catch (error) {
+    getProgressText().textContent = `Benchmark.js failed: ${String(error)}`;
+  } finally {
+    getContainer().innerHTML = '';
+    getPreviewLabel().textContent = 'Graph Preview';
+    getLiveMetrics().textContent = '';
+    getBtnStart().disabled = false;
+    getBtnMicro().disabled = false;
+  }
 }
 
 // ─── Export ──────────────────────────────────────────────────────────
 
 function resultsToMarkdown(): string {
   const lines = [
-    '| Scale | Layout | Render | First Render | Highlight | Drag FPS | Zoom FPS | Pick |',
-    '|-------|--------|--------|-------------|-----------|----------|----------|------|',
+    '| Scale | Layout | Render | First Render | First Render p95 | Highlight | Drag FPS | Drag p95 | Zoom FPS | Zoom p95 | Pick | Post-destroy Heap Delta |',
+    '|-------|--------|--------|-------------|------------------|-----------|----------|----------|----------|----------|------|---------------|',
   ];
   for (const r of results) {
     lines.push(
-      `| ${formatScale(r.scale.nodes, r.scale.edges)} | ${formatNum(r.firstRender.layout)}ms | ${formatNum(r.firstRender.render)}ms | ${formatNum(r.firstRender.total)}ms | ${formatNum(r.highlight.median)}ms | ${formatNum(r.dragFPS, 0)} FPS | ${formatNum(r.zoomFPS, 0)} FPS | ${formatNum(r.pickAt.median, 2)}ms |`,
+      `| ${formatScale(r.scale.nodes, r.scale.edges)} | ${formatNum(r.firstRender.layout)}ms | ${formatNum(r.firstRender.render)}ms | ${formatNum(r.firstRender.total)}ms | ${formatNum(r.firstRender.p95)}ms | ${formatNum(r.highlight.median)}ms | ${formatNum(r.dragFPS, 0)} FPS | ${formatNum(r.dragFrame.p95FrameMs, 1)}ms | ${formatNum(r.zoomFPS, 0)} FPS | ${formatNum(r.zoomFrame.p95FrameMs, 1)}ms | ${formatNum(r.pickAt.median, 2)}ms | ${r.memory.supported ? formatBytes(r.memory.postDestroyDelta) : 'unsupported'} |`,
     );
+  }
+  if (microResults.length > 0) {
+    lines.push('', '## Benchmark.js Micro Results', '');
+    for (const result of microResults) {
+      lines.push(
+        `- ${result.name}: ${formatNum(result.hz, 0)} ops/sec, ${formatNum(result.meanMs, 4)}ms mean, ±${formatNum(result.rme, 2)}% RME, ${result.sampleSize} samples (${result.scope})`,
+      );
+    }
   }
   return lines.join('\n');
 }
 
 function exportJSON(): void {
-  const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+  const report = buildBrowserReport();
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -511,6 +743,7 @@ function exportJSON(): void {
 // ─── Init ────────────────────────────────────────────────────────────
 
 getBtnStart().addEventListener('click', () => runBenchmark());
+getBtnMicro().addEventListener('click', () => runMicroBenchmark());
 getBtnStop().addEventListener('click', () => { aborted = true; });
 $('#btn-copy').addEventListener('click', () => {
   navigator.clipboard.writeText(resultsToMarkdown());
@@ -518,3 +751,4 @@ $('#btn-copy').addEventListener('click', () => {
   setTimeout(() => { ($('#btn-copy') as HTMLButtonElement).textContent = 'Copy Markdown'; }, 1500);
 });
 $('#btn-export').addEventListener('click', exportJSON);
+syncBrowserReport();

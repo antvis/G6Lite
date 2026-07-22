@@ -2,7 +2,7 @@ import {
   createDataUpdates,
   createPositionUpdates,
   generateGraphData,
-} from '../datasets/generate.mjs';
+} from '../datasets/generate.js';
 
 function createModel(DataModel, theme, data) {
   const model = new DataModel({ theme });

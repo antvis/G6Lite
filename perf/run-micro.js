@@ -1,11 +1,11 @@
 import path from 'node:path';
 import process from 'node:process';
-import { runBenchmarkSuite } from './core/benchmark-runner.mjs';
-import { collectNodeEnvironment } from './core/environment.mjs';
-import { writeJsonReport } from './reporters/json.mjs';
-import { writeMarkdownReport } from './reporters/markdown.mjs';
-import { createDataModelSuite } from './suites/data-model.bench.mjs';
-import { createLayoutSuite } from './suites/layout.bench.mjs';
+import { runBenchmarkSuite } from './core/benchmark-runner.js';
+import { collectNodeEnvironment } from './core/environment.js';
+import { writeJsonReport } from './reporters/json.js';
+import { writeMarkdownReport } from './reporters/markdown.js';
+import { createDataModelSuite } from './suites/data-model.bench.js';
+import { createLayoutSuite } from './suites/layout.bench.js';
 
 function readArgument(name, fallback) {
   const index = process.argv.indexOf(name);

@@ -9,7 +9,7 @@ import {
   runBrowserMicroBenchmarks,
   type BrowserMicroResult,
 } from '../perf/browser/micro.js';
-import { generateGraphData } from '../perf/datasets/generate.mjs';
+import { generateGraphData } from '../perf/datasets/generate.js';
 
 interface BrowserPerfReport {
   schemaVersion: 1;

@@ -3,7 +3,7 @@ import BenchmarkImport from 'benchmark';
 import lodashImport from 'lodash';
 import platformImport from 'platform';
 import { Graph, type GraphData } from '../../src/index.js';
-import { generateGraphData } from '../datasets/generate.mjs';
+import { generateGraphData } from '../datasets/generate.js';
 
 const unwrapDefault = <T>(value: T | { default?: T }): T =>
   ((value as { default?: T }).default ?? value) as T;

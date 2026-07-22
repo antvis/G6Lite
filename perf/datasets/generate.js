@@ -1,4 +1,4 @@
-import { createSeededRandom } from '../core/seeded-random.mjs';
+import { createSeededRandom } from '../core/seeded-random.js';
 
 export const PERF_TIERS = {
   tiny: { nodes: 100, degree: 3 },

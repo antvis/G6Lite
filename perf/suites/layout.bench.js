@@ -1,4 +1,4 @@
-import { cloneGraphData, generateGraphData } from '../datasets/generate.mjs';
+import { cloneGraphData, generateGraphData } from '../datasets/generate.js';
 
 function createDeferredLayoutCase(runLayout, data, tier, type, config = {}) {
   return {

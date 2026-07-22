@@ -2,8 +2,8 @@ import path from 'node:path';
 import process from 'node:process';
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
-import { writeJsonReport } from './reporters/json.mjs';
-import { writeMarkdownReport } from './reporters/markdown.mjs';
+import { writeJsonReport } from './reporters/json.js';
+import { writeMarkdownReport } from './reporters/markdown.js';
 
 function readArgument(name, fallback) {
   const index = process.argv.indexOf(name);

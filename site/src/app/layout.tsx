@@ -12,23 +12,23 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://antvis.github.io/G6
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'G6Lite — 基于 WebGL 的高性能图可视化与分析引擎',
-    template: '%s | G6Lite',
+    default: 'G6-GL — 基于 WebGL 的高性能图可视化与分析引擎',
+    template: '%s | G6-GL',
   },
   description:
-    'G6Lite 是一个基于 WebGL 的高性能图可视化与分析引擎，为大规模图数据而生。轻量、快速、可扩展，内置 15+ 布局与完整交互行为。',
-  keywords: ['G6Lite', 'graph', 'visualization', 'webgl', 'antv', 'g6', '图可视化', '图分析'],
+    'G6-GL 是一个基于 WebGL 的高性能图可视化与分析引擎，为大规模图数据而生。轻量、快速、可扩展，内置 15+ 布局与完整交互行为。',
+  keywords: ['G6-GL', 'graph', 'visualization', 'webgl', 'antv', 'g6', '图可视化', '图分析'],
   authors: [{ name: 'AntV' }],
   openGraph: {
-    title: 'G6Lite — 基于 WebGL 的高性能图可视化与分析引擎',
+    title: 'G6-GL — 基于 WebGL 的高性能图可视化与分析引擎',
     description: '轻量、快速、可扩展，让万级节点的图分析在浏览器中流畅运行。',
     url: siteUrl,
-    siteName: 'G6Lite',
+    siteName: 'G6-GL',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'G6Lite',
+    title: 'G6-GL',
     description: '基于 WebGL 的高性能图可视化与分析引擎，为大规模图数据而生。',
   },
 };

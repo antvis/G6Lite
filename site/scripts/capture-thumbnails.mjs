@@ -1,5 +1,5 @@
 /**
- * 用真实 g6-lite(WebGL)渲染每种布局并截图,输出到 public/layouts/<type>.png。
+ * 用真实 g6-gl(WebGL)渲染每种布局并截图,输出到 public/layouts/<type>.png。
  *
  * 依赖 playground 的 vite dev server + capture.html。
  * 运行(在仓库根目录):

@@ -5,6 +5,7 @@ import {
   BreathingNode,
   getNodeBaseType,
   getNodeExtension,
+  type NodeOverlayDrawParams,
   registerNode,
 } from '../extensions/node.js';
 
@@ -28,16 +29,26 @@ describe('node extension registry', () => {
     expect(getNodeExtension('badge-node')).toBeInstanceOf(BadgeNode);
   });
 
+  it('registers node factories through register()', () => {
+    register('node', 'factory-node', () => ({
+      base: 'rect',
+      style: { fill: '#fff' },
+    }));
+
+    expect(getNodeBaseType({ type: 'factory-node' })).toBe('rect');
+    expect(getNodeExtension('factory-node')?.style).toEqual({ fill: '#fff' });
+  });
+
   it('provides the built-in breathing-node extension', () => {
     const extension = getNodeExtension('breathing-node');
 
-    expect(extension).toBeInstanceOf(BreathingNode);
+    expect(extension).not.toBeInstanceOf(BreathingNode);
     expect(getNodeBaseType({ type: 'breathing-node' })).toBe('circle');
     expect(extension?.stateStyles?.selected?.haloWidth).toBe(14);
   });
 
   it('breathing-node overlay only animates active nodes', () => {
-    const extension = getNodeExtension('breathing-node') as BreathingNode;
+    const extension = getNodeExtension('breathing-node');
     const ctx = {
       save: vi.fn(),
       beginPath: vi.fn(),
@@ -48,8 +59,8 @@ describe('node extension registry', () => {
       set lineWidth(_value: number) {},
     } as unknown as CanvasRenderingContext2D;
 
-    const inactive = extension.drawOverlay!(ctx, {
-      node: { id: 'n1', x: 0, y: 0, states: new Set() } as any,
+    const inactive = extension!.drawOverlay!(ctx, {
+      node: { id: 'n1', x: 0, y: 0, states: new Set() } as unknown as NodeOverlayDrawParams['node'],
       x: 10,
       y: 20,
       nodeSize: 24,
@@ -60,8 +71,13 @@ describe('node extension registry', () => {
     });
     expect(inactive).toBe(false);
 
-    const active = extension.drawOverlay!(ctx, {
-      node: { id: 'n1', x: 0, y: 0, states: new Set(['selected']) } as any,
+    const active = extension!.drawOverlay!(ctx, {
+      node: {
+        id: 'n1',
+        x: 0,
+        y: 0,
+        states: new Set(['selected']),
+      } as unknown as NodeOverlayDrawParams['node'],
       x: 10,
       y: 20,
       nodeSize: 24,

@@ -17,14 +17,20 @@ import {
   RandomLayout,
 } from '@antv/layout';
 import type { ExtensionContext, LayoutExtension } from '../extensions/contracts.js';
-import { createExtension, safeExtensionCall } from '../extensions/registry.js';
+import { createExtension, destroyExtension, initializeExtension } from '../extensions/registry.js';
 import type { GraphData, GraphNode, LayoutConfig } from '../types.js';
-import { FishboneLayout } from './fishboneLayout.js';
-import { IndentedLayout } from './indentedLayout.js';
-import { MindmapLayout } from './mindmapLayout.js';
+import { executeFishboneLayout, type FishboneLayoutOptions } from './fishboneLayout.js';
+import { executeIndentedLayout, type IndentedLayoutOptions } from './indentedLayout.js';
+import { executeMindmapLayout, type MindmapLayoutOptions } from './mindmapLayout.js';
 import { runLayoutInWorker } from './workerLayout.js';
 
 export type LayoutResult = { nodes: Array<GraphNode & { x: number; y: number }> };
+
+function createFallbackResult(data: GraphData): LayoutResult {
+  return {
+    nodes: data.nodes.map((node) => ({ ...node, x: node.x ?? 0, y: node.y ?? 0 })),
+  };
+}
 
 type LayoutInstance = {
   execute: (data: GraphData) => Promise<void>;
@@ -43,10 +49,15 @@ const LAYOUT_MAP = {
   mds: MDSLayout,
   random: RandomLayout,
   radial: RadialLayout,
-  indented: IndentedLayout,
-  mindmap: MindmapLayout,
-  fishbone: FishboneLayout,
 } as Record<string, new (opts?: Record<string, unknown>) => LayoutInstance>;
+
+type BuiltInLayoutExecutor = (data: GraphData, config: LayoutConfig) => LayoutResult;
+
+const BUILTIN_EXECUTOR_MAP: Record<string, BuiltInLayoutExecutor> = {
+  indented: (data, config) => executeIndentedLayout(data, config as IndentedLayoutOptions),
+  mindmap: (data, config) => executeMindmapLayout(data, config as MindmapLayoutOptions),
+  fishbone: (data, config) => executeFishboneLayout(data, config as FishboneLayoutOptions),
+};
 
 /**
  * Run the configured layout on graph data; returns nodes with positions.
@@ -80,44 +91,60 @@ export async function runLayout(
 
   const customLayout = createExtension<LayoutExtension>('layout', config.type);
   if (customLayout) {
+    const options = Object.freeze({ ...config });
     try {
-      if (runtime.signal?.aborted) throw new DOMException('Layout aborted', 'AbortError');
+      if (runtime.signal?.aborted) return createFallbackResult(data);
       if (runtime.extensionContext) {
-        safeExtensionCall(
-          'layout',
-          config.type,
-          'init',
-          () => customLayout.init?.(runtime.extensionContext!, config),
-          undefined,
-        );
+        if (
+          !initializeExtension(
+            'layout',
+            config.type,
+            customLayout,
+            runtime.extensionContext,
+            config,
+          )
+        ) {
+          return createFallbackResult(data);
+        }
+        if (runtime.signal?.aborted) return createFallbackResult(data);
       }
-      return await customLayout.execute(data, {
+      const result = await customLayout.execute(data, {
         width: viewport?.width ?? Number(config.width ?? 800),
         height: viewport?.height ?? Number(config.height ?? 600),
         signal: runtime.signal,
+        options,
       });
+      if (runtime.signal?.aborted) return createFallbackResult(data);
+      return result;
     } catch (error) {
       if (runtime.signal?.aborted) {
-        return { nodes: data.nodes.map((node) => ({ ...node, x: node.x ?? 0, y: node.y ?? 0 })) };
+        return createFallbackResult(data);
       }
-      console.error(`[G6Lite] layout extension "${config.type}" failed during execute`, error);
-      return {
-        nodes: data.nodes.map((node) => ({ ...node, x: node.x ?? 0, y: node.y ?? 0 })),
-      };
+      console.error(`[G6-GL] layout extension "${config.type}" failed during execute`, error);
+      return createFallbackResult(data);
     } finally {
-      safeExtensionCall(
-        'layout',
-        config.type,
-        'destroy',
-        () => customLayout.destroy?.(),
-        undefined,
-      );
+      destroyExtension('layout', config.type, customLayout);
+    }
+  }
+
+  const builtInExecutor = BUILTIN_EXECUTOR_MAP[config.type];
+  if (builtInExecutor) {
+    try {
+      if (runtime.signal?.aborted) return createFallbackResult(data);
+      const result = builtInExecutor(data, config);
+      return runtime.signal?.aborted ? createFallbackResult(data) : result;
+    } catch (error) {
+      if (!runtime.signal?.aborted) {
+        console.error(`[G6-GL] built-in layout "${config.type}" failed during execute`, error);
+      }
+      return createFallbackResult(data);
     }
   }
 
   if (useWorker) {
     try {
-      const workerResult = await runLayoutInWorker(data, config);
+      const workerResult = await runLayoutInWorker(data, config, runtime.signal);
+      if (runtime.signal?.aborted) return createFallbackResult(data);
       const posMap = new Map(
         workerResult.positions.map((p) => [p.id, p] as [string, { x: number; y: number }]),
       );
@@ -127,13 +154,23 @@ export async function runLayout(
       });
       return { nodes };
     } catch {
+      if (runtime.signal?.aborted) {
+        return createFallbackResult(data);
+      }
       // Worker failed — fall through to main-thread layout
     }
   }
 
+  if (runtime.signal?.aborted) {
+    return createFallbackResult(data);
+  }
+
   const LayoutClass = LAYOUT_MAP[config.type] ?? RandomLayout;
   // Strip internal fields before passing to layout constructor
-  const { type, worker, ...opts } = config as Record<string, unknown>;
+  const type = config.type;
+  const opts = { ...(config as Record<string, unknown>) };
+  delete opts.type;
+  delete opts.worker;
   const nodeCount = data.nodes.length;
 
   // R-LAYOUT-01: Map user-friendly 'iterations' to @antv/layout's 'maxIteration'
@@ -239,6 +276,8 @@ export async function runLayout(
   } else {
     await layout.execute(layoutData);
   }
+
+  if (runtime.signal?.aborted) return createFallbackResult(data);
 
   const posMap = new Map<string, [number, number]>();
   layout.forEachNode((node: { id: string; x: number; y: number }) => {

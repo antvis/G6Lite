@@ -37,5 +37,8 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Package smoke tests
+        run: npm run check:package
+
       - name: Size limit
         run: npm run size

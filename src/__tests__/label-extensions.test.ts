@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getLabelRenderer, registerLabelRenderer } from '../extensions/label.js';
-import { register, type LabelRenderer } from '../index.js';
+import { extensionFactory, register, type LabelRenderer } from '../index.js';
 
 function renderer(width: number): LabelRenderer {
   return {
@@ -15,7 +15,17 @@ describe('label extension registry', () => {
 
     register('label', 'registry-custom-label', custom);
 
-    expect(getLabelRenderer('registry-custom-label')).toBe(custom);
+    expect(getLabelRenderer('registry-custom-label')).toEqual(custom);
+  });
+
+  it('registers label renderer factories through register()', () => {
+    register(
+      'label',
+      'registry-label-factory',
+      extensionFactory(() => renderer(24)),
+    );
+
+    expect(getLabelRenderer('registry-label-factory')?.measure({} as never).width).toBe(24);
   });
 
   it('uses the latest renderer for duplicate names', () => {
@@ -25,7 +35,7 @@ describe('label extension registry', () => {
     registerLabelRenderer('registry-replace-label', first);
     registerLabelRenderer('registry-replace-label', second);
 
-    expect(getLabelRenderer('registry-replace-label')).toBe(second);
+    expect(getLabelRenderer('registry-replace-label')?.measure({} as never).width).toBe(30);
   });
 
   it('rejects empty renderer names', () => {

@@ -2,6 +2,7 @@
  * Demo: public extension APIs working together without internal imports.
  */
 import {
+  extensionFactory,
   Graph,
   register,
   type BehaviorExtension,
@@ -55,18 +56,18 @@ const clickBehavior: BehaviorExtension = {
     return {
       'node:click': (event) => {
         if (!event.targetId) return;
-        const graph = this.context?.graph;
-        if (!graph) return;
-        graph.setElementStates(event.targetId, ['selected']);
-        const node = graph.getNodeData(event.targetId);
+        const context = this.context;
+        if (!context) return;
+        context.state.set(event.targetId, ['selected']);
+        const node = context.data.getNode(event.targetId);
         const currentSize = Number(node?.data?.size ?? 44);
-        graph.updateNodeData(event.targetId, { size: currentSize >= 60 ? 32 : 68 });
+        context.data.updateNode(event.targetId, { size: currentSize >= 60 ? 32 : 68 });
       },
       'canvas:click': () => {
-        const graph = this.context?.graph;
-        if (!graph) return;
-        const stateMap = Object.fromEntries(graph.getNodes().map((node) => [node.id, []]));
-        graph.setElementStates(stateMap);
+        const context = this.context;
+        if (!context) return;
+        const stateMap = Object.fromEntries(context.data.getNodeIds().map((id) => [id, []]));
+        context.state.setAll(stateMap);
       },
     };
   },
@@ -103,10 +104,14 @@ register('edge', 'business-relation', {
   style: { stroke: '#91caff', lineWidth: 2, curvature: 0.18, endArrow: true },
   stateStyles: { selected: { stroke: '#1677ff', lineWidth: 3 } },
 });
-register('layout', 'horizontal-business', () => ({ ...horizontalLayout }));
-register('transform', 'normalize-business-data', () => ({ ...normalizeData }));
-register('behavior', 'business-click', () => ({ ...clickBehavior }));
-register('plugin', 'extension-hint', () => ({ ...extensionHintPlugin }));
+register('layout', 'horizontal-business', extensionFactory(() => ({ ...horizontalLayout })));
+register(
+  'transform',
+  'normalize-business-data',
+  extensionFactory(() => ({ ...normalizeData })),
+);
+register('behavior', 'business-click', extensionFactory(() => ({ ...clickBehavior })));
+register('plugin', 'extension-hint', extensionFactory(() => ({ ...extensionHintPlugin })));
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({

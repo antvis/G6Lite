@@ -1,5 +1,5 @@
 /**
- * 截图页:用真实 g6-lite 渲染单个布局,供 scripts/capture-thumbnails 截图。
+ * 截图页:用真实 g6-gl 渲染单个布局,供 scripts/capture-thumbnails 截图。
  * 布局与配色由 URL hash 决定,如 #force|5B8FF9
  *
  * 逐节点的颜色/大小写入 node.data(color/size),由 node.style 的回调函数读取。
@@ -281,7 +281,6 @@ async function main() {
     await graph.render();
     await new Promise((r) => requestAnimationFrame(() => r(null)));
     graph.fitView(cfg.fit ?? 0.8);
-    graph.scheduleRender();
     attachLabelsCanvas(stage, graph as unknown as GraphInstanceWithTools, {
       nodeLabel: (node) => fishboneNodeById.get(node.id)?.name ?? node.id,
       position: (node) => ((fishboneNodeById.get(node.id)?.data.level as string) === FISHBONE_LEVELS.ITEM ? 'right-edge' : 'inside'),
@@ -318,11 +317,10 @@ async function main() {
     theme: 'light',
   });
   await graph.render();
-  // render 内部会画一帧默认相机、再 fitView 改相机;preserveDrawingBuffer 下两帧叠加成重影。
-  // 等一帧后强制重绘一次,WebGL 会先 clear 再画,只保留最终干净帧。
+  // render 内部会画一帧默认相机、再由 fitView 调度最终相机帧；等待其完成，
+  // WebGL 会先 clear 再画，只保留最终干净帧。
   await new Promise((r) => requestAnimationFrame(() => r(null)));
   graph.fitView(cfg.fit ?? 1.05);
-  graph.scheduleRender();
   await new Promise((r) => requestAnimationFrame(() => r(null)));
   await new Promise((r) => requestAnimationFrame(() => r(null)));
   // 标记渲染完成,供 playwright 等待

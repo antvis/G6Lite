@@ -7,7 +7,7 @@ export default defineConfig({
   server: { open: true },
   resolve: {
     alias: {
-      '@antv/g6-lite': new URL('./src/index.ts', import.meta.url).pathname,
+      '@antv/g6-gl': new URL('./src/index.ts', import.meta.url).pathname,
       // Source references the layout worker as './layoutWorker.js' so the
       // tsc-emitted dist resolves it correctly at runtime. Vite serves the TS
       // source directly, so redirect the .js worker URL to its .ts source.

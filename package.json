@@ -1,5 +1,5 @@
 {
-  "name": "@antv/g6-lite",
+  "name": "@antv/g6-gl",
   "version": "0.1.0-beta.22",
   "description": "A high-performance graph analysis engine based on WebGL, designed for large-scale graph data analysis.",
   "type": "module",
@@ -16,10 +16,12 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "clean:dist": "node scripts/clean-dist.mjs",
+    "build": "npm run clean:dist && tsc && tsc -p tsconfig.dist-declarations.json && node scripts/check-public-declarations.mjs && node scripts/check-esm-package.mjs",
     "build:playground": "npx vite build",
+    "check:package": "tsc -p tsconfig.package-nodenext.json && tsc -p tsconfig.package-bundler.json && node scripts/check-vite-package.mjs && node scripts/check-pack-manifest.mjs",
     "dev": "vite playground",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.public-api.json",
     "prepare": "husky",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
@@ -34,8 +36,8 @@
     "size": "size-limit",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "npm run build && changeset publish",
-    "ci": "npm run lint && npm run typecheck && npm run test:cov && npm run build && npm run size"
+    "release": "npm run build && npm run check:package && changeset publish",
+    "ci": "npm run lint && npm run typecheck && npm run test:cov && npm run build && npm run check:package && npm run size"
   },
   "keywords": [
     "graph",

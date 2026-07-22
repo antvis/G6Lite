@@ -1,5 +1,7 @@
 import type { Camera } from '../renderer/camera.js';
 import type { GraphNode, NodeConfig, NodeStateStyleOverride, NodeStyleConfig } from '../types.js';
+import type { ExtensionInput } from './contracts.js';
+import { createExtension, registerExtension } from './registry.js';
 
 export interface NodeOverlayDrawParams {
   node: GraphNode & { x: number; y: number };
@@ -31,6 +33,9 @@ export interface NodeExtension {
   drawOverlay?: (ctx: CanvasRenderingContext2D, params: NodeOverlayDrawParams) => boolean | void;
 }
 
+/**
+ * @deprecated Define a NodeExtension object or factory and register it with register('node', ...).
+ */
 export abstract class BaseNode implements NodeExtension {
   base: 'circle' | 'rect' = 'circle';
   style?: Partial<NodeStyleConfig>;
@@ -41,30 +46,22 @@ export abstract class BaseNode implements NodeExtension {
   drawOverlay?(_ctx: CanvasRenderingContext2D, _params: NodeOverlayDrawParams): boolean | void;
 }
 
-export type NodeExtensionInput = NodeExtension | (new () => NodeExtension);
+export type NodeExtensionInput = ExtensionInput<NodeExtension>;
 
-const NODE_REGISTRY = new Map<string, NodeExtensionInput>();
 const NODE_INSTANCE_CACHE = new Map<string, NodeExtension>();
 
+/** @deprecated Use the unified register('node', name, extension) API. */
 export function registerNode(name: string, extension: NodeExtensionInput): void {
-  NODE_REGISTRY.set(name, extension);
+  registerExtension('node', name, extension);
   NODE_INSTANCE_CACHE.delete(name);
-}
-
-export function register(type: 'node', name: string, extension: NodeExtensionInput): void {
-  if (type !== 'node') {
-    throw new Error(`Unsupported extension type: ${type}`);
-  }
-  registerNode(name, extension);
 }
 
 export function getNodeExtension(type: string | undefined): NodeExtension | undefined {
   if (!type || type === 'circle' || type === 'rect') return undefined;
   const cached = NODE_INSTANCE_CACHE.get(type);
   if (cached) return cached;
-  const entry = NODE_REGISTRY.get(type);
-  if (!entry) return undefined;
-  const extension = typeof entry === 'function' ? new entry() : entry;
+  const extension = createExtension<NodeExtension>('node', type);
+  if (!extension) return undefined;
   NODE_INSTANCE_CACHE.set(type, extension);
   return extension;
 }
@@ -82,39 +79,55 @@ function hasState(states: unknown, state: string): boolean {
   return Array.isArray(states) ? states.includes(state) : false;
 }
 
-export class BreathingNode extends BaseNode {
-  base = 'circle' as const;
-  stateStyles = {
-    active: { haloWidth: 10 },
-    selected: { haloWidth: 14 },
-    highlight: { haloWidth: 10 },
-  };
+const breathingNodeStateStyles: NonNullable<NodeExtension['stateStyles']> = {
+  active: { haloWidth: 10 },
+  selected: { haloWidth: 14 },
+  highlight: { haloWidth: 10 },
+};
 
-  drawOverlay(ctx: CanvasRenderingContext2D, params: NodeOverlayDrawParams): boolean {
-    const states = (params.node as { states?: unknown }).states;
-    if (
-      !hasState(states, 'active') &&
-      !hasState(states, 'selected') &&
-      !hasState(states, 'highlight')
-    ) {
-      return false;
-    }
-
-    const t = params.time / 700;
-    const pulse = (Math.sin(t) + 1) / 2;
-    const radius = Math.max(8 * params.dpr, params.nodeSize * params.zoom * 0.5);
-    const outerRadius = radius + (8 + pulse * 8) * params.dpr;
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(params.x, params.y, outerRadius, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(24, 144, 255, ${0.18 + (1 - pulse) * 0.18})`;
-    ctx.lineWidth = Math.max(1, 2 * params.dpr);
-    ctx.stroke();
-    ctx.restore();
-
-    return true;
+function drawBreathingNodeOverlay(
+  ctx: CanvasRenderingContext2D,
+  params: NodeOverlayDrawParams,
+): boolean {
+  const states = (params.node as { states?: unknown }).states;
+  if (
+    !hasState(states, 'active') &&
+    !hasState(states, 'selected') &&
+    !hasState(states, 'highlight')
+  ) {
+    return false;
   }
+
+  const t = params.time / 700;
+  const pulse = (Math.sin(t) + 1) / 2;
+  const radius = Math.max(8 * params.dpr, params.nodeSize * params.zoom * 0.5);
+  const outerRadius = radius + (8 + pulse * 8) * params.dpr;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(params.x, params.y, outerRadius, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(24, 144, 255, ${0.18 + (1 - pulse) * 0.18})`;
+  ctx.lineWidth = Math.max(1, 2 * params.dpr);
+  ctx.stroke();
+  ctx.restore();
+
+  return true;
 }
 
-registerNode('breathing-node', BreathingNode);
+const breathingNodeExtension = {
+  base: 'circle' as const,
+  stateStyles: breathingNodeStateStyles,
+  drawOverlay: drawBreathingNodeOverlay,
+} satisfies NodeExtension;
+
+/**
+ * @deprecated Use the built-in `breathing-node` type or a NodeExtension object.
+ * This class remains only for beta compatibility.
+ */
+export class BreathingNode extends BaseNode {
+  base = breathingNodeExtension.base;
+  stateStyles = breathingNodeStateStyles;
+  drawOverlay = drawBreathingNodeOverlay;
+}
+
+registerNode('breathing-node', breathingNodeExtension);

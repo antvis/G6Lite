@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { registerEdge } from '../extensions/edge.js';
+import { registerNode } from '../extensions/node.js';
 import {
   analyzeEdgeConfig,
   analyzeNodeConfig,
@@ -115,6 +116,28 @@ describe('style state resolution: Set vs Array', () => {
       expect(sourceStyle).not.toBe(targetStyle);
       expect(sourceStyle).toMatchObject({ width: 80, height: 30 });
       expect(targetStyle).toMatchObject({ width: 40, height: 20 });
+    });
+
+    it('falls back to the declared node extension style when getStyle throws', () => {
+      const error = new Error('node getStyle failed');
+      const report = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      registerNode('throwing-node-style', {
+        style: { fill: '#123456', size: 24 },
+        getStyle: () => {
+          throw error;
+        },
+      });
+      const extensionConfig: NodeConfig = { type: 'throwing-node-style' };
+      analyzeNodeConfig(extensionConfig, theme);
+
+      const style = resolveNodeStyle({ id: 'n', x: 0, y: 0 }, extensionConfig, theme);
+
+      expect(style).toMatchObject({ fill: '#123456', size: 24 });
+      expect(report).toHaveBeenCalledWith(
+        '[G6-GL] node extension "throwing-node-style" failed during getStyle',
+        error,
+      );
+      report.mockRestore();
     });
   });
 
@@ -285,6 +308,34 @@ describe('style state resolution: Set vs Array', () => {
       );
       expect(invalid.stroke).toBe('#f00');
       expect(invalid.lineWidth).toBe(5);
+    });
+
+    it('falls back to the declared edge extension style when getStyle throws', () => {
+      const error = new Error('edge getStyle failed');
+      const report = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      registerEdge('throwing-edge-style', {
+        style: { stroke: '#654321', lineWidth: 6 },
+        getStyle: () => {
+          throw error;
+        },
+      });
+      const extensionConfig: EdgeConfig = { type: 'throwing-edge-style' };
+      analyzeEdgeConfig(extensionConfig, theme);
+
+      const style = resolveEdgeStyle(
+        src,
+        tgt,
+        { source: 's', target: 't' },
+        extensionConfig,
+        theme,
+      );
+
+      expect(style).toMatchObject({ stroke: '#654321', lineWidth: 6 });
+      expect(report).toHaveBeenCalledWith(
+        '[G6-GL] edge extension "throwing-edge-style" failed during getStyle',
+        error,
+      );
+      report.mockRestore();
     });
   });
 });

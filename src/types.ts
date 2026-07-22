@@ -1,5 +1,5 @@
 /**
- * Graph data and options types for G6Lite.
+ * Graph data and options types for G6-GL.
  * Aligned with OpenSpec graph-rendering and theme specs.
  */
 
@@ -116,6 +116,31 @@ export interface GraphEdge {
   target: string;
   data?: EdgeData;
   states?: EdgeState[];
+}
+
+/**
+ * Read-only normalized node view returned by Graph query APIs.
+ * The view is backed by Graph; update it through Graph data/state APIs.
+ */
+export interface NodeModel {
+  readonly id: string;
+  readonly name?: string;
+  readonly x: number;
+  readonly y: number;
+  readonly data?: Readonly<Record<string, unknown>>;
+  readonly states: ReadonlySet<ElementState>;
+}
+
+/**
+ * Read-only normalized edge view returned by Graph query APIs.
+ * The view is backed by Graph; update it through Graph data/state APIs.
+ */
+export interface EdgeModel {
+  readonly id: string;
+  readonly source: string;
+  readonly target: string;
+  readonly data?: Readonly<Record<string, unknown>>;
+  readonly states: ReadonlySet<ElementState>;
 }
 
 /** Configuration for automatic same-endpoint edge separation. */
@@ -428,7 +453,7 @@ export interface ComboData {
 }
 
 /** Style value or function for combo. */
-export type ComboStyleValue<T> = T | ((combo: InternalCombo) => T);
+export type ComboStyleValue<T> = T | ((combo: ComboModel) => T);
 
 /** Style overrides applied per combo state. */
 export interface ComboStateStyleOverride {
@@ -457,7 +482,7 @@ export interface ComboStyleConfig {
   collapsedType?: 'circle' | 'rect';
   collapsedSize?: ComboStyleValue<number | [number, number]>;
   size?: ComboStyleValue<number | [number, number]>;
-  count?: boolean | string | ((combo: InternalCombo) => boolean | string);
+  count?: boolean | string | ((combo: ComboModel) => boolean | string);
   stateStyles?: Partial<Record<ElementState, ComboStateStyleOverride>>;
 }
 
@@ -466,7 +491,29 @@ export interface ComboConfig {
   style?: ComboStyleConfig;
 }
 
-/** Internal combo model with computed bounds. */
+/**
+ * Read-only normalized combo view returned by Graph query APIs.
+ * The view is backed by Graph; update it through Graph data/state APIs.
+ */
+export interface ComboModel {
+  readonly id: string;
+  readonly parentId?: string;
+  readonly childNodeIds: ReadonlySet<string>;
+  readonly childComboIds: ReadonlySet<string>;
+  readonly collapsed: boolean;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly style?: Readonly<Partial<ComboStyleConfig>>;
+  readonly data?: Readonly<Record<string, unknown>>;
+  readonly states: ReadonlySet<ElementState>;
+}
+
+/** Normalized graph element model returned by Graph.getElementData(). */
+export type ElementModel = NodeModel | EdgeModel | ComboModel;
+
+/** Mutable combo record owned by the internal DataModel module. */
 export interface InternalCombo {
   id: string;
   parentId?: string;

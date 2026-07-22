@@ -1,15 +1,22 @@
 import type { LabelRenderer } from '../types.js';
+import type { ExtensionInput } from './contracts.js';
+import { createExtension, registerExtension } from './registry.js';
 
-const LABEL_REGISTRY = new Map<string, LabelRenderer>();
+const LABEL_CACHE = new Map<string, LabelRenderer>();
 
-export function registerLabelRenderer<T = unknown>(name: string, renderer: LabelRenderer<T>): void {
-  if (!name.trim()) {
-    throw new Error('Label renderer name must not be empty');
-  }
-  LABEL_REGISTRY.set(name, renderer as unknown as LabelRenderer);
+export function registerLabelRenderer<T = unknown>(
+  name: string,
+  renderer: ExtensionInput<LabelRenderer<T>>,
+): void {
+  registerExtension('label', name, renderer as ExtensionInput<LabelRenderer>);
+  LABEL_CACHE.delete(name);
 }
 
 export function getLabelRenderer(name: string | undefined): LabelRenderer | undefined {
   if (!name) return undefined;
-  return LABEL_REGISTRY.get(name);
+  const cached = LABEL_CACHE.get(name);
+  if (cached) return cached;
+  const renderer = createExtension<LabelRenderer>('label', name);
+  if (renderer) LABEL_CACHE.set(name, renderer);
+  return renderer;
 }

@@ -1,5 +1,5 @@
 /**
- * G6Lite Examples — G6 官网风格：左侧目录 + 中间预览 + 右侧代码
+ * G6-GL Examples — G6 官网风格：左侧目录 + 中间预览 + 右侧代码
  */
 import { demos } from './demos/index.ts';
 

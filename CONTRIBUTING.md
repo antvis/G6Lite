@@ -1,8 +1,8 @@
-# Contributing to G6Lite
+# Contributing to G6-GL
 
 First off, thanks for taking the time to contribute! 🎉
 
-G6Lite is a 100% WebGL, AI-first high-performance graph engine in the [AntV](https://antv.antgroup.com/) family. This guide explains how to propose changes and get them merged.
+G6-GL is a 100% WebGL, AI-first high-performance graph engine in the [AntV](https://antv.antgroup.com/) family. This guide explains how to propose changes and get them merged.
 
 ## Table of Contents
 
@@ -33,7 +33,7 @@ align on the approach before you invest time.
 
 ## Development Setup
 
-G6Lite uses **npm** (a `package-lock.json` is committed — do not switch package managers).
+G6-GL uses **npm** (a `package-lock.json` is committed — do not switch package managers).
 
 ```bash
 # 1. Fork & clone
@@ -141,4 +141,4 @@ Use the issue forms:
 - ✨ **Feature request** — describe the problem and your proposed solution.
 - ❓ **Question** — for usage questions (consider GitHub Discussions for open-ended topics).
 
-Thanks again for contributing to G6Lite! 💙
+Thanks again for contributing to G6-GL! 💙

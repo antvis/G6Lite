@@ -1,13 +1,13 @@
 /**
  * Custom node extension demo.
- * Demonstrates: BaseNode/registerNode, explicit edge IDs, and Combo state API.
+ * Demonstrates: function-style node registration, explicit edge IDs, and Combo state API.
  */
 
-import { BaseNode, Graph, registerNode } from '../../src/index.ts';
+import { Graph, register, type NodeExtension } from '../../src/index.ts';
 
-class StatusBadgeNode extends BaseNode {
-  base = 'rect' as const;
-  style = {
+const statusBadgeNode: NodeExtension = {
+  base: 'rect',
+  style: {
     size: 42,
     width: 96,
     height: 34,
@@ -22,7 +22,7 @@ class StatusBadgeNode extends BaseNode {
     iconFontSize: 13,
     iconColor: '#fff',
     iconOffsetX: -32,
-  };
+  },
 
   getStyle(node: { data?: Record<string, unknown> }) {
     const role = node.data?.role;
@@ -30,10 +30,10 @@ class StatusBadgeNode extends BaseNode {
     if (role === 'compute') return { fill: '#D8911B', stroke: '#A86E12' };
     if (role === 'storage') return { fill: '#4E6E8E', stroke: '#35506B' };
     return { fill: '#64748b', stroke: '#475569' };
-  }
-}
+  },
+};
 
-registerNode('status-badge-node', StatusBadgeNode);
+register('node', 'status-badge-node', statusBadgeNode);
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({

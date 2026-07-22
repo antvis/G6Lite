@@ -1,10 +1,9 @@
 /**
- * G6Lite Performance Benchmark — browser-based benchmark runner.
+ * G6-GL Performance Benchmark — browser-based benchmark runner.
  * Runs 5 test scenarios across configurable data scale tiers.
  */
 
-import { Graph } from '../src/index.js';
-import type { GraphData, LayoutConfig } from '../src/types.js';
+import { Graph, type GraphData, type LayoutConfig } from '../src/index.js';
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -115,31 +114,6 @@ async function cleanContainer(cont: HTMLElement): Promise<void> {
   await new Promise((r) => setTimeout(r, 50));
 }
 
-/** Fit camera so the graph is centered with padding. */
-function fitView(graph: Graph): void {
-  const nodes = graph.getLayoutNodes();
-  if (!nodes.length) return;
-  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-  for (const n of nodes) {
-    if (n.x < minX) minX = n.x;
-    if (n.x > maxX) maxX = n.x;
-    if (n.y < minY) minY = n.y;
-    if (n.y > maxY) maxY = n.y;
-  }
-  const gw = maxX - minX || 1;
-  const gh = maxY - minY || 1;
-  const canvas = graph.getCanvas();
-  const rect = canvas.getBoundingClientRect();
-  const vw = rect.width || 800;
-  const vh = rect.height || 600;
-  const zoom = Math.min(vw / gw, vh / gh) * 0.85;
-  graph.setCamera({
-    zoom,
-    x: -(minX + maxX) / 2 + vw / (2 * zoom),
-    y: -(minY + maxY) / 2 + vh / (2 * zoom),
-  });
-}
-
 /** Create a Graph, render it, fit to center, and return it. */
 async function makeGraph(
   graphData: GraphData,
@@ -153,7 +127,7 @@ async function makeGraph(
     theme: 'light',
   });
   await graph.render();
-  fitView(graph);
+  graph.fitView(0.85);
   return graph;
 }
 
@@ -177,7 +151,7 @@ async function benchFirstRender(
 
   const t0 = performance.now();
   await graph.render();
-  fitView(graph);
+  graph.fitView(0.85);
   const total = performance.now() - t0;
 
   const layoutMs = layoutDuration || 0;
@@ -187,6 +161,11 @@ async function benchFirstRender(
   return { total, layout: layoutMs, render };
 }
 
+/**
+ * @internal benchmark
+ * Direct renderer access is intentional here to isolate raw WebGL highlight
+ * costs. This is benchmark-only code, not a public API usage example.
+ */
 async function benchHighlight(
   graphData: GraphData,
   cont: HTMLElement,
@@ -233,6 +212,7 @@ async function benchHighlight(
   return { median: median(times), p95: p95(times) };
 }
 
+/** @internal benchmark — directly measures renderer camera-update throughput. */
 async function benchDragFPS(
   graphData: GraphData,
   cont: HTMLElement,
@@ -275,6 +255,7 @@ async function benchDragFPS(
   });
 }
 
+/** @internal benchmark — directly measures renderer camera-update throughput. */
 async function benchZoomFPS(
   graphData: GraphData,
   cont: HTMLElement,
@@ -318,6 +299,7 @@ async function benchZoomFPS(
   });
 }
 
+/** @internal benchmark — directly measures the renderer picking path. */
 async function benchPickAt(
   graphData: GraphData,
   cont: HTMLElement,

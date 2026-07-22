@@ -6,6 +6,7 @@
     "custom-node",
     "custom-label-renderer",
     "extensions",
+    "beta-api-migration",
     "g6-v5-migration"
   ]
 }

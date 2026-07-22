@@ -1,16 +1,16 @@
 /**
- * @antv/g6-lite
+ * @antv/g6-gl
  * A high-performance graph analysis engine based on WebGL, designed for large-scale graph data analysis.
  *
- * Public API surface (frozen for 0.1.0 — see openspec/specs/api-freeze/spec.md).
- * Symbols tagged `@internal` below are exported for advanced/escape-hatch use
- * but are NOT part of the semver-stable surface and may change without a major bump.
+ * Public API surface is being re-baselined during the 0.1.0 beta period.
+ * Engine internals are excluded from the package root and published API
+ * declarations; consume supported APIs only through this entry point.
  */
 
 // ──── Core ────
 export { EventEmitter } from './events.js';
 export type { Handler } from './events.js';
-export { register } from './extensions/index.js';
+export { extensionFactory, register } from './extensions/index.js';
 export type {
   BehaviorExtension,
   DecorationDrawParams,
@@ -21,15 +21,25 @@ export type {
   ExtensionCategory,
   ExtensionConstructor,
   ExtensionContext,
+  ExtensionDataContext,
+  ExtensionEdgeData,
   ExtensionFactory,
   ExtensionInput,
+  ExtensionNodeData,
+  ExtensionStateContext,
+  ExtensionViewportContext,
   LayoutExtension,
   PluginExtension,
   TransformExtension,
 } from './extensions/index.js';
 export { BaseNode, BreathingNode, registerNode } from './extensions/node.js';
+export type {
+  NodeBoundaryAnchorParams,
+  NodeExtension,
+  NodeExtensionInput,
+  NodeOverlayDrawParams,
+} from './extensions/node.js';
 export { Graph } from './graph.js';
-export type { PickResult } from './graph.js';
 export { runLayout } from './layout/index.js';
 export type { LayoutResult } from './layout/index.js';
 export { resolveTheme } from './theme.js';
@@ -41,6 +51,7 @@ export type {
   BuiltInElementState,
   ComboConfig,
   ComboData,
+  ComboModel,
   ComboStateStyleOverride,
   ComboStyleConfig,
   ComboStyleValue,
@@ -49,9 +60,11 @@ export type {
   EdgeDataUpdate,
   EdgeLabelParams,
   EdgeLabelPlacement,
+  EdgeModel,
   EdgeState,
   EdgeStateStyleOverride,
   EdgeStyleValue,
+  ElementModel,
   ElementState,
   FitViewOptions,
   GraphData,
@@ -77,12 +90,12 @@ export type {
   NodeDecorationConfig,
   NodeDecorationPlacement,
   NodeLabelParams,
+  NodeModel,
   NodePositionUpdate,
   NodeState,
   NodeStateStyleOverride,
   NodeStyleConfig,
   NodeStyleValue,
-  ParallelEdgeMeta,
   ParallelEdgesConfig,
   PluginOption,
   ResolvedLabelStyle,
@@ -100,24 +113,3 @@ export type { HoverHighlightConfig } from './behaviors/hoverHighlight.js';
 export type { BehaviorConfig, BehaviorName } from './behaviors/index.js';
 export type { LassoSelectOptions } from './behaviors/lassoSelect.js';
 export type { TooltipContext, TooltipOptions } from './behaviors/tooltip.js';
-
-// ──── Query result types (returned by Graph.getNodeData/getEdgeData/getComboData) ────
-// Named `Internal*` for historical reasons (they mirror the in-memory column
-// store), but they ARE the public shape returned by the query getters above.
-export type { InternalEdge, InternalNode } from './dataModel.js';
-export type { InternalCombo } from './types.js';
-
-// ──── Advanced / internal escape hatches ────
-// @internal — DataModel, scheduler and the renderer data contract back the
-// engine internals. They are exported for power users building custom render
-// loops, but are not covered by the 0.1.0 stability guarantee.
-export { DataModel } from './dataModel.js';
-export type { ChangeRecord, ChangeType, DataModelOptions } from './dataModel.js';
-export type {
-  NodeBoundaryAnchorParams,
-  NodeExtension,
-  NodeExtensionInput,
-  NodeOverlayDrawParams,
-} from './extensions/node.js';
-export type { RendererData } from './renderer/renderer.js';
-export { RefreshLevel, RenderScheduler } from './scheduler.js';

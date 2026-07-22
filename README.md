@@ -1,6 +1,6 @@
-# G6Lite
+# G6-GL
 
-[![npm version](https://img.shields.io/npm/v/@antv/g6-lite.svg)](https://www.npmjs.com/package/@antv/g6-lite)
+[![npm version](https://img.shields.io/npm/v/@antv/g6-gl.svg)](https://www.npmjs.com/package/@antv/g6-gl)
 [![CI](https://github.com/antvis/G6Lite/actions/workflows/ci.yml/badge.svg)](https://github.com/antvis/G6Lite/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![bundle size](https://img.shields.io/badge/gzip-~117%20KB-brightgreen.svg)](./site/content/docs/metrics/bundle-size.mdx)
@@ -21,13 +21,13 @@
 ## 📦 安装 / Install
 
 ```bash
-npm install @antv/g6-lite
+npm install @antv/g6-gl
 ```
 
 ## 🚀 快速开始 / Quick Start
 
 ```ts
-import { Graph } from '@antv/g6-lite';
+import { Graph } from '@antv/g6-gl';
 
 const graph = new Graph({
   container: 'container',
@@ -50,6 +50,38 @@ const graph = new Graph({
 
 await graph.render();
 ```
+
+`new Graph(options)` 是长期保留的唯一推荐创建入口；项目不会改为 `createGraph()` 或无 `new` 的函数式入口。
+
+## 🧩 扩展与 API 边界 / Extensions & API Boundary
+
+业务扩展统一从包根使用 `register()`。无状态 Node / Edge / Label 描述可直接注册；Behavior、Layout、Transform、Plugin 等有状态扩展使用 `extensionFactory()`，确保每个 Graph 获得独立实例：
+
+```ts
+import { extensionFactory, register } from '@antv/g6-gl';
+
+register(
+  'behavior',
+  'business-click',
+  extensionFactory(() => ({
+    init(context) {
+      // 通过受控 context.data / state / viewport 使用引擎能力
+    },
+    getEvents() {
+      return {};
+    },
+  })),
+);
+```
+
+`extensionFactory()` 是有状态扩展实例隔离的唯一保证。beta 兼容的对象实例和 class constructor 仍可注册，但对象只做尽力克隆，新增有状态扩展不要依赖该兼容行为。
+
+- 公开 API 和类型只从 `@antv/g6-gl` 包根导入；不要依赖 `DataModel`、Renderer、Scheduler 或源码深层路径。
+- 查询结果使用 `NodeModel`、`EdgeModel`、`ComboModel` 和 `ElementModel`，数据修改统一通过 Graph 或 ExtensionContext API 完成。
+- 当前发布产物为 ESM-only，消费代码使用标准 ESM import，不支持 `require()`。
+- 仓库源码中的相对 `.js` 后缀用于保证 `tsc` 产物可被 Node ESM 直接解析，暂不应机械删除。
+
+详见[扩展体系](./site/content/docs/advanced/extensions.mdx)和[beta API 迁移指南](./site/content/docs/advanced/beta-api-migration.mdx)。公开 API 参考由 `npm run docs:api` 从包根类型自动生成。
 
 ## 📖 文档 / Documentation
 
@@ -79,20 +111,20 @@ npm run dev
 
 运行后在浏览器中可切换示例：
 
-| Demo | 说明 |
-|------|------|
-| 最简示例 | 少量节点边 + 环形布局 |
-| 节点样式 | 按 `data` 用函数设置 fill、size |
+| Demo     | 说明                                           |
+| -------- | ---------------------------------------------- |
+| 最简示例 | 少量节点边 + 环形布局                          |
+| 节点样式 | 按 `data` 用函数设置 fill、size                |
 | 布局切换 | 同一数据下切换 circular / force / grid / dagre |
-| 主题 | light / dark 及 token 覆盖 |
-| 交互高亮 | 缩放、拖拽、节点 / 边高亮 |
-| 较大规模 | 约 200 节点，验证基础性能 |
+| 主题     | light / dark 及 token 覆盖                     |
+| 交互高亮 | 缩放、拖拽、节点 / 边高亮                      |
+| 较大规模 | 约 200 节点，验证基础性能                      |
 
 ## 🔨 构建 / Build
 
 ```bash
 npm run build    # 输出 dist/（ESM + 类型声明）
-npm run ci       # lint + typecheck + test + build
+npm run ci       # lint + typecheck + coverage + build + package smoke + size
 npm run size     # 检查打包体积
 ```
 
@@ -103,9 +135,11 @@ npm run size     # 检查打包体积
 - ✅ 核心引擎、渲染、15+ 布局、P0–P3 交互行为
 - ✅ 治理文件（CONTRIBUTING / CODE_OF_CONDUCT / Issue & PR 模板）
 - ✅ 文档站点骨架（Next.js + Fumadocs）+ 三份指标文档
+- ✅ TypeDoc API 参考、公开类型边界检查与 beta API 迁移材料
+- ✅ Changesets beta 预发布配置与发布前 package smoke
 - 🚧 Guide 各章节正文、Combo / Label 文档与示例
-- 🚧 测试覆盖率门槛、独立 examples、API 文档
-- 🚧 GitHub Pages 部署、changesets 发布流程
+- 🚧 测试覆盖率门槛与独立 examples
+- 🚧 GitHub Pages 部署与发布自动化
 
 完整路线图见仓库内部 Roadmap 文档。
 

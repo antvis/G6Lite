@@ -1,5 +1,5 @@
 /**
- * Performance test page for G6Lite
+ * Performance test page for G6-GL
  * Measures first render time and reports results
  */
 
@@ -117,7 +117,7 @@ export async function run(container: string | HTMLElement) {
 // HTML structure for the test page
 export const testHtml = `
 <div style="padding: 20px; font-family: sans-serif;">
-  <h2>G6Lite Performance Test</h2>
+  <h2>G6-GL Performance Test</h2>
   <button id="runBtn" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Run Benchmark</button>
   <pre id="output" style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 4px; font-family: monospace; white-space: pre-wrap;">Click "Run Benchmark" to start...</pre>
   <div id="test-container" style="width: 800px; height: 600px; border: 1px solid #ddd; margin-top: 20px; display: none;"></div>

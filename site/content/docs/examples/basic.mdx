@@ -1,6 +1,6 @@
 ---
 title: 最简示例
-description: 使用 G6Lite 渲染一个最小关系图
+description: 使用 G6-GL 渲染一个最小关系图
 ---
 
 import { withBasePath } from '@/lib/shared';
@@ -9,7 +9,7 @@ import { withBasePath } from '@/lib/shared';
   <img src={withBasePath('/examples/basic.png')} alt="最简示例截图" />
 </div>
 
-这个示例展示 G6Lite 的最小使用链路：传入节点和边，配置一个环形布局，启用缩放和拖拽。
+这个示例展示 G6-GL 的最小使用链路：传入节点和边，配置一个环形布局，启用缩放和拖拽。
 
 <div className="example-actions">
   <a href="http://localhost:5179/#basic" target="_blank" rel="noreferrer">本地运行</a>
@@ -19,7 +19,7 @@ import { withBasePath } from '@/lib/shared';
 ## 代码
 
 ```ts
-import { Graph } from '@antv/g6-lite';
+import { Graph } from '@antv/g6-gl';
 
 const graph = new Graph({
   container,

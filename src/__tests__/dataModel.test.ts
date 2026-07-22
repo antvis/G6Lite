@@ -251,7 +251,9 @@ describe('DataModel', () => {
       model.getChanges();
       model.updateNodePosition('a', 100, 200);
       const changes = model.getChanges();
+      expect(changes).toHaveLength(1);
       expect(changes[0].type).toBe('nodePositionChanged');
+      expect(changes[0].ids).toEqual(['a']);
     });
 
     it('should track nodeStateChanged', () => {
@@ -463,6 +465,24 @@ describe('DataModel combo operations', () => {
     expect(model.getCombo('c1')!.childNodeIds.size).toBe(2);
   });
 
+  it('should ignore missing nodes when initializing or updating Combo membership', () => {
+    const model = createModel();
+    model.addNode({ id: 'existing', x: 0, y: 0 });
+    model.initCombos(
+      [{ id: 'c1' }],
+      [
+        { id: 'existing', comboId: 'c1' },
+        { id: 'missing', comboId: 'c1' },
+      ],
+    );
+
+    model.setNodeCombo('another-missing', 'c1');
+
+    expect(model.getCombo('c1')!.childNodeIds).toEqual(new Set(['existing']));
+    expect(model.getNodeCombo('missing')).toBeUndefined();
+    expect(model.getNodeCombo('another-missing')).toBeUndefined();
+  });
+
   it('should move a node between combos with setNodeCombo', () => {
     const model = createModel();
     model.addNode({ id: 'n1', x: 0, y: 0 });
@@ -489,6 +509,45 @@ describe('DataModel combo operations', () => {
     expect(model.getCombo('c1')).toBeUndefined();
     expect(model.getNodeCombo('n1')).toBeUndefined();
     expect(model.getCombo('parent')!.childComboIds.has('c1')).toBe(false);
+  });
+
+  it('should clear Combo membership and hidden ownership when removing a node', () => {
+    const model = createModel();
+    model.replaceData(
+      [
+        { id: 'n1', x: 0, y: 0 },
+        { id: 'outside', x: 100, y: 0 },
+      ],
+      [{ id: 'edge-1', source: 'n1', target: 'outside' }],
+    );
+    model.initCombos([{ id: 'combo-1', collapsed: true }], [{ id: 'n1', comboId: 'combo-1' }]);
+
+    model.removeNode('n1');
+
+    expect(model.getNodeCombo('n1')).toBeUndefined();
+    expect(model.getCombo('combo-1')!.childNodeIds.has('n1')).toBe(false);
+
+    model.addNode({ id: 'n1', x: 10, y: 10 });
+    model.setNodeState('n1', 'hidden', false);
+    expect(model.getNode('n1')!.states.has('hidden')).toBe(false);
+  });
+
+  it('should clear Combo hidden ownership when removing an edge', () => {
+    const model = createModel();
+    model.replaceData(
+      [
+        { id: 'n1', x: 0, y: 0 },
+        { id: 'outside', x: 100, y: 0 },
+      ],
+      [{ id: 'edge-1', source: 'n1', target: 'outside' }],
+    );
+    model.initCombos([{ id: 'combo-1', collapsed: true }], [{ id: 'n1', comboId: 'combo-1' }]);
+
+    model.removeEdge('edge-1');
+    model.addEdge({ id: 'edge-1', source: 'outside', target: 'outside' });
+    model.setEdgeState('edge-1', 'hidden', false);
+
+    expect(model.getEdge('edge-1')!.states.has('hidden')).toBe(false);
   });
 
   it('should toggle collapsed state', () => {

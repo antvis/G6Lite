@@ -16,10 +16,9 @@
     "dist"
   ],
   "scripts": {
-    "clean:dist": "node scripts/clean-dist.mjs",
-    "build": "npm run clean:dist && tsc && tsc -p tsconfig.dist-declarations.json && node scripts/check-public-declarations.mjs && node scripts/check-esm-package.mjs",
+    "build": "rm -rf dist && tsc && tsc -p tsconfig.dist-declarations.json && node scripts/check-package.mjs",
     "build:playground": "npx vite build",
-    "check:package": "tsc -p tsconfig.package-nodenext.json && tsc -p tsconfig.package-bundler.json && node scripts/check-vite-package.mjs && node scripts/check-pack-manifest.mjs",
+    "check:package": "tsc -p tsconfig.package-nodenext.json && tsc -p tsconfig.package-bundler.json",
     "dev": "vite playground",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.public-api.json",
     "prepare": "husky",

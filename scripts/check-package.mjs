@@ -2,6 +2,7 @@ import { access, readFile } from 'node:fs/promises';
 
 const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 const rootExport = packageJson.exports?.['.'];
+const publishedDirectories = [...(packageJson.files ?? [])].sort();
 
 if (
   packageJson.type !== 'module' ||
@@ -11,6 +12,10 @@ if (
   Object.hasOwn(rootExport ?? {}, 'require')
 ) {
   throw new Error('Package root must expose dist/index.js as ESM-only');
+}
+
+if (JSON.stringify(publishedDirectories) !== JSON.stringify(['dist', 'src'])) {
+  throw new Error('Package files must publish both dist and src');
 }
 
 // Resolve through package.json#exports so this exercises the published root entry.
@@ -37,3 +42,4 @@ if (JSON.stringify(actualRuntimeExports) !== JSON.stringify(expectedRuntimeExpor
 }
 
 await access(new URL('../dist/layout/layoutWorker.js', import.meta.url));
+await access(new URL('../src/index.ts', import.meta.url));

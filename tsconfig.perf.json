@@ -8,5 +8,6 @@
     "allowJs": true,
     "checkJs": false
   },
-  "include": ["perf/browser/**/*.ts", "playground/bench-main.ts"]
+  "include": ["tests/perf/browser/**/*.ts"],
+  "exclude": []
 }

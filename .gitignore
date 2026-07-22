@@ -1,4 +1,5 @@
 node_modules
+package-lock.json
 dist
 .DS_Store
 performance/
@@ -19,9 +20,6 @@ site/content/docs/api/
 # Local development files (not for commit)
 *.sh
 *.backup.*
-CLAUDE.md
-AGENTS.md
-design/
 
 # npm pack output
 *.tgz

@@ -110,13 +110,16 @@ export function brushSelect(
       pendingSelect = false;
     } else if (!pendingSelect) {
       pendingSelect = true;
-      setTimeout(() => {
-        if (selecting) {
-          selectNodesInRect(startX, startY, currentMouseX, currentMouseY);
-          lastSelectTime = performance.now();
-        }
-        pendingSelect = false;
-      }, throttleMs - (now - lastSelectTime));
+      setTimeout(
+        () => {
+          if (selecting) {
+            selectNodesInRect(startX, startY, currentMouseX, currentMouseY);
+            lastSelectTime = performance.now();
+          }
+          pendingSelect = false;
+        },
+        throttleMs - (now - lastSelectTime),
+      );
     }
   };
 

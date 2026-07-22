@@ -139,7 +139,7 @@ export class Graph {
       const key = `${index}:${name}`;
       activeKeys.add(key);
       let record = this.transformInstances.get(key);
-      const config = typeof option === 'string' ? {} : option.options ?? {};
+      const config = typeof option === 'string' ? {} : (option.options ?? {});
       if (!record) {
         const extension = createExtension<TransformExtension>('transform', name);
         if (!extension?.beforeRender) {
@@ -518,7 +518,7 @@ export class Graph {
       this.canvas.height || (this.containerEl.clientHeight || 600) * (window.devicePixelRatio ?? 1);
     const dpr = Math.min(2, window.devicePixelRatio ?? 1);
     const legacyScale = typeof options === 'number' ? options : 1;
-    const padding = typeof options === 'number' ? 0 : options.padding ?? 0;
+    const padding = typeof options === 'number' ? 0 : (options.padding ?? 0);
     const [pt, pr, pb, pl] = Array.isArray(padding)
       ? padding
       : [padding, padding, padding, padding];
@@ -527,8 +527,8 @@ export class Graph {
     const scaleX = availableW / graphW;
     const scaleY = availableH / graphH;
     const rawZoom = Math.min(scaleX, scaleY) * legacyScale;
-    const minZoom = typeof options === 'number' ? 0.1 : options.minZoom ?? 0.1;
-    const maxZoom = typeof options === 'number' ? 20 : options.maxZoom ?? 20;
+    const minZoom = typeof options === 'number' ? 0.1 : (options.minZoom ?? 0.1);
+    const maxZoom = typeof options === 'number' ? 20 : (options.maxZoom ?? 20);
     const zoom = Math.max(minZoom, Math.min(maxZoom, rawZoom));
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
@@ -1136,8 +1136,8 @@ export class Graph {
         nextStyle === undefined
           ? previousStyle
           : typeof nextStyle === 'function' || typeof previousStyle === 'function'
-          ? nextStyle
-          : { ...previousStyle, ...nextStyle };
+            ? nextStyle
+            : { ...previousStyle, ...nextStyle };
       this.options.node = {
         ...this.options.node,
         ...opts.node,

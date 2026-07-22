@@ -1124,7 +1124,7 @@ export class Renderer {
       const node = nodes[nIdx];
       const style = useStaticEdgeStyle
         ? eCache.cachedStyle!
-        : dynamicEdgeStyleCache?.[i] ?? resolveEdgeStyle(node, node, e, edgeConfig, theme);
+        : (dynamicEdgeStyleCache?.[i] ?? resolveEdgeStyle(node, node, e, edgeConfig, theme));
       const active = !hasHighlight || this.highlightEdgeIndices.has(i);
       // Use pre-parsed colors if available (static optimization), otherwise parse on-the-fly
       const edgeBaseColor = style.strokeRGB ?? parseColor(style.stroke);

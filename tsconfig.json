@@ -10,7 +10,6 @@
     "declarationMap": true,
     "stripInternal": true,
     "sourceMap": true,
-    "inlineSources": true,
     "outDir": "dist",
     "rootDir": "src",
     "skipLibCheck": true,
@@ -20,5 +19,5 @@
     "isolatedModules": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "playground", "src/__tests__"]
+  "exclude": ["node_modules", "dist", "playground", "tests"]
 }

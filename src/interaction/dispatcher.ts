@@ -62,11 +62,11 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
       typeof (graph as { screenToGraph?: unknown }).screenToGraph === 'function'
         ? graph.screenToGraph(e.clientX, e.clientY)
         : typeof (renderer as { screenToGraph?: unknown }).screenToGraph === 'function'
-        ? (() => {
-            const [x, y] = renderer.screenToGraph(e.clientX, e.clientY);
-            return { x, y };
-          })()
-        : canvasPoint;
+          ? (() => {
+              const [x, y] = renderer.screenToGraph(e.clientX, e.clientY);
+              return { x, y };
+            })()
+          : canvasPoint;
     return {
       targetType,
       targetId: extra.targetId,

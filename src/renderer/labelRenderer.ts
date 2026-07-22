@@ -469,7 +469,7 @@ export class LabelLayerRenderer {
       if (px < -100 || px > w + 100 || py < -100 || py > h + 100) continue;
 
       const userStyle =
-        typeof configuredStyle === 'function' ? configuredStyle(node) : configuredStyle ?? {};
+        typeof configuredStyle === 'function' ? configuredStyle(node) : (configuredStyle ?? {});
       const resolvedVisualStyle = resolveNodeStyle(
         node as GraphNode & { x: number; y: number },
         nodeConfig,
@@ -600,7 +600,7 @@ export class LabelLayerRenderer {
       const rawItems = isStack
         ? typeof decoration.items === 'function'
           ? decoration.items(node)
-          : decoration.items ?? []
+          : (decoration.items ?? [])
         : [typeof decoration.data === 'function' ? decoration.data(node) : decoration.data];
       if (!rawItems.length) continue;
       const measuredItems: Array<{
@@ -749,7 +749,7 @@ export class LabelLayerRenderer {
             )
           : undefined;
       const boundaryAnchor = boundaryPlacement
-        ? extensionBoundaryAnchor ??
+        ? (extensionBoundaryAnchor ??
           getBuiltInNodeBoundaryAnchor(
             getNodeBaseType(nodeConfig),
             boundaryPlacement,
@@ -757,7 +757,7 @@ export class LabelLayerRenderer {
             nodeHeight,
             crossOffsetRatio,
             borderRadius,
-          )
+          ))
         : undefined;
       let { x, y } = getNodeDecorationAnchor(
         px,

@@ -103,8 +103,9 @@ export interface BehaviorExtension<TOptions = Record<string, unknown>> extends E
   getEvents(): Record<string, (event: GraphElementEvent) => void>;
 }
 
-export interface TransformExtension<TOptions = Record<string, unknown>>
-  extends Extension<TOptions> {
+export interface TransformExtension<
+  TOptions = Record<string, unknown>,
+> extends Extension<TOptions> {
   beforeRender?(data: GraphData): GraphData;
 }
 

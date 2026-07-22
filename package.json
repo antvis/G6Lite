@@ -13,35 +13,23 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc && tsc -p tsconfig.dist-declarations.json && node scripts/check-package.mjs",
-    "build:playground": "npx vite build",
-    "bench:micro": "npm run build && node perf/run-micro.js --mode quick",
-    "bench:micro:full": "npm run build && node perf/run-micro.js --mode full",
-    "bench:scenario": "node perf/run-browser.js --mode quick",
-    "bench:scenario:full": "node perf/run-browser.js --mode full",
-    "bench:full": "npm run bench:micro:full && npm run bench:scenario:full",
-    "bench:compare": "node perf/compare.js",
-    "bench:browser": "vite playground --open /bench.html",
-    "check:package": "tsc -p tsconfig.package-nodenext.json && tsc -p tsconfig.package-bundler.json",
     "dev": "vite playground",
+    "build": "rm -rf dist && tsc && tsc -p tsconfig.dist-declarations.json && tsc -p tsconfig.package-nodenext.json && tsc -p tsconfig.package-bundler.json && node scripts/check-package.mjs",
+    "build:playground": "vite build",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.public-api.json && tsc -p tsconfig.perf.json",
-    "prepare": "husky",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\"",
+    "lint": "eslint src tests vite.config.ts vitest.config.ts",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "test:cov": "vitest run --coverage",
+    "benchmark": "npm run build && node tests/perf/run.js",
+    "benchmark:compare": "node tests/perf/compare.js",
+    "docs:api": "typedoc",
     "site:dev": "npm --prefix site run dev",
     "site:build": "npm run docs:api && npm --prefix site run build",
-    "docs:api": "typedoc",
     "size": "size-limit",
-    "release": "npm run build && npm run check:package && npm publish --tag beta",
-    "ci": "npm run lint && npm run typecheck && npm run test:cov && npm run build && npm run check:package && npm run size"
+    "ci": "npm run lint && npm run typecheck && npm test -- --coverage && npm run build && npm run size"
   },
   "keywords": [
     "graph",
@@ -62,16 +50,12 @@
     "eslint": "~10.3.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
-    "husky": "^9.1.7",
     "jsdom": "^29.1.1",
-    "lil-gui": "^0.21.0",
-    "lint-staged": "^15.5.2",
     "lodash": "^4.18.1",
     "platform": "^1.3.6",
     "playwright": "^1.61.1",
     "prettier": "^3.8.3",
     "size-limit": "^12.1.0",
-    "stats.js": "^0.17.0",
     "typedoc": "^0.28.19",
     "typedoc-plugin-frontmatter": "^1.3.1",
     "typedoc-plugin-markdown": "^4.12.0",
@@ -87,11 +71,8 @@
   "engines": {
     "node": ">=20"
   },
-  "lint-staged": {
-    "src/**/*.ts": [
-      "eslint --fix",
-      "prettier --write"
-    ]
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",

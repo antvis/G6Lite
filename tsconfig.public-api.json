@@ -8,5 +8,6 @@
       "@antv/g6-gl": ["./src/index.ts"]
     }
   },
-  "include": ["type-tests/public-api.ts"]
+  "include": ["tests/unit/publicApi.type-test.ts"],
+  "exclude": []
 }

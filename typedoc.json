@@ -7,7 +7,7 @@
   "readme": "none",
   "githubPages": false,
   "hideGenerator": true,
-  "excludeInternal": false,
+  "excludeInternal": true,
   "excludePrivate": true,
   "sort": ["source-order"],
   "outputFileStrategy": "modules",

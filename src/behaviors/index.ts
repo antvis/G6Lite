@@ -11,6 +11,9 @@ import type { BehaviorExtension } from '../extensions/contracts.js';
 import {
   createExtension,
   createExtensionContext,
+  destroyExtension,
+  hasExtension,
+  initializeExtension,
   safeExtensionCall,
 } from '../extensions/registry.js';
 import type { Graph } from '../graph.js';
@@ -84,11 +87,14 @@ export function registerBehaviors(
   graph?: Graph,
 ): () => void {
   const teardowns: Array<() => void> = [];
+  const usesBuiltIn = (name: string) => Boolean(BEHAVIORS[name]) && !hasExtension('behavior', name);
   const hasNodeHighlight = names.some(
-    (n) => (typeof n === 'string' ? n : n.type) === 'highlight-node',
+    (n) =>
+      (typeof n === 'string' ? n : n.type) === 'highlight-node' && usesBuiltIn('highlight-node'),
   );
   const hasEdgeHighlight = names.some(
-    (n) => (typeof n === 'string' ? n : n.type) === 'highlight-edge',
+    (n) =>
+      (typeof n === 'string' ? n : n.type) === 'highlight-edge' && usesBuiltIn('highlight-edge'),
   );
   const useCombinedHover = hasNodeHighlight && hasEdgeHighlight;
 
@@ -97,21 +103,15 @@ export function registerBehaviors(
     const config = typeof nameOrObj === 'string' ? undefined : nameOrObj;
     // Skip individual highlight behaviors if using combined hover
     if (useCombinedHover && (name === 'highlight-node' || name === 'highlight-edge')) continue;
-    const fn = BEHAVIORS[name];
-    if (fn) {
-      teardowns.push(fn(renderer, graph as Graph, config));
-      continue;
-    }
-    const extension = createExtension<BehaviorExtension>('behavior', name);
-    if (extension && graph) {
+    if (hasExtension('behavior', name)) {
+      if (!graph) continue;
+      const extension = createExtension<BehaviorExtension>('behavior', name);
+      if (!extension) continue;
       const context = createExtensionContext(graph);
-      safeExtensionCall(
-        'behavior',
-        name,
-        'init',
-        () => extension.init?.(context, config ?? {}),
-        undefined,
-      );
+      if (!initializeExtension('behavior', name, extension, context, config ?? {})) {
+        destroyExtension('behavior', name, extension);
+        continue;
+      }
       const events = safeExtensionCall(
         'behavior',
         name,
@@ -122,8 +122,13 @@ export function registerBehaviors(
       for (const [event, handler] of Object.entries(events)) graph.on(event, handler);
       teardowns.push(() => {
         for (const [event, handler] of Object.entries(events)) graph.off(event, handler);
-        safeExtensionCall('behavior', name, 'destroy', () => extension.destroy?.(), undefined);
+        destroyExtension('behavior', name, extension);
       });
+      continue;
+    }
+    const fn = BEHAVIORS[name];
+    if (fn) {
+      teardowns.push(fn(renderer, graph as Graph, config));
     }
   }
 

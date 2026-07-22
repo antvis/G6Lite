@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noEmit": true,
+    "rootDir": ".",
+    "paths": {
+      "@antv/g6-gl": ["./src/index.ts"]
+    }
+  },
+  "include": ["type-tests/public-api.ts"]
+}

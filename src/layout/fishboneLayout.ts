@@ -24,7 +24,6 @@ export interface FishboneLayoutOptions {
 
 interface TreeNode {
   id: string;
-  data: Record<string, unknown>;
   children: TreeNode[];
   x: number;
   y: number;
@@ -32,135 +31,119 @@ interface TreeNode {
   height: number;
 }
 
-export class FishboneLayout {
-  private opts: Required<FishboneLayoutOptions>;
-  private tree: TreeNode | null = null;
+type LayoutResult = { nodes: Array<GraphNode & { x: number; y: number }> };
 
-  constructor(options?: FishboneLayoutOptions) {
-    this.opts = {
-      direction: options?.direction ?? 'LR',
-      categoryGap: options?.categoryGap ?? 180,
-      itemGap: options?.itemGap ?? 44,
-      itemHStep: options?.itemHStep ?? 20,
-      categoryDistance: options?.categoryDistance ?? 200,
-      getWidth: options?.getWidth ?? (() => 80),
-      getHeight: options?.getHeight ?? (() => 30),
-    };
+/** Execute the fishbone layout without retaining state or mutating the input data. */
+export function executeFishboneLayout(
+  data: GraphData,
+  options: FishboneLayoutOptions = {},
+): LayoutResult {
+  const direction = options.direction ?? 'LR';
+  const categoryGap = options.categoryGap ?? 180;
+  const itemHStep = options.itemHStep ?? 20;
+  const categoryDistance = options.categoryDistance ?? 200;
+  const getWidth = options.getWidth ?? (() => 80);
+  const getHeight = options.getHeight ?? (() => 30);
+
+  const nodeMap = new Map<string, TreeNode>();
+  const childrenMap = new Map<string, string[]>();
+  const hasParent = new Set<string>();
+
+  for (const node of data.nodes) {
+    nodeMap.set(node.id, {
+      id: node.id,
+      children: [],
+      x: 0,
+      y: 0,
+      width: getWidth(node),
+      height: getHeight(node),
+    });
   }
 
-  async execute(data: GraphData): Promise<void> {
-    this.tree = this.buildTree(data);
-    if (!this.tree) return;
+  for (const edge of data.edges) {
+    if (!nodeMap.has(edge.source) || !nodeMap.has(edge.target)) continue;
+    if (!childrenMap.has(edge.source)) childrenMap.set(edge.source, []);
+    childrenMap.get(edge.source)!.push(edge.target);
+    hasParent.add(edge.target);
+  }
 
-    const { direction, categoryGap, itemHStep, categoryDistance } = this.opts;
-    const cats = this.tree.children;
-    const numCats = cats.length;
+  const rootId = data.nodes.find((node) => !hasParent.has(node.id))?.id;
+  const root = rootId ? nodeMap.get(rootId) : undefined;
+  if (!root) return { nodes: data.nodes.map((node) => ({ ...node, x: 0, y: 0 })) };
 
-    if (numCats === 0) {
-      this.tree.x = 450;
-      this.tree.y = 300;
-      return;
+  const visited = new Set<string>([root.id]);
+  const stack: Array<{ node: TreeNode; childIndex: number }> = [{ node: root, childIndex: 0 }];
+
+  while (stack.length > 0) {
+    const frame = stack[stack.length - 1];
+    const childIds = childrenMap.get(frame.node.id) ?? [];
+    if (frame.childIndex >= childIds.length) {
+      stack.pop();
+      continue;
     }
 
-    // Items are evenly distributed within categoryDistance, so halfH only needs margin.
-    const halfH = categoryDistance + 80;
-    const centerY = halfH;
+    const childId = childIds[frame.childIndex];
+    frame.childIndex += 1;
+    const child = nodeMap.get(childId);
+    if (!child || visited.has(childId)) continue;
 
-    // Spine runs from leftMargin to just before the head
+    visited.add(childId);
+    frame.node.children.push(child);
+    stack.push({ node: child, childIndex: 0 });
+  }
+
+  const categories = root.children;
+  const categoryCount = categories.length;
+
+  if (categoryCount === 0) {
+    root.x = 450;
+    root.y = 300;
+  } else {
+    const centerY = categoryDistance + 80;
     const leftMargin = categoryDistance + 20;
-    const spineLength = numCats * categoryGap;
+    const spineLength = categoryCount * categoryGap;
 
-    // Head node: right of spine
-    this.tree.x = leftMargin + spineLength + this.tree.width / 2;
-    this.tree.y = centerY;
+    root.x = leftMargin + spineLength + root.width / 2;
+    root.y = centerY;
 
-    for (let i = 0; i < numCats; i++) {
-      const cat = cats[i];
-      const dir = i % 2 === 0 ? -1 : 1; // even=above(-1), odd=below(+1)
+    for (let index = 0; index < categoryCount; index += 1) {
+      const category = categories[index];
+      const verticalDirection = index % 2 === 0 ? -1 : 1;
+      const spineX = leftMargin + (index + 0.5) * categoryGap;
 
-      // Spine anchor for this category (point on horizontal spine axis)
-      const spineX = leftMargin + (i + 0.5) * categoryGap;
+      category.x = spineX - categoryDistance;
+      category.y = centerY + verticalDirection * categoryDistance;
 
-      // Category offset LEFT so that the 45deg bone
-      // connects (cat.x, cat.y) to (spineX, centerY)
-      cat.x = spineX - categoryDistance;
-      cat.y = centerY + dir * categoryDistance;
-
-      // Items evenly distributed along the diagonal bone between category and spine.
-      // t = (j+1)/(n+1) divides the bone into n+1 equal segments.
-      // 45° geometry: x-offset = y-offset = t * categoryDistance
-      const numItems = cat.children.length;
-      for (let j = 0; j < numItems; j++) {
-        const item = cat.children[j];
-        const t = (j + 1) / (numItems + 1);
-        const yOffset = t * categoryDistance;
-        const meetX = cat.x + yOffset;
+      const itemCount = category.children.length;
+      for (let itemIndex = 0; itemIndex < itemCount; itemIndex += 1) {
+        const item = category.children[itemIndex];
+        const ratio = (itemIndex + 1) / (itemCount + 1);
+        const yOffset = ratio * categoryDistance;
+        const meetX = category.x + yOffset;
         item.x = meetX - itemHStep - item.width / 2;
-        item.y = cat.y - dir * yOffset;
+        item.y = category.y - verticalDirection * yOffset;
       }
     }
 
     if (direction === 'RL') {
-      const totalW = leftMargin + spineLength + this.tree.width;
-      const mirror = (n: TreeNode) => {
-        n.x = totalW - n.x;
-        n.children.forEach(mirror);
+      const totalWidth = leftMargin + spineLength + root.width;
+      const pending = [root];
+      while (pending.length > 0) {
+        const node = pending.pop()!;
+        node.x = totalWidth - node.x;
+        pending.push(...node.children);
+      }
+    }
+  }
+
+  return {
+    nodes: data.nodes.map((node) => {
+      const layoutNode = visited.has(node.id) ? nodeMap.get(node.id) : undefined;
+      return {
+        ...node,
+        x: layoutNode?.x ?? 0,
+        y: layoutNode?.y ?? 0,
       };
-      mirror(this.tree);
-    }
-  }
-
-  forEachNode(
-    fn: (n: { id: string; x: number; y: number; data?: Record<string, unknown> }) => void,
-  ): void {
-    if (!this.tree) return;
-    const visit = (n: TreeNode) => {
-      fn({ id: n.id, x: n.x, y: n.y, data: n.data });
-      n.children.forEach(visit);
-    };
-    visit(this.tree);
-  }
-
-  private buildTree(data: GraphData): TreeNode | null {
-    const nodeMap = new Map<string, TreeNode>();
-    const childrenMap = new Map<string, string[]>();
-    const hasParent = new Set<string>();
-
-    for (const n of data.nodes) {
-      nodeMap.set(n.id, {
-        id: n.id,
-        data: n.data || {},
-        children: [],
-        x: 0,
-        y: 0,
-        width: this.opts.getWidth(n as GraphNode),
-        height: this.opts.getHeight(n as GraphNode),
-      });
-    }
-
-    for (const e of data.edges) {
-      if (!childrenMap.has(e.source)) childrenMap.set(e.source, []);
-      childrenMap.get(e.source)!.push(e.target);
-      hasParent.add(e.target);
-    }
-
-    let rootId: string | undefined;
-    for (const n of data.nodes) {
-      if (!hasParent.has(n.id)) {
-        rootId = n.id;
-        break;
-      }
-    }
-    if (!rootId) return null;
-
-    const build = (id: string): TreeNode => {
-      const n = nodeMap.get(id)!;
-      for (const childId of childrenMap.get(id) ?? []) {
-        n.children.push(build(childId));
-      }
-      return n;
-    };
-
-    return build(rootId);
-  }
+    }),
+  };
 }

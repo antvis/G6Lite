@@ -67,6 +67,7 @@ function createLayer(ctx: CanvasRenderingContext2D, dpr = 1) {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true });
 });
 
@@ -296,6 +297,57 @@ describe('custom label helpers', () => {
 });
 
 describe('LabelLayerRenderer custom lifecycle', () => {
+  it('ignores pending image completion and redraw requests after destroy', () => {
+    const images: Array<{
+      onload: (() => void) | null;
+      onerror: (() => void) | null;
+      crossOrigin: string;
+      src: string;
+    }> = [];
+    class MockImage {
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      crossOrigin = '';
+      src = '';
+
+      constructor() {
+        images.push(this);
+      }
+    }
+    vi.stubGlobal('Image', MockImage);
+
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const scheduleRedraw = vi.fn();
+    layer.setScheduleRedraw(scheduleRedraw);
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      { style: { icon: 'https://example.com/icon.png' } },
+    );
+
+    expect(images).toHaveLength(1);
+    const pendingOnload = images[0].onload;
+    expect(pendingOnload).toBeTypeOf('function');
+
+    layer.destroy();
+    layer.setHoveredNode('n1');
+    pendingOnload?.();
+
+    const internals = layer as unknown as {
+      destroyed: boolean;
+      redrawScheduled: boolean;
+      scheduleRedrawFn: (() => void) | null;
+      imageCache: Map<string, HTMLImageElement | null>;
+    };
+    expect(internals.destroyed).toBe(true);
+    expect(internals.redrawScheduled).toBe(false);
+    expect(internals.scheduleRedrawFn).toBeNull();
+    expect(internals.imageCache.size).toBe(0);
+    expect(scheduleRedraw).not.toHaveBeenCalled();
+  });
+
   it('uses the main WebGL backing scale and does not double-apply DPR to node geometry', () => {
     const ctx = makeContext();
     const layer = createLayer(ctx, 3);
@@ -532,6 +584,119 @@ describe('LabelLayerRenderer custom lifecycle', () => {
     expect(translateX).toBeCloseTo(112);
     expect(translateY).toBeCloseTo(94);
     expect(draw).toHaveBeenCalledOnce();
+    layer.destroy();
+  });
+
+  it('keeps drawing labels when a node extension getStyle callback throws', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const error = new Error('label getStyle failed');
+    const report = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    registerNode('throwing-label-node-style', {
+      style: { label: 'fallback-label' },
+      getStyle: () => {
+        throw error;
+      },
+    });
+
+    expect(() =>
+      layer.draw(
+        [{ id: 'n1', x: 100, y: 100 }],
+        [],
+        { x: 0, y: 0, zoom: 1 },
+        { type: 'throwing-label-node-style' },
+      ),
+    ).not.toThrow();
+
+    expect(ctx.fillText).toHaveBeenCalledWith(
+      'fallback-label',
+      expect.any(Number),
+      expect.any(Number),
+    );
+    expect(report).toHaveBeenCalledWith(
+      '[G6-GL] node extension "throwing-label-node-style" failed during getStyle',
+      error,
+    );
+    layer.destroy();
+  });
+
+  it('keeps drawing labels when a node extension overlay callback throws', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const error = new Error('drawOverlay failed');
+    const report = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    registerNode('throwing-overlay-node', {
+      style: { label: 'after-overlay' },
+      drawOverlay: () => {
+        throw error;
+      },
+    });
+
+    expect(() =>
+      layer.draw(
+        [{ id: 'n1', x: 100, y: 100 }],
+        [],
+        { x: 0, y: 0, zoom: 1 },
+        { type: 'throwing-overlay-node' },
+      ),
+    ).not.toThrow();
+
+    expect(ctx.fillText).toHaveBeenCalledWith(
+      'after-overlay',
+      expect.any(Number),
+      expect.any(Number),
+    );
+    expect(report).toHaveBeenCalledWith(
+      '[G6-GL] node extension "throwing-overlay-node" failed during drawOverlay',
+      error,
+    );
+    layer.destroy();
+  });
+
+  it('uses the built-in boundary when a node extension boundary callback throws', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const error = new Error('getBoundaryAnchor failed');
+    const report = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const draw = vi.fn();
+    registerNode('throwing-boundary-node', {
+      base: 'rect',
+      getBoundaryAnchor: () => {
+        throw error;
+      },
+    });
+    registerDecoration('throwing-boundary-badge', {
+      measure: () => ({ width: 20, height: 10 }),
+      draw,
+    });
+
+    expect(() =>
+      layer.draw(
+        [{ id: 'n1', x: 100, y: 100 }],
+        [],
+        { x: 0, y: 0, zoom: 1 },
+        {
+          type: 'throwing-boundary-node',
+          style: { width: 40, height: 30 },
+          decorations: [
+            {
+              renderer: 'throwing-boundary-badge',
+              placement: 'right',
+              attachment: 'boundary',
+            },
+          ],
+        },
+      ),
+    ).not.toThrow();
+
+    const [translateX, translateY] = vi.mocked(ctx.translate).mock.calls[0];
+    expect(translateX).toBeCloseTo(120);
+    expect(translateY).toBeCloseTo(100);
+    expect(draw).toHaveBeenCalledOnce();
+    expect(report).toHaveBeenCalledWith(
+      '[G6-GL] node extension "throwing-boundary-node" failed during getBoundaryAnchor',
+      error,
+    );
     layer.destroy();
   });
 

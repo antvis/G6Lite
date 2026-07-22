@@ -5,94 +5,90 @@
  * 适用于文件目录、分类层级等场景。
  *
  * 支持内置色板：通过 nodeColors / edgeColors 按深度自动分配颜色，
- * 结果写入 node.data._nodeColor / node.data._edgeColor，供样式函数读取。
+ * 结果写入返回节点的 data._nodeColor / data._edgeColor，供样式函数读取。
  */
 
-import type { GraphData } from '../types.js';
+import type { GraphData, GraphNode } from '../types.js';
 
 /** Default palette when nodeColors / edgeColors are enabled but not specified. */
 const DEFAULT_PALETTE = ['#1783FF', '#F08F56', '#00C9C9', '#D580FF', '#7863FF'];
 
-export class IndentedLayout {
-  private opts: {
-    indent: number;
-    rowHeight: number;
-    direction: 'LR' | 'RL';
-    rootId?: string;
-    nodeColors?: string[];
-    edgeColors?: string[];
-  };
-  private nodes: Array<{ id: string; x: number; y: number }> = [];
+export interface IndentedLayoutOptions {
+  indent?: number;
+  rowHeight?: number;
+  direction?: 'LR' | 'RL';
+  rootId?: string;
+  nodeColors?: string[];
+  edgeColors?: string[];
+}
 
-  constructor(opts?: Record<string, unknown>) {
-    this.opts = {
-      indent: (opts?.indent as number) ?? 80,
-      rowHeight: (opts?.rowHeight as number) ?? 40,
-      direction: (opts?.direction as 'LR' | 'RL') ?? 'LR',
-      rootId: opts?.rootId as string | undefined,
-      nodeColors: opts?.nodeColors as string[] | undefined,
-      edgeColors: opts?.edgeColors as string[] | undefined,
-    };
+type LayoutResult = { nodes: Array<GraphNode & { x: number; y: number }> };
+
+/** Execute the indented tree layout without retaining state or mutating the input data. */
+export function executeIndentedLayout(
+  data: GraphData,
+  options: IndentedLayoutOptions = {},
+): LayoutResult {
+  const indent = options.indent ?? 80;
+  const rowHeight = options.rowHeight ?? 40;
+  const direction = options.direction ?? 'LR';
+  const { rootId, nodeColors, edgeColors } = options;
+  const { nodes, edges } = data;
+
+  if (nodes.length === 0) return { nodes: [] };
+
+  const children = new Map<string, string[]>();
+  const hasParent = new Set<string>();
+  const nodeIds = new Set(nodes.map((node) => node.id));
+  for (const edge of edges) {
+    if (!nodeIds.has(edge.source) || !nodeIds.has(edge.target)) continue;
+    if (!children.has(edge.source)) children.set(edge.source, []);
+    children.get(edge.source)!.push(edge.target);
+    hasParent.add(edge.target);
   }
 
-  async execute(data: GraphData): Promise<void> {
-    const { indent, rowHeight, direction, rootId, nodeColors, edgeColors } = this.opts;
-    const { nodes, edges } = data;
+  const root = rootId ?? nodes.find((node) => !hasParent.has(node.id))?.id ?? nodes[0].id;
+  const nPalette = nodeColors ?? (nodeColors === undefined ? undefined : DEFAULT_PALETTE);
+  const ePalette = edgeColors ?? (edgeColors === undefined ? undefined : DEFAULT_PALETTE);
+  const positions = new Map<string, { x: number; y: number; depth: number }>();
+  const visited = new Set<string>();
+  const stack: Array<{ id: string; depth: number }> = [{ id: root, depth: 0 }];
+  let rowIndex = 0;
 
-    if (nodes.length === 0) return;
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    if (!nodeIds.has(current.id) || visited.has(current.id)) continue;
+    visited.add(current.id);
 
-    // Build adjacency list
-    const children = new Map<string, string[]>();
-    const hasParent = new Set<string>();
-    for (const e of edges) {
-      if (!children.has(e.source)) children.set(e.source, []);
-      children.get(e.source)!.push(e.target);
-      hasParent.add(e.target);
+    const x = direction === 'LR' ? current.depth * indent : -(current.depth * indent);
+    const y = rowIndex * rowHeight;
+    rowIndex += 1;
+    positions.set(current.id, {
+      x,
+      y,
+      depth: current.depth,
+    });
+
+    const childIds = children.get(current.id) ?? [];
+    for (let index = childIds.length - 1; index >= 0; index -= 1) {
+      stack.push({ id: childIds[index], depth: current.depth + 1 });
     }
-
-    // Find root
-    const root = rootId ?? nodes.find((n) => !hasParent.has(n.id))?.id ?? nodes[0].id;
-
-    // Resolve palettes
-    const nPalette = nodeColors ?? (nodeColors === undefined ? undefined : DEFAULT_PALETTE);
-    const ePalette = edgeColors ?? (edgeColors === undefined ? undefined : DEFAULT_PALETTE);
-
-    // DFS to assign coordinates and colors
-    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
-    let rowIndex = 0;
-    this.nodes = [];
-
-    const dfs = (id: string, depth: number) => {
-      const node = nodeMap.get(id);
-      if (!node) return;
-
-      const baseX = direction === 'LR' ? depth * indent : -(depth * indent);
-      const x = baseX;
-      const y = rowIndex * rowHeight;
-      rowIndex++;
-
-      // Write metadata into node.data
-      if (!node.data) node.data = {};
-      const d = node.data as Record<string, unknown>;
-      d.depth = depth;
-      d._isRoot = depth === 0;
-      if (nPalette) d._nodeColor = nPalette[depth % nPalette.length];
-      if (ePalette) d._edgeColor = ePalette[depth % ePalette.length];
-
-      node.x = x;
-      node.y = y;
-      this.nodes.push({ id, x, y });
-
-      const kids = children.get(id) ?? [];
-      for (const kid of kids) {
-        dfs(kid, depth + 1);
-      }
-    };
-
-    dfs(root, 0);
   }
 
-  forEachNode(fn: (n: { id: string; x: number; y: number }) => void): void {
-    this.nodes.forEach(fn);
-  }
+  return {
+    nodes: nodes.map((node) => {
+      const position = positions.get(node.id);
+      if (!position) return { ...node, x: 0, y: 0 };
+
+      const nextData: Record<string, unknown> = {
+        ...node.data,
+        depth: position.depth,
+        _isRoot: position.depth === 0,
+      };
+      if (nPalette) nextData._nodeColor = nPalette[position.depth % nPalette.length];
+      if (ePalette) nextData._edgeColor = ePalette[position.depth % ePalette.length];
+
+      return { ...node, data: nextData, x: position.x, y: position.y };
+    }),
+  };
 }

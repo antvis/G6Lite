@@ -2706,7 +2706,7 @@ html > body[data-scroll-locked] {
   color: var(--feature-node-color);
 }
 
-/* Why G6Lite: graph-first showcase */
+/* Why G6-GL: graph-first showcase */
 .home-live-graph {
   max-width: 56rem;
   overflow: hidden;
@@ -3072,7 +3072,7 @@ html > body[data-scroll-locked] {
   }
 }
 
-/* Why G6Lite: structured engine pipeline visual */
+/* Why G6-GL: structured engine pipeline visual */
 .home-engine-visual {
   position: relative;
   width: 100%;
@@ -3447,7 +3447,7 @@ html > body[data-scroll-locked] {
 
 .dark .home-engine-endpoint-head strong { color: #eef3ff; }
 
-/* Why G6Lite: before / engine / after story */
+/* Why G6-GL: before / engine / after story */
 .home-graph-process {
   position: relative;
   display: grid;

@@ -12,13 +12,15 @@ import { registerDecoration } from './decoration.js';
 import { registerEdge } from './edge.js';
 import { registerLabelRenderer } from './label.js';
 import { registerNode, type NodeExtensionInput } from './node.js';
-import { registerExtension } from './registry.js';
+import { extensionFactory, registerExtension } from './registry.js';
+
+export { extensionFactory };
 
 export function register(type: 'node', name: string, extension: NodeExtensionInput): void;
 export function register<T = unknown>(
   type: 'label',
   name: string,
-  renderer: LabelRenderer<T>,
+  renderer: ExtensionInput<LabelRenderer<T>>,
 ): void;
 export function register(
   type: 'edge',
@@ -60,7 +62,7 @@ export function register(
     return;
   }
   if (type === 'label') {
-    registerLabelRenderer(name, extension as LabelRenderer);
+    registerLabelRenderer(name, extension as ExtensionInput<LabelRenderer>);
     return;
   }
   if (type === 'edge') {
@@ -84,8 +86,13 @@ export type {
   ExtensionCategory,
   ExtensionConstructor,
   ExtensionContext,
+  ExtensionDataContext,
+  ExtensionEdgeData,
   ExtensionFactory,
   ExtensionInput,
+  ExtensionNodeData,
+  ExtensionStateContext,
+  ExtensionViewportContext,
   LayoutExtension,
   PluginExtension,
   TransformExtension,

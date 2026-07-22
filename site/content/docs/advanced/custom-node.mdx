@@ -1,12 +1,24 @@
 ---
 title: 自定义节点
-description: 使用 BaseNode、BreathingNode 和 registerNode 扩展节点表现
+description: 使用统一 register 和函数式 NodeExtension 扩展节点表现
 ---
 
-G6Lite 导出 `BaseNode`、`BreathingNode`、`registerNode` 等扩展接口，用于在内置节点能力之外扩展节点表现。
+G6-GL 推荐通过统一的 `register()` 注册函数式节点扩展，不要求继承引擎内部基类。
 
 ```ts
-import { BaseNode, registerNode } from '@antv/g6-lite';
+import { register, type NodeExtension } from '@antv/g6-gl';
+
+const statusNode: NodeExtension = {
+  base: 'rect',
+  style: { width: 96, height: 34, borderRadius: 8 },
+  getStyle(node) {
+    return node.data?.status === 'error'
+      ? { fill: '#fff2f0', stroke: '#ff4d4f' }
+      : { fill: '#e6f4ff', stroke: '#1677ff' };
+  },
+};
+
+register('node', 'status-node', statusNode);
 ```
 
 ## 适用场景
@@ -17,12 +29,12 @@ import { BaseNode, registerNode } from '@antv/g6-lite';
 
 ## 内置扩展
 
-`BreathingNode` 是一个内置扩展示例，可用于呼吸态节点效果。
+`breathing-node` 已由 G6-GL 内置注册，可以直接在配置中使用：
 
 ```ts
-import { BreathingNode, registerNode } from '@antv/g6-lite';
-
-registerNode('breathing-node', BreathingNode);
+const graph = new Graph({
+  node: { type: 'breathing-node' },
+});
 ```
 
 具体可参考：
@@ -35,5 +47,6 @@ registerNode('breathing-node', BreathingNode);
 - 自定义节点应避免破坏 WebGL 批量渲染优势。
 - 大图中不要给所有节点叠加昂贵的自定义绘制。
 - 如果只是颜色、尺寸、描边、标签变化，优先使用 `node.style` 和 `stateStyles`。
+- `BaseNode` 与 `registerNode` 仅用于 beta 兼容，新增扩展应使用 `register('node', ...)`。
 
 更多类型见 [API 总览](/docs/api)。

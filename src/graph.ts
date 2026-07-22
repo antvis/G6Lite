@@ -5,18 +5,20 @@
  */
 
 import { registerBehaviors, resolveBehaviorOptions } from './behaviors/index.js';
-import type { InternalEdge, InternalNode } from './dataModel.js';
+import type { InternalEdge } from './dataModel.js';
 import { DataModel } from './dataModel.js';
 import { EventEmitter } from './events.js';
 import type { PluginExtension, TransformExtension } from './extensions/contracts.js';
 import {
   createExtension,
   createExtensionContext,
+  destroyExtension,
+  initializeExtension,
   safeExtensionCall,
+  updateExtension,
 } from './extensions/registry.js';
 import { attachInteraction } from './interaction/dispatcher.js';
 import { runLayout } from './layout/index.js';
-import { terminateLayoutWorker } from './layout/workerLayout.js';
 import type { Camera } from './renderer/camera.js';
 import { ComboRenderer } from './renderer/comboRenderer.js';
 import { LabelLayerRenderer } from './renderer/labelRenderer.js';
@@ -31,7 +33,10 @@ import {
 } from './transforms/processParallelEdges.js';
 import type {
   ComboData,
+  ComboModel,
   EdgeDataUpdate,
+  EdgeModel,
+  ElementModel,
   ElementState,
   FitViewOptions,
   GraphData,
@@ -41,14 +46,15 @@ import type {
   LayoutConfig,
   LayoutNode,
   NodeDataUpdate,
+  NodeModel,
   NodePositionUpdate,
   SetDataOptions,
   ThemeOption,
   ZoomOptions,
 } from './types.js';
 
-/** Result of a pick operation at screen coordinates. */
-export interface PickResult {
+/** Internal result of a renderer pick operation. */
+interface PickResult {
   type: 'node' | 'edge';
   /** Node ID (when type is 'node') or edge ID (when type is 'edge'). */
   id: string;
@@ -57,6 +63,11 @@ export interface PickResult {
   /** For edge results, the source and target node IDs. */
   source?: string;
   target?: string;
+}
+
+interface TransformInstanceRecord {
+  name: string;
+  extension: TransformExtension;
 }
 
 export class Graph {
@@ -69,7 +80,7 @@ export class Graph {
   private behaviorTeardown: (() => void) | null = null;
   private interactionTeardown: (() => void) | null = null;
   private pluginTeardowns: Array<() => void> = [];
-  private transformInstances = new Map<string, TransformExtension>();
+  private transformInstances = new Map<string, TransformInstanceRecord>();
   private resizeObserver: ResizeObserver | null = null;
   private layoutNodes: LayoutNode[] = [];
   private initialCamera: Camera | null = null;
@@ -82,7 +93,7 @@ export class Graph {
   private layoutGeneration = 0;
   private layoutAbortController: AbortController | null = null;
 
-  /** Event emitter for interaction events (node:click, node:hover, node:drag, etc.) */
+  /** @internal Event transport used by the dispatcher and behavior runtime. */
   readonly eventEmitter = new EventEmitter();
 
   get destroyed(): boolean {
@@ -108,66 +119,95 @@ export class Graph {
     };
   }
 
+  private isGenerationCurrent(generation: number): boolean {
+    return !this._destroyed && generation === this.layoutGeneration;
+  }
+
   private applyTransforms(): void {
     if (!this.dataModel) return;
     const config = resolveParallelEdgesConfig(this.options.transforms, this.options.edge);
     processParallelEdges(this.dataModel.getEdges() as InternalEdge[], config);
   }
 
-  private applyRegisteredTransforms(data: GraphData): GraphData {
+  private applyRegisteredTransforms(data: GraphData, generation: number): GraphData {
     let transformed = data;
-    for (const option of this.options.transforms ?? []) {
+    const activeKeys = new Set<string>();
+    for (const [index, option] of (this.options.transforms ?? []).entries()) {
+      if (!this.isGenerationCurrent(generation)) return transformed;
       const name = typeof option === 'string' ? option : option.type;
       if (name === 'process-parallel-edges') continue;
-      let extension = this.transformInstances.get(name);
-      const isNew = !extension;
-      if (!extension) {
-        extension = createExtension<TransformExtension>('transform', name);
-        if (extension) this.transformInstances.set(name, extension);
-      }
-      if (!extension?.beforeRender) continue;
+      const key = `${index}:${name}`;
+      activeKeys.add(key);
+      let record = this.transformInstances.get(key);
       const config = typeof option === 'string' ? {} : option.options ?? {};
-      if (isNew) {
-        safeExtensionCall(
-          'transform',
-          name,
-          'init',
-          () => extension!.init?.(createExtensionContext(this), config as Record<string, unknown>),
-          undefined,
-        );
+      if (!record) {
+        const extension = createExtension<TransformExtension>('transform', name);
+        if (!extension?.beforeRender) {
+          if (extension) destroyExtension('transform', name, extension);
+          continue;
+        }
+        if (
+          !initializeExtension(
+            'transform',
+            name,
+            extension,
+            createExtensionContext(this),
+            config as Record<string, unknown>,
+          )
+        ) {
+          destroyExtension('transform', name, extension);
+          continue;
+        }
+        if (!this.isGenerationCurrent(generation)) {
+          destroyExtension('transform', name, extension);
+          return transformed;
+        }
+        record = { name, extension };
+        this.transformInstances.set(key, record);
       } else {
-        safeExtensionCall(
-          'transform',
-          name,
-          'update',
-          () => extension!.update?.(config as Record<string, unknown>),
-          undefined,
-        );
+        if (
+          !updateExtension('transform', name, record.extension, config as Record<string, unknown>)
+        ) {
+          destroyExtension('transform', name, record.extension);
+          this.transformInstances.delete(key);
+          continue;
+        }
+        if (!this.isGenerationCurrent(generation)) return transformed;
       }
       transformed = safeExtensionCall(
         'transform',
         name,
         'beforeRender',
-        () => extension.beforeRender!(transformed),
+        () => record!.extension.beforeRender!(transformed),
         transformed,
       );
+      if (!this.isGenerationCurrent(generation)) return transformed;
+    }
+    for (const [key, record] of this.transformInstances) {
+      if (activeKeys.has(key)) continue;
+      destroyExtension('transform', record.name, record.extension);
+      this.transformInstances.delete(key);
     }
     return transformed;
   }
 
-  private mountPlugins(): void {
+  private mountPlugins(generation: number): void {
     this.pluginTeardowns.forEach((teardown) => teardown());
     this.pluginTeardowns = [];
     for (const option of this.options.plugins ?? []) {
+      if (!this.isGenerationCurrent(generation)) return;
       const extension = createExtension<PluginExtension>('plugin', option.type);
       if (!extension) continue;
-      safeExtensionCall(
-        'plugin',
-        option.type,
-        'init',
-        () => extension.init?.(createExtensionContext(this), option),
-        undefined,
-      );
+      if (
+        !initializeExtension('plugin', option.type, extension, createExtensionContext(this), option)
+      ) {
+        destroyExtension('plugin', option.type, extension);
+        continue;
+      }
+      if (!this.isGenerationCurrent(generation)) {
+        destroyExtension('plugin', option.type, extension);
+        return;
+      }
       safeExtensionCall(
         'plugin',
         option.type,
@@ -175,10 +215,30 @@ export class Graph {
         () => extension.mount?.(this.containerEl),
         undefined,
       );
-      this.pluginTeardowns.push(() =>
-        safeExtensionCall('plugin', option.type, 'destroy', () => extension.destroy?.(), undefined),
-      );
+      if (!this.isGenerationCurrent(generation)) {
+        destroyExtension('plugin', option.type, extension);
+        return;
+      }
+      this.pluginTeardowns.push(() => destroyExtension('plugin', option.type, extension));
     }
+  }
+
+  /** Release resources that are recreated by render(). */
+  private teardownRenderRuntime(): void {
+    this.behaviorTeardown?.();
+    this.behaviorTeardown = null;
+    this.interactionTeardown?.();
+    this.interactionTeardown = null;
+    this.pluginTeardowns.forEach((teardown) => teardown());
+    this.pluginTeardowns = [];
+    this.scheduler?.destroy();
+    this.scheduler = null;
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    this.labelRenderer?.destroy();
+    this.labelRenderer = null;
+    this.comboRenderer?.destroy();
+    this.comboRenderer = null;
   }
 
   private async executeLayout(data: GraphData, layout: LayoutConfig) {
@@ -199,7 +259,8 @@ export class Graph {
     if (this._destroyed) return;
     const generation = ++this.layoutGeneration;
     const { node, edge, layout, behaviors, theme } = this.options;
-    const data = this.applyRegisteredTransforms(this.options.data);
+    const data = this.applyRegisteredTransforms(this.options.data, generation);
+    if (!this.isGenerationCurrent(generation)) return;
     const themeTokens = resolveTheme((theme as ThemeOption) ?? 'light');
 
     // First, set up canvas with correct dimensions before any drawing.
@@ -221,6 +282,7 @@ export class Graph {
       // Yield to the browser so the background clear takes effect before
       // the potentially blocking layout computation.
       await new Promise((resolve) => requestAnimationFrame(resolve));
+      if (!this.isGenerationCurrent(generation)) return;
       // Auto-enable worker for large graphs unless explicitly disabled
       if (layout.worker === undefined && data.nodes.length >= 1000) {
         layout.worker = true;
@@ -228,14 +290,21 @@ export class Graph {
 
       this.eventEmitter.emit('beforelayout', { nodeCount: data.nodes.length });
       this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
+      if (!this.isGenerationCurrent(generation)) return;
       const t0 = performance.now();
       const result = await this.executeLayout(data, layout);
-      if (this._destroyed || generation !== this.layoutGeneration) return;
+      if (!this.isGenerationCurrent(generation)) return;
       const duration = performance.now() - t0;
       this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
       this.eventEmitter.emit('afterlayout', { duration, nodeCount: data.nodes.length });
+      if (!this.isGenerationCurrent(generation)) return;
       nodes = applyFixedPositions(result.nodes, data.nodes);
     }
+
+    // A repeated render replaces all per-render resources. Keep the previous
+    // graph visible while layout runs, then tear it down immediately before
+    // rebuilding the runtime around the new data.
+    this.teardownRenderRuntime();
     this.layoutNodes = nodes as LayoutNode[];
 
     const layoutDirection =
@@ -306,14 +375,17 @@ export class Graph {
     // Mount the interaction dispatcher (single source of pointer hit-testing
     // and element event dispatch) before behaviors, so behaviors consume its
     // events rather than doing their own picking.
-    this.interactionTeardown?.();
     this.interactionTeardown = attachInteraction(this.renderer, this);
 
     const resolvedBehaviors = resolveBehaviorOptions(behaviors);
-    this.behaviorTeardown?.();
-    this.behaviorTeardown = resolvedBehaviors.length
+    const behaviorTeardown = resolvedBehaviors.length
       ? registerBehaviors(this.renderer, resolvedBehaviors, this)
       : null;
+    if (!this.isGenerationCurrent(generation)) {
+      behaviorTeardown?.();
+      return;
+    }
+    this.behaviorTeardown = behaviorTeardown;
 
     // Initialize combo renderer (Canvas2D underlay for combo backgrounds)
     if (this.dataModel.hasCombos()) {
@@ -342,6 +414,7 @@ export class Graph {
       nodeCount: nodes.length,
       edgeCount: data.edges.length,
     });
+    if (!this.isGenerationCurrent(generation)) return;
 
     // Auto fit view
     this.fitView();
@@ -349,12 +422,14 @@ export class Graph {
     // Ensure first render completes synchronously so the canvas is painted
     // after render() returns. Subsequent resizes use scheduleRender (deferred).
     this.renderer.draw();
+    if (!this.isGenerationCurrent(generation)) return;
 
     // Emit afterrender event on first render completion
     this.eventEmitter.emit('afterrender', {
       nodeCount: nodes.length,
       edgeCount: data.edges.length,
     });
+    if (!this.isGenerationCurrent(generation)) return;
 
     // Capture initial camera after first fit
     if (!this.initialCamera) {
@@ -378,7 +453,7 @@ export class Graph {
     this.resizeObserver.observe(this.containerEl);
 
     this.initialized = true;
-    this.mountPlugins();
+    this.mountPlugins(generation);
     return undefined;
   }
 
@@ -389,28 +464,21 @@ export class Graph {
     this.layoutAbortController?.abort();
     this.layoutAbortController = null;
     this.eventEmitter.emit('destroy');
-    this.behaviorTeardown?.();
-    this.interactionTeardown?.();
-    this.pluginTeardowns.forEach((teardown) => teardown());
-    this.pluginTeardowns = [];
-    for (const [name, extension] of this.transformInstances) {
-      safeExtensionCall('transform', name, 'destroy', () => extension.destroy?.(), undefined);
+    this.teardownRenderRuntime();
+    for (const { name, extension } of this.transformInstances.values()) {
+      destroyExtension('transform', name, extension);
     }
     this.transformInstances.clear();
-    this.resizeObserver?.disconnect();
-    this.scheduler?.destroy();
-    this.labelRenderer?.destroy();
-    this.comboRenderer?.destroy();
     this.renderer.destroy();
-    terminateLayoutWorker();
     this.canvas.remove();
     this.eventEmitter.removeAllListeners();
   }
 
   // ──── Camera ────
 
+  /** Get a snapshot of the current camera. Use setCamera() to update it. */
   getCamera(): Camera {
-    return this.renderer.getCamera();
+    return { ...this.renderer.getCamera() };
   }
 
   setCamera(partial: Partial<Camera>): void {
@@ -492,9 +560,10 @@ export class Graph {
       y: rect.top + rect.height / 2,
     };
     const graphPoint = this.screenToGraph(center.x, center.y);
-    const dpr = Math.min(2, window.devicePixelRatio ?? 1);
-    const px = (center.x - rect.left) * dpr;
-    const py = (center.y - rect.top) * dpr;
+    const scaleX = rect.width > 0 ? this.canvas.width / rect.width : 1;
+    const scaleY = rect.height > 0 ? this.canvas.height / rect.height : 1;
+    const px = (center.x - rect.left) * scaleX;
+    const py = (center.y - rect.top) * scaleY;
     this.renderer.setCamera({
       zoom: nextZoom,
       x: px / nextZoom - graphPoint.x,
@@ -533,6 +602,7 @@ export class Graph {
 
   // ──── Data queries ────
 
+  /** @internal Layout runtime snapshot used by engine integrations. */
   getLayoutNodes(): LayoutNode[] {
     return (
       (this.dataModel?.getNodes() as unknown as LayoutNode[] | undefined) ?? this.layoutNodes
@@ -540,27 +610,30 @@ export class Graph {
   }
 
   getData(): GraphData {
-    return this.toData();
+    return this.dataModel?.toData() ?? snapshotGraphData(this.options.data);
   }
 
+  /** @deprecated Use getData(). */
   toData(): GraphData {
-    return this.dataModel?.toData() ?? this.options.data;
+    return this.getData();
   }
 
+  /** @internal DOM canvas access is not part of the stable Graph contract. */
   getCanvas(): HTMLCanvasElement {
     return this.canvas;
   }
 
-  getNodes(): LayoutNode[] {
-    if (this._destroyed) return this.layoutNodes.slice();
-    return this.renderer.getNodes();
+  /** Get all read-only normalized node views. */
+  getNodes(): readonly NodeModel[] {
+    return this.dataModel?.getNodes() ?? [];
   }
 
-  getEdges(): GraphEdge[] {
-    if (this._destroyed) return this.dataModel?.toData().edges ?? [];
-    return this.renderer.getEdges();
+  /** Get all read-only normalized edge views. */
+  getEdges(): readonly EdgeModel[] {
+    return this.dataModel?.getEdges() ?? [];
   }
 
+  /** @internal Renderer index lookup. */
   getNodeIndex(id: string): number {
     const nodes = this.renderer.getNodes();
     for (let i = 0; i < nodes.length; i++) {
@@ -571,6 +644,7 @@ export class Graph {
 
   // ──── P0: Expose existing Renderer capabilities ────
 
+  /** @internal Low-level picking used by the interaction dispatcher. */
   pickAt(screenX: number, screenY: number): PickResult | null {
     if (this._destroyed) return null;
     const result = this.renderer.pickAt(screenX, screenY);
@@ -591,6 +665,7 @@ export class Graph {
     };
   }
 
+  /** @internal Renderer highlight transport used by built-in behaviors. */
   setHighlight(option: { nodeIds?: Set<string>; edgeIndices?: Set<number> }): void {
     if (this._destroyed) return;
     this.renderer.setHighlight({
@@ -599,11 +674,13 @@ export class Graph {
     });
   }
 
+  /** @internal Renderer highlight transport used by built-in behaviors. */
   clearHighlight(): void {
     if (this._destroyed) return;
     this.renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
   }
 
+  /** @internal Direct RendererData replacement; use Graph data APIs instead. */
   updateData(renderData: RendererData): void {
     if (this._destroyed) return;
     this.renderer.updateData(renderData);
@@ -611,22 +688,26 @@ export class Graph {
     this.renderer.resize(rect.width || 800, rect.height || 600);
   }
 
+  /** Convert client viewport CSS coordinates to graph coordinates. */
   screenToGraph(screenX: number, screenY: number): { x: number; y: number } {
     if (this._destroyed) return { x: 0, y: 0 };
     const [gx, gy] = this.renderer.screenToGraph(screenX, screenY);
     return { x: gx, y: gy };
   }
 
+  /** Convert graph coordinates to client viewport CSS coordinates. */
   graphToScreen(graphX: number, graphY: number): { x: number; y: number } {
     if (this._destroyed) return { x: 0, y: 0 };
     const rect = this.canvas.getBoundingClientRect();
     const cam = this.renderer.getCamera();
-    const dpr = Math.min(2, window.devicePixelRatio ?? 1);
+    const scaleX = rect.width > 0 ? this.canvas.width / rect.width : 1;
+    const scaleY = rect.height > 0 ? this.canvas.height / rect.height : 1;
     const px = (graphX + cam.x) * cam.zoom;
     const py = (graphY + cam.y) * cam.zoom;
-    return { x: px / dpr + rect.left, y: py / dpr + rect.top };
+    return { x: px / scaleX + rect.left, y: py / scaleY + rect.top };
   }
 
+  /** @internal Render scheduling is exposed to extensions through ExtensionContext. */
   scheduleRender(): void {
     if (this._destroyed) return;
     this.renderer.scheduleRender();
@@ -902,7 +983,8 @@ export class Graph {
     );
   }
 
-  getElementData(id: string): InternalNode | InternalEdge | InternalCombo | undefined {
+  /** Get a read-only normalized element model by ID. */
+  getElementData(id: string): ElementModel | undefined {
     return (
       this.dataModel?.getNode(id) ?? this.dataModel?.getEdge(id) ?? this.dataModel?.getCombo(id)
     );
@@ -1003,18 +1085,21 @@ export class Graph {
     if (this._destroyed) return;
     if (!this.ensureInitialized()) return;
     const generation = ++this.layoutGeneration;
-    data = this.applyRegisteredTransforms(data);
+    data = this.applyRegisteredTransforms(data, generation);
+    if (!this.isGenerationCurrent(generation)) return;
     let nodes = data.nodes.map((n) => ({ ...n, x: n.x ?? 0, y: n.y ?? 0 }));
     const layout = this.options.layout;
     if (layout && data.nodes.length > 0) {
       this.eventEmitter.emit('beforelayout', { nodeCount: data.nodes.length });
       this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
+      if (!this.isGenerationCurrent(generation)) return;
       const t0 = performance.now();
       const result = await this.executeLayout(data, layout);
-      if (this._destroyed || generation !== this.layoutGeneration) return;
+      if (!this.isGenerationCurrent(generation)) return;
       const duration = performance.now() - t0;
       this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
       this.eventEmitter.emit('afterlayout', { duration, nodeCount: data.nodes.length });
+      if (!this.isGenerationCurrent(generation)) return;
       nodes = applyFixedPositions(result.nodes, data.nodes);
     }
     this.layoutNodes = nodes as LayoutNode[];
@@ -1094,16 +1179,18 @@ export class Graph {
     const generation = ++this.layoutGeneration;
     const layout = this.options.layout;
     if (!layout) return;
-    const data = this.toData();
+    const data = this.getData();
     if (data.nodes.length === 0) return;
     this.eventEmitter.emit('beforelayout', { nodeCount: data.nodes.length });
     this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
+    if (!this.isGenerationCurrent(generation)) return;
     const t0 = performance.now();
     const result = await this.executeLayout(data, layout);
-    if (this._destroyed || generation !== this.layoutGeneration) return;
+    if (!this.isGenerationCurrent(generation)) return;
     const duration = performance.now() - t0;
     this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
     this.eventEmitter.emit('afterlayout', { duration, nodeCount: data.nodes.length });
+    if (!this.isGenerationCurrent(generation)) return;
     const nodes = applyFixedPositions(result.nodes, data.nodes);
     this.layoutNodes = nodes as LayoutNode[];
     this.dataModel!.replaceData(nodes as any[], data.edges as any[]);
@@ -1121,20 +1208,15 @@ export class Graph {
     this.layoutGeneration++;
     this.layoutAbortController?.abort();
     this.layoutAbortController = null;
-    terminateLayoutWorker();
   }
 
-  /**
-   * Get a single node's internal data by ID. O(1) lookup.
-   */
-  getNodeData(id: string): InternalNode | undefined {
+  /** Get a read-only normalized node model by ID. O(1) lookup. */
+  getNodeData(id: string): NodeModel | undefined {
     return this.dataModel?.getNode(id);
   }
 
-  /**
-   * Get a single edge's internal data by ID. O(1) lookup.
-   */
-  getEdgeData(id: string): InternalEdge | undefined {
+  /** Get a read-only normalized edge model by ID. O(1) lookup. */
+  getEdgeData(id: string): EdgeModel | undefined {
     return this.dataModel?.getEdge(id);
   }
 
@@ -1145,17 +1227,24 @@ export class Graph {
    */
   batchSetState(items: Array<{ id: string; state: ElementState; value: boolean }>): void {
     if (!this.ensureInitialized()) return;
+    let comboChanged = false;
     for (const { id, state, value } of items) {
       if (this.dataModel!.hasNode(id)) {
         this.dataModel!.setNodeState(id, state, value);
       } else if (this.dataModel!.hasEdge(id)) {
         this.dataModel!.setEdgeState(id, state, value);
       } else if (this.dataModel!.hasCombo(id)) {
+        const had = this.dataModel!.getCombo(id)!.states.has(state);
         this.dataModel!.setComboState(id, state, value);
+        if (had !== value) comboChanged = true;
       }
     }
-    this.scheduler!.schedule();
-    this.renderer.scheduleRender();
+    const dataChanged = this.dataModel!.hasChanges();
+    if (dataChanged) {
+      this.scheduler!.schedule();
+    } else if (comboChanged) {
+      this.renderer.scheduleRender();
+    }
   }
 
   setElementStates(id: string, states: ElementState[]): void;
@@ -1179,8 +1268,12 @@ export class Graph {
         comboChanged = true;
       }
     }
-    this.scheduler!.schedule();
-    if (comboChanged) this.renderer.scheduleRender();
+    const dataChanged = this.dataModel!.hasChanges();
+    if (dataChanged) {
+      this.scheduler!.schedule();
+    } else if (comboChanged) {
+      this.renderer.scheduleRender();
+    }
   }
 
   /**
@@ -1212,7 +1305,9 @@ export class Graph {
   }
 
   /**
-   * Move the viewport to center on the specified node(s).
+   * Move the viewport to center on the specified node(s) without changing zoom.
+   * The padding parameter remains in the beta-compatible signature but does
+   * not alter the current center-only behavior.
    */
   focusItem(id: string | string[], padding = 20): void {
     if (this._destroyed || !this.dataModel) return;
@@ -1232,13 +1327,14 @@ export class Graph {
     if (minX === Infinity) return;
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
-    const viewW = this.containerEl.clientWidth || 800;
-    const viewH = this.containerEl.clientHeight || 600;
+    const viewW = this.canvas.width || this.containerEl.clientWidth || 800;
+    const viewH = this.canvas.height || this.containerEl.clientHeight || 600;
     const cam = this.renderer.getCamera();
-    const camX = viewW / (2 * cam.zoom) - centerX;
-    const camY = viewH / (2 * cam.zoom) - centerY;
-    this.renderer.setCamera({ x: camX, y: camY });
-    this.renderer.scheduleRender();
+    void padding;
+    this.renderer.setCamera({
+      x: viewW / (2 * cam.zoom) - centerX,
+      y: viewH / (2 * cam.zoom) - centerY,
+    });
   }
 
   // ──── Combo operations ────
@@ -1249,7 +1345,11 @@ export class Graph {
     if (!combo || combo.collapsed) return;
     this.dataModel.setComboCollapsed(comboId, true);
     this.dataModel.applyComboHidden(this.dataModel.getComboAllNodeIds(comboId));
-    this.scheduler?.schedule();
+    if (this.dataModel.hasChanges() && this.scheduler) {
+      this.scheduler.schedule();
+    } else {
+      this.renderer.scheduleRender();
+    }
     this.eventEmitter.emit('combo:collapse', { comboId });
   }
 
@@ -1259,7 +1359,11 @@ export class Graph {
     if (!combo || !combo.collapsed) return;
     this.dataModel.setComboCollapsed(comboId, false);
     this.dataModel.releaseComboHidden(this.dataModel.getComboAllNodeIds(comboId));
-    this.scheduler?.schedule();
+    if (this.dataModel.hasChanges() && this.scheduler) {
+      this.scheduler.schedule();
+    } else {
+      this.renderer.scheduleRender();
+    }
     this.eventEmitter.emit('combo:expand', { comboId });
   }
 
@@ -1274,7 +1378,8 @@ export class Graph {
     }
   }
 
-  getComboData(id: string): InternalCombo | undefined {
+  /** Get a read-only normalized combo model by ID. */
+  getComboData(id: string): ComboModel | undefined {
     return this.dataModel?.getCombo(id);
   }
 
@@ -1317,6 +1422,7 @@ export class Graph {
     this.dataModel.setNodeCombo(nodeId, comboId);
     this.dataModel.applyComboHidden([nodeId], this.getCollapsedAncestorCount(comboId));
     this.scheduler?.schedule();
+    this.renderer.scheduleRender();
   }
 
   removeFromCombo(nodeId: string): void {
@@ -1327,6 +1433,7 @@ export class Graph {
     }
     this.dataModel.setNodeCombo(nodeId, undefined);
     this.scheduler?.schedule();
+    this.renderer.scheduleRender();
   }
 
   createCombo(combo: ComboData, childNodeIds?: string[]): void {
@@ -1344,6 +1451,7 @@ export class Graph {
     // Initialize combo renderer if first combo
     this.ensureComboRenderer();
     this.scheduler?.schedule();
+    this.renderer.scheduleRender();
   }
 
   removeCombo(comboId: string): void {
@@ -1354,9 +1462,10 @@ export class Graph {
     }
     this.dataModel.removeCombo(comboId);
     this.scheduler?.schedule();
+    this.renderer.scheduleRender();
   }
 
-  /** Pick a combo at screen coordinates. Returns combo ID or null. */
+  /** @internal Low-level combo picking used by the interaction dispatcher. */
   pickComboAt(screenX: number, screenY: number): string | null {
     if (this._destroyed || !this.comboRenderer || !this.dataModel?.hasCombos()) return null;
     const rect = this.canvas.getBoundingClientRect();
@@ -1446,4 +1555,28 @@ function applyFixedPositions(
       y: source?.fy ?? node.y,
     } as LayoutNode;
   });
+}
+
+function snapshotGraphData(data: GraphData): GraphData {
+  const snapshot: GraphData = {
+    nodes: data.nodes.map((node) => ({
+      ...node,
+      data: node.data ? { ...node.data } : undefined,
+      states: node.states ? [...node.states] : undefined,
+    })),
+    edges: data.edges.map((edge) => ({
+      ...edge,
+      data: edge.data ? { ...edge.data } : undefined,
+      states: edge.states ? [...edge.states] : undefined,
+    })),
+  };
+  if (data.combos) {
+    snapshot.combos = data.combos.map((combo) => ({
+      ...combo,
+      style: combo.style ? { ...combo.style } : undefined,
+      data: combo.data ? { ...combo.data } : undefined,
+      states: combo.states ? [...combo.states] : undefined,
+    }));
+  }
+  return snapshot;
 }

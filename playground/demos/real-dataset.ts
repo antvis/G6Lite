@@ -6,10 +6,9 @@
  *  - ai-papers.json   8798 节点 / 71077 边  (v4 官网首页:高被引 AI 论文引用网络)
  *
  * 节点自带 sigma 预跑好的 ForceAtlas2 坐标,这里直接复用预置布局(不重跑 layout),
- * 用于横向对比 G6Lite 与 sigma.js 在相同真实数据上的渲染表现。
+ * 用于横向对比 G6-GL 与 sigma.js 在相同真实数据上的渲染表现。
  */
-import { Graph } from '../../src/index.ts';
-import type { GraphData } from '../../src/types.ts';
+import { Graph, type GraphData } from '../../src/index.ts';
 
 // 切换这里即可换数据集
 const DATASET = '/datasets/ai-papers.json'; // 或 '/datasets/wikipedia.json'

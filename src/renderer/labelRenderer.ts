@@ -7,6 +7,7 @@ import type { DecorationRenderer } from '../extensions/contracts.js';
 import { getDecorationRenderer } from '../extensions/decoration.js';
 import { getLabelRenderer } from '../extensions/label.js';
 import { getNodeBaseType, getNodeExtension } from '../extensions/node.js';
+import { safeExtensionCall } from '../extensions/registry.js';
 import type {
   EdgeConfig,
   EdgeLabelParams,
@@ -283,6 +284,7 @@ export class LabelLayerRenderer {
   private decorationGrid = new LabelGrid();
   private redrawScheduled = false;
   private scheduleRedrawFn: (() => void) | null = null;
+  private destroyed = false;
   private warnedRendererIssues = new Set<string>();
   private hoveredNodeId: string | null = null;
   private decorationHoverRegions: Array<{
@@ -338,11 +340,12 @@ export class LabelLayerRenderer {
   }
 
   setScheduleRedraw(fn: () => void): void {
+    if (this.destroyed) return;
     this.scheduleRedrawFn = fn;
   }
 
   private requestRedraw(): void {
-    if (this.redrawScheduled) return;
+    if (this.destroyed || this.redrawScheduled) return;
     this.redrawScheduled = true;
     if (this.scheduleRedrawFn) {
       this.scheduleRedrawFn();
@@ -474,9 +477,19 @@ export class LabelLayerRenderer {
       );
       const nodeBaseType = getNodeBaseType(nodeConfig);
       const renderedDimensions = getNodeDimensions?.(node.id);
+      const getExtensionStyle = nodeExtension?.getStyle;
+      const dynamicExtensionStyle = getExtensionStyle
+        ? safeExtensionCall(
+            'node',
+            nodeConfig?.type ?? 'unknown',
+            'getStyle',
+            () => getExtensionStyle(node),
+            undefined,
+          )
+        : undefined;
       const style = {
         ...nodeExtension?.style,
-        ...(nodeExtension?.getStyle ? nodeExtension.getStyle(node) : undefined),
+        ...dynamicExtensionStyle,
         ...userStyle,
         size: resolvedVisualStyle.size,
         width:
@@ -488,18 +501,26 @@ export class LabelLayerRenderer {
         borderRadius: resolvedVisualStyle.borderRadius,
       };
 
-      if (nodeExtension?.drawOverlay) {
+      const drawOverlay = nodeExtension?.drawOverlay;
+      if (drawOverlay) {
         const nodeSize = resolveNodeValue(style.size, node, 8);
-        const needsRedraw = nodeExtension.drawOverlay(ctx, {
-          node,
-          x: px,
-          y: py,
-          nodeSize,
-          dpr,
-          zoom,
-          camera,
-          time,
-        });
+        const needsRedraw = safeExtensionCall(
+          'node',
+          nodeConfig?.type ?? 'unknown',
+          'drawOverlay',
+          () =>
+            drawOverlay(ctx, {
+              node,
+              x: px,
+              y: py,
+              nodeSize,
+              dpr,
+              zoom,
+              camera,
+              time,
+            }),
+          false,
+        );
         if (needsRedraw) this.requestRedraw();
       }
 
@@ -571,7 +592,7 @@ export class LabelLayerRenderer {
       if (!renderer) {
         this.warnOnce(
           `decoration:${decoration.renderer}:missing`,
-          `[G6Lite] Decoration renderer "${decoration.renderer}" is not registered; skipping it.`,
+          `[G6-GL] Decoration renderer "${decoration.renderer}" is not registered; skipping it.`,
         );
         continue;
       }
@@ -606,7 +627,7 @@ export class LabelLayerRenderer {
         } catch (error) {
           this.warnOnce(
             `decoration:${decoration.renderer}:measure`,
-            `[G6Lite] Decoration renderer "${decoration.renderer}" threw during measure; skipping it.`,
+            `[G6-GL] Decoration renderer "${decoration.renderer}" threw during measure; skipping it.`,
             error,
           );
         } finally {
@@ -651,7 +672,7 @@ export class LabelLayerRenderer {
           } catch (error) {
             this.warnOnce(
               `decoration:${decoration.renderer}:overflow-measure`,
-              `[G6Lite] Decoration renderer "${decoration.renderer}" threw while measuring overflow; clipping it.`,
+              `[G6-GL] Decoration renderer "${decoration.renderer}" threw while measuring overflow; clipping it.`,
               error,
             );
           } finally {
@@ -708,15 +729,27 @@ export class LabelLayerRenderer {
         placement === 'bottom'
           ? placement
           : undefined;
+      const getBoundaryAnchor = nodeExtension?.getBoundaryAnchor;
+      const extensionBoundaryAnchor =
+        boundaryPlacement && getBoundaryAnchor
+          ? safeExtensionCall(
+              'node',
+              nodeConfig.type ?? 'unknown',
+              'getBoundaryAnchor',
+              () =>
+                getBoundaryAnchor({
+                  node,
+                  placement: boundaryPlacement,
+                  crossOffsetRatio,
+                  width: nodeWidth,
+                  height: nodeHeight,
+                  borderRadius,
+                }),
+              undefined,
+            )
+          : undefined;
       const boundaryAnchor = boundaryPlacement
-        ? nodeExtension?.getBoundaryAnchor?.({
-            node,
-            placement: boundaryPlacement,
-            crossOffsetRatio,
-            width: nodeWidth,
-            height: nodeHeight,
-            borderRadius,
-          }) ??
+        ? extensionBoundaryAnchor ??
           getBuiltInNodeBoundaryAnchor(
             getNodeBaseType(nodeConfig),
             boundaryPlacement,
@@ -777,7 +810,7 @@ export class LabelLayerRenderer {
       } catch (error) {
         this.warnOnce(
           `decoration:${decoration.renderer}:draw`,
-          `[G6Lite] Decoration renderer "${decoration.renderer}" threw during draw; skipping it.`,
+          `[G6-GL] Decoration renderer "${decoration.renderer}" threw during draw; skipping it.`,
           error,
         );
       } finally {
@@ -824,7 +857,7 @@ export class LabelLayerRenderer {
     if (!renderer) {
       this.warnOnce(
         `${type}:${name}:missing`,
-        `[G6Lite] Label renderer "${name}" is not registered for ${type} labels; falling back to the default renderer.`,
+        `[G6-GL] Label renderer "${name}" is not registered for ${type} labels; falling back to the default renderer.`,
       );
     }
     return renderer;
@@ -870,7 +903,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `node:${rendererName}:measure`,
-        `[G6Lite] Label renderer "${rendererName}" threw during node label measure; falling back to the default renderer.`,
+        `[G6-GL] Label renderer "${rendererName}" threw during node label measure; falling back to the default renderer.`,
         error,
       );
       return false;
@@ -881,7 +914,7 @@ export class LabelLayerRenderer {
     if (!isValidLabelLayout(layout)) {
       this.warnOnce(
         `node:${rendererName}:layout`,
-        `[G6Lite] Label renderer "${rendererName}" returned an invalid node label layout; falling back to the default renderer.`,
+        `[G6-GL] Label renderer "${rendererName}" returned an invalid node label layout; falling back to the default renderer.`,
       );
       return false;
     }
@@ -916,7 +949,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `node:${rendererName}:draw`,
-        `[G6Lite] Label renderer "${rendererName}" threw during node label draw; falling back to the default renderer.`,
+        `[G6-GL] Label renderer "${rendererName}" threw during node label draw; falling back to the default renderer.`,
         error,
       );
     } finally {
@@ -1235,7 +1268,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `edge:${rendererName}:measure`,
-        `[G6Lite] Label renderer "${rendererName}" threw during edge label measure; falling back to the default renderer.`,
+        `[G6-GL] Label renderer "${rendererName}" threw during edge label measure; falling back to the default renderer.`,
         error,
       );
       return false;
@@ -1246,7 +1279,7 @@ export class LabelLayerRenderer {
     if (!isValidLabelLayout(layout)) {
       this.warnOnce(
         `edge:${rendererName}:layout`,
-        `[G6Lite] Label renderer "${rendererName}" returned an invalid edge label layout; falling back to the default renderer.`,
+        `[G6-GL] Label renderer "${rendererName}" returned an invalid edge label layout; falling back to the default renderer.`,
       );
       return false;
     }
@@ -1270,7 +1303,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `edge:${rendererName}:draw`,
-        `[G6Lite] Label renderer "${rendererName}" threw during edge label draw; falling back to the default renderer.`,
+        `[G6-GL] Label renderer "${rendererName}" threw during edge label draw; falling back to the default renderer.`,
         error,
       );
     } finally {
@@ -1353,6 +1386,7 @@ export class LabelLayerRenderer {
   }
 
   private loadImage(url: string): HTMLImageElement | null {
+    if (this.destroyed) return null;
     const cached = this.imageCache.get(url);
     if (cached !== undefined) return cached;
     // Start loading
@@ -1360,6 +1394,7 @@ export class LabelLayerRenderer {
     img.crossOrigin = 'anonymous';
     this.imageCache.set(url, null); // placeholder
     img.onload = () => {
+      if (this.destroyed) return;
       this.imageCache.set(url, img);
       this.requestRedraw();
     };
@@ -1371,9 +1406,16 @@ export class LabelLayerRenderer {
   }
 
   destroy(): void {
+    if (this.destroyed) return;
+    this.destroyed = true;
     this.mainCanvas.removeEventListener('mousemove', this.onDecorationPointerMove);
     this.mainCanvas.removeEventListener('mouseleave', this.onDecorationPointerLeave);
     this.canvas.remove();
+    this.scheduleRedrawFn = null;
+    this.redrawScheduled = false;
+    this.hoveredNodeId = null;
+    this.decorationHoverRegions = [];
     this.imageCache.clear();
+    this.warnedRendererIssues.clear();
   }
 }

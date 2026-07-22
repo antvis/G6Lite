@@ -1,8 +1,7 @@
 /**
  * Demo: Node states - default / active / selected / disabled / highlight / inactive
  */
-import { Graph } from '../../src/index.ts';
-import type { NodeState } from '../../src/types.ts';
+import { Graph, type NodeState } from '../../src/index.ts';
 
 export async function run(container: string | HTMLElement) {
   const states: NodeState[] = ['default', 'active', 'selected', 'disabled', 'highlight', 'inactive'];

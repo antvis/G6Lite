@@ -3,7 +3,7 @@ title: 数据模型
 description: GraphData、节点、边、Combo、业务字段和状态的组织方式
 ---
 
-G6Lite 的数据通过 `GraphData` 传入，核心字段是 `nodes`、`edges` 和可选的 `combos`。
+G6-GL 的数据通过 `GraphData` 传入，核心字段是 `nodes`、`edges` 和可选的 `combos`。
 
 ```ts
 const data = {
@@ -33,7 +33,7 @@ const data = {
 | `states` | 初始状态，如 `['selected']` |
 | `comboId` | 所属 Combo id |
 
-业务字段建议放在 `data` 中，避免和 G6Lite 的保留字段冲突。
+业务字段建议放在 `data` 中，避免和 G6-GL 的保留字段冲突。
 
 ## 边
 
@@ -87,6 +87,16 @@ node: {
 ```
 
 状态变更会触发增量刷新，适合高频交互。
+
+## 查询视图
+
+`getNodeData()`、`getEdgeData()`、`getComboData()` 以及 `getNodes()` / `getEdges()` 返回归一化后的只读 Model 视图：
+
+- `NodeModel` 包含必选坐标和当前状态集合。
+- `EdgeModel` 包含确定的 edge id、端点和当前状态集合。
+- `ComboModel` 额外包含计算后的边界和子元素关系。
+
+这些 Model 由 Graph 持有，不是不可变快照。请通过 `updateNodeData()`、`updateEdgeData()`、位置和状态 API 修改数据，不要直接改写查询结果。
 
 ## 大图数据建议
 

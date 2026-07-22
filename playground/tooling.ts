@@ -1,13 +1,33 @@
-import type { Graph } from '../src/index.ts';
-import type { LayoutNode } from '../src/types.ts';
-import { graphToNDC } from '../src/renderer/camera.ts';
+import type { Graph, NodeModel } from '../src/index.ts';
 
-export interface GraphInstanceWithTools extends Graph {
-  getCamera(): { x: number; y: number; zoom: number };
-  setCamera(partial: { x?: number; y?: number; zoom?: number }): void;
-  resetCamera(): void;
-  getLayoutNodes(): LayoutNode[];
-  getCanvas(): HTMLCanvasElement;
+export type GraphInstanceWithTools = Graph;
+
+function getMainCanvas(container: HTMLElement): HTMLCanvasElement {
+  const canvases = container.querySelectorAll<HTMLCanvasElement>('canvas');
+  const canvas = Array.from(canvases).find(
+    (candidate) =>
+      candidate.parentElement === container &&
+      !candidate.classList.contains('label-canvas') &&
+      !candidate.classList.contains('edge-label-canvas'),
+  );
+  if (!canvas) {
+    throw new Error('Graph canvas not found in the supplied container.');
+  }
+  return canvas;
+}
+
+function graphToCanvas(
+  graph: GraphInstanceWithTools,
+  canvas: HTMLCanvasElement,
+  x: number,
+  y: number,
+): { x: number; y: number } {
+  const point = graph.graphToScreen(x, y);
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (point.x - rect.left) * (canvas.width / (rect.width || 1)),
+    y: (point.y - rect.top) * (canvas.height / (rect.height || 1)),
+  };
 }
 
 export function attachCanvasTools(
@@ -39,7 +59,7 @@ export function attachCanvasTools(
     } else if (tool === 'reset') {
       graph.resetCamera();
     } else if (tool === 'fit') {
-      fitView(graph);
+      graph.fitView();
     }
   });
 }
@@ -48,20 +68,17 @@ export function attachLabels(
   container: HTMLElement,
   graph: GraphInstanceWithTools,
   opts?: {
-    nodeLabel?: (node: LayoutNode) => string;
+    nodeLabel?: (node: NodeModel) => string;
   }
 ): () => void {
+  const canvas = getMainCanvas(container);
   const overlay = document.createElement('div');
   overlay.className = 'label-overlay';
   container.appendChild(overlay);
 
   function renderLabels() {
-    const nodes = graph.getLayoutNodes();
-    const canvas = graph.getCanvas();
-    const cam = graph.getCamera();
+    const nodes = graph.getNodes();
     const rect = canvas.getBoundingClientRect();
-    const width = canvas.width;
-    const height = canvas.height;
 
     overlay.innerHTML = '';
 
@@ -75,9 +92,9 @@ export function attachLabels(
         node.name ??
         node.id;
       if (!label) return;
-      const [ndcX, ndcY] = graphToNDC(node.x, node.y, width, height, cam);
-      const px = ((ndcX + 1) / 2) * rect.width;
-      const py = ((1 - ndcY) / 2) * rect.height;
+      const point = graph.graphToScreen(node.x, node.y);
+      const px = point.x - rect.left;
+      const py = point.y - rect.top;
       const el = document.createElement('div');
       el.className = 'node-label';
       el.textContent = label;
@@ -89,7 +106,7 @@ export function attachLabels(
   }
 
   const ro = new ResizeObserver(() => renderLabels());
-  ro.observe(graph.getCanvas());
+  ro.observe(canvas);
 
   const origSetCamera = graph.setCamera.bind(graph);
   graph.setCamera = (partial) => {
@@ -101,10 +118,9 @@ export function attachLabels(
 
   // Also watch camera changes driven by behaviors (e.g. wheel zoom) via a lightweight RAF loop.
   let lastCam = { ...graph.getCamera() };
-  let lastSize = { w: graph.getCanvas().width, h: graph.getCanvas().height };
+  let lastSize = { w: canvas.width, h: canvas.height };
   function tick() {
     const cam = graph.getCamera();
-    const canvas = graph.getCanvas();
     const size = { w: canvas.width, h: canvas.height };
     if (
       cam.x !== lastCam.x ||
@@ -137,25 +153,26 @@ export function attachLabelsCanvas(
   container: HTMLElement,
   graph: GraphInstanceWithTools,
   opts?: {
-    nodeLabel?: (node: LayoutNode) => string;
+    nodeLabel?: (node: NodeModel) => string;
     /** Where to render label relative to node: 'inside' centers text within node bounds,
      *  'above' renders above the node (default), 'below' renders below, 'right' renders to the
      *  right of the node's left edge (left-aligned), 'right-edge' right-aligns text at the
      *  node's right edge (for transparent nodes where the line meets the right edge).
      *  Can also be a per-node function. */
-    position?: 'inside' | 'above' | 'below' | 'right' | 'right-edge' | ((node: LayoutNode) => 'inside' | 'above' | 'below' | 'right' | 'right-edge');
+    position?: 'inside' | 'above' | 'below' | 'right' | 'right-edge' | ((node: NodeModel) => 'inside' | 'above' | 'below' | 'right' | 'right-edge');
     /** Return node size in graph coordinates for inside-node text layout. */
-    nodeSize?: (node: LayoutNode) => { width: number; height: number };
+    nodeSize?: (node: NodeModel) => { width: number; height: number };
     /** Font size in CSS pixels at zoom=1. Default: 10 for outside, 11 for inside. */
-    fontSize?: number;
+    fontSize?: number | ((node: NodeModel) => number);
     /** Font family. Default: sans-serif. */
     fontFamily?: string;
     /** Text color — string or per-node function. Default: '#333'. */
-    color?: string | ((node: LayoutNode) => string);
+    color?: string | ((node: NodeModel) => string);
     /** Secondary text color (for lines after the first in multi-line labels). */
     secondaryColor?: string;
   }
 ): () => void {
+  const mainCanvas = getMainCanvas(container);
   const overlayCanvas = document.createElement('canvas');
   overlayCanvas.className = 'label-canvas';
   overlayCanvas.style.position = 'absolute';
@@ -166,8 +183,12 @@ export function attachLabelsCanvas(
   overlayCanvas.style.pointerEvents = 'none';
   container.appendChild(overlayCanvas);
 
-  const ctx = overlayCanvas.getContext('2d');
-  if (!ctx) return;
+  const context = overlayCanvas.getContext('2d');
+  if (!context) {
+    overlayCanvas.remove();
+    return () => {};
+  }
+  const ctx = context;
 
   const positionOpt = opts?.position ?? 'above';
   const getPosition = typeof positionOpt === 'function' ? positionOpt : () => positionOpt;
@@ -189,19 +210,17 @@ export function attachLabelsCanvas(
   let needsRedraw = true;
 
   function syncCanvasSize(): { w: number; h: number } {
-    const src = graph.getCanvas();
-    const w = src.width;
-    const h = src.height;
+    const w = mainCanvas.width;
+    const h = mainCanvas.height;
     if (overlayCanvas.width !== w) overlayCanvas.width = w;
     if (overlayCanvas.height !== h) overlayCanvas.height = h;
     return { w, h };
   }
 
   function getDprFromSrc(): number {
-    const src = graph.getCanvas();
-    const rect = src.getBoundingClientRect();
+    const rect = mainCanvas.getBoundingClientRect();
     const cssW = rect.width || 1;
-    return Math.max(1, src.width / cssW);
+    return Math.max(1, mainCanvas.width / cssW);
   }
 
   /** Truncate text to fit within maxWidth pixels, appending '...' if needed. */
@@ -219,7 +238,7 @@ export function attachLabelsCanvas(
   }
 
   function renderLabelsChunked(token: number): void {
-    const nodes = graph.getLayoutNodes();
+    const nodes = graph.getNodes();
     const cam = graph.getCamera();
     const { w, h } = syncCanvasSize();
     const dpr = getDprFromSrc();
@@ -251,9 +270,12 @@ export function attachLabelsCanvas(
           (opts?.nodeLabel && opts.nodeLabel(node)) ?? node.name ?? node.id;
         if (!label) continue;
 
-        const [ndcX, ndcY] = graphToNDC(node.x, node.y, w, h, cam);
-        const px = ((ndcX + 1) / 2) * w;
-        const py = ((1 - ndcY) / 2) * h;
+        const { x: px, y: py } = graphToCanvas(
+          graph,
+          mainCanvas,
+          node.x,
+          node.y,
+        );
         if (px < -CULL_MARGIN || px > w + CULL_MARGIN || py < -CULL_MARGIN || py > h + CULL_MARGIN) {
           continue;
         }
@@ -430,17 +452,16 @@ export function attachLabelsCanvas(
     needsRedraw = true;
     requestRenderIfNeeded(true);
   });
-  ro.observe(graph.getCanvas());
+  ro.observe(mainCanvas);
 
   // Camera change detection: behaviors update renderer.setCamera directly,
   // so we must observe via RAF and compare camera/size.
   let lastCam = { ...graph.getCamera() };
-  let lastSize = { w: graph.getCanvas().width, h: graph.getCanvas().height };
+  let lastSize = { w: mainCanvas.width, h: mainCanvas.height };
 
   function tick() {
     const cam = graph.getCamera();
-    const canvas = graph.getCanvas();
-    const size = { w: canvas.width, h: canvas.height };
+    const size = { w: mainCanvas.width, h: mainCanvas.height };
 
     if (
       cam.x !== lastCam.x ||
@@ -496,6 +517,7 @@ export function attachEdgeLabelsCanvas(
     showBg?: boolean;
   }
 ): () => void {
+  const mainCanvas = getMainCanvas(container);
   const overlayCanvas = document.createElement('canvas');
   overlayCanvas.className = 'edge-label-canvas';
   overlayCanvas.style.position = 'absolute';
@@ -506,8 +528,12 @@ export function attachEdgeLabelsCanvas(
   overlayCanvas.style.pointerEvents = 'none';
   container.appendChild(overlayCanvas);
 
-  const ctx = overlayCanvas.getContext('2d');
-  if (!ctx) return;
+  const context = overlayCanvas.getContext('2d');
+  if (!context) {
+    overlayCanvas.remove();
+    return () => {};
+  }
+  const ctx = context;
 
   const FONT_BASE_CSS = opts?.fontSize ?? 9;
   const LABEL_COLOR = opts?.color ?? '#666';
@@ -515,23 +541,21 @@ export function attachEdgeLabelsCanvas(
   let needsRedraw = true;
 
   function syncCanvasSize(): { w: number; h: number } {
-    const src = graph.getCanvas();
-    const w = src.width;
-    const h = src.height;
+    const w = mainCanvas.width;
+    const h = mainCanvas.height;
     if (overlayCanvas.width !== w) overlayCanvas.width = w;
     if (overlayCanvas.height !== h) overlayCanvas.height = h;
     return { w, h };
   }
 
   function getDpr(): number {
-    const src = graph.getCanvas();
-    const rect = src.getBoundingClientRect();
-    return Math.max(1, src.width / (rect.width || 1));
+    const rect = mainCanvas.getBoundingClientRect();
+    return Math.max(1, mainCanvas.width / (rect.width || 1));
   }
 
   function renderEdgeLabels(): void {
-    const data = (graph as any).getData() as { edges: Array<{ source: string; target: string; data?: Record<string, unknown> }> };
-    const layoutNodes = graph.getLayoutNodes();
+    const data = graph.getData();
+    const layoutNodes = graph.getNodes();
     const cam = graph.getCamera();
     const { w, h } = syncCanvasSize();
 
@@ -560,18 +584,27 @@ export function attachEdgeLabelsCanvas(
       const midX = (src.x + tgt.x) / 2;
       const midY = (src.y + tgt.y) / 2;
 
-      const [ndcX, ndcY] = graphToNDC(midX, midY, w, h, cam);
-      const px = ((ndcX + 1) / 2) * w;
-      const py = ((1 - ndcY) / 2) * h;
+      const { x: px, y: py } = graphToCanvas(
+        graph,
+        mainCanvas,
+        midX,
+        midY,
+      );
 
       if (opts?.rotated) {
         // Compute screen-space angle from source to target
-        const [sNdcX, sNdcY] = graphToNDC(src.x, src.y, w, h, cam);
-        const [tNdcX, tNdcY] = graphToNDC(tgt.x, tgt.y, w, h, cam);
-        const spx = ((sNdcX + 1) / 2) * w;
-        const spy = ((1 - sNdcY) / 2) * h;
-        const tpx = ((tNdcX + 1) / 2) * w;
-        const tpy = ((1 - tNdcY) / 2) * h;
+        const { x: spx, y: spy } = graphToCanvas(
+          graph,
+          mainCanvas,
+          src.x,
+          src.y,
+        );
+        const { x: tpx, y: tpy } = graphToCanvas(
+          graph,
+          mainCanvas,
+          tgt.x,
+          tgt.y,
+        );
         let angle = Math.atan2(tpy - spy, tpx - spx);
         // Flip text that would render upside down
         if (angle > Math.PI / 2 || angle < -Math.PI / 2) angle += Math.PI;
@@ -634,15 +667,14 @@ export function attachEdgeLabelsCanvas(
   }
 
   const ro = new ResizeObserver(() => { needsRedraw = true; renderEdgeLabels(); });
-  ro.observe(graph.getCanvas());
+  ro.observe(mainCanvas);
 
   let lastCam = { ...graph.getCamera() };
-  let lastSize = { w: graph.getCanvas().width, h: graph.getCanvas().height };
+  let lastSize = { w: mainCanvas.width, h: mainCanvas.height };
 
   function tick() {
     const cam = graph.getCamera();
-    const canvas = graph.getCanvas();
-    const size = { w: canvas.width, h: canvas.height };
+    const size = { w: mainCanvas.width, h: mainCanvas.height };
     if (
       cam.x !== lastCam.x || cam.y !== lastCam.y || cam.zoom !== lastCam.zoom ||
       size.w !== lastSize.w || size.h !== lastSize.h
@@ -664,36 +696,3 @@ export function attachEdgeLabelsCanvas(
     overlayCanvas.remove();
   };
 }
-
-function fitView(graph: GraphInstanceWithTools): void {
-  const nodes = graph.getLayoutNodes();
-  if (!nodes.length) return;
-  let minX = Infinity;
-  let maxX = -Infinity;
-  let minY = Infinity;
-  let maxY = -Infinity;
-  for (const n of nodes) {
-    if (n.x < minX) minX = n.x;
-    if (n.x > maxX) maxX = n.x;
-    if (n.y < minY) minY = n.y;
-    if (n.y > maxY) maxY = n.y;
-  }
-  const width = maxX - minX || 1;
-  const height = maxY - minY || 1;
-  const canvas = graph.getCanvas();
-  const rect = canvas.getBoundingClientRect();
-  const viewW = rect.width || 800;
-  const viewH = rect.height || 600;
-  const scaleX = viewW / width;
-  const scaleY = viewH / height;
-  const zoom = Math.min(scaleX, scaleY) * 0.9;
-  const centerX = (minX + maxX) / 2;
-  const centerY = (minY + maxY) / 2;
-
-  graph.setCamera({
-    zoom,
-    x: -centerX + (viewW / (2 * zoom)),
-    y: -centerY + (viewH / (2 * zoom)),
-  });
-}
-

@@ -26,11 +26,12 @@ description: 14 种内置布局类型、常用参数与 Web Worker 支持
 | **indented** | 缩进树（自研） | `indent`, `rowHeight` |
 | **fishbone** | 鱼骨图（自研） | `direction` |
 
-> `mindmap` / `indented` / `fishbone` 为 G6Lite 自研的树形布局,需配合树状结构的数据使用。
+> `mindmap` / `indented` / `fishbone` 为 G6-GL 自研的树形布局,需配合树状结构的数据使用。
+> 三者由无状态 executor function 执行，复杂度为 O(V+E)，不会进入 Worker；配置 `worker: true` 时仍保持原布局类型。
 
 ## 效果预览
 
-以下为同一份数据在不同布局下的真实渲染截图（由 g6-lite WebGL 渲染并截图,见 `playground/capture.html`）：
+以下为同一份数据在不同布局下的真实渲染截图（由 g6-gl WebGL 渲染并截图,见 `playground/capture.html`）：
 
 | force | circular | radial |
 |:--:|:--:|:--:|

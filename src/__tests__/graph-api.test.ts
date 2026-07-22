@@ -253,6 +253,347 @@ describe('P0: destroyed Graph API safety', () => {
   });
 });
 
+describe('P1: repeated render resource lifecycle', () => {
+  it('tears down every per-render resource exactly once', () => {
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    const behaviorTeardown = vi.fn();
+    const interactionTeardown = vi.fn();
+    const pluginTeardown = vi.fn();
+    const schedulerDestroy = vi.fn();
+    const observerDisconnect = vi.fn();
+    const labelDestroy = vi.fn();
+    const comboDestroy = vi.fn();
+
+    Object.assign(graph, {
+      behaviorTeardown,
+      interactionTeardown,
+      pluginTeardowns: [pluginTeardown],
+      scheduler: { destroy: schedulerDestroy },
+      resizeObserver: { disconnect: observerDisconnect },
+      labelRenderer: { destroy: labelDestroy },
+      comboRenderer: { destroy: comboDestroy },
+    });
+
+    (graph as unknown as { teardownRenderRuntime(): void }).teardownRenderRuntime();
+    (graph as unknown as { teardownRenderRuntime(): void }).teardownRenderRuntime();
+
+    expect(behaviorTeardown).toHaveBeenCalledTimes(1);
+    expect(interactionTeardown).toHaveBeenCalledTimes(1);
+    expect(pluginTeardown).toHaveBeenCalledTimes(1);
+    expect(schedulerDestroy).toHaveBeenCalledTimes(1);
+    expect(observerDisconnect).toHaveBeenCalledTimes(1);
+    expect(labelDestroy).toHaveBeenCalledTimes(1);
+    expect(comboDestroy).toHaveBeenCalledTimes(1);
+    expect(graph).toMatchObject({
+      behaviorTeardown: null,
+      interactionTeardown: null,
+      pluginTeardowns: [],
+      scheduler: null,
+      resizeObserver: null,
+      labelRenderer: null,
+      comboRenderer: null,
+    });
+  });
+
+  it('aborts the active layout and invalidates its generation', () => {
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    const abort = vi.fn();
+    Object.assign(graph, {
+      _destroyed: false,
+      layoutGeneration: 4,
+      layoutAbortController: { abort },
+    });
+
+    graph.cancelLayout();
+
+    expect(abort).toHaveBeenCalledTimes(1);
+    expect(graph.layoutGeneration).toBe(5);
+    expect(graph.layoutAbortController).toBeNull();
+  });
+
+  it('does not start layout after cancellation during the pre-layout frame yield', async () => {
+    let resumeFrame: FrameRequestCallback | undefined;
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      resumeFrame = callback;
+      return 1;
+    });
+    const executeLayout = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      layoutGeneration: 0,
+      layoutAbortController: null,
+      transformInstances: new Map(),
+      options: {
+        data: { nodes: [{ id: 'node' }], edges: [] },
+        layout: { type: 'grid' },
+      },
+      containerEl: { clientWidth: 400, clientHeight: 300 },
+      renderer: { resize: vi.fn(), clearWithTheme: vi.fn() },
+      eventEmitter: new EventEmitter(),
+      executeLayout,
+    });
+
+    const rendering = graph.render();
+    graph.cancelLayout();
+    resumeFrame?.(0);
+    await rendering;
+
+    expect(executeLayout).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+});
+
+describe('P1: public data snapshot boundary', () => {
+  it('snapshots configured data before the first render', () => {
+    const source = {
+      nodes: [{ id: 'node', data: { label: 'original' }, states: ['selected' as const] }],
+      edges: [{ id: 'edge', source: 'node', target: 'node', data: { weight: 1 } }],
+      combos: [{ id: 'combo', style: { padding: 12 }, data: { label: 'group' } }],
+    };
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, { dataModel: null, options: { data: source } });
+
+    const snapshot = graph.getData();
+    snapshot.nodes[0].data!.label = 'changed';
+    snapshot.nodes[0].states!.push('active');
+    snapshot.edges[0].data!.weight = 2;
+    snapshot.combos![0].style!.padding = 24;
+    snapshot.combos![0].data!.label = 'changed';
+
+    expect(source.nodes[0].data.label).toBe('original');
+    expect(source.nodes[0].states).toEqual(['selected']);
+    expect(source.edges[0].data.weight).toBe(1);
+    expect(source.combos[0].style.padding).toBe(12);
+    expect(source.combos[0].data.label).toBe('group');
+  });
+
+  it('returns independent arrays, records, data objects, and state arrays', () => {
+    const dataModel = new DataModel({ theme: {} });
+    dataModel.replaceData(
+      [{ id: 'node', x: 1, y: 2, data: { label: 'original' }, states: ['selected'] }],
+      [
+        {
+          id: 'edge',
+          source: 'node',
+          target: 'node',
+          data: { weight: 1 },
+          states: ['active'],
+        },
+      ],
+    );
+    dataModel.initCombos(
+      [{ id: 'combo', data: { label: 'group' }, states: ['highlight'] }],
+      [{ id: 'node', comboId: 'combo' }],
+    );
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, { dataModel });
+
+    const snapshot = graph.getData();
+    snapshot.nodes[0].x = 100;
+    snapshot.nodes[0].data!.label = 'changed';
+    snapshot.nodes[0].states!.push('active');
+    snapshot.edges[0].data!.weight = 2;
+    snapshot.combos![0].data!.label = 'changed';
+    snapshot.combos![0].states!.push('selected');
+    snapshot.nodes.length = 0;
+
+    expect(dataModel.getNode('node')).toMatchObject({
+      x: 1,
+      data: { label: 'original' },
+    });
+    expect(Array.from(dataModel.getNode('node')!.states)).toEqual(['selected']);
+    expect(dataModel.getEdge('edge')!.data).toEqual({ weight: 1 });
+    expect(dataModel.getCombo('combo')!.data).toEqual({ label: 'group' });
+    expect(Array.from(dataModel.getCombo('combo')!.states)).toEqual(['highlight']);
+    expect(dataModel.getNodeCount()).toBe(1);
+  });
+});
+
+describe('P1: public camera and coordinate boundary', () => {
+  it('round-trips client coordinates with canvas offset and backing-store scale', () => {
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    const rect = {
+      left: 100,
+      top: 50,
+      width: 400,
+      height: 200,
+      right: 500,
+      bottom: 250,
+      x: 100,
+      y: 50,
+      toJSON: () => ({}),
+    } as DOMRect;
+    const canvas = {
+      width: 800,
+      height: 600,
+      getBoundingClientRect: () => rect,
+    };
+    const camera = { x: 10, y: -5, zoom: 2 };
+    const renderer = {
+      getCamera: () => camera,
+      screenToGraph: (screenX: number, screenY: number) => {
+        const px = (screenX - rect.left) * (canvas.width / rect.width);
+        const py = (screenY - rect.top) * (canvas.height / rect.height);
+        return [px / camera.zoom - camera.x, py / camera.zoom - camera.y];
+      },
+    };
+    Object.assign(graph, { _destroyed: false, canvas, renderer });
+
+    const clientPoint = graph.graphToScreen(30, 25);
+    const graphPoint = graph.screenToGraph(clientPoint.x, clientPoint.y);
+
+    expect(clientPoint.x).toBeCloseTo(140);
+    expect(clientPoint.y).toBeCloseTo(50 + 40 / 3);
+    expect(graphPoint.x).toBeCloseTo(30);
+    expect(graphPoint.y).toBeCloseTo(25);
+
+    const cameraSnapshot = graph.getCamera();
+    cameraSnapshot.zoom = 10;
+    expect(camera.zoom).toBe(2);
+  });
+
+  it('focuses using backing-store dimensions while preserving zoom', () => {
+    const dataModel = new DataModel({ theme: {} });
+    dataModel.addNodes([
+      { id: 'a', x: 10, y: 20 },
+      { id: 'b', x: 30, y: 40 },
+    ]);
+    const setCamera = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      dataModel,
+      containerEl: { clientWidth: 400, clientHeight: 300 },
+      canvas: { width: 800, height: 600 },
+      renderer: {
+        getCamera: () => ({ x: 0, y: 0, zoom: 2 }),
+        setCamera,
+      },
+    });
+
+    graph.focusItem(['a', 'b'], 40);
+
+    expect(setCamera).toHaveBeenCalledWith({ x: 180, y: 120 });
+  });
+});
+
+describe('P1: Graph batch state scheduling', () => {
+  function createStateGraph() {
+    const dataModel = new DataModel({ theme: {} });
+    dataModel.addNode({ id: 'node', x: 0, y: 0 });
+    dataModel.initCombos([{ id: 'combo' }], []);
+    dataModel.getChanges();
+    const schedule = vi.fn(() => dataModel.getChanges());
+    const scheduleRender = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      initialized: true,
+      dataModel,
+      scheduler: { schedule },
+      renderer: { scheduleRender },
+    });
+    return { dataModel, graph, schedule, scheduleRender };
+  }
+
+  it('uses the data scheduler as the single draw path for mixed real changes', () => {
+    const { graph, schedule, scheduleRender } = createStateGraph();
+
+    graph.batchSetState([
+      { id: 'node', state: 'selected', value: true },
+      { id: 'combo', state: 'selected', value: true },
+    ]);
+
+    expect(schedule).toHaveBeenCalledTimes(1);
+    expect(scheduleRender).not.toHaveBeenCalled();
+  });
+
+  it('still redraws a Combo when accompanying node operations are no-ops', () => {
+    const { dataModel, graph, schedule, scheduleRender } = createStateGraph();
+    dataModel.setNodeState('node', 'selected', true);
+    dataModel.getChanges();
+
+    graph.batchSetState([
+      { id: 'node', state: 'selected', value: true },
+      { id: 'combo', state: 'selected', value: true },
+    ]);
+
+    expect(schedule).not.toHaveBeenCalled();
+    expect(scheduleRender).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('P1: Combo structural API scheduling', () => {
+  it('requests a render for membership and Combo mutations', () => {
+    const dataModel = new DataModel({ theme: {} });
+    dataModel.addNode({ id: 'node', x: 0, y: 0 });
+    dataModel.initCombos([{ id: 'combo-a' }], [{ id: 'node' }]);
+    const schedule = vi.fn();
+    const scheduleRender = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      dataModel,
+      scheduler: { schedule },
+      renderer: { scheduleRender },
+      ensureComboRenderer: vi.fn(),
+    });
+
+    graph.addToCombo('node', 'combo-a');
+    graph.removeFromCombo('node');
+    graph.createCombo({ id: 'combo-b' }, ['node']);
+    graph.removeCombo('combo-b');
+
+    expect(schedule).toHaveBeenCalledTimes(4);
+    expect(scheduleRender).toHaveBeenCalledTimes(4);
+  });
+
+  it('uses draw-only refresh when collapsing or expanding has no element changes', () => {
+    const dataModel = new DataModel({ theme: {} });
+    dataModel.replaceData([{ id: 'node', x: 0, y: 0, states: ['hidden'] }], []);
+    dataModel.initCombos([{ id: 'combo' }], [{ id: 'node', comboId: 'combo' }]);
+    dataModel.getChanges();
+    const schedule = vi.fn(() => dataModel.getChanges());
+    const scheduleRender = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      dataModel,
+      scheduler: { schedule },
+      renderer: { scheduleRender },
+      eventEmitter: new EventEmitter(),
+    });
+
+    graph.collapseCombo('combo');
+    graph.expandCombo('combo');
+
+    expect(schedule).not.toHaveBeenCalled();
+    expect(scheduleRender).toHaveBeenCalledTimes(2);
+  });
+
+  it('uses draw-only refresh for an empty Combo', () => {
+    const dataModel = new DataModel({ theme: {} });
+    dataModel.initCombos([{ id: 'combo' }], []);
+    const schedule = vi.fn(() => dataModel.getChanges());
+    const scheduleRender = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      dataModel,
+      scheduler: { schedule },
+      renderer: { scheduleRender },
+      eventEmitter: new EventEmitter(),
+    });
+
+    graph.collapseCombo('combo');
+    graph.expandCombo('combo');
+
+    expect(schedule).not.toHaveBeenCalled();
+    expect(scheduleRender).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe('P0: Combo state API backing model', () => {
   it('should set, query, find, and clear combo states', () => {
     const dm = new DataModel({ theme: {} });

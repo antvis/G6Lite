@@ -27,12 +27,7 @@ interface TreeNode {
   depth: number;
 }
 
-type LayoutInstance = {
-  execute: (data: GraphData) => Promise<void>;
-  forEachNode: (
-    fn: (n: { id: string; x: number; y: number; data?: Record<string, unknown> }) => void,
-  ) => void;
-};
+type ResolvedMindmapLayoutOptions = Required<MindmapLayoutOptions>;
 
 const DEFAULT_LEVEL_GAP = 120;
 const DEFAULT_NODE_GAP = 30;
@@ -49,223 +44,193 @@ const DEFAULT_BRANCH_COLORS = [
   '#FFD8B8',
 ];
 
-export class MindmapLayout implements LayoutInstance {
-  private options: Required<MindmapLayoutOptions>;
-  private rootNode: TreeNode | null = null;
+export function executeMindmapLayout(
+  data: GraphData,
+  options: MindmapLayoutOptions = {},
+): { nodes: Array<GraphNode & { x: number; y: number }> } {
+  const inputNodes = Array.isArray(data?.nodes) ? data.nodes : [];
+  if (inputNodes.length === 0) return { nodes: [] };
 
-  constructor(options?: MindmapLayoutOptions) {
-    this.options = {
-      direction: options?.direction ?? 'H',
-      levelGap: options?.levelGap ?? DEFAULT_LEVEL_GAP,
-      nodeGap: options?.nodeGap ?? DEFAULT_NODE_GAP,
-      branchColors: options?.branchColors ?? DEFAULT_BRANCH_COLORS,
-      getWidth: options?.getWidth ?? (() => DEFAULT_NODE_WIDTH),
-      getHeight: options?.getHeight ?? (() => DEFAULT_NODE_HEIGHT),
-      getSide: options?.getSide ?? (() => 'right'),
-    };
+  const resolvedOptions: ResolvedMindmapLayoutOptions = {
+    direction: options.direction ?? 'H',
+    levelGap: options.levelGap ?? DEFAULT_LEVEL_GAP,
+    nodeGap: options.nodeGap ?? DEFAULT_NODE_GAP,
+    branchColors: [...(options.branchColors ?? DEFAULT_BRANCH_COLORS)],
+    getWidth: options.getWidth ?? (() => DEFAULT_NODE_WIDTH),
+    getHeight: options.getHeight ?? (() => DEFAULT_NODE_HEIGHT),
+    getSide: options.getSide ?? (() => 'right'),
+  };
+
+  const nodeMap = new Map<string, TreeNode>();
+  const childrenMap = new Map<string, string[]>();
+  const hasParent = new Set<string>();
+
+  for (const node of inputNodes) {
+    if (nodeMap.has(node.id)) continue;
+    nodeMap.set(node.id, {
+      id: node.id,
+      data: node.data ? { ...node.data } : undefined,
+      children: [],
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      depth: 0,
+    });
   }
 
-  async execute(data: GraphData): Promise<void> {
-    this.buildTree(data);
-    if (!this.rootNode) return;
-
-    // Root at center
-    this.rootNode.x = 0;
-    this.rootNode.y = 0;
-
-    // Assign sides recursively
-    this.assignSides(this.rootNode, undefined);
-
-    // Calculate positions
-    this.calcPositions(this.rootNode);
+  for (const edge of Array.isArray(data.edges) ? data.edges : []) {
+    const { source, target } = edge;
+    if (source === target || !nodeMap.has(source) || !nodeMap.has(target)) continue;
+    // A mind map is a tree. Keep the first valid parent so malformed multi-parent
+    // input cannot add the same TreeNode to multiple branches.
+    if (hasParent.has(target)) continue;
+    const children = childrenMap.get(source) ?? [];
+    if (children.includes(target)) continue;
+    children.push(target);
+    childrenMap.set(source, children);
+    hasParent.add(target);
   }
 
-  private getAllPositions(): string[] {
-    const positions: string[] = [];
-    const collect = (node: TreeNode | null) => {
-      if (!node) return;
-      positions.push(`${node.id}:(${Math.round(node.x)},${Math.round(node.y)})`);
-      node.children.forEach(collect);
-    };
-    collect(this.rootNode);
-    return positions;
-  }
-
-  forEachNode(
-    fn: (n: { id: string; x: number; y: number; data?: Record<string, unknown> }) => void,
-  ): void {
-    const collect = (node: TreeNode | null) => {
-      if (!node) return;
-      fn({ id: node.id, x: node.x, y: node.y, data: node.data as Record<string, unknown> });
-      node.children.forEach(collect);
-    };
-    collect(this.rootNode);
-  }
-
-  private buildTree(data: GraphData): void {
-    const nodeMap = new Map<string, TreeNode>();
-    const childrenMap = new Map<string, string[]>();
-    const hasParent = new Set<string>();
-
-    // Initialize nodes
-    for (const node of data.nodes) {
-      nodeMap.set(node.id, {
-        id: node.id,
-        data: node.data,
-        children: [],
+  const rootId = inputNodes.find((node) => nodeMap.has(node.id) && !hasParent.has(node.id))?.id;
+  // A graph made entirely of cycles has no natural root. Falling back to the
+  // first node keeps the result deterministic; the DFS guard below cuts cycles.
+  const rootNode = nodeMap.get(rootId ?? inputNodes[0].id);
+  if (!rootNode) {
+    return {
+      nodes: inputNodes.map((node) => ({
+        ...node,
+        data: node.data ? { ...node.data } : undefined,
         x: 0,
         y: 0,
-        width: 0,
-        height: 0,
-        depth: 0,
-      });
-    }
-
-    // Build relationships
-    for (const edge of data.edges) {
-      const parentId = edge.source;
-      const childId = edge.target;
-      if (!childrenMap.has(parentId)) {
-        childrenMap.set(parentId, []);
-      }
-      childrenMap.get(parentId)!.push(childId);
-      hasParent.add(childId);
-    }
-
-    // Find root
-    let rootId: string | undefined;
-    for (const node of data.nodes) {
-      if (!hasParent.has(node.id)) {
-        rootId = node.id;
-        break;
-      }
-    }
-
-    if (!rootId || !nodeMap.has(rootId)) {
-      this.rootNode = null;
-      return;
-    }
-
-    // Build tree
-    const buildChildren = (parentId: string, depth: number): void => {
-      const parent = nodeMap.get(parentId)!;
-      parent.depth = depth;
-      const childIds = childrenMap.get(parentId) || [];
-      for (const childId of childIds) {
-        const child = nodeMap.get(childId)!;
-        parent.children.push(child);
-        buildChildren(childId, depth + 1);
-      }
+      })),
     };
-
-    this.rootNode = nodeMap.get(rootId)!;
-    buildChildren(rootId, 0);
-
-    // Calculate sizes
-    const calcSize = (node: TreeNode): void => {
-      const graphNode = { id: node.id, data: node.data } as GraphNode;
-      node.width = this.options.getWidth(graphNode);
-      node.height = this.options.getHeight(graphNode);
-      node.children.forEach(calcSize);
-    };
-    calcSize(this.rootNode);
   }
 
-  private assignSides(node: TreeNode, parentSide?: 'left' | 'right'): void {
+  const visited = new Set<string>();
+  const visiting = new Set<string>();
+
+  const buildChildren = (node: TreeNode, depth: number): void => {
+    if (visiting.has(node.id) || visited.has(node.id)) return;
+    visiting.add(node.id);
+    visited.add(node.id);
+    node.depth = depth;
+
+    for (const childId of childrenMap.get(node.id) ?? []) {
+      if (visiting.has(childId) || visited.has(childId)) continue;
+      const child = nodeMap.get(childId);
+      if (!child) continue;
+      node.children.push(child);
+      buildChildren(child, depth + 1);
+    }
+
+    visiting.delete(node.id);
+  };
+
+  buildChildren(rootNode, 0);
+
+  const toCallbackNode = (node: TreeNode): GraphNode => ({
+    id: node.id,
+    data: node.data ? { ...node.data } : undefined,
+  });
+
+  const calculateSizes = (node: TreeNode): void => {
+    const graphNode = toCallbackNode(node);
+    node.width = resolvedOptions.getWidth(graphNode);
+    node.height = resolvedOptions.getHeight(graphNode);
+    node.children.forEach(calculateSizes);
+  };
+
+  const assignSides = (node: TreeNode, parentSide?: 'left' | 'right'): void => {
     if (node.children.length === 0) return;
 
     if (node.depth === 0) {
-      // Root: assign first-level children based on direction
-      if (this.options.direction === 'H') {
-        node.children.forEach((child, idx) => {
-          const graphNode = { id: child.id, data: child.data } as GraphNode;
-          child.side = this.options.getSide!(graphNode, idx, undefined);
+      if (resolvedOptions.direction === 'H') {
+        node.children.forEach((child, index) => {
+          child.side = resolvedOptions.getSide(toCallbackNode(child), index, undefined);
         });
-      } else if (this.options.direction === 'LR') {
+      } else {
+        const side = resolvedOptions.direction === 'LR' ? 'right' : 'left';
         node.children.forEach((child) => {
-          child.side = 'right';
-        });
-      } else if (this.options.direction === 'RL') {
-        node.children.forEach((child) => {
-          child.side = 'left';
+          child.side = side;
         });
       }
     } else {
-      // Non-root: children expand to opposite side of parent
-      const expandSide = parentSide === 'left' ? 'right' : 'left';
-      node.children.forEach((child, idx) => {
-        const graphNode = { id: child.id, data: child.data } as GraphNode;
-        child.side = this.options.getSide!(graphNode, idx, parentSide);
+      node.children.forEach((child, index) => {
+        child.side = resolvedOptions.getSide(toCallbackNode(child), index, parentSide);
       });
     }
 
-    // Recursively assign to children
-    node.children.forEach((child) => this.assignSides(child, node.side));
-  }
+    // Preserve the previous layout's parent-side propagation semantics.
+    node.children.forEach((child) => assignSides(child, node.side));
+  };
 
-  private calcPositions(node: TreeNode): void {
+  const assignBranchColor = (node: TreeNode, colorIndex: number): void => {
+    const { branchColors } = resolvedOptions;
+    if (branchColors.length > 0) {
+      const color = branchColors[colorIndex % branchColors.length];
+      node.data = { ...(node.data ?? {}), _branchColor: color };
+    }
+    node.children.forEach((child) => assignBranchColor(child, colorIndex));
+  };
+
+  const getChildrenHeight = (children: TreeNode[]): number => {
+    if (children.length === 0) return 0;
+    return children.reduce(
+      (total, child, index) =>
+        total + child.height + (index < children.length - 1 ? resolvedOptions.nodeGap : 0),
+      0,
+    );
+  };
+
+  const calculatePositions = (node: TreeNode): void => {
     if (node.children.length === 0) return;
 
-    const { levelGap, nodeGap } = this.options;
-
-    // Group by side
     const leftChildren: TreeNode[] = [];
     const rightChildren: TreeNode[] = [];
-
     for (const child of node.children) {
-      if (child.side === 'left') {
-        leftChildren.push(child);
-      } else {
-        rightChildren.push(child);
-      }
+      (child.side === 'left' ? leftChildren : rightChildren).push(child);
     }
 
-    // Calculate height for each side
-    const getHeight = (children: TreeNode[]): number => {
-      if (children.length === 0) return 0;
-      let total = 0;
-      for (let i = 0; i < children.length; i++) {
-        total += children[i].height;
-        if (i < children.length - 1) total += nodeGap;
-      }
-      return total;
-    };
-
-    const rightHeight = getHeight(rightChildren);
-    const leftHeight = getHeight(leftChildren);
-
-    // Position right children (expand to right from parent)
     if (rightChildren.length > 0) {
-      let yOffset = node.y - rightHeight / 2;
+      let yOffset = node.y - getChildrenHeight(rightChildren) / 2;
       for (const child of rightChildren) {
-        // Child expands to right: x = parent right edge + levelGap + child half width
-        child.x = node.x + node.width / 2 + levelGap + child.width / 2;
+        child.x = node.x + node.width / 2 + resolvedOptions.levelGap + child.width / 2;
         child.y = yOffset + child.height / 2;
-        yOffset += child.height + nodeGap;
-        this.assignBranchColor(child, 1);
-        this.calcPositions(child);
+        yOffset += child.height + resolvedOptions.nodeGap;
+        assignBranchColor(child, 1);
+        calculatePositions(child);
       }
     }
 
-    // Position left children (expand to left from parent)
     if (leftChildren.length > 0) {
-      let yOffset = node.y - leftHeight / 2;
+      let yOffset = node.y - getChildrenHeight(leftChildren) / 2;
       for (const child of leftChildren) {
-        // Child expands to left: x = parent left edge - levelGap - child half width
-        child.x = node.x - node.width / 2 - levelGap - child.width / 2;
+        child.x = node.x - node.width / 2 - resolvedOptions.levelGap - child.width / 2;
         child.y = yOffset + child.height / 2;
-        yOffset += child.height + nodeGap;
-        this.assignBranchColor(child, 0);
-        this.calcPositions(child);
+        yOffset += child.height + resolvedOptions.nodeGap;
+        assignBranchColor(child, 0);
+        calculatePositions(child);
       }
     }
-  }
+  };
 
-  private assignBranchColor(node: TreeNode, colorIndex: number): void {
-    const color = this.options.branchColors[colorIndex % this.options.branchColors.length];
-    (node.data as Record<string, unknown>)._branchColor = color;
-    for (const child of node.children) {
-      this.assignBranchColor(child, colorIndex);
-    }
-  }
+  rootNode.x = 0;
+  rootNode.y = 0;
+  calculateSizes(rootNode);
+  assignSides(rootNode);
+  calculatePositions(rootNode);
+
+  return {
+    nodes: inputNodes.map((node) => {
+      const layoutNode = nodeMap.get(node.id);
+      const positioned = layoutNode && visited.has(layoutNode.id);
+      return {
+        ...node,
+        data: layoutNode?.data ? { ...layoutNode.data } : undefined,
+        x: positioned ? layoutNode.x : 0,
+        y: positioned ? layoutNode.y : 0,
+      };
+    }),
+  };
 }

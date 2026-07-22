@@ -9,6 +9,7 @@
 
 import { getEdgeExtension } from '../extensions/edge.js';
 import { getNodeExtension } from '../extensions/node.js';
+import { safeExtensionCall } from '../extensions/registry.js';
 import type { EdgeConfig, GraphEdge, GraphNode, NodeConfig, ThemeTokens } from '../types.js';
 import { parseColor } from './color.js';
 
@@ -308,9 +309,19 @@ function resolveNodeStyleDynamic(
   theme: ThemeTokens,
 ): ResolvedNodeStyle {
   const extension = getNodeExtension(config?.type);
+  const getExtensionStyle = extension?.getStyle;
+  const dynamicExtensionStyle = getExtensionStyle
+    ? safeExtensionCall(
+        'node',
+        config?.type ?? 'unknown',
+        'getStyle',
+        () => getExtensionStyle(node),
+        undefined,
+      )
+    : undefined;
   const extensionStyle = {
     ...extension?.style,
-    ...(extension?.getStyle ? extension.getStyle(node) : undefined),
+    ...dynamicExtensionStyle,
   };
   const userStyle = typeof config?.style === 'object' ? config.style : undefined;
   const style = { ...extensionStyle, ...userStyle };
@@ -450,9 +461,19 @@ function resolveEdgeStyleDynamic(
   theme: ThemeTokens,
 ): ResolvedEdgeStyle {
   const extension = getEdgeExtension(config?.type);
+  const getExtensionStyle = extension?.getStyle;
+  const dynamicExtensionStyle = getExtensionStyle
+    ? safeExtensionCall(
+        'edge',
+        config?.type ?? 'unknown',
+        'getStyle',
+        () => getExtensionStyle(source, target, edge),
+        undefined,
+      )
+    : undefined;
   const extensionStyle = {
     ...extension?.style,
-    ...(extension?.getStyle ? extension.getStyle(source, target, edge) : undefined),
+    ...dynamicExtensionStyle,
   };
   let stroke: string;
   let lineWidth: number;

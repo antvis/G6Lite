@@ -21,7 +21,7 @@ description: 内置 behaviors —— 缩放、拖拽、高亮、选中,以及 To
 | **lasso-select**    | 套索选择（自由多边形）                |
 | **tooltip**         | 悬停 / 点击显示浮层提示（见下）       |
 
-> **架构说明**：单击、双击、右键、滚轮、悬停等**元素事件**由内核统一的「交互调度层」(`InteractionDispatcher`) 唯一分发——它做一次命中检测（`node → edge → combo → canvas` 优先级）,在 `graph.eventEmitter` 上发出规范事件,所有 behavior 都是这些事件的**消费者**。因此旧的 `click-node` / `wheel` 行为已移除（事件改由调度层默认发出）,无需再显式启用。
+> **架构说明**：单击、双击、右键、滚轮、悬停等**元素事件**由内核统一的「交互调度层」(`InteractionDispatcher`) 唯一分发——它做一次命中检测（`node → edge → combo → canvas` 优先级），再通过 Graph 公开事件接口发出规范事件，所有 behavior 都是这些事件的**消费者**。因此旧的 `click-node` / `wheel` 行为已移除（事件改由调度层默认发出），无需再显式启用。
 
 可同时启用多个;当同时启用 `highlight-node` 与 `highlight-edge` 时,边悬停优先。交互产生的事件可通过 `graph.on(eventName, handler)` 监听（事件清单见 [API 参考](/docs/api)）。
 

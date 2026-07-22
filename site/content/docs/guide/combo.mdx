@@ -10,7 +10,7 @@ description: 节点分组容器 —— 创建、嵌套、折叠展开与整体�
 Combo 通过两处声明：在 `data.combos` 中定义分组，在节点上用 `comboId` 指定归属。
 
 ```ts
-import { Graph } from '@antv/g6-lite';
+import { Graph } from '@antv/g6-gl';
 
 const graph = new Graph({
   container: 'container',
@@ -116,15 +116,14 @@ graph.createCombo({ id: 'newGroup', data: { name: 'New' } }, ['n1', 'n2']);
 
 // 删除一个 combo（其子节点回到无分组状态）
 graph.removeCombo('newGroup');
-
-// 改完数据后触发重绘
-graph.scheduleRender();
 ```
+
+上述数据操作会自动调度重绘，无需手动触发渲染。
 
 ## 查询
 
 ```ts
-graph.getComboData('frontend');     // 返回 InternalCombo（含计算后的 x/y/width/height）
+graph.getComboData('frontend');     // 返回 ComboModel（含计算后的 x/y/width/height）
 graph.getComboChildren('backend');  // { nodes: string[], combos: string[] }
 graph.getNodeCombo('n1');           // 节点所属 combo id
 ```

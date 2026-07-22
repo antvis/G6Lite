@@ -18,7 +18,7 @@ import type {
   ThemeTokens,
 } from './types.js';
 
-/** Internal node model with resolved style cache. */
+/** Mutable node record owned by the internal DataModel module. */
 export interface InternalNode {
   id: string;
   name?: string;
@@ -28,7 +28,7 @@ export interface InternalNode {
   states: Set<ElementState>;
 }
 
-/** Internal edge model with auto-generated ID. */
+/** Mutable edge record owned by the internal DataModel module. */
 export interface InternalEdge {
   id: string;
   source: string;
@@ -209,6 +209,14 @@ export class DataModel {
     const lastIndex = this._nodes.length - 1;
     const removedNode = this._nodes[index];
 
+    const comboId = this._nodeToCombo.get(removedNode.id);
+    if (comboId !== undefined) {
+      this._combos.get(comboId)?.childNodeIds.delete(removedNode.id);
+      this._nodeToCombo.delete(removedNode.id);
+    }
+    this._comboHiddenDepth.delete(removedNode.id);
+    this._comboHiddenApplied.delete(removedNode.id);
+
     if (index !== lastIndex) {
       // Swap with last
       const lastNode = this._nodes[lastIndex];
@@ -359,6 +367,9 @@ export class DataModel {
   private _removeEdgeAt(index: number): void {
     const lastIndex = this._edges.length - 1;
     const removedEdge = this._edges[index];
+
+    this._comboHiddenEdgeDepth.delete(removedEdge.id);
+    this._comboHiddenEdgeApplied.delete(removedEdge.id);
 
     if (index !== lastIndex) {
       // Swap with last
@@ -882,7 +893,7 @@ export class DataModel {
     }
     // Assign nodes to combos
     for (const n of nodes) {
-      if (n.comboId && this._combos.has(n.comboId)) {
+      if (this._nodeIdToIndex.has(n.id) && n.comboId && this._combos.has(n.comboId)) {
         this._combos.get(n.comboId)!.childNodeIds.add(n.id);
         this._nodeToCombo.set(n.id, n.comboId);
       }
@@ -934,6 +945,7 @@ export class DataModel {
   }
 
   setNodeCombo(nodeId: string, comboId: string | undefined): void {
+    if (!this._nodeIdToIndex.has(nodeId)) return;
     const oldComboId = this._nodeToCombo.get(nodeId);
     if (oldComboId) {
       this._combos.get(oldComboId)?.childNodeIds.delete(nodeId);

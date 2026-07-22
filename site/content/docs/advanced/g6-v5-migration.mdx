@@ -1,9 +1,9 @@
 ---
 title: 从 G6 v5 迁移
-description: 评估 G6 v5 项目迁移到 G6Lite 时的差异和改造点
+description: 评估 G6 v5 项目迁移到 G6-GL 时的差异和改造点
 ---
 
-G6Lite 借鉴 G6 的配置心智，但不是 G6 v5 的完整替代。迁移前应先确认你的项目是否真的需要 G6Lite 的性能取向。
+G6-GL 借鉴 G6 的配置心智，但不是 G6 v5 的完整替代。迁移前应先确认你的项目是否真的需要 G6-GL 的性能取向。
 
 ## 适合迁移的情况
 
@@ -19,11 +19,11 @@ G6Lite 借鉴 G6 的配置心智，但不是 G6 v5 的完整替代。迁移前�
 
 ## 常见差异
 
-| 能力 | G6 v5 | G6Lite |
+| 能力 | G6 v5 | G6-GL |
 | --- | --- | --- |
 | 渲染技术 | Canvas | WebGL |
 | 交互命名 | 如 `drag-element` | 如 `drag-node`、`drag-canvas` |
-| 自动适配 | G6 有更完整配置 | G6Lite 使用 `fitView()` 等 API |
+| 自动适配 | G6 有更完整配置 | G6-GL 使用 `fitView()` 等 API |
 | 插件生态 | 更丰富 | 聚焦核心行为 |
 | 扩展能力 | 完整元素/插件体系 | 轻量节点扩展 |
 
@@ -32,7 +32,7 @@ G6Lite 借鉴 G6 的配置心智，但不是 G6 v5 的完整替代。迁移前�
 1. 先用一份真实数据在 playground 中复现核心场景。
 2. 把数据统一成 `nodes` / `edges` / `combos`。
 3. 将样式映射迁移到 `node.style`、`edge.style` 和 `stateStyles`。
-4. 将交互替换为 G6Lite 内置 behaviors。
+4. 将交互替换为 G6-GL 内置 behaviors。
 5. 用 `setItemState()` 承接高亮、选中、隐藏等状态。
 6. 对比首屏、拖拽、拾取和状态切换指标。
 

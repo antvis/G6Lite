@@ -4,8 +4,7 @@
  * 7 rows (default/level 1-6) x 6 columns (Default/Active/Selected/Disabled/Highlight/Inactive)
  * Aligned with design spec 2.1 + 2.2
  */
-import { Graph } from '../../src/index.ts';
-import type { EdgeState } from '../../src/types.ts';
+import { Graph, type EdgeState } from '../../src/index.ts';
 
 export async function run(container: string | HTMLElement) {
   const states: EdgeState[] = ['default', 'active', 'selected', 'disabled', 'highlight', 'inactive'];

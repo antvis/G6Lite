@@ -330,7 +330,6 @@ export async function run(container: string | HTMLElement) {
       setStatus('运营控制台已加入服务层');
     }
     consoleInService = !consoleInService;
-    graph.scheduleRender();
   });
 
   runtimeButton.addEventListener('click', () => {

@@ -97,4 +97,23 @@ describe('function-based built-in layouts', () => {
       { id: 'child', x: 50, y: 25 },
     ]);
   });
+
+  it.each(['mindmap', 'fishbone'] as const)(
+    'routes %s through the unified runLayout entry',
+    async (type) => {
+      const result = await runLayout(
+        {
+          nodes: [{ id: 'root' }, { id: 'child' }],
+          edges: [{ source: 'root', target: 'child' }],
+        },
+        { type, worker: true },
+      );
+
+      expect(result.nodes.map((node) => node.id)).toEqual(['root', 'child']);
+      result.nodes.forEach((node) => {
+        expect(Number.isFinite(node.x)).toBe(true);
+        expect(Number.isFinite(node.y)).toBe(true);
+      });
+    },
+  );
 });

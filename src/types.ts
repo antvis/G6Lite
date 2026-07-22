@@ -26,13 +26,7 @@ export type EdgeData = Record<string, unknown>;
 
 /** Shared state type for nodes and edges. */
 export type BuiltInElementState =
-  | 'default'
-  | 'active'
-  | 'selected'
-  | 'disabled'
-  | 'highlight'
-  | 'inactive'
-  | 'hidden';
+  'default' | 'active' | 'selected' | 'disabled' | 'highlight' | 'inactive' | 'hidden';
 
 /** Built-in states plus application-defined state names. */
 export type ElementState = BuiltInElementState | (string & {});

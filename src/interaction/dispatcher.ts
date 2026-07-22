@@ -25,9 +25,7 @@ import type { GraphElementEvent } from '../types.js';
 import { GESTURE_CONSUME_EVENT } from './gesture.js';
 
 type HoverTarget =
-  | { kind: 'node'; id: string }
-  | { kind: 'edge'; id: string; index: number }
-  | null;
+  { kind: 'node'; id: string } | { kind: 'edge'; id: string; index: number } | null;
 
 /** A node/edge/combo/canvas hit, resolved once per DOM event. */
 type Hit =

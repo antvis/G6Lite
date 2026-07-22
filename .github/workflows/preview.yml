@@ -9,6 +9,7 @@ on:
       - 'vite.config.ts'
 
 permissions:
+  checks: read
   contents: read
   pull-requests: write
 

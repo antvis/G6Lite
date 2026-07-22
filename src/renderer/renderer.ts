@@ -248,9 +248,7 @@ export class Renderer {
 
   private resolveMaxPointSize(): number {
     const range = this.gl.getParameter(this.gl.ALIASED_POINT_SIZE_RANGE) as
-      | ArrayLike<number>
-      | null
-      | undefined;
+      ArrayLike<number> | null | undefined;
     const max = Number(range?.[1]);
     return Number.isFinite(max) && max > 0 ? max : 64;
   }

@@ -136,7 +136,7 @@ npm run size     # 检查打包体积
 - ✅ 治理文件（CONTRIBUTING / CODE_OF_CONDUCT / Issue & PR 模板）
 - ✅ 文档站点骨架（Next.js + Fumadocs）+ 三份指标文档
 - ✅ TypeDoc API 参考、公开类型边界检查与 beta API 迁移材料
-- ✅ Changesets beta 预发布配置与发布前 package smoke
+- ✅ 发布前 package smoke、公开声明和包入口验证
 - 🚧 Guide 各章节正文、Combo / Label 文档与示例
 - 🚧 测试覆盖率门槛与独立 examples
 - 🚧 GitHub Pages 部署与发布自动化

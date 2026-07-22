@@ -1,8 +1,0 @@
-{
-  "mode": "pre",
-  "tag": "beta",
-  "initialVersions": {
-    "@antv/g6-gl": "0.1.0-beta.22"
-  },
-  "changesets": []
-}

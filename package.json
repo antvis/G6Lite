@@ -34,9 +34,7 @@
     "site:build": "npm run docs:api && npm --prefix site run build",
     "docs:api": "typedoc",
     "size": "size-limit",
-    "changeset": "changeset",
-    "version-packages": "changeset version",
-    "release": "npm run build && npm run check:package && changeset publish",
+    "release": "npm run build && npm run check:package && npm publish --tag beta",
     "ci": "npm run lint && npm run typecheck && npm run test:cov && npm run build && npm run check:package && npm run size"
   },
   "keywords": [
@@ -48,7 +46,6 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@changesets/cli": "^2.31.0",
     "@eslint/js": "^10.0.1",
     "@size-limit/preset-small-lib": "^12.1.0",
     "@vitest/coverage-v8": "^3.2.6",

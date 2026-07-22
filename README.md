@@ -81,7 +81,7 @@ register(
 - 当前发布产物为 ESM-only，消费代码使用标准 ESM import，不支持 `require()`。
 - 仓库源码中的相对 `.js` 后缀用于保证 `tsc` 产物可被 Node ESM 直接解析，暂不应机械删除。
 
-详见[扩展体系](./site/content/docs/advanced/extensions.mdx)和[beta API 迁移指南](./site/content/docs/advanced/beta-api-migration.mdx)。公开 API 参考由 `npm run docs:api` 从包根类型自动生成。
+详见[扩展体系](./site/content/docs/advanced/extensions.mdx)。公开 API 参考由 `npm run docs:api` 从包根类型自动生成。
 
 ## 📖 文档 / Documentation
 

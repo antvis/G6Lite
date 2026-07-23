@@ -33,7 +33,7 @@ align on the approach before you invest time.
 
 ## Development Setup
 
-G6-GL uses **npm** (a `package-lock.json` is committed — do not switch package managers).
+G6-GL uses **npm**. Lockfiles are local-only and are not committed to the repository.
 
 ```bash
 # 1. Fork & clone
@@ -46,8 +46,8 @@ npm install
 # 3. Run the playground (dev server)
 npm run dev
 
-# 4. Run the full local check before pushing
-npm run ci   # lint + typecheck + test + build
+# 4. Run the core CI checks before pushing
+npm run ci   # lint + typecheck + test + library build + size limit
 ```
 
 ### Useful scripts
@@ -57,10 +57,10 @@ npm run ci   # lint + typecheck + test + build
 | `npm run dev` | Vite dev server for `playground/` |
 | `npm run build` | Build the library (`tsc` → `dist/`) |
 | `npm run typecheck` | Type-check without emitting |
-| `npm run lint` / `npm run lint:fix` | ESLint |
-| `npm run format` / `npm run format:check` | Prettier |
-| `npm run test` / `npm run test:watch` | Vitest |
-| `npm run ci` | Run the same checks as CI |
+| `npm run lint` | ESLint + Prettier checks; append `-- --fix` to fix |
+| `npm run test` | Vitest; append `-- --watch` or `-- --coverage` as needed |
+| `npm run benchmark` | Performance suites under `tests/perf/` |
+| `npm run ci` | Run the core library checks used by CI |
 
 ## Workflow
 
@@ -104,9 +104,6 @@ feat(combo): support dragging collapsed combos
 fix(picking): use viewport coords for hit detection
 docs(metrics): add bundle-size report
 ```
-
-A commit hook (husky + lint-staged) runs lint/format on staged files
-automatically.
 
 ## Developer Certificate of Origin (DCO)
 

@@ -4,5 +4,6 @@
     "noEmit": true,
     "rootDir": "."
   },
-  "include": ["type-tests/package-consumer.ts"]
+  "include": ["tests/unit/packageConsumer.type-test.ts"],
+  "exclude": []
 }

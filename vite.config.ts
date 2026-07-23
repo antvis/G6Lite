@@ -21,7 +21,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'playground/index.html'),
-        bench: resolve(__dirname, 'playground/bench.html'),
       },
     },
   },

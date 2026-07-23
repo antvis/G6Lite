@@ -25,9 +25,7 @@ import type { GraphElementEvent } from '../types.js';
 import { GESTURE_CONSUME_EVENT } from './gesture.js';
 
 type HoverTarget =
-  | { kind: 'node'; id: string }
-  | { kind: 'edge'; id: string; index: number }
-  | null;
+  { kind: 'node'; id: string } | { kind: 'edge'; id: string; index: number } | null;
 
 /** A node/edge/combo/canvas hit, resolved once per DOM event. */
 type Hit =
@@ -62,11 +60,11 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
       typeof (graph as { screenToGraph?: unknown }).screenToGraph === 'function'
         ? graph.screenToGraph(e.clientX, e.clientY)
         : typeof (renderer as { screenToGraph?: unknown }).screenToGraph === 'function'
-        ? (() => {
-            const [x, y] = renderer.screenToGraph(e.clientX, e.clientY);
-            return { x, y };
-          })()
-        : canvasPoint;
+          ? (() => {
+              const [x, y] = renderer.screenToGraph(e.clientX, e.clientY);
+              return { x, y };
+            })()
+          : canvasPoint;
     return {
       targetType,
       targetId: extra.targetId,

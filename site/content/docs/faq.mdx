@@ -77,7 +77,7 @@ DataModel 采用 Array / 列存结构，缓冲区用 Float32Array 指数增长�
 
 - 浏览器禁用了硬件加速，或在虚拟机 / 无 GPU 的 CI 环境中运行。
 - 容器元素尚未挂载到 DOM 就调用了 `render()`——确保容器已在文档中且有非零尺寸。
-- 单元测试 / jsdom 环境无 WebGL，需 mock gl 上下文（参考仓库 `src/__tests__/renderer.test.ts` 的做法）。
+- 单元测试 / jsdom 环境无 WebGL，需 mock gl 上下文（参考仓库 `tests/unit/renderer/renderer.test.ts` 的做法）。
 
 ## 使用
 

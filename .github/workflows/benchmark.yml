@@ -3,31 +3,76 @@ name: Benchmark
 on:
   push:
     branches: [main, master]
+    paths:
+      - 'src/**'
+      - 'tests/perf/**'
+      - 'package.json'
+      - 'tsconfig*.json'
+      - 'vite.config.ts'
   pull_request:
     branches: [main, master]
+    paths:
+      - 'src/**'
+      - 'tests/perf/**'
+      - 'package.json'
+      - 'tsconfig*.json'
+      - 'vite.config.ts'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Benchmark duration
+        required: true
+        default: quick
+        type: choice
+        options:
+          - quick
+          - full
+      suite:
+        description: Benchmark suite
+        required: true
+        default: all
+        type: choice
+        options:
+          - node
+          - browser
+          - all
+  schedule:
+    - cron: '0 18 * * 1'
+
+permissions:
+  contents: read
 
 jobs:
-  benchmark-smoke:
+  benchmark:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BENCHMARK_MODE: ${{ github.event_name == 'schedule' && 'full' || inputs.mode || 'quick' }}
+      BENCHMARK_SUITE: ${{ github.event_name == 'schedule' && 'all' || inputs.suite || 'node' }}
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-package-lock --no-audit --no-fund
 
-      - name: Run Benchmark.js smoke suite
-        run: npm run bench:micro
+      - name: Install Chromium
+        if: env.BENCHMARK_SUITE == 'browser' || env.BENCHMARK_SUITE == 'all'
+        run: npx playwright install --with-deps chromium
+
+      - name: Run benchmark
+        run: npm run benchmark -- --mode "$BENCHMARK_MODE" --suite "$BENCHMARK_SUITE"
 
       - name: Upload benchmark reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: benchmark-smoke-node20
+          name: benchmark-${{ env.BENCHMARK_MODE }}-${{ env.BENCHMARK_SUITE }}-node20
           path: performance/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 30

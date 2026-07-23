@@ -11,14 +11,7 @@ import type {
 } from '../types.js';
 
 export type ExtensionCategory =
-  | 'node'
-  | 'edge'
-  | 'label'
-  | 'decoration'
-  | 'layout'
-  | 'behavior'
-  | 'transform'
-  | 'plugin';
+  'node' | 'edge' | 'label' | 'decoration' | 'layout' | 'behavior' | 'transform' | 'plugin';
 
 /** Read-only node snapshot exposed to extensions. */
 export interface ExtensionNodeData {
@@ -103,8 +96,9 @@ export interface BehaviorExtension<TOptions = Record<string, unknown>> extends E
   getEvents(): Record<string, (event: GraphElementEvent) => void>;
 }
 
-export interface TransformExtension<TOptions = Record<string, unknown>>
-  extends Extension<TOptions> {
+export interface TransformExtension<
+  TOptions = Record<string, unknown>,
+> extends Extension<TOptions> {
   beforeRender?(data: GraphData): GraphData;
 }
 

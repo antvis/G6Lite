@@ -13,6 +13,7 @@
 
 import { ChangeRecord, DataModel } from './dataModel.js';
 import type { Renderer } from './renderer/renderer.js';
+import type { GraphEdge, LayoutNode } from './types.js';
 
 export enum RefreshLevel {
   NONE = 0,
@@ -172,8 +173,8 @@ export class RenderScheduler {
 
       case RefreshLevel.FULL_PROCESS:
         this.renderer.updateData({
-          nodes: this.dataModel.getNodes() as any[],
-          edges: this.dataModel.getEdges() as any[],
+          nodes: this.dataModel.getNodes() as unknown as LayoutNode[],
+          edges: this.dataModel.getEdges() as unknown as GraphEdge[],
           nodeConfig: this.dataModel.nodeConfig,
           edgeConfig: this.dataModel.edgeConfig,
           theme: this.dataModel.theme,
@@ -222,8 +223,8 @@ export class RenderScheduler {
         break;
       case RefreshLevel.FULL_PROCESS:
         this.renderer.updateData({
-          nodes: this.dataModel.getNodes() as any[],
-          edges: this.dataModel.getEdges() as any[],
+          nodes: this.dataModel.getNodes() as unknown as LayoutNode[],
+          edges: this.dataModel.getEdges() as unknown as GraphEdge[],
           nodeConfig: this.dataModel.nodeConfig,
           edgeConfig: this.dataModel.edgeConfig,
           theme: this.dataModel.theme,

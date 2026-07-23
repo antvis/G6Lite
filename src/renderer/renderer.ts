@@ -248,9 +248,7 @@ export class Renderer {
 
   private resolveMaxPointSize(): number {
     const range = this.gl.getParameter(this.gl.ALIASED_POINT_SIZE_RANGE) as
-      | ArrayLike<number>
-      | null
-      | undefined;
+      ArrayLike<number> | null | undefined;
     const max = Number(range?.[1]);
     return Number.isFinite(max) && max > 0 ? max : 64;
   }
@@ -309,7 +307,7 @@ export class Renderer {
       const e = renderData.edges[i];
       this.edgeSourceIdx[i] = this.nodeIdToIndex.get(e.source) ?? -1;
       this.edgeTargetIdx[i] = this.nodeIdToIndex.get(e.target) ?? -1;
-      const edgeId = (e as any).id;
+      const edgeId = e.id;
       if (edgeId) this.edgeIdToIndex.set(edgeId, i);
     }
     this.rebuildEdgeAdjacency(edgeCount);
@@ -451,8 +449,9 @@ export class Renderer {
     let hasNodeStates = false;
     if (nCache?.styleType === 'static' && nCache.cachedStyle && !hasHighlight) {
       for (let i = 0; i < nodes.length; i++) {
-        const s = (nodes[i] as any).states;
-        if (s && (s.size > 0 || s.length > 0)) {
+        const s = (nodes[i] as unknown as { states?: readonly string[] | ReadonlySet<string> })
+          .states;
+        if (s && (Array.isArray(s) ? s.length > 0 : (s as ReadonlySet<string>).size > 0)) {
           hasNodeStates = true;
           break;
         }
@@ -1124,7 +1123,7 @@ export class Renderer {
       const node = nodes[nIdx];
       const style = useStaticEdgeStyle
         ? eCache.cachedStyle!
-        : dynamicEdgeStyleCache?.[i] ?? resolveEdgeStyle(node, node, e, edgeConfig, theme);
+        : (dynamicEdgeStyleCache?.[i] ?? resolveEdgeStyle(node, node, e, edgeConfig, theme));
       const active = !hasHighlight || this.highlightEdgeIndices.has(i);
       // Use pre-parsed colors if available (static optimization), otherwise parse on-the-fly
       const edgeBaseColor = style.strokeRGB ?? parseColor(style.stroke);
@@ -1565,7 +1564,7 @@ export class Renderer {
         // this.nodes aliases the DataModel node objects; resolve style directly
         // from the DataModel node (its states Set is read natively). Do NOT
         // rewrite this.nodes[idx] — that would replace the shared object.
-        const style = resolveNodeStyle(node as any, this.nodeConfig, this.theme);
+        const style = resolveNodeStyle(node as unknown as LayoutNode, this.nodeConfig, this.theme);
         const active = !hasHighlight || this.highlightNodeIds.has(id);
         // Use pre-parsed colors if available (static optimization), otherwise parse on-the-fly
         const baseColor = style.fillRGB ?? parseColor(style.fill);
@@ -1649,7 +1648,7 @@ export class Renderer {
         // from the DataModel edge (its states Set is read natively). Do NOT
         // rewrite this.edges[idx] — that would replace the shared object.
         const dmEdge = dataModel.getEdge(edgeId);
-        const edgeForStyle = (dmEdge ?? e) as any;
+        const edgeForStyle = (dmEdge ?? e) as unknown as GraphEdge;
         const drawStart = this.edgeDrawStart[idx] ?? -1;
         const drawCount = this.edgeDrawCount[idx] ?? 0;
         const loopSlot = this.edgeLoopSlot[idx] ?? -1;
@@ -1757,13 +1756,13 @@ export class Renderer {
       this.edges.length === prevEdgeCount + addedEdgeIds.length
     ) {
       for (let i = prevEdgeCount; i < this.edges.length; i++) {
-        const edgeId = (this.edges[i] as any).id;
+        const edgeId = this.edges[i].id;
         if (edgeId) this.edgeIdToIndex.set(edgeId, i);
       }
     } else {
       this.edgeIdToIndex.clear();
       for (let i = 0; i < this.edges.length; i++) {
-        const edgeId = (this.edges[i] as any).id;
+        const edgeId = this.edges[i].id;
         if (edgeId) this.edgeIdToIndex.set(edgeId, i);
       }
     }
@@ -1814,9 +1813,9 @@ export class Renderer {
     addedNodeIds: string[],
     addedEdgeIds: string[],
     prevNodeCount: number,
-    prevEdgeCount: number,
+    _prevEdgeCount: number,
   ): void {
-    const { theme, nodeConfig, edgeConfig } = this;
+    const { theme, nodeConfig } = this;
     const bg = parseColor(this.theme.canvasBackground ?? '#fff');
     const hasHighlight = this.highlightNodeIds.size > 0;
 

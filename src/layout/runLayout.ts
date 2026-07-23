@@ -242,10 +242,10 @@ export async function runLayout(
   const spread = Math.max(200, Math.sqrt(nodeCount) * 30);
   const layoutData: GraphData = {
     nodes: data.nodes.map((n) => {
-      if (n.x !== undefined && n.y !== undefined) return n as any;
-      return { ...n, x: n.x ?? Math.random() * spread, y: n.y ?? Math.random() * spread } as any;
+      if (n.x !== undefined && n.y !== undefined) return n;
+      return { ...n, x: n.x ?? Math.random() * spread, y: n.y ?? Math.random() * spread };
     }),
-    edges: data.edges as any[],
+    edges: data.edges,
   };
 
   // R-LAYOUT-05: D3ForceLayout uses rAF-based simulation timer — each tick takes 16ms

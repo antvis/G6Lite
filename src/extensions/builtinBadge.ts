@@ -108,10 +108,10 @@ export const builtinBadgeRenderer: DecorationRenderer<NodeBadgeItem> = {
       data.kind === 'count'
         ? String(data.value ?? '')
         : data.kind === 'text'
-        ? String(data.text ?? '')
-        : data.kind === 'icon'
-        ? String(data.icon ?? '')
-        : '';
+          ? String(data.text ?? '')
+          : data.kind === 'icon'
+            ? String(data.icon ?? '')
+            : '';
 
     const contentFontSize = data.kind === 'icon' ? badgeSize * (2 / 3) : fontSize;
     ctx.font = `${contentFontSize}px ${fontFamily}`;

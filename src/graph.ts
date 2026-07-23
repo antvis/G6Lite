@@ -8,6 +8,7 @@ import { registerBehaviors, resolveBehaviorOptions } from './behaviors/index.js'
 import type { InternalEdge } from './dataModel.js';
 import { DataModel } from './dataModel.js';
 import { EventEmitter } from './events.js';
+import type { Handler } from './events.js';
 import type { PluginExtension, TransformExtension } from './extensions/contracts.js';
 import {
   createExtension,
@@ -139,7 +140,7 @@ export class Graph {
       const key = `${index}:${name}`;
       activeKeys.add(key);
       let record = this.transformInstances.get(key);
-      const config = typeof option === 'string' ? {} : option.options ?? {};
+      const config = typeof option === 'string' ? {} : (option.options ?? {});
       if (!record) {
         const extension = createExtension<TransformExtension>('transform', name);
         if (!extension?.beforeRender) {
@@ -518,7 +519,7 @@ export class Graph {
       this.canvas.height || (this.containerEl.clientHeight || 600) * (window.devicePixelRatio ?? 1);
     const dpr = Math.min(2, window.devicePixelRatio ?? 1);
     const legacyScale = typeof options === 'number' ? options : 1;
-    const padding = typeof options === 'number' ? 0 : options.padding ?? 0;
+    const padding = typeof options === 'number' ? 0 : (options.padding ?? 0);
     const [pt, pr, pb, pl] = Array.isArray(padding)
       ? padding
       : [padding, padding, padding, padding];
@@ -527,8 +528,8 @@ export class Graph {
     const scaleX = availableW / graphW;
     const scaleY = availableH / graphH;
     const rawZoom = Math.min(scaleX, scaleY) * legacyScale;
-    const minZoom = typeof options === 'number' ? 0.1 : options.minZoom ?? 0.1;
-    const maxZoom = typeof options === 'number' ? 20 : options.maxZoom ?? 20;
+    const minZoom = typeof options === 'number' ? 0.1 : (options.minZoom ?? 0.1);
+    const maxZoom = typeof options === 'number' ? 20 : (options.maxZoom ?? 20);
     const zoom = Math.max(minZoom, Math.min(maxZoom, rawZoom));
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
@@ -1060,18 +1061,18 @@ export class Graph {
   // ──── Event system ────
 
   /** Subscribe to an event. */
-  on(event: string, handler: (...args: any[]) => void): void {
+  on<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
     if (this._destroyed) return;
     this.eventEmitter.on(event, handler);
   }
 
   /** Unsubscribe from an event. */
-  off(event: string, handler: (...args: any[]) => void): void {
+  off<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
     this.eventEmitter.off(event, handler);
   }
 
   /** Subscribe to an event once. */
-  once(event: string, handler: (...args: any[]) => void): void {
+  once<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
     if (this._destroyed) return;
     this.eventEmitter.once(event, handler);
   }
@@ -1103,7 +1104,7 @@ export class Graph {
       nodes = applyFixedPositions(result.nodes, data.nodes);
     }
     this.layoutNodes = nodes as LayoutNode[];
-    this.dataModel!.replaceData(nodes as any[], data.edges as any[]);
+    this.dataModel!.replaceData(nodes, data.edges);
     this.layoutNodes = this.dataModel!.getNodes() as unknown as LayoutNode[];
     if (data.combos?.length) {
       this.dataModel!.initCombos(data.combos, data.nodes);
@@ -1136,8 +1137,8 @@ export class Graph {
         nextStyle === undefined
           ? previousStyle
           : typeof nextStyle === 'function' || typeof previousStyle === 'function'
-          ? nextStyle
-          : { ...previousStyle, ...nextStyle };
+            ? nextStyle
+            : { ...previousStyle, ...nextStyle };
       this.options.node = {
         ...this.options.node,
         ...opts.node,
@@ -1193,7 +1194,7 @@ export class Graph {
     if (!this.isGenerationCurrent(generation)) return;
     const nodes = applyFixedPositions(result.nodes, data.nodes);
     this.layoutNodes = nodes as LayoutNode[];
-    this.dataModel!.replaceData(nodes as any[], data.edges as any[]);
+    this.dataModel!.replaceData(nodes, data.edges);
     this.layoutNodes = this.dataModel!.getNodes() as unknown as LayoutNode[];
     if (data.combos?.length) {
       this.dataModel!.initCombos(data.combos, data.nodes);

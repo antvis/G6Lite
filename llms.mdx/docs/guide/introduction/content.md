@@ -1,0 +1,50 @@
+# 项目介绍 (/docs/guide/introduction)
+
+
+
+**G6-GL** 是一个基于 **WebGL** 的高性能图可视化与分析引擎，为**大规模图数据**而生。它聚焦「把该快的地方做到极致」——万级节点实时渲染、高频交互近乎零成本，核心引擎仅约 28 KB（brotli），与 [AntV](https://antv.antgroup.com/) 生态保持一致的设计风格。
+
+## 为什么再造一个轻量引擎 [#为什么再造一个轻量引擎]
+
+图可视化常见两类诉求：**功能全面**与**大规模 + 高性能**。前者有 [G6](https://g6.antv.antgroup.com/) v5 这样功能完备、插件生态丰富的方案，但当节点规模上万、且需要频繁高亮 / 选中 / 邻居聚焦时，基于 Canvas 的全量重绘会成为瓶颈。
+
+G6-GL 针对后一类场景重新设计：
+
+* **WebGL 渲染管线**：节点（circle / rect）与边（line / arc / cubic / polyline）以极少的 draw call 由 GPU 绘制，万级节点稳定渲染。
+* **增量更新近零成本**：高亮、状态变更走 `RefreshLevel` 分级调度 + GPU patch，只更新变化的那一小块缓冲区，单次开销约 0 ms——这正是分析型交互的主战场。
+* **GPU 拾取**：基于 Framebuffer 的颜色拾取，约 0.1 ms 完成命中检测，优于传统空间索引方案。
+* **极致轻量**：核心约 28 KB（brotli），全量含 14 种布局也仅约 99 KB，约为 G6 v5 的 1/4。
+
+## 核心能力 [#核心能力]
+
+* ⚡ **高性能渲染** — Array 化的 DataModel、分级刷新调度、静态样式优先、Float32Array 指数增长缓冲。
+* 🧭 **14 种内置布局** — force / d3-force / force-atlas2 / fruchterman / circular / concentric / radial / grid / dagre / mds / random，外加自研的 mindmap / indented / fishbone，≥1000 节点的力导向自动走 Worker。
+* 🖱️ **完整交互** — `zoom-canvas` / `drag-canvas` / `drag-node` / `click-select` / `hover-highlight` / `brush-select` / `lasso-select` 等开箱即用、可组合。
+* 🧩 **Combo 分组** — 支持节点分组容器、嵌套、折叠展开与整体拖拽。
+* 🏷️ **标签与图标** — 节点 / 边文本标签、图标，Canvas 2D 叠加绘制。
+* 🎨 **主题** — 内置 light / dark，支持 token 覆盖。
+
+## 与同类方案的取舍 [#与同类方案的取舍]
+
+| 维度         | G6-GL        | G6 v5     | sigma.js        |
+| ---------- | ------------ | --------- | --------------- |
+| 渲染技术       | WebGL        | Canvas    | WebGL           |
+| 定位         | 大规模渲染 + 核心交互 | 功能全面、插件丰富 | WebGL 轻量渲染      |
+| 布局         | 14 种内置       | 丰富        | 需另引入 graphology |
+| 全量体积（gzip） | \~117 KB     | \~400 KB+ | \~60–80 KB      |
+| 高频交互开销     | 近 0 ms       | 较高        | 3–9 ms          |
+
+更详细的体积与性能数据见 [包大小](/docs/metrics/bundle-size) 与 [性能指标](/docs/metrics/performance)。
+
+## 适合 / 不适合 [#适合--不适合]
+
+* ✅ **适合**：需要大规模节点渲染 + 高频交互 / 状态切换（高亮、选中、邻居聚焦）的分析型场景。
+* ⚖️ **需评估**：若核心诉求是「超大图（10 万+）极致首屏速度」且交互简单，请结合数据规模实测后决策——G6-GL 的首屏受布局算法主导，优势在交互而非纯首屏。
+* ❌ **不适合**：需要大量内置图论分析算法、或重度依赖完整插件生态的场景。
+
+## 下一步 [#下一步]
+
+* [快速开始](/docs/guide/quick-start) — 安装并渲染你的第一个图。
+* [数据与配置](/docs/guide/data) — 数据格式、配置项,以及节点 / 边 / 布局 / 交互 / 主题各页。
+* [API 参考](/docs/api) — 由 TypeDoc 自动生成的完整方法与类型签名。
+* [性能指标](/docs/metrics/performance) — 指标定义、测试环境与复现方式。

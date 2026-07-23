@@ -1,0 +1,77 @@
+# 数据 (/docs/guides/data)
+
+
+
+本页介绍 `Graph` 的数据结构和顶层配置项。节点、边、布局、交互和主题的细节见各自页面。
+
+## 数据格式 [#数据格式]
+
+图数据通过 `data` 传入：
+
+```ts
+const data = {
+  nodes: [
+    { id: '0', data: { cluster: 'a', value: 1 } },
+    { id: '1', data: { cluster: 'b' } },
+  ],
+  edges: [
+    { source: '0', target: '1', data: { weight: 2 } },
+  ],
+};
+```
+
+### nodes [#nodes]
+
+| 字段        | 必填 | 说明                      |
+| --------- | -- | ----------------------- |
+| `id`      | 是  | 节点唯一标识                  |
+| `name`    | 否  | 节点名称                    |
+| `data`    | 否  | 业务扩展字段，可用于样式函数或业务逻辑     |
+| `x` / `y` | 否  | 节点坐标；无布局或预布局场景使用        |
+| `states`  | 否  | 初始状态数组，如 `['selected']` |
+| `comboId` | 否  | 所属 Combo id             |
+
+### edges [#edges]
+
+| 字段       | 必填 | 说明           |
+| -------- | -- | ------------ |
+| `source` | 是  | 起点节点 id      |
+| `target` | 是  | 终点节点 id      |
+| `id`     | 否  | 边 id；不传时内部生成 |
+| `data`   | 否  | 业务扩展字段       |
+| `states` | 否  | 初始状态数组       |
+
+### combos [#combos]
+
+`combos` 用于声明节点分组，节点通过 `comboId` 归属到对应分组。
+
+```ts
+const data = {
+  nodes: [{ id: 'n1', comboId: 'group-a' }],
+  edges: [],
+  combos: [{ id: 'group-a', data: { name: 'Group A' } }],
+};
+```
+
+## Graph 配置项 [#graph-配置项]
+
+| 选项           | 类型                      | 说明                                  |
+| ------------ | ----------------------- | ----------------------------------- |
+| `container`  | `string \| HTMLElement` | 挂载画布的容器                             |
+| `data`       | `GraphData`             | 图数据                                 |
+| `node`       | `NodeConfig`            | [节点](/docs/guides/node)类型、样式和状态样式   |
+| `edge`       | `EdgeConfig`            | [边](/docs/guides/edge)类型、样式和箭头      |
+| `combo`      | `ComboConfig`           | [Combo](/docs/guides/combo) 样式      |
+| `layout`     | `LayoutConfig`          | [布局](/docs/layouts/overview)类型与参数   |
+| `behaviors`  | `BehaviorOption[]`      | [交互](/docs/interactions/overview)列表 |
+| `theme`      | `ThemeOption`           | [主题](/docs/guides/theme)            |
+| `transforms` | `TransformOption[]`     | 数据转换，如平行边处理                         |
+
+创建 `Graph` 后必须调用 `await graph.render()` 才会执行布局并绘制。销毁时调用 `graph.destroy()`。
+
+## 下一步 [#下一步]
+
+* [节点](/docs/guides/node)
+* [边](/docs/guides/edge)
+* [Graph 生命周期](/docs/concepts/graph-lifecycle)
+* [API 总览](/docs/api)

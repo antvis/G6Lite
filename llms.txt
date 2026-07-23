@@ -1,0 +1,48 @@
+# 文档
+
+- [概览](/docs): G6-GL — 基于 WebGL 的高性能图可视化与分析引擎
+- 快速开始
+  - [安装与第一个图](/docs/getting-started/quick-start): 安装 G6-GL，准备容器，并渲染第一个可交互图
+  - [在 React 中使用](/docs/getting-started/react): 用 useRef 和 useEffect 在 React 组件中挂载 G6-GL
+- 核心概念
+  - [G6-GL 是什么](/docs/concepts/overview): G6-GL 的定位、适用场景和与 G6 v5 的关系
+  - [Graph 生命周期](/docs/concepts/graph-lifecycle): 从创建 Graph 到 render、更新、重新布局和销毁
+  - [数据模型](/docs/concepts/data-model): GraphData、节点、边、Combo、业务字段和状态的组织方式
+- 基础配置
+  - [数据](/docs/guides/data): G6-GL 的图数据格式与 Graph 顶层配置项
+  - [节点](/docs/guides/node): 节点类型、样式函数、状态样式和性能建议
+  - [边](/docs/guides/edge): 边类型、箭头、标签、状态样式和平行边
+  - [标签与图标](/docs/guides/label): 节点标签、边标签和节点图标配置
+  - [Combo](/docs/guides/combo): 节点分组容器的声明、样式、折叠展开和整体拖拽
+  - [主题](/docs/guides/theme): 使用 light / dark 主题并覆盖 token
+- 布局
+  - [布局总览](/docs/layouts/overview): 内置布局类型、选型建议、常用参数与 Worker 支持
+- 交互
+  - [交互总览](/docs/interactions/overview): 内置 behaviors、启用方式和常用交互组合
+  - [事件](/docs/interactions/events): 监听元素事件、行为事件和生命周期事件
+  - [Tooltip](/docs/interactions/tooltip): 使用内置 tooltip behavior 展示节点和边信息
+- 进阶
+  - [性能调优](/docs/advanced/performance-tuning): 大图首屏、交互、标签、状态和布局的优化建议
+  - [平行边与自环](/docs/advanced/parallel-edges): 处理多条同源同目标边和自环边的展示
+  - [自定义节点](/docs/advanced/custom-node): 使用统一 register 和函数式 NodeExtension 扩展节点表现
+  - [自定义 Label Renderer](/docs/advanced/custom-label-renderer): 自定义节点和边的 Label 内容，同时复用 G6-GL 的定位、旋转、碰撞与调度
+  - [扩展体系](/docs/advanced/extensions): 通过配置、函数式映射和公开扩展 API 完成业务定制
+  - [从 G6 v5 迁移](/docs/advanced/g6-v5-migration): 评估 G6 v5 项目迁移到 G6-GL 时的差异和改造点
+- 示例
+  - [示例总览](/docs/examples): 查看真实 G6-GL demo 的截图、代码和运行入口
+  - [最简示例](/docs/examples/basic): 使用 G6-GL 渲染一个最小关系图
+  - [节点样式](/docs/examples/node-style): 按业务字段动态设置节点颜色和大小
+  - [箭头方向](/docs/examples/edge-arrows): 配置无箭头、单向箭头、双向箭头和粗边箭头
+  - [布局切换](/docs/examples/layouts): 在同一份数据上切换 circular、force、grid 和 dagre
+  - [Tooltip 浮层](/docs/examples/tooltip): 悬停节点或边时展示自定义业务信息
+  - [Combo 分组容器](/docs/examples/combo): 用固定坐标的应用架构图演示嵌套分组、折叠展开和动态归属
+  - [平行边自动错开](/docs/examples/parallel-edges): 处理同源同目标的多条边和反向边
+  - [真实数据集](/docs/examples/real-dataset): 使用 sigma 同款真实数据验证 G6-GL 的大图渲染
+- 指标
+  - [包大小](/docs/metrics/bundle-size): G6-GL 的真实打包体积与同类图可视化库横向对比
+  - [浏览器兼容性](/docs/metrics/browser-compatibility): G6-GL 的 WebGL 支持矩阵、最低浏览器版本与已知问题
+  - [性能指标](/docs/metrics/performance): G6-GL 的性能指标定义、测试环境、核心数据与复现方式
+- API 参考
+  - [API 参考](/docs/api): 由 TypeDoc 从 src/index.ts 的公共 API 类型自动生成
+- [常见问题](/docs/faq): G6-GL 的选型、性能调优、兼容性与使用中的高频问题
+- [更新日志](/docs/changelog): G6-GL 的版本与变更记录

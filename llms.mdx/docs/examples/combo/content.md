@@ -1,0 +1,114 @@
+# Combo 分组容器 (/docs/examples/combo)
+
+
+
+
+
+<div className="example-hero">
+  <img src="withBasePath('/examples/combo.png')" alt="应用架构 Combo 分组容器截图" />
+</div>
+
+这个示例用固定坐标展示一张应用架构图：客户端连接业务平台，业务平台内部嵌套服务层与数据层。稳定的三列结构可以更清楚地观察 Combo 的包围框、父子层级和跨组连线。
+
+Playground 工具条还可以折叠或展开分组、切换数据层、调整运营控制台的归属、通过 `createCombo()` 创建可观测分组，以及导出 `getData()` 的完整结果。
+
+<div className="example-actions">
+  <a href="http://localhost:5179/#combo" target="_blank" rel="noreferrer">
+    本地运行
+  </a>
+
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/combo.ts" target="_blank" rel="noreferrer">
+    完整源码
+  </a>
+</div>
+
+## 代码 [#代码]
+
+```ts
+const graph = new Graph({
+  container,
+  data: {
+    nodes: [
+      { id: 'web', name: 'Web 端', x: 100, y: 150, comboId: 'client-apps' },
+      { id: 'mobile', name: '移动端', x: 100, y: 255, comboId: 'client-apps' },
+      { id: 'console', name: '运营控制台', x: 100, y: 360, comboId: 'client-apps' },
+      { id: 'gateway', name: 'API 网关', x: 335, y: 255, comboId: 'service-layer' },
+      { id: 'auth', name: '认证服务', x: 500, y: 150, comboId: 'service-layer' },
+      { id: 'order', name: '订单服务', x: 500, y: 255, comboId: 'service-layer' },
+      { id: 'worker', name: '异步任务', x: 500, y: 360, comboId: 'service-layer' },
+      { id: 'cache', name: 'Redis 缓存', x: 720, y: 150, comboId: 'data-layer' },
+      { id: 'mysql', name: 'MySQL', x: 720, y: 255, comboId: 'data-layer' },
+      { id: 'mq', name: '消息队列', x: 720, y: 360, comboId: 'data-layer' },
+      { id: 'console', name: '运营控制台', x: 100, y: 360, comboId: 'client-apps' },
+      { id: 'logs', name: '日志采集', x: 560, y: 480 },
+      { id: 'metrics', name: '指标监控', x: 720, y: 480 },
+    ],
+    edges: [
+      { source: 'web', target: 'gateway' },
+      { source: 'mobile', target: 'gateway' },
+      { source: 'console', target: 'gateway' },
+      { source: 'gateway', target: 'auth' },
+      { source: 'gateway', target: 'order' },
+      { source: 'gateway', target: 'worker' },
+      { source: 'auth', target: 'cache' },
+      { source: 'order', target: 'mysql' },
+      { source: 'worker', target: 'mq' },
+    ],
+    combos: [
+      {
+        id: 'client-apps',
+        data: { name: '客户端' },
+        style: { fill: 'rgba(104, 145, 205, 0.08)', padding: 38 },
+      },
+      {
+        id: 'business-platform',
+        data: { name: '业务平台' },
+        style: { fill: 'rgba(112, 132, 160, 0.045)', padding: 24 },
+      },
+      {
+        id: 'service-layer',
+        parentId: 'business-platform',
+        data: { name: '服务层' },
+        style: { fill: 'rgba(91, 158, 130, 0.08)', padding: 38 },
+      },
+      {
+        id: 'data-layer',
+        parentId: 'business-platform',
+        data: { name: '数据层' },
+        style: { fill: 'rgba(205, 155, 82, 0.09)', padding: 38 },
+      },
+    ],
+  },
+  combo: {
+    style: {
+      borderRadius: 12,
+      label: (combo) => combo.data?.name ?? combo.id,
+      labelPlacement: 'inside',
+      collapsedType: 'rect',
+      count: false,
+    },
+  },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+});
+
+await graph.render();
+graph.fitView(0.82);
+
+graph.collapseCombo('business-platform');
+graph.expandCombo('business-platform');
+graph.toggleCombo('data-layer');
+graph.addToCombo('console', 'service-layer');
+graph.addToCombo('console', 'client-apps');
+graph.addNodes([
+  { id: 'logs', x: 570, y: 455, data: { label: '日志采集' } },
+  { id: 'metrics', x: 720, y: 455, data: { label: '指标监控' } },
+]);
+graph.createCombo({ id: 'observability' }, ['logs', 'metrics']);
+
+const exported = graph.getData();
+```
+
+## 相关文档 [#相关文档]
+
+* [Combo](/docs/guides/combo)
+* [交互总览](/docs/interactions/overview)

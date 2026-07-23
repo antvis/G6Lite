@@ -1,0 +1,63 @@
+# 自定义 Label Renderer (/docs/advanced/custom-label-renderer)
+
+
+
+G6-GL 支持注册自定义 Label Renderer。业务只负责内容的测量和绘制，节点与边遍历、函数式样式解析、定位、路径采样、自动旋转、DPR/zoom 换算、碰撞检测和刷新调度仍由 G6-GL 负责。
+
+## 注册与使用 [#注册与使用]
+
+```ts
+import { Graph, register, type LabelRenderer } from '@antv/g6-gl';
+
+const multiline: LabelRenderer<string[]> = {
+  measure({ ctx, text, style }) {
+    ctx.font = `${style.labelFontWeight} ${style.labelFontSize}px ${style.labelFontFamily}`;
+    const lines = text.split('\n');
+    return {
+      width: Math.max(...lines.map((line) => ctx.measureText(line).width)),
+      height: lines.length * style.labelFontSize * 1.2,
+      data: lines,
+    };
+  },
+  draw({ ctx, style, layout }) {
+    const lines = layout.data ?? [];
+    const lineHeight = style.labelFontSize * 1.2;
+    ctx.font = `${style.labelFontWeight} ${style.labelFontSize}px ${style.labelFontFamily}`;
+    ctx.fillStyle = style.labelColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    lines.forEach((line, index) => {
+      ctx.fillText(line, 0, (index - (lines.length - 1) / 2) * lineHeight);
+    });
+  },
+};
+
+register('label', 'multiline', multiline);
+
+const graph = new Graph({
+  container: 'container',
+  data,
+  node: {
+    labelRenderer: 'multiline',
+    style: { label: (node) => String(node.data?.label ?? '') },
+  },
+  edge: {
+    labelRenderer: 'multiline',
+    style: {
+      label: (_source, _target, edge) => String(edge.data?.label ?? ''),
+    },
+  },
+});
+```
+
+## 协议约定 [#协议约定]
+
+* `measure` 返回完整视觉包围盒的 `width` 和 `height`。
+* 尺寸和解析后的样式数值均为 Canvas backing-store px，业务不需要再次换算 DPR 或 zoom。
+* `draw` 时 Canvas 原点已经位于 Label 中心；边 Label 的旋转也已经应用。
+* `layout.data` 会从 `measure` 原样传给同一次 `draw`，可缓存分行等业务计算。
+* 自定义内容必须绘制在声明的包围盒内，否则裁剪和碰撞结果会不准确。
+
+未注册的名称、非法宽高或 Renderer 异常会给出警告，并仅对当前 Label 回退到默认单行渲染，不会中断 WebGL 主图层。
+
+完整示例见 `playground/demos/custom-label-renderer.ts`。

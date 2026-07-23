@@ -1,0 +1,99 @@
+# Graph 生命周期 (/docs/concepts/graph-lifecycle)
+
+
+
+`Graph` 是 G6-GL 的主入口。理解它的生命周期，有助于正确组织初始化、数据更新和组件卸载。
+
+## 创建实例 [#创建实例]
+
+```ts
+const graph = new Graph({
+  container: 'container',
+  data,
+  layout: { type: 'force' },
+});
+```
+
+构造阶段会解析容器并准备 canvas，但不会执行布局，也不会绘制图形。
+
+## 首次渲染 [#首次渲染]
+
+```ts
+await graph.render();
+```
+
+`render()` 会按顺序完成：
+
+1. 根据容器尺寸设置 canvas。
+2. 解析主题，并先绘制背景。
+3. 执行布局；大图的 force 系布局会自动启用 worker。
+4. 初始化 `DataModel`，写入节点、边和 Combo。
+5. 应用平行边等 transform。
+6. 初始化 WebGL renderer、调度器、交互分发层和 behaviors。
+7. 初始化 Combo 与标签绘制层。
+8. `fitView()` 后绘制首帧。
+9. 触发 `afterrender` 事件。
+
+## 更新数据 [#更新数据]
+
+替换整份数据：
+
+```ts
+await graph.setData(nextData);
+```
+
+增量更新：
+
+```ts
+graph.addNode({ id: 'n3', x: 120, y: 80 });
+graph.addEdge({ source: 'n1', target: 'n3' });
+graph.updateNodeData('n3', { label: '新节点' });
+graph.removeNode('n2');
+```
+
+状态更新：
+
+```ts
+graph.setItemState('n1', 'selected', true);
+graph.batchSetState([
+  { id: 'n1', state: 'highlight', value: true },
+  { id: 'n2', state: 'inactive', value: true },
+]);
+```
+
+高频交互优先使用状态 API，它会走更轻的刷新路径。
+
+## 重新布局 [#重新布局]
+
+```ts
+graph.setLayout({ type: 'dagre', rankdir: 'LR' });
+await graph.layout();
+```
+
+`setLayout()` 只更新布局配置，`layout()` 才会重新计算坐标并刷新画布。
+
+## 视口与坐标 [#视口与坐标]
+
+常用视口 API：
+
+```ts
+graph.fitView();
+graph.focusItem('n1', 40);
+graph.setCamera({ zoom: 1.5 });
+graph.resetCamera();
+```
+
+坐标转换：
+
+```ts
+const graphPoint = graph.screenToGraph(clientX, clientY);
+const screenPoint = graph.graphToScreen(x, y);
+```
+
+## 销毁 [#销毁]
+
+```ts
+graph.destroy();
+```
+
+销毁会释放 behavior、交互分发、ResizeObserver、scheduler、标签层、Combo 层和 WebGL renderer，并触发 `destroy` 事件。React、Vue 等框架中应在组件卸载时调用。

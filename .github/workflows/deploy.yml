@@ -24,6 +24,9 @@ jobs:
       - name: Build site
         run: npm run build --prefix site
 
+      - name: Create CNAME
+        run: echo "g6-gl.antv.vision" > site/out/CNAME
+
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:

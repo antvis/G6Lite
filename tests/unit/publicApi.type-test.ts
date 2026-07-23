@@ -4,10 +4,12 @@ import type {
   EdgeModel,
   ElementModel,
   ElementState,
+  EventEmitter,
   ExtensionContext,
   ExtensionEdgeData,
   ExtensionNodeData,
   Graph,
+  Handler,
   NodeModel,
 } from '@antv/g6-gl';
 
@@ -29,6 +31,23 @@ type ExtensionNodeGetter = Assert<
 type ExtensionEdgeGetter = Assert<
   Equal<ReturnType<ExtensionContext['data']['getEdge']>, ExtensionEdgeData | undefined>
 >;
+type EventPayload = { id: string; selected: boolean };
+type EventPayloadHandler = Handler<[payload: EventPayload]>;
+type EventHandlerParameters = Assert<Equal<Parameters<EventPayloadHandler>, [EventPayload]>>;
+
+declare const emitter: EventEmitter;
+const eventPayloadHandler: EventPayloadHandler = (payload) => {
+  const id: string = payload.id;
+  void id;
+};
+emitter.on('node:selectchange', eventPayloadHandler);
+emitter.once('node:selectchange', eventPayloadHandler);
+emitter.off('node:selectchange', eventPayloadHandler);
+emitter.emit('node:selectchange', { id: 'node', selected: true });
+emitter.emit('destroy');
+
+// @ts-expect-error Handler payloads keep their declared tuple contract.
+eventPayloadHandler({ id: 'node' });
 
 declare const graph: Graph;
 const node = graph.getNodeData('node');
@@ -75,6 +94,7 @@ export type PublicApiTypeAssertions =
   | EdgeCollection
   | ExtensionNodeGetter
   | ExtensionEdgeGetter
+  | EventHandlerParameters
   | InternalNodeExport
   | InternalEdgeExport
   | InternalComboExport;

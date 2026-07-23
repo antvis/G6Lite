@@ -34,7 +34,10 @@ describe('resolveTheme', () => {
   });
 
   it('should fallback to light for unknown type', () => {
-    const result = resolveTheme({ type: 'unknown' as any, nodeSize: 50 });
+    const invalidTheme = { type: 'unknown', nodeSize: 50 } as unknown as Parameters<
+      typeof resolveTheme
+    >[0];
+    const result = resolveTheme(invalidTheme);
     expect(result.nodeSize).toBe(50);
     expect(result.canvasBackground).toBe('#fff'); // light default
   });

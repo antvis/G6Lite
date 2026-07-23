@@ -16,10 +16,11 @@ import {
   RandomLayout,
   RadialLayout,
 } from '@antv/layout';
+import type { GraphData, GraphEdge, GraphNode } from '../types.js';
 
 type LayoutInstance = {
-  execute: (data: any) => Promise<void>;
-  forEachNode: (fn: (n: any) => void) => void;
+  execute: (data: GraphData) => Promise<void>;
+  forEachNode: (fn: (node: GraphNode & { x: number; y: number }) => void) => void;
 };
 
 const LAYOUT_MAP = {
@@ -38,8 +39,8 @@ const LAYOUT_MAP = {
 
 interface WorkerMessage {
   id: number;
-  nodes: Array<{ id: string; x?: number; y?: number; data?: any }>;
-  edges: Array<{ source: string; target: string; data?: any }>;
+  nodes: GraphNode[];
+  edges: GraphEdge[];
   config: { type: string; [key: string]: unknown };
 }
 
@@ -50,7 +51,8 @@ interface WorkerResponse {
 
 self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
   const { id, nodes, edges, config } = e.data;
-  const { type, worker, ...opts } = config;
+  const { type, ...opts } = config;
+  delete opts.worker;
 
   const LayoutClass = LAYOUT_MAP[type] ?? RandomLayout;
   const nodeCount = nodes.length;
@@ -101,7 +103,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
   const layoutEdges = edges.map((e) => ({ ...e, id: `${e.source}-${e.target}` }));
 
   const layout = new LayoutClass(opts);
-  const layoutData = { nodes: layoutNodes, edges: layoutEdges };
+  const layoutData: GraphData = { nodes: layoutNodes, edges: layoutEdges };
 
   try {
     await layout.execute(layoutData);

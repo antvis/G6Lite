@@ -2,8 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 import { clickSelect } from '@src/behaviors/clickSelect.js';
 import { dragNode } from '@src/behaviors/dragNode.js';
 import { EventEmitter } from '@src/events.js';
+import type { Graph } from '@src/graph.js';
 import { attachInteraction } from '@src/interaction/dispatcher.js';
 import { GESTURE_CONSUME_EVENT } from '@src/interaction/gesture.js';
+import type { Renderer } from '@src/renderer/renderer.js';
 
 // ============================================================
 // InteractionDispatcher — the single source of pointer hit-testing
@@ -12,6 +14,14 @@ import { GESTURE_CONSUME_EVENT } from '@src/interaction/gesture.js';
 // ============================================================
 
 type Pick = { type: 'node'; id: string } | { type: 'edge'; index: number } | null;
+
+function asRenderer<T>(renderer: T): Renderer {
+  return renderer as unknown as Renderer;
+}
+
+function asGraph<T>(graph: T): Graph {
+  return graph as unknown as Graph;
+}
 
 function setup(initialPick: Pick = null) {
   let pick: Pick = initialPick;
@@ -50,7 +60,7 @@ function setup(initialPick: Pick = null) {
       else selectedNodeIds.delete(id);
     }),
   };
-  const teardown = attachInteraction(renderer as any, graph as any);
+  const teardown = attachInteraction(asRenderer(renderer), asGraph(graph));
   return {
     canvas,
     renderer,
@@ -64,14 +74,14 @@ function setup(initialPick: Pick = null) {
   };
 }
 
-function fire(canvas: HTMLCanvasElement, type: string, init: Partial<MouseEvent> = {}) {
+function fire(canvas: HTMLCanvasElement, type: string, init: MouseEventInit = {}) {
   const Ctor = type === 'wheel' ? WheelEvent : MouseEvent;
   const ev = new Ctor(type, {
     clientX: 50,
     clientY: 50,
     button: 0,
     bubbles: true,
-    ...(init as any),
+    ...init,
   });
   canvas.dispatchEvent(ev);
   return ev;
@@ -302,8 +312,8 @@ describe('InteractionDispatcher — press / click / wheel', () => {
 
   it('does not select B when A is dragged onto B', () => {
     const t = setup({ type: 'node', id: 'a' });
-    const teardownDrag = dragNode(t.renderer as any, t.graph as any);
-    const teardownSelect = clickSelect(t.renderer as any, t.graph as any);
+    const teardownDrag = dragNode(asRenderer(t.renderer), asGraph(t.graph));
+    const teardownSelect = clickSelect(asRenderer(t.renderer), asGraph(t.graph));
 
     fire(t.canvas, 'mousedown', { clientX: 10, clientY: 10 });
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 20, clientY: 20 }));

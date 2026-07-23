@@ -8,6 +8,7 @@ import { registerBehaviors, resolveBehaviorOptions } from './behaviors/index.js'
 import type { InternalEdge } from './dataModel.js';
 import { DataModel } from './dataModel.js';
 import { EventEmitter } from './events.js';
+import type { Handler } from './events.js';
 import type { PluginExtension, TransformExtension } from './extensions/contracts.js';
 import {
   createExtension,
@@ -1060,18 +1061,18 @@ export class Graph {
   // ──── Event system ────
 
   /** Subscribe to an event. */
-  on(event: string, handler: (...args: any[]) => void): void {
+  on<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
     if (this._destroyed) return;
     this.eventEmitter.on(event, handler);
   }
 
   /** Unsubscribe from an event. */
-  off(event: string, handler: (...args: any[]) => void): void {
+  off<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
     this.eventEmitter.off(event, handler);
   }
 
   /** Subscribe to an event once. */
-  once(event: string, handler: (...args: any[]) => void): void {
+  once<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
     if (this._destroyed) return;
     this.eventEmitter.once(event, handler);
   }
@@ -1103,7 +1104,7 @@ export class Graph {
       nodes = applyFixedPositions(result.nodes, data.nodes);
     }
     this.layoutNodes = nodes as LayoutNode[];
-    this.dataModel!.replaceData(nodes as any[], data.edges as any[]);
+    this.dataModel!.replaceData(nodes, data.edges);
     this.layoutNodes = this.dataModel!.getNodes() as unknown as LayoutNode[];
     if (data.combos?.length) {
       this.dataModel!.initCombos(data.combos, data.nodes);
@@ -1193,7 +1194,7 @@ export class Graph {
     if (!this.isGenerationCurrent(generation)) return;
     const nodes = applyFixedPositions(result.nodes, data.nodes);
     this.layoutNodes = nodes as LayoutNode[];
-    this.dataModel!.replaceData(nodes as any[], data.edges as any[]);
+    this.dataModel!.replaceData(nodes, data.edges);
     this.layoutNodes = this.dataModel!.getNodes() as unknown as LayoutNode[];
     if (data.combos?.length) {
       this.dataModel!.initCombos(data.combos, data.nodes);

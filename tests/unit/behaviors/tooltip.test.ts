@@ -1,6 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { tooltip } from '@src/behaviors/tooltip.js';
 import { EventEmitter } from '@src/events.js';
+import type { Graph } from '@src/graph.js';
+import type { Renderer } from '@src/renderer/renderer.js';
+
+function asRenderer<T>(renderer: T): Renderer {
+  return renderer as unknown as Renderer;
+}
+
+function asGraph<T>(graph: T): Graph {
+  return graph as unknown as Graph;
+}
 
 // ============================================================
 // Tooltip behavior — pure consumer of dispatcher events. Drives
@@ -36,7 +46,7 @@ afterEach(() => {
 describe('tooltip — teardown safety', () => {
   it('can be torn down without error and removes its overlay', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any);
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:pointerover', {
       nodeId: 'a',
       data: { label: 'A' },
@@ -50,14 +60,14 @@ describe('tooltip — teardown safety', () => {
 
   it('returns a no-op teardown when graph is missing', () => {
     const { renderer } = setup();
-    expect(() => tooltip(renderer as any, undefined)()).not.toThrow();
+    expect(() => tooltip(asRenderer(renderer), undefined)()).not.toThrow();
   });
 });
 
 describe('tooltip — hover trigger', () => {
   it('shows after the delay on node:pointerover with the node label', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any, { delay: 80 });
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph), { delay: 80 });
 
     graph.eventEmitter.emit('node:pointerover', {
       nodeId: 'a',
@@ -76,7 +86,7 @@ describe('tooltip — hover trigger', () => {
 
   it('falls back to nodeId when data has no label', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any);
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:pointerover', { nodeId: 'xyz', data: {}, event: mouseEvent() });
     vi.advanceTimersByTime(80);
     expect(getOverlay()?.innerHTML).toContain('xyz');
@@ -85,7 +95,7 @@ describe('tooltip — hover trigger', () => {
 
   it('renders the default data label as text instead of executable HTML', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any);
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph));
     const label = '<img src=x onerror="globalThis.__tooltipXss = true">Unsafe';
 
     graph.eventEmitter.emit('node:pointerover', {
@@ -103,7 +113,7 @@ describe('tooltip — hover trigger', () => {
 
   it('hides on node:pointerleave', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any);
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:pointerover', {
       nodeId: 'a',
       data: { label: 'A' },
@@ -119,7 +129,7 @@ describe('tooltip — hover trigger', () => {
 
   it('does not show when enable returns false', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any, { enable: () => false });
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph), { enable: () => false });
     graph.eventEmitter.emit('node:pointerover', {
       nodeId: 'a',
       data: { label: 'A' },
@@ -133,7 +143,7 @@ describe('tooltip — hover trigger', () => {
 
   it('shows edge content (source → target) on edge:pointerover', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any);
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('edge:pointerover', {
       edgeIndex: 0,
       source: 'a',
@@ -150,7 +160,7 @@ describe('tooltip — hover trigger', () => {
 describe('tooltip — click trigger', () => {
   it('shows immediately on node:click and hides on canvas:click', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any, { trigger: 'click' });
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph), { trigger: 'click' });
 
     graph.eventEmitter.emit('node:click', {
       nodeId: 'a',
@@ -166,7 +176,7 @@ describe('tooltip — click trigger', () => {
 
   it('toggles off when the same node is clicked twice', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any, { trigger: 'click' });
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph), { trigger: 'click' });
 
     graph.eventEmitter.emit('node:click', {
       nodeId: 'a',
@@ -185,7 +195,7 @@ describe('tooltip — click trigger', () => {
 
   it('does not react to hover events in click mode', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any, { trigger: 'click' });
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph), { trigger: 'click' });
     graph.eventEmitter.emit('node:pointerover', {
       nodeId: 'a',
       data: { label: 'A' },
@@ -202,7 +212,7 @@ describe('tooltip — custom content & class', () => {
     vi.stubGlobal('scrollX', 240);
     vi.stubGlobal('scrollY', 160);
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any, { delay: 0 });
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph), { delay: 0 });
 
     graph.eventEmitter.emit('node:pointerover', {
       nodeId: 'a',
@@ -224,7 +234,7 @@ describe('tooltip — custom content & class', () => {
     container.getBoundingClientRect = () =>
       ({ left: 40, top: 30, right: 340, bottom: 230, width: 300, height: 200 }) as DOMRect;
     document.body.appendChild(container);
-    const teardown = tooltip(renderer as any, graph as any, { container, delay: 0 });
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph), { container, delay: 0 });
 
     graph.eventEmitter.emit('node:pointerover', {
       nodeId: 'a',
@@ -242,7 +252,7 @@ describe('tooltip — custom content & class', () => {
 
   it('uses a custom getContent and className', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any, {
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph), {
       className: 'custom-tip',
       getContent: (ctx) => `<b>${ctx.nodeId}</b>`,
     });
@@ -256,7 +266,7 @@ describe('tooltip — custom content & class', () => {
 
   it('accepts an HTMLElement for safely constructed custom content', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any, {
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph), {
       getContent: (ctx) => {
         const strong = document.createElement('strong');
         strong.textContent = `<${ctx.nodeId}>`;
@@ -274,7 +284,7 @@ describe('tooltip — custom content & class', () => {
 
   it('teardown unsubscribes listeners (no overlay after teardown)', () => {
     const { renderer, graph } = setup();
-    const teardown = tooltip(renderer as any, graph as any);
+    const teardown = tooltip(asRenderer(renderer), asGraph(graph));
     teardown();
     graph.eventEmitter.emit('node:pointerover', {
       nodeId: 'a',

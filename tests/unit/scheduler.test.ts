@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DataModel } from '@src/dataModel.js';
+import type { Renderer } from '@src/renderer/renderer.js';
 import { RefreshLevel, RenderScheduler } from '@src/scheduler.js';
 import type { ThemeTokens } from '@src/types.js';
 
@@ -29,6 +30,10 @@ function createMockRenderer() {
   };
 }
 
+function asRenderer<T>(renderer: T): Renderer {
+  return renderer as unknown as Renderer;
+}
+
 describe('RenderScheduler', () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -45,7 +50,7 @@ describe('RenderScheduler', () => {
   it('should schedule FULL_PROCESS on dataReplaced', () => {
     const renderer = createMockRenderer();
     const dataModel = new DataModel({ theme: mockTheme });
-    const scheduler = new RenderScheduler(renderer as any, dataModel);
+    const scheduler = new RenderScheduler(asRenderer(renderer), dataModel);
 
     dataModel.replaceData([{ id: 'a', x: 0, y: 0 }], []);
     scheduler.schedule();
@@ -58,7 +63,7 @@ describe('RenderScheduler', () => {
   it('should schedule PARTIAL_PROCESS on nodeAdded', () => {
     const renderer = createMockRenderer();
     const dataModel = new DataModel({ theme: mockTheme });
-    const scheduler = new RenderScheduler(renderer as any, dataModel);
+    const scheduler = new RenderScheduler(asRenderer(renderer), dataModel);
 
     dataModel.addNode({ id: 'a', x: 0, y: 0 });
     scheduler.schedule();
@@ -71,7 +76,7 @@ describe('RenderScheduler', () => {
   it('should schedule PATCH_POSITION on nodePositionChanged', () => {
     const renderer = createMockRenderer();
     const dataModel = new DataModel({ theme: mockTheme });
-    const scheduler = new RenderScheduler(renderer as any, dataModel);
+    const scheduler = new RenderScheduler(asRenderer(renderer), dataModel);
 
     dataModel.addNode({ id: 'a', x: 0, y: 0 });
     scheduler.schedule();
@@ -90,7 +95,7 @@ describe('RenderScheduler', () => {
   it('should schedule PATCH_STYLE on state changed', () => {
     const renderer = createMockRenderer();
     const dataModel = new DataModel({ theme: mockTheme });
-    const scheduler = new RenderScheduler(renderer as any, dataModel);
+    const scheduler = new RenderScheduler(asRenderer(renderer), dataModel);
 
     dataModel.addNode({ id: 'a', x: 0, y: 0 });
     scheduler.schedule();
@@ -110,7 +115,7 @@ describe('RenderScheduler', () => {
     const renderer = createMockRenderer();
     renderer.hasRenderedArrows.mockReturnValue(true);
     const dataModel = new DataModel({ theme: mockTheme });
-    const scheduler = new RenderScheduler(renderer as any, dataModel);
+    const scheduler = new RenderScheduler(asRenderer(renderer), dataModel);
 
     dataModel.addEdge({ id: 'edge-1', source: 'a', target: 'b' });
     scheduler.schedule();
@@ -131,7 +136,7 @@ describe('RenderScheduler', () => {
   it('should merge multiple schedule calls in same frame', () => {
     const renderer = createMockRenderer();
     const dataModel = new DataModel({ theme: mockTheme });
-    const scheduler = new RenderScheduler(renderer as any, dataModel);
+    const scheduler = new RenderScheduler(asRenderer(renderer), dataModel);
 
     dataModel.addNode({ id: 'a', x: 0, y: 0 });
     scheduler.schedule();
@@ -147,7 +152,7 @@ describe('RenderScheduler', () => {
   it('should not schedule after destroy', () => {
     const renderer = createMockRenderer();
     const dataModel = new DataModel({ theme: mockTheme });
-    const scheduler = new RenderScheduler(renderer as any, dataModel);
+    const scheduler = new RenderScheduler(asRenderer(renderer), dataModel);
 
     scheduler.destroy();
     dataModel.addNode({ id: 'a', x: 0, y: 0 });
@@ -160,7 +165,7 @@ describe('RenderScheduler', () => {
   it('should force flush at given level', () => {
     const renderer = createMockRenderer();
     const dataModel = new DataModel({ theme: mockTheme });
-    const scheduler = new RenderScheduler(renderer as any, dataModel);
+    const scheduler = new RenderScheduler(asRenderer(renderer), dataModel);
 
     scheduler.forceFlush(RefreshLevel.DRAW_ONLY);
     expect(renderer.draw).toHaveBeenCalled();

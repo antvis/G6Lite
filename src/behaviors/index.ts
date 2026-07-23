@@ -20,15 +20,15 @@ import type { Graph } from '../graph.js';
 import type { Renderer } from '../renderer/renderer.js';
 import type { BehaviorOption } from '../types.js';
 import { brushSelect } from './brushSelect.js';
-import { clickSelect } from './clickSelect.js';
+import { clickSelect, type ClickSelectConfig } from './clickSelect.js';
 import { dragCanvas } from './dragCanvas.js';
 import { dragEdge } from './dragEdge.js';
 import { dragNode } from './dragNode.js';
 import { highlightEdge } from './highlightEdge.js';
 import { highlightNode } from './highlightNode.js';
-import { hoverHighlight } from './hoverHighlight.js';
+import { hoverHighlight, type HoverHighlightConfig } from './hoverHighlight.js';
 import { lassoSelect } from './lassoSelect.js';
-import { tooltip } from './tooltip.js';
+import { tooltip, type TooltipOptions } from './tooltip.js';
 import { zoomCanvas } from './zoomCanvas.js';
 
 export type BehaviorName =
@@ -61,14 +61,14 @@ const BEHAVIORS: Record<string, BehaviorFactory> = {
   'highlight-node': (r, g) => highlightNode(r, g),
   'highlight-edge': (r, g) => highlightEdge(r, g),
   'drag-node': (r, g) => dragNode(r, g),
-  'hover-highlight': (r, g, config) => hoverHighlight(r, g, config as any),
-  'click-select': (r, g, config) => clickSelect(r, g, config as any),
+  'hover-highlight': (r, g, config) => hoverHighlight(r, g, resolveHoverHighlightConfig(config)),
+  'click-select': (r, g, config) => clickSelect(r, g, resolveClickSelectConfig(config)),
   'drag-edge': (r, g) => dragEdge(r, g),
   'brush-select': (r, g, config) =>
     brushSelect(r, g, config?.key ? { key: config.key as 'shift' | 'ctrl' | null } : undefined),
   'lasso-select': (r, g, config) =>
     lassoSelect(r, g, config?.key ? { key: config.key as 'shift' | 'ctrl' | null } : undefined),
-  tooltip: (r, g, config) => tooltip(r, g, config as any),
+  tooltip: (r, g, config) => tooltip(r, g, resolveTooltipOptions(config)),
 };
 
 export const DEFAULT_BEHAVIORS: readonly BehaviorName[] = ['zoom-canvas', 'drag-canvas'];
@@ -134,18 +134,57 @@ export function registerBehaviors(
 
   if (useCombinedHover) {
     const hoverConfig = names.find(
-      (n) => typeof n !== 'string' && (n.type === 'highlight-node' || n.type === 'highlight-edge'),
+      (n): n is BehaviorConfig =>
+        typeof n !== 'string' && (n.type === 'highlight-node' || n.type === 'highlight-edge'),
     );
-    teardowns.push(
-      hoverHighlight(
-        renderer,
-        graph,
-        typeof hoverConfig === 'string' ? undefined : (hoverConfig as any),
-      ),
-    );
+    teardowns.push(hoverHighlight(renderer, graph, resolveHoverHighlightConfig(hoverConfig)));
   }
 
   return () => teardowns.forEach((f) => f());
+}
+
+function resolveHoverHighlightConfig(config?: BehaviorConfig): HoverHighlightConfig | undefined {
+  if (!config) return undefined;
+  return {
+    type: config.type,
+    degree: typeof config.degree === 'number' ? config.degree : undefined,
+    inactiveState: typeof config.inactiveState === 'string' ? config.inactiveState : undefined,
+  };
+}
+
+function resolveClickSelectConfig(config?: BehaviorConfig): ClickSelectConfig | undefined {
+  if (!config) return undefined;
+  const trigger = config.trigger;
+  return {
+    type: config.type,
+    multiple: typeof config.multiple === 'boolean' ? config.multiple : undefined,
+    trigger: trigger === 'shift' || trigger === 'ctrl' || trigger === 'meta' ? trigger : undefined,
+  };
+}
+
+function resolveTooltipOptions(config?: BehaviorConfig): TooltipOptions | undefined {
+  if (!config) return undefined;
+  const options: TooltipOptions = {};
+  if (config.trigger === 'hover' || config.trigger === 'click') options.trigger = config.trigger;
+  if (typeof config.getContent === 'function') {
+    options.getContent = config.getContent as TooltipOptions['getContent'];
+  }
+  if (typeof config.enable === 'function') {
+    options.enable = config.enable as TooltipOptions['enable'];
+  }
+  if (
+    Array.isArray(config.offset) &&
+    config.offset.length === 2 &&
+    config.offset.every((value) => typeof value === 'number')
+  ) {
+    options.offset = config.offset as [number, number];
+  }
+  if (typeof config.delay === 'number') options.delay = config.delay;
+  if (typeof config.className === 'string') options.className = config.className;
+  if (typeof HTMLElement !== 'undefined' && config.container instanceof HTMLElement) {
+    options.container = config.container;
+  }
+  return options;
 }
 
 export {

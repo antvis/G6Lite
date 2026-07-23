@@ -1,7 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
 import { DEFAULT_BEHAVIORS, resolveBehaviorOptions } from '@src/behaviors/index.js';
 import { EventEmitter } from '@src/events.js';
+import type { Graph } from '@src/graph.js';
 import { GESTURE_CONSUME_EVENT } from '@src/interaction/gesture.js';
+import type { Renderer } from '@src/renderer/renderer.js';
+
+function asRenderer<T>(renderer: T): Renderer {
+  return renderer as unknown as Renderer;
+}
+
+function asGraph<T>(graph: T): Graph {
+  return graph as unknown as Graph;
+}
 
 describe('default canvas navigation behaviors', () => {
   it('enables zoom and canvas drag when behaviors is omitted', () => {
@@ -34,7 +44,7 @@ describe('dragCanvas behavior', () => {
       scheduleRender: vi.fn(),
     };
     const graph = { eventEmitter: new EventEmitter() };
-    const teardown = dragCanvas(renderer as any, graph as any);
+    const teardown = dragCanvas(asRenderer(renderer), asGraph(graph));
 
     graph.eventEmitter.emit('canvas:pointerdown', { event: mouseEvent({ shiftKey: true }) });
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 140, clientY: 140 }));
@@ -51,7 +61,7 @@ describe('dragCanvas behavior', () => {
       scheduleRender: vi.fn(),
     };
     const graph = { eventEmitter: new EventEmitter() };
-    const teardown = dragCanvas(renderer as any, graph as any);
+    const teardown = dragCanvas(asRenderer(renderer), asGraph(graph));
 
     graph.eventEmitter.emit('canvas:pointerdown', { event: mouseEvent() });
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 140, clientY: 140 }));
@@ -169,7 +179,7 @@ describe('clickSelect behavior', () => {
     const selectHandler = vi.fn();
     graph.eventEmitter.on('node:selectchange', selectHandler);
 
-    clickSelect(renderer as any, graph as any);
+    clickSelect(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:click', { nodeId: 'a', event: mouseEvent() });
 
     expect(selectHandler).toHaveBeenCalledTimes(1);
@@ -183,7 +193,7 @@ describe('clickSelect behavior', () => {
     const renderer = createMockRenderer();
     const graph = createMockGraph();
 
-    clickSelect(renderer as any, graph as any);
+    clickSelect(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:click', { nodeId: 'a', event: mouseEvent() });
     graph.eventEmitter.emit('node:click', { nodeId: 'a', event: mouseEvent() });
 
@@ -198,7 +208,7 @@ describe('clickSelect behavior', () => {
     const clearHandler = vi.fn();
     graph.eventEmitter.on('selection:clear', clearHandler);
 
-    clickSelect(renderer as any, graph as any);
+    clickSelect(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:click', { nodeId: 'a', event: mouseEvent() });
     graph.eventEmitter.emit('canvas:click', { event: mouseEvent() });
 
@@ -213,7 +223,7 @@ describe('clickSelect behavior', () => {
     const handler = vi.fn();
     graph.eventEmitter.on('edge:selectchange', handler);
 
-    clickSelect(renderer as any, graph as any);
+    clickSelect(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('edge:click', {
       edgeIndex: 0,
       source: 'a',
@@ -233,7 +243,7 @@ describe('clickSelect behavior', () => {
     const handler = vi.fn();
     graph.eventEmitter.on('node:selectchange', handler);
 
-    const teardown = clickSelect(renderer as any, graph as any);
+    const teardown = clickSelect(asRenderer(renderer), asGraph(graph));
     teardown();
     graph.eventEmitter.emit('node:click', { nodeId: 'a', event: mouseEvent() });
     expect(handler).not.toHaveBeenCalled();
@@ -249,7 +259,7 @@ describe('hoverHighlight behavior', () => {
     const renderer = createMockRenderer();
     const graph = createMockGraph();
 
-    hoverHighlight(renderer as any, graph as any);
+    hoverHighlight(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: mouseEvent() });
 
     expect(renderer.setHighlight).toHaveBeenCalledTimes(1);
@@ -266,7 +276,7 @@ describe('hoverHighlight behavior', () => {
     const renderer = createMockRenderer();
     const graph = createMockGraph();
 
-    hoverHighlight(renderer as any, graph as any);
+    hoverHighlight(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('edge:pointerover', {
       edgeIndex: 0,
       source: 'a',
@@ -288,7 +298,7 @@ describe('hoverHighlight behavior', () => {
     const renderer = createMockRenderer();
     const graph = createMockGraph();
 
-    hoverHighlight(renderer as any, graph as any);
+    hoverHighlight(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: mouseEvent() });
     graph.eventEmitter.emit('node:pointerleave', { nodeId: 'a', event: mouseEvent() });
 
@@ -304,7 +314,7 @@ describe('hoverHighlight behavior', () => {
     const renderer = createMockRenderer();
     const graph = createMockGraph();
 
-    hoverHighlight(renderer as any, graph as any, {
+    hoverHighlight(asRenderer(renderer), asGraph(graph), {
       type: 'hover-highlight',
       inactiveState: 'inactive',
     });
@@ -324,7 +334,7 @@ describe('hoverHighlight behavior', () => {
     const renderer = createMockRenderer();
     const graph = createMockGraph();
 
-    hoverHighlight(renderer as any, graph as any);
+    hoverHighlight(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:dragstart', { nodeId: 'a', nodeIds: ['a'] });
     graph.eventEmitter.emit('node:pointerover', { nodeId: 'b', event: mouseEvent() });
     graph.eventEmitter.emit('edge:pointerover', {
@@ -349,7 +359,7 @@ describe('hoverHighlight behavior', () => {
     const renderer = createMockRenderer();
     const graph = createMockGraph();
 
-    hoverHighlight(renderer as any, graph as any);
+    hoverHighlight(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('combo:dragstart', { comboId: 'combo-a' });
     graph.eventEmitter.emit('node:pointerover', { nodeId: 'b', event: mouseEvent() });
     expect(renderer.setHighlight).not.toHaveBeenCalled();
@@ -364,7 +374,7 @@ describe('hoverHighlight behavior', () => {
     const renderer = createMockRenderer();
     const graph = createMockGraph();
 
-    hoverHighlight(renderer as any, graph as any);
+    hoverHighlight(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: mouseEvent() });
     graph.eventEmitter.emit('node:dragstart', { nodeId: 'a', nodeIds: ['a'] });
     graph.eventEmitter.emit('node:pointerleave', { nodeId: 'a', event: mouseEvent() });
@@ -386,7 +396,7 @@ describe('hoverHighlight behavior', () => {
     const renderer = createMockRenderer();
     const graph = createMockGraph();
 
-    const teardown = hoverHighlight(renderer as any, graph as any);
+    const teardown = hoverHighlight(asRenderer(renderer), asGraph(graph));
     teardown();
     graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: mouseEvent() });
     expect(renderer.setHighlight).not.toHaveBeenCalled();
@@ -404,7 +414,7 @@ describe('dragNode behavior', () => {
     const startHandler = vi.fn();
     graph.eventEmitter.on('node:dragstart', startHandler);
 
-    dragNode(renderer as any, graph as any);
+    dragNode(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
 
     expect(startHandler).not.toHaveBeenCalled();
@@ -421,7 +431,7 @@ describe('dragNode behavior', () => {
     const consumeHandler = vi.fn();
     graph.eventEmitter.on(GESTURE_CONSUME_EVENT, consumeHandler);
 
-    const teardown = dragNode(renderer as any, graph as any);
+    const teardown = dragNode(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 100 }));
 
@@ -438,7 +448,7 @@ describe('dragNode behavior', () => {
     const endHandler = vi.fn();
     graph.eventEmitter.on('node:dragend', endHandler);
 
-    const teardown = dragNode(renderer as any, graph as any);
+    const teardown = dragNode(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 105 }));
     window.dispatchEvent(new MouseEvent('mouseup'));
@@ -466,7 +476,7 @@ describe('dragNode behavior', () => {
     graph.eventEmitter.on('combo:drag', dragHandler);
     graph.eventEmitter.on('combo:dragend', endHandler);
 
-    const teardown = dragNode(renderer as any, graph as any);
+    const teardown = dragNode(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('combo:pointerdown', { comboId: 'root', event: mouseEvent() });
     window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 106 }));
     window.dispatchEvent(new MouseEvent('mouseup'));
@@ -490,7 +500,7 @@ describe('dragNode behavior', () => {
     const endHandler = vi.fn();
     graph.eventEmitter.on('node:dragend', endHandler);
 
-    const teardown = dragNode(renderer as any, graph as any);
+    const teardown = dragNode(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
     window.dispatchEvent(new MouseEvent('mouseup'));
 
@@ -505,7 +515,7 @@ describe('dragNode behavior', () => {
     const startHandler = vi.fn();
     graph.eventEmitter.on('node:dragstart', startHandler);
 
-    dragNode(renderer as any, graph as any);
+    dragNode(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent({ button: 2 }) });
 
     expect(startHandler).not.toHaveBeenCalled();
@@ -518,7 +528,7 @@ describe('dragNode behavior', () => {
     const startHandler = vi.fn();
     graph.eventEmitter.on('node:dragstart', startHandler);
 
-    const teardown = dragNode(renderer as any, graph as any);
+    const teardown = dragNode(asRenderer(renderer), asGraph(graph));
     teardown();
     graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
     expect(startHandler).not.toHaveBeenCalled();
@@ -536,7 +546,7 @@ describe('dragEdge behavior', () => {
     const handler = vi.fn();
     graph.eventEmitter.on('edge:dragstart', handler);
 
-    dragEdge(renderer as any, graph as any);
+    dragEdge(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('edge:pointerdown', {
       edgeIndex: 0,
       source: 'a',
@@ -558,7 +568,7 @@ describe('dragEdge behavior', () => {
     const endHandler = vi.fn();
     graph.eventEmitter.on('edge:dragend', endHandler);
 
-    dragEdge(renderer as any, graph as any);
+    dragEdge(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('edge:pointerdown', {
       edgeIndex: 0,
       source: 'a',
@@ -579,7 +589,7 @@ describe('dragEdge behavior', () => {
     const handler = vi.fn();
     graph.eventEmitter.on('edge:dragstart', handler);
 
-    dragEdge(renderer as any, graph as any);
+    dragEdge(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('edge:pointerdown', {
       edgeIndex: 0,
       source: 'a',
@@ -597,7 +607,7 @@ describe('dragEdge behavior', () => {
     const handler = vi.fn();
     graph.eventEmitter.on('edge:dragstart', handler);
 
-    const teardown = dragEdge(renderer as any, graph as any);
+    const teardown = dragEdge(asRenderer(renderer), asGraph(graph));
     teardown();
     graph.eventEmitter.emit('edge:pointerdown', {
       edgeIndex: 0,
@@ -648,7 +658,7 @@ describe('brushSelect behavior', () => {
     const { brushSelect } = await import('@src/behaviors/brushSelect.js');
     const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const teardown = brushSelect(renderer as any, graph as any);
+    const teardown = brushSelect(asRenderer(renderer), asGraph(graph));
     expect(typeof teardown).toBe('function');
     teardown();
   });
@@ -657,7 +667,7 @@ describe('brushSelect behavior', () => {
     const { brushSelect } = await import('@src/behaviors/brushSelect.js');
     const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const teardown = brushSelect(renderer as any, graph as any, { key: 'shift' });
+    const teardown = brushSelect(asRenderer(renderer), asGraph(graph), { key: 'shift' });
     teardown();
   });
 
@@ -668,7 +678,7 @@ describe('brushSelect behavior', () => {
     const endHandler = vi.fn();
     graph.eventEmitter.on('brush:end', endHandler);
 
-    brushSelect(renderer as any, graph as any);
+    brushSelect(asRenderer(renderer), asGraph(graph));
     // node:pointerdown is not subscribed → brush never starts → mouseup emits nothing
     graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
     window.dispatchEvent(new MouseEvent('mouseup'));
@@ -681,7 +691,7 @@ describe('lassoSelect behavior', () => {
     const { lassoSelect } = await import('@src/behaviors/lassoSelect.js');
     const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const teardown = lassoSelect(renderer as any, graph as any);
+    const teardown = lassoSelect(asRenderer(renderer), asGraph(graph));
     expect(typeof teardown).toBe('function');
     teardown();
   });
@@ -690,7 +700,7 @@ describe('lassoSelect behavior', () => {
     const { lassoSelect } = await import('@src/behaviors/lassoSelect.js');
     const renderer = createMockRenderer();
     const graph = createMockGraph();
-    const teardown = lassoSelect(renderer as any, graph as any, { key: 'ctrl' });
+    const teardown = lassoSelect(asRenderer(renderer), asGraph(graph), { key: 'ctrl' });
     teardown();
   });
 
@@ -701,7 +711,7 @@ describe('lassoSelect behavior', () => {
     const endHandler = vi.fn();
     graph.eventEmitter.on('lasso:end', endHandler);
 
-    lassoSelect(renderer as any, graph as any);
+    lassoSelect(asRenderer(renderer), asGraph(graph));
     graph.eventEmitter.emit('canvas:pointerdown', { event: mouseEvent() });
     window.dispatchEvent(new MouseEvent('mouseup'));
     expect(endHandler).toHaveBeenCalledTimes(1);

@@ -26,6 +26,25 @@ import type { EdgeConfig, GraphEdge, LayoutNode, ThemeTokens } from '@src/types.
 
 const theme: ThemeTokens = resolveTheme('light');
 
+interface ProgramView {
+  itemCount: number;
+  array: Float32Array;
+}
+
+interface RendererInternals {
+  readonly activeNodeProgram: ProgramView;
+  readonly activeEdgeProgram: ProgramView;
+  resolveEdgeType(config?: EdgeConfig): string;
+}
+
+function rendererInternals(renderer: Renderer): RendererInternals {
+  return renderer as unknown as RendererInternals;
+}
+
+function edgeStates(states: ReadonlySet<string>): GraphEdge['states'] {
+  return states as unknown as GraphEdge['states'];
+}
+
 /**
  * A recursive no-op WebGL stub. Any unknown method returns another proxy so
  * call chains never throw; the few methods whose *return value* the renderer
@@ -160,13 +179,18 @@ describe('Renderer — data pipeline', () => {
     const dm = new DataModel({ theme });
     dm.addNode({ id: 'a', x: 1, y: 2 });
     dm.getChanges();
-    renderer.setData(rendererData(dm.getNodes() as any, dm.getEdges() as any));
+    renderer.setData(
+      rendererData(
+        dm.getNodes() as unknown as LayoutNode[],
+        dm.getEdges() as unknown as GraphEdge[],
+      ),
+    );
     renderer.draw();
 
     dm.addNode({ id: 'b', x: 30, y: 40 });
     renderer.partialProcess(dm, ['b'], []);
 
-    const program = (renderer as any).activeNodeProgram;
+    const program = rendererInternals(renderer).activeNodeProgram;
     expect(program.itemCount).toBe(2);
     expect(Array.from(program.array.slice(15, 17))).toEqual([30, 40]);
   });
@@ -201,7 +225,7 @@ describe('Renderer — data pipeline', () => {
     renderer.setHighlight({ nodeIds: new Set(['a', 'b']), edgeIndices: new Set([0]) });
     renderer.draw();
 
-    const program = (renderer as any).activeEdgeProgram;
+    const program = rendererInternals(renderer).activeEdgeProgram;
     const secondEdgeOffset = 2 * 16;
     expect(program.array[secondEdgeOffset + 9]).toBeCloseTo(0.9);
     expect(program.array[secondEdgeOffset + 10]).toBeCloseTo(0.9196, 3);
@@ -233,7 +257,7 @@ describe('Renderer — data pipeline', () => {
       },
     };
 
-    expect((renderer as any).resolveEdgeType(config)).toBe('rect');
+    expect(rendererInternals(renderer).resolveEdgeType(config)).toBe('rect');
   });
 
   it('replaces data fully on a second setData (no stale nodes)', () => {
@@ -269,16 +293,15 @@ describe('Renderer — data pipeline', () => {
         { id: 'a', x: 0, y: 0 },
         { id: 'b', x: 100, y: 0 },
       ],
-      edges: [{ source: 'a', target: 'b', states: new Set(['hidden']) as any }],
+      edges: [{ source: 'a', target: 'b', states: edgeStates(new Set(['hidden'])) }],
       edgeConfig,
       theme,
     });
     renderer.draw();
 
-    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
-      ._programs;
-    expect((programs.edgeLine as any).itemCount).toBe(0);
-    expect((programs.edgeArrow as any).itemCount).toBe(0);
+    const programs = (renderer as unknown as { _programs: Record<string, ProgramView> })._programs;
+    expect(programs.edgeLine.itemCount).toBe(0);
+    expect(programs.edgeArrow.itemCount).toBe(0);
   });
 
   it('omits hidden arc edges and arrows during full processing', () => {
@@ -294,16 +317,15 @@ describe('Renderer — data pipeline', () => {
         { id: 'a', x: 0, y: 0 },
         { id: 'b', x: 100, y: 0 },
       ],
-      edges: [{ source: 'a', target: 'b', states: new Set(['hidden']) as any }],
+      edges: [{ source: 'a', target: 'b', states: edgeStates(new Set(['hidden'])) }],
       edgeConfig,
       theme,
     });
     renderer.draw();
 
-    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
-      ._programs;
-    expect((programs.edgeArc as any).itemCount).toBe(0);
-    expect((programs.edgeArrow as any).itemCount).toBe(0);
+    const programs = (renderer as unknown as { _programs: Record<string, ProgramView> })._programs;
+    expect(programs.edgeArc.itemCount).toBe(0);
+    expect(programs.edgeArrow.itemCount).toBe(0);
   });
 
   it('omits hidden arrows when edge style is dynamic', () => {
@@ -324,16 +346,15 @@ describe('Renderer — data pipeline', () => {
         { id: 'a', x: 0, y: 0 },
         { id: 'b', x: 100, y: 0 },
       ],
-      edges: [{ source: 'a', target: 'b', states: new Set(['hidden']) as any }],
+      edges: [{ source: 'a', target: 'b', states: edgeStates(new Set(['hidden'])) }],
       edgeConfig,
       theme,
     });
     renderer.draw();
 
-    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
-      ._programs;
-    expect((programs.edgeLine as any).itemCount).toBe(0);
-    expect((programs.edgeArrow as any).itemCount).toBe(0);
+    const programs = (renderer as unknown as { _programs: Record<string, ProgramView> })._programs;
+    expect(programs.edgeLine.itemCount).toBe(0);
+    expect(programs.edgeArrow.itemCount).toBe(0);
   });
 
   it('shrinks arrow itemCount to actual writes for mixed dynamic hidden edges', () => {
@@ -365,14 +386,13 @@ describe('Renderer — data pipeline', () => {
     });
     renderer.draw();
 
-    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
-      ._programs;
-    expect((programs.edgeArrow as any).itemCount).toBe(2);
+    const programs = (renderer as unknown as { _programs: Record<string, ProgramView> })._programs;
+    expect(programs.edgeArrow.itemCount).toBe(2);
 
     renderer.setData({
       nodes,
       edges: [
-        { source: 'a', target: 'b', states: new Set(['hidden']) as any },
+        { source: 'a', target: 'b', states: edgeStates(new Set(['hidden'])) },
         { source: 'b', target: 'c' },
       ],
       edgeConfig,
@@ -380,8 +400,8 @@ describe('Renderer — data pipeline', () => {
     });
     renderer.draw();
 
-    expect((programs.edgeLine as any).itemCount).toBe(1);
-    expect((programs.edgeArrow as any).itemCount).toBe(1);
+    expect(programs.edgeLine.itemCount).toBe(1);
+    expect(programs.edgeArrow.itemCount).toBe(1);
 
     renderer.setData({
       nodes,
@@ -394,8 +414,8 @@ describe('Renderer — data pipeline', () => {
     });
     renderer.draw();
 
-    expect((programs.edgeLine as any).itemCount).toBe(2);
-    expect((programs.edgeArrow as any).itemCount).toBe(2);
+    expect(programs.edgeLine.itemCount).toBe(2);
+    expect(programs.edgeArrow.itemCount).toBe(2);
   });
 
   it('patches arrow slots without a full process when moving a simple arrow edge', () => {
@@ -421,8 +441,7 @@ describe('Renderer — data pipeline', () => {
     const processSpy = vi.spyOn(renderer as unknown as { process: () => void }, 'process');
     processSpy.mockClear();
 
-    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
-      ._programs;
+    const programs = (renderer as unknown as { _programs: Record<string, ProgramView> })._programs;
     expect(programs.edgeArrow.array[2]).toBeCloseTo(100);
 
     dataModel.updateNodePosition('b', 40, 0);
@@ -506,8 +525,7 @@ describe('Renderer — data pipeline', () => {
     });
     renderer.draw();
 
-    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
-      ._programs;
+    const programs = (renderer as unknown as { _programs: Record<string, ProgramView> })._programs;
     const processSpy = vi.spyOn(renderer as unknown as { process: () => void }, 'process');
     processSpy.mockClear();
 
@@ -571,8 +589,7 @@ describe('Renderer — data pipeline', () => {
     });
     renderer.draw();
 
-    const programs = (renderer as unknown as { _programs: Record<string, { array: Float32Array }> })
-      ._programs;
+    const programs = (renderer as unknown as { _programs: Record<string, ProgramView> })._programs;
     const expected = findPathBoundarySample(
       createQuadraticPath(source, target, 0.55),
       target,
@@ -580,7 +597,7 @@ describe('Renderer — data pipeline', () => {
       'target',
     );
 
-    expect((programs.edgeArrow as any).itemCount).toBe(1);
+    expect(programs.edgeArrow.itemCount).toBe(1);
     expect(programs.edgeArrow.array[2]).toBeCloseTo(expected.point.x, 4);
     expect(programs.edgeArrow.array[3]).toBeCloseTo(expected.point.y, 4);
     expect(

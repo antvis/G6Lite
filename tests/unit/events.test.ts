@@ -12,8 +12,8 @@ describe('EventEmitter', () => {
 
   it('should pass arguments to handlers', () => {
     const emitter = new EventEmitter();
-    let received: any;
-    emitter.on('test', (arg: any) => {
+    let received: { x: number } | undefined;
+    emitter.on('test', (arg: { x: number }) => {
       received = arg;
     });
     emitter.emit('test', { x: 42 });

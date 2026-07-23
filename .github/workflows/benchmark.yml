@@ -51,10 +51,10 @@ jobs:
       BENCHMARK_SUITE: ${{ github.event_name == 'schedule' && 'all' || inputs.suite || 'node' }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Use Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20
 
@@ -70,7 +70,7 @@ jobs:
 
       - name: Upload benchmark reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-${{ env.BENCHMARK_MODE }}-${{ env.BENCHMARK_SUITE }}-node20
           path: performance/

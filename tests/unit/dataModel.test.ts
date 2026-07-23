@@ -362,7 +362,7 @@ describe('findAllByState', () => {
     model.addNode({ id: 'b', x: 1, y: 1 });
     model.addNode({ id: 'c', x: 2, y: 2 });
     const e1 = model.addEdge({ source: 'a', target: 'b' });
-    const e2 = model.addEdge({ source: 'b', target: 'c' });
+    model.addEdge({ source: 'b', target: 'c' });
     model.setEdgeState(e1, 'active', true);
 
     const active = model.findEdgesByState('active');

@@ -3,6 +3,7 @@ import BenchmarkImport from 'benchmark';
 import lodashImport from 'lodash';
 import platformImport from 'platform';
 import { Graph, type GraphData } from '../../../src/index.js';
+import type { Renderer } from '../../../src/renderer/renderer.js';
 import { generateGraphData } from '../datasets/generate.js';
 
 const unwrapDefault = <T>(value: T | { default?: T }): T =>
@@ -106,7 +107,7 @@ export async function runBrowserMicroBenchmarks(
     data.nodes.slice(0, 100).map((node) => [node.id, ['selected']]),
   );
   const clearedStates = Object.fromEntries(data.nodes.slice(0, 100).map((node) => [node.id, []]));
-  const renderer = (graph as unknown as { renderer: any }).renderer;
+  const renderer = (graph as unknown as { renderer: Renderer }).renderer;
   const canvas = graph.getCanvas();
   const rect = canvas.getBoundingClientRect();
   const pickPoints = Array.from({ length: 32 }, (_, index) => ({

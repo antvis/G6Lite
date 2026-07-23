@@ -2,6 +2,19 @@ import { describe, expect, it, vi } from 'vitest';
 import { DataModel } from '@src/dataModel.js';
 import { EventEmitter } from '@src/events.js';
 import { Graph } from '@src/graph.js';
+import type { Renderer } from '@src/renderer/renderer.js';
+
+function asRenderer<T>(renderer: T): Renderer {
+  return renderer as unknown as Renderer;
+}
+
+function asGraph<T>(graph: T): Graph {
+  return graph as unknown as Graph;
+}
+
+function modifierEvent(shiftKey: boolean): MouseEvent {
+  return { shiftKey } as MouseEvent;
+}
 
 // ============================================================
 // P0/P1 API tests using DataModel directly (no WebGL needed)
@@ -736,23 +749,23 @@ describe('P1: click-select multiple', () => {
       findEdgesByState: vi.fn((state: string) => [...(stateMap.get(state) ?? [])]),
     };
 
-    clickSelect(renderer as any, graph as any, {
+    clickSelect(asRenderer(renderer), asGraph(graph), {
       type: 'click-select',
       multiple: true,
       trigger: 'shift',
     });
 
     // Click n1 without shift — selects n1
-    eventEmitter.emit('node:click', { nodeId: 'n1', event: { shiftKey: false } as any });
+    eventEmitter.emit('node:click', { nodeId: 'n1', event: modifierEvent(false) });
     expect(stateMap.get('selected')?.has('n1')).toBe(true);
 
     // Click n2 with shift — adds n2, keeps n1
-    eventEmitter.emit('node:click', { nodeId: 'n2', event: { shiftKey: true } as any });
+    eventEmitter.emit('node:click', { nodeId: 'n2', event: modifierEvent(true) });
     expect(stateMap.get('selected')?.has('n1')).toBe(true);
     expect(stateMap.get('selected')?.has('n2')).toBe(true);
 
     // Click n3 without shift — clears previous, selects only n3
-    eventEmitter.emit('node:click', { nodeId: 'n3', event: { shiftKey: false } as any });
+    eventEmitter.emit('node:click', { nodeId: 'n3', event: modifierEvent(false) });
     expect(stateMap.get('selected')?.has('n1')).toBe(false);
     expect(stateMap.get('selected')?.has('n2')).toBe(false);
     expect(stateMap.get('selected')?.has('n3')).toBe(true);
@@ -777,7 +790,7 @@ describe('P1: hover-highlight degree', () => {
         { id: 'n3', x: 2, y: 2 },
         { id: 'n4', x: 3, y: 3 },
       ]),
-      setHighlight: vi.fn((arg: any) => {
+      setHighlight: vi.fn((arg: { nodeIds: Set<string>; edgeIndices: Set<number> }) => {
         highlightArg.nodeIds = arg.nodeIds;
         highlightArg.edgeIndices = arg.edgeIndices;
       }),
@@ -798,7 +811,7 @@ describe('P1: hover-highlight degree', () => {
       setItemState: vi.fn(),
     };
 
-    hoverHighlight(renderer as any, graph as any, {
+    hoverHighlight(asRenderer(renderer), asGraph(graph), {
       type: 'hover-highlight',
       degree: 2,
     });

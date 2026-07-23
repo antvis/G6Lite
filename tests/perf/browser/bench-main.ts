@@ -4,6 +4,7 @@
  */
 
 import { Graph, type GraphData, type LayoutConfig } from '../../../src/index.js';
+import type { Renderer } from '../../../src/renderer/renderer.js';
 import {
   collectBrowserEnvironment,
   runBrowserMicroBenchmarks,
@@ -68,6 +69,10 @@ interface BenchTier {
 
 /** Whether real datasets should re-run force layout instead of reusing preset coords. */
 let relayoutReal = false;
+
+function getRenderer(graph: Graph): Renderer {
+  return (graph as unknown as { renderer: Renderer }).renderer;
+}
 
 // ─── Data Generation ─────────────────────────────────────────────────
 
@@ -238,7 +243,7 @@ async function benchHighlight(
   await cleanContainer(cont);
   const graph = await makeGraph(graphData, cont, layout);
 
-  const renderer = (graph as any).renderer;
+  const renderer = getRenderer(graph);
   const nodes = renderer.getNodes();
   const edges = renderer.getEdges();
 
@@ -251,7 +256,7 @@ async function benchHighlight(
 
     const edgeIndices = new Set<number>();
     const nodeIds = new Set<string>([nodeId]);
-    edges.forEach((e: any, idx: number) => {
+    edges.forEach((e, idx) => {
       if (e.source === nodeId || e.target === nodeId) {
         edgeIndices.add(idx);
         nodeIds.add(e.source);
@@ -323,7 +328,7 @@ async function benchDragFPS(
 ): Promise<FrameDiagnostics> {
   await cleanContainer(cont);
   const graph = await makeGraph(graphData, cont, layout);
-  const renderer = (graph as any).renderer;
+  const renderer = getRenderer(graph);
   const frames = 120;
   const intervals: number[] = [];
   const stopLongTaskTracker = createLongTaskTracker();
@@ -367,7 +372,7 @@ async function benchZoomFPS(
 ): Promise<FrameDiagnostics> {
   await cleanContainer(cont);
   const graph = await makeGraph(graphData, cont, layout);
-  const renderer = (graph as any).renderer;
+  const renderer = getRenderer(graph);
   const frames = 120;
   const intervals: number[] = [];
   const stopLongTaskTracker = createLongTaskTracker();
@@ -411,7 +416,7 @@ async function benchPickAt(
 ): Promise<{ median: number }> {
   await cleanContainer(cont);
   const graph = await makeGraph(graphData, cont, layout);
-  const renderer = (graph as any).renderer;
+  const renderer = getRenderer(graph);
   const canvas = renderer.getCanvas() as HTMLCanvasElement;
   const rect = canvas.getBoundingClientRect();
 

@@ -340,7 +340,7 @@ export function computeIndentedRoutes(
   edges: Array<{ index: number; src: NodeRect; tgt: NodeRect }>,
   direction: LayoutDirection = 'LR',
   targetEnd: 'left' | 'right' = 'left',
-  trunkGap: number = 0,
+  _trunkGap: number = 0,
 ): Map<number, Waypoint[]> {
   const result = new Map<number, Waypoint[]>();
 
@@ -410,8 +410,6 @@ function routeTB(src: NodeRect, tgt: NodeRect, offset: number): Waypoint[] {
   // Edge case: nodes are too close vertically or reversed — route around
   const srcRight = src.x + src.width / 2;
   const tgtRight = tgt.x + tgt.width / 2;
-  const srcLeft = src.x - src.width / 2;
-  const tgtLeft = tgt.x - tgt.width / 2;
 
   // Route to the side with more space
   const sideX = Math.max(srcRight, tgtRight) + offset;

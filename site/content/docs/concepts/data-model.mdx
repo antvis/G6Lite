@@ -11,12 +11,8 @@ const data = {
     { id: 'service-a', data: { name: '入口服务', type: 'gateway' } },
     { id: 'service-b', data: { name: '订单服务', type: 'service' } },
   ],
-  edges: [
-    { source: 'service-a', target: 'service-b', data: { qps: 1200 } },
-  ],
-  combos: [
-    { id: 'domain-order', data: { name: '订单域' } },
-  ],
+  edges: [{ source: 'service-a', target: 'service-b', data: { qps: 1200 } }],
+  combos: [{ id: 'domain-order', data: { name: '订单域' } }],
 };
 ```
 
@@ -24,14 +20,14 @@ const data = {
 
 节点必须有稳定的 `id`。
 
-| 字段 | 说明 |
-| --- | --- |
-| `id` | 节点唯一标识 |
-| `name` | 可选名称 |
-| `x` / `y` | 可选坐标；不传布局时会使用 |
-| `data` | 业务扩展字段，样式函数和业务逻辑可读取 |
-| `states` | 初始状态，如 `['selected']` |
-| `comboId` | 所属 Combo id |
+| 字段      | 说明                                   |
+| --------- | -------------------------------------- |
+| `id`      | 节点唯一标识                           |
+| `name`    | 可选名称                               |
+| `x` / `y` | 可选坐标；不传布局时会使用             |
+| `data`    | 业务扩展字段，样式函数和业务逻辑可读取 |
+| `states`  | 初始状态，如 `['selected']`            |
+| `comboId` | 所属 Combo id                          |
 
 业务字段建议放在 `data` 中，避免和 G6-GL 的保留字段冲突。
 
@@ -39,13 +35,13 @@ const data = {
 
 边必须声明 `source` 和 `target`。
 
-| 字段 | 说明 |
-| --- | --- |
-| `id` | 可选边 id；不传时内部生成 |
-| `source` | 起点节点 id |
-| `target` | 终点节点 id |
-| `data` | 业务扩展字段 |
-| `states` | 初始状态 |
+| 字段     | 说明                      |
+| -------- | ------------------------- |
+| `id`     | 可选边 id；不传时内部生成 |
+| `source` | 起点节点 id               |
+| `target` | 终点节点 id               |
+| `data`   | 业务扩展字段              |
+| `states` | 初始状态                  |
 
 ## Combo
 

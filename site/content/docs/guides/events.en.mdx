@@ -1,0 +1,18 @@
+---
+title: Events
+description: Listen to element, interaction, data, layout, render, and destroy events
+---
+
+```ts
+graph.on('node:click', ({ nodeId, data, event }) => {
+  console.log(nodeId, data, event);
+});
+```
+
+Element events use prefixes such as `node:`, `edge:`, and `combo:`. Lifecycle events include rendering, layout, data mutation, and destroy notifications. Keep the same handler reference when removing a listener:
+
+```ts
+graph.on('node:click', handler);
+graph.off('node:click', handler);
+graph.once('afterrender', () => console.log('ready'));
+```

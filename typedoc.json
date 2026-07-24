@@ -3,6 +3,7 @@
   "entryPoints": ["src/index.ts"],
   "tsconfig": "tsconfig.json",
   "out": "site/content/docs/api",
+  "cleanOutputDir": false,
   "plugin": ["typedoc-plugin-markdown", "typedoc-plugin-frontmatter"],
   "readme": "none",
   "githubPages": false,

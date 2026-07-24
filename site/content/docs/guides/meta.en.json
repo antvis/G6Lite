@@ -1,0 +1,19 @@
+{
+  "title": "Configuration",
+  "pages": [
+    "data",
+    "node",
+    "edge",
+    "label",
+    "combo",
+    "theme",
+    "layout",
+    "interactions",
+    "events",
+    "tooltip",
+    "parallel-edges",
+    "extensions",
+    "custom-node",
+    "custom-label-renderer"
+  ]
+}

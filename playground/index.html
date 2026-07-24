@@ -49,6 +49,7 @@
       padding: 8px 12px;
     }
     .demo-card {
+      width: 100%;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -58,7 +59,10 @@
       cursor: pointer;
       border: 2px solid transparent;
       transition: all 0.15s;
+      text-align: left;
+      background: transparent;
     }
+    .demo-card[hidden] { display: none; }
     .demo-card:hover { background: #eef0f7; }
     .demo-card.active {
       background: rgba(135, 59, 244, 0.06);
@@ -86,6 +90,8 @@
       color: #333;
       line-height: 1.4;
     }
+    .demo-card-content { min-width: 0; display: flex; flex-direction: column; }
+    .demo-category { color: #999; font-size: 10px; line-height: 1.3; text-transform: uppercase; }
     .demo-card.active .demo-name {
       color: #873bf4;
       font-weight: 500;
@@ -101,7 +107,7 @@
 
     /* Header bar */
     #content-header {
-      height: 48px;
+      min-height: 54px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
@@ -121,6 +127,19 @@
       margin-left: 8px;
       font-weight: 400;
     }
+    .demo-heading { min-width: 0; }
+    .demo-heading-main { display: flex; align-items: baseline; }
+    .demo-description {
+      max-width: 720px;
+      margin-top: 2px;
+      overflow: hidden;
+      color: #888;
+      font-size: 11px;
+      line-height: 1.4;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .demo-status { color: #999; font-size: 12px; white-space: nowrap; }
 
     /* Split area */
     #split {
@@ -213,6 +232,7 @@
       white-space: pre;
       background: #fafafa;
     }
+    .demo-error { padding: 16px; color: #d4380d; font-size: 13px; white-space: pre-wrap; }
     .hidden { display: none !important; }
 
     /* Tooltip overlay (the library ships an unstyled div; apps provide the look) */
@@ -239,7 +259,11 @@
     </nav>
     <main id="content">
       <header id="content-header">
-        <div><span class="demo-title" id="demo-title"></span><span class="demo-id" id="demo-id-label"></span></div>
+        <div class="demo-heading">
+          <div class="demo-heading-main"><span class="demo-title" id="demo-title"></span><span class="demo-id" id="demo-id-label"></span></div>
+          <div class="demo-description" id="demo-description"></div>
+        </div>
+        <span class="demo-status" id="demo-status"></span>
       </header>
       <div id="split">
         <div id="preview">

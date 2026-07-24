@@ -55,6 +55,12 @@ jobs:
       - name: Run CI checks
         run: npm run ci
 
+      - name: Build playground
+        run: npm run build:playground
+
+      - name: Run release example checks
+        run: npm run examples:check -- --profile release --screenshots-dir performance/examples-release
+
       - name: Inspect package contents
         run: npm pack --dry-run --json
 

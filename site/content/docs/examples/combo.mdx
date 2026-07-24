@@ -14,8 +14,8 @@ import { withBasePath } from '@/lib/shared';
 Playground 工具条还可以折叠或展开分组、切换数据层、调整运营控制台的归属、通过 `createCombo()` 创建可观测分组，以及导出 `getData()` 的完整结果。
 
 <div className="example-actions">
-  <a href="http://localhost:5179/#combo" target="_blank" rel="noreferrer">
-    本地运行
+  <a href={withBasePath('/playground/#combo')} target="_blank" rel="noreferrer">
+    在线运行
   </a>
   <a
     href="https://github.com/antvis/G6Lite/tree/master/playground/demos/combo.ts"
@@ -43,7 +43,6 @@ const graph = new Graph({
       { id: 'cache', name: 'Redis 缓存', x: 720, y: 150, comboId: 'data-layer' },
       { id: 'mysql', name: 'MySQL', x: 720, y: 255, comboId: 'data-layer' },
       { id: 'mq', name: '消息队列', x: 720, y: 360, comboId: 'data-layer' },
-      { id: 'console', name: '运营控制台', x: 100, y: 360, comboId: 'client-apps' },
       { id: 'logs', name: '日志采集', x: 560, y: 480 },
       { id: 'metrics', name: '指标监控', x: 720, y: 480 },
     ],

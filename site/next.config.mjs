@@ -1,6 +1,8 @@
 import { createMDX } from 'fumadocs-mdx/next';
+import { fileURLToPath } from 'node:url';
 
 const withMDX = createMDX();
+const repositoryRoot = fileURLToPath(new URL('..', import.meta.url));
 
 // GitHub Pages 子路径部署时设置，例如 "/G6Lite"；本地开发留空。
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || undefined;
@@ -11,6 +13,7 @@ const config = {
   reactStrictMode: true,
   basePath,
   images: { unoptimized: true },
+  turbopack: { root: repositoryRoot },
 };
 
 export default withMDX(config);

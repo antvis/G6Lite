@@ -109,16 +109,7 @@ npm run site:build    # 构建静态站点到 site/out/
 npm run dev
 ```
 
-运行后在浏览器中可切换示例：
-
-| Demo     | 说明                                           |
-| -------- | ---------------------------------------------- |
-| 最简示例 | 少量节点边 + 环形布局                          |
-| 节点样式 | 按 `data` 用函数设置 fill、size                |
-| 布局切换 | 同一数据下切换 circular / force / grid / dagre |
-| 主题     | light / dark 及 token 覆盖                     |
-| 交互高亮 | 缩放、拖拽、节点 / 边高亮                      |
-| 较大规模 | 约 200 节点，验证基础性能                      |
+运行后可按分类浏览功能、缺陷回归、性能和真实数据集案例；案例清单及覆盖能力以 [`playground/demos/catalog.json`](./playground/demos/catalog.json) 为准。
 
 ## 🔨 构建 / Build
 

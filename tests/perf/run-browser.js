@@ -19,6 +19,7 @@ const benchmarkRoot = path.resolve('tests/perf/browser');
 const server = await createServer({
   configFile: false,
   root: benchmarkRoot,
+  publicDir: path.resolve('playground'),
   logLevel: 'warn',
   resolve: {
     alias: {

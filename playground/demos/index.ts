@@ -1,188 +1,131 @@
-/**
- * Demo list
- */
-import * as basic from './basic.ts';
-import * as nodeStyle from './node-style.ts';
-import * as layouts from './layouts.ts';
-import * as theme from './theme.ts';
-import * as behaviors from './behaviors.ts';
-import * as large from './large.ts';
-import * as largeLabeled from './large-labeled.ts';
-import * as shapes from './shapes.ts';
-import * as hover from './hover.ts';
-import * as tooltip from './tooltip.ts';
-import * as edgeStates from './edge-states.ts';
-import * as edgeTypes from './edge-types.ts';
-import * as edgeColors from './edge-colors.ts';
-import * as edgeArrows from './edge-arrows.ts';
-import * as edgeLoops from './edge-loops.ts';
-import * as parallelEdges from './parallel-edges.ts';
-import * as nodeStates from './node-states.ts';
-import * as breathingNode from './breathing-node.ts';
-import * as nodeBorder from './node-border.ts';
-import * as flowchart from './flowchart.ts';
-import * as relationship from './relationship.ts';
-import * as orgChart from './org-chart.ts';
-import * as indentedTree from './indented-tree.ts';
-import * as mindmap from './mindmap.ts';
-import * as fishbone from './fishbone.ts';
-import * as performanceTest from './performance-test.ts';
-import * as setData from './set-data.ts';
-import * as labels from './labels.ts';
-import * as customLabelRenderer from './custom-label-renderer.ts';
-import * as combo from './combo.ts';
-import * as customNodeExtension from './g6-v5-compat.ts';
-import * as realDataset from './real-dataset.ts';
-import * as extensionSystem from './extension-system.ts';
-import * as incrementalNodes from './incremental-nodes.ts';
-import * as dragNodeThreshold from './drag-node-threshold.ts';
-import * as brushClickSelect from './brush-click-select.ts';
-import * as fitIncrementalNodes from './fit-incremental-nodes.ts';
-import * as batchNodePositions from './batch-node-positions.ts';
-import * as setDataFitOptions from './set-data-fit-options.ts';
-import * as selfLoopLabels from './self-loop-labels.ts';
-import basicSource from './basic.ts?raw';
-import nodeStyleSource from './node-style.ts?raw';
-import layoutsSource from './layouts.ts?raw';
-import themeSource from './theme.ts?raw';
-import behaviorsSource from './behaviors.ts?raw';
-import largeSource from './large.ts?raw';
-import largeLabeledSource from './large-labeled.ts?raw';
-import shapesSource from './shapes.ts?raw';
-import hoverSource from './hover.ts?raw';
-import tooltipSource from './tooltip.ts?raw';
-import edgeStatesSource from './edge-states.ts?raw';
-import edgeTypesSource from './edge-types.ts?raw';
-import edgeColorsSource from './edge-colors.ts?raw';
-import edgeArrowsSource from './edge-arrows.ts?raw';
-import edgeLoopsSource from './edge-loops.ts?raw';
-import parallelEdgesSource from './parallel-edges.ts?raw';
-import nodeStatesSource from './node-states.ts?raw';
-import breathingNodeSource from './breathing-node.ts?raw';
-import nodeBorderSource from './node-border.ts?raw';
-import flowchartSource from './flowchart.ts?raw';
-import relationshipSource from './relationship.ts?raw';
-import orgChartSource from './org-chart.ts?raw';
-import indentedTreeSource from './indented-tree.ts?raw';
-import mindmapSource from './mindmap.ts?raw';
-import fishboneSource from './fishbone.ts?raw';
-import performanceTestSource from './performance-test.ts?raw';
-import setDataSource from './set-data.ts?raw';
-import labelsSource from './labels.ts?raw';
-import customLabelRendererSource from './custom-label-renderer.ts?raw';
-import comboSource from './combo.ts?raw';
-import customNodeExtensionSource from './g6-v5-compat.ts?raw';
-import realDatasetSource from './real-dataset.ts?raw';
-import extensionSystemSource from './extension-system.ts?raw';
-import incrementalNodesSource from './incremental-nodes.ts?raw';
-import dragNodeThresholdSource from './drag-node-threshold.ts?raw';
-import brushClickSelectSource from './brush-click-select.ts?raw';
-import fitIncrementalNodesSource from './fit-incremental-nodes.ts?raw';
-import batchNodePositionsSource from './batch-node-positions.ts?raw';
-import setDataFitOptionsSource from './set-data-fit-options.ts?raw';
-import selfLoopLabelsSource from './self-loop-labels.ts?raw';
+import catalogData from './catalog.json';
 
-export interface DemoItem {
-  id: string;
-  name: string;
-  run: (container: string | HTMLElement) => Promise<{ destroy?: () => void } | { destroy: () => void }>;
-  source?: string;
+export type DemoCategory =
+  | 'getting-started'
+  | 'data'
+  | 'node'
+  | 'edge'
+  | 'label'
+  | 'layout'
+  | 'interaction'
+  | 'combo'
+  | 'theme'
+  | 'extension'
+  | 'scenario'
+  | 'dataset'
+  | 'performance'
+  | 'regression';
+
+export type DemoKind = 'functional' | 'regression' | 'scenario' | 'performance' | 'dataset';
+export type DemoAudience = 'playground' | 'site';
+export type DemoReleaseCheck = 'smoke' | 'visual' | 'full' | false;
+export type DemoCaptureMode = 'visual' | 'artifact' | 'none';
+
+export interface DemoCaptureConfig {
+  mode: DemoCaptureMode;
+  settleMs?: number;
+  deviceScaleFactor?: number;
 }
 
-export const demos: DemoItem[] = [
-  { id: 'basic', name: '最简示例', run: basic.run, source: basicSource },
-  { id: 'node-style', name: '节点样式', run: nodeStyle.run, source: nodeStyleSource },
-  { id: 'layouts', name: '布局切换', run: layouts.run, source: layoutsSource },
-  { id: 'theme', name: '主题切换', run: theme.run, source: themeSource },
-  { id: 'behaviors', name: '交互高亮', run: behaviors.run, source: behaviorsSource },
-  { id: 'hover', name: 'Hover 高亮', run: hover.run, source: hoverSource },
-  { id: 'tooltip', name: 'Tooltip 浮层', run: tooltip.run, source: tooltipSource },
-  { id: 'shapes', name: '图形类型', run: shapes.run, source: shapesSource },
-  { id: 'large', name: '较大规模 (200节点)', run: large.run, source: largeSource },
-  { id: 'large-labeled', name: '5000 节点 + 标签', run: largeLabeled.run, source: largeLabeledSource },
-  { id: 'edge-states', name: '边状态 + 权重矩阵', run: edgeStates.run, source: edgeStatesSource },
-  { id: 'edge-types', name: '边类型 (直线/虚线/弧线)', run: edgeTypes.run, source: edgeTypesSource },
-  { id: 'edge-colors', name: '边颜色 (分类色板)', run: edgeColors.run, source: edgeColorsSource },
-  { id: 'edge-arrows', name: '箭头方向', run: edgeArrows.run, source: edgeArrowsSource },
-  { id: 'edge-loops', name: '自环边 (嵌套)', run: edgeLoops.run, source: edgeLoopsSource },
-  {
-    id: 'parallel-edges',
-    name: '平行边自动错开',
-    run: parallelEdges.run,
-    source: parallelEdgesSource,
-  },
-  { id: 'node-states', name: '节点状态 (6态)', run: nodeStates.run, source: nodeStatesSource },
-  { id: 'breathing-node', name: '呼吸节点', run: breathingNode.run, source: breathingNodeSource },
-  { id: 'node-border', name: '节点边框 + 圆角', run: nodeBorder.run, source: nodeBorderSource },
-  { id: 'flowchart', name: '流程图 (决策树)', run: flowchart.run, source: flowchartSource },
-  { id: 'relationship', name: '人物关系网络图', run: relationship.run, source: relationshipSource },
-  { id: 'org-chart', name: '组织架构图', run: orgChart.run, source: orgChartSource },
-  { id: 'indented-tree', name: '缩进树 (目录结构)', run: indentedTree.run, source: indentedTreeSource },
-  { id: 'mindmap', name: '思维导图', run: mindmap.run, source: mindmapSource },
-  { id: 'fishbone', name: '鱼骨图', run: fishbone.run, source: fishboneSource },
-  { id: 'performance', name: '性能测试', run: performanceTest.run, source: performanceTestSource },
-  { id: 'set-data', name: 'setData + layout()', run: setData.run, source: setDataSource },
-  {
-    id: 'incremental-nodes',
-    name: '增量新增节点',
-    run: incrementalNodes.run,
-    source: incrementalNodesSource,
-  },
-  {
-    id: 'drag-node-threshold',
-    name: '节点拖拽阈值',
-    run: dragNodeThreshold.run,
-    source: dragNodeThresholdSource,
-  },
-  {
-    id: 'brush-click-select',
-    name: '框选与点击选择',
-    run: brushClickSelect.run,
-    source: brushClickSelectSource,
-  },
-  {
-    id: 'fit-incremental-nodes',
-    name: '增量节点视口适配',
-    run: fitIncrementalNodes.run,
-    source: fitIncrementalNodesSource,
-  },
-  {
-    id: 'batch-node-positions',
-    name: '批量更新节点坐标',
-    run: batchNodePositions.run,
-    source: batchNodePositionsSource,
-  },
-  {
-    id: 'set-data-fit-options',
-    name: 'setData 视口策略',
-    run: setDataFitOptions.run,
-    source: setDataFitOptionsSource,
-  },
-  {
-    id: 'self-loop-labels',
-    name: '自环边标签',
-    run: selfLoopLabels.run,
-    source: selfLoopLabelsSource,
-  },
-  { id: 'labels', name: '标签 + 图标', run: labels.run, source: labelsSource },
-  {
-    id: 'custom-label-renderer',
-    name: '自定义 Label Renderer',
-    run: customLabelRenderer.run,
-    source: customLabelRendererSource,
-  },
-  { id: 'combo', name: 'Combo 分组容器', run: combo.run, source: comboSource },
-  {
-    id: 'custom-node-extension',
-    name: '自定义节点 + 显式边 ID',
-    run: customNodeExtension.run,
-    source: customNodeExtensionSource,
-  },
-  { id: 'real-dataset', name: '真实数据集 (sigma 同款 8.8K 节点)', run: realDataset.run, source: realDatasetSource },
-  {
-    id: 'extension-system',
-    name: '公开扩展 API 综合示例',
-    run: extensionSystem.run,
-    source: extensionSystemSource,
-  },
-];
+export interface DemoCatalogEntry {
+  id: string;
+  file: string;
+  title: string;
+  description: string;
+  category: DemoCategory;
+  kind: DemoKind;
+  audiences: DemoAudience[];
+  coverage: string[];
+  releaseCheck: DemoReleaseCheck;
+  capture: DemoCaptureConfig;
+  aliases?: string[];
+}
+
+export interface DemoHandle {
+  destroy(): void;
+  ready?: Promise<void>;
+}
+
+export interface DemoModule {
+  run(container: string | HTMLElement): Promise<DemoHandle>;
+}
+
+export interface DemoItem extends DemoCatalogEntry {
+  loadModule(): Promise<DemoModule>;
+  loadSource(): Promise<string>;
+}
+
+const moduleLoaders = import.meta.glob<DemoModule>('./*.ts');
+const sourceLoaders = import.meta.glob<string>('./*.ts', {
+  query: '?raw',
+  import: 'default',
+});
+
+function assertCatalog(entries: DemoCatalogEntry[]): void {
+  const ids = new Set<string>();
+  const aliases = new Set<string>();
+  const files = new Set<string>();
+
+  for (const entry of entries) {
+    if (ids.has(entry.id)) throw new Error(`Duplicate demo id: ${entry.id}`);
+    ids.add(entry.id);
+  }
+
+  for (const entry of entries) {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.id)) {
+      throw new Error(`Invalid demo id: ${entry.id}`);
+    }
+    if (files.has(entry.file)) throw new Error(`Duplicate demo file: ${entry.file}`);
+    files.add(entry.file);
+
+    const modulePath = `./${entry.file}`;
+    if (!moduleLoaders[modulePath] || !sourceLoaders[modulePath]) {
+      throw new Error(`Demo module not found for ${entry.id}: ${entry.file}`);
+    }
+    if (entry.coverage.length === 0) {
+      throw new Error(`Demo ${entry.id} must declare at least one coverage capability`);
+    }
+    for (const alias of entry.aliases ?? []) {
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(alias)) {
+        throw new Error(`Invalid demo alias: ${alias}`);
+      }
+      if (ids.has(alias) || aliases.has(alias)) throw new Error(`Duplicate demo alias: ${alias}`);
+      aliases.add(alias);
+    }
+  }
+}
+
+const catalog = catalogData as DemoCatalogEntry[];
+assertCatalog(catalog);
+
+export const demos: DemoItem[] = catalog.map((entry) => {
+  const modulePath = `./${entry.file}`;
+  return {
+    ...entry,
+    loadModule: moduleLoaders[modulePath],
+    loadSource: sourceLoaders[modulePath],
+  };
+});
+
+const demoById = new Map(demos.map((demo) => [demo.id, demo]));
+const aliasToId = new Map(
+  demos.flatMap((demo) => (demo.aliases ?? []).map((alias) => [alias, demo.id] as const)),
+);
+
+export function normalizeDemoId(id: string): string {
+  return aliasToId.get(id) ?? id;
+}
+
+export function getDemo(id: string): DemoItem | undefined {
+  return demoById.get(normalizeDemoId(id));
+}
+
+export async function runDemo(demo: DemoItem, container: HTMLElement): Promise<DemoHandle> {
+  const module = await demo.loadModule();
+  const result = await module.run(container);
+  if (!result || typeof result.destroy !== 'function') {
+    throw new Error(`Demo ${demo.id} must return a handle with destroy()`);
+  }
+  const destroy = result.destroy.bind(result);
+  return { destroy, ready: 'ready' in result ? result.ready : undefined };
+}

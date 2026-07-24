@@ -1,7 +1,7 @@
 /**
  * Demo: process-parallel-edges
  */
-import { Graph } from '../../src/index.ts';
+import { Graph, type TooltipContext } from '../../src/index.ts';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -66,7 +66,7 @@ export async function run(container: string | HTMLElement) {
       {
         type: 'tooltip',
         trigger: 'hover',
-        getContent: (ctx) => {
+        getContent: (ctx: TooltipContext) => {
           if (ctx.itemType === 'edge') {
             const label = (ctx.data as { label?: string } | undefined)?.label ?? ctx.edgeId;
             return `${ctx.source} -> ${ctx.target}<br/><span style="color:#8c8c8c">${label}</span>`;

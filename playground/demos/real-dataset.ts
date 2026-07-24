@@ -11,7 +11,7 @@
 import { Graph, type GraphData } from '../../src/index.ts';
 
 // 切换这里即可换数据集
-const DATASET = '/datasets/ai-papers.json'; // 或 '/datasets/wikipedia.json'
+const DATASET = new URL('../datasets/ai-papers.json', import.meta.url).href;
 
 // 聚类调色板(cluster -> color),覆盖两个数据集的常见 class 数量
 const PALETTE = [

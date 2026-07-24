@@ -6,6 +6,7 @@
  */
 
 import { attachLabelsCanvas, type GraphInstanceWithTools } from './tooling.ts';
+import type { GraphData, GraphNode, LayoutConfig } from '../src/index.ts';
 
 // 截图必须保留绘制缓冲,否则跨次导航 playwright 截到的是上一帧/空白帧。
 // ES import 会被提升,所以在补丁后用动态 import 引入 Graph。
@@ -17,11 +18,11 @@ HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, kind
   return _getContext.call(this, kind, attrs);
 } as typeof HTMLCanvasElement.prototype.getContext;
 
-type Node = { id: string; name?: string; data: Record<string, unknown> & { color?: string; size?: number } };
+type Node = GraphNode & { data: Record<string, unknown> & { color?: string; size?: number } };
 type Edge = { source: string; target: string };
 type Cfg = {
-  layout: Record<string, unknown>;
-  data: { nodes: Node[]; edges: Edge[] };
+  layout: LayoutConfig;
+  data: GraphData;
   kind?: 'relationship' | 'fishbone';
   fit?: number;
 };
@@ -187,15 +188,20 @@ function fishboneGraph() {
   return { nodes, edges };
 }
 
-function fishboneNodeSize(node: Node) {
-  const level = node.data.level as string;
+type FishboneNodeLike = {
+  name?: string;
+  data?: Readonly<Record<string, unknown>>;
+};
+
+function fishboneNodeSize(node: FishboneNodeLike) {
+  const level = node.data?.level as string;
   if (level === FISHBONE_LEVELS.HEAD) return { width: 132, height: 46 };
   if (level === FISHBONE_LEVELS.CATEGORY) return { width: 82, height: 34 };
   return { width: Math.max(70, (node.name ?? '').length * 13 + 22), height: 26 };
 }
 
-function fishboneColor(node: Node) {
-  const categoryIndex = node.data.categoryIndex as number | undefined;
+function fishboneColor(node: FishboneNodeLike) {
+  const categoryIndex = node.data?.categoryIndex as number | undefined;
   return categoryIndex === undefined ? FISHBONE_COLORS[0] : FISHBONE_COLORS[categoryIndex % FISHBONE_COLORS.length];
 }
 
@@ -252,8 +258,8 @@ async function main() {
       data: cfg.data,
       node: {
         type: 'rect',
-        style: (node: Node) => {
-          const level = node.data.level as string;
+        style: (node) => {
+          const level = node.data?.level as string;
           const size = fishboneNodeSize(node);
           if (level === FISHBONE_LEVELS.ITEM) {
             return { fill: 'transparent', width: size.width, height: size.height, borderRadius: 0, stroke: 'transparent', strokeWidth: 0 };
@@ -283,15 +289,15 @@ async function main() {
     graph.fitView(cfg.fit ?? 0.8);
     attachLabelsCanvas(stage, graph as unknown as GraphInstanceWithTools, {
       nodeLabel: (node) => fishboneNodeById.get(node.id)?.name ?? node.id,
-      position: (node) => ((fishboneNodeById.get(node.id)?.data.level as string) === FISHBONE_LEVELS.ITEM ? 'right-edge' : 'inside'),
-      nodeSize: (node) => fishboneNodeSize(fishboneNodeById.get(node.id) ?? (node as Node)),
+      position: (node) => ((fishboneNodeById.get(node.id)?.data?.level as string) === FISHBONE_LEVELS.ITEM ? 'right-edge' : 'inside'),
+      nodeSize: (node) => fishboneNodeSize(fishboneNodeById.get(node.id) ?? node),
       fontSize: (node) => {
-        const level = fishboneNodeById.get(node.id)?.data.level as string;
+        const level = fishboneNodeById.get(node.id)?.data?.level as string;
         if (level === FISHBONE_LEVELS.HEAD) return 15;
         if (level === FISHBONE_LEVELS.CATEGORY) return 13;
         return 11;
       },
-      color: (node) => ((fishboneNodeById.get(node.id)?.data.level as string) === FISHBONE_LEVELS.ITEM ? '#263142' : '#ffffff'),
+      color: (node) => ((fishboneNodeById.get(node.id)?.data?.level as string) === FISHBONE_LEVELS.ITEM ? '#263142' : '#ffffff'),
     });
     await new Promise((r) => requestAnimationFrame(() => r(null)));
     await new Promise((r) => requestAnimationFrame(() => r(null)));
@@ -306,8 +312,8 @@ async function main() {
     node: {
       type: 'circle',
       style: {
-        fill: (d: { data?: { color?: string } }) => d.data?.color ?? accent,
-        size: (d: { data?: { size?: number } }) => d.data?.size ?? 10,
+        fill: (node) => String(node.data?.color ?? accent),
+        size: (node) => Number(node.data?.size ?? 10),
         stroke: '#ffffff',
         strokeWidth: 1.5,
       },

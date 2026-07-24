@@ -1,7 +1,7 @@
 /**
  * Demo: 思维导图 (Mind Map) — 台风形成因素
  */
-import { Graph } from '../../src/index.ts';
+import { Graph, type GraphEdge, type GraphNode } from '../../src/index.ts';
 import { attachLabelsCanvas, type GraphInstanceWithTools } from '../tooling.ts';
 
 const BRANCH_COLORS = ['#E8684A', '#5B8FF9', '#5AD8A6', '#F6BD16'];
@@ -110,7 +110,7 @@ function getNodeLabelColor(node: { data?: Record<string, unknown> }) {
 }
 
 // 获取边颜色
-function getEdgeColor(edge: { source: string }) {
+function getEdgeColor(_source: GraphNode, _target: GraphNode, edge: GraphEdge) {
   const sourceNode = data.nodes.find(n => n.id === edge.source);
   const branch = sourceNode?.data?.branch as number | undefined;
   return branch !== undefined ? BRANCH_COLORS[branch % BRANCH_COLORS.length] : '#5B8FF9';
@@ -141,9 +141,9 @@ export async function run(container: string | HTMLElement) {
       levelGap: 120,  // 缩短左右间距
       nodeGap: 12,
       branchColors: BRANCH_COLORS,
-      getWidth: (n) => getNodeSize(n).width,
-      getHeight: (n) => getNodeSize(n).height,
-      getSide: (n, index) => {
+      getWidth: (n: GraphNode) => getNodeSize(n).width,
+      getHeight: (n: GraphNode) => getNodeSize(n).height,
+      getSide: (n: GraphNode, index: number) => {
         // 一级子节点交替分配到左右
         const branch = n.data?.branch as number | undefined;
         if (branch !== undefined) {
@@ -160,7 +160,7 @@ export async function run(container: string | HTMLElement) {
 
   const g = graph as unknown as GraphInstanceWithTools;
   attachLabelsCanvas(wrapper, g, {
-    nodeLabel: (n) => n.name,
+    nodeLabel: (n) => n.name ?? n.id,
     position: 'inside',
     nodeSize: (n) => getNodeSize(n),
     fontSize: (n) => {

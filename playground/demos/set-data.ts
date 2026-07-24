@@ -45,7 +45,7 @@ const DATA_B = {
 };
 
 export async function run(container: string | HTMLElement) {
-  const el = typeof container === 'string' ? document.querySelector(container)! : container;
+  const el = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
 
   const toolbar = document.createElement('div');
   toolbar.style.cssText = 'position:absolute;top:8px;left:8px;z-index:10;display:flex;gap:6px;';

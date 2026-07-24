@@ -1,7 +1,7 @@
 /**
  * Demo: 鱼骨图 (Fishbone/Ishikawa Diagram) — 盈利未达预期分析
  */
-import { Graph } from '../../src/index.ts';
+import { Graph, type GraphEdge, type GraphNode } from '../../src/index.ts';
 import { attachLabelsCanvas, type GraphInstanceWithTools } from '../tooling.ts';
 
 const CATEGORY_COLORS = ['#E8684A', '#5B8FF9', '#5AD8A6', '#F6BD16', '#6F5EF9', '#5D7092'];
@@ -98,7 +98,7 @@ function getNodeLabelColor(node: { data?: Record<string, unknown> }) {
   return level === NODE_LEVELS.ITEM ? '#333' : '#fff';
 }
 
-function getEdgeColor(edge: { source: string; target: string }) {
+function getEdgeColor(_source: GraphNode, _target: GraphNode, edge: GraphEdge) {
   const targetNode = data.nodes.find(n => n.id === edge.target);
   const categoryIndex = targetNode?.data?.categoryIndex as number | undefined;
   return categoryIndex !== undefined ? CATEGORY_COLORS[categoryIndex % CATEGORY_COLORS.length] : '#d9d9d9';
@@ -122,7 +122,7 @@ export async function run(container: string | HTMLElement) {
 
   const g = graph as unknown as GraphInstanceWithTools;
   const cleanupLabels = attachLabelsCanvas(wrapper, g, {
-    nodeLabel: (n) => n.name,
+    nodeLabel: (n) => n.name ?? n.id,
     position: (n) => (n.data?.level as string) === NODE_LEVELS.ITEM ? 'right-edge' : 'inside',
     nodeSize: (n) => getNodeSize(n),
     fontSize: (n) => {

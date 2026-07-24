@@ -8,6 +8,7 @@ import {
   type BehaviorExtension,
   type DecorationRenderer,
   type GraphData,
+  type GraphNode,
   type LayoutExtension,
   type NodeBadgeItem,
   type PluginExtension,
@@ -179,10 +180,10 @@ export async function run(container: string | HTMLElement) {
       decorations: [
         {
           renderer: 'external-name',
-          placement: (node) =>
+          placement: (node: GraphNode) =>
             (node.data?.namePlacement as 'left' | 'right' | 'bottom' | undefined) ?? 'bottom',
           attachment: 'outside',
-          data: (node) => String(node.data?.label ?? node.id),
+          data: (node: GraphNode) => String(node.data?.label ?? node.id),
         },
         {
           renderer: 'builtin-badge',

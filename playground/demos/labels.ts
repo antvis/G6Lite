@@ -1,7 +1,7 @@
 /**
  * Demo: 节点标签 / 边标签 / 节点图标
  */
-import { Graph } from '../../src/index.ts';
+import { Graph, type GraphEdge, type GraphNode } from '../../src/index.ts';
 
 const DATA = {
   nodes: [
@@ -28,7 +28,7 @@ const DATA = {
 };
 
 export async function run(container: string | HTMLElement) {
-  const el = typeof container === 'string' ? document.querySelector(container)! : container;
+  const el = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
 
   const toolbar = document.createElement('div');
   toolbar.style.cssText = 'position:absolute;top:8px;left:8px;z-index:10;display:flex;gap:6px;flex-wrap:wrap;';
@@ -53,7 +53,7 @@ export async function run(container: string | HTMLElement) {
       style: {
         size: 20,
         fill: '#5B8FF9',
-        label: (n) => n.data?.name as string ?? n.id,
+        label: (n) => (n.data?.name as string | undefined) ?? n.id,
         labelPlacement: 'bottom',
         labelFontSize: 12,
         labelColor: '#333',
@@ -89,7 +89,14 @@ export async function run(container: string | HTMLElement) {
   document.getElementById('btn-toggle-edge-labels')!.onclick = () => {
     edgeLabelsVisible = !edgeLabelsVisible;
     graph.updateOptions({
-      edge: { style: { label: edgeLabelsVisible ? ((s: any, t: any, e: any) => (e.data?.label as string) ?? '') : false } },
+      edge: {
+        style: {
+          label: edgeLabelsVisible
+            ? ((_source: GraphNode, _target: GraphNode, edge: GraphEdge) =>
+                (edge.data?.label as string | undefined) ?? '')
+            : false,
+        },
+      },
     });
   };
 

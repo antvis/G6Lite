@@ -1,0 +1,74 @@
+const e=`import { Graph } from '../../src/index.ts';
+import { buttonStyle, createDemoPanel } from './demo-panel.ts';
+
+const button = (action: string, label: string) =>
+  \`<button data-action="\${action}" style="\${buttonStyle}">\${label}</button>\`;
+
+export async function run(container: string | HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'a', x: 60, y: 80, data: { label: 'A' } },
+        { id: 'b', x: 420, y: 80, data: { label: 'B' } },
+        { id: 'c', x: 240, y: 300, data: { label: 'C' } },
+      ],
+      edges: [
+        { id: 'ab', source: 'a', target: 'b' },
+        { id: 'bc', source: 'b', target: 'c' },
+        { id: 'ca', source: 'c', target: 'a' },
+      ],
+    },
+    node: { style: { size: 36, label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' } },
+    edge: { style: { endArrow: true } },
+    behaviors: ['zoom-canvas', 'drag-canvas'],
+  });
+  await graph.render();
+  graph.fitView({ padding: 80, maxZoom: 1.5 });
+
+  const ui = createDemoPanel(
+    container,
+    '视口与坐标转换',
+    '验证 camera、fitCenter、zoomBy、focusItem、setSize 和屏幕/图坐标互转。',
+    [
+      button('zoom-in', 'zoomBy +'),
+      button('zoom-out', 'zoomBy −'),
+      button('fit', 'fitView'),
+      button('center', 'fitCenter'),
+      button('focus', 'focus C'),
+      button('camera', 'setCamera'),
+      button('reset', 'resetCamera'),
+      button('resize', 'setSize'),
+      button('coords', '坐标互转'),
+    ].join(''),
+  );
+
+  const showCamera = (prefix: string) => {
+    const camera = graph.getCamera();
+    ui.setStatus(\`\${prefix}\\nzoom=\${camera.zoom.toFixed(3)} x=\${camera.x.toFixed(1)} y=\${camera.y.toFixed(1)}\\nnodes=\${graph.getNodes().length} edges=\${graph.getEdges().length}\`);
+  };
+
+  ui.controls.addEventListener('click', (event) => {
+    const action = (event.target as HTMLElement).dataset.action;
+    if (action === 'zoom-in') graph.zoomBy(1.25);
+    else if (action === 'zoom-out') graph.zoomBy(0.8);
+    else if (action === 'fit') graph.fitView({ padding: 64, maxZoom: 1.5 });
+    else if (action === 'center') graph.fitCenter();
+    else if (action === 'focus') graph.focusItem('c');
+    else if (action === 'camera') graph.setCamera({ zoom: 1.1, x: 80, y: 40 });
+    else if (action === 'reset') graph.resetCamera();
+    else if (action === 'resize') graph.setSize(720, 460);
+    else if (action === 'coords') {
+      const position = graph.getNodePosition('a')!;
+      const screen = graph.graphToScreen(position.x, position.y);
+      const restored = graph.screenToGraph(screen.x, screen.y);
+      ui.setStatus(\`graph=(\${position.x.toFixed(1)}, \${position.y.toFixed(1)})\\nscreen=(\${screen.x.toFixed(1)}, \${screen.y.toFixed(1)})\\nrestored=(\${restored.x.toFixed(1)}, \${restored.y.toFixed(1)})\`);
+      return;
+    }
+    showCamera(action ?? 'ready');
+  });
+
+  showCamera('ready');
+  return { destroy: () => { graph.destroy(); ui.panel.remove(); } };
+}
+`;export{e as default};

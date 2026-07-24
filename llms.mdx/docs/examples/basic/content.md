@@ -11,8 +11,8 @@
 这个示例展示 G6-GL 的最小使用链路：传入节点和边，配置一个环形布局，启用缩放和拖拽。
 
 <div className="example-actions">
-  <a href="http://localhost:5179/#basic" target="_blank" rel="noreferrer">
-    本地运行
+  <a href="withBasePath('/playground/#basic')" target="_blank" rel="noreferrer">
+    在线运行
   </a>
 
   <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/basic.ts" target="_blank" rel="noreferrer">

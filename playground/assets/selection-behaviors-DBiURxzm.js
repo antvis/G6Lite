@@ -1,0 +1,45 @@
+const e=`import { Graph } from '../../src/index.ts';
+import { createDemoPanel } from './demo-panel.ts';
+
+export async function run(container: string | HTMLElement) {
+  const nodes = Array.from({ length: 12 }, (_, index) => ({
+    id: String(index),
+    x: 120 + (index % 4) * 120,
+    y: 100 + Math.floor(index / 4) * 110,
+  }));
+  const graph = new Graph({
+    container,
+    data: { nodes, edges: [] },
+    node: {
+      style: { size: 30, label: (node) => node.id, labelPlacement: 'center', labelColor: '#fff' },
+      stateStyles: { selected: { fill: '#873BF4', stroke: '#5B21B6', strokeWidth: 3 } },
+    },
+    behaviors: [
+      { type: 'drag-canvas', ignoreModifierKeys: true },
+      'zoom-canvas',
+      { type: 'click-select', multiple: true, trigger: 'shift' },
+      { type: 'brush-select', key: 'shift' },
+      { type: 'lasso-select', key: 'ctrl' },
+    ],
+  });
+  await graph.render();
+  graph.fitView({ padding: 80, maxZoom: 1.5 });
+
+  const ui = createDemoPanel(
+    container,
+    '选择行为组合',
+    'Shift+点击多选，Shift+拖拽框选，Ctrl/⌘+自由拖拽套索选择。',
+    '',
+  );
+
+  const render = (eventName: string) => {
+    ui.setStatus(\`\${eventName}\\nselected=\${graph.findNodesByState('selected').join(', ') || '-'}\`);
+  };
+  graph.on('node:selectchange', () => render('node:selectchange'));
+  graph.on('brush:end', () => render('brush:end'));
+  graph.on('lasso:end', () => render('lasso:end'));
+  render('ready');
+
+  return { destroy: () => { graph.destroy(); ui.panel.remove(); } };
+}
+`;export{e as default};

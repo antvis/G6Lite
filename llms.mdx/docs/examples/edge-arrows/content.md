@@ -11,8 +11,8 @@
 这个示例展示 `startArrow`、`endArrow` 和 `arrowSize` 的组合方式，可用于表达调用方向、依赖方向和双向关系。
 
 <div className="example-actions">
-  <a href="http://localhost:5179/#edge-arrows" target="_blank" rel="noreferrer">
-    本地运行
+  <a href="withBasePath('/playground/#edge-arrows')" target="_blank" rel="noreferrer">
+    在线运行
   </a>
 
   <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/edge-arrows.ts" target="_blank" rel="noreferrer">

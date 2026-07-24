@@ -29,7 +29,7 @@
   - [扩展体系](/docs/advanced/extensions): 通过配置、函数式映射和公开扩展 API 完成业务定制
   - [从 G6 v5 迁移](/docs/advanced/g6-v5-migration): 评估 G6 v5 项目迁移到 G6-GL 时的差异和改造点
 - 示例
-  - [示例总览](/docs/examples): 查看真实 G6-GL demo 的截图、代码和运行入口
+  - [示例总览](/docs/examples): 查看从 Playground 验证并筛选出的真实 G6-GL 示例
   - [最简示例](/docs/examples/basic): 使用 G6-GL 渲染一个最小关系图
   - [节点样式](/docs/examples/node-style): 按业务字段动态设置节点颜色和大小
   - [箭头方向](/docs/examples/edge-arrows): 配置无箭头、单向箭头、双向箭头和粗边箭头

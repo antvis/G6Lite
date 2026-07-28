@@ -1,11 +1,14 @@
-export const ANTV_LOGO_URL =
-  'https://mdn.alipayobjects.com/huamei_qa8qxu/afts/img/A%2AA-lcQbVTpjwAAAAAAAAAAAAADmJ7AQ/original';
-
 export function AntVLogo({ className }: { className?: string }) {
   return (
     <span className={className ? `antv-logo ${className}` : 'antv-logo'} aria-label="AntV">
       <span className="antv-logo-mark" aria-hidden>
-        <img src={ANTV_LOGO_URL} alt="" width={82} height={28} loading="eager" />
+        <svg viewBox="0 0 32 28" role="presentation">
+          <path d="M5 21 12 7l7 14 8-14" />
+          <circle cx="5" cy="21" r="2.4" />
+          <circle cx="12" cy="7" r="2.4" />
+          <circle cx="19" cy="21" r="2.4" />
+          <circle cx="27" cy="7" r="2.4" />
+        </svg>
       </span>
       <span className="antv-logo-text">AntV</span>
     </span>

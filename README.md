@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@antv/g6-gl.svg)](https://www.npmjs.com/package/@antv/g6-gl)
 [![build](https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg)](https://github.com/antvis/G6Lite/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![bundle size](https://img.shields.io/badge/gzip-~117%20KB-brightgreen.svg)](./site/content/docs/metrics/bundle-size.mdx)
+[![bundle size](https://img.shields.io/badge/gzip-~117%20KB-brightgreen.svg)](./site/content/docs/zh/metrics/bundle-size.mdx)
 
 > 基于 WebGL 的高性能图可视化与分析引擎，为大规模图数据而生。
 >
@@ -81,7 +81,7 @@ register(
 - 当前发布产物为 ESM-only，消费代码使用标准 ESM import，不支持 `require()`。
 - 仓库源码中的相对 `.js` 后缀用于保证 `tsc` 产物可被 Node ESM 直接解析，暂不应机械删除。
 
-详见[扩展体系](./site/content/docs/advanced/extensions.mdx)。公开 API 参考由 `npm run docs:api` 从包根类型自动生成。
+详见[扩展体系](./site/content/docs/zh/guides/extensions.mdx)。公开 API 参考由 `npm run docs:api` 从包根类型自动生成。
 
 ## 📖 文档 / Documentation
 
@@ -96,10 +96,10 @@ npm run site:build    # 构建静态站点到 site/out/
 
 - **指南 / Guide** — 项目介绍、快速开始、数据格式、节点 / 边样式、布局、交互、主题（建设中，逐步补全）。
 - **指标 / Metrics**：
-  - [包大小](./site/content/docs/metrics/bundle-size.mdx) — 真实打包体积与同类库对比。
-  - [浏览器兼容性](./site/content/docs/metrics/browser-compatibility.mdx) — WebGL 支持矩阵与最低版本。
-  - [性能指标](./site/content/docs/metrics/performance.mdx) — 指标定义、测试环境与核心数据。
-- **完整指南** — 从 [快速开始](./site/content/docs/getting-started/quick-start.mdx) 进入，覆盖数据、配置、布局、交互、主题与 API。
+  - [包大小](./site/content/docs/zh/metrics/bundle-size.mdx) — 真实打包体积与同类库对比。
+  - [浏览器兼容性](./site/content/docs/zh/compatibility/browser.mdx) — WebGL 支持矩阵与最低版本。
+  - [性能指标](./site/content/docs/zh/metrics/performance.mdx) — 指标定义、测试环境与核心数据。
+- **完整指南** — 从 [快速开始](./site/content/docs/zh/getting-started/quick-start.mdx) 进入，覆盖数据、配置、布局、交互、主题与 API。
 
 > 公网文档站点（GitHub Pages）将在 `0.1.0` 正式发布时上线。
 

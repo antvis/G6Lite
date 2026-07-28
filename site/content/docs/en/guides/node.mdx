@@ -1,0 +1,23 @@
+---
+title: Nodes
+description: Configure node types, functional styles, labels, and state styles
+---
+
+Nodes support built-in circle and rectangle rendering plus registered extensions.
+
+```ts
+node: {
+  type: 'circle',
+  style: {
+    size: (node) => node.data?.important ? 28 : 18,
+    fill: (node) => node.data?.group === 'core' ? '#5B8FF9' : '#61DDAA',
+    label: (node) => String(node.data?.label ?? node.id),
+  },
+  stateStyles: {
+    selected: { stroke: '#1677ff', strokeWidth: 3 },
+    inactive: { opacity: 0.25 },
+  },
+}
+```
+
+Use state APIs for runtime selection and highlighting. Prefer static or precomputed fields for large graphs; keep functional style callbacks inexpensive.

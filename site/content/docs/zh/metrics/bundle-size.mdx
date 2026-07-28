@@ -1,0 +1,31 @@
+---
+title: 包体积
+description: G6-GL 的 size-limit 测量口径、120 kB brotli 预算与复现方法
+---
+
+G6-GL 使用 [size-limit](https://github.com/ai/size-limit) 对真实包入口和完整依赖树进行体积约束。仓库当前预算为 **120 kB（minify + brotli）**，避免功能迭代无意扩大业务最终产物。
+
+## 测量口径
+
+- 入口：`dist/index.js`，对应 `import { Graph } from '@antv/g6-gl'`。
+- 范围：核心引擎、`@antv/graphlib`、`@antv/layout` 及入口可达依赖。
+- 处理：size-limit 使用打包器模拟生产 bundle，执行 minify 与 brotli 压缩。
+- 门槛：根目录 `.size-limit.json` 中的 `120 KB`。
+
+## 复现
+
+```bash
+npm run build
+npm run size
+```
+
+2026-07-24 在当前工作区执行的结果为 **115.49 kB brotli**，低于 120 kB 预算。该数字用于本次版本验收，不应脱离版本和构建配置长期硬编码；最新结果以你当前 checkout 执行 `npm run size` 为准。
+
+## 使用建议
+
+- 从包根导入公开 API，让业务打包器可以正确分析依赖。
+- 使用支持 tree-shaking 的 Vite、Rollup、esbuild 或等价工具；包已声明 `sideEffects: false`。
+- 生产 CDN 开启 brotli 或 gzip，并以业务最终 bundle analyzer 结果评估真实增量。
+- 不把 G6-GL 与功能范围、依赖口径不同的图库做未经复现的体积倍数比较。
+
+体积门槛是工程约束，不代表所有业务只增加同等下载量；业务打包器版本、去重策略和已有共享依赖都会影响最终结果。

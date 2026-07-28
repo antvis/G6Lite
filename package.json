@@ -1,7 +1,7 @@
 {
   "name": "@antv/g6-gl",
   "version": "0.1.0-beta.22",
-  "description": "A high-performance graph analysis engine based on WebGL, designed for large-scale graph data analysis.",
+  "description": "A lightweight, high-performance WebGL graph visualization engine.",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -28,7 +28,9 @@
     "benchmark:compare": "node tests/perf/compare.js",
     "docs:api": "typedoc",
     "site:dev": "npm --prefix site run dev",
-    "site:build": "npm run docs:api && npm run build:playground && npm --prefix site run build && node scripts/copy-playground-to-site.mjs",
+    "site:check": "node scripts/check-site.mjs",
+    "site:output-check": "node scripts/check-site-output.mjs",
+    "site:build": "npm run docs:api && npm run build:playground && npm run site:check && npm --prefix site run build && node scripts/copy-playground-to-site.mjs && npm run site:output-check",
     "size": "size-limit",
     "ci": "npm run lint && npm run typecheck && npm test -- --coverage && npm run build && npm run size"
   },
@@ -79,7 +81,7 @@
     "type": "git",
     "url": "https://github.com/antvis/G6Lite"
   },
-  "homepage": "https://github.com/antvis/G6Lite#readme",
+  "homepage": "https://g6-gl.antv.vision",
   "bugs": {
     "url": "https://github.com/antvis/G6Lite/issues"
   },

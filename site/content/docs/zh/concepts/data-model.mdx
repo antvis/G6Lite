@@ -1,0 +1,102 @@
+---
+title: 数据模型
+description: GraphData、节点、边、Combo、业务字段和状态的组织方式
+---
+
+G6-GL 的数据通过 `GraphData` 传入，核心字段是 `nodes`、`edges` 和可选的 `combos`。
+
+```ts
+const data = {
+  nodes: [
+    { id: 'service-a', data: { name: '入口服务', type: 'gateway' } },
+    { id: 'service-b', data: { name: '订单服务', type: 'service' } },
+  ],
+  edges: [{ source: 'service-a', target: 'service-b', data: { qps: 1200 } }],
+  combos: [{ id: 'domain-order', data: { name: '订单域' } }],
+};
+```
+
+## 节点
+
+节点必须有稳定的 `id`。
+
+| 字段      | 说明                                   |
+| --------- | -------------------------------------- |
+| `id`      | 节点唯一标识                           |
+| `name`    | 可选名称                               |
+| `x` / `y` | 可选坐标；不传布局时会使用             |
+| `data`    | 业务扩展字段，样式函数和业务逻辑可读取 |
+| `states`  | 初始状态，如 `['selected']`            |
+| `comboId` | 所属 Combo id                          |
+
+业务字段建议放在 `data` 中，避免和 G6-GL 的保留字段冲突。
+
+## 边
+
+边必须声明 `source` 和 `target`。
+
+| 字段     | 说明                      |
+| -------- | ------------------------- |
+| `id`     | 可选边 id；不传时内部生成 |
+| `source` | 起点节点 id               |
+| `target` | 终点节点 id               |
+| `data`   | 业务扩展字段              |
+| `states` | 初始状态                  |
+
+## Combo
+
+Combo 用于节点分组：
+
+```ts
+const data = {
+  nodes: [
+    { id: 'n1', comboId: 'frontend' },
+    { id: 'n2', comboId: 'frontend' },
+  ],
+  edges: [],
+  combos: [{ id: 'frontend', data: { name: 'Frontend' } }],
+};
+```
+
+更完整的配置见 [Combo](/docs/guides/combo)。
+
+## 状态
+
+元素状态用于表达选中、高亮、置灰、隐藏等运行时语义：
+
+```ts
+graph.setItemState('n1', 'selected', true);
+graph.setItemState('n2', 'inactive', true);
+graph.hideItem('n3');
+graph.showItem('n3');
+```
+
+样式层可通过 `stateStyles` 定义状态覆盖：
+
+```ts
+node: {
+  stateStyles: {
+    selected: { stroke: '#1890ff', strokeWidth: 3 },
+    inactive: { opacity: 0.25 },
+  },
+}
+```
+
+状态变更会触发增量刷新，适合高频交互。
+
+## 查询视图
+
+`getNodeData()`、`getEdgeData()`、`getComboData()` 以及 `getNodes()` / `getEdges()` 返回归一化后的只读 Model 视图：
+
+- `NodeModel` 包含必选坐标和当前状态集合。
+- `EdgeModel` 包含确定的 edge id、端点和当前状态集合。
+- `ComboModel` 额外包含计算后的边界和子元素关系。
+
+这些 Model 由 Graph 持有，不是不可变快照。请通过 `updateNodeData()`、`updateEdgeData()`、位置和状态 API 修改数据，不要直接改写查询结果。
+
+## 大图数据建议
+
+- 保持 `id` 稳定，避免频繁删除再新增同一元素。
+- 大规模场景尽量使用静态样式，必要时再使用函数式样式。
+- 首屏如果已有后端布局坐标，可以直接传 `x` / `y` 并省略 `layout`。
+- 标签数量多时按需显示，避免全量文本绘制成为瓶颈。

@@ -1,45 +1,85 @@
 import type * as PageTree from 'fumadocs-core/page-tree';
 
-const guideFolders = ['getting-started', 'concepts', 'guides', 'layouts', 'interactions', 'advanced'];
+import type { Locale } from './i18n';
 
-export function getDocsNavigationTree(tree: PageTree.Root): PageTree.Root {
-  const docsChildren = [
-    findPageByUrl(tree, '/docs'),
-    findPageByUrl(tree, '/docs/faq'),
-    findPageByUrl(tree, '/docs/changelog'),
-  ].filter((node): node is PageTree.Item => Boolean(node));
+const labels = {
+  zh: {
+    gettingStarted: '快速开始',
+    concepts: '核心概念',
+    guides: '配置指南',
+    api: 'API',
+    examples: '示例',
+    metrics: '技术指标',
+    compatibility: '兼容性',
+  },
+  en: {
+    gettingStarted: 'Quick start',
+    concepts: 'Core concepts',
+    guides: 'Configuration',
+    api: 'API',
+    examples: 'Examples',
+    metrics: 'Technical metrics',
+    compatibility: 'Compatibility',
+  },
+} as const;
 
-  const guideChildren = guideFolders
-    .map((folder) => findFolderByPath(tree, folder))
-    .filter((node): node is PageTree.Folder => Boolean(node))
-    .map((node) => cloneNode(node));
+export function getDocsNavigationTree(tree: PageTree.Root, locale: Locale): PageTree.Root {
+  const text = labels[locale];
+  const docsOverview = findPageByUrl(tree, locale === 'en' ? '/en/docs' : '/docs');
+  const faq = findPageByUrl(tree, locale === 'en' ? '/en/docs/faq' : '/docs/faq');
+  const changelog = findPageByUrl(tree, locale === 'en' ? '/en/docs/changelog' : '/docs/changelog');
 
-  const examplesFolder = findFolderByPath(tree, 'examples');
-  const metricsFolder = findFolderByPath(tree, 'metrics');
-  const apiFolder = findFolderByPath(tree, 'api');
+  const gettingStarted = findFolderByPath(tree, 'getting-started');
+  const concepts = findFolderByPath(tree, 'concepts');
+  const guides = findFolderByPath(tree, 'guides');
+  const api = findFolderByPath(tree, 'api');
+  const examples = findFolderByPath(tree, 'examples');
+  const metrics = findFolderByPath(tree, 'metrics');
+  const compatibility = findFolderByPath(tree, 'compatibility');
 
   const children: PageTree.Node[] = [
-    createRootFolder('docs', '文档', docsChildren),
-    createRootFolder('guide', '指南', guideChildren),
+    createRootFolder(
+      'getting-started',
+      text.gettingStarted,
+      compactNodes([docsOverview, gettingStarted ? cloneNode(gettingStarted) : undefined]),
+    ),
+    createRootFolder(
+      'concepts',
+      text.concepts,
+      concepts ? concepts.children.map((node) => cloneNode(node)) : [],
+    ),
+    createRootFolder(
+      'guides',
+      text.guides,
+      guides ? guides.children.map((node) => cloneNode(node)) : [],
+    ),
+    createRootFolder('api', text.api, api ? api.children.map((node) => cloneNode(node)) : []),
+    createRootFolder(
+      'examples',
+      text.examples,
+      examples ? examples.children.map((node) => cloneNode(node)) : [],
+    ),
+    createRootFolder(
+      'metrics',
+      text.metrics,
+      metrics ? metrics.children.map((node) => cloneNode(node)) : [],
+    ),
+    createRootFolder(
+      'compatibility',
+      text.compatibility,
+      compactNodes([
+        ...(compatibility ? compatibility.children.map((node) => cloneNode(node)) : []),
+        faq,
+        changelog,
+      ]),
+    ),
   ];
 
-  if (examplesFolder) {
-    children.push(createRootFolder('examples', '示例', examplesFolder.children.map((node) => cloneNode(node))));
-  }
+  return { ...tree, $id: `docs-navigation-root-${locale}`, children };
+}
 
-  if (metricsFolder) {
-    children.push(createRootFolder('metrics', '指标', metricsFolder.children.map((node) => cloneNode(node))));
-  }
-
-  if (apiFolder) {
-    children.push(createRootFolder('api', 'API 参考', apiFolder.children.map((node) => cloneNode(node))));
-  }
-
-  return {
-    ...tree,
-    $id: 'docs-navigation-root',
-    children,
-  };
+function compactNodes<T extends PageTree.Node>(nodes: Array<T | undefined>): T[] {
+  return nodes.filter((node): node is T => node !== undefined);
 }
 
 function createRootFolder(id: string, name: string, children: PageTree.Node[]): PageTree.Folder {
@@ -66,9 +106,7 @@ function findFirstPage(nodes: PageTree.Node[]): PageTree.Item | undefined {
 }
 
 function cloneNode<T extends PageTree.Node>(node: T): T {
-  if (node.type !== 'folder') {
-    return { ...node };
-  }
+  if (node.type !== 'folder') return { ...node };
 
   return {
     ...node,
@@ -80,7 +118,10 @@ function cloneNode<T extends PageTree.Node>(node: T): T {
 }
 
 function findPageByUrl(tree: PageTree.Root, url: string): PageTree.Item | undefined {
-  return findNode(tree.children, (node): node is PageTree.Item => node.type === 'page' && node.url === url);
+  return findNode(
+    tree.children,
+    (node): node is PageTree.Item => node.type === 'page' && node.url === url,
+  );
 }
 
 function findFolderByPath(tree: PageTree.Root, folder: string): PageTree.Folder | undefined {

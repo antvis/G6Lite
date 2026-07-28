@@ -69,7 +69,6 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@antv/graphlib": "^2.0.0",
     "@antv/layout": "^2.0.0"
   },
   "engines": {

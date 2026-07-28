@@ -3,7 +3,7 @@
 English | [简体中文](./README.md)
 
 [![npm version](https://img.shields.io/npm/v/@antv/g6-gl.svg)](https://www.npmjs.com/package/@antv/g6-gl)
-[![CI](https://github.com/antvis/G6Lite/actions/workflows/ci.yml/badge.svg)](https://github.com/antvis/G6Lite/actions/workflows/ci.yml)
+[![build](https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg)](https://github.com/antvis/G6Lite/actions/workflows/build.yml)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@antv/g6-gl)](https://bundlephobia.com/package/@antv/g6-gl)
 [![license](https://img.shields.io/npm/l/@antv/g6-gl.svg)](./LICENSE)
 

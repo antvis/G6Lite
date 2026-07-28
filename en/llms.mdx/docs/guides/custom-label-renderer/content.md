@@ -1,0 +1,27 @@
+# Custom label renderers (/en/docs/guides/custom-label-renderer)
+
+
+
+Register a label renderer through the package-root API when standard text labels are not enough:
+
+```ts
+import { register, type LabelRenderer } from '@antv/g6-gl';
+
+const multiline: LabelRenderer<string[]> = {
+  measure({ ctx, text }) {
+    const lines = text.split('\n');
+    return {
+      width: Math.max(...lines.map((line) => ctx.measureText(line).width)),
+      height: lines.length * 18,
+      data: lines,
+    };
+  },
+  draw({ ctx, layout }) {
+    layout.data?.forEach((line, index) => ctx.fillText(line, 0, index * 18));
+  },
+};
+
+register('label', 'multiline', multiline);
+```
+
+The renderer owns content measurement and drawing. G6-GL continues to handle node and edge traversal, functional style resolution, placement, path sampling, rotation, DPR/zoom conversion, collision, and refresh scheduling. Release any renderer-owned resources during cleanup.

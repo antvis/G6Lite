@@ -50,5 +50,5 @@ await graph.render();
 
 ## 相关文档 [#相关文档]
 
-* [Tooltip](/docs/interactions/tooltip)
-* [事件](/docs/interactions/events)
+* [Tooltip](/docs/guides/tooltip)
+* [事件](/docs/guides/events)

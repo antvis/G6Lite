@@ -1,0 +1,864 @@
+# Changelog (/en/docs/changelog)
+
+
+
+G6-GL is currently in the `0.1.0-beta` series. Recent work has concentrated on package-root API boundaries, functional extensions, isolated extension lifecycle, read-only query models, layout cancellation, combo consistency, interaction dispatch, package size governance, examples, and reproducible benchmarks.
+
+Deprecated beta compatibility APIs remain documented in [API stability](/en/docs/compatibility/api-stability). Projects migrating from G6 v5 should follow the [migration guide](/en/docs/compatibility/g6-v5-migration).
+
+Before upgrading, run type checking, tests, a package build, size-limit, release examples, and target-device validation.
+
+
+# FAQ (/en/docs/faq)
+
+
+
+## Should I use G6-GL or G6 v5? [#should-i-use-g6-gl-or-g6-v5]
+
+Choose G6-GL when WebGL rendering, frequent state updates, and a smaller controlled capability surface match the product. Choose G6 v5 when the complete plugin, animation, and element ecosystem matters more.
+
+## Why is first render slow with a force layout? [#why-is-first-render-slow-with-a-force-layout]
+
+Layout computation often dominates first render. Reuse existing coordinates, control iterations, use a worker, or choose a deterministic layout. Measure with the repository Benchmark runner.
+
+## Can G6-GL run during SSR? [#can-g6-gl-run-during-ssr]
+
+No. It needs a real DOM canvas and WebGL context. Instantiate `Graph` in a client-only lifecycle such as React `useEffect`.
+
+## Where do TypeScript types come from? [#where-do-typescript-types-come-from]
+
+Import values and types from `@antv/g6-gl`. Deep `src/` paths are not public API.
+
+## Are combos stable? [#are-combos-stable]
+
+Combo rendering is available, but collapse, nesting, and runtime regrouping remain experimental in `0.1.x`.
+
+
+# Overview (/en/docs)
+
+
+
+G6-GL is a lightweight WebGL graph visualization engine for large relationship data and frequent analytical interactions. Follow the documentation from the first graph to concepts, configuration, examples, reproducible metrics, and compatibility boundaries.
+
+## Start here [#start-here]
+
+<Cards>
+  <Card title="Install and render your first graph" href="/en/docs/getting-started/quick-start" />
+
+  <Card title="Use G6-GL with React" href="/en/docs/getting-started/react" />
+
+  <Card title="Browse examples" href="/en/docs/examples" />
+
+  <Card title="Open the API reference" href="/en/docs/api" />
+</Cards>
+
+## Documentation structure [#documentation-structure]
+
+<Cards>
+  <Card title="Core concepts" href="/en/docs/concepts/overview" />
+
+  <Card title="Configuration" href="/en/docs/guides/data" />
+
+  <Card title="API" href="/en/docs/api" />
+
+  <Card title="Examples" href="/en/docs/examples" />
+
+  <Card title="Technical metrics" href="/en/docs/metrics/performance" />
+
+  <Card title="Compatibility" href="/en/docs/compatibility/browser" />
+</Cards>
+
+Use G6-GL when WebGL rendering, incremental state updates, AntV layouts, and a controlled extension boundary match your product. If you need the complete G6 plugin and animation ecosystem, evaluate G6 v5 first.
+
+
+# API reference (/en/docs/api)
+
+
+
+All supported imports come from `@antv/g6-gl`.
+
+```ts
+import { Graph, extensionFactory, register, runLayout } from '@antv/g6-gl';
+import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-gl';
+```
+
+## Main runtime APIs [#main-runtime-apis]
+
+* `Graph`: create, render, update, query, relayout, control the viewport, and destroy a graph.
+* `runLayout()`: run a supported layout independently.
+* `register()`: register node, edge, label, behavior, layout, transform, decoration, or plugin extensions.
+* `extensionFactory()`: provide isolated stateful extension instances.
+
+## Type groups [#type-groups]
+
+Package-root types cover graph options and data, nodes, edges, combos, labels, states, themes, layouts, viewport operations, behaviors, transforms, plugins, and extension context.
+
+The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).
+
+
+# Data model (/en/docs/concepts/data-model)
+
+
+
+`GraphData` contains `nodes`, `edges`, and optional `combos`:
+
+```ts
+const data = {
+  nodes: [
+    { id: 'gateway', data: { label: 'Gateway' } },
+    { id: 'orders', data: { label: 'Orders' } },
+  ],
+  edges: [{ source: 'gateway', target: 'orders', data: { qps: 1200 } }],
+};
+```
+
+Node IDs must be stable. Put business fields under `data`; use `x` and `y` when coordinates are already available. Edges declare `source` and `target` and may provide a stable `id`. Combos group nodes through `comboId` and remain experimental during the `0.1.x` beta.
+
+Use states for selection, highlighting, and dimming:
+
+```ts
+graph.batchSetState([
+  { id: 'gateway', state: 'selected', value: true },
+  { id: 'orders', state: 'inactive', value: true },
+]);
+```
+
+Query APIs return normalized read-only model views. Modify graph-owned data through update, position, and state APIs instead of mutating query results.
+
+
+# Graph lifecycle (/en/docs/concepts/graph-lifecycle)
+
+
+
+`Graph` is the main public entry point.
+
+```ts
+const graph = new Graph({ container: 'graph', data, layout: { type: 'force' } });
+await graph.render();
+```
+
+Construction resolves the container and prepares the rendering surface. `render()` sizes the canvases, resolves the theme, runs layout, initializes data and transforms, starts WebGL and interaction layers, fits the viewport, and emits `afterrender`.
+
+Use `setData()` for complete replacement. Use `addNode`, `addEdge`, update, remove, and state APIs for incremental changes. To run another layout:
+
+```ts
+graph.setLayout({ type: 'dagre', rankdir: 'LR' });
+await graph.layout();
+```
+
+Viewport APIs include `fitView()`, `focusItem()`, `setCamera()`, `screenToGraph()`, and `graphToScreen()`. Always call `graph.destroy()` during page or component cleanup.
+
+
+# What is G6-GL? (/en/docs/concepts/overview)
+
+
+
+G6-GL is a lightweight WebGL graph visualization engine. It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
+
+## Good fits [#good-fits]
+
+* Relationship exploration, topology, knowledge graphs, and dependency analysis.
+* Frequent highlighting, selection, neighbor focus, and state switching.
+* Products that need AntV layouts with a controlled package and extension boundary.
+
+## Evaluate carefully [#evaluate-carefully]
+
+* Extremely large graphs where first-paint speed is the only requirement.
+* Products that need the full G6 plugin, animation, and element ecosystem.
+* SVG/DOM-level customization or server-side image rendering.
+
+G6 v5 is the broader general-purpose framework. G6-GL is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
+
+
+# Minimal graph (/en/docs/examples/basic)
+
+
+
+
+
+<div className="example-hero">
+  <img src="withBasePath('/examples/basic.png')" alt="Minimal G6-GL graph" />
+</div>
+
+<div className="example-actions">
+  <a href="withBasePath('/playground/#basic')" target="_blank" rel="noreferrer">
+    Run online
+  </a>
+
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/basic.ts" target="_blank" rel="noreferrer">
+    View source
+  </a>
+</div>
+
+The example passes nodes and edges, runs a circular layout, and enables viewport navigation. It is the best starting point before adding styles or element-level behaviors.
+
+See [quick start](/en/docs/getting-started/quick-start) and [data configuration](/en/docs/guides/data).
+
+
+# Combo containers (/en/docs/examples/combo)
+
+
+
+
+
+<div className="example-hero">
+  <img src="withBasePath('/examples/combo.png')" alt="G6-GL combo containers" />
+</div>
+
+<div className="example-actions">
+  <a href="withBasePath('/playground/#combo')" target="_blank" rel="noreferrer">
+    Run online
+  </a>
+
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/combo.ts" target="_blank" rel="noreferrer">
+    View source
+  </a>
+</div>
+
+Combo APIs are experimental in `0.1.x`. Validate nesting, collapse, and incremental data updates with your own topology before production use. See [combos](/en/docs/guides/combo).
+
+
+# Edge arrows (/en/docs/examples/edge-arrows)
+
+
+
+
+
+<div className="example-hero">
+  <img src="withBasePath('/examples/edge-arrows.png')" alt="G6-GL edge arrow variants" />
+</div>
+
+<div className="example-actions">
+  <a href="withBasePath('/playground/#edge-arrows')" target="_blank" rel="noreferrer">
+    Run online
+  </a>
+
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/edge-arrows.ts" target="_blank" rel="noreferrer">
+    View source
+  </a>
+</div>
+
+Use edge style configuration for no arrow, start or end arrows, and line-width variations. See [edges](/en/docs/guides/edge).
+
+
+# Examples (/en/docs/examples)
+
+
+
+
+
+These examples are selected from `playground/demos/catalog.json`. The website, screenshots, source files, and release checks use the same catalog.
+
+<ExamplesGrid locale="en" />
+
+## Run and inspect [#run-and-inspect]
+
+* <a href="withBasePath('/playground/')">
+    Open the deployed Playground
+  </a>
+* [Browse every example source file](https://github.com/antvis/G6Lite/tree/master/playground/demos)
+
+
+# Layout switching (/en/docs/examples/layouts)
+
+
+
+
+
+<div className="example-hero">
+  <img src="withBasePath('/examples/layouts.png')" alt="G6-GL layout switching" />
+</div>
+
+<div className="example-actions">
+  <a href="withBasePath('/playground/#layouts')" target="_blank" rel="noreferrer">
+    Run online
+  </a>
+
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/layouts.ts" target="_blank" rel="noreferrer">
+    View source
+  </a>
+</div>
+
+Circular supports overview, force supports network exploration, grid creates a deterministic matrix, and dagre presents hierarchy. See [layout configuration](/en/docs/guides/layout).
+
+
+# Node styles (/en/docs/examples/node-style)
+
+
+
+
+
+<div className="example-hero">
+  <img src="withBasePath('/examples/node-style.png')" alt="G6-GL functional node styles" />
+</div>
+
+<div className="example-actions">
+  <a href="withBasePath('/playground/#node-style')" target="_blank" rel="noreferrer">
+    Run online
+  </a>
+
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/node-style.ts" target="_blank" rel="noreferrer">
+    View source
+  </a>
+</div>
+
+Functional styles read normalized node data. State styles handle highlight and dimming without replacing the complete dataset. See [nodes](/en/docs/guides/node) and [interactions](/en/docs/guides/interactions).
+
+
+# Parallel edges (/en/docs/examples/parallel-edges)
+
+
+
+
+
+<div className="example-hero">
+  <img src="withBasePath('/examples/parallel-edges.png')" alt="G6-GL parallel edges" />
+</div>
+
+<div className="example-actions">
+  <a href="withBasePath('/playground/#parallel-edges')" target="_blank" rel="noreferrer">
+    Run online
+  </a>
+
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/parallel-edges.ts" target="_blank" rel="noreferrer">
+    View source
+  </a>
+</div>
+
+The `process-parallel-edges` transform assigns distinct paths while preserving edge identity. See [parallel and self-loop edges](/en/docs/guides/parallel-edges).
+
+
+# Real dataset (/en/docs/examples/real-dataset)
+
+
+
+
+
+<div className="example-hero">
+  <img src="withBasePath('/examples/real-dataset.png')" alt="G6-GL real dataset" />
+</div>
+
+<div className="example-actions">
+  <a href="withBasePath('/playground/#real-dataset')" target="_blank" rel="noreferrer">
+    Run online
+  </a>
+
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/real-dataset.ts" target="_blank" rel="noreferrer">
+    View source
+  </a>
+</div>
+
+The example reuses dataset coordinates instead of running a new layout. It is useful for checking large-graph rendering, zooming, dragging, and neighbor focus with a more realistic topology. Measure your own target devices before using it as a performance baseline.
+
+
+# Tooltip (/en/docs/examples/tooltip)
+
+
+
+
+
+<div className="example-hero">
+  <img src="withBasePath('/examples/tooltip.png')" alt="G6-GL tooltip" />
+</div>
+
+<div className="example-actions">
+  <a href="withBasePath('/playground/#tooltip')" target="_blank" rel="noreferrer">
+    Run online
+  </a>
+
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/tooltip.ts" target="_blank" rel="noreferrer">
+    View source
+  </a>
+</div>
+
+The behavior consumes the shared picking and pointer pipeline. See [tooltip configuration](/en/docs/guides/tooltip) and [events](/en/docs/guides/events).
+
+
+# API stability and release boundary (/en/docs/compatibility/api-stability)
+
+
+
+G6-GL remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
+
+Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
+
+Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
+
+Combo collapse, nesting, and runtime regrouping remain experimental. Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.
+
+
+# Browsers and runtime environment (/en/docs/compatibility/browser)
+
+
+
+G6-GL requires WebGL 1.0 and a modern browser capable of running the ESM/ES2020 package. Canvas 2D is used for labels and combo outlines. WebGL 2.0 is not required.
+
+Recommended minimums for the untranspiled package are Chrome/Edge 80+, Firefox 74+, Safari 13.1+, and iOS Safari 13.4+. These are syntax and platform capability boundaries, not a complete certified device matrix.
+
+G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
+
+Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
+
+
+# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
+
+
+
+G6-GL borrows G6 configuration concepts but is not a complete replacement for G6 v5. Migration is most suitable when large-graph interaction and state updates are the primary bottleneck and the product uses core node, edge, layout, and behavior capabilities.
+
+Do not migrate blindly when the project depends on the complete plugin ecosystem, animation system, complex Canvas element customization, or built-in graph analysis.
+
+Suggested process:
+
+1. Reproduce one real workflow in the deployed Playground.
+2. Normalize data to nodes, edges, and optional combos.
+3. Map styles and states through package-root Graph options.
+4. Replace G6 behavior names with supported G6-GL behaviors.
+5. Verify layouts, events, incremental updates, compatibility, and performance on target devices.
+
+Keep the original implementation until the real-data acceptance suite passes.
+
+
+# Compatibility overview (/en/docs/compatibility)
+
+
+
+Review these boundaries before adopting or upgrading G6-GL:
+
+<Cards>
+  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
+
+  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
+
+  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
+</Cards>
+
+G6-GL needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.
+
+
+# Install and render your first graph (/en/docs/getting-started/quick-start)
+
+
+
+Install the package:
+
+```bash
+npm install @antv/g6-gl
+```
+
+The container must have an explicit size:
+
+```html
+<div id="graph" style="width: 800px; height: 500px"></div>
+```
+
+Create and render the graph using package-root APIs:
+
+```ts
+import { Graph } from '@antv/g6-gl';
+
+const graph = new Graph({
+  container: 'graph',
+  data: {
+    nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+    edges: [
+      { source: 'a', target: 'b' },
+      { source: 'a', target: 'c' },
+    ],
+  },
+  layout: { type: 'circular', radius: 140 },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+});
+
+await graph.render();
+```
+
+Use `setData()` for a complete replacement and the add/update/remove/state APIs for incremental changes. Call `graph.destroy()` when the page or component unmounts.
+
+Next: [React integration](/en/docs/getting-started/react), [data configuration](/en/docs/guides/data), and [examples](/en/docs/examples).
+
+
+# Use G6-GL with React (/en/docs/getting-started/react)
+
+
+
+Create the graph after the DOM container mounts and destroy it in the effect cleanup:
+
+```tsx
+import { Graph } from '@antv/g6-gl';
+import { useEffect, useRef } from 'react';
+
+export function GraphView() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: {
+        nodes: [{ id: 'a' }, { id: 'b' }],
+        edges: [{ source: 'a', target: 'b' }],
+      },
+      layout: { type: 'circular', radius: 120 },
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+    });
+
+    graph.render();
+    return () => graph.destroy();
+  }, []);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 480 }} />;
+}
+```
+
+Give the container a real height. Cleanup is especially important because React Strict Mode can run effects twice during development. Keep the graph in a ref when props change, then call `setData()` or an incremental update API from a separate effect.
+
+
+# Combos (/en/docs/guides/combo)
+
+
+
+Combo capabilities are experimental during `0.1.x`.
+
+```ts
+const graph = new Graph({
+  container: 'graph',
+  data: {
+    nodes: [
+      { id: 'n1', comboId: 'frontend' },
+      { id: 'n2', comboId: 'frontend' },
+    ],
+    edges: [],
+    combos: [{ id: 'frontend', data: { label: 'Frontend' } }],
+  },
+  combo: { style: { padding: 24, fill: 'rgba(22,119,255,0.06)' } },
+});
+```
+
+Use `collapseCombo()`, `expandCombo()`, and `toggleCombo()` for visibility. Runtime grouping APIs include `addToCombo()`, `removeFromCombo()`, `createCombo()`, and `removeCombo()`.
+
+
+# Custom label renderers (/en/docs/guides/custom-label-renderer)
+
+
+
+Register a label renderer through the package-root API when standard text labels are not enough:
+
+```ts
+import { register, type LabelRenderer } from '@antv/g6-gl';
+
+const multiline: LabelRenderer<string[]> = {
+  measure({ ctx, text }) {
+    const lines = text.split('\n');
+    return {
+      width: Math.max(...lines.map((line) => ctx.measureText(line).width)),
+      height: lines.length * 18,
+      data: lines,
+    };
+  },
+  draw({ ctx, layout }) {
+    layout.data?.forEach((line, index) => ctx.fillText(line, 0, index * 18));
+  },
+};
+
+register('label', 'multiline', multiline);
+```
+
+The renderer owns content measurement and drawing. G6-GL continues to handle node and edge traversal, functional style resolution, placement, path sampling, rotation, DPR/zoom conversion, collision, and refresh scheduling. Release any renderer-owned resources during cleanup.
+
+
+# Custom nodes (/en/docs/guides/custom-node)
+
+
+
+```ts
+import { register } from '@antv/g6-gl';
+
+register('node', 'status-node', {
+  type: 'rect',
+  style: { width: 96, height: 34, borderRadius: 8 },
+});
+```
+
+Prefer `node.style` and `stateStyles` when only color, size, stroke, label, or state appearance changes. `BaseNode` and `registerNode()` remain beta compatibility APIs; new extensions should use `register('node', ...)`.
+
+
+# Data and Graph options (/en/docs/guides/data)
+
+
+
+`GraphData` contains nodes, edges, and optional combos. IDs must be stable; put application fields under `data`.
+
+```ts
+const graph = new Graph({
+  container: 'graph',
+  data: {
+    nodes: [{ id: 'a', data: { type: 'service' } }, { id: 'b' }],
+    edges: [{ source: 'a', target: 'b', data: { relation: 'calls' } }],
+  },
+  node: { type: 'circle' },
+  edge: { type: 'line' },
+  layout: { type: 'circular' },
+  behaviors: ['zoom-canvas', 'drag-canvas'],
+  theme: 'light',
+});
+
+await graph.render();
+```
+
+Use `transforms` for reusable data processing such as parallel-edge separation and `plugins` for managed capabilities. Destroy the graph when its container is removed.
+
+
+# Edges (/en/docs/guides/edge)
+
+
+
+```ts
+edge: {
+  type: 'line',
+  style: {
+    stroke: '#91a3b0',
+    lineWidth: 2,
+    endArrow: true,
+  },
+  stateStyles: {
+    highlight: { stroke: '#1677ff', lineWidth: 3 },
+    inactive: { opacity: 0.2 },
+  },
+}
+```
+
+Use line, arc, cubic, quadratic, or polyline edges according to the topology. Enable `process-parallel-edges` when multiple edges share endpoints. See [parallel edges](/en/docs/guides/parallel-edges).
+
+
+# Events (/en/docs/guides/events)
+
+
+
+```ts
+graph.on('node:click', ({ nodeId, data, event }) => {
+  console.log(nodeId, data, event);
+});
+```
+
+Element events use prefixes such as `node:`, `edge:`, and `combo:`. Lifecycle events include rendering, layout, data mutation, and destroy notifications. Keep the same handler reference when removing a listener:
+
+```ts
+graph.on('node:click', handler);
+graph.off('node:click', handler);
+graph.once('afterrender', () => console.log('ready'));
+```
+
+
+# Extension system (/en/docs/guides/extensions)
+
+
+
+Start with configuration and functional styles. Register an extension only when configuration cannot express the capability.
+
+```ts
+import { extensionFactory, register } from '@antv/g6-gl';
+
+register('edge', 'business-relation', {
+  type: 'arc',
+  style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
+});
+```
+
+Use `extensionFactory()` when each Graph needs an isolated stateful instance. Extension lifecycle is managed through `init`, `update`, and `destroy`. Consume structured data, state, and viewport context instead of engine internals or deprecated `context.graph` access.
+
+Custom layouts must honor cancellation signals, and managed resources such as listeners, timers, workers, and DOM nodes must be released in `destroy()`.
+
+
+# Interaction configuration (/en/docs/guides/interactions)
+
+
+
+Without an explicit list, G6-GL enables zoom and canvas dragging. Passing `behaviors: []` disables the defaults.
+
+```ts
+behaviors: [
+  'zoom-canvas',
+  'drag-canvas',
+  'drag-node',
+  'click-select',
+  'hover-highlight',
+  'tooltip',
+];
+```
+
+Each behavior can be a string or an object with options. Picking and element event dispatch are shared, so behaviors consume one consistent interaction stream. See [events](/en/docs/guides/events).
+
+
+# Labels and icons (/en/docs/guides/label)
+
+
+
+```ts
+node: {
+  style: {
+    label: (node) => String(node.data?.name ?? node.id),
+    labelPlacement: 'bottom',
+    labelFill: '#344054',
+  },
+}
+```
+
+Edge labels can read source, target, and edge data. Labels and combo outlines use Canvas 2D above the WebGL surface. For large graphs, show only important labels initially and reveal more by zoom level, selection, or focus.
+
+
+# Layout configuration (/en/docs/guides/layout)
+
+
+
+```ts
+layout: { type: 'force', linkDistance: 100, worker: true }
+```
+
+Use circular or grid for deterministic overviews, dagre for hierarchies, force and d3-force for networks, and mindmap, indented, or fishbone for tree-oriented presentation. If coordinates already exist, omit layout and use node `x` / `y`.
+
+Run another layout at runtime:
+
+```ts
+graph.setLayout({ type: 'dagre', rankdir: 'LR' });
+await graph.layout();
+```
+
+Worker execution reduces main-thread blocking but does not make expensive layouts free. Control iterations and measure with real data.
+
+
+# Nodes (/en/docs/guides/node)
+
+
+
+Nodes support built-in circle and rectangle rendering plus registered extensions.
+
+```ts
+node: {
+  type: 'circle',
+  style: {
+    size: (node) => node.data?.important ? 28 : 18,
+    fill: (node) => node.data?.group === 'core' ? '#5B8FF9' : '#61DDAA',
+    label: (node) => String(node.data?.label ?? node.id),
+  },
+  stateStyles: {
+    selected: { stroke: '#1677ff', strokeWidth: 3 },
+    inactive: { opacity: 0.25 },
+  },
+}
+```
+
+Use state APIs for runtime selection and highlighting. Prefer static or precomputed fields for large graphs; keep functional style callbacks inexpensive.
+
+
+# Parallel and self-loop edges (/en/docs/guides/parallel-edges)
+
+
+
+```ts
+const graph = new Graph({
+  container: 'graph',
+  data,
+  edge: { type: 'line', style: { endArrow: true } },
+  transforms: [{ type: 'process-parallel-edges', distance: 20 }],
+});
+```
+
+The transform assigns different paths to same-direction, reverse, and self-loop edges. Keep stable edge IDs when updates need to preserve identity.
+
+
+# Themes (/en/docs/guides/theme)
+
+
+
+```ts
+theme: 'dark';
+```
+
+Override only the tokens your product needs:
+
+```ts
+theme: {
+  type: 'light',
+  tokens: {
+    nodeFill: '#5B8FF9',
+    edgeStroke: '#AAB7C4',
+    background: '#F7F9FC',
+  },
+}
+```
+
+Explicit node and edge styles take precedence over theme defaults. Keep application design tokens in one place and map them to G6-GL theme tokens.
+
+
+# Tooltip configuration (/en/docs/guides/tooltip)
+
+
+
+```ts
+behaviors: [
+  {
+    type: 'tooltip',
+    getContent: ({ itemType, data }) =>
+      `<strong>${itemType}</strong><br />${String(data?.label ?? '')}`,
+  },
+];
+```
+
+Use application-safe rendering when content contains user input. Tooltip positioning follows the shared pointer and picking pipeline. Style the generated surface through the documented tooltip class names or your own controlled content.
+
+
+# Bundle size (/en/docs/metrics/bundle-size)
+
+
+
+G6-GL measures the `dist/index.js` package entry and all reachable dependencies with size-limit. The repository budget is **120 kB after minification and brotli compression**.
+
+```bash
+npm run build
+npm run size
+```
+
+The 2026-07-24 verification result for this workspace was **115.49 kB brotli**, below the budget. Treat that number as version-specific acceptance evidence; run the command on the current checkout for the latest value.
+
+Import from the package root, use a tree-shaking bundler, enable production compression, and inspect the final application bundle. Do not compare libraries unless feature scope and dependency boundaries are equivalent.
+
+
+# Performance tuning (/en/docs/metrics/performance-tuning)
+
+
+
+* Reuse backend coordinates when available and omit layout.
+* Control iterations for force layouts and consider `worker: true`.
+* Prefer deterministic layouts for large overview screens.
+* Use state and batch update APIs for high-frequency interaction.
+* Keep functional style callbacks inexpensive and precompute complex mappings.
+* Limit initial labels; reveal more by zoom, focus, or selection.
+
+```bash
+npm run benchmark -- --suite all --mode quick
+npm run benchmark -- --suite browser --mode full
+```
+
+Compare only equivalent environments and configurations. Desktop Headless Chrome cannot replace real mobile or low-end device testing.
+
+
+# Benchmark and performance metrics (/en/docs/metrics/performance)
+
+
+
+G6-GL uses one repository runner for Node microbenchmarks and browser scenarios. Results are comparable only when version, commit, hardware, runtime, data, configuration, and sampling mode match.
+
+```bash
+npm run benchmark -- --suite all --mode quick
+```
+
+* `--suite node` covers DataModel and layout microbenchmarks.
+* `--suite browser` covers public Graph API updates, first render, viewport interaction, picking, and memory trends.
+* `--mode quick` validates the runner and release path.
+* `--mode full` expands workloads and samples for reviewed baselines.
+
+Reports are written to `performance/` as JSON and Markdown. Raw local reports are not committed by default. Public comparisons must record the G6-GL version and Git state, Node and Chromium versions, operating system, CPU, user agent, viewport, DPR, data scale, layout configuration, sample count, RME, and warnings.
+
+Quick results are smoke evidence, not marketing baselines. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).

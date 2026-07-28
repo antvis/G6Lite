@@ -110,4 +110,4 @@ const exported = graph.getData();
 ## 相关文档 [#相关文档]
 
 * [Combo](/docs/guides/combo)
-* [交互总览](/docs/interactions/overview)
+* [交互总览](/docs/guides/interactions)

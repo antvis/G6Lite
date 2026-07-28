@@ -10,12 +10,8 @@ const data = {
     { id: 'service-a', data: { name: '入口服务', type: 'gateway' } },
     { id: 'service-b', data: { name: '订单服务', type: 'service' } },
   ],
-  edges: [
-    { source: 'service-a', target: 'service-b', data: { qps: 1200 } },
-  ],
-  combos: [
-    { id: 'domain-order', data: { name: '订单域' } },
-  ],
+  edges: [{ source: 'service-a', target: 'service-b', data: { qps: 1200 } }],
+  combos: [{ id: 'domain-order', data: { name: '订单域' } }],
 };
 ```
 

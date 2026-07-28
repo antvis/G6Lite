@@ -1,0 +1,58 @@
+# Tooltip 配置 (/docs/guides/tooltip)
+
+
+
+启用 `tooltip` behavior 后，G6-GL 会在命中节点或边时显示浮层。
+
+```ts
+behaviors: ['tooltip'];
+```
+
+## 自定义内容 [#自定义内容]
+
+```ts
+behaviors: [
+  {
+    type: 'tooltip',
+    trigger: 'hover',
+    getContent: (ctx) =>
+      ctx.itemType === 'node'
+        ? `<b>${ctx.data?.label ?? ctx.nodeId}</b>`
+        : `${ctx.source} -> ${ctx.target}`,
+  },
+];
+```
+
+`getContent` 可以返回字符串或 HTMLElement。返回字符串时会写入 `innerHTML`，需要自行确保内容安全。
+
+## 配置项 [#配置项]
+
+| 选项           | 类型                               | 默认值                | 说明             |
+| ------------ | -------------------------------- | ------------------ | -------------- |
+| `trigger`    | `'hover' \| 'click'`             | `'hover'`          | 触发方式           |
+| `getContent` | `(ctx) => string \| HTMLElement` | label / id         | 自定义内容          |
+| `enable`     | `(ctx) => boolean`               | 总是显示               | 按元素控制是否显示      |
+| `offset`     | `[number, number]`               | `[10, 10]`         | 相对指针偏移         |
+| `delay`      | `number`                         | `80`               | hover 防抖，单位 ms |
+| `className`  | `string`                         | `'g6lite-tooltip'` | 浮层 class       |
+
+## 样式 [#样式]
+
+库本身不附带 tooltip 视觉样式。你可以用默认 class 自定义：
+
+```css
+.g6lite-tooltip {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.78);
+  color: #fff;
+  font-size: 12px;
+  pointer-events: none;
+}
+```
+
+## 相关 [#相关]
+
+* [交互总览](/docs/guides/interactions)
+* [事件](/docs/guides/events)
+* [API: TooltipOptions](/docs/api)

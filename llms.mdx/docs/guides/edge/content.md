@@ -74,10 +74,10 @@ transforms: [
     type: 'process-parallel-edges',
     distance: 18,
   },
-]
+];
 ```
 
-更多说明见 [平行边与自环](/docs/advanced/parallel-edges)。
+更多说明见 [平行边与自环](/docs/guides/parallel-edges)。
 
 ## 相关 [#相关]
 

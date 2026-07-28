@@ -49,4 +49,4 @@ await graph.render();
 
 * [安装与第一个图](/docs/getting-started/quick-start)
 * [数据](/docs/guides/data)
-* [布局](/docs/layouts/overview)
+* [布局](/docs/guides/layout)

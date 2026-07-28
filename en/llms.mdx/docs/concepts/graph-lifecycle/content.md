@@ -1,0 +1,21 @@
+# Graph lifecycle (/en/docs/concepts/graph-lifecycle)
+
+
+
+`Graph` is the main public entry point.
+
+```ts
+const graph = new Graph({ container: 'graph', data, layout: { type: 'force' } });
+await graph.render();
+```
+
+Construction resolves the container and prepares the rendering surface. `render()` sizes the canvases, resolves the theme, runs layout, initializes data and transforms, starts WebGL and interaction layers, fits the viewport, and emits `afterrender`.
+
+Use `setData()` for complete replacement. Use `addNode`, `addEdge`, update, remove, and state APIs for incremental changes. To run another layout:
+
+```ts
+graph.setLayout({ type: 'dagre', rankdir: 'LR' });
+await graph.layout();
+```
+
+Viewport APIs include `fitView()`, `focusItem()`, `setCamera()`, `screenToGraph()`, and `graphToScreen()`. Always call `graph.destroy()` during page or component cleanup.

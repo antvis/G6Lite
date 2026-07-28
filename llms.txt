@@ -8,26 +8,23 @@
   - [G6-GL 是什么](/docs/concepts/overview): G6-GL 的定位、适用场景和与 G6 v5 的关系
   - [Graph 生命周期](/docs/concepts/graph-lifecycle): 从创建 Graph 到 render、更新、重新布局和销毁
   - [数据模型](/docs/concepts/data-model): GraphData、节点、边、Combo、业务字段和状态的组织方式
-- 基础配置
+- 配置指南
   - [数据](/docs/guides/data): G6-GL 的图数据格式与 Graph 顶层配置项
   - [节点](/docs/guides/node): 节点类型、样式函数、状态样式和性能建议
   - [边](/docs/guides/edge): 边类型、箭头、标签、状态样式和平行边
   - [标签与图标](/docs/guides/label): 节点标签、边标签和节点图标配置
   - [Combo](/docs/guides/combo): 节点分组容器的声明、样式、折叠展开和整体拖拽
   - [主题](/docs/guides/theme): 使用 light / dark 主题并覆盖 token
-- 布局
-  - [布局总览](/docs/layouts/overview): 内置布局类型、选型建议、常用参数与 Worker 支持
-- 交互
-  - [交互总览](/docs/interactions/overview): 内置 behaviors、启用方式和常用交互组合
-  - [事件](/docs/interactions/events): 监听元素事件、行为事件和生命周期事件
-  - [Tooltip](/docs/interactions/tooltip): 使用内置 tooltip behavior 展示节点和边信息
-- 进阶
-  - [性能调优](/docs/advanced/performance-tuning): 大图首屏、交互、标签、状态和布局的优化建议
-  - [平行边与自环](/docs/advanced/parallel-edges): 处理多条同源同目标边和自环边的展示
-  - [自定义节点](/docs/advanced/custom-node): 使用统一 register 和函数式 NodeExtension 扩展节点表现
-  - [自定义 Label Renderer](/docs/advanced/custom-label-renderer): 自定义节点和边的 Label 内容，同时复用 G6-GL 的定位、旋转、碰撞与调度
-  - [扩展体系](/docs/advanced/extensions): 通过配置、函数式映射和公开扩展 API 完成业务定制
-  - [从 G6 v5 迁移](/docs/advanced/g6-v5-migration): 评估 G6 v5 项目迁移到 G6-GL 时的差异和改造点
+  - [布局配置](/docs/guides/layout): 内置布局类型、选型建议、常用参数与 Worker 支持
+  - [交互配置](/docs/guides/interactions): 内置 behaviors、启用方式和常用交互组合
+  - [事件](/docs/guides/events): 使用 graph.on、graph.off 和 graph.once 监听元素与生命周期事件
+  - [Tooltip 配置](/docs/guides/tooltip): 使用内置 tooltip behavior 展示节点和边信息
+  - [平行边与自环处理](/docs/guides/parallel-edges): 处理多条同源同目标边和自环边的展示
+  - [扩展体系](/docs/guides/extensions): 通过配置、函数式映射和公开扩展 API 完成受控业务定制
+  - [自定义节点](/docs/guides/custom-node): 使用统一 register 和函数式 NodeExtension 扩展节点表现形式
+  - [自定义 Label Renderer](/docs/guides/custom-label-renderer): 自定义节点和边的 Label 内容，并复用定位、旋转、碰撞与调度能力
+- API 参考
+  - [API 参考](/docs/api): 由 TypeDoc 从 src/index.ts 的公共 API 类型自动生成
 - 示例
   - [示例总览](/docs/examples): 查看从 Playground 验证并筛选出的真实 G6-GL 示例
   - [最简示例](/docs/examples/basic): 使用 G6-GL 渲染一个最小关系图
@@ -37,12 +34,64 @@
   - [Tooltip 浮层](/docs/examples/tooltip): 悬停节点或边时展示自定义业务信息
   - [Combo 分组容器](/docs/examples/combo): 用固定坐标的应用架构图演示嵌套分组、折叠展开和动态归属
   - [平行边自动错开](/docs/examples/parallel-edges): 处理同源同目标的多条边和反向边
-  - [真实数据集](/docs/examples/real-dataset): 使用 sigma 同款真实数据验证 G6-GL 的大图渲染
-- 指标
-  - [包大小](/docs/metrics/bundle-size): G6-GL 的真实打包体积与同类图可视化库横向对比
-  - [浏览器兼容性](/docs/metrics/browser-compatibility): G6-GL 的 WebGL 支持矩阵、最低浏览器版本与已知问题
-  - [性能指标](/docs/metrics/performance): G6-GL 的性能指标定义、测试环境、核心数据与复现方式
-- API 参考
-  - [API 参考](/docs/api): 由 TypeDoc 从 src/index.ts 的公共 API 类型自动生成
-- [常见问题](/docs/faq): G6-GL 的选型、性能调优、兼容性与使用中的高频问题
+  - [真实数据集](/docs/examples/real-dataset): 使用 AI Papers 真实数据集验证 G6-GL 的大图渲染
+- 技术指标
+  - [Benchmark 与性能指标](/docs/metrics/performance): G6-GL 的可复现 Benchmark 入口、指标口径、环境记录与结果使用边界
+  - [性能调优](/docs/metrics/performance-tuning): 大图首屏、交互、标签、状态与布局的优化建议和度量方法
+  - [包体积](/docs/metrics/bundle-size): G6-GL 的 size-limit 测量口径、120 kB brotli 预算与复现方法
+- 兼容性
+  - [兼容性总览](/docs/compatibility): 浏览器、运行环境、公开 API 稳定性与 G6 v5 迁移边界
+  - [浏览器与运行环境](/docs/compatibility/browser): G6-GL 的 WebGL 支持矩阵、最低浏览器版本与已知问题
+  - [API 稳定性与发布边界](/docs/compatibility/api-stability): G6-GL 的公开入口、稳定能力、弃用兼容层与实验性能力说明
+  - [从 G6 v5 迁移](/docs/compatibility/g6-v5-migration): 评估从 G6 v5 迁移到 G6-GL 时的能力差异、边界与改造点
+- [常见问题](/docs/faq): G6-GL 的选型、性能、兼容性、SSR、TypeScript 与 Combo 高频问题
 - [更新日志](/docs/changelog): G6-GL 的版本与变更记录
+
+# Documentation
+
+- [Overview](/en/docs): G6-GL documentation for getting started, configuration, API, examples, metrics, and compatibility
+- Quick start
+  - [Install and render your first graph](/en/docs/getting-started/quick-start): Install G6-GL, prepare a sized container, and render an interactive graph
+  - [Use G6-GL with React](/en/docs/getting-started/react): Mount and clean up a Graph instance with useRef and useEffect
+- Core concepts
+  - [What is G6-GL?](/en/docs/concepts/overview): Positioning, suitable workloads, and the relationship between G6-GL and G6 v5
+  - [Graph lifecycle](/en/docs/concepts/graph-lifecycle): Create, render, update, relayout, and destroy a G6-GL Graph instance
+  - [Data model](/en/docs/concepts/data-model): Organize nodes, edges, combos, business fields, coordinates, and runtime states
+- Configuration
+  - [Data and Graph options](/en/docs/guides/data): Configure GraphData, elements, layouts, behaviors, themes, transforms, and plugins
+  - [Nodes](/en/docs/guides/node): Configure node types, functional styles, labels, and state styles
+  - [Edges](/en/docs/guides/edge): Configure line, arc, curve, polyline, arrows, labels, and state styles
+  - [Labels and icons](/en/docs/guides/label): Configure node labels, edge labels, icons, placement, rotation, and collision behavior
+  - [Combos](/en/docs/guides/combo): Group nodes with nested, collapsible, draggable combo containers
+  - [Themes](/en/docs/guides/theme): Use light and dark presets or override G6-GL theme tokens
+  - [Layout configuration](/en/docs/guides/layout): Choose built-in layouts, configure workers, and rerun layout at runtime
+  - [Interaction configuration](/en/docs/guides/interactions): Combine viewport, element, selection, highlight, and tooltip behaviors
+  - [Events](/en/docs/guides/events): Listen to element, interaction, data, layout, render, and destroy events
+  - [Tooltip configuration](/en/docs/guides/tooltip): Show node and edge information with the built-in tooltip behavior
+  - [Parallel and self-loop edges](/en/docs/guides/parallel-edges): Separate multiple edges that share endpoints and render self-loops clearly
+  - [Extension system](/en/docs/guides/extensions): Extend nodes, edges, labels, layouts, behaviors, transforms, decorations, and plugins
+  - [Custom nodes](/en/docs/guides/custom-node): Register functional NodeExtension implementations through the public package API
+  - [Custom label renderers](/en/docs/guides/custom-label-renderer): Customize label measurement and drawing while reusing G6-GL placement and scheduling
+- API reference
+  - [API reference](/en/docs/api): Public package-root exports for Graph, layouts, extensions, configuration, data, and behaviors
+- Examples
+  - [Examples](/en/docs/examples): Browse runnable G6-GL examples grouped by public API concepts
+  - [Minimal graph](/en/docs/examples/basic): Render a small interactive relationship graph with minimal configuration
+  - [Node styles](/en/docs/examples/node-style): Map business fields to node colors, sizes, labels, and highlight states
+  - [Edge arrows](/en/docs/examples/edge-arrows): Compare direction and arrow rendering across several edge configurations
+  - [Layout switching](/en/docs/examples/layouts): Switch circular, force, grid, and dagre layouts on one dataset
+  - [Tooltip](/en/docs/examples/tooltip): Show custom node and edge details through the tooltip behavior
+  - [Combo containers](/en/docs/examples/combo): Explore nested groups, collapse, expansion, dragging, and runtime regrouping
+  - [Parallel edges](/en/docs/examples/parallel-edges): Separate same-direction, reverse, and self-loop edges
+  - [Real dataset](/en/docs/examples/real-dataset): Validate rendering and interaction with the AI Papers relationship dataset
+- Technical metrics
+  - [Benchmark and performance metrics](/en/docs/metrics/performance): Reproduce G6-GL Node and browser benchmarks with explicit environments and result boundaries
+  - [Performance tuning](/en/docs/metrics/performance-tuning): Measure and optimize first render, layout, updates, labels, and viewport interaction
+  - [Bundle size](/en/docs/metrics/bundle-size): Reproduce the size-limit measurement and enforce the 120 kB brotli budget
+- Compatibility
+  - [Compatibility overview](/en/docs/compatibility): Browser, runtime, public API stability, and G6 v5 migration boundaries
+  - [Browsers and runtime environment](/en/docs/compatibility/browser): WebGL, ESM, browser support, SSR boundaries, and known runtime constraints
+  - [API stability and release boundary](/en/docs/compatibility/api-stability): Public package entry points, deprecated compatibility APIs, and experimental capabilities
+  - [Migrate from G6 v5](/en/docs/compatibility/g6-v5-migration): Evaluate capability differences and migration work before moving a G6 v5 project to G6-GL
+- [FAQ](/en/docs/faq): Selection, performance, compatibility, SSR, TypeScript, and combo questions
+- [Changelog](/en/docs/changelog): Important G6-GL beta changes and migration boundaries

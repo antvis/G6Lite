@@ -27,13 +27,13 @@ G6-GL 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL 引
 
   <Card title="配置边" href="/docs/guides/edge" />
 
-  <Card title="选择布局" href="/docs/layouts/overview" />
+  <Card title="选择布局" href="/docs/guides/layout" />
 
-  <Card title="添加交互" href="/docs/interactions/overview" />
+  <Card title="添加交互" href="/docs/guides/interactions" />
 
-  <Card title="性能调优" href="/docs/advanced/performance-tuning" />
+  <Card title="性能调优" href="/docs/metrics/performance-tuning" />
 
-  <Card title="从 G6 v5 迁移" href="/docs/advanced/g6-v5-migration" />
+  <Card title="从 G6 v5 迁移" href="/docs/compatibility/g6-v5-migration" />
 </Cards>
 
 ## 核心能力 [#核心能力]
@@ -53,7 +53,7 @@ G6-GL 更适合大规模关系图和高频分析交互。如果你需要完整�
 
   <Card title="包大小" href="/docs/metrics/bundle-size" />
 
-  <Card title="浏览器兼容性" href="/docs/metrics/browser-compatibility" />
+  <Card title="浏览器兼容性" href="/docs/compatibility/browser" />
 
   <Card title="常见问题" href="/docs/faq" />
 </Cards>

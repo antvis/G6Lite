@@ -45,4 +45,4 @@ await graph.render();
 ## 相关文档 [#相关文档]
 
 * [边](/docs/guides/edge)
-* [平行边与自环](/docs/advanced/parallel-edges)
+* [平行边与自环](/docs/guides/parallel-edges)

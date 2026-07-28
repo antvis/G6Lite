@@ -7,11 +7,11 @@
 ## 使用预设 [#使用预设]
 
 ```ts
-theme: 'light'
+theme: 'light';
 ```
 
 ```ts
-theme: 'dark'
+theme: 'dark';
 ```
 
 ## 覆盖 token [#覆盖-token]

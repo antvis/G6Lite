@@ -45,5 +45,5 @@ await graph.render();
 ## 相关文档 [#相关文档]
 
 * [节点](/docs/guides/node)
-* [交互总览](/docs/interactions/overview)
-* [性能调优](/docs/advanced/performance-tuning)
+* [交互总览](/docs/guides/interactions)
+* [性能调优](/docs/metrics/performance-tuning)

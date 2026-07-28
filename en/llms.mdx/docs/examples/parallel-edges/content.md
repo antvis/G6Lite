@@ -1,0 +1,21 @@
+# Parallel edges (/en/docs/examples/parallel-edges)
+
+
+
+
+
+<div className="example-hero">
+  <img src="withBasePath('/examples/parallel-edges.png')" alt="G6-GL parallel edges" />
+</div>
+
+<div className="example-actions">
+  <a href="withBasePath('/playground/#parallel-edges')" target="_blank" rel="noreferrer">
+    Run online
+  </a>
+
+  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/parallel-edges.ts" target="_blank" rel="noreferrer">
+    View source
+  </a>
+</div>
+
+The `process-parallel-edges` transform assigns distinct paths while preserving edge identity. See [parallel and self-loop edges](/en/docs/guides/parallel-edges).

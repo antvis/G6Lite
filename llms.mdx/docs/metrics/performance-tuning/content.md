@@ -1,0 +1,53 @@
+# 性能调优 (/docs/metrics/performance-tuning)
+
+
+
+G6-GL 的首屏耗时通常由数据准备和布局计算主导；渲染后的状态更新、视口交互和拾取则更依赖浏览器、GPU 与单屏元素数量。调优应先测量，再针对瓶颈调整。
+
+## 首屏与布局 [#首屏与布局]
+
+* 后端已有坐标时，直接提供 `x` / `y` 并使用 preset 数据，避免重复布局。
+* 大图优先评估 `grid`、`circular` 等确定性布局；力导向布局需要控制迭代次数。
+* force 系布局可开启 `worker: true`，降低主线程阻塞。
+* 先渲染关键节点和边，再按业务优先级补充非关键元素。
+
+```ts
+layout: {
+  type: 'force',
+  worker: true,
+  maxIteration: 100,
+}
+```
+
+## 高频更新 [#高频更新]
+
+高亮、选中、隐藏等交互优先使用状态 API，让调度器只刷新变化部分：
+
+```ts
+graph.batchSetState([
+  { id: 'n2', state: 'inactive', value: true },
+  { id: 'e1', state: 'inactive', value: true },
+]);
+```
+
+批量更新位置或业务数据时，优先使用对应批量 API，避免在同一帧内循环触发大量独立调度。
+
+## 样式与标签 [#样式与标签]
+
+* 函数式样式中只读取已准备好的字段，不执行复杂聚合或网络查询。
+* 标签由 Canvas 2D 绘制；大规模图只展示关键标签，并随缩放级别或选中状态逐步展开。
+* 控制阴影、复杂描边、超长文本和全量边标签，避免把 CPU 绘制成本放在每次视口更新上。
+
+## 使用统一 Benchmark [#使用统一-benchmark]
+
+```bash
+# 快速确认 Node 与浏览器链路
+npm run benchmark -- --suite all --mode quick
+
+# 使用真实基线前扩大工作负载与采样量
+npm run benchmark -- --suite browser --mode full
+```
+
+对比前确保版本、commit、CPU、浏览器、视口、DPR、数据规模和布局配置一致。完整口径见 [Benchmark 与性能指标](/docs/metrics/performance)。
+
+如果目标是极大规模或低端移动设备，请在真实设备上使用真实拓扑测试；桌面 Headless Chrome 的结果不能替代终端验收。

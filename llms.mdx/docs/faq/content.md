@@ -2,99 +2,48 @@
 
 
 
-本页收口使用 G6-GL 时的高频问题。选型背景见 [项目介绍](/docs/guide/introduction)，体积与性能数据见 [包大小](/docs/metrics/bundle-size) 与 [性能指标](/docs/metrics/performance)。
+## G6-GL 和 G6 v5 怎么选？ [#g6-gl-和-g6-v5-怎么选]
 
-## 选型 [#选型]
+G6-GL 聚焦 WebGL 渲染、高频状态更新和受控能力边界；G6 v5 提供更完整的插件、动画、元素与通用图可视化生态。请用真实数据验证目标场景，不按未经复现的绝对跑分或体积倍数选型。
 
-### 1. G6-GL 和 G6 v5 是什么关系，该怎么选？ [#1-g6-gl-和-g6-v5-是什么关系该怎么选]
+如果核心问题是大规模关系图的浏览器渲染和分析交互，可以优先评估 G6-GL；如果重度依赖完整插件生态、复杂动画或图论能力，应优先评估 G6 v5。
 
-G6-GL 不是 G6 v5 的替代品，而是面向**不同侧重点**的姊妹方案：
+## 力导向布局首屏慢怎么办？ [#力导向布局首屏慢怎么办]
 
-* **G6 v5**：功能全面、插件生态丰富、基于 Canvas，适合中小规模、强调表现力与交互细节的场景。
-* **G6-GL**：100% WebGL、聚焦大规模渲染 + 高频交互，全量体积约为 G6 v5 的 1/4。
+首屏耗时通常由数据准备和布局计算主导。可按以下顺序排查：
 
-判断标准：若你的图**节点上万**、且需要**频繁高亮 / 选中 / 邻居聚焦**，G6-GL 的增量更新近零成本优势明显；若你重度依赖内置图论算法或完整插件生态，选 G6 v5。
+* 已有坐标时直接传入 `x` / `y`，省略重复布局。
+* 控制 force 系布局的迭代次数，并评估 `worker: true`。
+* 大图总览优先使用 grid、circular 等确定性布局。
+* 使用 [Benchmark 运行器](/docs/metrics/performance) 区分布局与渲染耗时。
 
-### 2. 和 sigma.js 有什么区别？ [#2-和-sigmajs-有什么区别]
+## 高亮或选中卡顿怎么办？ [#高亮或选中卡顿怎么办]
 
-两者都用 WebGL，但定位不同：
+使用 `setItemState()` 或 `batchSetState()` 表达运行时状态，不要为了高亮而替换整份数据。批量位置和业务数据更新也应优先使用批量 API，避免同一帧触发大量独立调度。
 
-* **sigma.js** 是一个**纯渲染器**，布局、图数据结构需另引入 [graphology](https://graphology.github.io/) 生态自行拼装。
-* **G6-GL** 是**开箱即用的引擎**：内置 14 种布局、完整交互（拖拽 / 框选 / 套索 / hover 高亮）、Combo 分组、标签图标、主题，且 API 与 AntV 生态一致。
+## 浏览器和 WebGL 要求是什么？ [#浏览器和-webgl-要求是什么]
 
-代价是体积略大（全量 gzip \~117 KB vs sigma \~60–80 KB），但省去自行集成布局与交互的工作量。若你只要一个最小渲染器并愿意自己拼装，sigma 更轻；若你要一站式的大规模图分析能力，选 G6-GL。
+G6-GL 需要 WebGL 1.0、Canvas 2D 和现代 ESM/ES2020 浏览器环境，不要求 WebGL 2.0。最低版本、移动端注意事项和硬件加速边界见 [浏览器与运行环境](/docs/compatibility/browser)。
 
-### 3. 什么场景**不**适合用 G6-GL？ [#3-什么场景不适合用-g6-gl]
+## 能在 Node.js 或 SSR 阶段直接运行吗？ [#能在-nodejs-或-ssr-阶段直接运行吗]
 
-* 需要大量**内置图论分析算法**（社区发现、最短路、中心性等）——G6-GL 不内置这些，需自行计算或引入第三方库。
-* 重度依赖 G6 v5 的**完整插件生态**（小地图、时间轴、各类交互插件）。
-* 超大图（10 万+）且**只看首屏速度、交互极简**——G6-GL 首屏受布局算法主导，优势在交互而非纯首屏，这类场景请实测后决策。
+不能。`Graph` 依赖真实 DOM、Canvas 和 WebGL 上下文。在 Next.js、Nuxt 等框架中应只在客户端生命周期创建实例，并在组件卸载时调用 `destroy()`。
 
-## 性能调优 [#性能调优]
+## TypeScript 类型从哪里导入？ [#typescript-类型从哪里导入]
 
-### 4. 万级节点首屏渲染慢，瓶颈在哪？ [#4-万级节点首屏渲染慢瓶颈在哪]
-
-G6-GL 的首屏耗时**由布局算法主导**，而非渲染本身。力导向（force / fa2）在大图上是计算密集型。优化方向：
-
-* 节点数 ≥ 1000 时，力导向布局**自动切到 Web Worker**，避免阻塞主线程（无需手动配置）。
-* 若数据已带坐标（`x` / `y`），可不配 `layout`，直接渲染，跳过布局开销。
-* 静态布局（grid / circular）远快于力导向，对超大图优先考虑。
-
-### 5. 高亮 / 选中卡顿怎么办？ [#5-高亮--选中卡顿怎么办]
-
-正常情况下不应卡顿——高亮 / 状态变更走 `RefreshLevel` 分级调度 + GPU patch，单次开销约 0 ms。如果卡顿，常见原因是**绕过了增量路径触发全量重建**：
-
-* 用 `setItemState` / `batchSetState` 更新状态，**不要**用 `setData` 重设全量数据来表达「高亮」。
-* 批量状态变更用 `batchSetState`，避免逐个 `setItemState` 造成多次调度。
-
-### 6. 频繁增删节点应该怎么写？ [#6-频繁增删节点应该怎么写]
-
-* 批量操作用复数方法：`addNodes` / `removeNodes` / `addEdges` / `removeEdges`，一次调度优于多次单条。
-* 数据整体替换用 `setData`；局部增量用单项方法。两者都走调度器，避免在一帧内交替混用。
-
-### 7. 内存占用如何？大图会不会 OOM？ [#7-内存占用如何大图会不会-oom]
-
-DataModel 采用 Array / 列存结构，缓冲区用 Float32Array 指数增长（而非每次精确扩容），在大图下显著降低 GC 压力。具体数值见 [性能指标](/docs/metrics/performance)。
-
-## 兼容性与跨端 [#兼容性与跨端]
-
-### 8. 需要哪些浏览器 / WebGL 版本？ [#8-需要哪些浏览器--webgl-版本]
-
-依赖 **WebGL 1.0**（覆盖率 ≈ 98%），不强制 WebGL 2。最低版本矩阵与已知问题（如 Safari 下的颜色 / ANGLE 差异）见 [浏览器兼容性](/docs/metrics/browser-compatibility)。
-
-### 9. 能在 Node.js / SSR 环境运行吗？ [#9-能在-nodejs--ssr-环境运行吗]
-
-不能直接运行——G6-GL 依赖真实的 `canvas` 与 WebGL 上下文。在 SSR 框架（Next.js / Nuxt 等）中，请把图的初始化放到**客户端**（如 `useEffect` / `onMounted`），避免在服务端渲染阶段实例化 `Graph`。
-
-### 10. 支持移动端 / 小程序吗？ [#10-支持移动端--小程序吗]
-
-支持移动端浏览器（iOS Safari / Android Chrome，见兼容矩阵）。小程序环境因缺少标准 DOM 与 WebGL 上下文，目前**不支持**。
-
-### 11. 拿不到 WebGL 上下文（`WebGL not supported`）怎么排查？ [#11-拿不到-webgl-上下文webgl-not-supported怎么排查]
-
-通常是环境不具备 WebGL：
-
-* 浏览器禁用了硬件加速，或在虚拟机 / 无 GPU 的 CI 环境中运行。
-* 容器元素尚未挂载到 DOM 就调用了 `render()`——确保容器已在文档中且有非零尺寸。
-* 单元测试 / jsdom 环境无 WebGL，需 mock gl 上下文（参考仓库 `tests/unit/renderer/renderer.test.ts` 的做法）。
-
-## 使用 [#使用]
-
-### 12. TypeScript 下类型从哪里引入？ [#12-typescript-下类型从哪里引入]
-
-全部从包入口导入：
+值和类型都从包根导入：
 
 ```ts
 import { Graph } from '@antv/g6-gl';
-import type { GraphOptions, GraphData, NodeConfig, EdgeConfig } from '@antv/g6-gl';
+import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-gl';
 ```
 
-公开类型清单以包根入口和 API 文档为准（`Camera` / `NodeState` / `EdgeState` 等均已导出）。`DataModel`、`RenderScheduler`、`RendererData` 等实现契约不再从包根导出，业务扩展应只依赖公开 Graph 与 Extension API。
+`src/` 深层路径不是公开 API。详细边界见 [API 稳定性](/docs/compatibility/api-stability)。
 
-### 13. Combo（分组）可以用了吗？ [#13-combo分组可以用了吗]
+## Combo 可以使用吗？ [#combo-可以使用吗]
 
-可以，支持分组容器、嵌套、折叠展开与整体拖拽，见 [Combo 指南](/docs/guide/combo)。Combo 仍在打磨中，标注为 experimental，API 在 0.1.x 内可能微调。
+Combo 已支持分组容器、嵌套、折叠和运行时归组，但这些能力在 `0.1.x` 仍标记为 experimental。正式使用前需要覆盖真实嵌套层级、增量更新和折叠交互回归。
 
-### 14. 文档里的 demo 能直接复制运行吗？ [#14-文档里的-demo-能直接复制运行吗]
+## 示例能在线运行吗？ [#示例能在线运行吗]
 
-可以。最小可运行示例见 [快速开始](/docs/guide/quick-start)，完整能力见[指南](/docs/guide/data)各页（数据 / 节点 / 边 / 布局 / 交互 / 主题）。仓库 `playground/` 下还有更多压测与示例页。
+官网示例链接到随静态站点一起部署的 Playground，并与 `playground/demos/catalog.json`、源码、截图和 Release profile 检查共用同一份案例清单。入口见 [示例](/docs/examples)。

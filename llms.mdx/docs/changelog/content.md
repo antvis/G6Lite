@@ -22,7 +22,7 @@
 * 补齐渲染与布局重入取消、Worker 请求隔离、Combo 关系清理、Label 异步销毁及 Node/Edge 扩展错误隔离。
 * 当前包保持 ESM-only。源码相对 import 的 `.js` 后缀服务于 Node ESM 产物解析，本轮不删除。
 
-从 G6 v5 迁移的项目可参考 [G6 v5 迁移说明](/docs/advanced/g6-v5-migration)。
+从 G6 v5 迁移的项目可参考 [G6 v5 迁移说明](/docs/compatibility/g6-v5-migration)。
 
 ### 交互事件统一调度（2026-06-10） [#交互事件统一调度2026-06-10]
 
@@ -40,7 +40,7 @@
 
 ### 首屏渲染与性能优化（2026-05-26 ～ 06-04） [#首屏渲染与性能优化2026-05-26--06-04]
 
-* 分级刷新调度（`RefreshLevel`）+ GPU patch，高亮 / 状态变更增量更新近零成本。
+* 分级刷新调度（`RefreshLevel`）+ GPU patch，高亮 / 状态变更走增量更新路径。
 * 静态样式优先（static style priority）路径，减少冗余样式解析。
 * 消除首屏冗余 draw call；力导向 / fa2 大图崩溃修复。
 * DataModel Array / 列存化，Float32Array 指数增长缓冲，降低 GC 压力。
@@ -60,11 +60,11 @@
 ### 治理与官网（2026-06 起） [#治理与官网2026-06-起]
 
 * 治理文件齐备：`CONTRIBUTING` / `CODE_OF_CONDUCT` / Issue & PR 模板。
-* 官网站点（Next.js + Fumadocs）+ 三份指标文档（包大小 / 浏览器兼容 / 性能）。
+* 官网站点（Next.js + Fumadocs）+ Benchmark、包体积与兼容性文档。
 * CI 接入覆盖率门槛与 size-limit 体积门禁。
 
 ## 相关链接 [#相关链接]
 
-* [项目介绍](/docs/guide/introduction)
+* [项目介绍](/docs)
 * [常见问题](/docs/faq)
 * [性能指标](/docs/metrics/performance)

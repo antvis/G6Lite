@@ -49,5 +49,5 @@ async function renderLayout(index: number) {
 
 ## 相关文档 [#相关文档]
 
-* [布局总览](/docs/layouts/overview)
+* [布局总览](/docs/guides/layout)
 * [Graph 生命周期](/docs/concepts/graph-lifecycle)

@@ -14,9 +14,7 @@ const data = {
     { id: '0', data: { cluster: 'a', value: 1 } },
     { id: '1', data: { cluster: 'b' } },
   ],
-  edges: [
-    { source: '0', target: '1', data: { weight: 2 } },
-  ],
+  edges: [{ source: '0', target: '1', data: { weight: 2 } }],
 };
 ```
 
@@ -55,17 +53,17 @@ const data = {
 
 ## Graph 配置项 [#graph-配置项]
 
-| 选项           | 类型                      | 说明                                  |
-| ------------ | ----------------------- | ----------------------------------- |
-| `container`  | `string \| HTMLElement` | 挂载画布的容器                             |
-| `data`       | `GraphData`             | 图数据                                 |
-| `node`       | `NodeConfig`            | [节点](/docs/guides/node)类型、样式和状态样式   |
-| `edge`       | `EdgeConfig`            | [边](/docs/guides/edge)类型、样式和箭头      |
-| `combo`      | `ComboConfig`           | [Combo](/docs/guides/combo) 样式      |
-| `layout`     | `LayoutConfig`          | [布局](/docs/layouts/overview)类型与参数   |
-| `behaviors`  | `BehaviorOption[]`      | [交互](/docs/interactions/overview)列表 |
-| `theme`      | `ThemeOption`           | [主题](/docs/guides/theme)            |
-| `transforms` | `TransformOption[]`     | 数据转换，如平行边处理                         |
+| 选项           | 类型                      | 说明                                |
+| ------------ | ----------------------- | --------------------------------- |
+| `container`  | `string \| HTMLElement` | 挂载画布的容器                           |
+| `data`       | `GraphData`             | 图数据                               |
+| `node`       | `NodeConfig`            | [节点](/docs/guides/node)类型、样式和状态样式 |
+| `edge`       | `EdgeConfig`            | [边](/docs/guides/edge)类型、样式和箭头    |
+| `combo`      | `ComboConfig`           | [Combo](/docs/guides/combo) 样式    |
+| `layout`     | `LayoutConfig`          | [布局](/docs/guides/layout)类型与参数    |
+| `behaviors`  | `BehaviorOption[]`      | [交互](/docs/guides/interactions)列表 |
+| `theme`      | `ThemeOption`           | [主题](/docs/guides/theme)          |
+| `transforms` | `TransformOption[]`     | 数据转换，如平行边处理                       |
 
 创建 `Graph` 后必须调用 `await graph.render()` 才会执行布局并绘制。销毁时调用 `graph.destroy()`。
 

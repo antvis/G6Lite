@@ -1,89 +1,63 @@
-# 性能指标 (/docs/metrics/performance)
+# Benchmark 与性能指标 (/docs/metrics/performance)
 
 
 
-G6-GL 面向**大规模图数据**渲染，其性能特征与传统 Canvas/SVG 图库有本质差异：增量更新（高亮、状态变更、拾取）走 GPU patch 路径，开销极低；而首次渲染受布局算法主导。本页给出指标定义、测试环境、核心数据与复现方式，帮助你判断 G6-GL 是否适合你的场景。
+G6-GL 使用仓库内统一的 Node 与浏览器 Benchmark 运行器验证性能链路。性能结果只在运行环境、数据规模、配置和采样模式一致时具有可比性；官网不使用缺少环境信息的绝对跑分或跨机器营销对比。
 
-> **数据说明**：下表核心基准数据采集于 2025-05-09 的对比测试，作为公开基线。此后版本针对首屏渲染、内存占用、大图交互做了多轮优化，实测复现脚本与持续更新的跑分将随版本补充。引用数据时请以你本地复现结果为准。
+## 运行入口 [#运行入口]
 
-## 一、指标定义 [#一指标定义]
-
-| 指标              | 含义                                     | 单位        |
-| --------------- | -------------------------------------- | --------- |
-| **firstRender** | 从 `graph.render()` 调用到首帧绘制完成的耗时（含布局计算） | ms（越低越好）  |
-| **dragFps**     | 拖拽 / 平移过程中的渲染帧率                        | fps（越高越好） |
-| **pickAt**      | 单次拾取（鼠标命中检测）耗时                         | ms（越低越好）  |
-| **highlight**   | 单次高亮状态切换的渲染开销                          | ms（越低越好）  |
-| **stateChange** | 单次元素状态变更的渲染开销                          | ms（越低越好）  |
-| **addNodes**    | 增量添加一批节点的耗时                            | ms（越低越好）  |
-| **memory**      | 渲染指定规模图后的常驻内存                          | MB（越低越好）  |
-
-其中 **firstRender** 与 **memory** 随节点规模变化，通常分 1000 / 5000 / 10000 三档测量。
-
-## 二、测试环境 [#二测试环境]
-
-| 项     | 说明                                   |
-| ----- | ------------------------------------ |
-| 对比对象  | sigma.js（同为 WebGL 轻量图库）              |
-| 图规模   | 1000 / 5000 / 10000 节点               |
-| 布局    | force（力导向，≥1000 节点自动启用 Worker 子线程计算） |
-| 渲染上下文 | WebGL 1.0，硬件加速开启                     |
-| 采集方式  | `performance.now()` 计时 + 内存快照        |
-
-> 性能结果高度依赖机器 GPU、屏幕 devicePixelRatio、图的拓扑结构（边密度）。下表为相对量级参考，不同机器绝对值会有差异。
-
-## 三、核心指标（2025-05-09 基线，G6-GL vs sigma.js） [#三核心指标2025-05-09-基线g6-gl-vs-sigmajs]
-
-| 指标                | G6-GL      | sigma.js | 对比               |
-| ----------------- | ---------- | -------- | ---------------- |
-| firstRender 1000  | 1580 ms    | 555 ms   | sigma 快 \~2.8×   |
-| firstRender 5000  | 4654 ms    | 3864 ms  | sigma 快 \~1.2×   |
-| firstRender 10000 | 12765 ms   | 4317 ms  | sigma 快 \~3×     |
-| dragFps 5000      | 121 fps    | 122 fps  | 基本持平             |
-| dragFps 10000     | 123 fps    | 462 fps  | sigma 更高         |
-| **pickAt**        | **0.1 ms** | 0.2 ms   | **G6-GL 快 \~2×** |
-| **highlight**     | **\~0 ms** | 4–9 ms   | **G6-GL 显著领先**   |
-| **stateChange**   | **\~0 ms** | 3–7 ms   | **G6-GL 显著领先**   |
-| addNodes          | 14–16 ms   | 8 ms     | sigma 更快         |
-| memory 5000       | 311 MB     | 152 MB   | sigma 更省         |
-
-## 四、性能特征解读 [#四性能特征解读]
-
-### G6-GL 的优势 [#g6-gl-的优势]
-
-* **增量更新近乎零成本**：高亮、状态变更走 RefreshLevel 分级调度 + GPU patch，仅更新变化的缓冲区，单次开销约 0 ms，而 sigma 需 3–9 ms。&#x2A;*频繁交互、状态频繁切换的分析场景是 G6-GL 的主战场。**
-* **拾取（picking）更快**：基于 GPU Framebuffer 的颜色拾取，0.1 ms 完成命中检测，优于空间索引方案。
-* **中等规模交互流畅**：5000 节点以下拖拽 / 缩放约 120 fps，与 sigma 持平。
-
-### G6-GL 的瓶颈与优化方向 [#g6-gl-的瓶颈与优化方向]
-
-* **首次渲染受布局主导**：基线数据中 firstRender 的大头是**力导向布局迭代**而非绘制。已落地的优化包括——为 ≤1000 节点补齐 `maxIteration=100` 限制（此前误走默认 500 次，是 5000 节点的 10 倍迭代）、将 Worker 卸载阈值从 `>2000` 降到 `≥1000` 让中小图也走子线程。这些改动预期将 1000 节点首屏从约 1.5 s 降至数百毫秒级（实测复现待补）。
-* **大图（10000+）交互**：已移除每帧空转的视口裁剪扫描（纯 CPU 负担砸在关键帧上），拖拽 GC 压力下降。真实空间裁剪 / LOD 列为后续方向。
-* **内存占用**：通过指数增长改 1.25× 收缩系数、`shrinkToFit` 回收 typed-array slack、消除 Renderer/DataModel 对象数组冗余等手段持续下压，目标向竞品靠拢。
-
-## 五、如何复现 [#五如何复现]
-
-仓库内提供布局基准脚本：
+先安装依赖，然后在仓库根目录执行：
 
 ```bash
-# 5000 节点布局基准（对比各布局算法耗时）
-node --experimental-vm-modules scripts/bench-layout-5k.mjs
+npm run benchmark -- --suite all --mode quick
 ```
 
-完整的端到端 benchmark（firstRender / dragFps / memory 全指标）正在整理为可复现脚本，将随后续版本补充。在此之前，你可以用以下方式快速自测首屏：
+参数含义：
 
-```ts
-import { Graph } from '@antv/g6-gl';
+* `--suite node`：DataModel 与布局微基准。
+* `--suite browser`：公开 Graph API、首屏、交互、拾取和内存趋势。
+* `--suite all`：依次运行 Node 与浏览器套件。
+* `--mode quick`：用于本地和发布链路的快速验收。
+* `--mode full`：扩大数据档位与采样量，用于审核基线。
 
-const t0 = performance.now();
-const graph = new Graph({ container, data, layout: { type: 'force' } });
-graph.on('afterrender', () => {
-  console.log('firstRender:', performance.now() - t0, 'ms');
-});
-graph.render();
+例如：
+
+```bash
+npm run benchmark -- --suite node --mode full
+npm run benchmark -- --suite browser --mode full
 ```
 
-## 六、选型建议 [#六选型建议]
+命令会先构建 npm 包，再把 JSON 与 Markdown 报告写入 `performance/`。本地原始报告默认不提交；只有经过审核、环境可比的结果才进入 `tests/perf/baselines/`。
 
-* **适合 G6-GL**：需要大规模节点渲染 + 高频交互 / 状态切换（高亮、选中、邻居聚焦）的分析型场景。
-* **需评估**：若核心诉求是「超大图（10万+）极致首屏速度」且交互简单，请结合你的数据规模实测后再决策。
+## 指标范围 [#指标范围]
+
+Node 套件覆盖数据模型替换、位置与业务数据更新、状态切换、增删节点、邻居查询和布局计算。浏览器套件覆盖：
+
+* 批量更新节点位置和业务数据直到下一帧完成。
+* 批量状态更新、邻居与邻接边查询。
+* 首次渲染、布局耗时和不含布局的渲染耗时。
+* 拖拽与缩放帧率、P95 帧耗时和掉帧比例。
+* 拾取耗时、Highlight 延迟和销毁后的堆内存趋势。
+
+报告中的内存变化是趋势信号，不等同于内存泄漏证明；垃圾回收时机、浏览器进程复用和显卡驱动都会影响结果。
+
+## 环境要求 [#环境要求]
+
+浏览器套件需要可用的 Chromium/Chrome 与 WebGL 硬件加速。公开或比较结果时至少记录：
+
+* G6-GL 版本、Git commit 与工作区是否干净。
+* Node、Chromium、操作系统和架构。
+* CPU 型号；浏览器结果还需记录 user agent、视口和 DPR。
+* 数据节点/边数量、布局、迭代次数与 quick/full 模式。
+* 样本量、RME 与运行器产生的 warning。
+
+Benchmark 报告会自动写入大部分环境字段。不同环境的结果不应直接计算“提升百分比”。
+
+## 当前公开口径 [#当前公开口径]
+
+* Quick 模式用于验证运行器、构建产物和关键路径可以完整执行，不作为营销基线。
+* 首页只展示 WebGL 1.0、内置布局能力与包体积预算等稳定事实。
+* 包体积由 `size-limit` 独立校验，详见 [包体积](/docs/metrics/bundle-size)。
+* 具体业务选型应使用真实数据和目标设备运行 full 模式，再结合 [性能调优](/docs/metrics/performance-tuning) 分析瓶颈。
+
+运行器实现与更完整说明位于仓库 `tests/perf/README.md`。

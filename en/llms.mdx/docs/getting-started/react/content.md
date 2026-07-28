@@ -1,0 +1,35 @@
+# Use G6-GL with React (/en/docs/getting-started/react)
+
+
+
+Create the graph after the DOM container mounts and destroy it in the effect cleanup:
+
+```tsx
+import { Graph } from '@antv/g6-gl';
+import { useEffect, useRef } from 'react';
+
+export function GraphView() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: {
+        nodes: [{ id: 'a' }, { id: 'b' }],
+        edges: [{ source: 'a', target: 'b' }],
+      },
+      layout: { type: 'circular', radius: 120 },
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+    });
+
+    graph.render();
+    return () => graph.destroy();
+  }, []);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 480 }} />;
+}
+```
+
+Give the container a real height. Cleanup is especially important because React Strict Mode can run effects twice during development. Keep the graph in a ref when props change, then call `setData()` or an incremental update API from a separate effect.

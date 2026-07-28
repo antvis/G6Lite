@@ -1,0 +1,14 @@
+{
+  "title": "Examples",
+  "pages": [
+    "index",
+    "basic",
+    "node-style",
+    "edge-arrows",
+    "layouts",
+    "tooltip",
+    "combo",
+    "parallel-edges",
+    "real-dataset"
+  ]
+}

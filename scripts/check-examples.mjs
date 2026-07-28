@@ -50,7 +50,8 @@ function validateCatalog() {
     }
     if (demo.audiences.includes('site')) {
       for (const required of [
-        path.resolve('site/content/docs/examples', `${demo.id}.mdx`),
+        path.resolve('site/content/docs/zh/examples', `${demo.id}.mdx`),
+        path.resolve('site/content/docs/en/examples', `${demo.id}.mdx`),
         path.resolve('site/public/examples', `${demo.id}.png`),
       ]) {
         if (!existsSync(required)) throw new Error(`Site demo ${demo.id} is missing ${required}`);

@@ -9,7 +9,7 @@ import type {
   NodeStyleConfig,
   NodeStyleValue,
   ResolvedLabelStyle,
-} from '../types.js';
+} from '../types';
 
 export const DEFAULT_FONT_FAMILY =
   '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';

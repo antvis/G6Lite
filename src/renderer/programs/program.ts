@@ -4,8 +4,8 @@
  * Supports both normal rendering and picking mode (via u_picking uniform).
  */
 
-import type { Camera } from '../camera.js';
-import { createProgram } from '../gl.js';
+import type { Camera } from '../camera';
+import { createProgram } from '../gl';
 
 export interface RenderParams {
   width: number;

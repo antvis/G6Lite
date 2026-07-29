@@ -3,11 +3,11 @@
  * Layered on top of the WebGL canvas with pointer-events: none.
  */
 
-import type { DecorationRenderer } from '../extensions/contracts.js';
-import { getDecorationRenderer } from '../extensions/decoration.js';
-import { getLabelRenderer } from '../extensions/label.js';
-import { getNodeBaseType, getNodeExtension } from '../extensions/node.js';
-import { safeExtensionCall } from '../extensions/registry.js';
+import type { DecorationRenderer } from '../extensions/contracts';
+import { getDecorationRenderer } from '../extensions/decoration';
+import { getLabelRenderer } from '../extensions/label';
+import { getNodeBaseType, getNodeExtension } from '../extensions/node';
+import { safeExtensionCall } from '../extensions/registry';
 import type {
   EdgeConfig,
   EdgeLabelParams,
@@ -25,9 +25,9 @@ import type {
   NodeStyleConfig,
   ResolvedLabelStyle,
   ThemeTokens,
-} from '../types.js';
-import type { Camera } from './camera.js';
-import { graphToNDC } from './camera.js';
+} from '../types';
+import type { Camera } from './camera';
+import { graphToNDC } from './camera';
 import {
   createDecorationGroupLayout,
   getStackItemX,
@@ -35,14 +35,14 @@ import {
   resolveDecorationPlacement,
   selectVisibleDecorationItems,
   type MeasuredDecorationItem,
-} from './decorationLayout.js';
-import { sampleEdgePath, type EdgePath } from './edgePath.js';
-import { LabelGrid } from './labelGrid.js';
+} from './decorationLayout';
+import { sampleEdgePath, type EdgePath } from './edgePath';
+import { LabelGrid } from './labelGrid';
 import {
   getBuiltInNodeBoundaryAnchor,
   getCustomNodeLabelAnchor,
   getNodeDecorationAnchor,
-} from './labelGeometry.js';
+} from './labelGeometry';
 import {
   DEFAULT_FONT_FAMILY,
   getLabelZoom,
@@ -52,21 +52,21 @@ import {
   resolveNodeLabelStyle,
   resolveNodeValue,
   toLabelScreenPx,
-} from './labelStyle.js';
-import { resolveNodeStyle } from './style.js';
+} from './labelStyle';
+import { resolveNodeStyle } from './style';
 
 export {
   getBuiltInNodeBoundaryAnchor,
   getCustomNodeLabelAnchor,
   getNodeDecorationAnchor,
-} from './labelGeometry.js';
+} from './labelGeometry';
 export {
   getLabelZoom,
   isValidLabelLayout,
   resolveEdgeLabelStyle,
   resolveNodeLabelStyle,
   toLabelScreenPx,
-} from './labelStyle.js';
+} from './labelStyle';
 
 function hasState(states: unknown, state: string): boolean {
   if (states instanceof Set) return states.has(state);

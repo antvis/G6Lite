@@ -16,7 +16,7 @@ import {
   RandomLayout,
   RadialLayout,
 } from '@antv/layout';
-import type { GraphData, GraphEdge, GraphNode } from '../types.js';
+import type { GraphData, GraphEdge, GraphNode } from '../types';
 
 type LayoutInstance = {
   execute: (data: GraphData) => Promise<void>;

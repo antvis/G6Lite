@@ -2,7 +2,7 @@
  * zoom-canvas: wheel to zoom.
  */
 
-import type { Renderer } from '../renderer/renderer.js';
+import type { Renderer } from '../renderer/renderer';
 
 export function zoomCanvas(renderer: Renderer): () => void {
   const canvas = renderer.getCanvas();

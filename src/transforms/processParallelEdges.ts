@@ -1,5 +1,5 @@
-import type { InternalEdge } from '../dataModel.js';
-import type { EdgeConfig, ParallelEdgesConfig, TransformOption } from '../types.js';
+import type { InternalEdge } from '../dataModel';
+import type { EdgeConfig, ParallelEdgesConfig, TransformOption } from '../types';
 
 export interface ResolvedParallelEdgesConfig {
   enabled: boolean;

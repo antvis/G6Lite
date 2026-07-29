@@ -9,9 +9,9 @@ import type {
   ComboStyleConfig,
   ElementState,
   InternalCombo,
-} from '../types.js';
-import type { Camera } from './camera.js';
-import { graphToNDC } from './camera.js';
+} from '../types';
+import type { Camera } from './camera';
+import { graphToNDC } from './camera';
 
 type ComboSize = number | [number, number];
 

@@ -3,10 +3,10 @@
  * Degenerate vertices isolate adjacent loops inside a single draw call.
  */
 
-import type { AttributeLayout, RenderParams } from './program.js';
-import { Program } from './program.js';
-import { fragmentShader } from './shaders/edgeArc.frag.js';
-import { vertexShader } from './shaders/edgeArc.vert.js';
+import type { AttributeLayout, RenderParams } from './program';
+import { Program } from './program';
+import { fragmentShader } from './shaders/edgeArc.frag';
+import { vertexShader } from './shaders/edgeArc.vert';
 
 const FLOATS_PER_VERTEX = 13;
 const SEGMENTS = 24;

@@ -4,11 +4,11 @@
  * Stride: 18 floats per vertex.
  */
 
-import { Program } from './program.js';
-import type { RenderParams, AttributeLayout } from './program.js';
-import { vertexShader } from './shaders/nodeRect.vert.js';
-import { fragmentShader } from './shaders/nodeRect.frag.js';
-import { encodeId } from '../picking.js';
+import { Program } from './program';
+import type { RenderParams, AttributeLayout } from './program';
+import { vertexShader } from './shaders/nodeRect.vert';
+import { fragmentShader } from './shaders/nodeRect.frag';
+import { encodeId } from '../picking';
 
 const FLOATS_PER_VERTEX = 19;
 const VERTICES_PER_ITEM = 6;

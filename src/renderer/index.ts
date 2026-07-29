@@ -4,10 +4,10 @@
  * This barrel is for engine-internal imports. It is intentionally not re-exported
  * from the package root because renderer resources are not part of the public API.
  */
-export { createCamera, graphToNDC, screenToGraph } from './camera.js';
-export type { Camera } from './camera.js';
-export { parseColor } from './color.js';
-export { ComboRenderer } from './comboRenderer.js';
+export { createCamera, graphToNDC, screenToGraph } from './camera';
+export type { Camera } from './camera';
+export { parseColor } from './color';
+export { ComboRenderer } from './comboRenderer';
 export {
   createCubicPath,
   createLinePath,
@@ -17,7 +17,7 @@ export {
   getParallelEdgeCurvature,
   getRectBoundaryDistance,
   sampleEdgePath,
-} from './edgePath.js';
+} from './edgePath';
 export type {
   BoundarySample,
   CubicEdgePath,
@@ -27,9 +27,9 @@ export type {
   Point,
   QuadraticEdgePath,
   RectBoundary,
-} from './edgePath.js';
-export { createProgram, getGL } from './gl.js';
-export { LabelGrid } from './labelGrid.js';
+} from './edgePath';
+export { createProgram, getGL } from './gl';
+export { LabelGrid } from './labelGrid';
 export {
   LabelLayerRenderer,
   getBuiltInNodeBoundaryAnchor,
@@ -40,15 +40,10 @@ export {
   resolveEdgeLabelStyle,
   resolveNodeLabelStyle,
   toLabelScreenPx,
-} from './labelRenderer.js';
-export { PickingManager, encodeId } from './picking.js';
-export type { PickingResult } from './picking.js';
-export { Renderer } from './renderer.js';
-export type { RendererData } from './renderer.js';
-export {
-  analyzeEdgeConfig,
-  analyzeNodeConfig,
-  resolveEdgeStyle,
-  resolveNodeStyle,
-} from './style.js';
-export type { ResolvedEdgeStyle, ResolvedNodeStyle } from './style.js';
+} from './labelRenderer';
+export { PickingManager, encodeId } from './picking';
+export type { PickingResult } from './picking';
+export { Renderer } from './renderer';
+export type { RendererData } from './renderer';
+export { analyzeEdgeConfig, analyzeNodeConfig, resolveEdgeStyle, resolveNodeStyle } from './style';
+export type { ResolvedEdgeStyle, ResolvedNodeStyle } from './style';

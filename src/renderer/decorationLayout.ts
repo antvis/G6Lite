@@ -1,4 +1,4 @@
-import type { LabelLayout, LabelPlacement, NodeDecorationPlacement } from '../types.js';
+import type { LabelLayout, LabelPlacement, NodeDecorationPlacement } from '../types';
 
 export interface MeasuredDecorationItem {
   data: unknown;

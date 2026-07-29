@@ -16,13 +16,13 @@ import {
   RadialLayout,
   RandomLayout,
 } from '@antv/layout';
-import type { ExtensionContext, LayoutExtension } from '../extensions/contracts.js';
-import { createExtension, destroyExtension, initializeExtension } from '../extensions/registry.js';
-import type { GraphData, GraphNode, LayoutConfig } from '../types.js';
-import { executeFishboneLayout, type FishboneLayoutOptions } from './fishboneLayout.js';
-import { executeIndentedLayout, type IndentedLayoutOptions } from './indentedLayout.js';
-import { executeMindmapLayout, type MindmapLayoutOptions } from './mindmapLayout.js';
-import { runLayoutInWorker } from './workerLayout.js';
+import type { ExtensionContext, LayoutExtension } from '../extensions/contracts';
+import { createExtension, destroyExtension, initializeExtension } from '../extensions/registry';
+import type { GraphData, GraphNode, LayoutConfig } from '../types';
+import { executeFishboneLayout, type FishboneLayoutOptions } from './fishboneLayout';
+import { executeIndentedLayout, type IndentedLayoutOptions } from './indentedLayout';
+import { executeMindmapLayout, type MindmapLayoutOptions } from './mindmapLayout';
+import { runLayoutInWorker } from './workerLayout';
 
 export type LayoutResult = { nodes: Array<GraphNode & { x: number; y: number }> };
 

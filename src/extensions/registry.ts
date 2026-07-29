@@ -1,4 +1,4 @@
-import type { Graph } from '../graph.js';
+import type { Graph } from '../graph';
 import type {
   Extension,
   ExtensionCategory,
@@ -7,7 +7,7 @@ import type {
   ExtensionFactory,
   ExtensionInput,
   RegisteredExtension,
-} from './contracts.js';
+} from './contracts';
 
 type RegistryEntry =
   | { kind: 'instance'; value: unknown }

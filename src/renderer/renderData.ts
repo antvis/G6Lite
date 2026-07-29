@@ -1,5 +1,5 @@
-import type { DataModel, InternalEdge, InternalNode } from '../dataModel.js';
-import type { EdgeConfig, GraphEdge, LayoutNode, NodeConfig, ThemeTokens } from '../types.js';
+import type { DataModel, InternalEdge, InternalNode } from '../dataModel';
+import type { EdgeConfig, GraphEdge, LayoutNode, NodeConfig, ThemeTokens } from '../types';
 
 /**
  * Immutable array views shared by DataModel and Renderer.

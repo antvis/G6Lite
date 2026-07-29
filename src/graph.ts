@@ -1,10 +1,10 @@
 /** Graph lifecycle, public API, layout orchestration, and render runtime ownership. */
 
-import { registerBehaviors, resolveBehaviorOptions } from './behaviors/index.js';
-import { DataModel } from './dataModel.js';
-import { EventEmitter } from './events.js';
-import type { Handler } from './events.js';
-import type { PluginExtension, TransformExtension } from './extensions/contracts.js';
+import { registerBehaviors, resolveBehaviorOptions } from './behaviors/index';
+import { DataModel } from './dataModel';
+import { EventEmitter } from './events';
+import type { Handler } from './events';
+import type { PluginExtension, TransformExtension } from './extensions/contracts';
 import {
   createExtension,
   createExtensionContext,
@@ -12,22 +12,22 @@ import {
   initializeExtension,
   safeExtensionCall,
   updateExtension,
-} from './extensions/registry.js';
-import { attachInteraction } from './interaction/dispatcher.js';
-import { runLayout } from './layout/index.js';
-import type { Camera } from './renderer/camera.js';
-import { ComboRenderer } from './renderer/comboRenderer.js';
-import { LabelLayerRenderer } from './renderer/labelRenderer.js';
-import { createRendererData, getRendererNodes } from './renderer/renderData.js';
-import type { RendererData } from './renderer/renderer.js';
-import { Renderer } from './renderer/renderer.js';
-import { analyzeEdgeConfig, analyzeNodeConfig } from './renderer/style.js';
-import { RefreshLevel, RenderScheduler } from './scheduler.js';
-import { resolveTheme } from './theme.js';
+} from './extensions/registry';
+import { attachInteraction } from './interaction/dispatcher';
+import { runLayout } from './layout/index';
+import type { Camera } from './renderer/camera';
+import { ComboRenderer } from './renderer/comboRenderer';
+import { LabelLayerRenderer } from './renderer/labelRenderer';
+import { createRendererData, getRendererNodes } from './renderer/renderData';
+import type { RendererData } from './renderer/renderer';
+import { Renderer } from './renderer/renderer';
+import { analyzeEdgeConfig, analyzeNodeConfig } from './renderer/style';
+import { RefreshLevel, RenderScheduler } from './scheduler';
+import { resolveTheme } from './theme';
 import {
   processParallelEdges,
   resolveParallelEdgesConfig,
-} from './transforms/processParallelEdges.js';
+} from './transforms/processParallelEdges';
 import type {
   ComboData,
   ComboModel,
@@ -47,7 +47,7 @@ import type {
   SetDataOptions,
   ThemeOption,
   ZoomOptions,
-} from './types.js';
+} from './types';
 
 /** Internal result of a renderer pick operation. */
 interface PickResult {

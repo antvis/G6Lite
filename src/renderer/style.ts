@@ -7,11 +7,11 @@
  * - Dynamic configs fall back to per-node resolution
  */
 
-import { getEdgeExtension } from '../extensions/edge.js';
-import { getNodeExtension } from '../extensions/node.js';
-import { safeExtensionCall } from '../extensions/registry.js';
-import type { EdgeConfig, GraphEdge, GraphNode, NodeConfig, ThemeTokens } from '../types.js';
-import { parseColor } from './color.js';
+import { getEdgeExtension } from '../extensions/edge';
+import { getNodeExtension } from '../extensions/node';
+import { safeExtensionCall } from '../extensions/registry';
+import type { EdgeConfig, GraphEdge, GraphNode, NodeConfig, ThemeTokens } from '../types';
+import { parseColor } from './color';
 
 /**
  * State containers come in two shapes depending on the source: a plain array

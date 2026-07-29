@@ -3,7 +3,7 @@
  * Manages a Web Worker lifecycle for off-main-thread layout computation.
  */
 
-import type { GraphData, LayoutConfig } from '../types.js';
+import type { GraphData, LayoutConfig } from '../types';
 
 export interface LayoutWorkerResult {
   positions: Array<{ id: string; x: number; y: number }>;

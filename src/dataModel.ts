@@ -16,7 +16,7 @@ import type {
   NodeConfig,
   ParallelEdgeMeta,
   ThemeTokens,
-} from './types.js';
+} from './types';
 
 /** Mutable node record owned by the internal DataModel module. */
 export interface InternalNode {

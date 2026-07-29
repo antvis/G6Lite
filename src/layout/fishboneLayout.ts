@@ -10,7 +10,7 @@
  *   - Items staircase away from the category in the same direction
  */
 
-import type { GraphData, GraphNode } from '../types.js';
+import type { GraphData, GraphNode } from '../types';
 
 export interface FishboneLayoutOptions {
   direction?: 'LR' | 'RL';

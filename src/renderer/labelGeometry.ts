@@ -4,7 +4,7 @@ import type {
   NodeDecorationAnchor,
   NodeDecorationAttachment,
   ResolvedLabelStyle,
-} from '../types.js';
+} from '../types';
 
 export function getCustomNodeLabelAnchor(
   px: number,

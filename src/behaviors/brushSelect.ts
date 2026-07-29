@@ -13,8 +13,8 @@
  * The selected nodes have their 'selected' state set via graph.setItemState.
  */
 
-import type { Graph } from '../graph.js';
-import type { Renderer } from '../renderer/renderer.js';
+import type { Graph } from '../graph';
+import type { Renderer } from '../renderer/renderer';
 
 export interface BrushSelectOptions {
   /** Modifier key to activate. null = always active. Default: null */

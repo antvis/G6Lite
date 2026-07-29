@@ -11,9 +11,9 @@
  *   FULL_PROCESS      — full data replacement or config change, rebuild everything
  */
 
-import type { ChangeRecord, DataModel } from './dataModel.js';
-import { createRendererData } from './renderer/renderData.js';
-import type { Renderer } from './renderer/renderer.js';
+import type { ChangeRecord, DataModel } from './dataModel';
+import { createRendererData } from './renderer/renderData';
+import type { Renderer } from './renderer/renderer';
 
 export enum RefreshLevel {
   NONE = 0,

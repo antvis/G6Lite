@@ -3,21 +3,21 @@
  * and framebuffer picking for O(1) hit detection.
  */
 
-import { getEdgeBaseType } from '../extensions/edge.js';
-import { getNodeBaseType } from '../extensions/node.js';
-import type { DataModel } from '../dataModel.js';
-import type { NodeRect, Waypoint } from '../routing/orthogonal.js';
+import { getEdgeBaseType } from '../extensions/edge';
+import { getNodeBaseType } from '../extensions/node';
+import type { DataModel } from '../dataModel';
+import type { NodeRect, Waypoint } from '../routing/orthogonal';
 import {
   applyRoundedCorners,
   computeFishboneRoute,
   computeIndentedRoutes,
   computeOrthogonalRoute,
   computeTreeRoutes,
-} from '../routing/orthogonal.js';
-import type { EdgeConfig, GraphEdge, LayoutNode, NodeConfig, ThemeTokens } from '../types.js';
-import type { Camera } from './camera.js';
-import { createCamera } from './camera.js';
-import { parseColor } from './color.js';
+} from '../routing/orthogonal';
+import type { EdgeConfig, GraphEdge, LayoutNode, NodeConfig, ThemeTokens } from '../types';
+import type { Camera } from './camera';
+import { createCamera } from './camera';
+import { parseColor } from './color';
 import {
   createCubicPath,
   createLinePath,
@@ -27,32 +27,27 @@ import {
   getRectBoundaryDistance,
   type EdgePath,
   type NodeBoundary,
-} from './edgePath.js';
-import { getGL } from './gl.js';
-import { PickingManager } from './picking.js';
-import {
-  getRendererEdge,
-  getRendererEdges,
-  getRendererNode,
-  getRendererNodes,
-} from './renderData.js';
-import type { RendererData } from './renderData.js';
-import { EdgeArcProgram } from './programs/edgeArc.js';
-import { EdgeArrowProgram } from './programs/edgeArrow.js';
-import { EdgeCubicProgram } from './programs/edgeCubic.js';
-import { EdgeLineProgram } from './programs/edgeLine.js';
-import { EdgeLoopProgram } from './programs/edgeLoop.js';
-import { EdgeRectProgram } from './programs/edgeRect.js';
-import { NodeCircleProgram } from './programs/nodeCircle.js';
-import { NodeCircleQuadProgram } from './programs/nodeCircleQuad.js';
-import { NodeRectProgram } from './programs/nodeRect.js';
-import type { Program, RenderParams } from './programs/program.js';
-import type { ResolvedEdgeStyle } from './style.js';
-import { edgeConfigCache, nodeConfigCache, resolveEdgeStyle, resolveNodeStyle } from './style.js';
+} from './edgePath';
+import { getGL } from './gl';
+import { PickingManager } from './picking';
+import { getRendererEdge, getRendererEdges, getRendererNode, getRendererNodes } from './renderData';
+import type { RendererData } from './renderData';
+import { EdgeArcProgram } from './programs/edgeArc';
+import { EdgeArrowProgram } from './programs/edgeArrow';
+import { EdgeCubicProgram } from './programs/edgeCubic';
+import { EdgeLineProgram } from './programs/edgeLine';
+import { EdgeLoopProgram } from './programs/edgeLoop';
+import { EdgeRectProgram } from './programs/edgeRect';
+import { NodeCircleProgram } from './programs/nodeCircle';
+import { NodeCircleQuadProgram } from './programs/nodeCircleQuad';
+import { NodeRectProgram } from './programs/nodeRect';
+import type { Program, RenderParams } from './programs/program';
+import type { ResolvedEdgeStyle } from './style';
+import { edgeConfigCache, nodeConfigCache, resolveEdgeStyle, resolveNodeStyle } from './style';
 
 const HOVER_DIM_STRENGTH = 0.25;
 
-export type { RendererData } from './renderData.js';
+export type { RendererData } from './renderData';
 
 type NodeProgramType = 'circle' | 'rect';
 type EdgeProgramType = 'line' | 'rect' | 'arc' | 'polyline' | 'cubic';

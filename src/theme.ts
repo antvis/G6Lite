@@ -3,7 +3,7 @@
  * OpenSpec: theme spec.
  */
 
-import type { ThemeTokens } from './types.js';
+import type { ThemeTokens } from './types';
 
 const CATEGORY_PALETTE = [
   '#1783FF',

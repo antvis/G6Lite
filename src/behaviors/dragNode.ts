@@ -8,9 +8,9 @@
  * Emits node:dragstart, node:drag, node:dragend, combo:dragstart, combo:drag, combo:dragend events.
  */
 
-import type { Graph } from '../graph.js';
-import { GESTURE_CONSUME_EVENT } from '../interaction/gesture.js';
-import type { Renderer } from '../renderer/renderer.js';
+import type { Graph } from '../graph';
+import { GESTURE_CONSUME_EVENT } from '../interaction/gesture';
+import type { Renderer } from '../renderer/renderer';
 
 export function dragNode(renderer: Renderer, graph: Graph): () => void {
   let draggingIds: string[] = [];

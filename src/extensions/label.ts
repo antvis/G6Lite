@@ -1,6 +1,6 @@
-import type { LabelRenderer } from '../types.js';
-import type { ExtensionInput } from './contracts.js';
-import { createExtension, registerExtension } from './registry.js';
+import type { LabelRenderer } from '../types';
+import type { ExtensionInput } from './contracts';
+import { createExtension, registerExtension } from './registry';
 
 const LABEL_CACHE = new Map<string, LabelRenderer>();
 

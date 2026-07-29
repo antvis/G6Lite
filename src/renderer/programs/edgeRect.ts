@@ -8,11 +8,11 @@
  * u_scale) so it stays correct on zoom.
  */
 
-import { encodeId } from '../picking.js';
-import type { AttributeLayout, RenderParams } from './program.js';
-import { Program } from './program.js';
-import { fragmentShader } from './shaders/edgeRect.frag.js';
-import { vertexShader } from './shaders/edgeRect.vert.js';
+import { encodeId } from '../picking';
+import type { AttributeLayout, RenderParams } from './program';
+import { Program } from './program';
+import { fragmentShader } from './shaders/edgeRect.frag';
+import { vertexShader } from './shaders/edgeRect.vert';
 
 const FLOATS_PER_VERTEX = 19;
 const VERTICES_PER_ITEM = 6;

@@ -13,8 +13,8 @@
  * Point-in-polygon test uses ray-casting algorithm.
  */
 
-import type { Graph } from '../graph.js';
-import type { Renderer } from '../renderer/renderer.js';
+import type { Graph } from '../graph';
+import type { Renderer } from '../renderer/renderer';
 
 export interface LassoSelectOptions {
   /** Modifier key to activate. Default: null (always active) */

@@ -8,15 +8,15 @@
  */
 
 // ──── Core ────
-export { EventEmitter } from './events.js';
-export type { Handler } from './events.js';
+export { EventEmitter } from './events';
+export type { Handler } from './events';
 export {
   BaseNode,
   BreathingNode,
   extensionFactory,
   register,
   registerNode,
-} from './extensions/index.js';
+} from './extensions/index';
 export type {
   BehaviorExtension,
   DecorationDrawParams,
@@ -41,14 +41,14 @@ export type {
   NodeOverlayDrawParams,
   PluginExtension,
   TransformExtension,
-} from './extensions/index.js';
-export { Graph } from './graph.js';
-export { runLayout } from './layout/index.js';
-export type { LayoutResult } from './layout/index.js';
-export { resolveTheme } from './theme.js';
+} from './extensions/index';
+export { Graph } from './graph';
+export { runLayout } from './layout/index';
+export type { LayoutResult } from './layout/index';
+export { resolveTheme } from './theme';
 
 // ──── Configuration & data types ────
-export type { Camera } from './renderer/index.js';
+export type { Camera } from './renderer/index';
 export type {
   BehaviorOption,
   BuiltInElementState,
@@ -108,7 +108,7 @@ export type {
   TransformOption,
   ViewportPoint,
   ZoomOptions,
-} from './types.js';
+} from './types';
 
 // ──── Behavior config types ────
 export type {
@@ -119,4 +119,4 @@ export type {
   LassoSelectOptions,
   TooltipContext,
   TooltipOptions,
-} from './behaviors/index.js';
+} from './behaviors/index';

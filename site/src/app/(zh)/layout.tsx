@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'AntV' }],
   applicationName: siteConfig.name,
   manifest: '/manifest.webmanifest',
-  icons: { icon: '/icon.svg' },
+  icons: { icon: '/icon.svg?v=antv-20260724' },
   openGraph: {
     title: `${siteConfig.name} — ${siteConfig.description.zh}`,
     description: siteConfig.description.zh,

@@ -89,12 +89,9 @@ html > body[data-scroll-locked] {
 }
 
 .antv-logo-mark img {
-  position: absolute;
-  inset: 0 auto auto 0;
   display: block;
-  width: 5.125rem;
-  height: 1.75rem;
-  max-width: none;
+  width: 100%;
+  height: 100%;
 }
 
 .antv-logo-text {
@@ -393,30 +390,6 @@ html > body[data-scroll-locked] {
   box-shadow: 0 18px 42px -34px rgba(111, 60, 255, 0.58);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-}
-
-.home-hero-brand {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  border-radius: 9999px;
-  border: 1px solid var(--color-fd-border);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 0.55rem 0.9rem;
-  box-shadow: 0 12px 30px -28px rgba(21, 31, 54, 0.36);
-}
-
-.home-hero-brand-divider {
-  width: 1px;
-  height: 1.25rem;
-  background: var(--color-fd-border);
-}
-
-.home-hero-brand-name {
-  color: #202632;
-  font-size: 1.125rem;
-  font-weight: 700;
 }
 
 .home-hero-title {
@@ -2361,7 +2334,6 @@ html > body[data-scroll-locked] {
 .dark .site-brand,
 .dark .site-brand-product,
 .dark .antv-logo-text,
-.dark .home-hero-brand-name,
 .dark .home-hero-title {
   color: #f7f8ff;
 }
@@ -2413,8 +2385,7 @@ html > body[data-scroll-locked] {
   color: rgba(226, 232, 240, 0.78);
 }
 
-.dark .site-brand-divider,
-.dark .home-hero-brand-divider {
+.dark .site-brand-divider {
   background: rgba(148, 163, 184, 0.28);
 }
 
@@ -2423,12 +2394,6 @@ html > body[data-scroll-locked] {
     radial-gradient(circle at 80% 10%, rgba(22, 119, 255, 0.2), transparent 28rem),
     radial-gradient(circle at 50% 34%, rgba(255, 138, 61, 0.08), transparent 30rem),
     linear-gradient(180deg, #090c14 0%, #0c111c 68%, var(--home-muted-bg) 100%);
-}
-
-.dark .home-hero-brand {
-  border-color: rgba(148, 163, 184, 0.22);
-  background: rgba(14, 19, 32, 0.76);
-  box-shadow: 0 18px 42px -30px rgba(111, 60, 255, 0.72);
 }
 
 .dark .home-hero-title-accent {

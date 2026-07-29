@@ -2,8 +2,6 @@ import { CheckCircle2, Layers3, MousePointerClick, Network, Zap } from 'lucide-r
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { AntVLogo } from '@/components/antv-logo';
-import { siteConfig } from '@/lib/site-config';
 import { withBasePath } from '@/lib/shared';
 
 import { LegacyCodeBlock } from './legacy-code-block';
@@ -159,15 +157,6 @@ export default function HomePage() {
       <section className="home-hero relative overflow-hidden">
         <div className="mx-auto flex max-w-6xl flex-col items-center px-6 pb-14 pt-8 lg:pb-16">
           <div className="animate-in-up mt-12 flex w-full flex-col items-center text-center sm:mt-16">
-            <div className="home-hero-brand">
-              <AntVLogo className="h-7 w-auto" />
-              <span className="home-hero-brand-divider" />
-              <span className="home-hero-brand-name">G6-GL</span>
-              <span className="rounded-full bg-fd-secondary px-2 py-0.5 text-xs text-fd-muted-foreground">
-                {siteConfig.version}
-              </span>
-            </div>
-
             <h1 className="home-hero-title mt-7 max-w-4xl text-[2.6rem] font-medium leading-[1.12] text-fd-foreground sm:text-[4.25rem]">
               <span className="home-hero-title-accent">G6-GL</span> · 图可视化引擎
             </h1>

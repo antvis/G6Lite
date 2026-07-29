@@ -42,7 +42,7 @@ register('edge', 'business-relation', {
 * `label`：测量并绘制节点或边的自定义 Label 内容。
 * `decoration`：绘制 badge 等节点装饰内容。
 * `layout`：输入 GraphData，返回节点坐标。
-* `behavior`：消费统一事件，通过 Graph 公开 API 修改状态和数据。
+* `behavior`：消费统一事件，通过 `ExtensionContext` 修改状态和数据。
 * `transform`：在渲染前完成通用数据转换。
 * `plugin`：管理 Toolbar、Minimap 等独立 DOM 与状态生命周期。
 
@@ -65,8 +65,8 @@ register(
       },
       getEvents() {
         return {
-          'node:click': (event) => {
-            if (event.targetId) context?.state.set(event.targetId, ['selected']);
+          'node:click': ({ nodeId }) => {
+            context?.state.set(nodeId, ['selected']);
           },
         };
       },
@@ -84,16 +84,20 @@ register(
 | Node / Edge / Label / Decoration | 全局无状态描述，解析后缓存   | create；重复注册使缓存失效                          |
 | Behavior                         | 每个 Graph、每次挂载   | create → init → getEvents → destroy       |
 | Layout                           | 每次执行            | create → init → execute → destroy         |
-| Transform                        | 每个 Graph、每个配置类型 | create → init；后续 update；Graph 销毁时 destroy |
+| Transform                        | 每个 Graph、每个配置位置 | create → init；后续 update；Graph 销毁时 destroy |
 | Plugin                           | 每个 Graph、每次挂载   | create → init → mount → destroy           |
 
-扩展的 create、init、update、destroy 以及类别能力调用都会隔离业务异常。单个扩展失败会输出带类别、名称和阶段的错误，不会导致主图层白屏。
+`update()` 不是所有扩展的共同生命周期：当前只有 Transform 会在复用实例时收到 `update()`；Behavior 和 Plugin 在重新挂载时销毁旧实例并创建新实例，Layout 每次执行也使用新实例。
+
+扩展的 create、init、destroy 以及类别能力调用都会隔离业务异常。Behavior 的单个事件 handler 也会独立隔离；错误信息包含类别、扩展名和事件名，不会中断其他 handler 或导致主图层白屏。
 
 `ExtensionContext` 将能力分为 `data`、`state`、`viewport` 和 `requestRender()`。新增扩展不应直接依赖 `context.graph`；该字段只在 beta 迁移期保留。
 
 `context.data.getNode()` / `getEdge()` 返回只读快照：元素记录、状态数组和顶层 `data` 对象都会复制，修改返回值不会反向修改 Graph。快照中的更深层业务对象不承诺递归克隆，数据变更仍应通过 `context.data.updateNode()` / `updateEdge()` 完成。
 
 如果注册 Behavior 与内置 Behavior 同名，显式注册的版本优先。注册版本失败时不会自动回退到内置实现，避免配置与实际行为不一致。
+
+完整的名称常量、options 类型、factory、显式注册函数与 Graph 激活模板见[自定义 Behavior](/docs/guides/custom-behavior)。
 
 ## 自定义 Layout [#自定义-layout]
 
@@ -249,7 +253,7 @@ type NodeBadgeItem =
 ## 职责边界 [#职责边界]
 
 * 扩展不直接访问 Renderer、DataModel、WebGL context 或 GPU buffer。
-* Behavior、Transform 和 Plugin 只能通过 Graph 公开 API 修改引擎状态。
+* Behavior、Transform 和 Plugin 只能通过 `ExtensionContext` 的公开能力修改引擎状态。
 * Edge Extension 复用内置 WebGL 边基型，保留批处理、拾取和箭头能力。
 * Label 与 Decoration 只负责内容，定位、旋转、碰撞和刷新由 G6-GL 管理。
 

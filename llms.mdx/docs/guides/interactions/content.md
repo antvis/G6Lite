@@ -14,6 +14,8 @@ behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'];
 behaviors: ['drag-canvas', { type: 'brush-select', key: 'shift' }];
 ```
 
+内置对象配置可通过 `BuiltInBehaviorOptionsMap` 按名称查询，`BuiltInBehaviorConfig` 是全部内置配置的联合类型。自定义 Behavior 应声明字面量 `type` 和独立 options 类型，并在配置处使用 `satisfies` 保留严格检查。
+
 ## 内置 behaviors [#内置-behaviors]
 
 | 行为                | 说明                   |
@@ -71,5 +73,7 @@ graph.on('node:click', ({ nodeId }) => {
 ## 相关 [#相关]
 
 * [事件](/docs/guides/events)
+* [自定义 Behavior](/docs/guides/custom-behavior)
+* [扩展体系](/docs/guides/extensions)
 * [Tooltip](/docs/guides/tooltip)
 * [示例总览](/docs/examples)

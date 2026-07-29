@@ -17,7 +17,8 @@
   - [主题](/docs/guides/theme): 使用 light / dark 主题并覆盖 token
   - [布局配置](/docs/guides/layout): 内置布局类型、选型建议、常用参数与 Worker 支持
   - [交互配置](/docs/guides/interactions): 内置 behaviors、启用方式和常用交互组合
-  - [事件](/docs/guides/events): 使用 graph.on、graph.off 和 graph.once 监听元素与生命周期事件
+  - [自定义 Behavior](/docs/guides/custom-behavior): 使用类型安全的 options、GraphEventMap 和 extensionFactory 编写可复用交互扩展
+  - [事件](/docs/guides/events): 使用 GraphEventMap 和 graph.on、graph.off、graph.once 监听公开事件
   - [Tooltip 配置](/docs/guides/tooltip): 使用内置 tooltip behavior 展示节点和边信息
   - [平行边与自环处理](/docs/guides/parallel-edges): 处理多条同源同目标边和自环边的展示
   - [扩展体系](/docs/guides/extensions): 通过配置、函数式映射和公开扩展 API 完成受控业务定制
@@ -66,7 +67,8 @@
   - [Themes](/en/docs/guides/theme): Use light and dark presets or override G6-GL theme tokens
   - [Layout configuration](/en/docs/guides/layout): Choose built-in layouts, configure workers, and rerun layout at runtime
   - [Interaction configuration](/en/docs/guides/interactions): Combine viewport, element, selection, highlight, and tooltip behaviors
-  - [Events](/en/docs/guides/events): Listen to element, interaction, data, layout, render, and destroy events
+  - [Custom Behavior](/en/docs/guides/custom-behavior): Build reusable interactions with typed options, GraphEventMap, and extensionFactory
+  - [Events](/en/docs/guides/events): Listen to public events with GraphEventMap and graph.on, graph.off, and graph.once
   - [Tooltip configuration](/en/docs/guides/tooltip): Show node and edge information with the built-in tooltip behavior
   - [Parallel and self-loop edges](/en/docs/guides/parallel-edges): Separate multiple edges that share endpoints and render self-loops clearly
   - [Extension system](/en/docs/guides/extensions): Extend nodes, edges, labels, layouts, behaviors, transforms, decorations, and plugins

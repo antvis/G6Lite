@@ -4,6 +4,14 @@
 
 G6-GL is currently in the `0.1.0-beta` series. Recent work has concentrated on package-root API boundaries, functional extensions, isolated extension lifecycle, read-only query models, layout cancellation, combo consistency, interaction dispatch, package size governance, examples, and reproducible benchmarks.
 
+## Extension and Behavior contracts — 2026-07-29 [#extension-and-behavior-contracts--2026-07-29]
+
+* Extension is the umbrella term, while Plugin identifies only the peripheral DOM or stateful extension category.
+* The public `GraphEventMap`, precise element event types, and typed `Graph.on/off/once` overloads infer known payloads, including zero-argument events and native mouse or wheel events.
+* Custom Behaviors use a literal name, `BehaviorOptions`, `BehaviorExtension`, `extensionFactory()`, and an explicit registration function. String references are normalized to `{ type }` before `init()`.
+* Behavior handlers are error-isolated with registered-name and event diagnostics. Behavior and Plugin do not promise `update()`; Transform uses it when an instance is reused.
+* New English and Chinese Custom Behavior guides document the complete package-author pattern and public capability boundary.
+
 Deprecated beta compatibility APIs remain documented in [API stability](/en/docs/compatibility/api-stability). Projects migrating from G6 v5 should follow the [migration guide](/en/docs/compatibility/g6-v5-migration).
 
 Before upgrading, run type checking, tests, a package build, size-limit, release examples, and target-device validation.
@@ -94,6 +102,68 @@ import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-g
 Package-root types cover graph options and data, nodes, edges, combos, labels, states, themes, layouts, viewport operations, behaviors, transforms, plugins, and extension context.
 
 The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).
+
+
+# API stability and release boundary (/en/docs/compatibility/api-stability)
+
+
+
+G6-GL remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
+
+Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
+
+Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
+
+Combo collapse, nesting, and runtime regrouping remain experimental. Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.
+
+
+# Browsers and runtime environment (/en/docs/compatibility/browser)
+
+
+
+G6-GL requires WebGL 1.0 and a modern browser capable of running the ESM/ES2020 package. Canvas 2D is used for labels and combo outlines. WebGL 2.0 is not required.
+
+Recommended minimums for the untranspiled package are Chrome/Edge 80+, Firefox 74+, Safari 13.1+, and iOS Safari 13.4+. These are syntax and platform capability boundaries, not a complete certified device matrix.
+
+G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
+
+Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
+
+
+# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
+
+
+
+G6-GL borrows G6 configuration concepts but is not a complete replacement for G6 v5. Migration is most suitable when large-graph interaction and state updates are the primary bottleneck and the product uses core node, edge, layout, and behavior capabilities.
+
+Do not migrate blindly when the project depends on the complete plugin ecosystem, animation system, complex Canvas element customization, or built-in graph analysis.
+
+Suggested process:
+
+1. Reproduce one real workflow in the deployed Playground.
+2. Normalize data to nodes, edges, and optional combos.
+3. Map styles and states through package-root Graph options.
+4. Replace G6 behavior names with supported G6-GL behaviors.
+5. Verify layouts, events, incremental updates, compatibility, and performance on target devices.
+
+Keep the original implementation until the real-data acceptance suite passes.
+
+
+# Compatibility overview (/en/docs/compatibility)
+
+
+
+Review these boundaries before adopting or upgrading G6-GL:
+
+<Cards>
+  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
+
+  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
+
+  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
+</Cards>
+
+G6-GL needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.
 
 
 # Data model (/en/docs/concepts/data-model)
@@ -477,6 +547,190 @@ const graph = new Graph({
 Use `collapseCombo()`, `expandCombo()`, and `toggleCombo()` for visibility. Runtime grouping APIs include `addToCombo()`, `removeFromCombo()`, `createCombo()`, and `removeCombo()`.
 
 
+# Custom Behavior (/en/docs/guides/custom-behavior)
+
+
+
+A Behavior consumes public Graph events and updates data or states through `ExtensionContext`. Use it for graph interactions such as business selection, highlighting, or event coordination. Use a Plugin for independently owned DOM, observers, keyboard listeners, or peripheral controllers, and use a Transform for render-time data preprocessing.
+
+## Public type pattern [#public-type-pattern]
+
+The core public types are:
+
+```ts
+interface BehaviorOptions<TType extends string = string> {
+  type: TType;
+}
+
+type BehaviorConfig<
+  TType extends string = string,
+  TOptions extends object = Record<string, unknown>,
+> = Readonly<BehaviorOptions<TType> & TOptions>;
+
+interface BehaviorExtension<
+  TOptions extends BehaviorOptions = BehaviorConfig,
+  TEventMap extends object = GraphEventMap,
+> {
+  init?(context: ExtensionContext, options: Readonly<TOptions>): void;
+  getEvents(): BehaviorEventHandlers<TEventMap>;
+  destroy?(): void;
+}
+```
+
+`GraphEventMap` is the single “event name → argument tuple” contract. It infers a required `nodeId` and `MouseEvent` for `'node:click'`, a `WheelEvent` for `'canvas:wheel'`, and zero arguments for `destroy`.
+
+## Recommended exports [#recommended-exports]
+
+A reusable Behavior should export a stable name, its options type, and an explicit registration function:
+
+```text
+src/
+  behavior.ts
+  index.ts
+tests/
+  behavior.test.ts
+```
+
+Avoid registration through import side effects alone. Applications should call the registration function before creating the Graph so global registry ordering and name replacement remain visible.
+
+## Complete implementation [#complete-implementation]
+
+```ts
+import {
+  extensionFactory,
+  register,
+  type BehaviorExtension,
+  type BehaviorOptions,
+  type ElementState,
+  type ExtensionContext,
+} from '@antv/g6-gl';
+
+export const BUSINESS_SELECT_BEHAVIOR = 'business-select' as const;
+
+export interface BusinessSelectBehaviorOptions extends BehaviorOptions<
+  typeof BUSINESS_SELECT_BEHAVIOR
+> {
+  state?: ElementState;
+}
+
+function createBusinessSelectBehavior(): BehaviorExtension<BusinessSelectBehaviorOptions> {
+  let context: ExtensionContext | undefined;
+  let state: ElementState = 'selected';
+
+  return {
+    init(nextContext, options) {
+      context = nextContext;
+      state = options.state ?? 'selected';
+    },
+
+    getEvents() {
+      return {
+        'node:click': ({ nodeId, nativeEvent }) => {
+          if (nativeEvent.button !== 0) return;
+          context?.state.set(nodeId, [state]);
+        },
+        'canvas:click': () => {
+          if (!context) return;
+          const stateMap = Object.fromEntries(context.data.getNodeIds().map((id) => [id, []]));
+          context.state.setAll(stateMap);
+        },
+      };
+    },
+
+    destroy() {
+      context = undefined;
+    },
+  };
+}
+
+export function registerBusinessSelectBehavior(): void {
+  register('behavior', BUSINESS_SELECT_BEHAVIOR, extensionFactory(createBusinessSelectBehavior));
+}
+```
+
+This pattern does not extend `this`, inherit from a base class, or require intersection-type assertions. Every factory call returns a fresh closure so Graph instances do not share context or mutable options.
+
+## Register and activate [#register-and-activate]
+
+```ts
+registerBusinessSelectBehavior();
+
+const graph = new Graph({
+  container: 'container',
+  data,
+  behaviors: [
+    'zoom-canvas',
+    {
+      type: BUSINESS_SELECT_BEHAVIOR,
+      state: 'active',
+    } satisfies BusinessSelectBehaviorOptions,
+  ],
+});
+```
+
+Both a string reference and an object activate the extension. A string is normalized to `{ type: BUSINESS_SELECT_BEHAVIOR }`, so the read-only options passed to `init()` always include `type`.
+
+`BuiltInBehaviorOptionsMap` maps built-in names to their supported object configurations, while `BuiltInBehaviorConfig` is their union. `GraphOptions.behaviors` remains open for third-party names; use `satisfies YourBehaviorOptions` to strictly check a custom object.
+
+## Event typing [#event-typing]
+
+A Behavior consumes the complete `GraphEventMap` by default:
+
+```ts
+const behavior: BehaviorExtension<BusinessSelectBehaviorOptions> = {
+  getEvents() {
+    return {
+      'node:click': ({ nodeId, nativeEvent }) => {
+        // nodeId: string
+        // nativeEvent: MouseEvent
+      },
+      'canvas:wheel': ({ nativeEvent }) => {
+        // nativeEvent: WheelEvent
+      },
+      destroy: () => {
+        // zero arguments
+      },
+    };
+  },
+};
+```
+
+The second generic can extend a host-defined event contract:
+
+```ts
+interface BusinessEventMap {
+  'business:selection-reset': [payload: { source: 'toolbar' | 'shortcut' }];
+}
+
+type BusinessBehavior = BehaviorExtension<
+  BusinessSelectBehaviorOptions,
+  GraphEventMap & BusinessEventMap
+>;
+```
+
+This generic adds consumer-side typing only. This release does not add a public event `emit` API; do not use internal `graph.eventEmitter` to publish events.
+
+## Lifecycle and cleanup [#lifecycle-and-cleanup]
+
+The supported Behavior lifecycle is `create → init → getEvents → destroy`. Behavior does not promise `update()`; Graph destroys the old instance and creates a new one when interactions are remounted.
+
+The runtime automatically registers and removes handlers returned by `getEvents()`. Each handler is error-isolated with diagnostics that include the Behavior name and event name, so one failure does not stop unrelated handlers.
+
+Listeners on `window` or `document`, timers, observers, and asynchronous work created directly by the Behavior must still be released in `destroy()`. Resources better owned by a peripheral component should live in a Plugin.
+
+## Boundaries and replacement [#boundaries-and-replacement]
+
+* Import public APIs only from the `@antv/g6-gl` package root.
+* Use `context.data`, `context.state`, `context.viewport`, `requestRender()`, and `isDestroyed()`; new code must not depend on deprecated `context.graph`.
+* Do not access Renderer, picking, DataModel, WebGL state, or GPU buffers.
+* A registered Behavior replaces a built-in Behavior with the same name. A failing registered implementation does not fall back to the built-in implementation.
+* Prefix extension names with a business or package namespace to reduce global registry collisions.
+
+If an interaction requires low-level gesture sessions, camera writes, position writes, or a general overlay root that is not public yet, extend the public contract first instead of bypassing it with assertions.
+
+See `playground/demos/extension-system.ts` for a complete runnable example.
+
+
 # Custom label renderers (/en/docs/guides/custom-label-renderer)
 
 
@@ -574,39 +828,179 @@ Use line, arc, cubic, quadratic, or polyline edges according to the topology. En
 
 
 
+Known events are inferred from the public `GraphEventMap`:
+
 ```ts
-graph.on('node:click', ({ nodeId, data, event }) => {
-  console.log(nodeId, data, event);
+graph.on('node:click', ({ nodeId, data, nativeEvent }) => {
+  console.log(nodeId, data, nativeEvent.clientX, nativeEvent.clientY);
+});
+
+graph.on('canvas:wheel', ({ nativeEvent }) => {
+  console.log(nativeEvent.deltaY); // WheelEvent
+});
+
+graph.once('destroy', () => {
+  console.log('destroyed'); // zero arguments
 });
 ```
 
-Element events use prefixes such as `node:`, `edge:`, and `combo:`. Lifecycle events include rendering, layout, data mutation, and destroy notifications. Keep the same handler reference when removing a listener:
+Element payloads expose the original `MouseEvent` or `WheelEvent` as `nativeEvent`. The compatibility field `event` still exists but is deprecated.
+
+## Element events [#element-events]
+
+The interaction dispatcher performs shared picking and emits these events without requiring a separate click Behavior:
+
+* Node: `node:pointerover`, `node:pointerenter`, `node:pointermove`, `node:pointerleave`, `node:pointerdown`, `node:click`, `node:dblclick`, `node:contextmenu`, `node:wheel`.
+* Edge: `edge:pointerover`, `edge:pointerenter`, `edge:pointermove`, `edge:pointerleave`, `edge:pointerdown`, `edge:click`, `edge:dblclick`, `edge:contextmenu`, `edge:wheel`.
+* Combo: `combo:pointerdown`, `combo:click`, `combo:dblclick`, `combo:contextmenu`.
+* Canvas: `canvas:pointermove`, `canvas:pointerdown`, `canvas:pointerup`, `canvas:click`, `canvas:dblclick`, `canvas:contextmenu`, `canvas:wheel`.
+
+The precise payload types are `NodeGraphEvent`, `EdgeGraphEvent`, `ComboGraphEvent`, and `CanvasGraphEvent`. Their target-specific IDs and edge metadata are required in the matching handlers.
+
+## Selection and drag events [#selection-and-drag-events]
+
+Built-in Behaviors emit:
+
+* Selection: `node:selectchange`, `edge:selectchange`, `selection:clear`.
+* Node drag: `node:dragstart`, `node:drag`, `node:dragend`.
+* Combo drag: `combo:dragstart`, `combo:drag`, `combo:dragend`.
+* Edge endpoint drag: `edge:dragstart`, `edge:drag`, `edge:dragend`.
+* Brush: `brush:select`, `brush:end`.
+* Lasso: `lasso:select`, `lasso:end`.
+
+Derived events are emitted only when the corresponding Behavior is active.
+
+## Lifecycle and data events [#lifecycle-and-data-events]
+
+* Layout: `beforelayout`, `layout:start`, `layout:end`, `afterlayout`.
+* Render: `beforerender`, `afterrender`.
+* Container and teardown: `resize`, `destroy`.
+* Data: `datachange`, `afteradditem`, `afterremoveitem`, `afterupdateitem`.
+* Combo: `combo:collapse`, `combo:expand`.
+
+`GraphEventMap` values are argument tuples rather than single payload types, so both ordinary events and zero-argument events are represented exactly:
 
 ```ts
+import type { GraphEventMap } from '@antv/g6-gl';
+
+type NodeClickPayload = GraphEventMap['node:click'][0];
+type DestroyArguments = GraphEventMap['destroy']; // []
+```
+
+## Removing listeners [#removing-listeners]
+
+Use the same handler reference when removing a listener:
+
+```ts
+const handler = ({ nodeId }: GraphEventMap['node:click'][0]) => console.log(nodeId);
+
 graph.on('node:click', handler);
 graph.off('node:click', handler);
-graph.once('afterrender', () => console.log('ready'));
 ```
+
+Use `once()` for a one-time listener:
+
+```ts
+graph.once('afterrender', ({ nodeCount, edgeCount }) => {
+  console.log(nodeCount, edgeCount);
+});
+```
+
+## Custom event typing [#custom-event-typing]
+
+`graph.on/off/once` retain a generic fallback for unknown event strings:
+
+```ts
+graph.on('business:custom', (payload: { id: string }) => {
+  console.log(payload.id);
+});
+```
+
+A custom Behavior can also extend its event-map generic. This release provides consumer-side typing only and does not expose a public `emit` API; do not depend on internal `graph.eventEmitter`. See [Custom Behavior](/en/docs/guides/custom-behavior).
 
 
 # Extension system (/en/docs/guides/extensions)
 
 
 
-Start with configuration and functional styles. Register an extension only when configuration cannot express the capability.
+G6-GL uses **Extension** as the umbrella term. Node, Edge, Label, Decoration, Layout, Behavior, Transform, and Plugin are extension categories. A **Plugin** is only the category for peripheral DOM or stateful capabilities such as a toolbar or minimap; a custom Behavior is an extension, not a Plugin.
+
+Prefer configuration and functional style mappings first. Register an extension only when configuration cannot express the capability.
 
 ```ts
-import { extensionFactory, register } from '@antv/g6-gl';
+import { register } from '@antv/g6-gl';
 
 register('edge', 'business-relation', {
-  type: 'arc',
+  base: 'arc',
   style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
 });
 ```
 
-Use `extensionFactory()` when each Graph needs an isolated stateful instance. Extension lifecycle is managed through `init`, `update`, and `destroy`. Consume structured data, state, and viewport context instead of engine internals or deprecated `context.graph` access.
+## Registration and activation [#registration-and-activation]
 
-Custom layouts must honor cancellation signals, and managed resources such as listeners, timers, workers, and DOM nodes must be released in `destroy()`.
+Registration assigns an implementation to a stable name. A Graph activates it by referencing that name in its options. Register extensions before creating or rendering the Graph, and prefix third-party names to reduce global registry collisions.
+
+Stateful Layout, Behavior, Transform, and Plugin extensions should use `extensionFactory()` so each runtime scope receives a fresh instance:
+
+```ts
+import { extensionFactory, register, type ExtensionContext } from '@antv/g6-gl';
+
+register(
+  'behavior',
+  'business-click',
+  extensionFactory(() => {
+    let context: ExtensionContext | undefined;
+
+    return {
+      init(nextContext) {
+        context = nextContext;
+      },
+      getEvents() {
+        return {
+          'node:click': ({ nodeId }) => context?.state.set(nodeId, ['selected']),
+        };
+      },
+      destroy() {
+        context = undefined;
+      },
+    };
+  }),
+);
+```
+
+Object and zero-argument class registrations remain beta compatibility forms. Only `extensionFactory()` guarantees isolated mutable state for new stateful extensions.
+
+## Lifecycle by category [#lifecycle-by-category]
+
+* Node, Edge, Label, and Decoration are stateless descriptions resolved and cached by the engine.
+* Behavior uses `create → init → getEvents → destroy` for each Graph mount.
+* Layout uses `create → init → execute → destroy` for each managed execution.
+* Transform uses `create → init`, receives `update` when the instance is reused, and is destroyed when removed or when the Graph is destroyed.
+* Plugin uses `create → init → mount → destroy` for each Graph mount.
+
+`update()` is not a common lifecycle hook. Behavior and Plugin are recreated when remounted, and Layout receives a new instance for every execution.
+
+Extension creation, lifecycle hooks, category methods, and each custom Behavior event handler are error-isolated. Diagnostics identify the category, registered name, and failing phase or event without stopping unrelated handlers.
+
+## Public capability boundary [#public-capability-boundary]
+
+`ExtensionContext` groups supported capabilities under `data`, `state`, `viewport`, `requestRender()`, and `isDestroyed()`. New extensions must not depend on deprecated `context.graph`, internal `Renderer`, `DataModel`, WebGL state, GPU buffers, deep source imports, or `graph.eventEmitter`.
+
+`context.data.getNode()` and `getEdge()` return read-only snapshots. Update data through `context.data.updateNode()` or `updateEdge()`, and update states through `context.state`.
+
+If a registered Behavior uses the same name as a built-in Behavior, the registered extension wins. A failing registered implementation does not fall back to the built-in implementation.
+
+See [Custom Behavior](/en/docs/guides/custom-behavior) for the complete typed extension template.
+
+## Choosing a category [#choosing-a-category]
+
+* Use Behavior for graph interaction driven by public events.
+* Use Transform for data preprocessing before rendering.
+* Use Plugin for independently owned DOM, observers, keyboard listeners, or peripheral state.
+* Use Node, Edge, Label, or Decoration for rendering descriptions and content.
+* Use Layout only to compute and return node coordinates; Graph owns position application and rendering.
+
+Custom layouts must honor their `AbortSignal`. Every extension must release the listeners, timers, workers, observers, and DOM nodes it owns in `destroy()`.
 
 
 # Interaction configuration (/en/docs/guides/interactions)
@@ -627,6 +1021,31 @@ behaviors: [
 ```
 
 Each behavior can be a string or an object with options. Picking and element event dispatch are shared, so behaviors consume one consistent interaction stream. See [events](/en/docs/guides/events).
+
+`BuiltInBehaviorOptionsMap` maps each built-in name to its supported object configuration, while `BuiltInBehaviorConfig` is the union of all built-in configurations. Custom Behaviors should declare a literal `type`, a dedicated options type, and use `satisfies` at activation sites.
+
+## Built-in Behaviors [#built-in-behaviors]
+
+* `zoom-canvas`: wheel zoom.
+* `drag-canvas`: canvas panning.
+* `drag-node`: node movement and Combo group dragging.
+* `drag-edge`: edge endpoint reconnection.
+* `click-select`: node and edge selection.
+* `hover-highlight`, `highlight-node`, and `highlight-edge`: analytical highlighting.
+* `brush-select` and `lasso-select`: area selection.
+* `tooltip`: hover- or click-triggered information overlay.
+
+## Event dispatch [#event-dispatch]
+
+The internal interaction dispatcher performs one shared pick and emits normalized events in node → edge → combo → canvas priority. Click, double-click, context-menu, wheel, and hover events can be observed without enabling a separate click Behavior.
+
+```ts
+graph.on('node:click', ({ nodeId }) => {
+  console.log(nodeId);
+});
+```
+
+See [Custom Behavior](/en/docs/guides/custom-behavior) for the typed factory and registration pattern, and [Extension system](/en/docs/guides/extensions) for category boundaries and lifecycle rules.
 
 
 # Labels and icons (/en/docs/guides/label)
@@ -800,65 +1219,3 @@ npm run benchmark -- --suite all --mode quick
 Reports are written to `performance/` as JSON and Markdown. Raw local reports are not committed by default. Public comparisons must record the G6-GL version and Git state, Node and Chromium versions, operating system, CPU, user agent, viewport, DPR, data scale, layout configuration, sample count, RME, and warnings.
 
 Quick results are smoke evidence, not marketing baselines. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
-
-
-# API stability and release boundary (/en/docs/compatibility/api-stability)
-
-
-
-G6-GL remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
-
-Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
-
-Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
-
-Combo collapse, nesting, and runtime regrouping remain experimental. Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.
-
-
-# Browsers and runtime environment (/en/docs/compatibility/browser)
-
-
-
-G6-GL requires WebGL 1.0 and a modern browser capable of running the ESM/ES2020 package. Canvas 2D is used for labels and combo outlines. WebGL 2.0 is not required.
-
-Recommended minimums for the untranspiled package are Chrome/Edge 80+, Firefox 74+, Safari 13.1+, and iOS Safari 13.4+. These are syntax and platform capability boundaries, not a complete certified device matrix.
-
-G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
-
-Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
-
-
-# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
-
-
-
-G6-GL borrows G6 configuration concepts but is not a complete replacement for G6 v5. Migration is most suitable when large-graph interaction and state updates are the primary bottleneck and the product uses core node, edge, layout, and behavior capabilities.
-
-Do not migrate blindly when the project depends on the complete plugin ecosystem, animation system, complex Canvas element customization, or built-in graph analysis.
-
-Suggested process:
-
-1. Reproduce one real workflow in the deployed Playground.
-2. Normalize data to nodes, edges, and optional combos.
-3. Map styles and states through package-root Graph options.
-4. Replace G6 behavior names with supported G6-GL behaviors.
-5. Verify layouts, events, incremental updates, compatibility, and performance on target devices.
-
-Keep the original implementation until the real-data acceptance suite passes.
-
-
-# Compatibility overview (/en/docs/compatibility)
-
-
-
-Review these boundaries before adopting or upgrading G6-GL:
-
-<Cards>
-  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
-
-  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
-
-  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
-</Cards>
-
-G6-GL needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.

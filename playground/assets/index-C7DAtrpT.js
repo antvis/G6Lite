@@ -1,1 +1,0 @@
-import{r as s,a as g,b as t,c as a,d}from"./graph-1KFqBjYb.js";function f(r,e,i){if(r==="node"){g(e,i);return}if(r==="label"){s(e,i);return}if(r==="edge"){t(e,i);return}if(r==="decoration"){a(e,i);return}d(r,e,i)}export{f as r};

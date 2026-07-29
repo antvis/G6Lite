@@ -10,10 +10,18 @@
 
 ## Beta 阶段变更脉络 [#beta-阶段变更脉络]
 
+### 扩展与 Behavior 类型契约（2026-07-29） [#扩展与-behavior-类型契约2026-07-29]
+
+* “Extension”统一作为扩展体系总称，“Plugin”只表示管理独立 DOM 或外围状态的具体扩展类别。
+* 新增公开 `GraphEventMap`、精确元素事件类型，以及 `Graph.on/off/once` 的已知事件推导；零参数事件和 `MouseEvent` / `WheelEvent` 可被准确表达。
+* 自定义 Behavior 统一采用字面量名称、`BehaviorOptions`、`BehaviorExtension`、`extensionFactory()` 和显式注册函数；字符串引用在 `init()` 前归一化为 `{ type }`。
+* Behavior handler 增加按扩展名和事件名定位的异常隔离；Behavior 与 Plugin 不承诺 `update()`，当前只有 Transform 在实例复用时调用 `update()`。
+* 新增中英文自定义 Behavior 指南，并同步更新扩展、交互和事件文档。
+
 ### API、扩展体系与公开边界重新基线（2026-07-21 ～ 2026-07-22） [#api扩展体系与公开边界重新基线2026-07-21--2026-07-22]
 
 * `new Graph(options)` 继续作为唯一推荐且长期保留的创建入口，核心有状态模块继续使用 class。
-* 新增统一 `register()` + `extensionFactory()` 范式；Behavior、Layout、Transform、Plugin 使用独立实例和一致的 `init / update / destroy` 生命周期。
+* 新增统一 `register()` + `extensionFactory()` 范式；Behavior、Layout、Transform、Plugin 使用独立实例，并按类别执行各自的 `init`、能力方法和 `destroy` 生命周期。
 * `ExtensionContext` 新增受控的 `data`、`state`、`viewport` 与 `requestRender()`；`context.graph` 和平铺坐标方法只保留 beta 兼容。
 * 扩展数据查询返回只读快照；旧对象实例只做尽力克隆，有状态扩展通过 `extensionFactory()` 获得确定的实例隔离。
 * 自定义 Node、Edge、Label、Decoration 和 Layout 统一采用 function / factory / config；`BaseNode`、`BreathingNode`、`registerNode()` 仅保留 beta deprecated 兼容层。

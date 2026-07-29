@@ -2,17 +2,81 @@
 
 
 
-Start with configuration and functional styles. Register an extension only when configuration cannot express the capability.
+G6-GL uses **Extension** as the umbrella term. Node, Edge, Label, Decoration, Layout, Behavior, Transform, and Plugin are extension categories. A **Plugin** is only the category for peripheral DOM or stateful capabilities such as a toolbar or minimap; a custom Behavior is an extension, not a Plugin.
+
+Prefer configuration and functional style mappings first. Register an extension only when configuration cannot express the capability.
 
 ```ts
-import { extensionFactory, register } from '@antv/g6-gl';
+import { register } from '@antv/g6-gl';
 
 register('edge', 'business-relation', {
-  type: 'arc',
+  base: 'arc',
   style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
 });
 ```
 
-Use `extensionFactory()` when each Graph needs an isolated stateful instance. Extension lifecycle is managed through `init`, `update`, and `destroy`. Consume structured data, state, and viewport context instead of engine internals or deprecated `context.graph` access.
+## Registration and activation [#registration-and-activation]
 
-Custom layouts must honor cancellation signals, and managed resources such as listeners, timers, workers, and DOM nodes must be released in `destroy()`.
+Registration assigns an implementation to a stable name. A Graph activates it by referencing that name in its options. Register extensions before creating or rendering the Graph, and prefix third-party names to reduce global registry collisions.
+
+Stateful Layout, Behavior, Transform, and Plugin extensions should use `extensionFactory()` so each runtime scope receives a fresh instance:
+
+```ts
+import { extensionFactory, register, type ExtensionContext } from '@antv/g6-gl';
+
+register(
+  'behavior',
+  'business-click',
+  extensionFactory(() => {
+    let context: ExtensionContext | undefined;
+
+    return {
+      init(nextContext) {
+        context = nextContext;
+      },
+      getEvents() {
+        return {
+          'node:click': ({ nodeId }) => context?.state.set(nodeId, ['selected']),
+        };
+      },
+      destroy() {
+        context = undefined;
+      },
+    };
+  }),
+);
+```
+
+Object and zero-argument class registrations remain beta compatibility forms. Only `extensionFactory()` guarantees isolated mutable state for new stateful extensions.
+
+## Lifecycle by category [#lifecycle-by-category]
+
+* Node, Edge, Label, and Decoration are stateless descriptions resolved and cached by the engine.
+* Behavior uses `create → init → getEvents → destroy` for each Graph mount.
+* Layout uses `create → init → execute → destroy` for each managed execution.
+* Transform uses `create → init`, receives `update` when the instance is reused, and is destroyed when removed or when the Graph is destroyed.
+* Plugin uses `create → init → mount → destroy` for each Graph mount.
+
+`update()` is not a common lifecycle hook. Behavior and Plugin are recreated when remounted, and Layout receives a new instance for every execution.
+
+Extension creation, lifecycle hooks, category methods, and each custom Behavior event handler are error-isolated. Diagnostics identify the category, registered name, and failing phase or event without stopping unrelated handlers.
+
+## Public capability boundary [#public-capability-boundary]
+
+`ExtensionContext` groups supported capabilities under `data`, `state`, `viewport`, `requestRender()`, and `isDestroyed()`. New extensions must not depend on deprecated `context.graph`, internal `Renderer`, `DataModel`, WebGL state, GPU buffers, deep source imports, or `graph.eventEmitter`.
+
+`context.data.getNode()` and `getEdge()` return read-only snapshots. Update data through `context.data.updateNode()` or `updateEdge()`, and update states through `context.state`.
+
+If a registered Behavior uses the same name as a built-in Behavior, the registered extension wins. A failing registered implementation does not fall back to the built-in implementation.
+
+See [Custom Behavior](/en/docs/guides/custom-behavior) for the complete typed extension template.
+
+## Choosing a category [#choosing-a-category]
+
+* Use Behavior for graph interaction driven by public events.
+* Use Transform for data preprocessing before rendering.
+* Use Plugin for independently owned DOM, observers, keyboard listeners, or peripheral state.
+* Use Node, Edge, Label, or Decoration for rendering descriptions and content.
+* Use Layout only to compute and return node coordinates; Graph owns position application and rendering.
+
+Custom layouts must honor their `AbortSignal`. Every extension must release the listeners, timers, workers, observers, and DOM nodes it owns in `destroy()`.

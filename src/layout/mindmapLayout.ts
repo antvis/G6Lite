@@ -3,6 +3,7 @@
  * Reference: G6 mindmap layout
  */
 
+import { ANTV_CATEGORY_10 } from '../palette';
 import type { GraphData, GraphNode } from '../types';
 
 export interface MindmapLayoutOptions {
@@ -33,16 +34,7 @@ const DEFAULT_LEVEL_GAP = 120;
 const DEFAULT_NODE_GAP = 30;
 const DEFAULT_NODE_WIDTH = 100;
 const DEFAULT_NODE_HEIGHT = 40;
-const DEFAULT_BRANCH_COLORS = [
-  '#5B8FF9',
-  '#F6BD16',
-  '#5AD8A6',
-  '#5D7092',
-  '#E8684A',
-  '#6F5EF9',
-  '#C6E5FF',
-  '#FFD8B8',
-];
+const DEFAULT_BRANCH_COLORS = ANTV_CATEGORY_10;
 
 export function executeMindmapLayout(
   data: GraphData,

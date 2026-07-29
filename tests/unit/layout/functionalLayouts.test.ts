@@ -3,6 +3,7 @@ import { executeFishboneLayout } from '@src/layout/fishboneLayout.js';
 import { executeIndentedLayout } from '@src/layout/indentedLayout.js';
 import { executeMindmapLayout } from '@src/layout/mindmapLayout.js';
 import { runLayout } from '@src/layout/runLayout.js';
+import { ANTV_CATEGORY_10 } from '@src/palette.js';
 import type { GraphData } from '@src/types.js';
 
 describe('function-based built-in layouts', () => {
@@ -62,6 +63,25 @@ describe('function-based built-in layouts', () => {
       data: { _branchColor: '#left' },
     });
     expect(data).toEqual(original);
+  });
+
+  it('uses the current AntV category palette for default mindmap branch colors', () => {
+    const result = executeMindmapLayout(
+      {
+        nodes: [{ id: 'root' }, { id: 'first' }, { id: 'second' }],
+        edges: [
+          { source: 'root', target: 'first' },
+          { source: 'root', target: 'second' },
+        ],
+      },
+      {
+        getSide: (_node, index) => (index === 0 ? 'left' : 'right'),
+      },
+    );
+    const byId = new Map(result.nodes.map((node) => [node.id, node]));
+
+    expect(byId.get('first')?.data?._branchColor).toBe(ANTV_CATEGORY_10[0]);
+    expect(byId.get('second')?.data?._branchColor).toBe(ANTV_CATEGORY_10[1]);
   });
 
   it('executes the fishbone layout as a stateless function', () => {

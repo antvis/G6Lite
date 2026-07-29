@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { registerEdge } from '@src/extensions/edge.js';
 import { registerNode } from '@src/extensions/node.js';
+import { ANTV_PRIMARY_COLOR } from '@src/palette.js';
 import {
   analyzeEdgeConfig,
   analyzeNodeConfig,
@@ -193,7 +194,7 @@ describe('style state resolution: Set vs Array', () => {
       );
 
       expect(highlighted.lineWidth).toBe(2);
-      expect(highlighted.stroke).toBe('#5B8FF9');
+      expect(highlighted.stroke).toBe(ANTV_PRIMARY_COLOR);
     });
 
     it('hidden edge state sets opacity 0 (Set)', () => {

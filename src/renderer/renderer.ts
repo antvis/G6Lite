@@ -6,6 +6,7 @@
 import { getEdgeBaseType } from '../extensions/edge';
 import { getNodeBaseType } from '../extensions/node';
 import type { DataModel } from '../dataModel';
+import { ANTV_PRIMARY_COLOR } from '../palette';
 import type { NodeRect, Waypoint } from '../routing/orthogonal';
 import {
   applyRoundedCorners,
@@ -150,7 +151,7 @@ export class Renderer {
   private nodeConfig: NodeConfig | undefined;
   private edgeConfig: EdgeConfig | undefined;
   private theme: ThemeTokens = {
-    nodeFill: '#5B8FF9',
+    nodeFill: ANTV_PRIMARY_COLOR,
     nodeSize: 8,
     edgeStroke: '#e2e2e2',
     edgeLineWidth: 1,

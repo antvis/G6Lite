@@ -4,36 +4,30 @@
  */
 
 import type { ThemeTokens } from './types';
-
-const CATEGORY_PALETTE = [
-  '#1783FF',
-  '#00C9C9',
-  '#F08F56',
-  '#D580FF',
-  '#7863FF',
-  '#DB9D0D',
-  '#60C42D',
-  '#FF80CA',
-  '#2491B3',
-  '#17C76F',
-];
+import {
+  ANTV_CATEGORY_10,
+  ANTV_DARK_EDGE_CATEGORY_10,
+  ANTV_DARK_EDGE_COLOR,
+  ANTV_LIGHT_EDGE_COLOR,
+  ANTV_PRIMARY_COLOR,
+} from './palette';
 
 const light: ThemeTokens = {
-  nodeFill: '#5B8FF9',
+  nodeFill: ANTV_PRIMARY_COLOR,
   nodeSize: 24,
   nodeStroke: '#fff',
   nodeStrokeWidth: 0,
-  edgeStroke: '#99ADD1',
+  edgeStroke: ANTV_LIGHT_EDGE_COLOR,
   edgeLineWidth: 1,
   edgeArrow: true,
   canvasBackground: '#fff',
-  edgeDefaultColor: '#99ADD1',
-  edgeCategoryPalette: CATEGORY_PALETTE,
+  edgeDefaultColor: ANTV_LIGHT_EDGE_COLOR,
+  edgeCategoryPalette: [...ANTV_CATEGORY_10],
   edgeStateStyles: {
-    active: { stroke: '#5B8FF9', opacity: 1 },
-    selected: { stroke: '#5B8FF9', opacity: 1 },
+    active: { stroke: ANTV_PRIMARY_COLOR, opacity: 1 },
+    selected: { stroke: ANTV_PRIMARY_COLOR, opacity: 1 },
     disabled: { opacity: 0.15, lineDash: [4, 4] },
-    highlight: { stroke: '#5B8FF9', opacity: 1 },
+    highlight: { stroke: ANTV_PRIMARY_COLOR, opacity: 1 },
     inactive: { opacity: 0.25 },
   },
   nodeStateStyles: {
@@ -46,21 +40,21 @@ const light: ThemeTokens = {
 };
 
 const dark: ThemeTokens = {
-  nodeFill: '#5B8FF9',
+  nodeFill: ANTV_PRIMARY_COLOR,
   nodeSize: 24,
   nodeStroke: '#333',
   nodeStrokeWidth: 0,
-  edgeStroke: '#4a4a4a',
+  edgeStroke: ANTV_DARK_EDGE_COLOR,
   edgeLineWidth: 1,
   edgeArrow: true,
   canvasBackground: '#1a1a1a',
-  edgeDefaultColor: '#4a4a4a',
-  edgeCategoryPalette: CATEGORY_PALETTE,
+  edgeDefaultColor: ANTV_DARK_EDGE_COLOR,
+  edgeCategoryPalette: [...ANTV_DARK_EDGE_CATEGORY_10],
   edgeStateStyles: {
-    active: { stroke: '#5B8FF9', opacity: 1 },
-    selected: { stroke: '#5B8FF9', opacity: 1 },
+    active: { stroke: ANTV_PRIMARY_COLOR, opacity: 1 },
+    selected: { stroke: ANTV_PRIMARY_COLOR, opacity: 1 },
     disabled: { opacity: 0.15, lineDash: [4, 4] },
-    highlight: { stroke: '#5B8FF9', opacity: 1 },
+    highlight: { stroke: ANTV_PRIMARY_COLOR, opacity: 1 },
     inactive: { opacity: 0.25 },
   },
   nodeStateStyles: {
@@ -74,6 +68,13 @@ const dark: ThemeTokens = {
 
 const presets: Record<string, ThemeTokens> = { light, dark };
 
+function cloneTheme(theme: ThemeTokens): ThemeTokens {
+  return {
+    ...theme,
+    edgeCategoryPalette: theme.edgeCategoryPalette ? [...theme.edgeCategoryPalette] : undefined,
+  };
+}
+
 /**
  * Resolve theme option to a full ThemeTokens object.
  * String -> preset; object -> preset + overrides.
@@ -82,10 +83,10 @@ export function resolveTheme(
   theme: 'light' | 'dark' | ({ type: 'light' | 'dark' } & Partial<ThemeTokens>),
 ): ThemeTokens {
   if (theme === 'light' || theme === 'dark') {
-    return { ...presets[theme] };
+    return cloneTheme(presets[theme]);
   }
   const base = presets[theme.type] ?? light;
-  return { ...base, ...theme };
+  return cloneTheme({ ...base, ...theme });
 }
 
 export { dark, light, presets };

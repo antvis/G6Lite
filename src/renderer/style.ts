@@ -10,6 +10,7 @@
 import { getEdgeExtension } from '../extensions/edge';
 import { getNodeExtension } from '../extensions/node';
 import { safeExtensionCall } from '../extensions/registry';
+import { ANTV_PRIMARY_COLOR } from '../palette';
 import type { EdgeConfig, GraphEdge, GraphNode, NodeConfig, ThemeTokens } from '../types';
 import { parseColor } from './color';
 
@@ -213,7 +214,7 @@ export function analyzeNodeConfig(config: NodeConfig | undefined, theme: ThemeTo
   // Static config: pre-compute and cache the base style (including pre-parsed colors)
   const size = style?.size ?? theme.nodeSize ?? 8;
   const sizeNum = typeof size === 'number' ? size : 8;
-  const fillValue = (style?.fill as string) ?? theme.nodeFill ?? '#5B8FF9';
+  const fillValue = (style?.fill as string) ?? theme.nodeFill ?? ANTV_PRIMARY_COLOR;
   const strokeValue = (style?.stroke as string) ?? theme.nodeStroke ?? '#fff';
 
   const cachedStyle: CachedNodeStyle = {
@@ -370,7 +371,7 @@ function resolveNodeStyleDynamic(
     const styleFn = config.style as (n: GraphNode) => Partial<ResolvedNodeStyle>;
     const styleObj = styleFn(node);
     return {
-      fill: styleObj.fill ?? theme.nodeFill ?? '#5B8FF9',
+      fill: styleObj.fill ?? theme.nodeFill ?? ANTV_PRIMARY_COLOR,
       size: styleObj.size ?? 40,
       width: styleObj.width ?? 100,
       height: styleObj.height ?? 40,
@@ -382,7 +383,7 @@ function resolveNodeStyleDynamic(
     };
   }
 
-  const fill = resolveStyleValue(style.fill, node, theme.nodeFill ?? '#5B8FF9');
+  const fill = resolveStyleValue(style.fill, node, theme.nodeFill ?? ANTV_PRIMARY_COLOR);
   const size = resolveStyleValue(style.size, node, theme.nodeSize ?? 8);
   const sizeNum = typeof size === 'number' ? size : 8;
   const width = resolveStyleValue(style.width, node, sizeNum);

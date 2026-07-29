@@ -1,4 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import {
+  ANTV_CATEGORY_10,
+  ANTV_DARK_EDGE_CATEGORY_10,
+  ANTV_DARK_EDGE_COLOR,
+  ANTV_PRIMARY_COLOR,
+} from '@src/palette.js';
 import { dark, light, presets, resolveTheme } from '@src/theme.js';
 
 describe('resolveTheme', () => {
@@ -17,6 +23,21 @@ describe('resolveTheme', () => {
     const result = resolveTheme('light');
     expect(result).not.toBe(light);
     expect(result).toEqual(light);
+    expect(result.edgeCategoryPalette).not.toBe(light.edgeCategoryPalette);
+  });
+
+  it('should isolate a custom palette override from the returned theme', () => {
+    const palette = ['#111111', '#222222'];
+    const result = resolveTheme({ type: 'light', edgeCategoryPalette: palette });
+
+    expect(result.edgeCategoryPalette).toEqual(palette);
+    expect(result.edgeCategoryPalette).not.toBe(palette);
+  });
+
+  it('should preserve an explicitly undefined palette override', () => {
+    const result = resolveTheme({ type: 'light', edgeCategoryPalette: undefined });
+
+    expect(result.edgeCategoryPalette).toBeUndefined();
   });
 
   it('should override preset values with custom values', () => {
@@ -62,6 +83,15 @@ describe('presets', () => {
     expect(presets.dark.nodeStateStyles).toBeDefined();
   });
 
+  it('uses the current AntV palettes for light and dark themes', () => {
+    expect(light.nodeFill).toBe(ANTV_PRIMARY_COLOR);
+    expect(light.edgeCategoryPalette).toEqual(ANTV_CATEGORY_10);
+    expect(dark.nodeFill).toBe(ANTV_PRIMARY_COLOR);
+    expect(dark.edgeStroke).toBe(ANTV_DARK_EDGE_COLOR);
+    expect(dark.edgeDefaultColor).toBe(ANTV_DARK_EDGE_COLOR);
+    expect(dark.edgeCategoryPalette).toEqual(ANTV_DARK_EDGE_CATEGORY_10);
+  });
+
   it.each([light, dark])('keeps default edge widths stable across interaction states', (theme) => {
     expect(theme.edgeStateStyles?.active?.lineWidth).toBeUndefined();
     expect(theme.edgeStateStyles?.selected?.lineWidth).toBeUndefined();
@@ -91,9 +121,9 @@ describe('presets', () => {
   });
 
   it.each([light, dark])('uses the primary blue for emphasized edges', (theme) => {
-    expect(theme.edgeStateStyles?.active?.stroke).toBe('#5B8FF9');
-    expect(theme.edgeStateStyles?.selected?.stroke).toBe('#5B8FF9');
-    expect(theme.edgeStateStyles?.highlight?.stroke).toBe('#5B8FF9');
+    expect(theme.edgeStateStyles?.active?.stroke).toBe(ANTV_PRIMARY_COLOR);
+    expect(theme.edgeStateStyles?.selected?.stroke).toBe(ANTV_PRIMARY_COLOR);
+    expect(theme.edgeStateStyles?.highlight?.stroke).toBe(ANTV_PRIMARY_COLOR);
   });
 
   it('light and dark should have different backgrounds', () => {

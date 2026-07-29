@@ -8,10 +8,11 @@
  * 结果写入返回节点的 data._nodeColor / data._edgeColor，供样式函数读取。
  */
 
+import { ANTV_CATEGORY_10 } from '../palette';
 import type { GraphData, GraphNode } from '../types';
 
 /** Default palette when nodeColors / edgeColors are enabled but not specified. */
-const DEFAULT_PALETTE = ['#1783FF', '#F08F56', '#00C9C9', '#D580FF', '#7863FF'];
+const DEFAULT_PALETTE = ANTV_CATEGORY_10;
 
 export interface IndentedLayoutOptions {
   indent?: number;

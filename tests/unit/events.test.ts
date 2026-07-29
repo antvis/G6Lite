@@ -1,5 +1,17 @@
 import { describe, it, expect, vi } from 'vitest';
-import { EventEmitter } from '@src/events.js';
+import { EventEmitter, resolveEventEmitterConstructor } from '@src/events.js';
+
+describe('resolveEventEmitterConstructor', () => {
+  class FakeEventEmitter {}
+
+  it('should use an ESM default constructor directly', () => {
+    expect(resolveEventEmitterConstructor(FakeEventEmitter)).toBe(FakeEventEmitter);
+  });
+
+  it('should unwrap a CommonJS default constructor', () => {
+    expect(resolveEventEmitterConstructor({ default: FakeEventEmitter })).toBe(FakeEventEmitter);
+  });
+});
 
 describe('EventEmitter', () => {
   it('should register and emit events', () => {

@@ -15,12 +15,15 @@ interface EventEmitterDelegate {
 
 type EventEmitterConstructor = new () => EventEmitterDelegate;
 
+/** @internal */
+export function resolveEventEmitterConstructor(moduleValue: unknown): EventEmitterConstructor {
+  return (
+    typeof moduleValue === 'function' ? moduleValue : (moduleValue as { default: unknown }).default
+  ) as EventEmitterConstructor;
+}
+
 const eventEmitterModule: unknown = AntVEventEmitter;
-const AntVEventEmitterConstructor = (
-  typeof eventEmitterModule === 'function'
-    ? eventEmitterModule
-    : (eventEmitterModule as { default: unknown }).default
-) as EventEmitterConstructor;
+const AntVEventEmitterConstructor = resolveEventEmitterConstructor(eventEmitterModule);
 
 export class EventEmitter {
   private readonly emitter = new AntVEventEmitterConstructor();

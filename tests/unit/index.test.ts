@@ -1,5 +1,5 @@
 import { readFileSync, readdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import * as publicApi from '@src/index.js';
@@ -35,6 +35,35 @@ function collectRelativeModuleSpecifiers(source: string, filePath: string): stri
 
   visit(sourceFile);
   return specifiers;
+}
+
+function collectDirectories(directory: string): string[] {
+  const directories = [directory];
+
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (entry.isDirectory()) directories.push(...collectDirectories(join(directory, entry.name)));
+  }
+
+  return directories;
+}
+
+function collectExportSpecifiers(indexFile: string): string[] {
+  const source = readFileSync(indexFile, 'utf8');
+  const sourceFile = ts.createSourceFile(indexFile, source, ts.ScriptTarget.Latest, true);
+
+  return sourceFile.statements.flatMap((statement) => {
+    if (!ts.isExportDeclaration(statement) || !statement.moduleSpecifier) return [];
+    return ts.isStringLiteralLike(statement.moduleSpecifier)
+      ? [statement.moduleSpecifier.text]
+      : [];
+  });
+}
+
+function getDirectModuleSpecifiers(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.ts') && entry.name !== 'index.ts')
+    .map((entry) => `./${entry.name.slice(0, -'.ts'.length)}`)
+    .sort();
 }
 
 describe('package public API boundary', () => {
@@ -84,5 +113,50 @@ describe('package public API boundary', () => {
     );
 
     expect(violations).toEqual([]);
+  });
+
+  it('provides an index.ts for every source directory', () => {
+    const sourceDirectory = resolve(process.cwd(), 'src');
+    const missingIndexes = collectDirectories(sourceDirectory)
+      .filter((directory) => !readdirSync(directory).includes('index.ts'))
+      .map((directory) => basename(directory));
+
+    expect(missingIndexes).toEqual([]);
+  });
+
+  it('keeps every barrel export at its own directory level', () => {
+    const sourceDirectory = resolve(process.cwd(), 'src');
+    const violations = collectDirectories(sourceDirectory).flatMap((directory) => {
+      const indexFile = join(directory, 'index.ts');
+
+      return collectExportSpecifiers(indexFile)
+        .filter((specifier) => {
+          if (!specifier.startsWith('./')) return true;
+          const segments = specifier.slice(2).split('/');
+          return segments.length > 2 || (segments.length === 2 && segments[1] !== 'index');
+        })
+        .map((specifier) => `${indexFile}: ${specifier}`);
+    });
+
+    expect(violations).toEqual([]);
+  });
+
+  it('exposes every renderer program through the programs directory API', () => {
+    const programsDirectory = resolve(process.cwd(), 'src/renderer/programs');
+    const exports = new Set(collectExportSpecifiers(join(programsDirectory, 'index.ts')));
+
+    expect(
+      getDirectModuleSpecifiers(programsDirectory).filter((specifier) => !exports.has(specifier)),
+    ).toEqual([]);
+    expect(exports).toContain('./shaders/index');
+  });
+
+  it('exposes every shader through the shaders directory API', () => {
+    const shadersDirectory = resolve(process.cwd(), 'src/renderer/programs/shaders');
+    const exports = new Set(collectExportSpecifiers(join(shadersDirectory, 'index.ts')));
+
+    expect(
+      getDirectModuleSpecifiers(shadersDirectory).filter((specifier) => !exports.has(specifier)),
+    ).toEqual([]);
   });
 });

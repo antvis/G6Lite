@@ -47,3 +47,4 @@ export { Renderer } from './renderer';
 export type { RendererData } from './renderer';
 export { analyzeEdgeConfig, analyzeNodeConfig, resolveEdgeStyle, resolveNodeStyle } from './style';
 export type { ResolvedEdgeStyle, ResolvedNodeStyle } from './style';
+export * as programs from './programs/index';

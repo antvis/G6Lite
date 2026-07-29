@@ -79,6 +79,31 @@ G6-GL is a lightweight WebGL graph visualization engine for large relationship d
 Use G6-GL when WebGL rendering, incremental state updates, AntV layouts, and a controlled extension boundary match your product. If you need the complete G6 plugin and animation ecosystem, evaluate G6 v5 first.
 
 
+# API reference (/en/docs/api)
+
+
+
+All supported imports come from `@antv/g6-gl`.
+
+```ts
+import { Graph, extensionFactory, register, runLayout } from '@antv/g6-gl';
+import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-gl';
+```
+
+## Main runtime APIs [#main-runtime-apis]
+
+* `Graph`: create, render, update, query, relayout, control the viewport, and destroy a graph.
+* `runLayout()`: run a supported layout independently.
+* `register()`: register node, edge, label, behavior, layout, transform, decoration, or plugin extensions.
+* `extensionFactory()`: provide isolated stateful extension instances.
+
+## Type groups [#type-groups]
+
+Package-root types cover graph options and data, nodes, edges, combos, labels, states, themes, layouts, viewport operations, behaviors, transforms, plugins, and extension context.
+
+The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).
+
+
 # Data model (/en/docs/concepts/data-model)
 
 
@@ -1194,28 +1219,3 @@ Review these boundaries before adopting or upgrading G6-GL:
 </Cards>
 
 G6-GL needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.
-
-
-# API reference (/en/docs/api)
-
-
-
-All supported imports come from `@antv/g6-gl`.
-
-```ts
-import { Graph, extensionFactory, register, runLayout } from '@antv/g6-gl';
-import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-gl';
-```
-
-## Main runtime APIs [#main-runtime-apis]
-
-* `Graph`: create, render, update, query, relayout, control the viewport, and destroy a graph.
-* `runLayout()`: run a supported layout independently.
-* `register()`: register node, edge, label, behavior, layout, transform, decoration, or plugin extensions.
-* `extensionFactory()`: provide isolated stateful extension instances.
-
-## Type groups [#type-groups]
-
-Package-root types cover graph options and data, nodes, edges, combos, labels, states, themes, layouts, viewport operations, behaviors, transforms, plugins, and extension context.
-
-The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).

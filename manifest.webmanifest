@@ -1,1 +1,1 @@
-{"name":"G6-GL","short_name":"G6-GL","description":"基于 WebGL 的高性能轻量图可视化引擎","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#ec3d75","icons":[{"src":"/icon.svg","sizes":"any","type":"image/svg+xml"}]}
+{"name":"G6-GL","short_name":"G6-GL","description":"基于 WebGL 的高性能轻量图可视化引擎","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#ec3d75","icons":[{"src":"/icon.svg?v=antv-20260724","sizes":"any","type":"image/svg+xml"}]}

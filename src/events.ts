@@ -1,57 +1,47 @@
 /**
- * Lightweight typed event emitter.
+ * Typed compatibility facade backed by @antv/event-emitter.
  */
+
+import AntVEventEmitter from '@antv/event-emitter';
 
 export type Handler<Args extends unknown[]> = (...args: Args) => void;
 
-type StoredHandler = Handler<never[]>;
+interface EventEmitterDelegate {
+  on(event: string, handler: unknown, once?: boolean): unknown;
+  off(event?: string, handler?: unknown): unknown;
+  once(event: string, handler: unknown): unknown;
+  emit<Args extends unknown[]>(event: string, ...args: Args): void;
+}
+
+type EventEmitterConstructor = new () => EventEmitterDelegate;
+
+const eventEmitterModule: unknown = AntVEventEmitter;
+const AntVEventEmitterConstructor = (
+  typeof eventEmitterModule === 'function'
+    ? eventEmitterModule
+    : (eventEmitterModule as { default: unknown }).default
+) as EventEmitterConstructor;
 
 export class EventEmitter {
-  private _handlers = new Map<string, Set<StoredHandler>>();
+  private readonly emitter = new AntVEventEmitterConstructor();
 
   on<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
-    let set = this._handlers.get(event);
-    if (!set) {
-      set = new Set();
-      this._handlers.set(event, set);
-    }
-    set.add(handler as unknown as StoredHandler);
+    this.emitter.on(event, handler);
   }
 
   off<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
-    const set = this._handlers.get(event);
-    if (set) {
-      set.delete(handler as unknown as StoredHandler);
-      if (set.size === 0) this._handlers.delete(event);
-    }
+    this.emitter.off(event, handler);
   }
 
   once<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
-    const wrapper: Handler<Args> = (...args) => {
-      this.off(event, wrapper);
-      handler(...args);
-    };
-    this.on(event, wrapper);
+    this.emitter.once(event, handler);
   }
 
   emit<Args extends unknown[]>(event: string, ...args: Args): void {
-    const set = this._handlers.get(event);
-    if (!set) return;
-    for (const storedHandler of set) {
-      try {
-        const handler = storedHandler as unknown as Handler<Args>;
-        handler(...args);
-      } catch (e) {
-        console.error(`EventEmitter: error in handler for "${event}"`, e);
-      }
-    }
+    this.emitter.emit(event, ...args);
   }
 
   removeAllListeners(event?: string): void {
-    if (event) {
-      this._handlers.delete(event);
-    } else {
-      this._handlers.clear();
-    }
+    this.emitter.off(event);
   }
 }

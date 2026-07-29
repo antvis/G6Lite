@@ -29,6 +29,33 @@ describe('EventEmitter', () => {
     expect(count).toBe(2);
   });
 
+  it('should invoke the same handler once per registration', () => {
+    const emitter = new EventEmitter();
+    const handler = vi.fn();
+    emitter.on('click', handler);
+    emitter.on('click', handler);
+    emitter.emit('click');
+    expect(handler).toHaveBeenCalledTimes(2);
+  });
+
+  it('should remove all duplicate registrations for a handler', () => {
+    const emitter = new EventEmitter();
+    const handler = vi.fn();
+    emitter.on('click', handler);
+    emitter.on('click', handler);
+    emitter.off('click', handler);
+    emitter.emit('click');
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('should support wildcard handlers', () => {
+    const emitter = new EventEmitter();
+    const handler = vi.fn();
+    emitter.on('*', handler);
+    emitter.emit('test', { value: 1 });
+    expect(handler).toHaveBeenCalledWith({ value: 1 });
+  });
+
   it('should remove handler with off', () => {
     const emitter = new EventEmitter();
     const handler = vi.fn();
@@ -81,18 +108,15 @@ describe('EventEmitter', () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it('should isolate errors in handlers', () => {
+  it('should propagate errors from handlers', () => {
     const emitter = new EventEmitter();
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const goodHandler = vi.fn();
     emitter.on('test', () => {
       throw new Error('oops');
     });
     emitter.on('test', goodHandler);
-    emitter.emit('test');
-    expect(goodHandler).toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+    expect(() => emitter.emit('test')).toThrow('oops');
+    expect(goodHandler).not.toHaveBeenCalled();
   });
 });
 

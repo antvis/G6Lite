@@ -355,6 +355,39 @@ describe('P1: repeated render resource lifecycle', () => {
     expect(executeLayout).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
+
+  it('derives automatic worker layout without mutating the configured options', async () => {
+    const layout = { type: 'grid' };
+    const executeLayout = vi.fn(async (data: { nodes: Array<{ id: string }> }, config) => ({
+      nodes: data.nodes.map((node, index) => ({ ...node, x: index, y: index })),
+      config,
+    }));
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      layoutGeneration: 1,
+      options: { layout },
+      eventEmitter: new EventEmitter(),
+      executeLayout,
+    });
+    const nodes = Array.from({ length: 1000 }, (_, index) => ({ id: `node-${index}` }));
+
+    await (
+      graph as unknown as {
+        runConfiguredLayout(
+          data: { nodes: Array<{ id: string }>; edges: [] },
+          generation: number,
+        ): Promise<unknown>;
+      }
+    ).runConfiguredLayout({ nodes, edges: [] }, 1);
+
+    expect(layout).toEqual({ type: 'grid' });
+    expect(executeLayout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ type: 'grid', worker: true }),
+    );
+    expect(executeLayout.mock.calls[0][1]).not.toBe(layout);
+  });
 });
 
 describe('P1: public data snapshot boundary', () => {
@@ -488,6 +521,33 @@ describe('P1: public camera and coordinate boundary', () => {
     graph.focusItem(['a', 'b'], 40);
 
     expect(setCamera).toHaveBeenCalledWith({ x: 180, y: 120 });
+  });
+
+  it('zooms out only when needed to keep focused nodes inside padding', () => {
+    const dataModel = new DataModel({ theme: {} });
+    dataModel.addNodes([
+      { id: 'a', x: 0, y: 0 },
+      { id: 'b', x: 1000, y: 0 },
+    ]);
+    const setCamera = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      dataModel,
+      containerEl: { clientWidth: 800, clientHeight: 600 },
+      canvas: { width: 800, height: 600 },
+      renderer: {
+        getCamera: () => ({ x: 0, y: 0, zoom: 2 }),
+        setCamera,
+      },
+    });
+
+    graph.focusItem(['a', 'b'], 50);
+
+    const camera = setCamera.mock.calls[0][0] as { x: number; y: number; zoom: number };
+    expect(camera.zoom).toBeCloseTo(0.7);
+    expect(camera.x * camera.zoom).toBeCloseTo(50);
+    expect((1000 + camera.x) * camera.zoom).toBeCloseTo(750);
   });
 });
 

@@ -9,9 +9,9 @@
  * - inactiveState: string — optional state to apply to non-highlighted elements
  */
 
-import type { Graph } from '../graph.js';
-import type { Renderer } from '../renderer/renderer.js';
-import type { ElementState } from '../types.js';
+import type { Graph } from '../graph';
+import type { Renderer } from '../renderer/renderer';
+import type { ElementState } from '../types';
 
 export interface HoverHighlightConfig {
   type: string;
@@ -195,6 +195,7 @@ export function hoverHighlight(
   graph.eventEmitter.on('combo:dragend', unfreeze);
 
   return () => {
+    if (highlightApplied.length > 0 || inactiveApplied.length > 0) clearHighlight();
     graph.eventEmitter.off('edge:pointerover', onEdgeOver);
     graph.eventEmitter.off('edge:pointerleave', onPointerLeave);
     graph.eventEmitter.off('node:pointerover', onNodeOver);

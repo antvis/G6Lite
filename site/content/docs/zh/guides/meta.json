@@ -1,5 +1,5 @@
 {
-  "title": "Configuration",
+  "title": "配置指南",
   "pages": [
     "data",
     "node",
@@ -9,6 +9,7 @@
     "theme",
     "layout",
     "interactions",
+    "custom-behavior",
     "events",
     "tooltip",
     "parallel-edges",

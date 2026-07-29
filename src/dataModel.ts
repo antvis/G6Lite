@@ -16,7 +16,7 @@ import type {
   NodeConfig,
   ParallelEdgeMeta,
   ThemeTokens,
-} from './types.js';
+} from './types';
 
 /** Mutable node record owned by the internal DataModel module. */
 export interface InternalNode {
@@ -887,16 +887,16 @@ export class DataModel {
     }
     // Build parent-child combo relationships
     for (const c of combos) {
-      if (c.parentId && this._combos.has(c.parentId)) {
-        this._combos.get(c.parentId)!.childComboIds.add(c.id);
-      }
+      if (!c.parentId) continue;
+      this._combos.get(c.parentId)?.childComboIds.add(c.id);
     }
     // Assign nodes to combos
     for (const n of nodes) {
-      if (this._nodeIdToIndex.has(n.id) && n.comboId && this._combos.has(n.comboId)) {
-        this._combos.get(n.comboId)!.childNodeIds.add(n.id);
-        this._nodeToCombo.set(n.id, n.comboId);
-      }
+      if (!this._nodeIdToIndex.has(n.id) || !n.comboId) continue;
+      const combo = this._combos.get(n.comboId);
+      if (!combo) continue;
+      combo.childNodeIds.add(n.id);
+      this._nodeToCombo.set(n.id, n.comboId);
     }
     for (const combo of this._combos.values()) {
       if (combo.collapsed) {
@@ -921,9 +921,7 @@ export class DataModel {
       data: combo.data,
       states: combo.states && combo.states.length > 0 ? new Set(combo.states) : new Set(),
     });
-    if (combo.parentId && this._combos.has(combo.parentId)) {
-      this._combos.get(combo.parentId)!.childComboIds.add(combo.id);
-    }
+    if (combo.parentId) this._combos.get(combo.parentId)?.childComboIds.add(combo.id);
   }
 
   removeCombo(id: string): void {
@@ -950,9 +948,10 @@ export class DataModel {
     if (oldComboId) {
       this._combos.get(oldComboId)?.childNodeIds.delete(nodeId);
     }
-    if (comboId && this._combos.has(comboId)) {
-      this._combos.get(comboId)!.childNodeIds.add(nodeId);
-      this._nodeToCombo.set(nodeId, comboId);
+    const combo = comboId ? this._combos.get(comboId) : undefined;
+    if (combo) {
+      combo.childNodeIds.add(nodeId);
+      this._nodeToCombo.set(nodeId, combo.id);
     } else {
       this._nodeToCombo.delete(nodeId);
     }

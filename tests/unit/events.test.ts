@@ -1,5 +1,17 @@
 import { describe, it, expect, vi } from 'vitest';
-import { EventEmitter } from '@src/events.js';
+import { EventEmitter, resolveEventEmitterConstructor } from '@src/events.js';
+
+describe('resolveEventEmitterConstructor', () => {
+  class FakeEventEmitter {}
+
+  it('should use an ESM default constructor directly', () => {
+    expect(resolveEventEmitterConstructor(FakeEventEmitter)).toBe(FakeEventEmitter);
+  });
+
+  it('should unwrap a CommonJS default constructor', () => {
+    expect(resolveEventEmitterConstructor({ default: FakeEventEmitter })).toBe(FakeEventEmitter);
+  });
+});
 
 describe('EventEmitter', () => {
   it('should register and emit events', () => {
@@ -27,6 +39,33 @@ describe('EventEmitter', () => {
     emitter.on('click', () => count++);
     emitter.emit('click');
     expect(count).toBe(2);
+  });
+
+  it('should invoke the same handler once per registration', () => {
+    const emitter = new EventEmitter();
+    const handler = vi.fn();
+    emitter.on('click', handler);
+    emitter.on('click', handler);
+    emitter.emit('click');
+    expect(handler).toHaveBeenCalledTimes(2);
+  });
+
+  it('should remove all duplicate registrations for a handler', () => {
+    const emitter = new EventEmitter();
+    const handler = vi.fn();
+    emitter.on('click', handler);
+    emitter.on('click', handler);
+    emitter.off('click', handler);
+    emitter.emit('click');
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('should support wildcard handlers', () => {
+    const emitter = new EventEmitter();
+    const handler = vi.fn();
+    emitter.on('*', handler);
+    emitter.emit('test', { value: 1 });
+    expect(handler).toHaveBeenCalledWith({ value: 1 });
   });
 
   it('should remove handler with off', () => {
@@ -81,18 +120,15 @@ describe('EventEmitter', () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it('should isolate errors in handlers', () => {
+  it('should propagate errors from handlers', () => {
     const emitter = new EventEmitter();
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const goodHandler = vi.fn();
     emitter.on('test', () => {
       throw new Error('oops');
     });
     emitter.on('test', goodHandler);
-    emitter.emit('test');
-    expect(goodHandler).toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+    expect(() => emitter.emit('test')).toThrow('oops');
+    expect(goodHandler).not.toHaveBeenCalled();
   });
 });
 

@@ -1,7 +1,7 @@
-import type { Camera } from '../renderer/camera.js';
-import type { GraphNode, NodeConfig, NodeStateStyleOverride, NodeStyleConfig } from '../types.js';
-import type { ExtensionInput } from './contracts.js';
-import { createExtension, registerExtension } from './registry.js';
+import type { Camera } from '../renderer/camera';
+import type { GraphNode, NodeConfig, NodeStateStyleOverride, NodeStyleConfig } from '../types';
+import type { ExtensionInput } from './contracts';
+import { createExtension, registerExtension } from './registry';
 
 export interface NodeOverlayDrawParams {
   node: GraphNode & { x: number; y: number };

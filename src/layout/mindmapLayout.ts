@@ -3,8 +3,8 @@
  * Reference: G6 mindmap layout
  */
 
-import { ANTV_CATEGORY_10 } from '../palette.js';
-import type { GraphData, GraphNode } from '../types.js';
+import { ANTV_CATEGORY_10 } from '../palette';
+import type { GraphData, GraphNode } from '../types';
 
 export interface MindmapLayoutOptions {
   direction?: 'H' | 'LR' | 'RL';

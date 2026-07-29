@@ -1,0 +1,18 @@
+---
+title: Changelog
+description: Important G6-GL beta changes and migration boundaries
+---
+
+G6-GL is currently in the `0.1.0-beta` series. Recent work has concentrated on package-root API boundaries, functional extensions, isolated extension lifecycle, read-only query models, layout cancellation, combo consistency, interaction dispatch, package size governance, examples, and reproducible benchmarks.
+
+## Extension and Behavior contracts — 2026-07-29
+
+- Extension is the umbrella term, while Plugin identifies only the peripheral DOM or stateful extension category.
+- The public `GraphEventMap`, precise element event types, and typed `Graph.on/off/once` overloads infer known payloads, including zero-argument events and native mouse or wheel events.
+- Custom Behaviors use a literal name, `BehaviorOptions`, `BehaviorExtension`, `extensionFactory()`, and an explicit registration function. String references are normalized to `{ type }` before `init()`.
+- Behavior handlers are error-isolated with registered-name and event diagnostics. Behavior and Plugin do not promise `update()`; Transform uses it when an instance is reused.
+- New English and Chinese Custom Behavior guides document the complete package-author pattern and public capability boundary.
+
+Deprecated beta compatibility APIs remain documented in [API stability](/en/docs/compatibility/api-stability). Projects migrating from G6 v5 should follow the [migration guide](/en/docs/compatibility/g6-v5-migration).
+
+Before upgrading, run type checking, tests, a package build, size-limit, release examples, and target-device validation.

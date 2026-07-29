@@ -3,14 +3,14 @@
  * OpenSpec: theme spec.
  */
 
-import type { ThemeTokens } from './types.js';
+import type { ThemeTokens } from './types';
 import {
   ANTV_CATEGORY_10,
   ANTV_DARK_EDGE_CATEGORY_10,
   ANTV_DARK_EDGE_COLOR,
   ANTV_LIGHT_EDGE_COLOR,
   ANTV_PRIMARY_COLOR,
-} from './palette.js';
+} from './palette';
 
 const light: ThemeTokens = {
   nodeFill: ANTV_PRIMARY_COLOR,

@@ -1,6 +1,6 @@
-import type { EdgeConfig } from '../types.js';
-import type { EdgeExtension, ExtensionInput } from './contracts.js';
-import { createExtension, registerExtension } from './registry.js';
+import type { EdgeConfig } from '../types';
+import type { EdgeExtension, ExtensionInput } from './contracts';
+import { createExtension, registerExtension } from './registry';
 
 const EDGE_CACHE = new Map<string, EdgeExtension>();
 

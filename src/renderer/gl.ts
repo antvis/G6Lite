@@ -3,7 +3,8 @@
  */
 
 function compileShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader {
-  const shader = gl.createShader(type)!;
+  const shader = gl.createShader(type);
+  if (!shader) throw new Error('Unable to create WebGL shader');
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -21,7 +22,12 @@ export function createProgram(
 ): WebGLProgram {
   const vert = compileShader(gl, gl.VERTEX_SHADER, vertSource);
   const frag = compileShader(gl, gl.FRAGMENT_SHADER, fragSource);
-  const program = gl.createProgram()!;
+  const program = gl.createProgram();
+  if (!program) {
+    gl.deleteShader(vert);
+    gl.deleteShader(frag);
+    throw new Error('Unable to create WebGL program');
+  }
   gl.attachShader(program, vert);
   gl.attachShader(program, frag);
   gl.linkProgram(program);

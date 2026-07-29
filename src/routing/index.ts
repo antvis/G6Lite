@@ -4,5 +4,5 @@ export {
   computeOrthogonalRoute,
   computeTreeRoutes,
   getPolylineMidpoint,
-} from './orthogonal.js';
-export type { LayoutDirection, NodeRect, Waypoint } from './orthogonal.js';
+} from './orthogonal';
+export type { LayoutDirection, NodeRect, Waypoint } from './orthogonal';

@@ -54,15 +54,19 @@ for (const [file, lang] of [
 
 for (const file of walk(docsRoot).filter((item) => item.endsWith('.mdx'))) {
   const relative = path.relative(docsRoot, file).replace(/\\/g, '/');
-  const english = relative.endsWith('.en.mdx');
-  const localized = relative.replace(/\.en\.mdx$|\.mdx$/g, '');
+  const [locale, ...segments] = relative.split('/');
+  if (locale !== 'zh' && locale !== 'en') {
+    fail(`Documentation file is outside a locale directory: ${path.relative(root, file)}`);
+    continue;
+  }
+  const localized = segments.join('/').replace(/\.mdx$/, '');
   const route =
     localized === 'index'
       ? 'docs'
       : localized.endsWith('/index')
-        ? `docs/${localized.slice(0, -6)}`
-        : `docs/${localized}`;
-  const output = path.join(outRoot, english ? 'en' : '', `${route}.html`);
+      ? `docs/${localized.slice(0, -6)}`
+      : `docs/${localized}`;
+  const output = path.join(outRoot, locale === 'en' ? 'en' : '', `${route}.html`);
   if (!existsSync(output)) fail(`Missing static document route: ${path.relative(root, output)}`);
 }
 

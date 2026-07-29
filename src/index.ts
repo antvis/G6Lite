@@ -8,10 +8,17 @@
  */
 
 // ──── Core ────
-export { EventEmitter } from './events.js';
-export type { Handler } from './events.js';
-export { extensionFactory, register } from './extensions/index.js';
+export { EventEmitter } from './events';
+export type { Handler } from './events';
+export {
+  BaseNode,
+  BreathingNode,
+  extensionFactory,
+  register,
+  registerNode,
+} from './extensions/index';
 export type {
+  BehaviorEventHandlers,
   BehaviorExtension,
   DecorationDrawParams,
   DecorationMeasureParams,
@@ -28,29 +35,31 @@ export type {
   ExtensionNodeData,
   ExtensionStateContext,
   ExtensionViewportContext,
+  EventArguments,
   LayoutExtension,
-  PluginExtension,
-  TransformExtension,
-} from './extensions/index.js';
-export { BaseNode, BreathingNode, registerNode } from './extensions/node.js';
-export type {
   NodeBoundaryAnchorParams,
   NodeExtension,
   NodeExtensionInput,
   NodeOverlayDrawParams,
-} from './extensions/node.js';
-export { Graph } from './graph.js';
-export { runLayout } from './layout/index.js';
-export type { LayoutResult } from './layout/index.js';
-export { resolveTheme } from './theme.js';
+  PluginExtension,
+  TransformExtension,
+} from './extensions/index';
+export { Graph } from './graph';
+export { runLayout } from './layout/index';
+export type { LayoutResult } from './layout/index';
+export { resolveTheme } from './theme';
 
 // ──── Configuration & data types ────
-export type { Camera } from './renderer/camera.js';
+export type { Camera } from './renderer/index';
 export type {
+  BehaviorConfig,
   BehaviorOption,
+  BehaviorOptions,
   BuiltInElementState,
+  CanvasGraphEvent,
   ComboConfig,
   ComboData,
+  ComboGraphEvent,
   ComboModel,
   ComboStateStyleOverride,
   ComboStyleConfig,
@@ -58,6 +67,7 @@ export type {
   EdgeConfig,
   EdgeData,
   EdgeDataUpdate,
+  EdgeGraphEvent,
   EdgeLabelParams,
   EdgeLabelPlacement,
   EdgeModel,
@@ -70,6 +80,7 @@ export type {
   GraphData,
   GraphEdge,
   GraphElementEvent,
+  GraphEventMap,
   GraphNode,
   GraphOptions,
   GraphPoint,
@@ -91,6 +102,7 @@ export type {
   NodeDecorationPlacement,
   NodeLabelParams,
   NodeModel,
+  NodeGraphEvent,
   NodePositionUpdate,
   NodeState,
   NodeStateStyleOverride,
@@ -98,6 +110,7 @@ export type {
   NodeStyleValue,
   ParallelEdgesConfig,
   PluginOption,
+  PluginOptions,
   ResolvedLabelStyle,
   SetDataOptions,
   ThemeOption,
@@ -105,11 +118,18 @@ export type {
   TransformOption,
   ViewportPoint,
   ZoomOptions,
-} from './types.js';
+} from './types';
 
 // ──── Behavior config types ────
-export type { DragCanvasOptions } from './behaviors/dragCanvas.js';
-export type { HoverHighlightConfig } from './behaviors/hoverHighlight.js';
-export type { BehaviorConfig, BehaviorName } from './behaviors/index.js';
-export type { LassoSelectOptions } from './behaviors/lassoSelect.js';
-export type { TooltipContext, TooltipOptions } from './behaviors/tooltip.js';
+export type {
+  BehaviorName,
+  BrushSelectOptions,
+  BuiltInBehaviorConfig,
+  BuiltInBehaviorOptionsMap,
+  ClickSelectConfig,
+  DragCanvasOptions,
+  HoverHighlightConfig,
+  LassoSelectOptions,
+  TooltipContext,
+  TooltipOptions,
+} from './behaviors/index';

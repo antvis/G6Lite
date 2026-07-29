@@ -5,7 +5,8 @@ The product website and API documentation live in this directory. It uses Next.j
 ## Content model
 
 - Chinese is the default language.
-- English routes use `/en` and localized MDX files use the `*.en.mdx` / `meta.en.json` convention.
+- Chinese documentation lives in `content/docs/zh`, and English documentation lives in `content/docs/en`.
+- English routes use `/en`; Fumadocs maps the language directories with its `dir` locale parser.
 - Documentation is organized into quick start, core concepts, configuration, API, examples, technical metrics, and compatibility.
 - Generated API content comes from the package-root exports through TypeDoc.
 - Website examples consume `playground/demos/catalog.json`; the deployed Playground is copied into the static site after the Next.js build.

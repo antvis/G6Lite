@@ -97,6 +97,177 @@ export interface GraphElementEvent<T = Record<string, unknown>> {
   target?: string;
 }
 
+/** Precisely typed node event emitted by the interaction dispatcher. */
+export interface NodeGraphEvent<
+  TData = Record<string, unknown>,
+  TNativeEvent extends MouseEvent | WheelEvent = MouseEvent | WheelEvent,
+> extends GraphElementEvent<TData> {
+  targetType: 'node';
+  targetId: string;
+  nodeId: string;
+  nativeEvent: TNativeEvent;
+  /** @deprecated Use nativeEvent. */
+  event: TNativeEvent;
+}
+
+/** Precisely typed edge event emitted by the interaction dispatcher. */
+export interface EdgeGraphEvent<
+  TData = Record<string, unknown>,
+  TNativeEvent extends MouseEvent | WheelEvent = MouseEvent | WheelEvent,
+> extends GraphElementEvent<TData> {
+  targetType: 'edge';
+  targetId: string;
+  edgeId: string;
+  edgeIndex: number;
+  source: string;
+  target: string;
+  nativeEvent: TNativeEvent;
+  /** @deprecated Use nativeEvent. */
+  event: TNativeEvent;
+}
+
+/** Precisely typed combo event emitted by the interaction dispatcher. */
+export interface ComboGraphEvent<
+  TNativeEvent extends MouseEvent = MouseEvent,
+> extends GraphElementEvent<Record<string, unknown>> {
+  targetType: 'combo';
+  targetId: string;
+  comboId: string;
+  nativeEvent: TNativeEvent;
+  /** @deprecated Use nativeEvent. */
+  event: TNativeEvent;
+}
+
+/** Precisely typed canvas event emitted by the interaction dispatcher. */
+export interface CanvasGraphEvent<
+  TNativeEvent extends MouseEvent | WheelEvent = MouseEvent | WheelEvent,
+> extends GraphElementEvent<Record<string, unknown>> {
+  targetType: 'canvas';
+  nativeEvent: TNativeEvent;
+  /** @deprecated Use nativeEvent. */
+  event: TNativeEvent;
+}
+
+/**
+ * Public graph event contract. Values are argument tuples so zero-argument and
+ * future multi-argument events remain type-safe.
+ */
+export interface GraphEventMap {
+  'node:pointerover': [event: NodeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'node:pointerenter': [event: NodeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'node:pointermove': [event: NodeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'node:pointerleave': [event: NodeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'node:pointerdown': [event: NodeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'node:click': [event: NodeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'node:dblclick': [event: NodeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'node:contextmenu': [event: NodeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'node:wheel': [event: NodeGraphEvent<Record<string, unknown>, WheelEvent>];
+
+  'edge:pointerover': [event: EdgeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'edge:pointerenter': [event: EdgeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'edge:pointermove': [event: EdgeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'edge:pointerleave': [event: EdgeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'edge:pointerdown': [event: EdgeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'edge:click': [event: EdgeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'edge:dblclick': [event: EdgeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'edge:contextmenu': [event: EdgeGraphEvent<Record<string, unknown>, MouseEvent>];
+  'edge:wheel': [event: EdgeGraphEvent<Record<string, unknown>, WheelEvent>];
+
+  'combo:pointerdown': [event: ComboGraphEvent];
+  'combo:click': [event: ComboGraphEvent];
+  'combo:dblclick': [event: ComboGraphEvent];
+  'combo:contextmenu': [event: ComboGraphEvent];
+
+  'canvas:pointermove': [event: CanvasGraphEvent<MouseEvent>];
+  'canvas:pointerdown': [event: CanvasGraphEvent<MouseEvent>];
+  'canvas:pointerup': [event: CanvasGraphEvent<MouseEvent>];
+  'canvas:click': [event: CanvasGraphEvent<MouseEvent>];
+  'canvas:dblclick': [event: CanvasGraphEvent<MouseEvent>];
+  'canvas:contextmenu': [event: CanvasGraphEvent<MouseEvent>];
+  'canvas:wheel': [event: CanvasGraphEvent<WheelEvent>];
+
+  'selection:clear': [payload: { ids: string[]; event: MouseEvent }];
+  'node:selectchange': [payload: { nodeId: string; selected: boolean; event: MouseEvent }];
+  'edge:selectchange': [
+    payload: {
+      edgeId: string;
+      edgeIndex: number;
+      source: string;
+      target: string;
+      selected: boolean;
+      event: MouseEvent;
+    },
+  ];
+
+  'node:dragstart': [payload: { nodeId: string; nodeIds: string[]; event: MouseEvent }];
+  'node:drag': [
+    payload: { nodeId: string; nodeIds: string[]; dx: number; dy: number; event: MouseEvent },
+  ];
+  'node:dragend': [payload: { nodeId: string; nodeIds: string[] }];
+  'combo:dragstart': [payload: { comboId: string; event: MouseEvent }];
+  'combo:drag': [payload: { comboId: string; dx: number; dy: number; event: MouseEvent }];
+  'combo:dragend': [payload: { comboId: string }];
+  'edge:dragstart': [
+    payload: {
+      edgeId?: string;
+      edgeIndex: number;
+      source: string;
+      target: string;
+      dragEnd: 'source' | 'target';
+      event: MouseEvent;
+    },
+  ];
+  'edge:drag': [
+    payload: {
+      edgeId?: string;
+      edgeIndex: number;
+      source: string;
+      target: string;
+      dragEnd: 'source' | 'target';
+      event: MouseEvent;
+    },
+  ];
+  'edge:dragend': [
+    payload: {
+      edgeId?: string;
+      edgeIndex: number;
+      source: string;
+      target: string;
+      originalSource: string;
+      originalTarget: string;
+      reconnected: boolean;
+      newEndpoint?: string;
+      event: MouseEvent;
+    },
+  ];
+  'brush:select': [payload: { nodeIds: string[] }];
+  'brush:end': [payload: { nodeIds: string[] }];
+  'lasso:select': [payload: { nodeIds: string[] }];
+  'lasso:end': [payload: { nodeIds: string[] }];
+
+  beforelayout: [payload: { nodeCount: number }];
+  'layout:start': [payload: { nodeCount: number }];
+  'layout:end': [payload: { duration: number; nodeCount: number }];
+  afterlayout: [payload: { duration: number; nodeCount: number }];
+  beforerender: [payload: { nodeCount: number; edgeCount: number }];
+  afterrender: [payload: { nodeCount: number; edgeCount: number }];
+  resize: [payload: { width: number; height: number }];
+  destroy: [];
+  datachange: [payload: { nodeCount: number; edgeCount: number }];
+  afteradditem: [
+    payload:
+      { type: 'node'; id: string } | { type: 'edge'; id: string; source: string; target: string },
+  ];
+  afterremoveitem: [payload: { type: 'node' | 'edge'; id: string }];
+  afterupdateitem: [
+    payload:
+      | { type: 'node'; id: string; action: 'position' | 'data' }
+      | { type: 'edge'; id: string; action: 'data' },
+  ];
+  'combo:collapse': [payload: { comboId: string }];
+  'combo:expand': [payload: { comboId: string }];
+}
+
 /** Node states for visual differentiation. */
 export type NodeState = ElementState;
 
@@ -403,8 +574,19 @@ export interface LayoutConfig {
   [key: string]: unknown;
 }
 
+/** Shared selector included in every normalized behavior configuration. */
+export interface BehaviorOptions<TType extends string = string> {
+  type: TType;
+}
+
+/** Type-safe behavior configuration authored by built-in or third-party extensions. */
+export type BehaviorConfig<
+  TType extends string = string,
+  TOptions extends object = Record<string, unknown>,
+> = Readonly<BehaviorOptions<TType> & TOptions>;
+
 /** Behavior: string name or config object. */
-export type BehaviorOption = string | { type: string; [key: string]: unknown };
+export type BehaviorOption = string | BehaviorConfig;
 
 /** Data transform config. */
 export type TransformOption =
@@ -412,8 +594,12 @@ export type TransformOption =
   | (string & {})
   | { type: string; options?: Record<string, unknown> | ParallelEdgesConfig };
 
-export interface PluginOption {
-  type: string;
+/** Shared selector included in every plugin configuration. */
+export interface PluginOptions<TType extends string = string> {
+  type: TType;
+}
+
+export interface PluginOption extends PluginOptions {
   [key: string]: unknown;
 }
 

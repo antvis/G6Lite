@@ -5,8 +5,8 @@
  * pick guard is no longer needed. In-flight move/up tracking is owned here.
  */
 
-import type { Graph } from '../graph.js';
-import type { Renderer } from '../renderer/renderer.js';
+import type { Graph } from '../graph';
+import type { Renderer } from '../renderer/renderer';
 
 export interface DragCanvasOptions {
   /** Keep modifier-key gestures available for brush/lasso selection. Default: true. */

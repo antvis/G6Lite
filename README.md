@@ -1,38 +1,49 @@
-# G6-GL
+[简体中文](./README.zh-CN.md) | English
 
-[English](./README.en-US.md) | 简体中文
+<h1 align="center">G6-GL</h1>
 
-[![npm version](https://img.shields.io/npm/v/@antv/g6-gl.svg)](https://www.npmjs.com/package/@antv/g6-gl)
-[![build](https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg)](https://github.com/antvis/G6Lite/actions/workflows/build.yml)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@antv/g6-gl)](https://bundlephobia.com/package/@antv/g6-gl)
-[![license](https://img.shields.io/npm/l/@antv/g6-gl.svg)](./LICENSE)
+<p align="center">
+  A lightweight, high-performance WebGL engine for interactive graph visualization.
+</p>
 
-基于 WebGL 的高性能轻量图可视化引擎。
+<p align="center">
+  <a href="https://www.npmjs.com/package/@antv/g6-gl"><img alt="npm version" src="https://img.shields.io/npm/v/@antv/g6-gl.svg"></a>
+  <a href="https://github.com/antvis/G6Lite/actions/workflows/build.yml"><img alt="build" src="https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg"></a>
+  <a href="https://bundlephobia.com/package/@antv/g6-gl"><img alt="minified and gzipped size" src="https://img.shields.io/bundlephobia/minzip/@antv/g6-gl"></a>
+  <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/npm/l/@antv/g6-gl.svg"></a>
+</p>
 
-![G6-GL 大规模关系图渲染效果](./site/public/examples/large.png)
+<p align="center">
+  <a href="https://g6-gl.antv.vision/en">Website</a> ·
+  <a href="https://g6-gl.antv.vision/en/docs/getting-started/quick-start">Quick Start</a> ·
+  <a href="https://g6-gl.antv.vision/en/docs/api">API</a> ·
+  <a href="https://g6-gl.antv.vision/en/docs/examples">Examples</a>
+</p>
 
-## 核心价值
+![G6-GL rendering a large relationship graph](./site/public/examples/large.png)
 
-- **WebGL 批量渲染**：节点和边进入 GPU 渲染管线，适合大规模关系图。
-- **增量交互更新**：状态、位置和业务数据变更按刷新级别调度，避免无关全量重建。
-- **AntV 布局能力**：集成 `@antv/layout`，覆盖 force、circular、grid、dagre、mindmap 等布局。
-- **受控扩展边界**：通过包根公开 API、函数式映射和统一 `register()` 扩展业务能力。
+## Why G6-GL
 
-## 安装
+- **GPU-first graph rendering** — Nodes and edges share a batched WebGL pipeline designed for responsive relationship exploration.
+- **Incremental by design** — State, position, and data changes are scheduled by refresh level, avoiding unrelated full rebuilds.
+- **Layouts and interactions included** — Use `@antv/layout` algorithms together with configurable zoom, pan, drag, select, and highlight behaviors.
+- **An explicit extension surface** — Import from the package root, map data to styles with functions, and add capabilities through the unified `register()` API.
+
+## Install
 
 ```bash
 npm install @antv/g6-gl
 ```
 
-## 最小示例
+## Quick Start
 
-准备一个有明确宽高的容器：
+Create a container with an explicit size:
 
 ```html
 <div id="graph" style="width: 800px; height: 500px"></div>
 ```
 
-然后创建并渲染图：
+Then create and render an interactive graph:
 
 ```ts
 import { Graph } from '@antv/g6-gl';
@@ -40,12 +51,24 @@ import { Graph } from '@antv/g6-gl';
 const graph = new Graph({
   container: 'graph',
   data: {
-    nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+    nodes: [
+      { id: 'gateway', data: { role: 'core' } },
+      { id: 'orders', data: { role: 'service' } },
+      { id: 'inventory', data: { role: 'service' } },
+    ],
     edges: [
-      { source: 'a', target: 'b' },
-      { source: 'a', target: 'c' },
+      { source: 'gateway', target: 'orders' },
+      { source: 'gateway', target: 'inventory' },
     ],
   },
+  node: {
+    type: 'circle',
+    style: {
+      size: 18,
+      fill: (node) => (node.data?.role === 'core' ? '#1677ff' : '#36cfc9'),
+    },
+  },
+  edge: { type: 'line', style: { lineWidth: 2 } },
   layout: { type: 'circular', radius: 140 },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
@@ -53,42 +76,31 @@ const graph = new Graph({
 await graph.render();
 ```
 
-公开 API 只以 `@antv/g6-gl` 包根导出和 `package.json#exports` 为准，不承诺 `src/` 深层路径。
+Only package-root exports from `@antv/g6-gl` and `package.json#exports` are public API. Deep `src/` paths are internal and may change without notice.
 
-## 继续阅读
+## Learn More
 
-- [官网](https://g6-gl.antv.vision)
-- [快速开始](https://g6-gl.antv.vision/docs/getting-started/quick-start)
-- [核心概念](https://g6-gl.antv.vision/docs/concepts/overview)
-- [配置指南](https://g6-gl.antv.vision/docs/guides/data)
-- [API](https://g6-gl.antv.vision/docs/api)
-- [示例](https://g6-gl.antv.vision/docs/examples)
-- [技术指标](https://g6-gl.antv.vision/docs/metrics/performance)
-- [兼容性](https://g6-gl.antv.vision/docs/compatibility/browser)
+- [Website](https://g6-gl.antv.vision/en)
+- [Quick Start](https://g6-gl.antv.vision/en/docs/getting-started/quick-start)
+- [Core Concepts](https://g6-gl.antv.vision/en/docs/concepts/overview)
+- [Data and Configuration](https://g6-gl.antv.vision/en/docs/guides/data)
+- [API Reference](https://g6-gl.antv.vision/en/docs/api)
+- [Examples](https://g6-gl.antv.vision/en/docs/examples)
+- [Performance Metrics](https://g6-gl.antv.vision/en/docs/metrics/performance)
+- [Browser Compatibility](https://g6-gl.antv.vision/en/docs/compatibility/browser)
 
-## 本地开发
+## Local Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-常用验证命令：
+Run the project verification pipeline with `npm run ci`, and build the documentation site with `npm run site:build`.
 
-```bash
-npm run lint
-npm run typecheck
-npm test -- --coverage
-npm run build
-npm run size
-npm run examples:check -- --profile release
-npm run benchmark -- --suite all --mode quick
-npm run site:build
-```
+## Contributing
 
-## 贡献
-
-提交 Pull Request 前请阅读 [贡献指南](./CONTRIBUTING.md) 与 [行为准则](./CODE_OF_CONDUCT.md)。Bug、功能建议和使用问题请通过 [GitHub Issues](https://github.com/antvis/G6Lite/issues) 提交。
+Before opening a pull request, read the [contributing guide](./CONTRIBUTING.md). Report bugs, feature requests, and usage questions through [GitHub Issues](https://github.com/antvis/G6Lite/issues).
 
 ## License
 

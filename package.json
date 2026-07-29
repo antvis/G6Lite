@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "dev": "vite playground",
-    "build": "rm -rf dist && tsc && tsc -p tsconfig.dist-declarations.json && tsc -p tsconfig.package-nodenext.json && tsc -p tsconfig.package-bundler.json && node scripts/check-package.mjs",
+    "build": "rm -rf dist && tsc && node scripts/add-js-extensions.mjs && tsc -p tsconfig.dist-declarations.json && tsc -p tsconfig.package-nodenext.json && tsc -p tsconfig.package-bundler.json && node scripts/check-package.mjs",
     "build:playground": "vite build",
     "examples:check": "node scripts/check-examples.mjs",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.public-api.json && tsc -p tsconfig.perf.json && tsc -p tsconfig.playground.json",
@@ -69,6 +69,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@antv/event-emitter": "^0.1.3",
     "@antv/layout": "^2.0.0"
   },
   "engines": {

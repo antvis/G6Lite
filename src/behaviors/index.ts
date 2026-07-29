@@ -7,7 +7,7 @@
  * When both highlight-node and highlight-edge are used, one combined hover handler runs (edge takes precedence).
  */
 
-import type { BehaviorExtension } from '../extensions/contracts.js';
+import type { BehaviorExtension } from '../extensions/contracts';
 import {
   createExtension,
   createExtensionContext,
@@ -15,21 +15,28 @@ import {
   hasExtension,
   initializeExtension,
   safeExtensionCall,
-} from '../extensions/registry.js';
-import type { Graph } from '../graph.js';
-import type { Renderer } from '../renderer/renderer.js';
-import type { BehaviorOption } from '../types.js';
-import { brushSelect } from './brushSelect.js';
-import { clickSelect, type ClickSelectConfig } from './clickSelect.js';
-import { dragCanvas } from './dragCanvas.js';
-import { dragEdge } from './dragEdge.js';
-import { dragNode } from './dragNode.js';
-import { highlightEdge } from './highlightEdge.js';
-import { highlightNode } from './highlightNode.js';
-import { hoverHighlight, type HoverHighlightConfig } from './hoverHighlight.js';
-import { lassoSelect } from './lassoSelect.js';
-import { tooltip, type TooltipOptions } from './tooltip.js';
-import { zoomCanvas } from './zoomCanvas.js';
+} from '../extensions/registry';
+import type { Graph } from '../graph';
+import type { Renderer } from '../renderer/renderer';
+import type { BehaviorConfig, BehaviorOption } from '../types';
+import { brushSelect, type BrushSelectOptions } from './brushSelect';
+import { clickSelect, type ClickSelectConfig } from './clickSelect';
+import { dragCanvas, type DragCanvasOptions } from './dragCanvas';
+import { dragEdge } from './dragEdge';
+import { dragNode } from './dragNode';
+import { highlightEdge } from './highlightEdge';
+import { highlightNode } from './highlightNode';
+import { hoverHighlight, type HoverHighlightConfig } from './hoverHighlight';
+import { lassoSelect, type LassoSelectOptions } from './lassoSelect';
+import { tooltip, type TooltipOptions } from './tooltip';
+import { zoomCanvas } from './zoomCanvas';
+
+export type { BrushSelectOptions } from './brushSelect';
+export type { ClickSelectConfig } from './clickSelect';
+export type { DragCanvasOptions } from './dragCanvas';
+export type { HoverHighlightConfig } from './hoverHighlight';
+export type { LassoSelectOptions } from './lassoSelect';
+export type { TooltipContext, TooltipOptions } from './tooltip';
 
 export type BehaviorName =
   | 'zoom-canvas'
@@ -44,10 +51,22 @@ export type BehaviorName =
   | 'lasso-select'
   | 'tooltip';
 
-export interface BehaviorConfig {
-  type: string;
-  [key: string]: unknown;
+/** Built-in behavior name to its supported object configuration. */
+export interface BuiltInBehaviorOptionsMap {
+  'zoom-canvas': BehaviorConfig<'zoom-canvas'>;
+  'drag-canvas': BehaviorConfig<'drag-canvas', DragCanvasOptions>;
+  'highlight-node': BehaviorConfig<'highlight-node'>;
+  'highlight-edge': BehaviorConfig<'highlight-edge'>;
+  'hover-highlight': BehaviorConfig<'hover-highlight', Omit<HoverHighlightConfig, 'type'>>;
+  'drag-node': BehaviorConfig<'drag-node'>;
+  'click-select': BehaviorConfig<'click-select', Omit<ClickSelectConfig, 'type'>>;
+  'drag-edge': BehaviorConfig<'drag-edge'>;
+  'brush-select': BehaviorConfig<'brush-select', BrushSelectOptions>;
+  'lasso-select': BehaviorConfig<'lasso-select', LassoSelectOptions>;
+  tooltip: BehaviorConfig<'tooltip', TooltipOptions>;
 }
+
+export type BuiltInBehaviorConfig = BuiltInBehaviorOptionsMap[keyof BuiltInBehaviorOptionsMap];
 
 type BehaviorFactory = (renderer: Renderer, graph: Graph, config?: BehaviorConfig) => () => void;
 
@@ -83,7 +102,7 @@ export function resolveBehaviorOptions(behaviors?: BehaviorOption[]): BehaviorOp
 
 export function registerBehaviors(
   renderer: Renderer,
-  names: (string | BehaviorConfig)[],
+  names: BehaviorOption[],
   graph?: Graph,
 ): () => void {
   const teardowns: Array<() => void> = [];
@@ -100,7 +119,7 @@ export function registerBehaviors(
 
   for (const nameOrObj of names) {
     const name = typeof nameOrObj === 'string' ? nameOrObj : nameOrObj.type;
-    const config = typeof nameOrObj === 'string' ? undefined : nameOrObj;
+    const config: BehaviorConfig = typeof nameOrObj === 'string' ? { type: nameOrObj } : nameOrObj;
     // Skip individual highlight behaviors if using combined hover
     if (useCombinedHover && (name === 'highlight-node' || name === 'highlight-edge')) continue;
     if (hasExtension('behavior', name)) {
@@ -108,7 +127,7 @@ export function registerBehaviors(
       const extension = createExtension<BehaviorExtension>('behavior', name);
       if (!extension) continue;
       const context = createExtensionContext(graph);
-      if (!initializeExtension('behavior', name, extension, context, config ?? {})) {
+      if (!initializeExtension('behavior', name, extension, context, config)) {
         destroyExtension('behavior', name, extension);
         continue;
       }
@@ -119,9 +138,23 @@ export function registerBehaviors(
         () => extension.getEvents(),
         {},
       );
-      for (const [event, handler] of Object.entries(events)) graph.on(event, handler);
+      const bindings: Array<{ event: string; handler: (...args: unknown[]) => void }> = [];
+      for (const [event, handler] of Object.entries(events)) {
+        if (typeof handler !== 'function') continue;
+        const wrapped = (...args: unknown[]): void => {
+          safeExtensionCall(
+            'behavior',
+            name,
+            `event:${event}`,
+            () => (handler as (...handlerArgs: unknown[]) => void)(...args),
+            undefined,
+          );
+        };
+        graph.on(event, wrapped);
+        bindings.push({ event, handler: wrapped });
+      }
       teardowns.push(() => {
-        for (const [event, handler] of Object.entries(events)) graph.off(event, handler);
+        for (const binding of bindings) graph.off(binding.event, binding.handler);
         destroyExtension('behavior', name, extension);
       });
       continue;

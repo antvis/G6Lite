@@ -1,4 +1,4 @@
-import type { Graph } from '../graph.js';
+import type { Graph } from '../graph';
 import type {
   Extension,
   ExtensionCategory,
@@ -7,7 +7,7 @@ import type {
   ExtensionFactory,
   ExtensionInput,
   RegisteredExtension,
-} from './contracts.js';
+} from './contracts';
 
 type RegistryEntry =
   | { kind: 'instance'; value: unknown }
@@ -217,8 +217,10 @@ export function initializeExtension<TOptions>(
 export function updateExtension<TOptions>(
   category: ExtensionCategory,
   name: string,
-  extension: Extension<TOptions>,
-  options: Partial<TOptions>,
+  extension: Extension<TOptions> & {
+    update?(options: Readonly<Partial<TOptions>>): void;
+  },
+  options: Readonly<Partial<TOptions>>,
 ): boolean {
   return safeExtensionCall(
     category,

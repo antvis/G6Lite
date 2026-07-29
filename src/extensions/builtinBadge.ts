@@ -1,6 +1,6 @@
-import { ANTV_BADGE_PALETTE } from '../palette.js';
-import type { NodeBadgeItem } from '../types.js';
-import type { DecorationRenderer } from './contracts.js';
+import { ANTV_BADGE_PALETTE } from '../palette';
+import type { NodeBadgeItem } from '../types';
+import type { DecorationRenderer } from './contracts';
 
 interface BuiltinBadgeLayoutData {
   shape: 'circle' | 'pill';

@@ -16,7 +16,7 @@
 - Retain `BaseNode`, `BreathingNode`, `registerNode()`, unmarked factories, and class constructors as deprecated beta migration adapters.
 - Keep the package ESM-only. Internal relative `.js` import suffixes remain required by the current TypeScript-to-Node-ESM build and are not a consumer-facing import convention.
 
-See the [beta API migration guide](./site/content/docs/advanced/beta-api-migration.mdx) for upgrade steps.
+See the [G6 v5 migration guide](./site/content/docs/zh/compatibility/g6-v5-migration.mdx) for upgrade steps.
 
 ## 0.1.0
 

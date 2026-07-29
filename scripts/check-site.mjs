@@ -3,6 +3,10 @@ import path from 'node:path';
 
 const root = path.resolve('.');
 const docsRoot = path.join(root, 'site/content/docs');
+const localeRoots = {
+  zh: path.join(docsRoot, 'zh'),
+  en: path.join(docsRoot, 'en'),
+};
 const failures = [];
 
 function fail(message) {
@@ -20,19 +24,46 @@ function read(relativePath) {
   return readFileSync(path.join(root, relativePath), 'utf8');
 }
 
-const docsFiles = walk(docsRoot);
-const mdxFiles = docsFiles.filter((file) => file.endsWith('.mdx'));
-const zhMdxFiles = mdxFiles.filter((file) => !file.endsWith('.en.mdx'));
-const metaFiles = docsFiles.filter((file) => file.endsWith('meta.json'));
-
-for (const file of zhMdxFiles) {
-  const english = file.replace(/\.mdx$/, '.en.mdx');
-  if (!existsSync(english)) fail(`Missing English document: ${path.relative(root, english)}`);
+function relativeFiles(locale, suffix) {
+  return walk(localeRoots[locale])
+    .filter((file) => file.endsWith(suffix))
+    .map((file) => path.relative(localeRoots[locale], file).replace(/\\/g, '/'));
 }
 
-for (const file of metaFiles) {
-  const english = file.replace(/meta\.json$/, 'meta.en.json');
-  if (!existsSync(english)) fail(`Missing English metadata: ${path.relative(root, english)}`);
+const topLevelEntries = readdirSync(docsRoot, { withFileTypes: true });
+for (const entry of topLevelEntries) {
+  if (!entry.isDirectory() || !Object.hasOwn(localeRoots, entry.name)) {
+    fail(`Unexpected documentation root entry: site/content/docs/${entry.name}`);
+  }
+}
+
+const zhMdxFiles = relativeFiles('zh', '.mdx');
+const enMdxFiles = relativeFiles('en', '.mdx');
+const zhMetaFiles = relativeFiles('zh', 'meta.json');
+const enMetaFiles = relativeFiles('en', 'meta.json');
+const zhMdxSet = new Set(zhMdxFiles);
+const enMdxSet = new Set(enMdxFiles);
+const zhMetaSet = new Set(zhMetaFiles);
+const enMetaSet = new Set(enMetaFiles);
+
+for (const relative of zhMdxFiles.filter((file) => !file.startsWith('api/'))) {
+  if (!enMdxSet.has(relative)) fail(`Missing English document: site/content/docs/en/${relative}`);
+}
+for (const relative of enMdxFiles.filter((file) => !file.startsWith('api/'))) {
+  if (!zhMdxSet.has(relative)) fail(`Missing Chinese document: site/content/docs/zh/${relative}`);
+}
+for (const relative of zhMetaFiles) {
+  if (!enMetaSet.has(relative)) fail(`Missing English metadata: site/content/docs/en/${relative}`);
+}
+for (const relative of enMetaFiles) {
+  if (!zhMetaSet.has(relative)) fail(`Missing Chinese metadata: site/content/docs/zh/${relative}`);
+}
+
+const allDocsFiles = [...walk(localeRoots.zh), ...walk(localeRoots.en)];
+for (const file of allDocsFiles) {
+  if (file.endsWith('.en.mdx') || file.endsWith('meta.en.json')) {
+    fail(`Legacy locale suffix remains: ${path.relative(root, file)}`);
+  }
 }
 
 const forbiddenRoutes = [
@@ -41,7 +72,7 @@ const forbiddenRoutes = [
   '/docs/interactions/',
   '/docs/advanced/',
 ];
-for (const file of [...mdxFiles, ...walk(path.join(root, 'site/src'))]) {
+for (const file of [...allDocsFiles, ...walk(path.join(root, 'site/src'))]) {
   if (!/\.(?:mdx|ts|tsx)$/.test(file)) continue;
   const content = readFileSync(file, 'utf8');
   for (const route of forbiddenRoutes) {
@@ -49,7 +80,8 @@ for (const file of [...mdxFiles, ...walk(path.join(root, 'site/src'))]) {
   }
 }
 
-for (const file of mdxFiles.filter((item) => item.endsWith('.en.mdx'))) {
+for (const relative of enMdxFiles) {
+  const file = path.join(localeRoots.en, relative);
   const content = readFileSync(file, 'utf8');
   if (/(?:href=["']|\]\()\/docs\//.test(content)) {
     fail(`English document links to the Chinese route: ${path.relative(root, file)}`);
@@ -57,19 +89,17 @@ for (const file of mdxFiles.filter((item) => item.endsWith('.en.mdx'))) {
 }
 
 function routeExists(route) {
-  const english = route === '/en/docs' || route.startsWith('/en/docs/');
-  const withoutLocale = english ? route.slice(3) : route;
+  const locale = route === '/en/docs' || route.startsWith('/en/docs/') ? 'en' : 'zh';
+  const withoutLocale = locale === 'en' ? route.slice(3) : route;
   const suffix = withoutLocale.replace(/^\/docs\/?/, '');
+  const localeRoot = localeRoots[locale];
   const candidates = suffix
-    ? [
-        path.join(docsRoot, `${suffix}${english ? '.en' : ''}.mdx`),
-        path.join(docsRoot, suffix, `index${english ? '.en' : ''}.mdx`),
-      ]
-    : [path.join(docsRoot, `index${english ? '.en' : ''}.mdx`)];
+    ? [path.join(localeRoot, `${suffix}.mdx`), path.join(localeRoot, suffix, 'index.mdx')]
+    : [path.join(localeRoot, 'index.mdx')];
   return candidates.some((candidate) => existsSync(candidate));
 }
 
-for (const file of mdxFiles) {
+for (const file of allDocsFiles.filter((item) => item.endsWith('.mdx'))) {
   const content = readFileSync(file, 'utf8');
   const routes = content.match(/\/(?:en\/)?docs(?:\/[a-zA-Z0-9._~/-]+)?/g) ?? [];
   for (const route of new Set(routes.map((item) => item.replace(/\/$/, '')))) {
@@ -118,8 +148,8 @@ const docsGroups = new Set([
 for (const demo of catalog.filter((item) => item.audiences.includes('site'))) {
   if (!docsGroups.has(demo.docsGroup)) fail(`Site demo ${demo.id} has no valid docsGroup`);
   for (const file of [
-    `site/content/docs/examples/${demo.id}.mdx`,
-    `site/content/docs/examples/${demo.id}.en.mdx`,
+    `site/content/docs/zh/examples/${demo.id}.mdx`,
+    `site/content/docs/en/examples/${demo.id}.mdx`,
     `site/public/examples/${demo.id}.png`,
   ]) {
     if (!existsSync(path.join(root, file))) fail(`Site demo ${demo.id} is missing ${file}`);
@@ -139,10 +169,8 @@ function extractMinimalExample(relativePath) {
 }
 
 const snippetFiles = [
-  'README.md',
-  'README.en-US.md',
-  'site/content/docs/getting-started/quick-start.mdx',
-  'site/content/docs/getting-started/quick-start.en.mdx',
+  'site/content/docs/zh/getting-started/quick-start.mdx',
+  'site/content/docs/en/getting-started/quick-start.mdx',
   'site/src/components/home-page.tsx',
 ];
 const snippets = snippetFiles.map((file) => [file, extractMinimalExample(file)]);
@@ -156,6 +184,6 @@ if (failures.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    `Checked ${zhMdxFiles.length} bilingual documentation pages and ${catalog.length} examples.`,
+    `Checked ${zhMdxFiles.length} Chinese and ${enMdxFiles.length} English documentation pages across locale directories.`,
   );
 }

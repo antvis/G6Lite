@@ -401,6 +401,22 @@ describe('hoverHighlight behavior', () => {
     graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: mouseEvent() });
     expect(renderer.setHighlight).not.toHaveBeenCalled();
   });
+
+  it('teardown clears active renderer and element highlight state', async () => {
+    const { hoverHighlight } = await import('@src/behaviors/hoverHighlight.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+
+    const teardown = hoverHighlight(asRenderer(renderer), asGraph(graph));
+    graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: mouseEvent() });
+    teardown();
+
+    const lastArg = renderer.setHighlight.mock.calls.at(-1)![0];
+    expect(lastArg.nodeIds.size).toBe(0);
+    expect(lastArg.edgeIndices.size).toBe(0);
+    expect(graph.setItemState).toHaveBeenCalledWith('a', 'highlight', false);
+    expect(graph.setItemState).toHaveBeenCalledWith('e0', 'highlight', false);
+  });
 });
 
 // ============================================================
@@ -683,6 +699,70 @@ describe('brushSelect behavior', () => {
     graph.eventEmitter.emit('node:pointerdown', { nodeId: 'a', event: mouseEvent() });
     window.dispatchEvent(new MouseEvent('mouseup'));
     expect(endHandler).not.toHaveBeenCalled();
+  });
+
+  it('replaces the current selection with nodes inside the brush rectangle', async () => {
+    const { brushSelect } = await import('@src/behaviors/brushSelect.js');
+    const renderer = createMockRenderer();
+    const graph = createMockGraph();
+    const selectHandler = vi.fn();
+    graph.eventEmitter.on('brush:select', selectHandler);
+    graph.setItemState('c', 'selected', true);
+    graph.setItemState.mockClear();
+    const teardown = brushSelect(asRenderer(renderer), asGraph(graph), { throttleMs: 0 });
+
+    graph.eventEmitter.emit('canvas:pointerdown', {
+      event: mouseEvent({ clientX: -1, clientY: -1 }),
+    });
+    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 15, clientY: 1 }));
+
+    expect(graph.setItemState).toHaveBeenCalledWith('c', 'selected', false);
+    expect(graph.setItemState).toHaveBeenCalledWith('a', 'selected', true);
+    expect(graph.setItemState).toHaveBeenCalledWith('b', 'selected', true);
+    expect(selectHandler).toHaveBeenCalledWith({ nodeIds: ['a', 'b'] });
+    teardown();
+  });
+
+  it('cancels pending throttled selection on teardown', async () => {
+    vi.useFakeTimers();
+    try {
+      const { brushSelect } = await import('@src/behaviors/brushSelect.js');
+      const renderer = createMockRenderer();
+      const graph = createMockGraph();
+      const teardown = brushSelect(asRenderer(renderer), asGraph(graph));
+
+      graph.eventEmitter.emit('canvas:pointerdown', { event: mouseEvent() });
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 120, clientY: 120 }));
+
+      expect(vi.getTimerCount()).toBe(1);
+      teardown();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('cancels pending throttled selection before the final mouseup selection', async () => {
+    vi.useFakeTimers();
+    try {
+      const { brushSelect } = await import('@src/behaviors/brushSelect.js');
+      const renderer = createMockRenderer();
+      const graph = createMockGraph();
+      const endHandler = vi.fn();
+      graph.eventEmitter.on('brush:end', endHandler);
+      const teardown = brushSelect(asRenderer(renderer), asGraph(graph));
+
+      graph.eventEmitter.emit('canvas:pointerdown', { event: mouseEvent() });
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 120, clientY: 120 }));
+      expect(vi.getTimerCount()).toBe(1);
+
+      window.dispatchEvent(new MouseEvent('mouseup'));
+      expect(vi.getTimerCount()).toBe(0);
+      expect(endHandler).toHaveBeenCalledTimes(1);
+      teardown();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

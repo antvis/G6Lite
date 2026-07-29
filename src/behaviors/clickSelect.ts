@@ -8,8 +8,8 @@
  * - trigger: 'shift' | 'ctrl' | 'meta' — modifier key for multi-select (default: 'shift')
  */
 
-import type { Graph } from '../graph.js';
-import type { Renderer } from '../renderer/renderer.js';
+import type { Graph } from '../graph';
+import type { Renderer } from '../renderer/renderer';
 
 export interface ClickSelectConfig {
   type: string;

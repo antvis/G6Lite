@@ -77,6 +77,18 @@ const LOOP_SEGMENTS = 24;
 const LOOP_VERTICES_PER_ITEM = (LOOP_SEGMENTS + 1) * 2 + 2;
 
 describe('EdgeLine processEdge buffer encoding', () => {
+  it('fails clearly when WebGL cannot allocate a shader, program, or buffer', () => {
+    expect(() => new TestEdgeLine(makeGLStub({ createShader: () => null }))).toThrow(
+      /create WebGL shader/,
+    );
+    expect(() => new TestEdgeLine(makeGLStub({ createProgram: () => null }))).toThrow(
+      /create WebGL program/,
+    );
+    expect(() => new TestEdgeLine(makeGLStub({ createBuffer: () => null }))).toThrow(
+      /create WebGL buffer/,
+    );
+  });
+
   it('encodes both endpoints + clamp inputs, with a_posCoef selecting the end', () => {
     const prog = new TestEdgeLine(makeGLStub());
     prog.reallocate(1);

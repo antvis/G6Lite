@@ -34,6 +34,12 @@ describe('resolveTheme', () => {
     expect(result.edgeCategoryPalette).not.toBe(palette);
   });
 
+  it('should preserve an explicitly undefined palette override', () => {
+    const result = resolveTheme({ type: 'light', edgeCategoryPalette: undefined });
+
+    expect(result.edgeCategoryPalette).toBeUndefined();
+  });
+
   it('should override preset values with custom values', () => {
     const result = resolveTheme({ type: 'light', nodeFill: '#FF0000', nodeSize: 40 });
     expect(result.nodeFill).toBe('#FF0000');

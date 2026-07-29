@@ -522,6 +522,33 @@ describe('P1: public camera and coordinate boundary', () => {
 
     expect(setCamera).toHaveBeenCalledWith({ x: 180, y: 120 });
   });
+
+  it('zooms out only when needed to keep focused nodes inside padding', () => {
+    const dataModel = new DataModel({ theme: {} });
+    dataModel.addNodes([
+      { id: 'a', x: 0, y: 0 },
+      { id: 'b', x: 1000, y: 0 },
+    ]);
+    const setCamera = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      dataModel,
+      containerEl: { clientWidth: 800, clientHeight: 600 },
+      canvas: { width: 800, height: 600 },
+      renderer: {
+        getCamera: () => ({ x: 0, y: 0, zoom: 2 }),
+        setCamera,
+      },
+    });
+
+    graph.focusItem(['a', 'b'], 50);
+
+    const camera = setCamera.mock.calls[0][0] as { x: number; y: number; zoom: number };
+    expect(camera.zoom).toBeCloseTo(0.7);
+    expect(camera.x * camera.zoom).toBeCloseTo(50);
+    expect((1000 + camera.x) * camera.zoom).toBeCloseTo(750);
+  });
 });
 
 describe('P1: Graph batch state scheduling', () => {

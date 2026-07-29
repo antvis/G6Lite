@@ -4,6 +4,95 @@ import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import * as publicApi from '@src/index.js';
 
+const REVIEWED_GRAPH_API = [
+  // Lifecycle
+  'constructor',
+  'destroyed',
+  'isDestroyed',
+  'render',
+  'destroy',
+  // Data replacement and configuration
+  'getData',
+  'toData',
+  'setData',
+  'updateOptions',
+  'refresh',
+  // Element queries
+  'getNodes',
+  'getNodeData',
+  'getEdges',
+  'getEdgeData',
+  'getComboData',
+  'getElementData',
+  'getNodeCount',
+  'getEdgeCount',
+  'hasNode',
+  'hasEdge',
+  'hasElement',
+  'getElementPosition',
+  'getNodePosition',
+  'getNeighborNodes',
+  'getAdjacentEdges',
+  // Node and edge mutations
+  'addNode',
+  'addNodes',
+  'updateNodePosition',
+  'updateNodePositions',
+  'updateNodeData',
+  'removeNode',
+  'removeNodes',
+  'addEdge',
+  'addEdges',
+  'updateEdgeData',
+  'removeEdge',
+  'removeEdges',
+  // Element state, visibility, and focus
+  'setItemState',
+  'clearItemStates',
+  'batchSetState',
+  'setElementStates',
+  'getItemStates',
+  'findNodesByState',
+  'findEdgesByState',
+  'findCombosByState',
+  'hideItem',
+  'showItem',
+  'focusItem',
+  // Combo hierarchy and collapse
+  'createCombo',
+  'removeCombo',
+  'addToCombo',
+  'removeFromCombo',
+  'getComboChildren',
+  'getNodeCombo',
+  'collapseCombo',
+  'expandCombo',
+  'toggleCombo',
+  'setComboState',
+  'clearComboStates',
+  'getComboStates',
+  // Layout
+  'setLayout',
+  'layout',
+  'cancelLayout',
+  // Viewport and coordinates
+  'getCamera',
+  'setCamera',
+  'resetCamera',
+  'setSize',
+  'getZoom',
+  'zoomTo',
+  'zoomBy',
+  'fitView',
+  'fitCenter',
+  'screenToGraph',
+  'graphToScreen',
+  // Events
+  'on',
+  'off',
+  'once',
+];
+
 function collectTypeScriptFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = resolve(directory, entry.name);
@@ -66,6 +155,35 @@ function getDirectModuleSpecifiers(directory: string): string[] {
     .sort();
 }
 
+function collectGraphPublicApi(source: string, filePath: string): string[] {
+  const sourceFile = ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true);
+  const graphClass = sourceFile.statements.find(
+    (statement): statement is ts.ClassDeclaration =>
+      ts.isClassDeclaration(statement) && statement.name?.text === 'Graph',
+  );
+  if (!graphClass) throw new Error('Graph class declaration not found');
+
+  const members: string[] = [];
+  for (const member of graphClass.members) {
+    if (
+      member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.PrivateKeyword) ||
+      ts.getJSDocTags(member).some((tag) => tag.tagName.text === 'internal')
+    ) {
+      continue;
+    }
+
+    let name: string | undefined;
+    if (ts.isConstructorDeclaration(member)) {
+      name = 'constructor';
+    } else if (ts.isMethodDeclaration(member) || ts.isGetAccessorDeclaration(member)) {
+      name = member.name.getText(sourceFile);
+    }
+
+    if (name && members.at(-1) !== name) members.push(name);
+  }
+
+  return members;
+}
 describe('package public API boundary', () => {
   it('exports the reviewed runtime surface only', () => {
     expect(Object.keys(publicApi).sort()).toEqual([
@@ -85,6 +203,13 @@ describe('package public API boundary', () => {
     expect(publicApi).not.toHaveProperty('DataModel');
     expect(publicApi).not.toHaveProperty('RenderScheduler');
     expect(publicApi).not.toHaveProperty('RefreshLevel');
+  });
+
+  it('keeps the Graph first-level API reviewed and logically ordered', () => {
+    const filePath = resolve(process.cwd(), 'src/graph.ts');
+    const source = readFileSync(filePath, 'utf8');
+
+    expect(collectGraphPublicApi(source, filePath)).toEqual(REVIEWED_GRAPH_API);
   });
 
   it('uses directory barrels instead of reaching through directory internals', () => {

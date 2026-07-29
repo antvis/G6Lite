@@ -1,11 +1,6 @@
-/**
- * Graph: main entry. Creates container canvas, runs layout, renders with WebGL, registers behaviors.
- * P1: Now backed by DataModel for incremental data operations and RenderScheduler for optimal refresh.
- * P4: EventEmitter for interaction events, GPU-picking behaviors, drag-node support.
- */
+/** Graph lifecycle, public API, layout orchestration, and render runtime ownership. */
 
 import { registerBehaviors, resolveBehaviorOptions } from './behaviors/index.js';
-import type { InternalEdge } from './dataModel.js';
 import { DataModel } from './dataModel.js';
 import { EventEmitter } from './events.js';
 import type { Handler } from './events.js';
@@ -23,6 +18,7 @@ import { runLayout } from './layout/index.js';
 import type { Camera } from './renderer/camera.js';
 import { ComboRenderer } from './renderer/comboRenderer.js';
 import { LabelLayerRenderer } from './renderer/labelRenderer.js';
+import { createRendererData, getRendererNodes } from './renderer/renderData.js';
 import type { RendererData } from './renderer/renderer.js';
 import { Renderer } from './renderer/renderer.js';
 import { analyzeEdgeConfig, analyzeNodeConfig } from './renderer/style.js';
@@ -41,7 +37,6 @@ import type {
   ElementState,
   FitViewOptions,
   GraphData,
-  GraphEdge,
   GraphOptions,
   InternalCombo,
   LayoutConfig,
@@ -69,6 +64,11 @@ interface PickResult {
 interface TransformInstanceRecord {
   name: string;
   extension: TransformExtension;
+}
+
+interface GraphRuntime {
+  dataModel: DataModel;
+  scheduler: RenderScheduler;
 }
 
 export class Graph {
@@ -127,7 +127,7 @@ export class Graph {
   private applyTransforms(): void {
     if (!this.dataModel) return;
     const config = resolveParallelEdgesConfig(this.options.transforms, this.options.edge);
-    processParallelEdges(this.dataModel.getEdges() as InternalEdge[], config);
+    processParallelEdges(this.dataModel.getEdges(), config);
   }
 
   private applyRegisteredTransforms(data: GraphData, generation: number): GraphData {
@@ -175,11 +175,14 @@ export class Graph {
         }
         if (!this.isGenerationCurrent(generation)) return transformed;
       }
+      const extension = record.extension;
+      const beforeRender = extension.beforeRender;
+      if (!beforeRender) continue;
       transformed = safeExtensionCall(
         'transform',
         name,
         'beforeRender',
-        () => record!.extension.beforeRender!(transformed),
+        () => beforeRender.call(extension, transformed),
         transformed,
       );
       if (!this.isGenerationCurrent(generation)) return transformed;
@@ -256,145 +259,100 @@ export class Graph {
     }
   }
 
-  async render(): Promise<void> {
-    if (this._destroyed) return;
-    const generation = ++this.layoutGeneration;
-    const { node, edge, layout, behaviors, theme } = this.options;
-    const data = this.applyRegisteredTransforms(this.options.data, generation);
-    if (!this.isGenerationCurrent(generation)) return;
-    const themeTokens = resolveTheme((theme as ThemeOption) ?? 'light');
-
-    // First, set up canvas with correct dimensions before any drawing.
-    const width = this.containerEl.clientWidth || 800;
-    const height = this.containerEl.clientHeight || 600;
+  private prepareCanvas(theme: ReturnType<typeof resolveTheme>): void {
+    const { width, height } = this.getViewport();
     this.renderer.resize(width, height);
+    this.renderer.clearWithTheme(theme);
+  }
 
-    // Clear canvas with theme background immediately so the user sees a white
-    // canvas instead of a black void while layout is computing.
-    this.renderer.clearWithTheme(themeTokens);
+  private resolveEffectiveLayout(nodeCount: number): LayoutConfig | undefined {
+    const layout = this.options.layout;
+    if (!layout) return undefined;
+    return layout.worker === undefined && nodeCount >= 1000
+      ? { ...layout, worker: true }
+      : { ...layout };
+  }
 
-    let nodes = data.nodes.map((n) => ({
-      ...n,
-      x: n.x ?? 0,
-      y: n.y ?? 0,
-    }));
+  private getCurrentLayoutNodes(): LayoutNode[] {
+    return this.dataModel ? getRendererNodes(this.dataModel.getNodes()) : this.layoutNodes;
+  }
 
-    if (layout && data.nodes.length > 0) {
-      // Yield to the browser so the background clear takes effect before
-      // the potentially blocking layout computation.
+  private async runConfiguredLayout(
+    data: GraphData,
+    generation: number,
+    yieldBeforeLayout = false,
+  ): Promise<LayoutNode[] | null> {
+    const fallbackNodes = data.nodes.map((node) => ({
+      ...node,
+      x: node.x ?? 0,
+      y: node.y ?? 0,
+    })) as LayoutNode[];
+    const layout = this.resolveEffectiveLayout(data.nodes.length);
+    if (!layout || data.nodes.length === 0) return fallbackNodes;
+
+    if (yieldBeforeLayout) {
       await new Promise((resolve) => requestAnimationFrame(resolve));
-      if (!this.isGenerationCurrent(generation)) return;
-      // Auto-enable worker for large graphs unless explicitly disabled
-      if (layout.worker === undefined && data.nodes.length >= 1000) {
-        layout.worker = true;
-      }
-
-      this.eventEmitter.emit('beforelayout', { nodeCount: data.nodes.length });
-      this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
-      if (!this.isGenerationCurrent(generation)) return;
-      const t0 = performance.now();
-      const result = await this.executeLayout(data, layout);
-      if (!this.isGenerationCurrent(generation)) return;
-      const duration = performance.now() - t0;
-      this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
-      this.eventEmitter.emit('afterlayout', { duration, nodeCount: data.nodes.length });
-      if (!this.isGenerationCurrent(generation)) return;
-      nodes = applyFixedPositions(result.nodes, data.nodes);
+      if (!this.isGenerationCurrent(generation)) return null;
     }
 
-    // A repeated render replaces all per-render resources. Keep the previous
-    // graph visible while layout runs, then tear it down immediately before
-    // rebuilding the runtime around the new data.
-    this.teardownRenderRuntime();
-    this.layoutNodes = nodes as LayoutNode[];
+    this.eventEmitter.emit('beforelayout', { nodeCount: data.nodes.length });
+    this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
+    if (!this.isGenerationCurrent(generation)) return null;
+    const startedAt = performance.now();
+    const result = await this.executeLayout(data, layout);
+    if (!this.isGenerationCurrent(generation)) return null;
+    const duration = performance.now() - startedAt;
+    this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
+    this.eventEmitter.emit('afterlayout', { duration, nodeCount: data.nodes.length });
+    if (!this.isGenerationCurrent(generation)) return null;
+    return applyFixedPositions(result.nodes, data.nodes);
+  }
 
+  private replaceRuntimeData(
+    dataModel: DataModel,
+    data: GraphData,
+    nodes: LayoutNode[],
+    consumeInitialChange = false,
+  ): void {
+    dataModel.replaceData(nodes, data.edges);
+    if (data.combos?.length) dataModel.initCombos(data.combos, data.nodes);
+    this.applyTransforms();
+    if (consumeInitialChange) dataModel.getChanges();
+    this.layoutNodes = getRendererNodes(dataModel.getNodes());
+  }
+
+  private createDataModel(theme: ReturnType<typeof resolveTheme>): DataModel {
+    const { node, edge, layout } = this.options;
     const layoutDirection =
       ((layout?.rankdir ?? layout?.direction) as ('TB' | 'LR' | 'BT' | 'RL') | undefined) ?? 'TB';
-    const polylineRouter = edge?.style?.router ?? 'orth';
-
-    // Analyze configs for static style optimization (enables fast path)
-    analyzeNodeConfig(node, themeTokens);
-    analyzeEdgeConfig(edge, themeTokens);
-
-    // Initialize DataModel
-    this.dataModel = new DataModel({
+    return new DataModel({
       nodeConfig: node,
       edgeConfig: edge,
-      theme: themeTokens,
+      theme,
       layoutDirection,
       layoutType: layout?.type,
-      polylineRouter,
+      polylineRouter: edge?.style?.router ?? 'orth',
     });
+  }
 
-    // Populate DataModel with initial data (pass arrays directly, no map/copy)
-    this.dataModel.replaceData(
-      nodes as Array<{
-        id: string;
-        name?: string;
-        x: number;
-        y: number;
-        data?: Record<string, unknown>;
-        states?: ElementState[];
-      }>,
-      data.edges as Array<{
-        id?: string;
-        source: string;
-        target: string;
-        data?: Record<string, unknown>;
-        states?: ElementState[];
-      }>,
-    );
-    if (data.combos?.length) {
-      this.dataModel.initCombos(data.combos, data.nodes);
-    }
-    this.applyTransforms();
-    // Clear the dataReplaced change since we'll do a full process immediately
-    this.dataModel.getChanges();
-
-    // Repoint layoutNodes at the DataModel's node objects so the original
-    // post-layout array can be GC'd — one shared set of objects, not three.
-    this.layoutNodes = this.dataModel.getNodes() as unknown as LayoutNode[];
-
-    // Feed the Renderer the DataModel's own node/edge objects so there is a
-    // single shared set of element objects instead of two parallel copies.
-    // The renderer references (does not clone) these arrays; in-place mutation
-    // in patchPositions keeps both views consistent.
-    this.renderer.setData({
-      nodes: this.dataModel.getNodes() as unknown as LayoutNode[],
-      edges: this.dataModel.getEdges() as unknown as GraphEdge[],
-      nodeConfig: node,
-      edgeConfig: edge,
-      theme: themeTokens,
-      layoutType: layout?.type,
-      layoutDirection,
-      polylineRouter,
-    });
-
-    // Initialize RenderScheduler
-    this.scheduler = new RenderScheduler(this.renderer, this.dataModel);
-
-    // Mount the interaction dispatcher (single source of pointer hit-testing
-    // and element event dispatch) before behaviors, so behaviors consume its
-    // events rather than doing their own picking.
+  private mountInteractionRuntime(generation: number): boolean {
     this.interactionTeardown = attachInteraction(this.renderer, this);
-
-    const resolvedBehaviors = resolveBehaviorOptions(behaviors);
-    const behaviorTeardown = resolvedBehaviors.length
-      ? registerBehaviors(this.renderer, resolvedBehaviors, this)
-      : null;
+    const behaviors = resolveBehaviorOptions(this.options.behaviors);
+    const teardown = behaviors.length ? registerBehaviors(this.renderer, behaviors, this) : null;
     if (!this.isGenerationCurrent(generation)) {
-      behaviorTeardown?.();
-      return;
+      teardown?.();
+      return false;
     }
-    this.behaviorTeardown = behaviorTeardown;
+    this.behaviorTeardown = teardown;
+    return true;
+  }
 
-    // Initialize combo renderer (Canvas2D underlay for combo backgrounds)
-    if (this.dataModel.hasCombos()) {
+  private mountOverlayRuntime(dataModel: DataModel): void {
+    if (dataModel.hasCombos()) {
       this.ensureComboRenderer();
-      this.dataModel.updateComboBounds((combo) => this.getComboStylePadding(combo));
+      dataModel.updateComboBounds((combo) => this.getComboStylePadding(combo));
     }
 
-    // Initialize label renderer (Canvas2D overlay for labels and icons)
     this.labelRenderer = new LabelLayerRenderer(this.containerEl, this.canvas);
     this.labelRenderer.setScheduleRedraw(() => this.renderer.scheduleRender());
     this.renderer.onAfterDraw(() => {
@@ -410,6 +368,41 @@ export class Graph {
         (id) => this.renderer.getNodeDimensions(id),
       );
     });
+  }
+
+  private observeContainerResize(): void {
+    let { width: lastWidth, height: lastHeight } = this.getViewport();
+    this.resizeObserver = new ResizeObserver(() => {
+      const { width, height } = this.getViewport();
+      if (width === lastWidth && height === lastHeight) return;
+      lastWidth = width;
+      lastHeight = height;
+      this.renderer.resize(width, height);
+      this.eventEmitter.emit('resize', { width, height });
+    });
+    this.resizeObserver.observe(this.containerEl);
+  }
+
+  async render(): Promise<void> {
+    if (this._destroyed) return;
+    const generation = ++this.layoutGeneration;
+    const data = this.applyRegisteredTransforms(this.options.data, generation);
+    if (!this.isGenerationCurrent(generation)) return;
+    const theme = resolveTheme((this.options.theme as ThemeOption) ?? 'light');
+    this.prepareCanvas(theme);
+    const nodes = await this.runConfiguredLayout(data, generation, true);
+    if (!nodes || !this.isGenerationCurrent(generation)) return;
+
+    this.teardownRenderRuntime();
+    analyzeNodeConfig(this.options.node, theme);
+    analyzeEdgeConfig(this.options.edge, theme);
+    const dataModel = this.createDataModel(theme);
+    this.dataModel = dataModel;
+    this.replaceRuntimeData(dataModel, data, nodes, true);
+    this.renderer.setData(createRendererData(dataModel));
+    this.scheduler = new RenderScheduler(this.renderer, dataModel);
+    if (!this.mountInteractionRuntime(generation)) return;
+    this.mountOverlayRuntime(dataModel);
 
     this.eventEmitter.emit('beforerender', {
       nodeCount: nodes.length,
@@ -417,42 +410,22 @@ export class Graph {
     });
     if (!this.isGenerationCurrent(generation)) return;
 
-    // Auto fit view
     this.fitView();
-
-    // Ensure first render completes synchronously so the canvas is painted
-    // after render() returns. Subsequent resizes use scheduleRender (deferred).
     this.renderer.draw();
     if (!this.isGenerationCurrent(generation)) return;
 
-    // Emit afterrender event on first render completion
     this.eventEmitter.emit('afterrender', {
       nodeCount: nodes.length,
       edgeCount: data.edges.length,
     });
     if (!this.isGenerationCurrent(generation)) return;
 
-    // Capture initial camera after first fit
     if (!this.initialCamera) {
       const cam = this.renderer.getCamera();
       this.initialCamera = { x: cam.x, y: cam.y, zoom: cam.zoom };
     }
 
-    // Seed last-observed size so the immediate ResizeObserver callback on .observe()
-    // is filtered out when the container hasn't actually resized.
-    let lastObservedW = this.containerEl.clientWidth || 800;
-    let lastObservedH = this.containerEl.clientHeight || 600;
-    this.resizeObserver = new ResizeObserver(() => {
-      const w = this.containerEl.clientWidth || 800;
-      const h = this.containerEl.clientHeight || 600;
-      if (w === lastObservedW && h === lastObservedH) return;
-      lastObservedW = w;
-      lastObservedH = h;
-      this.renderer.resize(w, h);
-      this.eventEmitter.emit('resize', { width: w, height: h });
-    });
-    this.resizeObserver.observe(this.containerEl);
-
+    this.observeContainerResize();
     this.initialized = true;
     this.mountPlugins(generation);
     return undefined;
@@ -497,8 +470,7 @@ export class Graph {
 
   fitView(options: number | FitViewOptions = 0.9): void {
     if (this._destroyed) return;
-    const nodes =
-      (this.dataModel?.getNodes() as unknown as LayoutNode[] | undefined) ?? this.layoutNodes;
+    const nodes = this.getCurrentLayoutNodes();
     if (!nodes.length) return;
     let minX = Infinity,
       maxX = -Infinity,
@@ -579,8 +551,7 @@ export class Graph {
 
   fitCenter(): void {
     if (this._destroyed) return;
-    const nodes =
-      (this.dataModel?.getNodes() as unknown as LayoutNode[] | undefined) ?? this.layoutNodes;
+    const nodes = this.getCurrentLayoutNodes();
     if (nodes.length === 0) return;
     let minX = Infinity,
       maxX = -Infinity,
@@ -605,9 +576,7 @@ export class Graph {
 
   /** @internal Layout runtime snapshot used by engine integrations. */
   getLayoutNodes(): LayoutNode[] {
-    return (
-      (this.dataModel?.getNodes() as unknown as LayoutNode[] | undefined) ?? this.layoutNodes
-    ).slice();
+    return this.getCurrentLayoutNodes().slice();
   }
 
   getData(): GraphData {
@@ -643,7 +612,7 @@ export class Graph {
     return -1;
   }
 
-  // ──── P0: Expose existing Renderer capabilities ────
+  // ──── Renderer integration ────
 
   /** @internal Low-level picking used by the interaction dispatcher. */
   pickAt(screenX: number, screenY: number): PickResult | null {
@@ -714,16 +683,16 @@ export class Graph {
     this.renderer.scheduleRender();
   }
 
-  // ──── P1: Incremental data operations ────
+  // ──── Incremental data operations ────
 
-  private ensureInitialized(): boolean {
-    if (this._destroyed) return false;
+  private getRuntime(): GraphRuntime | null {
+    if (this._destroyed) return null;
     if (!this.initialized || !this.dataModel || !this.scheduler) {
       throw new Error(
         'Graph must be rendered before calling data operations. Call render() first.',
       );
     }
-    return true;
+    return { dataModel: this.dataModel, scheduler: this.scheduler };
   }
 
   /**
@@ -731,9 +700,10 @@ export class Graph {
    * The node must have a unique id and x,y coordinates.
    */
   addNode(node: { id: string; x: number; y: number; data?: Record<string, unknown> }): void {
-    if (!this.ensureInitialized()) return;
-    this.dataModel!.addNode(node);
-    this.scheduler!.schedule();
+    const runtime = this.getRuntime();
+    if (!runtime) return;
+    runtime.dataModel.addNode(node);
+    runtime.scheduler.schedule();
     this.eventEmitter.emit('afteradditem', { type: 'node', id: node.id });
   }
 
@@ -744,9 +714,10 @@ export class Graph {
   addNodes(
     nodes: Array<{ id: string; x: number; y: number; data?: Record<string, unknown> }>,
   ): void {
-    if (!this.ensureInitialized()) return;
-    this.dataModel!.addNodes(nodes);
-    this.scheduler!.schedule();
+    const runtime = this.getRuntime();
+    if (!runtime) return;
+    runtime.dataModel.addNodes(nodes);
+    runtime.scheduler.schedule();
     for (const n of nodes) {
       this.eventEmitter.emit('afteradditem', { type: 'node', id: n.id });
     }
@@ -756,10 +727,11 @@ export class Graph {
    * Remove a node and all its connected edges. Triggers partial process on next frame.
    */
   removeNode(id: string): void {
-    if (!this.ensureInitialized()) return;
-    this.dataModel!.removeNode(id);
+    const runtime = this.getRuntime();
+    if (!runtime) return;
+    runtime.dataModel.removeNode(id);
     this.applyTransforms();
-    this.scheduler!.schedule();
+    runtime.scheduler.schedule();
     this.eventEmitter.emit('afterremoveitem', { type: 'node', id });
   }
 
@@ -767,10 +739,11 @@ export class Graph {
    * Remove multiple nodes and their connected edges in one batch.
    */
   removeNodes(ids: string[]): void {
-    if (!this.ensureInitialized()) return;
-    this.dataModel!.removeNodes(ids);
+    const runtime = this.getRuntime();
+    if (!runtime) return;
+    runtime.dataModel.removeNodes(ids);
     this.applyTransforms();
-    this.scheduler!.schedule();
+    runtime.scheduler.schedule();
     for (const id of ids) {
       this.eventEmitter.emit('afterremoveitem', { type: 'node', id });
     }
@@ -782,16 +755,18 @@ export class Graph {
    * in the GPU buffer.
    */
   updateNodePosition(id: string, x: number, y: number): void {
-    if (!this.ensureInitialized()) return;
-    this.dataModel!.updateNodePosition(id, x, y);
-    this.scheduler!.schedule();
+    const runtime = this.getRuntime();
+    if (!runtime) return;
+    runtime.dataModel.updateNodePosition(id, x, y);
+    runtime.scheduler.schedule();
     this.eventEmitter.emit('afterupdateitem', { type: 'node', id, action: 'position' });
   }
 
   updateNodePositions(updates: NodePositionUpdate[]): void {
-    if (!this.ensureInitialized()) return;
-    const ids = this.dataModel!.updateNodePositions(updates);
-    this.scheduler!.schedule();
+    const runtime = this.getRuntime();
+    if (!runtime) return;
+    const ids = runtime.dataModel.updateNodePositions(updates);
+    runtime.scheduler.schedule();
     for (const id of ids) {
       this.eventEmitter.emit('afterupdateitem', { type: 'node', id, action: 'position' });
     }
@@ -804,11 +779,12 @@ export class Graph {
   updateNodeData(id: string, data: Record<string, unknown>): void;
   updateNodeData(updates: NodeDataUpdate[]): void;
   updateNodeData(idOrUpdates: string | NodeDataUpdate[], data?: Record<string, unknown>): void {
-    if (!this.ensureInitialized()) return;
+    const runtime = this.getRuntime();
+    if (!runtime) return;
     const updates =
       typeof idOrUpdates === 'string' ? [{ id: idOrUpdates, data: data ?? {} }] : idOrUpdates;
-    const ids = this.dataModel!.updateNodeDataBatch(updates);
-    this.scheduler!.schedule();
+    const ids = runtime.dataModel.updateNodeDataBatch(updates);
+    runtime.scheduler.schedule();
     for (const id of ids) {
       this.eventEmitter.emit('afterupdateitem', { type: 'node', id, action: 'data' });
     }
@@ -817,12 +793,13 @@ export class Graph {
   updateEdgeData(id: string, data: Record<string, unknown>): void;
   updateEdgeData(updates: EdgeDataUpdate[]): void;
   updateEdgeData(idOrUpdates: string | EdgeDataUpdate[], data?: Record<string, unknown>): void {
-    if (!this.ensureInitialized()) return;
+    const runtime = this.getRuntime();
+    if (!runtime) return;
     const updates =
       typeof idOrUpdates === 'string' ? [{ id: idOrUpdates, data: data ?? {} }] : idOrUpdates;
-    const ids = this.dataModel!.updateEdgeDataBatch(updates);
+    const ids = runtime.dataModel.updateEdgeDataBatch(updates);
     this.applyTransforms();
-    this.scheduler!.schedule();
+    runtime.scheduler.schedule();
     for (const id of ids) {
       this.eventEmitter.emit('afterupdateitem', { type: 'edge', id, action: 'data' });
     }
@@ -838,10 +815,11 @@ export class Graph {
     data?: Record<string, unknown>;
     states?: ElementState[];
   }): string {
-    if (!this.ensureInitialized()) return '';
-    const id = this.dataModel!.addEdge(edge);
+    const runtime = this.getRuntime();
+    if (!runtime) return '';
+    const id = runtime.dataModel.addEdge(edge);
     this.applyTransforms();
-    this.scheduler!.schedule();
+    runtime.scheduler.schedule();
     this.eventEmitter.emit('afteradditem', {
       type: 'edge',
       id,
@@ -863,10 +841,11 @@ export class Graph {
       states?: ElementState[];
     }>,
   ): string[] {
-    if (!this.ensureInitialized()) return [];
-    const ids = this.dataModel!.addEdges(edges);
+    const runtime = this.getRuntime();
+    if (!runtime) return [];
+    const ids = runtime.dataModel.addEdges(edges);
     this.applyTransforms();
-    this.scheduler!.schedule();
+    runtime.scheduler.schedule();
     for (let i = 0; i < ids.length; i++) {
       this.eventEmitter.emit('afteradditem', {
         type: 'edge',
@@ -882,10 +861,11 @@ export class Graph {
    * Remove an edge by its auto-generated ID.
    */
   removeEdge(id: string): void {
-    if (!this.ensureInitialized()) return;
-    this.dataModel!.removeEdge(id);
+    const runtime = this.getRuntime();
+    if (!runtime) return;
+    runtime.dataModel.removeEdge(id);
     this.applyTransforms();
-    this.scheduler!.schedule();
+    runtime.scheduler.schedule();
     this.eventEmitter.emit('afterremoveitem', { type: 'edge', id });
   }
 
@@ -893,16 +873,17 @@ export class Graph {
    * Remove multiple edges by their IDs.
    */
   removeEdges(ids: string[]): void {
-    if (!this.ensureInitialized()) return;
-    this.dataModel!.removeEdges(ids);
+    const runtime = this.getRuntime();
+    if (!runtime) return;
+    runtime.dataModel.removeEdges(ids);
     this.applyTransforms();
-    this.scheduler!.schedule();
+    runtime.scheduler.schedule();
     for (const id of ids) {
       this.eventEmitter.emit('afterremoveitem', { type: 'edge', id });
     }
   }
 
-  // ──── P1: State management ────
+  // ──── State management ────
 
   /**
    * Set a state (e.g. 'active', 'selected', 'highlight') on a node or edge.
@@ -910,20 +891,20 @@ export class Graph {
    * Triggers partial process on next frame to re-resolve styles.
    */
   setItemState(id: string, state: ElementState, value: boolean): void {
-    if (!this.ensureInitialized()) return;
-    // Try node first, then edge
-    if (this.dataModel!.hasNode(id)) {
-      this.dataModel!.setNodeState(id, state, value);
-      this.scheduler!.schedule();
+    const runtime = this.getRuntime();
+    if (!runtime) return;
+    if (runtime.dataModel.hasNode(id)) {
+      runtime.dataModel.setNodeState(id, state, value);
+      runtime.scheduler.schedule();
       return;
     }
-    if (this.dataModel!.hasEdge(id)) {
-      this.dataModel!.setEdgeState(id, state, value);
-      this.scheduler!.schedule();
+    if (runtime.dataModel.hasEdge(id)) {
+      runtime.dataModel.setEdgeState(id, state, value);
+      runtime.scheduler.schedule();
       return;
     }
-    if (this.dataModel!.hasCombo(id)) {
-      this.dataModel!.setComboState(id, state, value);
+    if (runtime.dataModel.hasCombo(id)) {
+      runtime.dataModel.setComboState(id, state, value);
       this.renderer.scheduleRender();
     }
   }
@@ -932,19 +913,20 @@ export class Graph {
    * Clear all states on a node or edge.
    */
   clearItemStates(id: string): void {
-    if (!this.ensureInitialized()) return;
-    if (this.dataModel!.hasNode(id)) {
-      this.dataModel!.clearNodeStates(id);
-      this.scheduler!.schedule();
+    const runtime = this.getRuntime();
+    if (!runtime) return;
+    if (runtime.dataModel.hasNode(id)) {
+      runtime.dataModel.clearNodeStates(id);
+      runtime.scheduler.schedule();
       return;
     }
-    if (this.dataModel!.hasEdge(id)) {
-      this.dataModel!.clearEdgeStates(id);
-      this.scheduler!.schedule();
+    if (runtime.dataModel.hasEdge(id)) {
+      runtime.dataModel.clearEdgeStates(id);
+      runtime.scheduler.schedule();
       return;
     }
-    if (this.dataModel!.hasCombo(id)) {
-      this.dataModel!.clearComboStates(id);
+    if (runtime.dataModel.hasCombo(id)) {
+      runtime.dataModel.clearComboStates(id);
       this.renderer.scheduleRender();
     }
   }
@@ -1012,7 +994,7 @@ export class Graph {
     return this.dataModel?.getEdgeCount() ?? 0;
   }
 
-  // ──── Batch state queries (P3) ────
+  // ──── Batch state queries ────
 
   /**
    * Find all node IDs that have the given state.
@@ -1077,47 +1059,28 @@ export class Graph {
     this.eventEmitter.once(event, handler);
   }
 
-  // ──── P0: Runtime data/layout/options ────
+  // ──── Runtime data, layout, and options ────
 
   /**
    * Replace all graph data at runtime. Runs layout if configured, then triggers full re-render.
    */
   async setData(data: GraphData, options: SetDataOptions = {}): Promise<void> {
-    if (this._destroyed) return;
-    if (!this.ensureInitialized()) return;
+    const runtime = this.getRuntime();
+    if (!runtime) return;
     const generation = ++this.layoutGeneration;
     data = this.applyRegisteredTransforms(data, generation);
     if (!this.isGenerationCurrent(generation)) return;
-    let nodes = data.nodes.map((n) => ({ ...n, x: n.x ?? 0, y: n.y ?? 0 }));
-    const layout = this.options.layout;
-    if (layout && data.nodes.length > 0) {
-      this.eventEmitter.emit('beforelayout', { nodeCount: data.nodes.length });
-      this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
-      if (!this.isGenerationCurrent(generation)) return;
-      const t0 = performance.now();
-      const result = await this.executeLayout(data, layout);
-      if (!this.isGenerationCurrent(generation)) return;
-      const duration = performance.now() - t0;
-      this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
-      this.eventEmitter.emit('afterlayout', { duration, nodeCount: data.nodes.length });
-      if (!this.isGenerationCurrent(generation)) return;
-      nodes = applyFixedPositions(result.nodes, data.nodes);
-    }
-    this.layoutNodes = nodes as LayoutNode[];
-    this.dataModel!.replaceData(nodes, data.edges);
-    this.layoutNodes = this.dataModel!.getNodes() as unknown as LayoutNode[];
-    if (data.combos?.length) {
-      this.dataModel!.initCombos(data.combos, data.nodes);
-      this.ensureComboRenderer();
-    }
-    this.applyTransforms();
+    const nodes = await this.runConfiguredLayout(data, generation);
+    if (!nodes || !this.isGenerationCurrent(generation)) return;
+    this.replaceRuntimeData(runtime.dataModel, data, nodes);
+    if (runtime.dataModel.hasCombos()) this.ensureComboRenderer();
     this.options.data = data;
     if (options.fitView !== false) {
       this.fitView(
         options.fitView === true || options.fitView === undefined ? 0.9 : options.fitView,
       );
     }
-    this.scheduler!.schedule();
+    runtime.scheduler.schedule();
     this.eventEmitter.emit('datachange', {
       nodeCount: nodes.length,
       edgeCount: data.edges.length,
@@ -1129,7 +1092,8 @@ export class Graph {
    * Triggers a full re-process to apply new styles.
    */
   updateOptions(opts: Partial<Pick<GraphOptions, 'node' | 'edge' | 'theme'>>): void {
-    if (!this.ensureInitialized()) return;
+    const runtime = this.getRuntime();
+    if (!runtime) return;
     if (opts.node) {
       const previousStyle = this.options.node?.style;
       const nextStyle = opts.node.style;
@@ -1154,13 +1118,13 @@ export class Graph {
     }
     if (opts.theme) this.options.theme = opts.theme;
     const themeTokens = resolveTheme((this.options.theme as ThemeOption) ?? 'light');
-    this.dataModel!.nodeConfig = this.options.node;
-    this.dataModel!.edgeConfig = this.options.edge;
-    this.dataModel!.theme = themeTokens;
+    runtime.dataModel.nodeConfig = this.options.node;
+    runtime.dataModel.edgeConfig = this.options.edge;
+    runtime.dataModel.theme = themeTokens;
     analyzeNodeConfig(this.options.node, themeTokens);
     analyzeEdgeConfig(this.options.edge, themeTokens);
     this.applyTransforms();
-    this.scheduler!.forceFlush(RefreshLevel.FULL_PROCESS);
+    runtime.scheduler.forceFlush(RefreshLevel.FULL_PROCESS);
   }
 
   /**
@@ -1175,33 +1139,17 @@ export class Graph {
    * Execute the current layout algorithm and update node positions.
    */
   async layout(): Promise<void> {
-    if (this._destroyed) return;
-    if (!this.ensureInitialized()) return;
+    const runtime = this.getRuntime();
+    if (!runtime) return;
     const generation = ++this.layoutGeneration;
-    const layout = this.options.layout;
-    if (!layout) return;
+    if (!this.options.layout) return;
     const data = this.getData();
     if (data.nodes.length === 0) return;
-    this.eventEmitter.emit('beforelayout', { nodeCount: data.nodes.length });
-    this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });
-    if (!this.isGenerationCurrent(generation)) return;
-    const t0 = performance.now();
-    const result = await this.executeLayout(data, layout);
-    if (!this.isGenerationCurrent(generation)) return;
-    const duration = performance.now() - t0;
-    this.eventEmitter.emit('layout:end', { duration, nodeCount: data.nodes.length });
-    this.eventEmitter.emit('afterlayout', { duration, nodeCount: data.nodes.length });
-    if (!this.isGenerationCurrent(generation)) return;
-    const nodes = applyFixedPositions(result.nodes, data.nodes);
-    this.layoutNodes = nodes as LayoutNode[];
-    this.dataModel!.replaceData(nodes, data.edges);
-    this.layoutNodes = this.dataModel!.getNodes() as unknown as LayoutNode[];
-    if (data.combos?.length) {
-      this.dataModel!.initCombos(data.combos, data.nodes);
-      this.ensureComboRenderer();
-    }
-    this.applyTransforms();
-    this.scheduler!.schedule();
+    const nodes = await this.runConfiguredLayout(data, generation);
+    if (!nodes || !this.isGenerationCurrent(generation)) return;
+    this.replaceRuntimeData(runtime.dataModel, data, nodes);
+    if (runtime.dataModel.hasCombos()) this.ensureComboRenderer();
+    runtime.scheduler.schedule();
   }
 
   cancelLayout(): void {
@@ -1221,28 +1169,29 @@ export class Graph {
     return this.dataModel?.getEdge(id);
   }
 
-  // ──── P1: Batch state, visibility, focus ────
+  // ──── Batch state, visibility, and focus ────
 
   /**
    * Set states on multiple items in a single batch, triggering only one render.
    */
   batchSetState(items: Array<{ id: string; state: ElementState; value: boolean }>): void {
-    if (!this.ensureInitialized()) return;
+    const runtime = this.getRuntime();
+    if (!runtime) return;
     let comboChanged = false;
     for (const { id, state, value } of items) {
-      if (this.dataModel!.hasNode(id)) {
-        this.dataModel!.setNodeState(id, state, value);
-      } else if (this.dataModel!.hasEdge(id)) {
-        this.dataModel!.setEdgeState(id, state, value);
-      } else if (this.dataModel!.hasCombo(id)) {
-        const had = this.dataModel!.getCombo(id)!.states.has(state);
-        this.dataModel!.setComboState(id, state, value);
+      if (runtime.dataModel.hasNode(id)) {
+        runtime.dataModel.setNodeState(id, state, value);
+      } else if (runtime.dataModel.hasEdge(id)) {
+        runtime.dataModel.setEdgeState(id, state, value);
+      } else if (runtime.dataModel.hasCombo(id)) {
+        const had = runtime.dataModel.getCombo(id)?.states.has(state) ?? false;
+        runtime.dataModel.setComboState(id, state, value);
         if (had !== value) comboChanged = true;
       }
     }
-    const dataChanged = this.dataModel!.hasChanges();
+    const dataChanged = runtime.dataModel.hasChanges();
     if (dataChanged) {
-      this.scheduler!.schedule();
+      runtime.scheduler.schedule();
     } else if (comboChanged) {
       this.renderer.scheduleRender();
     }
@@ -1254,24 +1203,25 @@ export class Graph {
     idOrMap: string | Record<string, ElementState[]>,
     states?: ElementState[],
   ): void {
-    if (!this.ensureInitialized()) return;
+    const runtime = this.getRuntime();
+    if (!runtime) return;
     const entries =
       typeof idOrMap === 'string' ? [[idOrMap, states ?? []] as const] : Object.entries(idOrMap);
     let comboChanged = false;
     for (const [id, nextStates] of entries) {
-      if (this.dataModel!.replaceNodeStates(id, nextStates)) continue;
-      if (this.dataModel!.replaceEdgeStates(id, nextStates)) continue;
-      if (this.dataModel!.hasCombo(id)) {
-        this.dataModel!.clearComboStates(id);
+      if (runtime.dataModel.replaceNodeStates(id, nextStates)) continue;
+      if (runtime.dataModel.replaceEdgeStates(id, nextStates)) continue;
+      if (runtime.dataModel.hasCombo(id)) {
+        runtime.dataModel.clearComboStates(id);
         for (const state of nextStates) {
-          if (state !== 'default') this.dataModel!.setComboState(id, state, true);
+          if (state !== 'default') runtime.dataModel.setComboState(id, state, true);
         }
         comboChanged = true;
       }
     }
-    const dataChanged = this.dataModel!.hasChanges();
+    const dataChanged = runtime.dataModel.hasChanges();
     if (dataChanged) {
-      this.scheduler!.schedule();
+      runtime.scheduler.schedule();
     } else if (comboChanged) {
       this.renderer.scheduleRender();
     }

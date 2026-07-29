@@ -26,16 +26,23 @@ import { runLayoutInWorker } from './workerLayout.js';
 
 export type LayoutResult = { nodes: Array<GraphNode & { x: number; y: number }> };
 
-function createFallbackResult(data: GraphData): LayoutResult {
-  return {
-    nodes: data.nodes.map((node) => ({ ...node, x: node.x ?? 0, y: node.y ?? 0 })),
-  };
+interface LayoutRuntime {
+  signal?: AbortSignal;
+  extensionContext?: ExtensionContext;
 }
 
 type LayoutInstance = {
   execute: (data: GraphData) => Promise<void>;
-  forEachNode: (fn: (n: { id: string; x: number; y: number }) => void) => void;
+  forEachNode: (fn: (node: { id: string; x: number; y: number }) => void) => void;
 };
+
+type D3LayoutInstance = LayoutInstance & {
+  tick: (iterations?: number) => void;
+  stop: () => void;
+  getAlpha: () => number;
+};
+
+type BuiltInLayoutExecutor = (data: GraphData, config: LayoutConfig) => LayoutResult;
 
 const LAYOUT_MAP = {
   circular: CircularLayout,
@@ -49,9 +56,7 @@ const LAYOUT_MAP = {
   mds: MDSLayout,
   random: RandomLayout,
   radial: RadialLayout,
-} as Record<string, new (opts?: Record<string, unknown>) => LayoutInstance>;
-
-type BuiltInLayoutExecutor = (data: GraphData, config: LayoutConfig) => LayoutResult;
+} as Record<string, new (options?: Record<string, unknown>) => LayoutInstance>;
 
 const BUILTIN_EXECUTOR_MAP: Record<string, BuiltInLayoutExecutor> = {
   indented: (data, config) => executeIndentedLayout(data, config as IndentedLayoutOptions),
@@ -59,242 +64,252 @@ const BUILTIN_EXECUTOR_MAP: Record<string, BuiltInLayoutExecutor> = {
   fishbone: (data, config) => executeFishboneLayout(data, config as FishboneLayoutOptions),
 };
 
+function createFallbackResult(data: GraphData): LayoutResult {
+  return {
+    nodes: data.nodes.map((node) => ({ ...node, x: node.x ?? 0, y: node.y ?? 0 })),
+  };
+}
+
+function resolveLayoutConfig(
+  config: LayoutConfig,
+  viewport?: { width: number; height: number },
+): LayoutConfig {
+  const resolved = { ...config } as LayoutConfig;
+  if (!viewport) return resolved;
+  if (resolved.width === undefined) resolved.width = viewport.width;
+  if (resolved.height === undefined) resolved.height = viewport.height;
+  if (resolved.center === undefined) {
+    resolved.center = [Number(resolved.width) / 2, Number(resolved.height) / 2];
+  }
+  return resolved;
+}
+
+async function runExtensionLayout(
+  data: GraphData,
+  config: LayoutConfig,
+  viewport: { width: number; height: number } | undefined,
+  runtime: LayoutRuntime,
+): Promise<LayoutResult | undefined> {
+  const extension = createExtension<LayoutExtension>('layout', config.type);
+  if (!extension) return undefined;
+  const options = Object.freeze({ ...config });
+  try {
+    if (runtime.signal?.aborted) return createFallbackResult(data);
+    if (
+      runtime.extensionContext &&
+      !initializeExtension('layout', config.type, extension, runtime.extensionContext, config)
+    ) {
+      return createFallbackResult(data);
+    }
+    if (runtime.signal?.aborted) return createFallbackResult(data);
+    const result = await extension.execute(data, {
+      width: viewport?.width ?? Number(config.width ?? 800),
+      height: viewport?.height ?? Number(config.height ?? 600),
+      signal: runtime.signal,
+      options,
+    });
+    return runtime.signal?.aborted ? createFallbackResult(data) : result;
+  } catch (error) {
+    if (!runtime.signal?.aborted) {
+      console.error(`[G6-GL] layout extension "${config.type}" failed during execute`, error);
+    }
+    return createFallbackResult(data);
+  } finally {
+    destroyExtension('layout', config.type, extension);
+  }
+}
+
+function runBuiltInLayout(
+  data: GraphData,
+  config: LayoutConfig,
+  runtime: LayoutRuntime,
+): LayoutResult | undefined {
+  const execute = BUILTIN_EXECUTOR_MAP[config.type];
+  if (!execute) return undefined;
+  try {
+    if (runtime.signal?.aborted) return createFallbackResult(data);
+    const result = execute(data, config);
+    return runtime.signal?.aborted ? createFallbackResult(data) : result;
+  } catch (error) {
+    if (!runtime.signal?.aborted) {
+      console.error(`[G6-GL] built-in layout "${config.type}" failed during execute`, error);
+    }
+    return createFallbackResult(data);
+  }
+}
+
+async function runWorkerLayout(
+  data: GraphData,
+  config: LayoutConfig,
+  runtime: LayoutRuntime,
+): Promise<LayoutResult | undefined> {
+  try {
+    const workerResult = await runLayoutInWorker(data, config, runtime.signal);
+    if (runtime.signal?.aborted) return createFallbackResult(data);
+    const positions = new Map(
+      workerResult.positions.map(
+        (position) => [position.id, position] as [string, { x: number; y: number }],
+      ),
+    );
+    return {
+      nodes: data.nodes.map((node) => {
+        const position = positions.get(node.id);
+        return { ...node, x: position?.x ?? 0, y: position?.y ?? 0 };
+      }),
+    };
+  } catch {
+    return runtime.signal?.aborted ? createFallbackResult(data) : undefined;
+  }
+}
+
+function normalizeLibraryLayoutOptions(
+  config: LayoutConfig,
+  nodeCount: number,
+): Record<string, unknown> {
+  const type = config.type;
+  const options = { ...(config as Record<string, unknown>) };
+  delete options.type;
+  delete options.worker;
+
+  if ('iterations' in options && !('maxIteration' in options)) {
+    options.maxIteration = options.iterations;
+  }
+  delete options.iterations;
+  if (options.animate === undefined) options.animate = false;
+
+  if (type === 'force' || type === 'fruchterman') {
+    if (nodeCount > 5000) {
+      if (options.maxIteration === undefined) options.maxIteration = 50;
+      if (options.minMovement === undefined) options.minMovement = 2;
+    } else if (nodeCount >= 1000) {
+      if (options.maxIteration === undefined) options.maxIteration = 200;
+      if (options.minMovement === undefined) options.minMovement = 1.5;
+    } else {
+      if (options.maxIteration === undefined) options.maxIteration = 100;
+      if (options.minMovement === undefined) options.minMovement = 1;
+    }
+  }
+
+  // ForceAtlas2's default pruning finishing pass disables Barnes-Hut and turns
+  // large layouts into an O(n²) operation. Keep the optimized path by default.
+  if (type === 'force-atlas2') {
+    if (options.barnesHut === undefined) options.barnesHut = true;
+    if (options.prune === undefined && nodeCount > 200) options.prune = false;
+    if (options.maxIteration === undefined) {
+      options.maxIteration = nodeCount > 5000 ? 50 : 100;
+    }
+  }
+
+  if (type === 'd3-force') {
+    if (options.alphaDecay === undefined) options.alphaDecay = 0.1;
+    if (options.linkDistance === undefined) {
+      options.linkDistance = Math.max(200, Math.sqrt(nodeCount) * 80);
+    }
+  }
+  return options;
+}
+
+function createLibraryLayoutData(data: GraphData): GraphData {
+  const spread = Math.max(200, Math.sqrt(data.nodes.length) * 30);
+  return {
+    nodes: data.nodes.map((node) => {
+      if (node.x !== undefined && node.y !== undefined) return node;
+      return {
+        ...node,
+        x: node.x ?? Math.random() * spread,
+        y: node.y ?? Math.random() * spread,
+      };
+    }),
+    edges: data.edges,
+  };
+}
+
+async function executeLibraryLayout(
+  layout: LayoutInstance,
+  type: string,
+  layoutData: GraphData,
+  options: Record<string, unknown>,
+): Promise<void> {
+  if (type !== 'd3-force' || !('tick' in layout) || !('stop' in layout)) {
+    await layout.execute(layoutData);
+    return;
+  }
+
+  const simulation = layout as D3LayoutInstance;
+  const execution = simulation.execute(layoutData);
+  simulation.stop();
+  const alphaMin = (options.alphaMin as number) ?? 0.001;
+  for (let index = 0; index < 300 && simulation.getAlpha() >= alphaMin; index++) {
+    simulation.tick(1);
+  }
+  void execution;
+}
+
+function mergeLibraryLayoutResult(
+  data: GraphData,
+  layoutData: GraphData,
+  layout: LayoutInstance,
+): LayoutResult {
+  const positions = new Map<string, [number, number]>();
+  layout.forEachNode((node) => positions.set(node.id, [node.x, node.y]));
+  const layoutNodes = new Map(layoutData.nodes.map((node) => [node.id, node]));
+  return {
+    nodes: data.nodes.map((node) => {
+      const position = positions.get(node.id);
+      const layoutNode = layoutNodes.get(node.id);
+      const mergedData = layoutNode?.data ? { ...node.data, ...layoutNode.data } : node.data;
+      if (position && node.x === position[0] && node.y === position[1] && !layoutNode?.data) {
+        return node as GraphNode & { x: number; y: number };
+      }
+      return {
+        ...node,
+        data: mergedData,
+        x: position?.[0] ?? 0,
+        y: position?.[1] ?? 0,
+      };
+    }),
+  };
+}
+
+async function runLibraryLayout(
+  data: GraphData,
+  config: LayoutConfig,
+  runtime: LayoutRuntime,
+): Promise<LayoutResult> {
+  const LayoutClass = LAYOUT_MAP[config.type] ?? RandomLayout;
+  const options = normalizeLibraryLayoutOptions(config, data.nodes.length);
+  const layout = new LayoutClass(options);
+  const layoutData = createLibraryLayoutData(data);
+  await executeLibraryLayout(layout, config.type, layoutData, options);
+  if (runtime.signal?.aborted) return createFallbackResult(data);
+  return mergeLibraryLayoutResult(data, layoutData, layout);
+}
+
 /**
  * Run the configured layout on graph data; returns nodes with positions.
- * Layout options are passed through to the underlying @antv/layout algorithm.
- * When config.worker is true (or auto-detected for large graphs), layout runs
- * in a Web Worker to avoid blocking the main thread. Falls back to main-thread
- * layout if the Worker fails.
+ * Registered extensions and built-in functional layouts take precedence over
+ * worker and @antv/layout execution. Worker failures fall back to the same
+ * main-thread library path.
  */
 export async function runLayout(
   data: GraphData,
   config: LayoutConfig,
   viewport?: { width: number; height: number },
-  runtime: { signal?: AbortSignal; extensionContext?: ExtensionContext } = {},
+  runtime: LayoutRuntime = {},
 ): Promise<LayoutResult> {
-  // Inject canvas viewport (width/height/center) so @antv/layout sizes the
-  // graph to the CANVAS, not window.innerWidth/innerHeight. Without this its
-  // normalizeViewport() falls back to the browser window (or 0×0 in a worker),
-  // distorting force/circular/radial/etc. by the window aspect ratio. Only fill
-  // fields the user did not provide. Merge into config BEFORE the worker branch
-  // so the worker inherits the same dimensions.
-  if (viewport) {
-    const merged = { ...config } as Record<string, unknown>;
-    if (merged.width === undefined) merged.width = viewport.width;
-    if (merged.height === undefined) merged.height = viewport.height;
-    if (merged.center === undefined)
-      merged.center = [(merged.width as number) / 2, (merged.height as number) / 2];
-    config = merged as LayoutConfig;
-  }
+  const resolvedConfig = resolveLayoutConfig(config, viewport);
 
-  const useWorker = config.worker ?? false;
+  const extensionResult = await runExtensionLayout(data, resolvedConfig, viewport, runtime);
+  if (extensionResult) return extensionResult;
 
-  const customLayout = createExtension<LayoutExtension>('layout', config.type);
-  if (customLayout) {
-    const options = Object.freeze({ ...config });
-    try {
-      if (runtime.signal?.aborted) return createFallbackResult(data);
-      if (runtime.extensionContext) {
-        if (
-          !initializeExtension(
-            'layout',
-            config.type,
-            customLayout,
-            runtime.extensionContext,
-            config,
-          )
-        ) {
-          return createFallbackResult(data);
-        }
-        if (runtime.signal?.aborted) return createFallbackResult(data);
-      }
-      const result = await customLayout.execute(data, {
-        width: viewport?.width ?? Number(config.width ?? 800),
-        height: viewport?.height ?? Number(config.height ?? 600),
-        signal: runtime.signal,
-        options,
-      });
-      if (runtime.signal?.aborted) return createFallbackResult(data);
-      return result;
-    } catch (error) {
-      if (runtime.signal?.aborted) {
-        return createFallbackResult(data);
-      }
-      console.error(`[G6-GL] layout extension "${config.type}" failed during execute`, error);
-      return createFallbackResult(data);
-    } finally {
-      destroyExtension('layout', config.type, customLayout);
-    }
-  }
+  const builtInResult = runBuiltInLayout(data, resolvedConfig, runtime);
+  if (builtInResult) return builtInResult;
 
-  const builtInExecutor = BUILTIN_EXECUTOR_MAP[config.type];
-  if (builtInExecutor) {
-    try {
-      if (runtime.signal?.aborted) return createFallbackResult(data);
-      const result = builtInExecutor(data, config);
-      return runtime.signal?.aborted ? createFallbackResult(data) : result;
-    } catch (error) {
-      if (!runtime.signal?.aborted) {
-        console.error(`[G6-GL] built-in layout "${config.type}" failed during execute`, error);
-      }
-      return createFallbackResult(data);
-    }
-  }
-
-  if (useWorker) {
-    try {
-      const workerResult = await runLayoutInWorker(data, config, runtime.signal);
-      if (runtime.signal?.aborted) return createFallbackResult(data);
-      const posMap = new Map(
-        workerResult.positions.map((p) => [p.id, p] as [string, { x: number; y: number }]),
-      );
-      const nodes: Array<GraphNode & { x: number; y: number }> = data.nodes.map((n) => {
-        const pos = posMap.get(n.id);
-        return { ...n, x: pos ? pos.x : 0, y: pos ? pos.y : 0 };
-      });
-      return { nodes };
-    } catch {
-      if (runtime.signal?.aborted) {
-        return createFallbackResult(data);
-      }
-      // Worker failed — fall through to main-thread layout
-    }
-  }
-
-  if (runtime.signal?.aborted) {
-    return createFallbackResult(data);
-  }
-
-  const LayoutClass = LAYOUT_MAP[config.type] ?? RandomLayout;
-  // Strip internal fields before passing to layout constructor
-  const type = config.type;
-  const opts = { ...(config as Record<string, unknown>) };
-  delete opts.type;
-  delete opts.worker;
-  const nodeCount = data.nodes.length;
-
-  // R-LAYOUT-01: Map user-friendly 'iterations' to @antv/layout's 'maxIteration'
-  if ('iterations' in opts && !('maxIteration' in opts)) {
-    opts.maxIteration = opts.iterations;
-  }
-  delete opts.iterations;
-
-  // R-LAYOUT-02: Always disable animate mode — we await the result synchronously,
-  // so timer-based stepping adds overhead without benefit. Without this, d3-force
-  // resolves immediately before the simulation converges.
-  if (opts.animate === undefined) {
-    opts.animate = false;
-  }
-
-  // R-LAYOUT-03: Auto-tune defaults for force layouts
-  if (type === 'force' || type === 'fruchterman') {
-    if (nodeCount > 5000) {
-      if (opts.maxIteration === undefined) opts.maxIteration = 50;
-      if (opts.minMovement === undefined) opts.minMovement = 2.0;
-    } else if (nodeCount >= 1000) {
-      if (opts.maxIteration === undefined) opts.maxIteration = 200;
-      if (opts.minMovement === undefined) opts.minMovement = 1.5;
-    } else {
-      if (opts.maxIteration === undefined) opts.maxIteration = 100;
-      if (opts.minMovement === undefined) opts.minMovement = 1.0;
-    }
-  }
-
-  // R-LAYOUT-03b: Auto-tune ForceAtlas2. Two failure modes to guard against:
-  //  1. Default maxIteration is 0, which @antv/layout auto-expands to 950 — never
-  //     leave it at 0 for large graphs.
-  //  2. When `prune` is on (auto-enabled at >100 nodes), FA2's finishing pass runs
-  //     `simulation.tick(100)` with barnesHut FORCED OFF — a pure O(n²) step that
-  //     takes ~37s for 5000 nodes and freezes the page. Setting prune=false keeps
-  //     barnesHut active throughout (5000 nodes: 37s → ~1s, measured).
-  // (Note: the real @antv/layout option is `barnesHut`/`prune`; `barnesHutOptimize`
-  //  was an invalid no-op field and has been removed.)
-  if (type === 'force-atlas2') {
-    if (opts.barnesHut === undefined) opts.barnesHut = true;
-    if (opts.prune === undefined && nodeCount > 200) opts.prune = false;
-    if (nodeCount > 5000) {
-      if (opts.maxIteration === undefined) opts.maxIteration = 50;
-    } else if (nodeCount >= 1000) {
-      if (opts.maxIteration === undefined) opts.maxIteration = 100;
-    } else {
-      if (opts.maxIteration === undefined) opts.maxIteration = 100;
-    }
-  }
-
-  // R-LAYOUT-04b: D3ForceLayout uses simulation timer (rAF-based) — increase alphaDecay
-  // so it converges faster. Default alphaDecay=0.0228 → ~300 frames (~5s).
-  // With alphaDecay=0.1 → ~45 frames (~0.7s); alphaDecay=0.05 → ~90 frames (~1.5s).
-  if (type === 'd3-force') {
-    if (opts.alphaDecay === undefined) opts.alphaDecay = 0.1;
-    // Default linkDistance=30 produces very compact layouts. Scale it so the graph
-    // fills the viewport at zoom=1 after fitView.
-    if (opts.linkDistance === undefined) {
-      opts.linkDistance = Math.max(200, Math.sqrt(nodeCount) * 80);
-    }
-  }
-
-  const layout = new LayoutClass(opts);
-
-  // R-LAYOUT-04: Random initial positions for nodes without coordinates.
-  // Force layouts degrade catastrophically (20x slower) when all nodes start at (0,0)
-  // because repulsive forces hit a singularity. Spreading nodes randomly first lets
-  // the algorithm converge efficiently.
-  const spread = Math.max(200, Math.sqrt(nodeCount) * 30);
-  const layoutData: GraphData = {
-    nodes: data.nodes.map((n) => {
-      if (n.x !== undefined && n.y !== undefined) return n;
-      return { ...n, x: n.x ?? Math.random() * spread, y: n.y ?? Math.random() * spread };
-    }),
-    edges: data.edges,
-  };
-
-  // R-LAYOUT-05: D3ForceLayout uses rAF-based simulation timer — each tick takes 16ms
-  // wall-clock time regardless of CPU cost. Manually ticking synchronously avoids this
-  // and completes in <10ms for small graphs instead of ~700ms.
-  if (type === 'd3-force' && 'tick' in layout && 'stop' in layout) {
-    const sim = layout as unknown as {
-      execute: (data: GraphData) => Promise<void>;
-      tick: (iterations?: number) => void;
-      stop: () => void;
-      getAlpha: () => number;
-      forEachNode: (fn: (n: { id: string; x: number; y: number }) => void) => void;
-    };
-    // execute() sets up simulation and starts the rAF timer
-    const execPromise = sim.execute(layoutData);
-    // Stop the rAF timer immediately — we'll tick manually
-    sim.stop();
-    // Manually tick synchronously until converged
-    const alphaMin = (opts.alphaMin as number) ?? 0.001;
-    const maxTicks = 300;
-    for (let i = 0; i < maxTicks; i++) {
-      if (sim.getAlpha() < alphaMin) break;
-      sim.tick(1);
-    }
-    // The execute() promise resolves on 'end' event which won't fire since we stopped
-    // the timer. We don't need it — positions are already synced by tick().
-    void execPromise;
-  } else {
-    await layout.execute(layoutData);
+  if (resolvedConfig.worker) {
+    const workerResult = await runWorkerLayout(data, resolvedConfig, runtime);
+    if (workerResult) return workerResult;
   }
 
   if (runtime.signal?.aborted) return createFallbackResult(data);
-
-  const posMap = new Map<string, [number, number]>();
-  layout.forEachNode((node: { id: string; x: number; y: number }) => {
-    posMap.set(node.id, [node.x, node.y]);
-  });
-
-  // Build a map of enriched node data from layoutData (layouts may write metadata like depth, _nodeColor)
-  const layoutNodeMap = new Map(layoutData.nodes.map((n) => [n.id, n]));
-
-  const nodes: Array<GraphNode & { x: number; y: number }> = data.nodes.map((n) => {
-    const pos = posMap.get(n.id);
-    const layoutNode = layoutNodeMap.get(n.id);
-    const mergedData = layoutNode?.data ? { ...n.data, ...layoutNode.data } : n.data;
-    if (pos && n.x === pos[0] && n.y === pos[1] && !layoutNode?.data)
-      return n as GraphNode & { x: number; y: number };
-    return { ...n, data: mergedData, x: pos ? pos[0] : 0, y: pos ? pos[1] : 0 };
-  });
-
-  return { nodes };
+  return runLibraryLayout(data, resolvedConfig, runtime);
 }

@@ -355,6 +355,39 @@ describe('P1: repeated render resource lifecycle', () => {
     expect(executeLayout).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
+
+  it('derives automatic worker layout without mutating the configured options', async () => {
+    const layout = { type: 'grid' };
+    const executeLayout = vi.fn(async (data: { nodes: Array<{ id: string }> }, config) => ({
+      nodes: data.nodes.map((node, index) => ({ ...node, x: index, y: index })),
+      config,
+    }));
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      layoutGeneration: 1,
+      options: { layout },
+      eventEmitter: new EventEmitter(),
+      executeLayout,
+    });
+    const nodes = Array.from({ length: 1000 }, (_, index) => ({ id: `node-${index}` }));
+
+    await (
+      graph as unknown as {
+        runConfiguredLayout(
+          data: { nodes: Array<{ id: string }>; edges: [] },
+          generation: number,
+        ): Promise<unknown>;
+      }
+    ).runConfiguredLayout({ nodes, edges: [] }, 1);
+
+    expect(layout).toEqual({ type: 'grid' });
+    expect(executeLayout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ type: 'grid', worker: true }),
+    );
+    expect(executeLayout.mock.calls[0][1]).not.toBe(layout);
+  });
 });
 
 describe('P1: public data snapshot boundary', () => {

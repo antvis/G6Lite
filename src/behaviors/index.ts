@@ -31,6 +31,13 @@ import { lassoSelect } from './lassoSelect.js';
 import { tooltip, type TooltipOptions } from './tooltip.js';
 import { zoomCanvas } from './zoomCanvas.js';
 
+export type { BrushSelectOptions } from './brushSelect.js';
+export type { ClickSelectConfig } from './clickSelect.js';
+export type { DragCanvasOptions } from './dragCanvas.js';
+export type { HoverHighlightConfig } from './hoverHighlight.js';
+export type { LassoSelectOptions } from './lassoSelect.js';
+export type { TooltipContext, TooltipOptions } from './tooltip.js';
+
 export type BehaviorName =
   | 'zoom-canvas'
   | 'drag-canvas'

@@ -20,8 +20,9 @@ import { parseColor } from './color.js';
  * These helpers read either without allocating.
  */
 type StateLike = readonly string[] | ReadonlySet<string> | undefined;
+type StateContainer = Exclude<StateLike, undefined>;
 
-function hasAnyState(states: StateLike): boolean {
+function hasAnyState(states: StateLike): states is StateContainer {
   if (!states) return false;
   return Array.isArray(states) ? states.length > 0 : (states as ReadonlySet<string>).size > 0;
 }
@@ -59,6 +60,64 @@ export interface ResolvedEdgeStyle {
   lineDash: number[];
   opacity: number;
   radius: number;
+}
+
+function applyNodeStateOverrides(
+  style: ResolvedNodeStyle,
+  states: StateLike,
+  configStyles: NodeConfig['stateStyles'],
+  extensionStyles: NodeConfig['stateStyles'],
+  themeStyles: ThemeTokens['nodeStateStyles'],
+): void {
+  if (!hasAnyState(states)) return;
+  if (hasState(states, 'hidden')) {
+    style.opacity = 0;
+    return;
+  }
+  for (const state of states) {
+    if (state === 'default') continue;
+    const override = configStyles?.[state] ?? extensionStyles?.[state] ?? themeStyles?.[state];
+    if (!override) continue;
+    if (override.fill !== undefined) {
+      style.fill = override.fill;
+      style.fillRGB = undefined;
+    }
+    if (override.stroke !== undefined) {
+      style.stroke = override.stroke;
+      style.strokeRGB = undefined;
+    }
+    if (override.strokeWidth !== undefined) style.strokeWidth = override.strokeWidth;
+    if (override.opacity !== undefined) style.opacity = override.opacity;
+    if (override.haloWidth !== undefined) style.haloWidth = override.haloWidth;
+  }
+  if (hasState(states, 'active') && style.haloWidth === 0) style.haloWidth = 8;
+  if (hasState(states, 'selected') && style.haloWidth < 12) style.haloWidth = 12;
+}
+
+function applyEdgeStateOverrides(
+  style: ResolvedEdgeStyle,
+  states: StateLike,
+  configStyles: EdgeConfig['stateStyles'],
+  extensionStyles: EdgeConfig['stateStyles'],
+  themeStyles: ThemeTokens['edgeStateStyles'],
+): void {
+  if (!hasAnyState(states)) return;
+  if (hasState(states, 'hidden')) {
+    style.opacity = 0;
+    return;
+  }
+  for (const state of states) {
+    if (state === 'default') continue;
+    const override = configStyles?.[state] ?? extensionStyles?.[state] ?? themeStyles?.[state];
+    if (!override) continue;
+    if (override.stroke !== undefined) {
+      style.stroke = override.stroke;
+      style.strokeRGB = undefined;
+    }
+    if (override.lineWidth !== undefined) style.lineWidth = override.lineWidth;
+    if (override.opacity !== undefined) style.opacity = override.opacity;
+    if (override.lineDash !== undefined) style.lineDash = override.lineDash;
+  }
 }
 
 /** Config analysis result type */
@@ -255,47 +314,27 @@ export function resolveNodeStyle(
 
   if (cache?.styleType === 'static' && cache.cachedStyle) {
     const base = cache.cachedStyle;
-
-    // Apply state overrides (only dynamic part for static configs)
-    let fill = base.fill;
-    let stroke = base.stroke;
-    let strokeWidth = base.strokeWidth;
-    let opacity = base.opacity;
-    let haloWidth = 0;
-
-    const states = (node as GraphNode).states;
-    if (hasAnyState(states)) {
-      if (hasState(states, 'hidden')) {
-        opacity = 0;
-      } else {
-        for (const state of states!) {
-          if (state === 'default') continue;
-          const override = config?.stateStyles?.[state] ?? theme.nodeStateStyles?.[state];
-          if (!override) continue;
-          if (override.fill !== undefined) fill = override.fill;
-          if (override.stroke !== undefined) stroke = override.stroke;
-          if (override.strokeWidth !== undefined) strokeWidth = override.strokeWidth;
-          if (override.opacity !== undefined) opacity = override.opacity;
-          if (override.haloWidth !== undefined) haloWidth = override.haloWidth;
-        }
-        if (hasState(states, 'active') && haloWidth === 0) haloWidth = 8;
-        if (hasState(states, 'selected') && haloWidth < 12) haloWidth = 12;
-      }
-    }
-
-    return {
-      fill,
-      fillRGB: fill === base.fill ? base.fillRGB : undefined,
+    const resolved: ResolvedNodeStyle = {
+      fill: base.fill,
+      fillRGB: base.fillRGB,
       size: base.size,
       width: base.width,
       height: base.height,
-      stroke,
-      strokeRGB: stroke === base.stroke ? base.strokeRGB : undefined,
-      strokeWidth,
-      opacity,
+      stroke: base.stroke,
+      strokeRGB: base.strokeRGB,
+      strokeWidth: base.strokeWidth,
+      opacity: base.opacity,
       borderRadius: base.borderRadius,
-      haloWidth,
+      haloWidth: 0,
     };
+    applyNodeStateOverrides(
+      resolved,
+      node.states as StateLike,
+      config?.stateStyles,
+      undefined,
+      theme.nodeStateStyles,
+    );
+    return resolved;
   }
 
   // Slow path: dynamic config or not yet analyzed
@@ -343,12 +382,12 @@ function resolveNodeStyleDynamic(
     };
   }
 
-  let fill = resolveStyleValue(style.fill, node, theme.nodeFill ?? '#5B8FF9');
+  const fill = resolveStyleValue(style.fill, node, theme.nodeFill ?? '#5B8FF9');
   const size = resolveStyleValue(style.size, node, theme.nodeSize ?? 8);
   const sizeNum = typeof size === 'number' ? size : 8;
   const width = resolveStyleValue(style.width, node, sizeNum);
   const height = resolveStyleValue(style.height, node, sizeNum);
-  let stroke = resolveStyleValue(style.stroke, node, theme.nodeStroke ?? '#fff');
+  const stroke = resolveStyleValue(style.stroke, node, theme.nodeStroke ?? '#fff');
   let strokeWidth = resolveStyleValue(style.strokeWidth, node, theme.nodeStrokeWidth ?? 0);
   let opacity = resolveStyleValue(style.opacity, node, 1 as number);
   const borderRadius = resolveStyleValue(style.borderRadius, node, 0 as number);
@@ -356,35 +395,7 @@ function resolveNodeStyleDynamic(
   strokeWidth = typeof strokeWidth === 'number' ? strokeWidth : 0;
   opacity = typeof opacity === 'number' ? opacity : 1;
 
-  // Determine halo from state
-  let haloWidth = 0;
-
-  // Apply state style overrides (last state wins)
-  const states = (node as GraphNode).states;
-  if (hasAnyState(states)) {
-    if (hasState(states, 'hidden')) {
-      opacity = 0;
-    } else {
-      for (const state of states!) {
-        if (state === 'default') continue;
-        const override =
-          config?.stateStyles?.[state] ??
-          extension?.stateStyles?.[state] ??
-          theme.nodeStateStyles?.[state];
-        if (!override) continue;
-        if (override.fill !== undefined) fill = override.fill;
-        if (override.stroke !== undefined) stroke = override.stroke;
-        if (override.strokeWidth !== undefined) strokeWidth = override.strokeWidth;
-        if (override.opacity !== undefined) opacity = override.opacity;
-        if (override.haloWidth !== undefined) haloWidth = override.haloWidth;
-      }
-      // Halo for active/selected states
-      if (hasState(states, 'active') && haloWidth === 0) haloWidth = 8;
-      if (hasState(states, 'selected') && haloWidth < 12) haloWidth = 12;
-    }
-  }
-
-  return {
+  const resolved: ResolvedNodeStyle = {
     fill,
     size: sizeNum,
     width: typeof width === 'number' ? width : sizeNum,
@@ -393,8 +404,16 @@ function resolveNodeStyleDynamic(
     strokeWidth,
     opacity,
     borderRadius: typeof borderRadius === 'number' ? borderRadius : 0,
-    haloWidth,
+    haloWidth: 0,
   };
+  applyNodeStateOverrides(
+    resolved,
+    node.states as StateLike,
+    config?.stateStyles,
+    extension?.stateStyles,
+    theme.nodeStateStyles,
+  );
+  return resolved;
 }
 
 export function resolveEdgeStyle(
@@ -409,43 +428,28 @@ export function resolveEdgeStyle(
 
   if (cache?.styleType === 'static' && cache.cachedStyle) {
     const base = cache.cachedStyle;
-
-    // Apply state overrides (only dynamic part for static configs)
-    let stroke = base.stroke;
-    let lineWidth = base.lineWidth;
-    let opacity = base.opacity;
-    let lineDash = base.lineDash;
-
-    const states = edge.states;
-    if (hasAnyState(states)) {
-      if (hasState(states, 'hidden')) {
-        opacity = 0;
-      } else {
-        for (const state of states!) {
-          if (state === 'default') continue;
-          const override = config?.stateStyles?.[state] ?? theme.edgeStateStyles?.[state];
-          if (!override) continue;
-          if (override.stroke !== undefined) stroke = override.stroke;
-          if (override.lineWidth !== undefined) lineWidth = override.lineWidth;
-          if (override.opacity !== undefined) opacity = override.opacity;
-          if (override.lineDash !== undefined) lineDash = override.lineDash;
-        }
-      }
-    }
-
-    return {
-      stroke,
-      strokeRGB: stroke === base.stroke ? base.strokeRGB : undefined,
-      lineWidth,
+    const resolved: ResolvedEdgeStyle = {
+      stroke: base.stroke,
+      strokeRGB: base.strokeRGB,
+      lineWidth: base.lineWidth,
       curvature: base.curvature,
       curveOffset: base.curveOffset,
       endArrow: base.endArrow,
       startArrow: base.startArrow,
-      arrowSize: base.arrowSize > 0 ? base.arrowSize : getArrowSize(lineWidth),
-      lineDash,
-      opacity,
+      arrowSize: base.arrowSize > 0 ? base.arrowSize : getArrowSize(base.lineWidth),
+      lineDash: base.lineDash,
+      opacity: base.opacity,
       radius: base.radius,
     };
+    applyEdgeStateOverrides(
+      resolved,
+      edge.states as StateLike,
+      config?.stateStyles,
+      undefined,
+      theme.edgeStateStyles,
+    );
+    if (base.arrowSize <= 0) resolved.arrowSize = getArrowSize(resolved.lineWidth);
+    return resolved;
   }
 
   // Slow path: dynamic config or not yet analyzed
@@ -577,28 +581,7 @@ function resolveEdgeStyleDynamic(
   lineWidth = typeof lineWidth === 'number' ? lineWidth : 1;
   opacity = typeof opacity === 'number' ? opacity : 1;
 
-  // Apply state style overrides (last state wins)
-  const states = edge.states;
-  if (hasAnyState(states)) {
-    if (hasState(states, 'hidden')) {
-      opacity = 0;
-    } else {
-      for (const state of states!) {
-        if (state === 'default') continue;
-        const override =
-          config?.stateStyles?.[state] ??
-          extension?.stateStyles?.[state] ??
-          theme.edgeStateStyles?.[state];
-        if (!override) continue;
-        if (override.stroke !== undefined) stroke = override.stroke;
-        if (override.lineWidth !== undefined) lineWidth = override.lineWidth;
-        if (override.opacity !== undefined) opacity = override.opacity;
-        if (override.lineDash !== undefined) lineDash = override.lineDash;
-      }
-    }
-  }
-
-  return {
+  const resolved: ResolvedEdgeStyle = {
     stroke,
     lineWidth,
     curvature: typeof curvature === 'number' ? curvature : 0.3,
@@ -610,6 +593,15 @@ function resolveEdgeStyleDynamic(
     opacity,
     radius: typeof radius === 'number' ? radius : 0,
   };
+  applyEdgeStateOverrides(
+    resolved,
+    edge.states as StateLike,
+    config?.stateStyles,
+    extension?.stateStyles,
+    theme.edgeStateStyles,
+  );
+  if (userArrowSize <= 0) resolved.arrowSize = getArrowSize(resolved.lineWidth);
+  return resolved;
 }
 
 function resolveStyleValue<T>(

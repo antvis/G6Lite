@@ -11,9 +11,9 @@
  *   FULL_PROCESS      — full data replacement or config change, rebuild everything
  */
 
-import { ChangeRecord, DataModel } from './dataModel.js';
+import type { ChangeRecord, DataModel } from './dataModel.js';
+import { createRendererData } from './renderer/renderData.js';
 import type { Renderer } from './renderer/renderer.js';
-import type { GraphEdge, LayoutNode } from './types.js';
 
 export enum RefreshLevel {
   NONE = 0,
@@ -116,6 +116,10 @@ export class RenderScheduler {
     this.pendingLevel = RefreshLevel.NONE;
     this.pendingChanges = [];
 
+    this.executeRefresh(level, changes);
+  }
+
+  private executeRefresh(level: RefreshLevel, changes: readonly ChangeRecord[]): void {
     if (level === RefreshLevel.NONE) return;
 
     switch (level) {
@@ -172,16 +176,7 @@ export class RenderScheduler {
       }
 
       case RefreshLevel.FULL_PROCESS:
-        this.renderer.updateData({
-          nodes: this.dataModel.getNodes() as unknown as LayoutNode[],
-          edges: this.dataModel.getEdges() as unknown as GraphEdge[],
-          nodeConfig: this.dataModel.nodeConfig,
-          edgeConfig: this.dataModel.edgeConfig,
-          theme: this.dataModel.theme,
-          layoutDirection: this.dataModel.layoutDirection,
-          layoutType: this.dataModel.layoutType,
-          polylineRouter: this.dataModel.polylineRouter,
-        });
+        this.renderer.updateData(createRendererData(this.dataModel));
         this.renderer.draw();
         break;
     }
@@ -199,42 +194,7 @@ export class RenderScheduler {
     this.pendingLevel = RefreshLevel.NONE;
     this.pendingChanges = [];
 
-    if (level === RefreshLevel.NONE) return;
-
-    switch (level) {
-      case RefreshLevel.DRAW_ONLY:
-        this.renderer.draw();
-        break;
-      case RefreshLevel.HIGHLIGHT_DELTA:
-        this.renderer.draw();
-        break;
-      case RefreshLevel.PATCH_STYLE:
-        this.renderer.patchStyles(this.dataModel, new Set(), new Set());
-        this.renderer.draw();
-        break;
-      case RefreshLevel.PATCH_POSITION:
-        this.renderer.patchPositions(this.dataModel, new Set());
-        this.renderer.draw();
-        break;
-      case RefreshLevel.PARTIAL_PROCESS:
-        // In forceFlush, we don't have change details, so do full partial process
-        this.renderer.partialProcess(this.dataModel);
-        this.renderer.draw();
-        break;
-      case RefreshLevel.FULL_PROCESS:
-        this.renderer.updateData({
-          nodes: this.dataModel.getNodes() as unknown as LayoutNode[],
-          edges: this.dataModel.getEdges() as unknown as GraphEdge[],
-          nodeConfig: this.dataModel.nodeConfig,
-          edgeConfig: this.dataModel.edgeConfig,
-          theme: this.dataModel.theme,
-          layoutDirection: this.dataModel.layoutDirection,
-          layoutType: this.dataModel.layoutType,
-          polylineRouter: this.dataModel.polylineRouter,
-        });
-        this.renderer.draw();
-        break;
-    }
+    this.executeRefresh(level, []);
   }
 
   destroy(): void {

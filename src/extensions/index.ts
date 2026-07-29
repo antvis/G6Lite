@@ -14,6 +14,13 @@ import { registerLabelRenderer } from './label.js';
 import { registerNode, type NodeExtensionInput } from './node.js';
 import { extensionFactory, registerExtension } from './registry.js';
 
+export { BaseNode, BreathingNode, registerNode } from './node.js';
+export type {
+  NodeBoundaryAnchorParams,
+  NodeExtension,
+  NodeExtensionInput,
+  NodeOverlayDrawParams,
+} from './node.js';
 export { extensionFactory };
 
 export function register(type: 'node', name: string, extension: NodeExtensionInput): void;

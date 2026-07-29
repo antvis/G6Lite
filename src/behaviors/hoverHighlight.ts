@@ -195,6 +195,7 @@ export function hoverHighlight(
   graph.eventEmitter.on('combo:dragend', unfreeze);
 
   return () => {
+    if (highlightApplied.length > 0 || inactiveApplied.length > 0) clearHighlight();
     graph.eventEmitter.off('edge:pointerover', onEdgeOver);
     graph.eventEmitter.off('edge:pointerleave', onPointerLeave);
     graph.eventEmitter.off('node:pointerover', onNodeOver);

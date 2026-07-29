@@ -37,6 +37,7 @@ export function brushSelect(
   let overlay: HTMLDivElement | null = null;
   let lastSelectTime = 0;
   let pendingSelect = false;
+  let pendingSelectTimer: ReturnType<typeof setTimeout> | null = null;
   let currentMouseX = 0;
   let currentMouseY = 0;
 
@@ -110,8 +111,9 @@ export function brushSelect(
       pendingSelect = false;
     } else if (!pendingSelect) {
       pendingSelect = true;
-      setTimeout(
+      pendingSelectTimer = setTimeout(
         () => {
+          pendingSelectTimer = null;
           if (selecting) {
             selectNodesInRect(startX, startY, currentMouseX, currentMouseY);
             lastSelectTime = performance.now();
@@ -153,6 +155,11 @@ export function brushSelect(
   const onMouseUp = (): void => {
     if (!selecting) return;
     selecting = false;
+    if (pendingSelectTimer !== null) {
+      clearTimeout(pendingSelectTimer);
+      pendingSelectTimer = null;
+      pendingSelect = false;
+    }
 
     if (overlay) {
       overlay.style.display = 'none';
@@ -172,6 +179,12 @@ export function brushSelect(
   window.addEventListener('mouseup', onMouseUp);
 
   return () => {
+    selecting = false;
+    if (pendingSelectTimer !== null) {
+      clearTimeout(pendingSelectTimer);
+      pendingSelectTimer = null;
+    }
+    pendingSelect = false;
     graph.eventEmitter.off('canvas:pointerdown', onPointerDown);
     graph.eventEmitter.off('edge:pointerdown', onPointerDown);
     graph.eventEmitter.off('combo:pointerdown', onPointerDown);

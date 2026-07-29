@@ -34,7 +34,12 @@ export abstract class Program {
   constructor(gl: WebGLRenderingContext) {
     this.gl = gl;
     this.glProgram = createProgram(gl, this.getVertexShader(), this.getFragmentShader());
-    this.buffer = gl.createBuffer()!;
+    const buffer = gl.createBuffer();
+    if (!buffer) {
+      gl.deleteProgram(this.glProgram);
+      throw new Error('Unable to create WebGL buffer');
+    }
+    this.buffer = buffer;
   }
 
   abstract getVertexShader(): string;
@@ -49,14 +54,14 @@ export abstract class Program {
     if (!this.uniforms.has(name)) {
       this.uniforms.set(name, this.gl.getUniformLocation(this.glProgram, name));
     }
-    return this.uniforms.get(name)!;
+    return this.uniforms.get(name) ?? null;
   }
 
   protected attribute(name: string): number {
     if (!this.attributes.has(name)) {
       this.attributes.set(name, this.gl.getAttribLocation(this.glProgram, name));
     }
-    return this.attributes.get(name)!;
+    return this.attributes.get(name) ?? -1;
   }
 
   reallocate(count: number): void {

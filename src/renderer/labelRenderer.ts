@@ -12,7 +12,6 @@ import type {
   EdgeConfig,
   EdgeLabelParams,
   EdgeLabelPlacement,
-  EdgeStyleValue,
   GraphEdge,
   GraphNode,
   LabelLayout,
@@ -20,259 +19,58 @@ import type {
   LabelRenderer,
   LayoutNode,
   NodeConfig,
-  NodeDecorationAnchor,
-  NodeDecorationAttachment,
+  NodeDecorationConfig,
   NodeDecorationPlacement,
   NodeLabelParams,
   NodeStyleConfig,
-  NodeStyleValue,
   ResolvedLabelStyle,
   ThemeTokens,
 } from '../types.js';
 import type { Camera } from './camera.js';
 import { graphToNDC } from './camera.js';
+import {
+  createDecorationGroupLayout,
+  getStackItemX,
+  orderDecorationItems,
+  resolveDecorationPlacement,
+  selectVisibleDecorationItems,
+  type MeasuredDecorationItem,
+} from './decorationLayout.js';
 import { sampleEdgePath, type EdgePath } from './edgePath.js';
 import { LabelGrid } from './labelGrid.js';
+import {
+  getBuiltInNodeBoundaryAnchor,
+  getCustomNodeLabelAnchor,
+  getNodeDecorationAnchor,
+} from './labelGeometry.js';
+import {
+  DEFAULT_FONT_FAMILY,
+  getLabelZoom,
+  isValidLabelLayout,
+  resolveEdgeLabelStyle,
+  resolveEdgeValue,
+  resolveNodeLabelStyle,
+  resolveNodeValue,
+  toLabelScreenPx,
+} from './labelStyle.js';
 import { resolveNodeStyle } from './style.js';
 
-const DEFAULT_FONT_FAMILY =
-  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-
-export function getLabelZoom(zoom: number): number {
-  if (!Number.isFinite(zoom)) return 1;
-  return Math.max(0.25, Math.min(zoom, 2));
-}
-
-export function toLabelScreenPx(value: number, dpr: number, zoom: number): number {
-  return value * dpr * getLabelZoom(zoom / Math.max(dpr, Number.EPSILON));
-}
-
-function resolveNodeValue<T>(val: NodeStyleValue<T> | undefined, node: GraphNode, fallback: T): T {
-  if (val === undefined) return fallback;
-  return typeof val === 'function' ? (val as (n: GraphNode) => T)(node) : val;
-}
-
-function resolveEdgeValue<T>(
-  val: EdgeStyleValue<T> | undefined,
-  source: GraphNode,
-  target: GraphNode,
-  edge: GraphEdge,
-  fallback: T,
-): T {
-  if (val === undefined) return fallback;
-  return typeof val === 'function'
-    ? (val as (s: GraphNode, t: GraphNode, e: GraphEdge) => T)(source, target, edge)
-    : val;
-}
+export {
+  getBuiltInNodeBoundaryAnchor,
+  getCustomNodeLabelAnchor,
+  getNodeDecorationAnchor,
+} from './labelGeometry.js';
+export {
+  getLabelZoom,
+  isValidLabelLayout,
+  resolveEdgeLabelStyle,
+  resolveNodeLabelStyle,
+  toLabelScreenPx,
+} from './labelStyle.js';
 
 function hasState(states: unknown, state: string): boolean {
   if (states instanceof Set) return states.has(state);
   return Array.isArray(states) && states.includes(state);
-}
-
-export function isValidLabelLayout(layout: unknown): layout is LabelLayout {
-  if (!layout || typeof layout !== 'object') return false;
-  const candidate = layout as Partial<LabelLayout>;
-  return (
-    typeof candidate.width === 'number' &&
-    Number.isFinite(candidate.width) &&
-    candidate.width > 0 &&
-    typeof candidate.height === 'number' &&
-    Number.isFinite(candidate.height) &&
-    candidate.height > 0
-  );
-}
-
-export function resolveNodeLabelStyle(
-  style: NodeStyleConfig,
-  node: GraphNode,
-  dpr: number,
-  zoom: number,
-): ResolvedLabelStyle {
-  const scale = dpr * getLabelZoom(zoom);
-  const maxWidth = resolveNodeValue(style.labelMaxWidth, node, 0);
-  return {
-    labelFontSize: resolveNodeValue(style.labelFontSize, node, 12) * scale,
-    labelFontFamily: resolveNodeValue(style.labelFontFamily, node, DEFAULT_FONT_FAMILY),
-    labelFontWeight: resolveNodeValue(style.labelFontWeight, node, 'normal'),
-    labelColor: resolveNodeValue(style.labelColor, node, '#333'),
-    labelPlacement: resolveNodeValue(style.labelPlacement, node, 'bottom' as LabelPlacement),
-    labelOffsetX: resolveNodeValue(style.labelOffsetX, node, 0) * scale,
-    labelOffsetY: resolveNodeValue(style.labelOffsetY, node, 0) * scale,
-    labelBackground: resolveNodeValue(style.labelBackground, node, false as string | false),
-    labelBackgroundPadding: resolveNodeValue(style.labelBackgroundPadding, node, 2) * scale,
-    labelMaxWidth: maxWidth > 0 ? maxWidth * scale : 0,
-    labelAutoRotate: false,
-  };
-}
-
-export function resolveEdgeLabelStyle(
-  style: NonNullable<EdgeConfig['style']>,
-  source: GraphNode,
-  target: GraphNode,
-  edge: GraphEdge,
-  dpr: number,
-): ResolvedLabelStyle {
-  return {
-    labelFontSize: resolveEdgeValue(style.labelFontSize, source, target, edge, 10) * dpr,
-    labelFontFamily: resolveEdgeValue(
-      style.labelFontFamily,
-      source,
-      target,
-      edge,
-      DEFAULT_FONT_FAMILY,
-    ),
-    labelFontWeight: 'normal',
-    labelColor: resolveEdgeValue(style.labelColor, source, target, edge, '#666'),
-    labelPlacement: resolveEdgeValue(
-      style.labelPlacement,
-      source,
-      target,
-      edge,
-      'center' as EdgeLabelPlacement,
-    ),
-    labelOffsetX: 0,
-    labelOffsetY: 0,
-    labelBackground: resolveEdgeValue(
-      style.labelBackground,
-      source,
-      target,
-      edge,
-      'rgba(255,255,255,0.8)' as string | false,
-    ),
-    labelBackgroundPadding:
-      resolveEdgeValue(style.labelBackgroundPadding, source, target, edge, 2) * dpr,
-    labelMaxWidth: 0,
-    labelAutoRotate: resolveEdgeValue(style.labelAutoRotate, source, target, edge, true),
-  };
-}
-
-export function getCustomNodeLabelAnchor(
-  px: number,
-  py: number,
-  nodeWidth: number,
-  nodeHeight: number,
-  layout: LabelLayout,
-  style: ResolvedLabelStyle,
-  horizontalGap: number,
-): { x: number; y: number } {
-  let x = px + style.labelOffsetX;
-  let y = py + style.labelOffsetY;
-  switch (style.labelPlacement) {
-    case 'bottom':
-      y += nodeHeight / 2 + layout.height / 2 + style.labelFontSize * 0.1;
-      break;
-    case 'top':
-      y -= nodeHeight / 2 + layout.height / 2 + style.labelFontSize * 0.1;
-      break;
-    case 'left':
-      x -= nodeWidth / 2 + horizontalGap + layout.width / 2;
-      break;
-    case 'right':
-      x += nodeWidth / 2 + horizontalGap + layout.width / 2;
-      break;
-    case 'center':
-      break;
-  }
-  return { x, y };
-}
-
-export function getNodeDecorationAnchor(
-  px: number,
-  py: number,
-  nodeWidth: number,
-  nodeHeight: number,
-  layout: LabelLayout,
-  placement: LabelPlacement,
-  attachment: NodeDecorationAttachment,
-  anchor: NodeDecorationAnchor,
-  gap: number,
-  crossOffsetRatio = 0,
-  boundaryOverlap = 0,
-  boundaryAnchor?: { x: number; y: number },
-): { x: number; y: number } {
-  let x = px + (boundaryAnchor?.x ?? 0);
-  let y = py + (boundaryAnchor?.y ?? 0);
-  let widthOffset = 0;
-  let heightOffset = 0;
-  if (attachment === 'outside') {
-    widthOffset = layout.width / 2 + gap;
-    heightOffset = layout.height / 2 + gap;
-  } else if (attachment === 'inside') {
-    widthOffset = -layout.width / 2;
-    heightOffset = -layout.height / 2;
-  }
-
-  if (!boundaryAnchor) {
-    if (placement === 'top') y -= nodeHeight / 2 + heightOffset;
-    else if (placement === 'bottom') y += nodeHeight / 2 + heightOffset;
-    else if (placement === 'left') x -= nodeWidth / 2 + widthOffset;
-    else if (placement === 'right') x += nodeWidth / 2 + widthOffset;
-  } else if (attachment === 'outside') {
-    if (placement === 'top') y -= heightOffset;
-    else if (placement === 'bottom') y += heightOffset;
-    else if (placement === 'left') x -= widthOffset;
-    else if (placement === 'right') x += widthOffset;
-  } else if (attachment === 'inside') {
-    if (placement === 'top') y -= heightOffset;
-    else if (placement === 'bottom') y += heightOffset;
-    else if (placement === 'left') x -= widthOffset;
-    else if (placement === 'right') x += widthOffset;
-  }
-
-  if (anchor !== 'center') {
-    const direction = anchor === 'start' ? 1 : -1;
-    if (placement === 'right') x += (layout.width / 2) * direction;
-    else if (placement === 'left') x -= (layout.width / 2) * direction;
-    else if (placement === 'bottom') y += (layout.height / 2) * direction;
-    else if (placement === 'top') y -= (layout.height / 2) * direction;
-  }
-
-  if (anchor === 'start' && boundaryOverlap) {
-    if (placement === 'right') x -= boundaryOverlap;
-    else if (placement === 'left') x += boundaryOverlap;
-    else if (placement === 'bottom') y -= boundaryOverlap;
-    else if (placement === 'top') y += boundaryOverlap;
-  }
-
-  if (!boundaryAnchor) {
-    if (placement === 'left' || placement === 'right') y += nodeHeight * crossOffsetRatio;
-    else if (placement === 'top' || placement === 'bottom') x += nodeWidth * crossOffsetRatio;
-  }
-  return { x, y };
-}
-
-export function getBuiltInNodeBoundaryAnchor(
-  base: 'circle' | 'rect',
-  placement: 'left' | 'right' | 'top' | 'bottom',
-  width: number,
-  height: number,
-  crossOffsetRatio: number,
-  borderRadius = 0,
-): { x: number; y: number } {
-  const rx = width / 2;
-  const ry = height / 2;
-  if (placement === 'left' || placement === 'right') {
-    const y = Math.max(-ry, Math.min(ry, height * crossOffsetRatio));
-    let x = rx;
-    if (base === 'circle' && ry > 0) {
-      x = rx * Math.sqrt(Math.max(0, 1 - (y * y) / (ry * ry)));
-    } else if (base === 'rect' && borderRadius > 0 && Math.abs(y) > ry - borderRadius) {
-      const cornerY = Math.abs(y) - (ry - borderRadius);
-      x = rx - borderRadius + Math.sqrt(Math.max(0, borderRadius ** 2 - cornerY ** 2));
-    }
-    return { x: placement === 'right' ? x : -x, y };
-  }
-
-  const x = Math.max(-rx, Math.min(rx, width * crossOffsetRatio));
-  let y = ry;
-  if (base === 'circle' && rx > 0) {
-    y = ry * Math.sqrt(Math.max(0, 1 - (x * x) / (rx * rx)));
-  } else if (base === 'rect' && borderRadius > 0 && Math.abs(x) > rx - borderRadius) {
-    const cornerX = Math.abs(x) - (rx - borderRadius);
-    y = ry - borderRadius + Math.sqrt(Math.max(0, borderRadius ** 2 - cornerX ** 2));
-  }
-  return { x, y: placement === 'bottom' ? y : -y };
 }
 
 export class LabelLayerRenderer {
@@ -328,13 +126,15 @@ export class LabelLayerRenderer {
     this.canvas.style.width = '100%';
     this.canvas.style.height = '100%';
     this.canvas.style.pointerEvents = 'none';
+    const context = this.canvas.getContext('2d');
+    if (!context) throw new Error('Unable to create the label canvas 2D context');
     // Insert after mainCanvas
     if (mainCanvas.nextSibling) {
       container.insertBefore(this.canvas, mainCanvas.nextSibling);
     } else {
       container.appendChild(this.canvas);
     }
-    this.ctx = this.canvas.getContext('2d')!;
+    this.ctx = context;
     mainCanvas.addEventListener('mousemove', this.onDecorationPointerMove);
     mainCanvas.addEventListener('mouseleave', this.onDecorationPointerLeave);
   }
@@ -570,6 +370,233 @@ export class LabelLayerRenderer {
     }
   }
 
+  private measureDecorationLayout(
+    renderer: DecorationRenderer,
+    params: Parameters<DecorationRenderer['measure']>[0],
+    warningKey: string,
+    warningMessage: string,
+  ): LabelLayout | undefined {
+    params.ctx.save();
+    try {
+      const layout = renderer.measure(params);
+      return isValidLabelLayout(layout) ? layout : undefined;
+    } catch (error) {
+      this.warnOnce(warningKey, warningMessage, error);
+      return undefined;
+    } finally {
+      params.ctx.restore();
+    }
+  }
+
+  private measureDecorationItems(
+    renderer: DecorationRenderer,
+    rendererName: string,
+    ctx: CanvasRenderingContext2D,
+    node: GraphNode,
+    rawItems: unknown[],
+    dpr: number,
+    zoom: number,
+    nodeWidth: number,
+    nodeHeight: number,
+  ): MeasuredDecorationItem[] {
+    const measuredItems: MeasuredDecorationItem[] = [];
+    for (let index = 0; index < rawItems.length; index++) {
+      const data = rawItems[index];
+      const layout = this.measureDecorationLayout(
+        renderer,
+        { ctx, node, data, dpr, zoom, nodeWidth, nodeHeight },
+        `decoration:${rendererName}:measure`,
+        `[G6-GL] Decoration renderer "${rendererName}" threw during measure; skipping it.`,
+      );
+      if (layout) measuredItems.push({ data, layout, index });
+    }
+    return measuredItems;
+  }
+
+  private drawDecorationGroup(
+    renderer: DecorationRenderer,
+    rendererName: string,
+    ctx: CanvasRenderingContext2D,
+    node: GraphNode,
+    isStack: boolean,
+    visibleItems: MeasuredDecorationItem[],
+    layout: LabelLayout,
+    placement: LabelPlacement,
+    x: number,
+    y: number,
+    itemGap: number,
+    dpr: number,
+    zoom: number,
+    nodeWidth: number,
+    nodeHeight: number,
+  ): boolean {
+    const params = {
+      ctx,
+      node,
+      data: visibleItems[0].data,
+      dpr,
+      zoom,
+      nodeWidth,
+      nodeHeight,
+    };
+    ctx.save();
+    try {
+      ctx.translate(x, y);
+      if (isStack) {
+        let itemY = -layout.height / 2;
+        for (const item of visibleItems) {
+          ctx.save();
+          try {
+            ctx.translate(
+              getStackItemX(placement, layout.width, item.layout.width),
+              itemY + item.layout.height / 2,
+            );
+            renderer.draw({ ...params, data: item.data, layout: item.layout });
+          } finally {
+            ctx.restore();
+          }
+          itemY += item.layout.height + itemGap;
+        }
+      } else {
+        renderer.draw({ ...params, layout });
+      }
+      return true;
+    } catch (error) {
+      this.warnOnce(
+        `decoration:${rendererName}:draw`,
+        `[G6-GL] Decoration renderer "${rendererName}" threw during draw; skipping it.`,
+        error,
+      );
+      return false;
+    } finally {
+      ctx.restore();
+    }
+  }
+
+  private registerDecorationHoverRegion(
+    nodeId: string,
+    visibleItems: MeasuredDecorationItem[],
+    expanded: boolean,
+    placement: LabelPlacement,
+    bboxX: number,
+    bboxY: number,
+    layout: LabelLayout,
+    itemGap: number,
+  ): void {
+    if (expanded) {
+      this.decorationHoverRegions.push({
+        nodeId,
+        x: bboxX,
+        y: bboxY,
+        width: layout.width,
+        height: layout.height,
+      });
+      return;
+    }
+    let itemY = bboxY;
+    for (const item of visibleItems) {
+      if (item.isOverflow) {
+        this.decorationHoverRegions.push({
+          nodeId,
+          x: placement === 'left' ? bboxX + layout.width - item.layout.width : bboxX,
+          y: itemY,
+          width: item.layout.width,
+          height: item.layout.height,
+        });
+        return;
+      }
+      itemY += item.layout.height + itemGap;
+    }
+  }
+
+  private resolveDecorationAnchor(
+    node: GraphNode,
+    style: NodeStyleConfig,
+    nodeConfig: NodeConfig,
+    decoration: NodeDecorationConfig,
+    visibleItems: MeasuredDecorationItem[],
+    layout: LabelLayout,
+    px: number,
+    py: number,
+    nodeWidth: number,
+    nodeHeight: number,
+    dpr: number,
+    zoom: number,
+  ): { x: number; y: number; placement: LabelPlacement } {
+    const requestedPlacement = resolveNodeValue(
+      decoration.placement,
+      node,
+      'top' as NodeDecorationPlacement,
+    );
+    const labelPlacement = resolveNodeValue(style.labelPlacement, node, 'bottom' as LabelPlacement);
+    const placement = resolveDecorationPlacement(requestedPlacement, labelPlacement);
+    const crossOffsetRatio = resolveNodeValue(decoration.crossOffsetRatio, node, 0);
+    const borderRadius = resolveNodeValue(style.borderRadius, node, 0) * zoom;
+    const boundaryPlacement =
+      placement === 'left' || placement === 'right' || placement === 'top' || placement === 'bottom'
+        ? placement
+        : undefined;
+    const nodeExtension = getNodeExtension(nodeConfig.type);
+    const getBoundaryAnchor = nodeExtension?.getBoundaryAnchor;
+    const extensionBoundaryAnchor =
+      boundaryPlacement && getBoundaryAnchor
+        ? safeExtensionCall(
+            'node',
+            nodeConfig.type ?? 'unknown',
+            'getBoundaryAnchor',
+            () =>
+              getBoundaryAnchor({
+                node,
+                placement: boundaryPlacement,
+                crossOffsetRatio,
+                width: nodeWidth,
+                height: nodeHeight,
+                borderRadius,
+              }),
+            undefined,
+          )
+        : undefined;
+    const boundaryAnchor = boundaryPlacement
+      ? (extensionBoundaryAnchor ??
+        getBuiltInNodeBoundaryAnchor(
+          getNodeBaseType(nodeConfig),
+          boundaryPlacement,
+          nodeWidth,
+          nodeHeight,
+          crossOffsetRatio,
+          borderRadius,
+        ))
+      : undefined;
+    const boundaryAdjacentItem =
+      placement === 'top' && decoration.layout === 'stack'
+        ? visibleItems[visibleItems.length - 1]
+        : visibleItems[0];
+    const boundaryOverlapValue = resolveNodeValue(decoration.boundaryOverlap, node, 0);
+    const boundaryOverlap =
+      boundaryOverlapValue === 'half-badge'
+        ? boundaryAdjacentItem.layout.height / 2
+        : boundaryOverlapValue * dpr;
+    const anchor = getNodeDecorationAnchor(
+      px,
+      py,
+      nodeWidth,
+      nodeHeight,
+      layout,
+      placement,
+      decoration.attachment ?? 'boundary',
+      decoration.anchor ?? 'center',
+      4 * dpr * getLabelZoom(zoom / Math.max(dpr, Number.EPSILON)),
+      crossOffsetRatio,
+      boundaryOverlap,
+      boundaryAnchor,
+    );
+    return {
+      x: anchor.x + (decoration.offsetX ?? 0) * dpr,
+      y: anchor.y + (decoration.offsetY ?? 0) * dpr,
+      placement,
+    };
+  }
+
   private drawNodeDecorations(
     ctx: CanvasRenderingContext2D,
     node: GraphNode,
@@ -603,178 +630,66 @@ export class LabelLayerRenderer {
           : (decoration.items ?? [])
         : [typeof decoration.data === 'function' ? decoration.data(node) : decoration.data];
       if (!rawItems.length) continue;
-      const measuredItems: Array<{
-        data: unknown;
-        layout: LabelLayout;
-        index: number;
-        isOverflow?: boolean;
-      }> = [];
-      for (let index = 0; index < rawItems.length; index++) {
-        const data = rawItems[index];
-        ctx.save();
-        try {
-          const itemLayout = (renderer as DecorationRenderer).measure({
-            ctx,
-            node,
-            data,
-            dpr,
-            zoom,
-            nodeWidth,
-            nodeHeight,
-          });
-          if (isValidLabelLayout(itemLayout))
-            measuredItems.push({ data, layout: itemLayout, index });
-        } catch (error) {
-          this.warnOnce(
-            `decoration:${decoration.renderer}:measure`,
-            `[G6-GL] Decoration renderer "${decoration.renderer}" threw during measure; skipping it.`,
-            error,
-          );
-        } finally {
-          ctx.restore();
-        }
-      }
+      const measuredItems = this.measureDecorationItems(
+        renderer,
+        decoration.renderer,
+        ctx,
+        node,
+        rawItems,
+        dpr,
+        zoom,
+        nodeWidth,
+        nodeHeight,
+      );
       if (!measuredItems.length) continue;
-      if (decoration.sort === 'width-desc') {
-        measuredItems.sort((a, b) => b.layout.width - a.layout.width || a.index - b.index);
-      }
+      orderDecorationItems(measuredItems, decoration.sort);
 
-      const maxVisible = Math.max(1, decoration.maxVisible ?? measuredItems.length);
       const expanded = decoration.overflow === 'hover-expand' && this.hoveredNodeId === node.id;
-      let visibleItems = measuredItems;
-      if (!expanded && measuredItems.length > maxVisible) {
-        visibleItems = measuredItems.slice(0, Math.max(0, maxVisible - 1));
+      const selection = selectVisibleDecorationItems(
+        measuredItems,
+        decoration.maxVisible,
+        expanded,
+      );
+      const visibleItems = selection.visibleItems;
+      if (selection.hiddenCount > 0) {
         if (decoration.overflowData !== undefined) {
-          const hiddenCount = measuredItems.length - visibleItems.length;
           const overflowData =
             typeof decoration.overflowData === 'function'
-              ? decoration.overflowData(hiddenCount, node)
+              ? decoration.overflowData(selection.hiddenCount, node)
               : decoration.overflowData;
-          ctx.save();
-          try {
-            const overflowLayout = (renderer as DecorationRenderer).measure({
-              ctx,
-              node,
+          const overflowLayout = this.measureDecorationLayout(
+            renderer,
+            { ctx, node, data: overflowData, dpr, zoom, nodeWidth, nodeHeight },
+            `decoration:${decoration.renderer}:overflow-measure`,
+            `[G6-GL] Decoration renderer "${decoration.renderer}" threw while measuring overflow; clipping it.`,
+          );
+          if (overflowLayout) {
+            visibleItems.push({
               data: overflowData,
-              dpr,
-              zoom,
-              nodeWidth,
-              nodeHeight,
+              layout: overflowLayout,
+              index: Number.MAX_VALUE,
+              isOverflow: true,
             });
-            if (isValidLabelLayout(overflowLayout)) {
-              visibleItems.push({
-                data: overflowData,
-                layout: overflowLayout,
-                index: Number.MAX_VALUE,
-                isOverflow: true,
-              });
-            }
-          } catch (error) {
-            this.warnOnce(
-              `decoration:${decoration.renderer}:overflow-measure`,
-              `[G6-GL] Decoration renderer "${decoration.renderer}" threw while measuring overflow; clipping it.`,
-              error,
-            );
-          } finally {
-            ctx.restore();
           }
         }
       }
 
       const itemGap = (decoration.itemGap ?? 2) * dpr;
-      const layout: LabelLayout = isStack
-        ? {
-            width: Math.max(...visibleItems.map((item) => item.layout.width)),
-            height:
-              visibleItems.reduce((sum, item) => sum + item.layout.height, 0) +
-              itemGap * Math.max(0, visibleItems.length - 1),
-          }
-        : visibleItems[0].layout;
-      const data = visibleItems[0].data;
-      const params = { ctx, node, data, dpr, zoom, nodeWidth, nodeHeight };
-
-      const requestedPlacement = resolveNodeValue(
-        decoration.placement,
+      const layout = createDecorationGroupLayout(visibleItems, isStack, itemGap);
+      const { x, y, placement } = this.resolveDecorationAnchor(
         node,
-        'top' as NodeDecorationPlacement,
-      );
-      const labelPlacement = resolveNodeValue(
-        style.labelPlacement,
-        node,
-        'bottom' as LabelPlacement,
-      );
-      const placement: LabelPlacement =
-        requestedPlacement === 'follow-label'
-          ? labelPlacement === 'left'
-            ? 'left'
-            : 'right'
-          : requestedPlacement;
-      const attachment = decoration.attachment ?? 'boundary';
-      const anchor = decoration.anchor ?? 'center';
-      const gap = 4 * dpr * getLabelZoom(zoom / Math.max(dpr, Number.EPSILON));
-      const borderRadius = resolveNodeValue(style.borderRadius, node, 0) * zoom;
-      const crossOffsetRatio = resolveNodeValue(decoration.crossOffsetRatio, node, 0);
-      const boundaryOverlapValue = resolveNodeValue(decoration.boundaryOverlap, node, 0);
-      const boundaryAdjacentItem =
-        placement === 'top' && isStack ? visibleItems[visibleItems.length - 1] : visibleItems[0];
-      const boundaryOverlap =
-        boundaryOverlapValue === 'half-badge'
-          ? boundaryAdjacentItem.layout.height / 2
-          : boundaryOverlapValue * dpr;
-      const nodeExtension = getNodeExtension(nodeConfig.type);
-      const boundaryPlacement =
-        placement === 'left' ||
-        placement === 'right' ||
-        placement === 'top' ||
-        placement === 'bottom'
-          ? placement
-          : undefined;
-      const getBoundaryAnchor = nodeExtension?.getBoundaryAnchor;
-      const extensionBoundaryAnchor =
-        boundaryPlacement && getBoundaryAnchor
-          ? safeExtensionCall(
-              'node',
-              nodeConfig.type ?? 'unknown',
-              'getBoundaryAnchor',
-              () =>
-                getBoundaryAnchor({
-                  node,
-                  placement: boundaryPlacement,
-                  crossOffsetRatio,
-                  width: nodeWidth,
-                  height: nodeHeight,
-                  borderRadius,
-                }),
-              undefined,
-            )
-          : undefined;
-      const boundaryAnchor = boundaryPlacement
-        ? (extensionBoundaryAnchor ??
-          getBuiltInNodeBoundaryAnchor(
-            getNodeBaseType(nodeConfig),
-            boundaryPlacement,
-            nodeWidth,
-            nodeHeight,
-            crossOffsetRatio,
-            borderRadius,
-          ))
-        : undefined;
-      let { x, y } = getNodeDecorationAnchor(
+        style,
+        nodeConfig,
+        decoration,
+        visibleItems,
+        layout,
         px,
         py,
         nodeWidth,
         nodeHeight,
-        layout,
-        placement,
-        attachment,
-        anchor,
-        gap,
-        crossOffsetRatio,
-        boundaryOverlap,
-        boundaryAnchor,
+        dpr,
+        zoom,
       );
-      x += (decoration.offsetX ?? 0) * dpr;
-      y += (decoration.offsetY ?? 0) * dpr;
 
       const bboxX = x - layout.width / 2;
       const bboxY = y - layout.height / 2;
@@ -782,67 +697,36 @@ export class LabelLayerRenderer {
         continue;
       if (this.decorationGrid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) continue;
 
-      let drawn = false;
-      ctx.save();
-      try {
-        ctx.translate(x, y);
-        if (isStack) {
-          let itemY = -layout.height / 2;
-          for (const item of visibleItems) {
-            ctx.save();
-            const itemX =
-              placement === 'left'
-                ? layout.width / 2 - item.layout.width / 2
-                : -layout.width / 2 + item.layout.width / 2;
-            ctx.translate(itemX, itemY + item.layout.height / 2);
-            (renderer as DecorationRenderer).draw({
-              ...params,
-              data: item.data,
-              layout: item.layout,
-            });
-            ctx.restore();
-            itemY += item.layout.height + itemGap;
-          }
-        } else {
-          (renderer as DecorationRenderer).draw({ ...params, layout });
-        }
-        drawn = true;
-      } catch (error) {
-        this.warnOnce(
-          `decoration:${decoration.renderer}:draw`,
-          `[G6-GL] Decoration renderer "${decoration.renderer}" threw during draw; skipping it.`,
-          error,
-        );
-      } finally {
-        ctx.restore();
-      }
+      const drawn = this.drawDecorationGroup(
+        renderer,
+        decoration.renderer,
+        ctx,
+        node,
+        isStack,
+        visibleItems,
+        layout,
+        placement,
+        x,
+        y,
+        itemGap,
+        dpr,
+        zoom,
+        nodeWidth,
+        nodeHeight,
+      );
       if (drawn) {
         drawnBounds.push({ x: bboxX, y: bboxY, width: layout.width, height: layout.height });
         if (isStack && decoration.overflow === 'hover-expand') {
-          if (expanded) {
-            this.decorationHoverRegions.push({
-              nodeId: node.id,
-              x: bboxX,
-              y: bboxY,
-              width: layout.width,
-              height: layout.height,
-            });
-          } else {
-            let itemY = bboxY;
-            for (const item of visibleItems) {
-              if (item.isOverflow) {
-                this.decorationHoverRegions.push({
-                  nodeId: node.id,
-                  x: placement === 'left' ? bboxX + layout.width - item.layout.width : bboxX,
-                  y: itemY,
-                  width: item.layout.width,
-                  height: item.layout.height,
-                });
-                break;
-              }
-              itemY += item.layout.height + itemGap;
-            }
-          }
+          this.registerDecorationHoverRegion(
+            node.id,
+            visibleItems,
+            expanded,
+            placement,
+            bboxX,
+            bboxY,
+            layout,
+            itemGap,
+          );
         }
       }
     }
@@ -1158,9 +1042,8 @@ export class LabelLayerRenderer {
       if (placement === 'start') t = 0.2;
       else if (placement === 'end') t = 0.8;
 
-      const pathSample = edgePathCache?.get(i)
-        ? sampleEdgePath(edgePathCache.get(i)!, t)
-        : undefined;
+      const edgePath = edgePathCache?.get(i);
+      const pathSample = edgePath ? sampleEdgePath(edgePath, t) : undefined;
       const midX = pathSample?.point.x ?? srcNode.x + (tgtNode.x - srcNode.x) * t;
       const midY = pathSample?.point.y ?? srcNode.y + (tgtNode.y - srcNode.y) * t;
 

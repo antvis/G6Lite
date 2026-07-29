@@ -168,6 +168,8 @@ export function lassoSelect(
   window.addEventListener('mouseup', onMouseUp);
 
   return () => {
+    selecting = false;
+    path = [];
     graph.eventEmitter.off('canvas:pointerdown', onPointerDown);
     graph.eventEmitter.off('edge:pointerdown', onPointerDown);
     graph.eventEmitter.off('combo:pointerdown', onPointerDown);

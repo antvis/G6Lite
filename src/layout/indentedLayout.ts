@@ -42,8 +42,12 @@ export function executeIndentedLayout(
   const nodeIds = new Set(nodes.map((node) => node.id));
   for (const edge of edges) {
     if (!nodeIds.has(edge.source) || !nodeIds.has(edge.target)) continue;
-    if (!children.has(edge.source)) children.set(edge.source, []);
-    children.get(edge.source)!.push(edge.target);
+    let childIds = children.get(edge.source);
+    if (!childIds) {
+      childIds = [];
+      children.set(edge.source, childIds);
+    }
+    childIds.push(edge.target);
     hasParent.add(edge.target);
   }
 
@@ -56,7 +60,8 @@ export function executeIndentedLayout(
   let rowIndex = 0;
 
   while (stack.length > 0) {
-    const current = stack.pop()!;
+    const current = stack.pop();
+    if (!current) break;
     if (!nodeIds.has(current.id) || visited.has(current.id)) continue;
     visited.add(current.id);
 

@@ -79,93 +79,6 @@ G6-GL is a lightweight WebGL graph visualization engine for large relationship d
 Use G6-GL when WebGL rendering, incremental state updates, AntV layouts, and a controlled extension boundary match your product. If you need the complete G6 plugin and animation ecosystem, evaluate G6 v5 first.
 
 
-# API reference (/en/docs/api)
-
-
-
-All supported imports come from `@antv/g6-gl`.
-
-```ts
-import { Graph, extensionFactory, register, runLayout } from '@antv/g6-gl';
-import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-gl';
-```
-
-## Main runtime APIs [#main-runtime-apis]
-
-* `Graph`: create, render, update, query, relayout, control the viewport, and destroy a graph.
-* `runLayout()`: run a supported layout independently.
-* `register()`: register node, edge, label, behavior, layout, transform, decoration, or plugin extensions.
-* `extensionFactory()`: provide isolated stateful extension instances.
-
-## Type groups [#type-groups]
-
-Package-root types cover graph options and data, nodes, edges, combos, labels, states, themes, layouts, viewport operations, behaviors, transforms, plugins, and extension context.
-
-The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).
-
-
-# API stability and release boundary (/en/docs/compatibility/api-stability)
-
-
-
-G6-GL remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
-
-Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
-
-Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
-
-Combo collapse, nesting, and runtime regrouping remain experimental. Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.
-
-
-# Browsers and runtime environment (/en/docs/compatibility/browser)
-
-
-
-G6-GL requires WebGL 1.0 and a modern browser capable of running the ESM/ES2020 package. Canvas 2D is used for labels and combo outlines. WebGL 2.0 is not required.
-
-Recommended minimums for the untranspiled package are Chrome/Edge 80+, Firefox 74+, Safari 13.1+, and iOS Safari 13.4+. These are syntax and platform capability boundaries, not a complete certified device matrix.
-
-G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
-
-Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
-
-
-# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
-
-
-
-G6-GL borrows G6 configuration concepts but is not a complete replacement for G6 v5. Migration is most suitable when large-graph interaction and state updates are the primary bottleneck and the product uses core node, edge, layout, and behavior capabilities.
-
-Do not migrate blindly when the project depends on the complete plugin ecosystem, animation system, complex Canvas element customization, or built-in graph analysis.
-
-Suggested process:
-
-1. Reproduce one real workflow in the deployed Playground.
-2. Normalize data to nodes, edges, and optional combos.
-3. Map styles and states through package-root Graph options.
-4. Replace G6 behavior names with supported G6-GL behaviors.
-5. Verify layouts, events, incremental updates, compatibility, and performance on target devices.
-
-Keep the original implementation until the real-data acceptance suite passes.
-
-
-# Compatibility overview (/en/docs/compatibility)
-
-
-
-Review these boundaries before adopting or upgrading G6-GL:
-
-<Cards>
-  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
-
-  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
-
-  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
-</Cards>
-
-G6-GL needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.
-
-
 # Data model (/en/docs/concepts/data-model)
 
 
@@ -1219,3 +1132,90 @@ npm run benchmark -- --suite all --mode quick
 Reports are written to `performance/` as JSON and Markdown. Raw local reports are not committed by default. Public comparisons must record the G6-GL version and Git state, Node and Chromium versions, operating system, CPU, user agent, viewport, DPR, data scale, layout configuration, sample count, RME, and warnings.
 
 Quick results are smoke evidence, not marketing baselines. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
+
+
+# API stability and release boundary (/en/docs/compatibility/api-stability)
+
+
+
+G6-GL remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
+
+Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
+
+Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
+
+Combo collapse, nesting, and runtime regrouping remain experimental. Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.
+
+
+# Browsers and runtime environment (/en/docs/compatibility/browser)
+
+
+
+G6-GL requires WebGL 1.0 and a modern browser capable of running the ESM/ES2020 package. Canvas 2D is used for labels and combo outlines. WebGL 2.0 is not required.
+
+Recommended minimums for the untranspiled package are Chrome/Edge 80+, Firefox 74+, Safari 13.1+, and iOS Safari 13.4+. These are syntax and platform capability boundaries, not a complete certified device matrix.
+
+G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
+
+Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
+
+
+# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
+
+
+
+G6-GL borrows G6 configuration concepts but is not a complete replacement for G6 v5. Migration is most suitable when large-graph interaction and state updates are the primary bottleneck and the product uses core node, edge, layout, and behavior capabilities.
+
+Do not migrate blindly when the project depends on the complete plugin ecosystem, animation system, complex Canvas element customization, or built-in graph analysis.
+
+Suggested process:
+
+1. Reproduce one real workflow in the deployed Playground.
+2. Normalize data to nodes, edges, and optional combos.
+3. Map styles and states through package-root Graph options.
+4. Replace G6 behavior names with supported G6-GL behaviors.
+5. Verify layouts, events, incremental updates, compatibility, and performance on target devices.
+
+Keep the original implementation until the real-data acceptance suite passes.
+
+
+# Compatibility overview (/en/docs/compatibility)
+
+
+
+Review these boundaries before adopting or upgrading G6-GL:
+
+<Cards>
+  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
+
+  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
+
+  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
+</Cards>
+
+G6-GL needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.
+
+
+# API reference (/en/docs/api)
+
+
+
+All supported imports come from `@antv/g6-gl`.
+
+```ts
+import { Graph, extensionFactory, register, runLayout } from '@antv/g6-gl';
+import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-gl';
+```
+
+## Main runtime APIs [#main-runtime-apis]
+
+* `Graph`: create, render, update, query, relayout, control the viewport, and destroy a graph.
+* `runLayout()`: run a supported layout independently.
+* `register()`: register node, edge, label, behavior, layout, transform, decoration, or plugin extensions.
+* `extensionFactory()`: provide isolated stateful extension instances.
+
+## Type groups [#type-groups]
+
+Package-root types cover graph options and data, nodes, edges, combos, labels, states, themes, layouts, viewport operations, behaviors, transforms, plugins, and extension context.
+
+The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).

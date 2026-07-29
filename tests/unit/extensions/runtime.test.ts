@@ -3,7 +3,6 @@ import { registerBehaviors } from '@src/behaviors/index.js';
 import { EventEmitter } from '@src/events.js';
 import type {
   BehaviorExtension,
-  Extension,
   ExtensionContext,
   TransformExtension,
 } from '@src/extensions/contracts.js';
@@ -91,18 +90,18 @@ describe('runtime extension registry', () => {
     expect(second?.increment()).toBe(1);
   });
 
-  it('runs init, update, and destroy through the common lifecycle helpers', () => {
+  it('runs init, update, and destroy for transform extensions', () => {
     const calls: Array<string | number> = [];
-    const extension: Extension<{ value: number }> = {
+    const extension: TransformExtension<{ value: number }> = {
       init: (_context, options) => calls.push('init', options.value),
       update: (options) => calls.push('update', options.value ?? -1),
       destroy: () => calls.push('destroy'),
     };
     const context = {} as ExtensionContext;
 
-    initializeExtension('plugin', 'lifecycle-test', extension, context, { value: 1 });
-    updateExtension('plugin', 'lifecycle-test', extension, { value: 2 });
-    destroyExtension('plugin', 'lifecycle-test', extension);
+    initializeExtension('transform', 'lifecycle-test', extension, context, { value: 1 });
+    updateExtension('transform', 'lifecycle-test', extension, { value: 2 });
+    destroyExtension('transform', 'lifecycle-test', extension);
 
     expect(calls).toEqual(['init', 1, 'update', 2, 'destroy']);
   });
@@ -530,6 +529,76 @@ describe('runtime extension registry', () => {
     eventEmitter.emit('node:click', { targetId: 'a' });
     expect(handler).toHaveBeenCalledTimes(1);
     expect(destroy).toHaveBeenCalledTimes(1);
+  });
+
+  it('normalizes a string behavior reference before init', () => {
+    const init = vi.fn();
+    register('behavior', 'string-config-behavior', {
+      init,
+      getEvents: () => ({}),
+    });
+    const eventEmitter = new EventEmitter();
+    const graph = {
+      eventEmitter,
+      on: eventEmitter.on.bind(eventEmitter),
+      off: eventEmitter.off.bind(eventEmitter),
+      scheduleRender: vi.fn(),
+      screenToGraph: vi.fn(() => ({ x: 0, y: 0 })),
+      graphToScreen: vi.fn(() => ({ x: 0, y: 0 })),
+      getZoom: vi.fn(() => 1),
+      isDestroyed: vi.fn(() => false),
+    };
+
+    const teardown = registerBehaviors({} as never, ['string-config-behavior'], graph as never);
+
+    expect(init).toHaveBeenCalledTimes(1);
+    expect(init.mock.calls[0][1]).toEqual({ type: 'string-config-behavior' });
+    teardown();
+  });
+
+  it('isolates behavior handler errors with extension and event diagnostics', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const healthyHandler = vi.fn();
+    const failure = new Error('handler failed');
+    register('behavior', 'failing-event-behavior', {
+      getEvents: () => ({
+        'node:click': () => {
+          throw failure;
+        },
+      }),
+    });
+    register('behavior', 'healthy-event-behavior', {
+      getEvents: () => ({ 'node:click': healthyHandler }),
+    });
+    const eventEmitter = new EventEmitter();
+    const graph = {
+      eventEmitter,
+      on: eventEmitter.on.bind(eventEmitter),
+      off: eventEmitter.off.bind(eventEmitter),
+      scheduleRender: vi.fn(),
+      screenToGraph: vi.fn(() => ({ x: 0, y: 0 })),
+      graphToScreen: vi.fn(() => ({ x: 0, y: 0 })),
+      getZoom: vi.fn(() => 1),
+      isDestroyed: vi.fn(() => false),
+    };
+
+    const teardown = registerBehaviors(
+      {} as never,
+      ['failing-event-behavior', 'healthy-event-behavior'],
+      graph as never,
+    );
+    eventEmitter.emit('node:click', { targetId: 'a' });
+
+    expect(healthyHandler).toHaveBeenCalledTimes(1);
+    expect(consoleError).toHaveBeenCalledWith(
+      '[G6-GL] behavior extension "failing-event-behavior" failed during event:node:click',
+      failure,
+    );
+
+    teardown();
+    eventEmitter.emit('node:click', { targetId: 'a' });
+    expect(healthyHandler).toHaveBeenCalledTimes(1);
+    consoleError.mockRestore();
   });
 
   it('lets a registered behavior explicitly override a built-in name', () => {

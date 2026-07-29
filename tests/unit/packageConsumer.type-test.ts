@@ -2,10 +2,17 @@ import {
   extensionFactory,
   Graph,
   register,
+  type BehaviorExtension,
+  type BehaviorOptions,
   type ComboModel,
   type EdgeModel,
+  type ElementState,
+  type ExtensionContext,
+  type GraphEventMap,
   type GraphOptions,
   type NodeModel,
+  type PluginExtension,
+  type PluginOptions,
 } from '@antv/g6-gl';
 
 declare const options: GraphOptions;
@@ -46,8 +53,89 @@ register(
   })),
 );
 
+const PACKAGE_BEHAVIOR = 'package-typed-behavior' as const;
+
+interface PackageBehaviorOptions extends BehaviorOptions<typeof PACKAGE_BEHAVIOR> {
+  state?: ElementState;
+}
+
+interface PackageBehaviorEventMap {
+  'business:reset': [payload: { source: 'toolbar' | 'shortcut' }];
+}
+
+function createPackageBehavior(): BehaviorExtension<
+  PackageBehaviorOptions,
+  GraphEventMap & PackageBehaviorEventMap
+> {
+  let context: ExtensionContext | undefined;
+  let state: ElementState = 'selected';
+  return {
+    init(nextContext, behaviorOptions) {
+      context = nextContext;
+      state = behaviorOptions.state ?? 'selected';
+    },
+    getEvents() {
+      return {
+        'node:click': ({ nodeId }) => context?.state.set(nodeId, [state]),
+        'business:reset': () => {
+          if (!context) return;
+          context.state.setAll(Object.fromEntries(context.data.getNodeIds().map((id) => [id, []])));
+        },
+      };
+    },
+    destroy() {
+      context = undefined;
+    },
+  };
+}
+
+register('behavior', PACKAGE_BEHAVIOR, extensionFactory(createPackageBehavior));
+
+const PACKAGE_PLUGIN = 'package-typed-plugin' as const;
+
+interface PackagePluginOptions extends PluginOptions<typeof PACKAGE_PLUGIN> {
+  label?: string;
+}
+
+function createPackagePlugin(): PluginExtension<PackagePluginOptions> {
+  let element: HTMLElement | undefined;
+  let label = '';
+  return {
+    init(_context, pluginOptions) {
+      label = pluginOptions.label ?? '';
+    },
+    mount(container) {
+      element = document.createElement('div');
+      element.textContent = label;
+      container.appendChild(element);
+    },
+    destroy() {
+      element?.remove();
+      element = undefined;
+    },
+  };
+}
+
+register('plugin', PACKAGE_PLUGIN, extensionFactory(createPackagePlugin));
+
+const typedOptions: GraphOptions = {
+  container: 'container',
+  data: { nodes: [], edges: [] },
+  behaviors: [{ type: PACKAGE_BEHAVIOR, state: 'active' } satisfies PackageBehaviorOptions],
+  plugins: [{ type: PACKAGE_PLUGIN, label: 'Package plugin' } satisfies PackagePluginOptions],
+};
+
+graph.on('node:click', ({ nodeId, nativeEvent }) => {
+  const id: string = nodeId;
+  const event: MouseEvent = nativeEvent;
+  void id;
+  void event;
+});
+graph.once('destroy', () => undefined);
+
 void GraphConstructor;
 void options;
 void node;
 void edge;
 void combo;
+void typedOptions;

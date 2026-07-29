@@ -18,6 +18,7 @@ export {
   registerNode,
 } from './extensions/index';
 export type {
+  BehaviorEventHandlers,
   BehaviorExtension,
   DecorationDrawParams,
   DecorationMeasureParams,
@@ -34,6 +35,7 @@ export type {
   ExtensionNodeData,
   ExtensionStateContext,
   ExtensionViewportContext,
+  EventArguments,
   LayoutExtension,
   NodeBoundaryAnchorParams,
   NodeExtension,
@@ -50,10 +52,14 @@ export { resolveTheme } from './theme';
 // ──── Configuration & data types ────
 export type { Camera } from './renderer/index';
 export type {
+  BehaviorConfig,
   BehaviorOption,
+  BehaviorOptions,
   BuiltInElementState,
+  CanvasGraphEvent,
   ComboConfig,
   ComboData,
+  ComboGraphEvent,
   ComboModel,
   ComboStateStyleOverride,
   ComboStyleConfig,
@@ -61,6 +67,7 @@ export type {
   EdgeConfig,
   EdgeData,
   EdgeDataUpdate,
+  EdgeGraphEvent,
   EdgeLabelParams,
   EdgeLabelPlacement,
   EdgeModel,
@@ -73,6 +80,7 @@ export type {
   GraphData,
   GraphEdge,
   GraphElementEvent,
+  GraphEventMap,
   GraphNode,
   GraphOptions,
   GraphPoint,
@@ -94,6 +102,7 @@ export type {
   NodeDecorationPlacement,
   NodeLabelParams,
   NodeModel,
+  NodeGraphEvent,
   NodePositionUpdate,
   NodeState,
   NodeStateStyleOverride,
@@ -101,6 +110,7 @@ export type {
   NodeStyleValue,
   ParallelEdgesConfig,
   PluginOption,
+  PluginOptions,
   ResolvedLabelStyle,
   SetDataOptions,
   ThemeOption,
@@ -112,8 +122,11 @@ export type {
 
 // ──── Behavior config types ────
 export type {
-  BehaviorConfig,
   BehaviorName,
+  BrushSelectOptions,
+  BuiltInBehaviorConfig,
+  BuiltInBehaviorOptionsMap,
+  ClickSelectConfig,
   DragCanvasOptions,
   HoverHighlightConfig,
   LassoSelectOptions,

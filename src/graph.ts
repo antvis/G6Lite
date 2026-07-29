@@ -37,6 +37,7 @@ import type {
   ElementState,
   FitViewOptions,
   GraphData,
+  GraphEventMap,
   GraphOptions,
   InternalCombo,
   LayoutConfig,
@@ -1053,18 +1054,24 @@ export class Graph {
   // ──── Events ────
 
   /** Subscribe to an event. */
-  on<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
+  on<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void;
+  on<Args extends unknown[]>(event: string, handler: Handler<Args>): void;
+  on(event: string, handler: Handler<never[]>): void {
     if (this._destroyed) return;
     this.eventEmitter.on(event, handler);
   }
 
   /** Unsubscribe from an event. */
-  off<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
+  off<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void;
+  off<Args extends unknown[]>(event: string, handler: Handler<Args>): void;
+  off(event: string, handler: Handler<never[]>): void {
     this.eventEmitter.off(event, handler);
   }
 
   /** Subscribe to an event once. */
-  once<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
+  once<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void;
+  once<Args extends unknown[]>(event: string, handler: Handler<Args>): void;
+  once(event: string, handler: Handler<never[]>): void {
     if (this._destroyed) return;
     this.eventEmitter.once(event, handler);
   }

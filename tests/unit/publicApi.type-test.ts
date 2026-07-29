@@ -1,4 +1,11 @@
 import type {
+  BehaviorExtension,
+  BehaviorName,
+  BehaviorOptions,
+  BrushSelectOptions,
+  BuiltInBehaviorOptionsMap,
+  CanvasGraphEvent,
+  ClickSelectConfig,
   ComboModel,
   ComboStyleValue,
   EdgeModel,
@@ -9,8 +16,12 @@ import type {
   ExtensionEdgeData,
   ExtensionNodeData,
   Graph,
+  GraphEventMap,
   Handler,
   NodeModel,
+  NodeGraphEvent,
+  PluginExtension,
+  TransformExtension,
 } from '@antv/g6-gl';
 
 type Equal<Left, Right> =
@@ -34,6 +45,32 @@ type ExtensionEdgeGetter = Assert<
 type EventPayload = { id: string; selected: boolean };
 type EventPayloadHandler = Handler<[payload: EventPayload]>;
 type EventHandlerParameters = Assert<Equal<Parameters<EventPayloadHandler>, [EventPayload]>>;
+type NodeClickEvent = Assert<
+  Equal<GraphEventMap['node:click'][0], NodeGraphEvent<Record<string, unknown>, MouseEvent>>
+>;
+type CanvasWheelEvent = Assert<
+  Equal<GraphEventMap['canvas:wheel'][0], CanvasGraphEvent<WheelEvent>>
+>;
+type DestroyEventArguments = Assert<Equal<GraphEventMap['destroy'], []>>;
+type BuiltInBehaviorNames = Assert<Equal<keyof BuiltInBehaviorOptionsMap, BehaviorName>>;
+type DragCanvasModifierOption = Assert<
+  Equal<BuiltInBehaviorOptionsMap['drag-canvas']['ignoreModifierKeys'], boolean | undefined>
+>;
+type BrushSelectMapType = Assert<
+  Equal<BuiltInBehaviorOptionsMap['brush-select']['key'], BrushSelectOptions['key']>
+>;
+type ClickSelectMapType = Assert<
+  Equal<BuiltInBehaviorOptionsMap['click-select']['multiple'], ClickSelectConfig['multiple']>
+>;
+type BehaviorHasNoUpdate = Assert<
+  Equal<'update' extends keyof BehaviorExtension ? true : false, false>
+>;
+type PluginHasNoUpdate = Assert<
+  Equal<'update' extends keyof PluginExtension ? true : false, false>
+>;
+type TransformHasUpdate = Assert<
+  Equal<'update' extends keyof TransformExtension ? true : false, true>
+>;
 
 declare const emitter: EventEmitter;
 const eventPayloadHandler: EventPayloadHandler = (payload) => {
@@ -50,6 +87,45 @@ emitter.emit('destroy');
 eventPayloadHandler({ id: 'node' });
 
 declare const graph: Graph;
+graph.on('node:click', (event) => {
+  const nodeId: string = event.nodeId;
+  const nativeEvent: MouseEvent = event.nativeEvent;
+  void nodeId;
+  void nativeEvent;
+});
+graph.on('canvas:wheel', (event) => {
+  const nativeEvent: WheelEvent = event.nativeEvent;
+  void nativeEvent;
+});
+graph.once('destroy', () => undefined);
+graph.on('business:custom', (payload: { id: string }) => {
+  const id: string = payload.id;
+  void id;
+});
+
+interface TypeTestBehaviorOptions extends BehaviorOptions<'type-test-behavior'> {
+  state?: ElementState;
+}
+
+const typeTestBehavior: BehaviorExtension<TypeTestBehaviorOptions> = {
+  init(_context, options) {
+    const type: 'type-test-behavior' = options.type;
+    void type;
+    // @ts-expect-error Extension options are read-only lifecycle inputs.
+    options.state = 'active';
+  },
+  getEvents() {
+    return {
+      'node:click': (event) => {
+        const nodeId: string = event.nodeId;
+        void nodeId;
+      },
+      destroy: () => undefined,
+    };
+  },
+};
+void typeTestBehavior;
+
 const node = graph.getNodeData('node');
 if (node) {
   const states: ReadonlySet<ElementState> = node.states;
@@ -95,6 +171,16 @@ export type PublicApiTypeAssertions =
   | ExtensionNodeGetter
   | ExtensionEdgeGetter
   | EventHandlerParameters
+  | NodeClickEvent
+  | CanvasWheelEvent
+  | DestroyEventArguments
+  | BuiltInBehaviorNames
+  | DragCanvasModifierOption
+  | BrushSelectMapType
+  | ClickSelectMapType
+  | BehaviorHasNoUpdate
+  | PluginHasNoUpdate
+  | TransformHasUpdate
   | InternalNodeExport
   | InternalEdgeExport
   | InternalComboExport;

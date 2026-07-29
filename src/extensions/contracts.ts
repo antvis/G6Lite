@@ -1,4 +1,4 @@
-import type { Graph } from '../graph.js';
+import type { Graph } from '../graph';
 import type {
   EdgeConfig,
   EdgeStateStyleOverride,
@@ -8,7 +8,7 @@ import type {
   GraphElementEvent,
   GraphNode,
   LabelLayout,
-} from '../types.js';
+} from '../types';
 
 export type ExtensionCategory =
   'node' | 'edge' | 'label' | 'decoration' | 'layout' | 'behavior' | 'transform' | 'plugin';

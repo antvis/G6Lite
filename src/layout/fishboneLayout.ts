@@ -10,7 +10,7 @@
  *   - Items staircase away from the category in the same direction
  */
 
-import type { GraphData, GraphNode } from '../types.js';
+import type { GraphData, GraphNode } from '../types';
 
 export interface FishboneLayoutOptions {
   direction?: 'LR' | 'RL';
@@ -62,8 +62,12 @@ export function executeFishboneLayout(
 
   for (const edge of data.edges) {
     if (!nodeMap.has(edge.source) || !nodeMap.has(edge.target)) continue;
-    if (!childrenMap.has(edge.source)) childrenMap.set(edge.source, []);
-    childrenMap.get(edge.source)!.push(edge.target);
+    let childIds = childrenMap.get(edge.source);
+    if (!childIds) {
+      childIds = [];
+      childrenMap.set(edge.source, childIds);
+    }
+    childIds.push(edge.target);
     hasParent.add(edge.target);
   }
 
@@ -129,7 +133,8 @@ export function executeFishboneLayout(
       const totalWidth = leftMargin + spineLength + root.width;
       const pending = [root];
       while (pending.length > 0) {
-        const node = pending.pop()!;
+        const node = pending.pop();
+        if (!node) break;
         node.x = totalWidth - node.x;
         pending.push(...node.children);
       }

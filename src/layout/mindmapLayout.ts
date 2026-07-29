@@ -3,7 +3,7 @@
  * Reference: G6 mindmap layout
  */
 
-import type { GraphData, GraphNode } from '../types.js';
+import type { GraphData, GraphNode } from '../types';
 
 export interface MindmapLayoutOptions {
   direction?: 'H' | 'LR' | 'RL';

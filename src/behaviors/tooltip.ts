@@ -17,8 +17,8 @@
  *   behaviors: [{ type: 'tooltip', trigger: 'click', getContent: (ctx) => ... }]
  */
 
-import type { Graph } from '../graph.js';
-import type { Renderer } from '../renderer/renderer.js';
+import type { Graph } from '../graph';
+import type { Renderer } from '../renderer/renderer';
 
 export interface TooltipContext {
   itemType: 'node' | 'edge';

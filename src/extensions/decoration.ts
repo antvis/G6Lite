@@ -1,6 +1,6 @@
-import { builtinBadgeRenderer } from './builtinBadge.js';
-import type { DecorationRenderer, ExtensionInput } from './contracts.js';
-import { createExtension, registerExtension } from './registry.js';
+import { builtinBadgeRenderer } from './builtinBadge';
+import type { DecorationRenderer, ExtensionInput } from './contracts';
+import { createExtension, registerExtension } from './registry';
 
 const DECORATION_CACHE = new Map<string, DecorationRenderer>();
 

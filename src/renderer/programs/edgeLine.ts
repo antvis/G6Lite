@@ -7,11 +7,11 @@
  * Stride: 16 floats per vertex, 2 vertices per edge.
  */
 
-import { encodeId } from '../picking.js';
-import type { AttributeLayout, RenderParams } from './program.js';
-import { Program } from './program.js';
-import { fragmentShader } from './shaders/edgeLine.frag.js';
-import { vertexShader } from './shaders/edgeLine.vert.js';
+import { encodeId } from '../picking';
+import type { AttributeLayout, RenderParams } from './program';
+import { Program } from './program';
+import { fragmentShader } from './shaders/edgeLine.frag';
+import { vertexShader } from './shaders/edgeLine.vert';
 
 const FLOATS_PER_VERTEX = 16;
 

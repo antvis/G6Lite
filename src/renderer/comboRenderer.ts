@@ -9,9 +9,9 @@ import type {
   ComboStyleConfig,
   ElementState,
   InternalCombo,
-} from '../types.js';
-import type { Camera } from './camera.js';
-import { graphToNDC } from './camera.js';
+} from '../types';
+import type { Camera } from './camera';
+import { graphToNDC } from './camera';
 
 type ComboSize = number | [number, number];
 
@@ -61,9 +61,11 @@ export class ComboRenderer {
     this.canvas.style.width = '100%';
     this.canvas.style.height = '100%';
     this.canvas.style.pointerEvents = 'none';
+    const context = this.canvas.getContext('2d');
+    if (!context) throw new Error('Unable to create the combo canvas 2D context');
     // Insert before mainCanvas (underlay)
     container.insertBefore(this.canvas, mainCanvas);
-    this.ctx = this.canvas.getContext('2d')!;
+    this.ctx = context;
   }
 
   private syncSize(): { w: number; h: number; dpr: number } {
@@ -424,7 +426,8 @@ export class ComboRenderer {
 
     const visiting = new Set<string>();
     const getDepth = (id: string): number => {
-      if (depthMap.has(id)) return depthMap.get(id)!;
+      const cachedDepth = depthMap.get(id);
+      if (cachedDepth !== undefined) return cachedDepth;
       // Guard against circular parent-child relationships to avoid stack overflow.
       if (visiting.has(id)) {
         depthMap.set(id, 0);
@@ -445,7 +448,7 @@ export class ComboRenderer {
     for (const c of combos) getDepth(c.id);
 
     // Sort parent-first so children overlay parents
-    return [...combos].sort((a, b) => depthMap.get(a.id)! - depthMap.get(b.id)!);
+    return [...combos].sort((a, b) => (depthMap.get(a.id) ?? 0) - (depthMap.get(b.id) ?? 0));
   }
 
   private roundRect(

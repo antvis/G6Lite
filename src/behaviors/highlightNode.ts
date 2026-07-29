@@ -3,8 +3,8 @@
  * Consumes pointer events from the InteractionDispatcher (no own picking).
  */
 
-import type { Graph } from '../graph.js';
-import type { Renderer } from '../renderer/renderer.js';
+import type { Graph } from '../graph';
+import type { Renderer } from '../renderer/renderer';
 
 export function highlightNode(renderer: Renderer, graph?: Graph): () => void {
   if (!graph) return () => {};

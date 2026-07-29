@@ -1,2 +1,2 @@
-export { runLayout } from './runLayout.js';
-export type { LayoutResult } from './runLayout.js';
+export { runLayout } from './runLayout';
+export type { LayoutResult } from './runLayout';

@@ -1,4 +1,4 @@
-import type { GraphEdge, LayoutNode } from '../types.js';
+import type { GraphEdge, LayoutNode } from '../types';
 
 export interface Point {
   x: number;

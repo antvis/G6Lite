@@ -13,8 +13,8 @@
  * Emits: edge:dragstart, edge:drag, edge:dragend
  */
 
-import type { Graph } from '../graph.js';
-import type { Renderer } from '../renderer/renderer.js';
+import type { Graph } from '../graph';
+import type { Renderer } from '../renderer/renderer';
 
 export function dragEdge(renderer: Renderer, graph: Graph): () => void {
   let dragging: {

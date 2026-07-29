@@ -1,4 +1,4 @@
-import type { LabelRenderer } from '../types.js';
+import type { LabelRenderer } from '../types';
 import type {
   BehaviorExtension,
   DecorationRenderer,
@@ -7,13 +7,20 @@ import type {
   LayoutExtension,
   PluginExtension,
   TransformExtension,
-} from './contracts.js';
-import { registerDecoration } from './decoration.js';
-import { registerEdge } from './edge.js';
-import { registerLabelRenderer } from './label.js';
-import { registerNode, type NodeExtensionInput } from './node.js';
-import { extensionFactory, registerExtension } from './registry.js';
+} from './contracts';
+import { registerDecoration } from './decoration';
+import { registerEdge } from './edge';
+import { registerLabelRenderer } from './label';
+import { registerNode, type NodeExtensionInput } from './node';
+import { extensionFactory, registerExtension } from './registry';
 
+export { BaseNode, BreathingNode, registerNode } from './node';
+export type {
+  NodeBoundaryAnchorParams,
+  NodeExtension,
+  NodeExtensionInput,
+  NodeOverlayDrawParams,
+} from './node';
 export { extensionFactory };
 
 export function register(type: 'node', name: string, extension: NodeExtensionInput): void;
@@ -96,4 +103,4 @@ export type {
   LayoutExtension,
   PluginExtension,
   TransformExtension,
-} from './contracts.js';
+} from './contracts';

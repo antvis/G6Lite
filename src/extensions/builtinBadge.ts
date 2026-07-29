@@ -1,5 +1,5 @@
-import type { NodeBadgeItem } from '../types.js';
-import type { DecorationRenderer } from './contracts.js';
+import type { NodeBadgeItem } from '../types';
+import type { DecorationRenderer } from './contracts';
 
 interface BuiltinBadgeLayoutData {
   shape: 'circle' | 'pill';

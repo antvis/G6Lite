@@ -7,7 +7,7 @@
  * When both highlight-node and highlight-edge are used, one combined hover handler runs (edge takes precedence).
  */
 
-import type { BehaviorExtension } from '../extensions/contracts.js';
+import type { BehaviorExtension } from '../extensions/contracts';
 import {
   createExtension,
   createExtensionContext,
@@ -15,21 +15,28 @@ import {
   hasExtension,
   initializeExtension,
   safeExtensionCall,
-} from '../extensions/registry.js';
-import type { Graph } from '../graph.js';
-import type { Renderer } from '../renderer/renderer.js';
-import type { BehaviorOption } from '../types.js';
-import { brushSelect } from './brushSelect.js';
-import { clickSelect, type ClickSelectConfig } from './clickSelect.js';
-import { dragCanvas } from './dragCanvas.js';
-import { dragEdge } from './dragEdge.js';
-import { dragNode } from './dragNode.js';
-import { highlightEdge } from './highlightEdge.js';
-import { highlightNode } from './highlightNode.js';
-import { hoverHighlight, type HoverHighlightConfig } from './hoverHighlight.js';
-import { lassoSelect } from './lassoSelect.js';
-import { tooltip, type TooltipOptions } from './tooltip.js';
-import { zoomCanvas } from './zoomCanvas.js';
+} from '../extensions/registry';
+import type { Graph } from '../graph';
+import type { Renderer } from '../renderer/renderer';
+import type { BehaviorOption } from '../types';
+import { brushSelect } from './brushSelect';
+import { clickSelect, type ClickSelectConfig } from './clickSelect';
+import { dragCanvas } from './dragCanvas';
+import { dragEdge } from './dragEdge';
+import { dragNode } from './dragNode';
+import { highlightEdge } from './highlightEdge';
+import { highlightNode } from './highlightNode';
+import { hoverHighlight, type HoverHighlightConfig } from './hoverHighlight';
+import { lassoSelect } from './lassoSelect';
+import { tooltip, type TooltipOptions } from './tooltip';
+import { zoomCanvas } from './zoomCanvas';
+
+export type { BrushSelectOptions } from './brushSelect';
+export type { ClickSelectConfig } from './clickSelect';
+export type { DragCanvasOptions } from './dragCanvas';
+export type { HoverHighlightConfig } from './hoverHighlight';
+export type { LassoSelectOptions } from './lassoSelect';
+export type { TooltipContext, TooltipOptions } from './tooltip';
 
 export type BehaviorName =
   | 'zoom-canvas'

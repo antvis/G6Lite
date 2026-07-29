@@ -71,6 +71,18 @@ afterEach(() => {
   Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true });
 });
 
+describe('LabelLayerRenderer construction', () => {
+  it('fails clearly without leaving an overlay when a 2D context is unavailable', () => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+    const container = document.createElement('div');
+    const mainCanvas = document.createElement('canvas');
+    container.appendChild(mainCanvas);
+
+    expect(() => new LabelLayerRenderer(container, mainCanvas)).toThrow(/label canvas 2D context/);
+    expect(container.children).toHaveLength(1);
+  });
+});
+
 describe('LabelRenderer zoom scaling helpers', () => {
   it('clamps label zoom to a readable screen-space range', () => {
     expect(getLabelZoom(0.1)).toBe(0.25);

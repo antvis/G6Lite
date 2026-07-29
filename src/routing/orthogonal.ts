@@ -185,8 +185,12 @@ export function computeTreeRoutes(
   const groups = new Map<string, Array<{ index: number; src: NodeRect; tgt: NodeRect }>>();
   for (const edge of edges) {
     const key = `${edge.src.x},${edge.src.y}`;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(edge);
+    let group = groups.get(key);
+    if (!group) {
+      group = [];
+      groups.set(key, group);
+    }
+    group.push(edge);
   }
 
   // Pre-compute incoming edge count and index per target node for port distribution

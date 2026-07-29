@@ -5,11 +5,11 @@
  * Stride: 17 floats per vertex.
  */
 
-import { encodeId } from '../picking.js';
-import type { AttributeLayout, RenderParams } from './program.js';
-import { Program } from './program.js';
-import { fragmentShader } from './shaders/nodeCircleQuad.frag.js';
-import { vertexShader } from './shaders/nodeCircleQuad.vert.js';
+import { encodeId } from '../picking';
+import type { AttributeLayout, RenderParams } from './program';
+import { Program } from './program';
+import { fragmentShader } from './shaders/nodeCircleQuad.frag';
+import { vertexShader } from './shaders/nodeCircleQuad.vert';
 
 const FLOATS_PER_VERTEX = 17;
 const VERTICES_PER_ITEM = 6;

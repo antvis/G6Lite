@@ -19,10 +19,10 @@
  * start from pointerdown and run their own move/up tracking afterwards.
  */
 
-import type { Graph } from '../graph.js';
-import type { Renderer } from '../renderer/renderer.js';
-import type { GraphElementEvent } from '../types.js';
-import { GESTURE_CONSUME_EVENT } from './gesture.js';
+import type { Graph } from '../graph';
+import type { Renderer } from '../renderer/renderer';
+import type { GraphElementEvent } from '../types';
+import { GESTURE_CONSUME_EVENT } from './gesture';
 
 type HoverTarget =
   { kind: 'node'; id: string } | { kind: 'edge'; id: string; index: number } | null;

@@ -5,11 +5,11 @@
  * Stride: 9 floats per vertex (position.xy, color.rgb, pickingColor.rgb, opacity).
  */
 
-import { encodeId } from '../picking.js';
-import type { AttributeLayout, RenderParams } from './program.js';
-import { Program } from './program.js';
-import { fragmentShader } from './shaders/edgeCubic.frag.js';
-import { vertexShader } from './shaders/edgeCubic.vert.js';
+import { encodeId } from '../picking';
+import type { AttributeLayout, RenderParams } from './program';
+import { Program } from './program';
+import { fragmentShader } from './shaders/edgeCubic.frag';
+import { vertexShader } from './shaders/edgeCubic.vert';
 
 const FLOATS_PER_VERTEX = 9;
 const SEGMENTS = 16;

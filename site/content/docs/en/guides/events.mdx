@@ -1,18 +1,94 @@
 ---
 title: Events
-description: Listen to element, interaction, data, layout, render, and destroy events
+description: Listen to public events with GraphEventMap and graph.on, graph.off, and graph.once
 ---
 
+Known events are inferred from the public `GraphEventMap`:
+
 ```ts
-graph.on('node:click', ({ nodeId, data, event }) => {
-  console.log(nodeId, data, event);
+graph.on('node:click', ({ nodeId, data, nativeEvent }) => {
+  console.log(nodeId, data, nativeEvent.clientX, nativeEvent.clientY);
+});
+
+graph.on('canvas:wheel', ({ nativeEvent }) => {
+  console.log(nativeEvent.deltaY); // WheelEvent
+});
+
+graph.once('destroy', () => {
+  console.log('destroyed'); // zero arguments
 });
 ```
 
-Element events use prefixes such as `node:`, `edge:`, and `combo:`. Lifecycle events include rendering, layout, data mutation, and destroy notifications. Keep the same handler reference when removing a listener:
+Element payloads expose the original `MouseEvent` or `WheelEvent` as `nativeEvent`. The compatibility field `event` still exists but is deprecated.
+
+## Element events
+
+The interaction dispatcher performs shared picking and emits these events without requiring a separate click Behavior:
+
+- Node: `node:pointerover`, `node:pointerenter`, `node:pointermove`, `node:pointerleave`, `node:pointerdown`, `node:click`, `node:dblclick`, `node:contextmenu`, `node:wheel`.
+- Edge: `edge:pointerover`, `edge:pointerenter`, `edge:pointermove`, `edge:pointerleave`, `edge:pointerdown`, `edge:click`, `edge:dblclick`, `edge:contextmenu`, `edge:wheel`.
+- Combo: `combo:pointerdown`, `combo:click`, `combo:dblclick`, `combo:contextmenu`.
+- Canvas: `canvas:pointermove`, `canvas:pointerdown`, `canvas:pointerup`, `canvas:click`, `canvas:dblclick`, `canvas:contextmenu`, `canvas:wheel`.
+
+The precise payload types are `NodeGraphEvent`, `EdgeGraphEvent`, `ComboGraphEvent`, and `CanvasGraphEvent`. Their target-specific IDs and edge metadata are required in the matching handlers.
+
+## Selection and drag events
+
+Built-in Behaviors emit:
+
+- Selection: `node:selectchange`, `edge:selectchange`, `selection:clear`.
+- Node drag: `node:dragstart`, `node:drag`, `node:dragend`.
+- Combo drag: `combo:dragstart`, `combo:drag`, `combo:dragend`.
+- Edge endpoint drag: `edge:dragstart`, `edge:drag`, `edge:dragend`.
+- Brush: `brush:select`, `brush:end`.
+- Lasso: `lasso:select`, `lasso:end`.
+
+Derived events are emitted only when the corresponding Behavior is active.
+
+## Lifecycle and data events
+
+- Layout: `beforelayout`, `layout:start`, `layout:end`, `afterlayout`.
+- Render: `beforerender`, `afterrender`.
+- Container and teardown: `resize`, `destroy`.
+- Data: `datachange`, `afteradditem`, `afterremoveitem`, `afterupdateitem`.
+- Combo: `combo:collapse`, `combo:expand`.
+
+`GraphEventMap` values are argument tuples rather than single payload types, so both ordinary events and zero-argument events are represented exactly:
 
 ```ts
+import type { GraphEventMap } from '@antv/g6-gl';
+
+type NodeClickPayload = GraphEventMap['node:click'][0];
+type DestroyArguments = GraphEventMap['destroy']; // []
+```
+
+## Removing listeners
+
+Use the same handler reference when removing a listener:
+
+```ts
+const handler = ({ nodeId }: GraphEventMap['node:click'][0]) => console.log(nodeId);
+
 graph.on('node:click', handler);
 graph.off('node:click', handler);
-graph.once('afterrender', () => console.log('ready'));
 ```
+
+Use `once()` for a one-time listener:
+
+```ts
+graph.once('afterrender', ({ nodeCount, edgeCount }) => {
+  console.log(nodeCount, edgeCount);
+});
+```
+
+## Custom event typing
+
+`graph.on/off/once` retain a generic fallback for unknown event strings:
+
+```ts
+graph.on('business:custom', (payload: { id: string }) => {
+  console.log(payload.id);
+});
+```
+
+A custom Behavior can also extend its event-map generic. This release provides consumer-side typing only and does not expose a public `emit` API; do not depend on internal `graph.eventEmitter`. See [Custom Behavior](/en/docs/guides/custom-behavior).

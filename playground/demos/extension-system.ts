@@ -6,12 +6,16 @@ import {
   Graph,
   register,
   type BehaviorExtension,
+  type BehaviorOptions,
   type DecorationRenderer,
+  type ElementState,
+  type ExtensionContext,
   type GraphData,
   type GraphNode,
   type LayoutExtension,
   type NodeBadgeItem,
   type PluginExtension,
+  type PluginOptions,
   type TransformExtension,
 } from '../../src/index.ts';
 
@@ -49,55 +53,89 @@ const normalizeData: TransformExtension = {
   },
 };
 
-const clickBehavior: BehaviorExtension = {
-  init(context) {
-    this.context = context;
-  },
-  getEvents() {
-    return {
-      'node:click': (event) => {
-        if (!event.targetId) return;
-        const context = this.context;
-        if (!context) return;
-        context.state.set(event.targetId, ['selected']);
-        const node = context.data.getNode(event.targetId);
-        const currentSize = Number(node?.data?.size ?? 44);
-        context.data.updateNode(event.targetId, { size: currentSize >= 60 ? 32 : 68 });
-      },
-      'canvas:click': () => {
-        const context = this.context;
-        if (!context) return;
-        const stateMap = Object.fromEntries(context.data.getNodeIds().map((id) => [id, []]));
-        context.state.setAll(stateMap);
-      },
-    };
-  },
-} as BehaviorExtension & { context?: Parameters<NonNullable<BehaviorExtension['init']>>[0] };
+const BUSINESS_CLICK_BEHAVIOR = 'business-click' as const;
 
-const extensionHintPlugin: PluginExtension = {
-  mount(container) {
-    const hint = document.createElement('div');
-    hint.className = 'g6lite-extension-demo-hint';
-    hint.textContent = '点击节点切换 32px / 68px，悬停 ··· 展开';
-    Object.assign(hint.style, {
-      position: 'absolute',
-      left: '12px',
-      top: '12px',
-      padding: '6px 10px',
-      border: '1px solid #d9d9d9',
-      borderRadius: '6px',
-      background: '#fff',
-      color: '#595959',
-      fontSize: '12px',
-      pointerEvents: 'none',
-    });
-    container.appendChild(hint);
-    this.hint = hint;
-  },
-  destroy() {
-    this.hint?.remove();
-  },
-} as PluginExtension & { hint?: HTMLElement };
+interface BusinessClickBehaviorOptions extends BehaviorOptions<typeof BUSINESS_CLICK_BEHAVIOR> {
+  state?: ElementState;
+  compactSize?: number;
+  expandedSize?: number;
+}
+
+function createBusinessClickBehavior(): BehaviorExtension<BusinessClickBehaviorOptions> {
+  let context: ExtensionContext | undefined;
+  let state: ElementState = 'selected';
+  let compactSize = 32;
+  let expandedSize = 68;
+
+  return {
+    init(nextContext, options) {
+      context = nextContext;
+      state = options.state ?? 'selected';
+      compactSize = options.compactSize ?? 32;
+      expandedSize = options.expandedSize ?? 68;
+    },
+    getEvents() {
+      return {
+        'node:click': ({ nodeId }) => {
+          if (!context) return;
+          context.state.set(nodeId, [state]);
+          const node = context.data.getNode(nodeId);
+          const currentSize = Number(node?.data?.size ?? 44);
+          context.data.updateNode(nodeId, {
+            size: currentSize >= expandedSize ? compactSize : expandedSize,
+          });
+        },
+        'canvas:click': () => {
+          if (!context) return;
+          const stateMap = Object.fromEntries(context.data.getNodeIds().map((id) => [id, []]));
+          context.state.setAll(stateMap);
+        },
+      };
+    },
+    destroy() {
+      context = undefined;
+    },
+  };
+}
+
+const EXTENSION_HINT_PLUGIN = 'extension-hint' as const;
+
+interface ExtensionHintPluginOptions extends PluginOptions<typeof EXTENSION_HINT_PLUGIN> {
+  text?: string;
+}
+
+function createExtensionHintPlugin(): PluginExtension<ExtensionHintPluginOptions> {
+  let hint: HTMLElement | undefined;
+  let text = '点击节点切换 32px / 68px，悬停 ··· 展开';
+
+  return {
+    init(_context, options) {
+      text = options.text ?? text;
+    },
+    mount(container) {
+      hint = document.createElement('div');
+      hint.className = 'g6lite-extension-demo-hint';
+      hint.textContent = text;
+      Object.assign(hint.style, {
+        position: 'absolute',
+        left: '12px',
+        top: '12px',
+        padding: '6px 10px',
+        border: '1px solid #d9d9d9',
+        borderRadius: '6px',
+        background: '#fff',
+        color: '#595959',
+        fontSize: '12px',
+        pointerEvents: 'none',
+      });
+      container.appendChild(hint);
+    },
+    destroy() {
+      hint?.remove();
+      hint = undefined;
+    },
+  };
+}
 
 register('decoration', 'external-name', externalNameRenderer);
 register('edge', 'business-relation', {
@@ -111,8 +149,8 @@ register(
   'normalize-business-data',
   extensionFactory(() => ({ ...normalizeData })),
 );
-register('behavior', 'business-click', extensionFactory(() => ({ ...clickBehavior })));
-register('plugin', 'extension-hint', extensionFactory(() => ({ ...extensionHintPlugin })));
+register('behavior', BUSINESS_CLICK_BEHAVIOR, extensionFactory(createBusinessClickBehavior));
+register('plugin', EXTENSION_HINT_PLUGIN, extensionFactory(createExtensionHintPlugin));
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -166,8 +204,22 @@ export async function run(container: string | HTMLElement) {
     },
     transforms: ['normalize-business-data'],
     layout: { type: 'horizontal-business' },
-    behaviors: ['drag-canvas', 'zoom-canvas', 'business-click'],
-    plugins: [{ type: 'extension-hint' }],
+    behaviors: [
+      'drag-canvas',
+      'zoom-canvas',
+      {
+        type: BUSINESS_CLICK_BEHAVIOR,
+        state: 'selected',
+        compactSize: 32,
+        expandedSize: 68,
+      } satisfies BusinessClickBehaviorOptions,
+    ],
+    plugins: [
+      {
+        type: EXTENSION_HINT_PLUGIN,
+        text: '点击节点切换 32px / 68px，悬停 ··· 展开',
+      } satisfies ExtensionHintPluginOptions,
+    ],
     node: {
       style: {
         size: (node) => Number(node.data?.size ?? 44),

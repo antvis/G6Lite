@@ -1,13 +1,17 @@
 import type { Graph } from '../graph';
 import type {
+  BehaviorConfig,
+  BehaviorOptions,
   EdgeConfig,
   EdgeStateStyleOverride,
   ElementState,
   GraphData,
   GraphEdge,
-  GraphElementEvent,
+  GraphEventMap,
   GraphNode,
   LabelLayout,
+  PluginOption,
+  PluginOptions,
 } from '../types';
 
 export type ExtensionCategory =
@@ -71,8 +75,7 @@ export interface ExtensionContext {
 }
 
 export interface Extension<TOptions = Record<string, unknown>> {
-  init?(context: ExtensionContext, options: TOptions): void;
-  update?(options: Partial<TOptions>): void;
+  init?(context: ExtensionContext, options: Readonly<TOptions>): void;
   destroy?(): void;
 }
 
@@ -92,17 +95,31 @@ export interface LayoutExtension<TOptions = Record<string, unknown>> extends Ext
       }>;
 }
 
-export interface BehaviorExtension<TOptions = Record<string, unknown>> extends Extension<TOptions> {
-  getEvents(): Record<string, (event: GraphElementEvent) => void>;
+/** Extracts the argument tuple declared for an event-map entry. */
+export type EventArguments<T> = T extends readonly unknown[] ? T : never;
+
+/** Event handlers declared by a behavior, keyed by graph event name. */
+export type BehaviorEventHandlers<TEventMap extends object = GraphEventMap> = Partial<{
+  [K in keyof TEventMap]: (...args: EventArguments<TEventMap[K]>) => void;
+}>;
+
+export interface BehaviorExtension<
+  TOptions extends BehaviorOptions = BehaviorConfig,
+  TEventMap extends object = GraphEventMap,
+> extends Extension<TOptions> {
+  getEvents(): BehaviorEventHandlers<TEventMap>;
 }
 
 export interface TransformExtension<
   TOptions = Record<string, unknown>,
 > extends Extension<TOptions> {
+  update?(options: Readonly<Partial<TOptions>>): void;
   beforeRender?(data: GraphData): GraphData;
 }
 
-export interface PluginExtension<TOptions = Record<string, unknown>> extends Extension<TOptions> {
+export interface PluginExtension<
+  TOptions extends PluginOptions = PluginOption,
+> extends Extension<TOptions> {
   mount?(container: HTMLElement): void;
 }
 

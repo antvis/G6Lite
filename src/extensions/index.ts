@@ -1,4 +1,4 @@
-import type { LabelRenderer } from '../types';
+import type { BehaviorOptions, GraphEventMap, LabelRenderer, PluginOptions } from '../types';
 import type {
   BehaviorExtension,
   DecorationRenderer,
@@ -39,26 +39,29 @@ export function register(
   name: string,
   extension: ExtensionInput<DecorationRenderer>,
 ): void;
-export function register(
+export function register<TOptions = Record<string, unknown>>(
   type: 'layout',
   name: string,
-  extension: ExtensionInput<LayoutExtension>,
+  extension: ExtensionInput<LayoutExtension<TOptions>>,
 ): void;
-export function register(
+export function register<
+  TType extends string,
+  TOptions extends BehaviorOptions<TType> = BehaviorOptions<TType>,
+  TEventMap extends object = GraphEventMap,
+>(
   type: 'behavior',
-  name: string,
-  extension: ExtensionInput<BehaviorExtension>,
+  name: TType,
+  extension: ExtensionInput<BehaviorExtension<TOptions, TEventMap>>,
 ): void;
-export function register(
+export function register<TOptions = Record<string, unknown>>(
   type: 'transform',
   name: string,
-  extension: ExtensionInput<TransformExtension>,
+  extension: ExtensionInput<TransformExtension<TOptions>>,
 ): void;
-export function register(
-  type: 'plugin',
-  name: string,
-  extension: ExtensionInput<PluginExtension>,
-): void;
+export function register<
+  TType extends string,
+  TOptions extends PluginOptions<TType> = PluginOptions<TType>,
+>(type: 'plugin', name: TType, extension: ExtensionInput<PluginExtension<TOptions>>): void;
 export function register(
   type: 'node' | 'label' | 'edge' | 'decoration' | 'layout' | 'behavior' | 'transform' | 'plugin',
   name: string,
@@ -84,6 +87,7 @@ export function register(
 }
 
 export type {
+  BehaviorEventHandlers,
   BehaviorExtension,
   DecorationDrawParams,
   DecorationMeasureParams,
@@ -100,6 +104,7 @@ export type {
   ExtensionNodeData,
   ExtensionStateContext,
   ExtensionViewportContext,
+  EventArguments,
   LayoutExtension,
   PluginExtension,
   TransformExtension,

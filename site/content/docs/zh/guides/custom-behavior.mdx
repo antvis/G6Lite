@@ -1,0 +1,183 @@
+---
+title: 自定义 Behavior
+description: 使用类型安全的 options、GraphEventMap 和 extensionFactory 编写可复用交互扩展
+---
+
+Behavior 用于消费 Graph 公开事件，并通过 `ExtensionContext` 更新数据或状态。它适合点击选择、业务高亮和事件联动等图内交互。需要独立 DOM、键盘监听、Observer 或外围控制器时使用 Plugin；只做渲染前数据处理时使用 Transform。
+
+## 公共类型范式
+
+自定义 Behavior 的核心类型如下：
+
+```ts
+interface BehaviorOptions<TType extends string = string> {
+  type: TType;
+}
+
+type BehaviorConfig<
+  TType extends string = string,
+  TOptions extends object = Record<string, unknown>,
+> = Readonly<BehaviorOptions<TType> & TOptions>;
+
+interface BehaviorExtension<
+  TOptions extends BehaviorOptions = BehaviorConfig,
+  TEventMap extends object = GraphEventMap,
+> {
+  init?(context: ExtensionContext, options: Readonly<TOptions>): void;
+  getEvents(): BehaviorEventHandlers<TEventMap>;
+  destroy?(): void;
+}
+```
+
+`GraphEventMap` 以“事件名 → 参数元组”定义全部公开 Graph 事件，因此 `'node:click'` 会推导出必填 `nodeId` 和 `MouseEvent`，`'canvas:wheel'` 会推导出 `WheelEvent`，`destroy` 会推导为零参数函数。
+
+## 推荐文件与导出
+
+一个可复用 Behavior 建议导出稳定名称、options 类型和显式注册函数：
+
+```text
+src/
+  behavior.ts
+  index.ts
+tests/
+  behavior.test.ts
+```
+
+不要仅通过包导入副作用自动注册。应用应在创建 Graph 前显式调用注册函数，使全局 registry 的加载顺序和同名覆盖可见。
+
+## 完整实现
+
+```ts
+import {
+  extensionFactory,
+  register,
+  type BehaviorExtension,
+  type BehaviorOptions,
+  type ElementState,
+  type ExtensionContext,
+} from '@antv/g6-gl';
+
+export const BUSINESS_SELECT_BEHAVIOR = 'business-select' as const;
+
+export interface BusinessSelectBehaviorOptions extends BehaviorOptions<
+  typeof BUSINESS_SELECT_BEHAVIOR
+> {
+  state?: ElementState;
+}
+
+function createBusinessSelectBehavior(): BehaviorExtension<BusinessSelectBehaviorOptions> {
+  let context: ExtensionContext | undefined;
+  let state: ElementState = 'selected';
+
+  return {
+    init(nextContext, options) {
+      context = nextContext;
+      state = options.state ?? 'selected';
+    },
+
+    getEvents() {
+      return {
+        'node:click': ({ nodeId, nativeEvent }) => {
+          if (nativeEvent.button !== 0) return;
+          context?.state.set(nodeId, [state]);
+        },
+        'canvas:click': () => {
+          if (!context) return;
+          const stateMap = Object.fromEntries(context.data.getNodeIds().map((id) => [id, []]));
+          context.state.setAll(stateMap);
+        },
+      };
+    },
+
+    destroy() {
+      context = undefined;
+    },
+  };
+}
+
+export function registerBusinessSelectBehavior(): void {
+  register('behavior', BUSINESS_SELECT_BEHAVIOR, extensionFactory(createBusinessSelectBehavior));
+}
+```
+
+这里不使用 `this` 扩展、class 继承或交叉类型断言。factory 每次调用都返回全新闭包，确保多个 Graph 之间不共享 context 和可变配置。
+
+## 注册并激活
+
+```ts
+registerBusinessSelectBehavior();
+
+const graph = new Graph({
+  container: 'container',
+  data,
+  behaviors: [
+    'zoom-canvas',
+    {
+      type: BUSINESS_SELECT_BEHAVIOR,
+      state: 'active',
+    } satisfies BusinessSelectBehaviorOptions,
+  ],
+});
+```
+
+字符串形式 `BUSINESS_SELECT_BEHAVIOR` 与对象形式都可激活扩展。运行时会把字符串归一化为 `{ type: BUSINESS_SELECT_BEHAVIOR }`，因此 `init()` 收到的只读 options 始终包含 `type`。
+
+`BuiltInBehaviorOptionsMap` 提供内置 Behavior 名称到配置类型的映射，`BuiltInBehaviorConfig` 是这些配置的联合类型。`GraphOptions.behaviors` 仍保持开放，以支持任意第三方名称；自定义对象可使用 `satisfies YourBehaviorOptions` 获得严格检查。
+
+## 事件类型
+
+Behavior 默认消费完整 `GraphEventMap`：
+
+```ts
+const behavior: BehaviorExtension<BusinessSelectBehaviorOptions> = {
+  getEvents() {
+    return {
+      'node:click': ({ nodeId, nativeEvent }) => {
+        // nodeId: string
+        // nativeEvent: MouseEvent
+      },
+      'canvas:wheel': ({ nativeEvent }) => {
+        // nativeEvent: WheelEvent
+      },
+      destroy: () => {
+        // 零参数事件
+      },
+    };
+  },
+};
+```
+
+第二个泛型可扩展宿主约定的事件类型：
+
+```ts
+interface BusinessEventMap {
+  'business:selection-reset': [payload: { source: 'toolbar' | 'shortcut' }];
+}
+
+type BusinessBehavior = BehaviorExtension<
+  BusinessSelectBehaviorOptions,
+  GraphEventMap & BusinessEventMap
+>;
+```
+
+该泛型只补充消费端类型。本期没有新增公开事件 `emit` API；不要通过内部 `graph.eventEmitter` 发出事件。
+
+## 生命周期与清理
+
+Behavior 的正式生命周期是 `create → init → getEvents → destroy`。它不承诺 `update()`：Graph 重新挂载 Behavior 时会销毁旧实例并创建新实例。
+
+运行时会自动注册和解除 `getEvents()` 返回的 handler。每个 handler 的异常会单独隔离，并输出包含 Behavior 名称和事件名的诊断；一个 handler 失败不会阻止其他 handler 执行。
+
+Behavior 自己创建的 `window` / `document` 监听、timer、Observer 或异步任务仍必须在 `destroy()` 中释放。更适合由独立外围组件持有的资源应放入 Plugin。
+
+## 边界与覆盖规则
+
+- 只从 `@antv/g6-gl` 包根导入公开 API，不深层导入源码。
+- 使用 `context.data`、`context.state`、`context.viewport`、`requestRender()` 和 `isDestroyed()`；新代码不依赖已弃用的 `context.graph`。
+- 不访问 Renderer、Picking、DataModel、WebGL context 或 GPU buffer。
+- 自定义 Behavior 与内置 Behavior 同名时，注册版本优先；注册版本失败不会自动回退内置实现。
+- 建议使用业务或包名前缀命名，降低全局 registry 的冲突风险。
+
+需要底层手势 session、相机写操作、节点位置写入、通用 overlay root 等当前未公开能力时，应先扩展公共契约，而不是通过类型断言绕过边界。
+
+完整运行示例见 `playground/demos/extension-system.ts`。

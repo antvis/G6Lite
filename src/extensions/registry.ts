@@ -217,8 +217,10 @@ export function initializeExtension<TOptions>(
 export function updateExtension<TOptions>(
   category: ExtensionCategory,
   name: string,
-  extension: Extension<TOptions>,
-  options: Partial<TOptions>,
+  extension: Extension<TOptions> & {
+    update?(options: Readonly<Partial<TOptions>>): void;
+  },
+  options: Readonly<Partial<TOptions>>,
 ): boolean {
   return safeExtensionCall(
     category,

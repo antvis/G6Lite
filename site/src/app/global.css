@@ -96,23 +96,10 @@ html > body[data-scroll-locked] {
   height: 1.75rem;
 }
 
-.antv-logo-mark svg {
+.antv-logo-mark img {
+  display: block;
   width: 100%;
   height: 100%;
-  overflow: visible;
-}
-
-.antv-logo-mark path {
-  fill: none;
-  stroke: url('#antv-gradient');
-  stroke: var(--brand-accent);
-  stroke-width: 2.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.antv-logo-mark circle {
-  fill: var(--brand-accent);
 }
 
 .antv-logo-text {

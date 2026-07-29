@@ -5,6 +5,7 @@
 
 import { getEdgeBaseType } from '../extensions/edge.js';
 import { getNodeBaseType } from '../extensions/node.js';
+import { ANTV_PRIMARY_COLOR } from '../palette.js';
 import type { NodeRect, Waypoint } from '../routing/orthogonal.js';
 import {
   applyRoundedCorners,
@@ -132,7 +133,7 @@ export class Renderer {
   private nodeConfig: NodeConfig | undefined;
   private edgeConfig: EdgeConfig | undefined;
   private theme: ThemeTokens = {
-    nodeFill: '#5B8FF9',
+    nodeFill: ANTV_PRIMARY_COLOR,
     nodeSize: 8,
     edgeStroke: '#e2e2e2',
     edgeLineWidth: 1,

@@ -1,3 +1,4 @@
+import { ANTV_BADGE_PALETTE } from '../palette.js';
 import type { NodeBadgeItem } from '../types.js';
 import type { DecorationRenderer } from './contracts.js';
 
@@ -12,13 +13,15 @@ interface BuiltinBadgeLayoutData {
   fontFamily: string;
 }
 
+const [BADGE_NEUTRAL_COLOR, BADGE_DANGER_COLOR, BADGE_WARNING_COLOR] = ANTV_BADGE_PALETTE;
+
 const DEFAULT_FILL: Record<NodeBadgeItem['kind'], string> = {
-  count: '#F4664A',
-  lock: '#7E92B5',
-  warning: '#F4664A',
-  favorite: '#FFBE3A',
-  text: '#F4664A',
-  icon: '#7E92B5',
+  count: BADGE_DANGER_COLOR,
+  lock: BADGE_NEUTRAL_COLOR,
+  warning: BADGE_DANGER_COLOR,
+  favorite: BADGE_WARNING_COLOR,
+  text: BADGE_DANGER_COLOR,
+  icon: BADGE_NEUTRAL_COLOR,
 };
 
 function getLabelScale(zoom: number): number {
@@ -102,7 +105,7 @@ export const builtinBadgeRenderer: DecorationRenderer<NodeBadgeItem> = {
     const labelScale = dpr * getLabelScale(zoom / Math.max(dpr, Number.EPSILON));
     const fontSize = Math.min(8 * labelScale, badgeSize * 0.65);
     const color = data.color ?? '#FFFFFF';
-    const fill = data.fill ?? DEFAULT_FILL[data.kind] ?? '#7E92B5';
+    const fill = data.fill ?? DEFAULT_FILL[data.kind] ?? BADGE_NEUTRAL_COLOR;
     const fontFamily = data.iconFontFamily ?? 'sans-serif';
     const rawText =
       data.kind === 'count'

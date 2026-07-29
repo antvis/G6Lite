@@ -1,8 +1,12 @@
 export { Program } from './program';
 export type { RenderParams, AttributeLayout } from './program';
 export { NodeCircleProgram } from './nodeCircle';
+export { NodeCircleQuadProgram } from './nodeCircleQuad';
 export { NodeRectProgram } from './nodeRect';
 export { EdgeLineProgram } from './edgeLine';
 export { EdgeRectProgram } from './edgeRect';
 export { EdgeArcProgram } from './edgeArc';
+export { EdgeArrowProgram } from './edgeArrow';
 export { EdgeCubicProgram } from './edgeCubic';
+export { EdgeLoopProgram } from './edgeLoop';
+export * as shaders from './shaders/index';

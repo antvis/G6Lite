@@ -8,7 +8,7 @@
 
 ### EventEmitter [#eventemitter]
 
-Defined in: [events.ts:9](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/events.ts#L9)
+Defined in: [events.ts:9](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/events.ts#L9)
 
 @antv/g6-gl
 A high-performance graph analysis engine based on WebGL, designed for large-scale graph data analysis.
@@ -37,7 +37,7 @@ new EventEmitter(): EventEmitter;
 on<Args>(event: string, handler: Handler<Args>): void;
 ```
 
-Defined in: [events.ts:12](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/events.ts#L12)
+Defined in: [events.ts:12](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/events.ts#L12)
 
 ###### Type Parameters [#type-parameters]
 
@@ -62,7 +62,7 @@ Defined in: [events.ts:12](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 off<Args>(event: string, handler: Handler<Args>): void;
 ```
 
-Defined in: [events.ts:21](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/events.ts#L21)
+Defined in: [events.ts:21](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/events.ts#L21)
 
 ###### Type Parameters [#type-parameters-1]
 
@@ -87,7 +87,7 @@ Defined in: [events.ts:21](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 once<Args>(event: string, handler: Handler<Args>): void;
 ```
 
-Defined in: [events.ts:29](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/events.ts#L29)
+Defined in: [events.ts:29](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/events.ts#L29)
 
 ###### Type Parameters [#type-parameters-2]
 
@@ -112,7 +112,7 @@ Defined in: [events.ts:29](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 emit<Args>(event: string, ...args: Args): void;
 ```
 
-Defined in: [events.ts:37](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/events.ts#L37)
+Defined in: [events.ts:37](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/events.ts#L37)
 
 ###### Type Parameters [#type-parameters-3]
 
@@ -137,7 +137,7 @@ Defined in: [events.ts:37](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 removeAllListeners(event?: string): void;
 ```
 
-Defined in: [events.ts:50](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/events.ts#L50)
+Defined in: [events.ts:50](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/events.ts#L50)
 
 ###### Parameters [#parameters-4]
 
@@ -153,7 +153,7 @@ Defined in: [events.ts:50](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 
 ### ~~`abstract` BaseNode~~ [#abstract-basenode]
 
-Defined in: [extensions/node.ts:39](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L39)
+Defined in: [extensions/node.ts:39](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L39)
 
 #### Deprecated [#deprecated]
 
@@ -187,7 +187,7 @@ new BaseNode(): BaseNode;
 base: "circle" | "rect" = 'circle';
 ```
 
-Defined in: [extensions/node.ts:40](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L40)
+Defined in: [extensions/node.ts:40](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L40)
 
 ###### Implementation of [#implementation-of]
 
@@ -199,7 +199,7 @@ Defined in: [extensions/node.ts:40](https://github.com/antvis/G6Lite/blob/3c62ec
 optional style?: Partial<NodeStyleConfig>;
 ```
 
-Defined in: [extensions/node.ts:41](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L41)
+Defined in: [extensions/node.ts:41](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L41)
 
 ###### Implementation of [#implementation-of-1]
 
@@ -211,7 +211,7 @@ Defined in: [extensions/node.ts:41](https://github.com/antvis/G6Lite/blob/3c62ec
 optional stateStyles?: Partial<Record<string, NodeStateStyleOverride>>;
 ```
 
-Defined in: [extensions/node.ts:42](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L42)
+Defined in: [extensions/node.ts:42](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L42)
 
 ###### Implementation of [#implementation-of-2]
 
@@ -225,7 +225,7 @@ Defined in: [extensions/node.ts:42](https://github.com/antvis/G6Lite/blob/3c62ec
 optional getStyle(_node: GraphNode): Partial<NodeStyleConfig>;
 ```
 
-Defined in: [extensions/node.ts:44](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L44)
+Defined in: [extensions/node.ts:44](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L44)
 
 ###### Parameters [#parameters-5]
 
@@ -250,7 +250,7 @@ optional getBoundaryAnchor(_params: NodeBoundaryAnchorParams): {
 };
 ```
 
-Defined in: [extensions/node.ts:45](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L45)
+Defined in: [extensions/node.ts:45](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L45)
 
 Returns a screen-space offset from the node center to its visual boundary.
 
@@ -291,7 +291,7 @@ y: number;
 optional drawOverlay(_ctx: CanvasRenderingContext2D, _params: NodeOverlayDrawParams): boolean | void;
 ```
 
-Defined in: [extensions/node.ts:46](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L46)
+Defined in: [extensions/node.ts:46](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L46)
 
 ###### Parameters [#parameters-7]
 
@@ -312,7 +312,7 @@ Defined in: [extensions/node.ts:46](https://github.com/antvis/G6Lite/blob/3c62ec
 
 ### ~~BreathingNode~~ [#breathingnode]
 
-Defined in: [extensions/node.ts:127](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L127)
+Defined in: [extensions/node.ts:127](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L127)
 
 #### Deprecated [#deprecated-1]
 
@@ -347,7 +347,7 @@ new BreathingNode(): BreathingNode;
 optional style?: Partial<NodeStyleConfig>;
 ```
 
-Defined in: [extensions/node.ts:41](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L41)
+Defined in: [extensions/node.ts:41](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L41)
 
 ###### Inherited from [#inherited-from-1]
 
@@ -359,7 +359,7 @@ Defined in: [extensions/node.ts:41](https://github.com/antvis/G6Lite/blob/3c62ec
 base: "circle" = breathingNodeExtension.base;
 ```
 
-Defined in: [extensions/node.ts:128](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L128)
+Defined in: [extensions/node.ts:128](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L128)
 
 ###### Overrides [#overrides]
 
@@ -371,7 +371,7 @@ Defined in: [extensions/node.ts:128](https://github.com/antvis/G6Lite/blob/3c62e
 stateStyles: Partial<Record<string, NodeStateStyleOverride>> = breathingNodeStateStyles;
 ```
 
-Defined in: [extensions/node.ts:129](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L129)
+Defined in: [extensions/node.ts:129](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L129)
 
 ###### Overrides [#overrides-1]
 
@@ -383,7 +383,7 @@ Defined in: [extensions/node.ts:129](https://github.com/antvis/G6Lite/blob/3c62e
 drawOverlay: (ctx: CanvasRenderingContext2D, params: NodeOverlayDrawParams) => boolean = drawBreathingNodeOverlay;
 ```
 
-Defined in: [extensions/node.ts:130](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L130)
+Defined in: [extensions/node.ts:130](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L130)
 
 ###### Parameters [#parameters-8]
 
@@ -408,7 +408,7 @@ Defined in: [extensions/node.ts:130](https://github.com/antvis/G6Lite/blob/3c62e
 optional getStyle(_node: GraphNode): Partial<NodeStyleConfig>;
 ```
 
-Defined in: [extensions/node.ts:44](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L44)
+Defined in: [extensions/node.ts:44](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L44)
 
 ###### Parameters [#parameters-9]
 
@@ -433,7 +433,7 @@ optional getBoundaryAnchor(_params: NodeBoundaryAnchorParams): {
 };
 ```
 
-Defined in: [extensions/node.ts:45](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L45)
+Defined in: [extensions/node.ts:45](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L45)
 
 Returns a screen-space offset from the node center to its visual boundary.
 
@@ -472,7 +472,7 @@ y: number;
 
 ### Graph [#graph]
 
-Defined in: [graph.ts:74](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L74)
+Defined in: [graph.ts:74](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L74)
 
 #### Constructors [#constructors-3]
 
@@ -482,7 +482,7 @@ Defined in: [graph.ts:74](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 new Graph(options: GraphOptions): Graph;
 ```
 
-Defined in: [graph.ts:108](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L108)
+Defined in: [graph.ts:108](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L108)
 
 ###### Parameters [#parameters-11]
 
@@ -504,7 +504,7 @@ Defined in: [graph.ts:108](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 get destroyed(): boolean;
 ```
 
-Defined in: [graph.ts:100](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L100)
+Defined in: [graph.ts:100](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L100)
 
 ###### Returns [#returns-15]
 
@@ -518,7 +518,7 @@ Defined in: [graph.ts:100](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 isDestroyed(): boolean;
 ```
 
-Defined in: [graph.ts:104](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L104)
+Defined in: [graph.ts:104](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L104)
 
 ###### Returns [#returns-16]
 
@@ -530,7 +530,7 @@ Defined in: [graph.ts:104](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 render(): Promise<void>;
 ```
 
-Defined in: [graph.ts:386](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L386)
+Defined in: [graph.ts:386](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L386)
 
 ###### Returns [#returns-17]
 
@@ -542,7 +542,7 @@ Defined in: [graph.ts:386](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 destroy(): void;
 ```
 
-Defined in: [graph.ts:434](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L434)
+Defined in: [graph.ts:434](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L434)
 
 ###### Returns [#returns-18]
 
@@ -554,7 +554,7 @@ Defined in: [graph.ts:434](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 getCamera(): Camera;
 ```
 
-Defined in: [graph.ts:454](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L454)
+Defined in: [graph.ts:454](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L454)
 
 Get a snapshot of the current camera. Use setCamera() to update it.
 
@@ -568,7 +568,7 @@ Get a snapshot of the current camera. Use setCamera() to update it.
 setCamera(partial: Partial<Camera>): void;
 ```
 
-Defined in: [graph.ts:458](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L458)
+Defined in: [graph.ts:458](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L458)
 
 ###### Parameters [#parameters-12]
 
@@ -586,7 +586,7 @@ Defined in: [graph.ts:458](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 resetCamera(): void;
 ```
 
-Defined in: [graph.ts:465](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L465)
+Defined in: [graph.ts:465](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L465)
 
 ###### Returns [#returns-21]
 
@@ -598,7 +598,7 @@ Defined in: [graph.ts:465](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 fitView(options?: number | FitViewOptions): void;
 ```
 
-Defined in: [graph.ts:471](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L471)
+Defined in: [graph.ts:471](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L471)
 
 ###### Parameters [#parameters-13]
 
@@ -616,7 +616,7 @@ Defined in: [graph.ts:471](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 setSize(width: number, height: number): void;
 ```
 
-Defined in: [graph.ts:515](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L515)
+Defined in: [graph.ts:515](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L515)
 
 ###### Parameters [#parameters-14]
 
@@ -635,7 +635,7 @@ Defined in: [graph.ts:515](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 getZoom(): number;
 ```
 
-Defined in: [graph.ts:521](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L521)
+Defined in: [graph.ts:521](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L521)
 
 ###### Returns [#returns-24]
 
@@ -647,7 +647,7 @@ Defined in: [graph.ts:521](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 zoomTo(zoom: number, options?: ZoomOptions): void;
 ```
 
-Defined in: [graph.ts:525](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L525)
+Defined in: [graph.ts:525](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L525)
 
 ###### Parameters [#parameters-15]
 
@@ -666,7 +666,7 @@ Defined in: [graph.ts:525](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 zoomBy(ratio: number, options?: ZoomOptions): void;
 ```
 
-Defined in: [graph.ts:547](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L547)
+Defined in: [graph.ts:547](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L547)
 
 ###### Parameters [#parameters-16]
 
@@ -685,7 +685,7 @@ Defined in: [graph.ts:547](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 fitCenter(): void;
 ```
 
-Defined in: [graph.ts:552](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L552)
+Defined in: [graph.ts:552](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L552)
 
 ###### Returns [#returns-27]
 
@@ -697,7 +697,7 @@ Defined in: [graph.ts:552](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 getData(): GraphData;
 ```
 
-Defined in: [graph.ts:582](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L582)
+Defined in: [graph.ts:582](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L582)
 
 ###### Returns [#returns-28]
 
@@ -709,7 +709,7 @@ Defined in: [graph.ts:582](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 toData(): GraphData;
 ```
 
-Defined in: [graph.ts:587](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L587)
+Defined in: [graph.ts:587](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L587)
 
 ###### Returns [#returns-29]
 
@@ -725,7 +725,7 @@ Use getData().
 getNodes(): readonly NodeModel[];
 ```
 
-Defined in: [graph.ts:597](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L597)
+Defined in: [graph.ts:597](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L597)
 
 Get all read-only normalized node views.
 
@@ -739,7 +739,7 @@ readonly [`NodeModel`](#nodemodel)\[]
 getEdges(): readonly EdgeModel[];
 ```
 
-Defined in: [graph.ts:602](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L602)
+Defined in: [graph.ts:602](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L602)
 
 Get all read-only normalized edge views.
 
@@ -756,7 +756,7 @@ screenToGraph(screenX: number, screenY: number): {
 };
 ```
 
-Defined in: [graph.ts:662](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L662)
+Defined in: [graph.ts:662](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L662)
 
 Convert client viewport CSS coordinates to graph coordinates.
 
@@ -797,7 +797,7 @@ graphToScreen(graphX: number, graphY: number): {
 };
 ```
 
-Defined in: [graph.ts:669](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L669)
+Defined in: [graph.ts:669](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L669)
 
 Convert graph coordinates to client viewport CSS coordinates.
 
@@ -840,7 +840,7 @@ addNode(node: {
 }): void;
 ```
 
-Defined in: [graph.ts:702](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L702)
+Defined in: [graph.ts:702](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L702)
 
 Add a single node. Triggers partial process on next frame.
 The node must have a unique id and x,y coordinates.
@@ -870,7 +870,7 @@ addNodes(nodes: {
 }[]): void;
 ```
 
-Defined in: [graph.ts:714](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L714)
+Defined in: [graph.ts:714](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L714)
 
 Add multiple nodes in one batch. More efficient than calling addNode repeatedly
 because it triggers a single render.
@@ -891,7 +891,7 @@ because it triggers a single render.
 removeNode(id: string): void;
 ```
 
-Defined in: [graph.ts:729](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L729)
+Defined in: [graph.ts:729](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L729)
 
 Remove a node and all its connected edges. Triggers partial process on next frame.
 
@@ -911,7 +911,7 @@ Remove a node and all its connected edges. Triggers partial process on next fram
 removeNodes(ids: string[]): void;
 ```
 
-Defined in: [graph.ts:741](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L741)
+Defined in: [graph.ts:741](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L741)
 
 Remove multiple nodes and their connected edges in one batch.
 
@@ -934,7 +934,7 @@ updateNodePosition(
    y: number): void;
 ```
 
-Defined in: [graph.ts:757](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L757)
+Defined in: [graph.ts:757](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L757)
 
 Update a node's position. Triggers position patch on next frame —
 much cheaper than full process since it only patches the position floats
@@ -958,7 +958,7 @@ in the GPU buffer.
 updateNodePositions(updates: NodePositionUpdate[]): void;
 ```
 
-Defined in: [graph.ts:765](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L765)
+Defined in: [graph.ts:765](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L765)
 
 ###### Parameters [#parameters-24]
 
@@ -978,7 +978,7 @@ Defined in: [graph.ts:765](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 updateNodeData(id: string, data: Record<string, unknown>): void;
 ```
 
-Defined in: [graph.ts:779](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L779)
+Defined in: [graph.ts:779](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L779)
 
 Update a node's custom data. May affect style if the style function depends on data.
 Triggers partial process on next frame.
@@ -1000,7 +1000,7 @@ Triggers partial process on next frame.
 updateNodeData(updates: NodeDataUpdate[]): void;
 ```
 
-Defined in: [graph.ts:780](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L780)
+Defined in: [graph.ts:780](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L780)
 
 Update a node's custom data. May affect style if the style function depends on data.
 Triggers partial process on next frame.
@@ -1023,7 +1023,7 @@ Triggers partial process on next frame.
 updateEdgeData(id: string, data: Record<string, unknown>): void;
 ```
 
-Defined in: [graph.ts:793](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L793)
+Defined in: [graph.ts:793](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L793)
 
 ###### Parameters [#parameters-27]
 
@@ -1042,7 +1042,7 @@ Defined in: [graph.ts:793](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 updateEdgeData(updates: EdgeDataUpdate[]): void;
 ```
 
-Defined in: [graph.ts:794](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L794)
+Defined in: [graph.ts:794](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L794)
 
 ###### Parameters [#parameters-28]
 
@@ -1066,7 +1066,7 @@ addEdge(edge: {
 }): string;
 ```
 
-Defined in: [graph.ts:811](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L811)
+Defined in: [graph.ts:811](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L811)
 
 Add an edge between two existing nodes. Returns the auto-generated edge ID.
 
@@ -1097,7 +1097,7 @@ addEdges(edges: {
 }[]): string[];
 ```
 
-Defined in: [graph.ts:835](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L835)
+Defined in: [graph.ts:835](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L835)
 
 Add multiple edges in one batch. Returns the auto-generated edge IDs.
 
@@ -1117,7 +1117,7 @@ Add multiple edges in one batch. Returns the auto-generated edge IDs.
 removeEdge(id: string): void;
 ```
 
-Defined in: [graph.ts:863](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L863)
+Defined in: [graph.ts:863](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L863)
 
 Remove an edge by its auto-generated ID.
 
@@ -1137,7 +1137,7 @@ Remove an edge by its auto-generated ID.
 removeEdges(ids: string[]): void;
 ```
 
-Defined in: [graph.ts:875](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L875)
+Defined in: [graph.ts:875](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L875)
 
 Remove multiple edges by their IDs.
 
@@ -1160,7 +1160,7 @@ setItemState(
    value: boolean): void;
 ```
 
-Defined in: [graph.ts:893](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L893)
+Defined in: [graph.ts:893](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L893)
 
 Set a state (e.g. 'active', 'selected', 'highlight') on a node or edge.
 The state affects the visual style if stateStyles are configured in node/edge config.
@@ -1184,7 +1184,7 @@ Triggers partial process on next frame to re-resolve styles.
 clearItemStates(id: string): void;
 ```
 
-Defined in: [graph.ts:915](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L915)
+Defined in: [graph.ts:915](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L915)
 
 Clear all states on a node or edge.
 
@@ -1204,7 +1204,7 @@ Clear all states on a node or edge.
 getNeighborNodes(nodeId: string): string[];
 ```
 
-Defined in: [graph.ts:937](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L937)
+Defined in: [graph.ts:937](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L937)
 
 Get all neighbor node IDs of a given node.
 
@@ -1228,7 +1228,7 @@ getAdjacentEdges(nodeId: string): {
 }[];
 ```
 
-Defined in: [graph.ts:945](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L945)
+Defined in: [graph.ts:945](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L945)
 
 Get all edges connected to a given node.
 
@@ -1252,7 +1252,7 @@ Get all edges connected to a given node.
 hasNode(id: string): boolean;
 ```
 
-Defined in: [graph.ts:955](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L955)
+Defined in: [graph.ts:955](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L955)
 
 Check if a node exists in the graph.
 
@@ -1272,7 +1272,7 @@ Check if a node exists in the graph.
 hasEdge(id: string): boolean;
 ```
 
-Defined in: [graph.ts:959](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L959)
+Defined in: [graph.ts:959](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L959)
 
 ###### Parameters [#parameters-38]
 
@@ -1290,7 +1290,7 @@ Defined in: [graph.ts:959](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 hasElement(id: string): boolean;
 ```
 
-Defined in: [graph.ts:963](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L963)
+Defined in: [graph.ts:963](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L963)
 
 ###### Parameters [#parameters-39]
 
@@ -1308,7 +1308,7 @@ Defined in: [graph.ts:963](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 getElementData(id: string): ElementModel | undefined;
 ```
 
-Defined in: [graph.ts:970](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L970)
+Defined in: [graph.ts:970](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L970)
 
 Get a read-only normalized element model by ID.
 
@@ -1333,7 +1333,7 @@ getElementPosition(id: string):
   | null;
 ```
 
-Defined in: [graph.ts:976](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L976)
+Defined in: [graph.ts:976](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L976)
 
 ###### Parameters [#parameters-41]
 
@@ -1355,7 +1355,7 @@ Defined in: [graph.ts:976](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 getNodeCount(): number;
 ```
 
-Defined in: [graph.ts:986](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L986)
+Defined in: [graph.ts:986](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L986)
 
 Get the total number of nodes.
 
@@ -1369,7 +1369,7 @@ Get the total number of nodes.
 getEdgeCount(): number;
 ```
 
-Defined in: [graph.ts:993](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L993)
+Defined in: [graph.ts:993](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L993)
 
 Get the total number of edges.
 
@@ -1383,7 +1383,7 @@ Get the total number of edges.
 findNodesByState(state: ElementState): string[];
 ```
 
-Defined in: [graph.ts:1003](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1003)
+Defined in: [graph.ts:1003](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1003)
 
 Find all node IDs that have the given state.
 Example: graph.findNodesByState('selected') → \['node1', 'node3']
@@ -1404,7 +1404,7 @@ Example: graph.findNodesByState('selected') → \['node1', 'node3']
 findEdgesByState(state: ElementState): string[];
 ```
 
-Defined in: [graph.ts:1012](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1012)
+Defined in: [graph.ts:1012](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1012)
 
 Find all edge IDs that have the given state.
 Example: graph.findEdgesByState('active') → \['e0', 'e5']
@@ -1425,7 +1425,7 @@ Example: graph.findEdgesByState('active') → \['e0', 'e5']
 findCombosByState(state: ElementState): string[];
 ```
 
-Defined in: [graph.ts:1020](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1020)
+Defined in: [graph.ts:1020](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1020)
 
 Find all combo IDs that have the given state.
 
@@ -1450,7 +1450,7 @@ getNodePosition(id: string):
   | null;
 ```
 
-Defined in: [graph.ts:1028](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1028)
+Defined in: [graph.ts:1028](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1028)
 
 Get a node's current position. Returns null if node not found.
 
@@ -1474,7 +1474,7 @@ Get a node's current position. Returns null if node not found.
 refresh(): void;
 ```
 
-Defined in: [graph.ts:1037](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1037)
+Defined in: [graph.ts:1037](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1037)
 
 Force a full re-render. Use sparingly — the scheduler handles this automatically.
 
@@ -1488,7 +1488,7 @@ Force a full re-render. Use sparingly — the scheduler handles this automatical
 on<Args>(event: string, handler: Handler<Args>): void;
 ```
 
-Defined in: [graph.ts:1046](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1046)
+Defined in: [graph.ts:1046](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1046)
 
 Subscribe to an event.
 
@@ -1515,7 +1515,7 @@ Subscribe to an event.
 off<Args>(event: string, handler: Handler<Args>): void;
 ```
 
-Defined in: [graph.ts:1052](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1052)
+Defined in: [graph.ts:1052](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1052)
 
 Unsubscribe from an event.
 
@@ -1542,7 +1542,7 @@ Unsubscribe from an event.
 once<Args>(event: string, handler: Handler<Args>): void;
 ```
 
-Defined in: [graph.ts:1057](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1057)
+Defined in: [graph.ts:1057](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1057)
 
 Subscribe to an event once.
 
@@ -1569,7 +1569,7 @@ Subscribe to an event once.
 setData(data: GraphData, options?: SetDataOptions): Promise<void>;
 ```
 
-Defined in: [graph.ts:1067](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1067)
+Defined in: [graph.ts:1067](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1067)
 
 Replace all graph data at runtime. Runs layout if configured, then triggers full re-render.
 
@@ -1590,7 +1590,7 @@ Replace all graph data at runtime. Runs layout if configured, then triggers full
 updateOptions(opts: Partial<Pick<GraphOptions, "node" | "edge" | "theme">>): void;
 ```
 
-Defined in: [graph.ts:1094](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1094)
+Defined in: [graph.ts:1094](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1094)
 
 Update visual configuration (node/edge styles, theme) at runtime.
 Triggers a full re-process to apply new styles.
@@ -1611,7 +1611,7 @@ Triggers a full re-process to apply new styles.
 setLayout(config: LayoutConfig): void;
 ```
 
-Defined in: [graph.ts:1133](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1133)
+Defined in: [graph.ts:1133](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1133)
 
 Set the layout configuration. Does not execute layout — call layout() after.
 
@@ -1631,7 +1631,7 @@ Set the layout configuration. Does not execute layout — call layout() after.
 layout(): Promise<void>;
 ```
 
-Defined in: [graph.ts:1141](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1141)
+Defined in: [graph.ts:1141](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1141)
 
 Execute the current layout algorithm and update node positions.
 
@@ -1645,7 +1645,7 @@ Execute the current layout algorithm and update node positions.
 cancelLayout(): void;
 ```
 
-Defined in: [graph.ts:1155](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1155)
+Defined in: [graph.ts:1155](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1155)
 
 ###### Returns [#returns-71]
 
@@ -1657,7 +1657,7 @@ Defined in: [graph.ts:1155](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 getNodeData(id: string): NodeModel | undefined;
 ```
 
-Defined in: [graph.ts:1163](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1163)
+Defined in: [graph.ts:1163](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1163)
 
 Get a read-only normalized node model by ID. O(1) lookup.
 
@@ -1677,7 +1677,7 @@ Get a read-only normalized node model by ID. O(1) lookup.
 getEdgeData(id: string): EdgeModel | undefined;
 ```
 
-Defined in: [graph.ts:1168](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1168)
+Defined in: [graph.ts:1168](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1168)
 
 Get a read-only normalized edge model by ID. O(1) lookup.
 
@@ -1701,7 +1701,7 @@ batchSetState(items: {
 }[]): void;
 ```
 
-Defined in: [graph.ts:1177](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1177)
+Defined in: [graph.ts:1177](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1177)
 
 Set states on multiple items in a single batch, triggering only one render.
 
@@ -1723,7 +1723,7 @@ Set states on multiple items in a single batch, triggering only one render.
 setElementStates(id: string, states: ElementState[]): void;
 ```
 
-Defined in: [graph.ts:1200](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1200)
+Defined in: [graph.ts:1200](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1200)
 
 ###### Parameters [#parameters-55]
 
@@ -1742,7 +1742,7 @@ Defined in: [graph.ts:1200](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 setElementStates(stateMap: Record<string, ElementState[]>): void;
 ```
 
-Defined in: [graph.ts:1201](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1201)
+Defined in: [graph.ts:1201](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1201)
 
 ###### Parameters [#parameters-56]
 
@@ -1760,7 +1760,7 @@ Defined in: [graph.ts:1201](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 getItemStates(id: string): ElementState[];
 ```
 
-Defined in: [graph.ts:1233](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1233)
+Defined in: [graph.ts:1233](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1233)
 
 Get all active states on a node or edge.
 
@@ -1780,7 +1780,7 @@ Get all active states on a node or edge.
 hideItem(id: string): void;
 ```
 
-Defined in: [graph.ts:1247](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1247)
+Defined in: [graph.ts:1247](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1247)
 
 Hide a node or edge (sets opacity to 0 via 'hidden' state).
 
@@ -1800,7 +1800,7 @@ Hide a node or edge (sets opacity to 0 via 'hidden' state).
 showItem(id: string): void;
 ```
 
-Defined in: [graph.ts:1254](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1254)
+Defined in: [graph.ts:1254](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1254)
 
 Show a previously hidden node or edge.
 
@@ -1820,7 +1820,7 @@ Show a previously hidden node or edge.
 focusItem(id: string | string[], padding?: number): void;
 ```
 
-Defined in: [graph.ts:1263](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1263)
+Defined in: [graph.ts:1263](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1263)
 
 Move the viewport to center on the specified node(s) without changing zoom.
 The padding parameter remains in the beta-compatible signature but does
@@ -1843,7 +1843,7 @@ not alter the current center-only behavior.
 collapseCombo(comboId: string): void;
 ```
 
-Defined in: [graph.ts:1293](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1293)
+Defined in: [graph.ts:1293](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1293)
 
 ###### Parameters [#parameters-61]
 
@@ -1861,7 +1861,7 @@ Defined in: [graph.ts:1293](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 expandCombo(comboId: string): void;
 ```
 
-Defined in: [graph.ts:1307](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1307)
+Defined in: [graph.ts:1307](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1307)
 
 ###### Parameters [#parameters-62]
 
@@ -1879,7 +1879,7 @@ Defined in: [graph.ts:1307](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 toggleCombo(comboId: string): void;
 ```
 
-Defined in: [graph.ts:1321](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1321)
+Defined in: [graph.ts:1321](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1321)
 
 ###### Parameters [#parameters-63]
 
@@ -1897,7 +1897,7 @@ Defined in: [graph.ts:1321](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 getComboData(id: string): ComboModel | undefined;
 ```
 
-Defined in: [graph.ts:1333](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1333)
+Defined in: [graph.ts:1333](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1333)
 
 Get a read-only normalized combo model by ID.
 
@@ -1920,7 +1920,7 @@ setComboState(
    value: boolean): void;
 ```
 
-Defined in: [graph.ts:1337](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1337)
+Defined in: [graph.ts:1337](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1337)
 
 ###### Parameters [#parameters-65]
 
@@ -1940,7 +1940,7 @@ Defined in: [graph.ts:1337](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 clearComboStates(comboId: string): void;
 ```
 
-Defined in: [graph.ts:1343](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1343)
+Defined in: [graph.ts:1343](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1343)
 
 ###### Parameters [#parameters-66]
 
@@ -1958,7 +1958,7 @@ Defined in: [graph.ts:1343](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 getComboStates(comboId: string): ElementState[];
 ```
 
-Defined in: [graph.ts:1349](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1349)
+Defined in: [graph.ts:1349](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1349)
 
 ###### Parameters [#parameters-67]
 
@@ -1979,7 +1979,7 @@ getComboChildren(id: string): {
 };
 ```
 
-Defined in: [graph.ts:1354](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1354)
+Defined in: [graph.ts:1354](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1354)
 
 ###### Parameters [#parameters-68]
 
@@ -2014,7 +2014,7 @@ combos: string[];
 getNodeCombo(nodeId: string): string | undefined;
 ```
 
-Defined in: [graph.ts:1363](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1363)
+Defined in: [graph.ts:1363](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1363)
 
 ###### Parameters [#parameters-69]
 
@@ -2032,7 +2032,7 @@ Defined in: [graph.ts:1363](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 addToCombo(nodeId: string, comboId: string): void;
 ```
 
-Defined in: [graph.ts:1367](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1367)
+Defined in: [graph.ts:1367](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1367)
 
 ###### Parameters [#parameters-70]
 
@@ -2051,7 +2051,7 @@ Defined in: [graph.ts:1367](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 removeFromCombo(nodeId: string): void;
 ```
 
-Defined in: [graph.ts:1379](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1379)
+Defined in: [graph.ts:1379](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1379)
 
 ###### Parameters [#parameters-71]
 
@@ -2069,7 +2069,7 @@ Defined in: [graph.ts:1379](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 createCombo(combo: ComboData, childNodeIds?: string[]): void;
 ```
 
-Defined in: [graph.ts:1390](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1390)
+Defined in: [graph.ts:1390](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1390)
 
 ###### Parameters [#parameters-72]
 
@@ -2088,7 +2088,7 @@ Defined in: [graph.ts:1390](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 removeCombo(comboId: string): void;
 ```
 
-Defined in: [graph.ts:1408](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/graph.ts#L1408)
+Defined in: [graph.ts:1408](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/graph.ts#L1408)
 
 ###### Parameters [#parameters-73]
 
@@ -2104,7 +2104,7 @@ Defined in: [graph.ts:1408](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef
 
 ### DragCanvasOptions [#dragcanvasoptions]
 
-Defined in: [behaviors/dragCanvas.ts:11](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/dragCanvas.ts#L11)
+Defined in: [behaviors/dragCanvas.ts:11](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/dragCanvas.ts#L11)
 
 #### Properties [#properties-2]
 
@@ -2114,7 +2114,7 @@ Defined in: [behaviors/dragCanvas.ts:11](https://github.com/antvis/G6Lite/blob/3
 optional ignoreModifierKeys?: boolean;
 ```
 
-Defined in: [behaviors/dragCanvas.ts:13](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/dragCanvas.ts#L13)
+Defined in: [behaviors/dragCanvas.ts:13](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/dragCanvas.ts#L13)
 
 Keep modifier-key gestures available for brush/lasso selection. Default: true.
 
@@ -2122,7 +2122,7 @@ Keep modifier-key gestures available for brush/lasso selection. Default: true.
 
 ### HoverHighlightConfig [#hoverhighlightconfig]
 
-Defined in: [behaviors/hoverHighlight.ts:16](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/hoverHighlight.ts#L16)
+Defined in: [behaviors/hoverHighlight.ts:16](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/hoverHighlight.ts#L16)
 
 #### Properties [#properties-3]
 
@@ -2132,7 +2132,7 @@ Defined in: [behaviors/hoverHighlight.ts:16](https://github.com/antvis/G6Lite/bl
 type: string;
 ```
 
-Defined in: [behaviors/hoverHighlight.ts:17](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/hoverHighlight.ts#L17)
+Defined in: [behaviors/hoverHighlight.ts:17](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/hoverHighlight.ts#L17)
 
 ##### degree? [#degree]
 
@@ -2140,7 +2140,7 @@ Defined in: [behaviors/hoverHighlight.ts:17](https://github.com/antvis/G6Lite/bl
 optional degree?: number;
 ```
 
-Defined in: [behaviors/hoverHighlight.ts:18](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/hoverHighlight.ts#L18)
+Defined in: [behaviors/hoverHighlight.ts:18](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/hoverHighlight.ts#L18)
 
 ##### inactiveState? [#inactivestate]
 
@@ -2148,13 +2148,13 @@ Defined in: [behaviors/hoverHighlight.ts:18](https://github.com/antvis/G6Lite/bl
 optional inactiveState?: string;
 ```
 
-Defined in: [behaviors/hoverHighlight.ts:19](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/hoverHighlight.ts#L19)
+Defined in: [behaviors/hoverHighlight.ts:19](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/hoverHighlight.ts#L19)
 
 ***
 
 ### BehaviorConfig [#behaviorconfig]
 
-Defined in: [behaviors/index.ts:54](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/index.ts#L54)
+Defined in: [behaviors/index.ts:54](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/index.ts#L54)
 
 #### Indexable [#indexable]
 
@@ -2170,13 +2170,13 @@ Defined in: [behaviors/index.ts:54](https://github.com/antvis/G6Lite/blob/3c62ec
 type: string;
 ```
 
-Defined in: [behaviors/index.ts:55](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/index.ts#L55)
+Defined in: [behaviors/index.ts:55](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/index.ts#L55)
 
 ***
 
 ### LassoSelectOptions [#lassoselectoptions]
 
-Defined in: [behaviors/lassoSelect.ts:19](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/lassoSelect.ts#L19)
+Defined in: [behaviors/lassoSelect.ts:19](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/lassoSelect.ts#L19)
 
 #### Properties [#properties-5]
 
@@ -2186,7 +2186,7 @@ Defined in: [behaviors/lassoSelect.ts:19](https://github.com/antvis/G6Lite/blob/
 optional key?: "shift" | "ctrl" | null;
 ```
 
-Defined in: [behaviors/lassoSelect.ts:21](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/lassoSelect.ts#L21)
+Defined in: [behaviors/lassoSelect.ts:21](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/lassoSelect.ts#L21)
 
 Modifier key to activate. Default: null (always active)
 
@@ -2196,7 +2196,7 @@ Modifier key to activate. Default: null (always active)
 optional throttleMs?: number;
 ```
 
-Defined in: [behaviors/lassoSelect.ts:23](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/lassoSelect.ts#L23)
+Defined in: [behaviors/lassoSelect.ts:23](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/lassoSelect.ts#L23)
 
 Throttle interval for real-time selection during drag (ms). Default: 100
 
@@ -2204,7 +2204,7 @@ Throttle interval for real-time selection during drag (ms). Default: 100
 
 ### TooltipContext [#tooltipcontext]
 
-Defined in: [behaviors/tooltip.ts:23](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L23)
+Defined in: [behaviors/tooltip.ts:23](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L23)
 
 #### Properties [#properties-6]
 
@@ -2214,7 +2214,7 @@ Defined in: [behaviors/tooltip.ts:23](https://github.com/antvis/G6Lite/blob/3c62
 itemType: "node" | "edge";
 ```
 
-Defined in: [behaviors/tooltip.ts:24](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L24)
+Defined in: [behaviors/tooltip.ts:24](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L24)
 
 ##### nodeId? [#nodeid]
 
@@ -2222,7 +2222,7 @@ Defined in: [behaviors/tooltip.ts:24](https://github.com/antvis/G6Lite/blob/3c62
 optional nodeId?: string;
 ```
 
-Defined in: [behaviors/tooltip.ts:25](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L25)
+Defined in: [behaviors/tooltip.ts:25](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L25)
 
 ##### edgeId? [#edgeid]
 
@@ -2230,7 +2230,7 @@ Defined in: [behaviors/tooltip.ts:25](https://github.com/antvis/G6Lite/blob/3c62
 optional edgeId?: string;
 ```
 
-Defined in: [behaviors/tooltip.ts:26](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L26)
+Defined in: [behaviors/tooltip.ts:26](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L26)
 
 ##### edgeIndex? [#edgeindex]
 
@@ -2238,7 +2238,7 @@ Defined in: [behaviors/tooltip.ts:26](https://github.com/antvis/G6Lite/blob/3c62
 optional edgeIndex?: number;
 ```
 
-Defined in: [behaviors/tooltip.ts:27](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L27)
+Defined in: [behaviors/tooltip.ts:27](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L27)
 
 ##### source? [#source]
 
@@ -2246,7 +2246,7 @@ Defined in: [behaviors/tooltip.ts:27](https://github.com/antvis/G6Lite/blob/3c62
 optional source?: string;
 ```
 
-Defined in: [behaviors/tooltip.ts:28](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L28)
+Defined in: [behaviors/tooltip.ts:28](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L28)
 
 ##### target? [#target]
 
@@ -2254,7 +2254,7 @@ Defined in: [behaviors/tooltip.ts:28](https://github.com/antvis/G6Lite/blob/3c62
 optional target?: string;
 ```
 
-Defined in: [behaviors/tooltip.ts:29](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L29)
+Defined in: [behaviors/tooltip.ts:29](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L29)
 
 ##### data? [#data]
 
@@ -2262,7 +2262,7 @@ Defined in: [behaviors/tooltip.ts:29](https://github.com/antvis/G6Lite/blob/3c62
 optional data?: Record<string, unknown>;
 ```
 
-Defined in: [behaviors/tooltip.ts:30](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L30)
+Defined in: [behaviors/tooltip.ts:30](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L30)
 
 ##### event [#event]
 
@@ -2270,13 +2270,13 @@ Defined in: [behaviors/tooltip.ts:30](https://github.com/antvis/G6Lite/blob/3c62
 event: MouseEvent;
 ```
 
-Defined in: [behaviors/tooltip.ts:31](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L31)
+Defined in: [behaviors/tooltip.ts:31](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L31)
 
 ***
 
 ### TooltipOptions [#tooltipoptions]
 
-Defined in: [behaviors/tooltip.ts:34](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L34)
+Defined in: [behaviors/tooltip.ts:34](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L34)
 
 #### Properties [#properties-7]
 
@@ -2286,7 +2286,7 @@ Defined in: [behaviors/tooltip.ts:34](https://github.com/antvis/G6Lite/blob/3c62
 optional trigger?: "click" | "hover";
 ```
 
-Defined in: [behaviors/tooltip.ts:36](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L36)
+Defined in: [behaviors/tooltip.ts:36](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L36)
 
 Trigger mode. Default: 'hover'.
 
@@ -2296,7 +2296,7 @@ Trigger mode. Default: 'hover'.
 optional getContent?: (ctx: TooltipContext) => string | HTMLElement;
 ```
 
-Defined in: [behaviors/tooltip.ts:42](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L42)
+Defined in: [behaviors/tooltip.ts:42](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L42)
 
 Build the tooltip body. A custom string is treated as trusted HTML for
 backward compatibility; escape untrusted values or return an HTMLElement
@@ -2318,7 +2318,7 @@ whose textContent you control.
 optional enable?: (ctx: TooltipContext) => boolean;
 ```
 
-Defined in: [behaviors/tooltip.ts:44](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L44)
+Defined in: [behaviors/tooltip.ts:44](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L44)
 
 Gate display per element. Return false to suppress. Default: always show.
 
@@ -2338,7 +2338,7 @@ Gate display per element. Return false to suppress. Default: always show.
 optional offset?: [number, number];
 ```
 
-Defined in: [behaviors/tooltip.ts:46](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L46)
+Defined in: [behaviors/tooltip.ts:46](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L46)
 
 Pixel offset \[dx, dy] from the pointer. Default: \[10, 10].
 
@@ -2348,7 +2348,7 @@ Pixel offset \[dx, dy] from the pointer. Default: \[10, 10].
 optional delay?: number;
 ```
 
-Defined in: [behaviors/tooltip.ts:48](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L48)
+Defined in: [behaviors/tooltip.ts:48](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L48)
 
 Hover debounce in ms before show. Default: 80.
 
@@ -2358,7 +2358,7 @@ Hover debounce in ms before show. Default: 80.
 optional className?: string;
 ```
 
-Defined in: [behaviors/tooltip.ts:50](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L50)
+Defined in: [behaviors/tooltip.ts:50](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L50)
 
 Overlay class name. Default: 'g6lite-tooltip'.
 
@@ -2368,7 +2368,7 @@ Overlay class name. Default: 'g6lite-tooltip'.
 optional container?: HTMLElement;
 ```
 
-Defined in: [behaviors/tooltip.ts:52](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/tooltip.ts#L52)
+Defined in: [behaviors/tooltip.ts:52](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/tooltip.ts#L52)
 
 DOM mount and collision boundary. Defaults to document.body.
 
@@ -2376,7 +2376,7 @@ DOM mount and collision boundary. Defaults to document.body.
 
 ### ExtensionNodeData [#extensionnodedata]
 
-Defined in: [extensions/contracts.ts:17](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L17)
+Defined in: [extensions/contracts.ts:17](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L17)
 
 Read-only node snapshot exposed to extensions.
 
@@ -2388,7 +2388,7 @@ Read-only node snapshot exposed to extensions.
 readonly id: string;
 ```
 
-Defined in: [extensions/contracts.ts:18](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L18)
+Defined in: [extensions/contracts.ts:18](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L18)
 
 ##### name? [#name]
 
@@ -2396,7 +2396,7 @@ Defined in: [extensions/contracts.ts:18](https://github.com/antvis/G6Lite/blob/3
 readonly optional name?: string;
 ```
 
-Defined in: [extensions/contracts.ts:19](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L19)
+Defined in: [extensions/contracts.ts:19](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L19)
 
 ##### x [#x-4]
 
@@ -2404,7 +2404,7 @@ Defined in: [extensions/contracts.ts:19](https://github.com/antvis/G6Lite/blob/3
 readonly x: number;
 ```
 
-Defined in: [extensions/contracts.ts:20](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L20)
+Defined in: [extensions/contracts.ts:20](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L20)
 
 ##### y [#y-4]
 
@@ -2412,7 +2412,7 @@ Defined in: [extensions/contracts.ts:20](https://github.com/antvis/G6Lite/blob/3
 readonly y: number;
 ```
 
-Defined in: [extensions/contracts.ts:21](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L21)
+Defined in: [extensions/contracts.ts:21](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L21)
 
 ##### data? [#data-1]
 
@@ -2420,7 +2420,7 @@ Defined in: [extensions/contracts.ts:21](https://github.com/antvis/G6Lite/blob/3
 readonly optional data?: Readonly<Record<string, unknown>>;
 ```
 
-Defined in: [extensions/contracts.ts:22](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L22)
+Defined in: [extensions/contracts.ts:22](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L22)
 
 ##### states [#states]
 
@@ -2428,13 +2428,13 @@ Defined in: [extensions/contracts.ts:22](https://github.com/antvis/G6Lite/blob/3
 readonly states: readonly ElementState[];
 ```
 
-Defined in: [extensions/contracts.ts:23](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L23)
+Defined in: [extensions/contracts.ts:23](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L23)
 
 ***
 
 ### ExtensionEdgeData [#extensionedgedata]
 
-Defined in: [extensions/contracts.ts:27](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L27)
+Defined in: [extensions/contracts.ts:27](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L27)
 
 Read-only edge snapshot exposed to extensions.
 
@@ -2446,7 +2446,7 @@ Read-only edge snapshot exposed to extensions.
 readonly id: string;
 ```
 
-Defined in: [extensions/contracts.ts:28](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L28)
+Defined in: [extensions/contracts.ts:28](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L28)
 
 ##### source [#source-1]
 
@@ -2454,7 +2454,7 @@ Defined in: [extensions/contracts.ts:28](https://github.com/antvis/G6Lite/blob/3
 readonly source: string;
 ```
 
-Defined in: [extensions/contracts.ts:29](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L29)
+Defined in: [extensions/contracts.ts:29](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L29)
 
 ##### target [#target-1]
 
@@ -2462,7 +2462,7 @@ Defined in: [extensions/contracts.ts:29](https://github.com/antvis/G6Lite/blob/3
 readonly target: string;
 ```
 
-Defined in: [extensions/contracts.ts:30](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L30)
+Defined in: [extensions/contracts.ts:30](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L30)
 
 ##### data? [#data-2]
 
@@ -2470,7 +2470,7 @@ Defined in: [extensions/contracts.ts:30](https://github.com/antvis/G6Lite/blob/3
 readonly optional data?: Readonly<Record<string, unknown>>;
 ```
 
-Defined in: [extensions/contracts.ts:31](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L31)
+Defined in: [extensions/contracts.ts:31](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L31)
 
 ##### states [#states-1]
 
@@ -2478,13 +2478,13 @@ Defined in: [extensions/contracts.ts:31](https://github.com/antvis/G6Lite/blob/3
 readonly states: readonly ElementState[];
 ```
 
-Defined in: [extensions/contracts.ts:32](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L32)
+Defined in: [extensions/contracts.ts:32](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L32)
 
 ***
 
 ### ExtensionDataContext [#extensiondatacontext]
 
-Defined in: [extensions/contracts.ts:35](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L35)
+Defined in: [extensions/contracts.ts:35](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L35)
 
 #### Methods [#methods-4]
 
@@ -2494,7 +2494,7 @@ Defined in: [extensions/contracts.ts:35](https://github.com/antvis/G6Lite/blob/3
 getNode(id: string): ExtensionNodeData | undefined;
 ```
 
-Defined in: [extensions/contracts.ts:36](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L36)
+Defined in: [extensions/contracts.ts:36](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L36)
 
 ###### Parameters [#parameters-76]
 
@@ -2512,7 +2512,7 @@ Defined in: [extensions/contracts.ts:36](https://github.com/antvis/G6Lite/blob/3
 getEdge(id: string): ExtensionEdgeData | undefined;
 ```
 
-Defined in: [extensions/contracts.ts:37](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L37)
+Defined in: [extensions/contracts.ts:37](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L37)
 
 ###### Parameters [#parameters-77]
 
@@ -2530,7 +2530,7 @@ Defined in: [extensions/contracts.ts:37](https://github.com/antvis/G6Lite/blob/3
 getNodeIds(): string[];
 ```
 
-Defined in: [extensions/contracts.ts:38](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L38)
+Defined in: [extensions/contracts.ts:38](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L38)
 
 ###### Returns [#returns-98]
 
@@ -2542,7 +2542,7 @@ Defined in: [extensions/contracts.ts:38](https://github.com/antvis/G6Lite/blob/3
 getEdgeIds(): string[];
 ```
 
-Defined in: [extensions/contracts.ts:39](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L39)
+Defined in: [extensions/contracts.ts:39](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L39)
 
 ###### Returns [#returns-99]
 
@@ -2554,7 +2554,7 @@ Defined in: [extensions/contracts.ts:39](https://github.com/antvis/G6Lite/blob/3
 updateNode(id: string, data: Record<string, unknown>): void;
 ```
 
-Defined in: [extensions/contracts.ts:40](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L40)
+Defined in: [extensions/contracts.ts:40](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L40)
 
 ###### Parameters [#parameters-78]
 
@@ -2573,7 +2573,7 @@ Defined in: [extensions/contracts.ts:40](https://github.com/antvis/G6Lite/blob/3
 updateEdge(id: string, data: Record<string, unknown>): void;
 ```
 
-Defined in: [extensions/contracts.ts:41](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L41)
+Defined in: [extensions/contracts.ts:41](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L41)
 
 ###### Parameters [#parameters-79]
 
@@ -2590,7 +2590,7 @@ Defined in: [extensions/contracts.ts:41](https://github.com/antvis/G6Lite/blob/3
 
 ### ExtensionStateContext [#extensionstatecontext]
 
-Defined in: [extensions/contracts.ts:44](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L44)
+Defined in: [extensions/contracts.ts:44](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L44)
 
 #### Methods [#methods-5]
 
@@ -2600,7 +2600,7 @@ Defined in: [extensions/contracts.ts:44](https://github.com/antvis/G6Lite/blob/3
 set(id: string, states: ElementState[]): void;
 ```
 
-Defined in: [extensions/contracts.ts:45](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L45)
+Defined in: [extensions/contracts.ts:45](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L45)
 
 ###### Parameters [#parameters-80]
 
@@ -2619,7 +2619,7 @@ Defined in: [extensions/contracts.ts:45](https://github.com/antvis/G6Lite/blob/3
 setAll(stateMap: Record<string, ElementState[]>): void;
 ```
 
-Defined in: [extensions/contracts.ts:46](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L46)
+Defined in: [extensions/contracts.ts:46](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L46)
 
 ###### Parameters [#parameters-81]
 
@@ -2637,7 +2637,7 @@ Defined in: [extensions/contracts.ts:46](https://github.com/antvis/G6Lite/blob/3
 get(id: string): ElementState[];
 ```
 
-Defined in: [extensions/contracts.ts:47](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L47)
+Defined in: [extensions/contracts.ts:47](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L47)
 
 ###### Parameters [#parameters-82]
 
@@ -2655,7 +2655,7 @@ Defined in: [extensions/contracts.ts:47](https://github.com/antvis/G6Lite/blob/3
 clear(id: string): void;
 ```
 
-Defined in: [extensions/contracts.ts:48](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L48)
+Defined in: [extensions/contracts.ts:48](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L48)
 
 ###### Parameters [#parameters-83]
 
@@ -2671,7 +2671,7 @@ Defined in: [extensions/contracts.ts:48](https://github.com/antvis/G6Lite/blob/3
 
 ### ExtensionViewportContext [#extensionviewportcontext]
 
-Defined in: [extensions/contracts.ts:51](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L51)
+Defined in: [extensions/contracts.ts:51](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L51)
 
 #### Methods [#methods-6]
 
@@ -2687,7 +2687,7 @@ screenToGraph(point: {
 };
 ```
 
-Defined in: [extensions/contracts.ts:52](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L52)
+Defined in: [extensions/contracts.ts:52](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L52)
 
 ###### Parameters [#parameters-84]
 
@@ -2730,7 +2730,7 @@ graphToScreen(point: {
 };
 ```
 
-Defined in: [extensions/contracts.ts:53](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L53)
+Defined in: [extensions/contracts.ts:53](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L53)
 
 ###### Parameters [#parameters-85]
 
@@ -2767,7 +2767,7 @@ y: number;
 getZoom(): number;
 ```
 
-Defined in: [extensions/contracts.ts:54](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L54)
+Defined in: [extensions/contracts.ts:54](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L54)
 
 ###### Returns [#returns-108]
 
@@ -2777,7 +2777,7 @@ Defined in: [extensions/contracts.ts:54](https://github.com/antvis/G6Lite/blob/3
 
 ### ExtensionContext [#extensioncontext]
 
-Defined in: [extensions/contracts.ts:57](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L57)
+Defined in: [extensions/contracts.ts:57](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L57)
 
 #### Properties [#properties-10]
 
@@ -2787,7 +2787,7 @@ Defined in: [extensions/contracts.ts:57](https://github.com/antvis/G6Lite/blob/3
 graph: Graph;
 ```
 
-Defined in: [extensions/contracts.ts:59](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L59)
+Defined in: [extensions/contracts.ts:59](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L59)
 
 ###### Deprecated [#deprecated-3]
 
@@ -2799,7 +2799,7 @@ Use data, state, viewport, and requestRender instead.
 data: ExtensionDataContext;
 ```
 
-Defined in: [extensions/contracts.ts:60](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L60)
+Defined in: [extensions/contracts.ts:60](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L60)
 
 ##### state [#state]
 
@@ -2807,7 +2807,7 @@ Defined in: [extensions/contracts.ts:60](https://github.com/antvis/G6Lite/blob/3
 state: ExtensionStateContext;
 ```
 
-Defined in: [extensions/contracts.ts:61](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L61)
+Defined in: [extensions/contracts.ts:61](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L61)
 
 ##### viewport [#viewport]
 
@@ -2815,7 +2815,7 @@ Defined in: [extensions/contracts.ts:61](https://github.com/antvis/G6Lite/blob/3
 viewport: ExtensionViewportContext;
 ```
 
-Defined in: [extensions/contracts.ts:62](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L62)
+Defined in: [extensions/contracts.ts:62](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L62)
 
 #### Methods [#methods-7]
 
@@ -2825,7 +2825,7 @@ Defined in: [extensions/contracts.ts:62](https://github.com/antvis/G6Lite/blob/3
 requestRender(): void;
 ```
 
-Defined in: [extensions/contracts.ts:63](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L63)
+Defined in: [extensions/contracts.ts:63](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L63)
 
 ###### Returns [#returns-109]
 
@@ -2843,7 +2843,7 @@ screenToGraph(point: {
 };
 ```
 
-Defined in: [extensions/contracts.ts:65](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L65)
+Defined in: [extensions/contracts.ts:65](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L65)
 
 ###### Parameters [#parameters-86]
 
@@ -2890,7 +2890,7 @@ graphToScreen(point: {
 };
 ```
 
-Defined in: [extensions/contracts.ts:67](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L67)
+Defined in: [extensions/contracts.ts:67](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L67)
 
 ###### Parameters [#parameters-87]
 
@@ -2931,7 +2931,7 @@ Use viewport.graphToScreen.
 getZoom(): number;
 ```
 
-Defined in: [extensions/contracts.ts:69](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L69)
+Defined in: [extensions/contracts.ts:69](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L69)
 
 ###### Returns [#returns-112]
 
@@ -2947,7 +2947,7 @@ Use viewport.getZoom.
 isDestroyed(): boolean;
 ```
 
-Defined in: [extensions/contracts.ts:70](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L70)
+Defined in: [extensions/contracts.ts:70](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L70)
 
 ###### Returns [#returns-113]
 
@@ -2957,7 +2957,7 @@ Defined in: [extensions/contracts.ts:70](https://github.com/antvis/G6Lite/blob/3
 
 ### Extension [#extension]
 
-Defined in: [extensions/contracts.ts:73](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L73)
+Defined in: [extensions/contracts.ts:73](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L73)
 
 #### Extended by [#extended-by-1]
 
@@ -2980,7 +2980,7 @@ Defined in: [extensions/contracts.ts:73](https://github.com/antvis/G6Lite/blob/3
 optional init(context: ExtensionContext, options: TOptions): void;
 ```
 
-Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L74)
+Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L74)
 
 ###### Parameters [#parameters-88]
 
@@ -2999,7 +2999,7 @@ Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/3
 optional update(options: Partial<TOptions>): void;
 ```
 
-Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L75)
+Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L75)
 
 ###### Parameters [#parameters-89]
 
@@ -3017,7 +3017,7 @@ Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/3
 optional destroy(): void;
 ```
 
-Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L76)
+Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L76)
 
 ###### Returns [#returns-116]
 
@@ -3027,7 +3027,7 @@ Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/3
 
 ### LayoutExtension [#layoutextension]
 
-Defined in: [extensions/contracts.ts:79](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L79)
+Defined in: [extensions/contracts.ts:79](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L79)
 
 #### Extends [#extends-1]
 
@@ -3047,7 +3047,7 @@ Defined in: [extensions/contracts.ts:79](https://github.com/antvis/G6Lite/blob/3
 optional init(context: ExtensionContext, options: TOptions): void;
 ```
 
-Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L74)
+Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L74)
 
 ###### Parameters [#parameters-90]
 
@@ -3070,7 +3070,7 @@ Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/3
 optional update(options: Partial<TOptions>): void;
 ```
 
-Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L75)
+Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L75)
 
 ###### Parameters [#parameters-91]
 
@@ -3092,7 +3092,7 @@ Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/3
 optional destroy(): void;
 ```
 
-Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L76)
+Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L76)
 
 ###### Returns [#returns-119]
 
@@ -3125,7 +3125,7 @@ execute(data: GraphData, context: {
 }>;
 ```
 
-Defined in: [extensions/contracts.ts:80](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L80)
+Defined in: [extensions/contracts.ts:80](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L80)
 
 ###### Parameters [#parameters-92]
 
@@ -3157,7 +3157,7 @@ Defined in: [extensions/contracts.ts:80](https://github.com/antvis/G6Lite/blob/3
 
 ### BehaviorExtension [#behaviorextension]
 
-Defined in: [extensions/contracts.ts:95](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L95)
+Defined in: [extensions/contracts.ts:95](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L95)
 
 #### Extends [#extends-2]
 
@@ -3177,7 +3177,7 @@ Defined in: [extensions/contracts.ts:95](https://github.com/antvis/G6Lite/blob/3
 optional init(context: ExtensionContext, options: TOptions): void;
 ```
 
-Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L74)
+Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L74)
 
 ###### Parameters [#parameters-93]
 
@@ -3200,7 +3200,7 @@ Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/3
 optional update(options: Partial<TOptions>): void;
 ```
 
-Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L75)
+Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L75)
 
 ###### Parameters [#parameters-94]
 
@@ -3222,7 +3222,7 @@ Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/3
 optional destroy(): void;
 ```
 
-Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L76)
+Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L76)
 
 ###### Returns [#returns-123]
 
@@ -3238,7 +3238,7 @@ Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/3
 getEvents(): Record<string, (event: GraphElementEvent) => void>;
 ```
 
-Defined in: [extensions/contracts.ts:96](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L96)
+Defined in: [extensions/contracts.ts:96](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L96)
 
 ###### Returns [#returns-124]
 
@@ -3248,7 +3248,7 @@ Defined in: [extensions/contracts.ts:96](https://github.com/antvis/G6Lite/blob/3
 
 ### TransformExtension [#transformextension]
 
-Defined in: [extensions/contracts.ts:99](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L99)
+Defined in: [extensions/contracts.ts:99](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L99)
 
 #### Extends [#extends-3]
 
@@ -3268,7 +3268,7 @@ Defined in: [extensions/contracts.ts:99](https://github.com/antvis/G6Lite/blob/3
 optional init(context: ExtensionContext, options: TOptions): void;
 ```
 
-Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L74)
+Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L74)
 
 ###### Parameters [#parameters-95]
 
@@ -3291,7 +3291,7 @@ Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/3
 optional update(options: Partial<TOptions>): void;
 ```
 
-Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L75)
+Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L75)
 
 ###### Parameters [#parameters-96]
 
@@ -3313,7 +3313,7 @@ Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/3
 optional destroy(): void;
 ```
 
-Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L76)
+Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L76)
 
 ###### Returns [#returns-127]
 
@@ -3329,7 +3329,7 @@ Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/3
 optional beforeRender(data: GraphData): GraphData;
 ```
 
-Defined in: [extensions/contracts.ts:102](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L102)
+Defined in: [extensions/contracts.ts:102](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L102)
 
 ###### Parameters [#parameters-97]
 
@@ -3345,7 +3345,7 @@ Defined in: [extensions/contracts.ts:102](https://github.com/antvis/G6Lite/blob/
 
 ### PluginExtension [#pluginextension]
 
-Defined in: [extensions/contracts.ts:105](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L105)
+Defined in: [extensions/contracts.ts:105](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L105)
 
 #### Extends [#extends-4]
 
@@ -3365,7 +3365,7 @@ Defined in: [extensions/contracts.ts:105](https://github.com/antvis/G6Lite/blob/
 optional init(context: ExtensionContext, options: TOptions): void;
 ```
 
-Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L74)
+Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L74)
 
 ###### Parameters [#parameters-98]
 
@@ -3388,7 +3388,7 @@ Defined in: [extensions/contracts.ts:74](https://github.com/antvis/G6Lite/blob/3
 optional update(options: Partial<TOptions>): void;
 ```
 
-Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L75)
+Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L75)
 
 ###### Parameters [#parameters-99]
 
@@ -3410,7 +3410,7 @@ Defined in: [extensions/contracts.ts:75](https://github.com/antvis/G6Lite/blob/3
 optional destroy(): void;
 ```
 
-Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L76)
+Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L76)
 
 ###### Returns [#returns-131]
 
@@ -3426,7 +3426,7 @@ Defined in: [extensions/contracts.ts:76](https://github.com/antvis/G6Lite/blob/3
 optional mount(container: HTMLElement): void;
 ```
 
-Defined in: [extensions/contracts.ts:106](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L106)
+Defined in: [extensions/contracts.ts:106](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L106)
 
 ###### Parameters [#parameters-100]
 
@@ -3442,7 +3442,7 @@ Defined in: [extensions/contracts.ts:106](https://github.com/antvis/G6Lite/blob/
 
 ### EdgeExtension [#edgeextension]
 
-Defined in: [extensions/contracts.ts:110](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L110)
+Defined in: [extensions/contracts.ts:110](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L110)
 
 Immutable edge rendering descriptor; Graph owns all runtime state.
 
@@ -3454,7 +3454,7 @@ Immutable edge rendering descriptor; Graph owns all runtime state.
 optional base?: "line" | "arc" | "polyline" | "cubic";
 ```
 
-Defined in: [extensions/contracts.ts:111](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L111)
+Defined in: [extensions/contracts.ts:111](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L111)
 
 ##### style? [#style-2]
 
@@ -3484,7 +3484,7 @@ optional style?: Partial<{
 }>;
 ```
 
-Defined in: [extensions/contracts.ts:112](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L112)
+Defined in: [extensions/contracts.ts:112](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L112)
 
 ##### stateStyles? [#statestyles-2]
 
@@ -3492,7 +3492,7 @@ Defined in: [extensions/contracts.ts:112](https://github.com/antvis/G6Lite/blob/
 optional stateStyles?: Partial<Record<string, EdgeStateStyleOverride>>;
 ```
 
-Defined in: [extensions/contracts.ts:113](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L113)
+Defined in: [extensions/contracts.ts:113](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L113)
 
 #### Methods [#methods-13]
 
@@ -3505,7 +3505,7 @@ optional getStyle(
 edge: GraphEdge): Partial<NonNullable<EdgeConfig["style"]>>;
 ```
 
-Defined in: [extensions/contracts.ts:114](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L114)
+Defined in: [extensions/contracts.ts:114](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L114)
 
 ###### Parameters [#parameters-101]
 
@@ -3523,7 +3523,7 @@ Defined in: [extensions/contracts.ts:114](https://github.com/antvis/G6Lite/blob/
 
 ### DecorationMeasureParams [#decorationmeasureparams]
 
-Defined in: [extensions/contracts.ts:121](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L121)
+Defined in: [extensions/contracts.ts:121](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L121)
 
 #### Extended by [#extended-by-2]
 
@@ -3543,7 +3543,7 @@ Defined in: [extensions/contracts.ts:121](https://github.com/antvis/G6Lite/blob/
 ctx: CanvasRenderingContext2D;
 ```
 
-Defined in: [extensions/contracts.ts:122](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L122)
+Defined in: [extensions/contracts.ts:122](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L122)
 
 ##### node [#node]
 
@@ -3551,7 +3551,7 @@ Defined in: [extensions/contracts.ts:122](https://github.com/antvis/G6Lite/blob/
 node: GraphNode;
 ```
 
-Defined in: [extensions/contracts.ts:123](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L123)
+Defined in: [extensions/contracts.ts:123](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L123)
 
 ##### data [#data-4]
 
@@ -3559,7 +3559,7 @@ Defined in: [extensions/contracts.ts:123](https://github.com/antvis/G6Lite/blob/
 data: T;
 ```
 
-Defined in: [extensions/contracts.ts:124](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L124)
+Defined in: [extensions/contracts.ts:124](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L124)
 
 ##### dpr [#dpr]
 
@@ -3567,7 +3567,7 @@ Defined in: [extensions/contracts.ts:124](https://github.com/antvis/G6Lite/blob/
 dpr: number;
 ```
 
-Defined in: [extensions/contracts.ts:125](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L125)
+Defined in: [extensions/contracts.ts:125](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L125)
 
 ##### zoom [#zoom]
 
@@ -3575,7 +3575,7 @@ Defined in: [extensions/contracts.ts:125](https://github.com/antvis/G6Lite/blob/
 zoom: number;
 ```
 
-Defined in: [extensions/contracts.ts:126](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L126)
+Defined in: [extensions/contracts.ts:126](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L126)
 
 ##### nodeWidth [#nodewidth]
 
@@ -3583,7 +3583,7 @@ Defined in: [extensions/contracts.ts:126](https://github.com/antvis/G6Lite/blob/
 nodeWidth: number;
 ```
 
-Defined in: [extensions/contracts.ts:128](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L128)
+Defined in: [extensions/contracts.ts:128](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L128)
 
 Final node dimensions in Canvas backing-store pixels.
 
@@ -3593,7 +3593,7 @@ Final node dimensions in Canvas backing-store pixels.
 nodeHeight: number;
 ```
 
-Defined in: [extensions/contracts.ts:130](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L130)
+Defined in: [extensions/contracts.ts:130](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L130)
 
 Final node dimensions in Canvas backing-store pixels.
 
@@ -3601,7 +3601,7 @@ Final node dimensions in Canvas backing-store pixels.
 
 ### DecorationDrawParams [#decorationdrawparams]
 
-Defined in: [extensions/contracts.ts:133](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L133)
+Defined in: [extensions/contracts.ts:133](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L133)
 
 #### Extends [#extends-5]
 
@@ -3621,7 +3621,7 @@ Defined in: [extensions/contracts.ts:133](https://github.com/antvis/G6Lite/blob/
 ctx: CanvasRenderingContext2D;
 ```
 
-Defined in: [extensions/contracts.ts:122](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L122)
+Defined in: [extensions/contracts.ts:122](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L122)
 
 ###### Inherited from [#inherited-from-16]
 
@@ -3633,7 +3633,7 @@ Defined in: [extensions/contracts.ts:122](https://github.com/antvis/G6Lite/blob/
 node: GraphNode;
 ```
 
-Defined in: [extensions/contracts.ts:123](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L123)
+Defined in: [extensions/contracts.ts:123](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L123)
 
 ###### Inherited from [#inherited-from-17]
 
@@ -3645,7 +3645,7 @@ Defined in: [extensions/contracts.ts:123](https://github.com/antvis/G6Lite/blob/
 data: T;
 ```
 
-Defined in: [extensions/contracts.ts:124](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L124)
+Defined in: [extensions/contracts.ts:124](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L124)
 
 ###### Inherited from [#inherited-from-18]
 
@@ -3657,7 +3657,7 @@ Defined in: [extensions/contracts.ts:124](https://github.com/antvis/G6Lite/blob/
 dpr: number;
 ```
 
-Defined in: [extensions/contracts.ts:125](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L125)
+Defined in: [extensions/contracts.ts:125](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L125)
 
 ###### Inherited from [#inherited-from-19]
 
@@ -3669,7 +3669,7 @@ Defined in: [extensions/contracts.ts:125](https://github.com/antvis/G6Lite/blob/
 zoom: number;
 ```
 
-Defined in: [extensions/contracts.ts:126](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L126)
+Defined in: [extensions/contracts.ts:126](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L126)
 
 ###### Inherited from [#inherited-from-20]
 
@@ -3681,7 +3681,7 @@ Defined in: [extensions/contracts.ts:126](https://github.com/antvis/G6Lite/blob/
 nodeWidth: number;
 ```
 
-Defined in: [extensions/contracts.ts:128](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L128)
+Defined in: [extensions/contracts.ts:128](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L128)
 
 Final node dimensions in Canvas backing-store pixels.
 
@@ -3695,7 +3695,7 @@ Final node dimensions in Canvas backing-store pixels.
 nodeHeight: number;
 ```
 
-Defined in: [extensions/contracts.ts:130](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L130)
+Defined in: [extensions/contracts.ts:130](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L130)
 
 Final node dimensions in Canvas backing-store pixels.
 
@@ -3709,13 +3709,13 @@ Final node dimensions in Canvas backing-store pixels.
 layout: Readonly<LabelLayout>;
 ```
 
-Defined in: [extensions/contracts.ts:134](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L134)
+Defined in: [extensions/contracts.ts:134](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L134)
 
 ***
 
 ### DecorationRenderer [#decorationrenderer]
 
-Defined in: [extensions/contracts.ts:138](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L138)
+Defined in: [extensions/contracts.ts:138](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L138)
 
 Stateless decoration content renderer; LabelLayerRenderer owns positioning and scheduling.
 
@@ -3733,7 +3733,7 @@ Stateless decoration content renderer; LabelLayerRenderer owns positioning and s
 measure(params: DecorationMeasureParams<T>): LabelLayout;
 ```
 
-Defined in: [extensions/contracts.ts:139](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L139)
+Defined in: [extensions/contracts.ts:139](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L139)
 
 ###### Parameters [#parameters-102]
 
@@ -3751,7 +3751,7 @@ Defined in: [extensions/contracts.ts:139](https://github.com/antvis/G6Lite/blob/
 draw(params: DecorationDrawParams<T>): void;
 ```
 
-Defined in: [extensions/contracts.ts:140](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L140)
+Defined in: [extensions/contracts.ts:140](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L140)
 
 ###### Parameters [#parameters-103]
 
@@ -3767,7 +3767,7 @@ Defined in: [extensions/contracts.ts:140](https://github.com/antvis/G6Lite/blob/
 
 ### NodeOverlayDrawParams [#nodeoverlaydrawparams]
 
-Defined in: [extensions/node.ts:6](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L6)
+Defined in: [extensions/node.ts:6](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L6)
 
 #### Properties [#properties-14]
 
@@ -3780,7 +3780,7 @@ node: GraphNode & {
 };
 ```
 
-Defined in: [extensions/node.ts:7](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L7)
+Defined in: [extensions/node.ts:7](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L7)
 
 ###### Type Declaration [#type-declaration]
 
@@ -3802,7 +3802,7 @@ y: number;
 x: number;
 ```
 
-Defined in: [extensions/node.ts:8](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L8)
+Defined in: [extensions/node.ts:8](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L8)
 
 ##### y [#y-10]
 
@@ -3810,7 +3810,7 @@ Defined in: [extensions/node.ts:8](https://github.com/antvis/G6Lite/blob/3c62ec2
 y: number;
 ```
 
-Defined in: [extensions/node.ts:9](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L9)
+Defined in: [extensions/node.ts:9](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L9)
 
 ##### nodeSize [#nodesize]
 
@@ -3818,7 +3818,7 @@ Defined in: [extensions/node.ts:9](https://github.com/antvis/G6Lite/blob/3c62ec2
 nodeSize: number;
 ```
 
-Defined in: [extensions/node.ts:10](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L10)
+Defined in: [extensions/node.ts:10](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L10)
 
 ##### dpr [#dpr-2]
 
@@ -3826,7 +3826,7 @@ Defined in: [extensions/node.ts:10](https://github.com/antvis/G6Lite/blob/3c62ec
 dpr: number;
 ```
 
-Defined in: [extensions/node.ts:11](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L11)
+Defined in: [extensions/node.ts:11](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L11)
 
 ##### zoom [#zoom-2]
 
@@ -3834,7 +3834,7 @@ Defined in: [extensions/node.ts:11](https://github.com/antvis/G6Lite/blob/3c62ec
 zoom: number;
 ```
 
-Defined in: [extensions/node.ts:12](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L12)
+Defined in: [extensions/node.ts:12](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L12)
 
 ##### camera [#camera]
 
@@ -3842,7 +3842,7 @@ Defined in: [extensions/node.ts:12](https://github.com/antvis/G6Lite/blob/3c62ec
 camera: Camera;
 ```
 
-Defined in: [extensions/node.ts:13](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L13)
+Defined in: [extensions/node.ts:13](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L13)
 
 ##### time [#time]
 
@@ -3850,13 +3850,13 @@ Defined in: [extensions/node.ts:13](https://github.com/antvis/G6Lite/blob/3c62ec
 time: number;
 ```
 
-Defined in: [extensions/node.ts:14](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L14)
+Defined in: [extensions/node.ts:14](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L14)
 
 ***
 
 ### NodeBoundaryAnchorParams [#nodeboundaryanchorparams]
 
-Defined in: [extensions/node.ts:17](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L17)
+Defined in: [extensions/node.ts:17](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L17)
 
 #### Properties [#properties-15]
 
@@ -3866,7 +3866,7 @@ Defined in: [extensions/node.ts:17](https://github.com/antvis/G6Lite/blob/3c62ec
 node: GraphNode;
 ```
 
-Defined in: [extensions/node.ts:18](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L18)
+Defined in: [extensions/node.ts:18](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L18)
 
 ##### placement [#placement]
 
@@ -3874,7 +3874,7 @@ Defined in: [extensions/node.ts:18](https://github.com/antvis/G6Lite/blob/3c62ec
 placement: "top" | "bottom" | "left" | "right";
 ```
 
-Defined in: [extensions/node.ts:19](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L19)
+Defined in: [extensions/node.ts:19](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L19)
 
 ##### crossOffsetRatio [#crossoffsetratio]
 
@@ -3882,7 +3882,7 @@ Defined in: [extensions/node.ts:19](https://github.com/antvis/G6Lite/blob/3c62ec
 crossOffsetRatio: number;
 ```
 
-Defined in: [extensions/node.ts:20](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L20)
+Defined in: [extensions/node.ts:20](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L20)
 
 ##### width [#width]
 
@@ -3890,7 +3890,7 @@ Defined in: [extensions/node.ts:20](https://github.com/antvis/G6Lite/blob/3c62ec
 width: number;
 ```
 
-Defined in: [extensions/node.ts:21](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L21)
+Defined in: [extensions/node.ts:21](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L21)
 
 ##### height [#height]
 
@@ -3898,7 +3898,7 @@ Defined in: [extensions/node.ts:21](https://github.com/antvis/G6Lite/blob/3c62ec
 height: number;
 ```
 
-Defined in: [extensions/node.ts:22](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L22)
+Defined in: [extensions/node.ts:22](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L22)
 
 ##### borderRadius [#borderradius]
 
@@ -3906,13 +3906,13 @@ Defined in: [extensions/node.ts:22](https://github.com/antvis/G6Lite/blob/3c62ec
 borderRadius: number;
 ```
 
-Defined in: [extensions/node.ts:23](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L23)
+Defined in: [extensions/node.ts:23](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L23)
 
 ***
 
 ### NodeExtension [#nodeextension]
 
-Defined in: [extensions/node.ts:26](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L26)
+Defined in: [extensions/node.ts:26](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L26)
 
 #### Properties [#properties-16]
 
@@ -3922,7 +3922,7 @@ Defined in: [extensions/node.ts:26](https://github.com/antvis/G6Lite/blob/3c62ec
 optional base?: "circle" | "rect";
 ```
 
-Defined in: [extensions/node.ts:27](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L27)
+Defined in: [extensions/node.ts:27](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L27)
 
 ##### style? [#style-3]
 
@@ -3930,7 +3930,7 @@ Defined in: [extensions/node.ts:27](https://github.com/antvis/G6Lite/blob/3c62ec
 optional style?: Partial<NodeStyleConfig>;
 ```
 
-Defined in: [extensions/node.ts:28](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L28)
+Defined in: [extensions/node.ts:28](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L28)
 
 ##### stateStyles? [#statestyles-3]
 
@@ -3938,7 +3938,7 @@ Defined in: [extensions/node.ts:28](https://github.com/antvis/G6Lite/blob/3c62ec
 optional stateStyles?: Partial<Record<string, NodeStateStyleOverride>>;
 ```
 
-Defined in: [extensions/node.ts:29](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L29)
+Defined in: [extensions/node.ts:29](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L29)
 
 ##### getStyle? [#getstyle-3]
 
@@ -3946,7 +3946,7 @@ Defined in: [extensions/node.ts:29](https://github.com/antvis/G6Lite/blob/3c62ec
 optional getStyle?: (node: GraphNode) => Partial<NodeStyleConfig>;
 ```
 
-Defined in: [extensions/node.ts:30](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L30)
+Defined in: [extensions/node.ts:30](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L30)
 
 ###### Parameters [#parameters-104]
 
@@ -3967,7 +3967,7 @@ optional getBoundaryAnchor?: (params: NodeBoundaryAnchorParams) => {
 };
 ```
 
-Defined in: [extensions/node.ts:32](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L32)
+Defined in: [extensions/node.ts:32](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L32)
 
 Returns a screen-space offset from the node center to its visual boundary.
 
@@ -4004,7 +4004,7 @@ y: number;
 optional drawOverlay?: (ctx: CanvasRenderingContext2D, params: NodeOverlayDrawParams) => boolean | void;
 ```
 
-Defined in: [extensions/node.ts:33](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L33)
+Defined in: [extensions/node.ts:33](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L33)
 
 ###### Parameters [#parameters-106]
 
@@ -4021,7 +4021,7 @@ Defined in: [extensions/node.ts:33](https://github.com/antvis/G6Lite/blob/3c62ec
 
 ### Camera [#camera-1]
 
-Defined in: [renderer/camera.ts:5](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/renderer/camera.ts#L5)
+Defined in: [renderer/camera.ts:5](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/renderer/camera.ts#L5)
 
 2D pan + zoom camera for graph space -> NDC.
 
@@ -4033,7 +4033,7 @@ Defined in: [renderer/camera.ts:5](https://github.com/antvis/G6Lite/blob/3c62ec2
 x: number;
 ```
 
-Defined in: [renderer/camera.ts:6](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/renderer/camera.ts#L6)
+Defined in: [renderer/camera.ts:6](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/renderer/camera.ts#L6)
 
 ##### y [#y-12]
 
@@ -4041,7 +4041,7 @@ Defined in: [renderer/camera.ts:6](https://github.com/antvis/G6Lite/blob/3c62ec2
 y: number;
 ```
 
-Defined in: [renderer/camera.ts:7](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/renderer/camera.ts#L7)
+Defined in: [renderer/camera.ts:7](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/renderer/camera.ts#L7)
 
 ##### zoom [#zoom-3]
 
@@ -4049,13 +4049,13 @@ Defined in: [renderer/camera.ts:7](https://github.com/antvis/G6Lite/blob/3c62ec2
 zoom: number;
 ```
 
-Defined in: [renderer/camera.ts:8](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/renderer/camera.ts#L8)
+Defined in: [renderer/camera.ts:8](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/renderer/camera.ts#L8)
 
 ***
 
 ### NodeData [#nodedata]
 
-Defined in: [types.ts:7](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L7)
+Defined in: [types.ts:7](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L7)
 
 Extended payload attached to a node.
 
@@ -4077,13 +4077,13 @@ Extended payload attached to a node.
 optional cluster?: string;
 ```
 
-Defined in: [types.ts:8](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L8)
+Defined in: [types.ts:8](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L8)
 
 ***
 
 ### GraphNode [#graphnode]
 
-Defined in: [types.ts:12](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L12)
+Defined in: [types.ts:12](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L12)
 
 Node: at least id; optional name and data.
 
@@ -4095,7 +4095,7 @@ Node: at least id; optional name and data.
 id: string;
 ```
 
-Defined in: [types.ts:13](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L13)
+Defined in: [types.ts:13](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L13)
 
 ##### name? [#name-1]
 
@@ -4103,7 +4103,7 @@ Defined in: [types.ts:13](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional name?: string;
 ```
 
-Defined in: [types.ts:14](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L14)
+Defined in: [types.ts:14](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L14)
 
 ##### data? [#data-6]
 
@@ -4111,7 +4111,7 @@ Defined in: [types.ts:14](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional data?: NodeData;
 ```
 
-Defined in: [types.ts:15](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L15)
+Defined in: [types.ts:15](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L15)
 
 ##### x? [#x-13]
 
@@ -4119,7 +4119,7 @@ Defined in: [types.ts:15](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional x?: number;
 ```
 
-Defined in: [types.ts:16](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L16)
+Defined in: [types.ts:16](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L16)
 
 ##### y? [#y-13]
 
@@ -4127,7 +4127,7 @@ Defined in: [types.ts:16](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional y?: number;
 ```
 
-Defined in: [types.ts:17](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L17)
+Defined in: [types.ts:17](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L17)
 
 ##### fx? [#fx]
 
@@ -4135,7 +4135,7 @@ Defined in: [types.ts:17](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional fx?: number;
 ```
 
-Defined in: [types.ts:18](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L18)
+Defined in: [types.ts:18](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L18)
 
 ##### fy? [#fy]
 
@@ -4143,7 +4143,7 @@ Defined in: [types.ts:18](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional fy?: number;
 ```
 
-Defined in: [types.ts:19](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L19)
+Defined in: [types.ts:19](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L19)
 
 ##### states? [#states-2]
 
@@ -4151,7 +4151,7 @@ Defined in: [types.ts:19](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional states?: ElementState[];
 ```
 
-Defined in: [types.ts:20](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L20)
+Defined in: [types.ts:20](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L20)
 
 ##### comboId? [#comboid]
 
@@ -4159,13 +4159,13 @@ Defined in: [types.ts:20](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional comboId?: string;
 ```
 
-Defined in: [types.ts:21](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L21)
+Defined in: [types.ts:21](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L21)
 
 ***
 
 ### NodeDataUpdate [#nodedataupdate]
 
-Defined in: [types.ts:34](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L34)
+Defined in: [types.ts:34](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L34)
 
 #### Properties [#properties-20]
 
@@ -4175,7 +4175,7 @@ Defined in: [types.ts:34](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 id: string;
 ```
 
-Defined in: [types.ts:35](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L35)
+Defined in: [types.ts:35](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L35)
 
 ##### data [#data-7]
 
@@ -4183,13 +4183,13 @@ Defined in: [types.ts:35](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 data: Record<string, unknown>;
 ```
 
-Defined in: [types.ts:36](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L36)
+Defined in: [types.ts:36](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L36)
 
 ***
 
 ### EdgeDataUpdate [#edgedataupdate]
 
-Defined in: [types.ts:39](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L39)
+Defined in: [types.ts:39](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L39)
 
 #### Properties [#properties-21]
 
@@ -4199,7 +4199,7 @@ Defined in: [types.ts:39](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 id: string;
 ```
 
-Defined in: [types.ts:40](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L40)
+Defined in: [types.ts:40](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L40)
 
 ##### data? [#data-8]
 
@@ -4207,7 +4207,7 @@ Defined in: [types.ts:40](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional data?: Record<string, unknown>;
 ```
 
-Defined in: [types.ts:41](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L41)
+Defined in: [types.ts:41](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L41)
 
 ##### source? [#source-2]
 
@@ -4215,7 +4215,7 @@ Defined in: [types.ts:41](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional source?: string;
 ```
 
-Defined in: [types.ts:42](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L42)
+Defined in: [types.ts:42](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L42)
 
 ##### target? [#target-2]
 
@@ -4223,13 +4223,13 @@ Defined in: [types.ts:42](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional target?: string;
 ```
 
-Defined in: [types.ts:43](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L43)
+Defined in: [types.ts:43](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L43)
 
 ***
 
 ### ViewportPoint [#viewportpoint]
 
-Defined in: [types.ts:46](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L46)
+Defined in: [types.ts:46](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L46)
 
 #### Properties [#properties-22]
 
@@ -4239,7 +4239,7 @@ Defined in: [types.ts:46](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 x: number;
 ```
 
-Defined in: [types.ts:47](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L47)
+Defined in: [types.ts:47](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L47)
 
 ##### y [#y-14]
 
@@ -4247,13 +4247,13 @@ Defined in: [types.ts:47](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 y: number;
 ```
 
-Defined in: [types.ts:48](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L48)
+Defined in: [types.ts:48](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L48)
 
 ***
 
 ### ZoomOptions [#zoomoptions]
 
-Defined in: [types.ts:51](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L51)
+Defined in: [types.ts:51](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L51)
 
 #### Properties [#properties-23]
 
@@ -4263,7 +4263,7 @@ Defined in: [types.ts:51](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional center?: ViewportPoint;
 ```
 
-Defined in: [types.ts:53](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L53)
+Defined in: [types.ts:53](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L53)
 
 Client/screen coordinate that remains visually fixed while zooming.
 
@@ -4273,7 +4273,7 @@ Client/screen coordinate that remains visually fixed while zooming.
 optional minZoom?: number;
 ```
 
-Defined in: [types.ts:54](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L54)
+Defined in: [types.ts:54](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L54)
 
 ##### maxZoom? [#maxzoom]
 
@@ -4281,13 +4281,13 @@ Defined in: [types.ts:54](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional maxZoom?: number;
 ```
 
-Defined in: [types.ts:55](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L55)
+Defined in: [types.ts:55](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L55)
 
 ***
 
 ### FitViewOptions [#fitviewoptions]
 
-Defined in: [types.ts:58](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L58)
+Defined in: [types.ts:58](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L58)
 
 #### Properties [#properties-24]
 
@@ -4297,7 +4297,7 @@ Defined in: [types.ts:58](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional padding?: number | [number, number, number, number];
 ```
 
-Defined in: [types.ts:60](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L60)
+Defined in: [types.ts:60](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L60)
 
 CSS-like padding in viewport pixels.
 
@@ -4307,7 +4307,7 @@ CSS-like padding in viewport pixels.
 optional minZoom?: number;
 ```
 
-Defined in: [types.ts:61](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L61)
+Defined in: [types.ts:61](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L61)
 
 ##### maxZoom? [#maxzoom-1]
 
@@ -4315,13 +4315,13 @@ Defined in: [types.ts:61](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional maxZoom?: number;
 ```
 
-Defined in: [types.ts:62](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L62)
+Defined in: [types.ts:62](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L62)
 
 ***
 
 ### SetDataOptions [#setdataoptions]
 
-Defined in: [types.ts:65](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L65)
+Defined in: [types.ts:65](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L65)
 
 #### Properties [#properties-25]
 
@@ -4331,7 +4331,7 @@ Defined in: [types.ts:65](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional fitView?: number | boolean | FitViewOptions;
 ```
 
-Defined in: [types.ts:67](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L67)
+Defined in: [types.ts:67](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L67)
 
 Auto-fit after replacement. false preserves the current camera.
 
@@ -4339,7 +4339,7 @@ Auto-fit after replacement. false preserves the current camera.
 
 ### NodePositionUpdate [#nodepositionupdate]
 
-Defined in: [types.ts:70](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L70)
+Defined in: [types.ts:70](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L70)
 
 #### Properties [#properties-26]
 
@@ -4349,7 +4349,7 @@ Defined in: [types.ts:70](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 id: string;
 ```
 
-Defined in: [types.ts:71](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L71)
+Defined in: [types.ts:71](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L71)
 
 ##### x [#x-15]
 
@@ -4357,7 +4357,7 @@ Defined in: [types.ts:71](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 x: number;
 ```
 
-Defined in: [types.ts:72](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L72)
+Defined in: [types.ts:72](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L72)
 
 ##### y [#y-15]
 
@@ -4365,13 +4365,13 @@ Defined in: [types.ts:72](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 y: number;
 ```
 
-Defined in: [types.ts:73](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L73)
+Defined in: [types.ts:73](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L73)
 
 ***
 
 ### GraphPoint [#graphpoint]
 
-Defined in: [types.ts:76](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L76)
+Defined in: [types.ts:76](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L76)
 
 #### Properties [#properties-27]
 
@@ -4381,7 +4381,7 @@ Defined in: [types.ts:76](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 x: number;
 ```
 
-Defined in: [types.ts:77](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L77)
+Defined in: [types.ts:77](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L77)
 
 ##### y [#y-16]
 
@@ -4389,13 +4389,13 @@ Defined in: [types.ts:77](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 y: number;
 ```
 
-Defined in: [types.ts:78](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L78)
+Defined in: [types.ts:78](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L78)
 
 ***
 
 ### GraphElementEvent [#graphelementevent]
 
-Defined in: [types.ts:81](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L81)
+Defined in: [types.ts:81](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L81)
 
 #### Type Parameters [#type-parameters-15]
 
@@ -4411,7 +4411,7 @@ Defined in: [types.ts:81](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 targetType: "node" | "edge" | "combo" | "canvas";
 ```
 
-Defined in: [types.ts:82](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L82)
+Defined in: [types.ts:82](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L82)
 
 ##### targetId? [#targetid]
 
@@ -4419,7 +4419,7 @@ Defined in: [types.ts:82](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional targetId?: string;
 ```
 
-Defined in: [types.ts:83](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L83)
+Defined in: [types.ts:83](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L83)
 
 ##### data? [#data-9]
 
@@ -4427,7 +4427,7 @@ Defined in: [types.ts:83](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional data?: T;
 ```
 
-Defined in: [types.ts:84](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L84)
+Defined in: [types.ts:84](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L84)
 
 ##### client [#client]
 
@@ -4435,7 +4435,7 @@ Defined in: [types.ts:84](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 client: GraphPoint;
 ```
 
-Defined in: [types.ts:85](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L85)
+Defined in: [types.ts:85](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L85)
 
 ##### canvas [#canvas]
 
@@ -4443,7 +4443,7 @@ Defined in: [types.ts:85](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 canvas: GraphPoint;
 ```
 
-Defined in: [types.ts:86](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L86)
+Defined in: [types.ts:86](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L86)
 
 ##### graph [#graph-2]
 
@@ -4451,7 +4451,7 @@ Defined in: [types.ts:86](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 graph: GraphPoint;
 ```
 
-Defined in: [types.ts:87](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L87)
+Defined in: [types.ts:87](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L87)
 
 ##### nativeEvent [#nativeevent]
 
@@ -4459,7 +4459,7 @@ Defined in: [types.ts:87](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 nativeEvent: MouseEvent | WheelEvent;
 ```
 
-Defined in: [types.ts:88](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L88)
+Defined in: [types.ts:88](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L88)
 
 ##### ~~event~~ [#event-1]
 
@@ -4467,7 +4467,7 @@ Defined in: [types.ts:88](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 event: MouseEvent | WheelEvent;
 ```
 
-Defined in: [types.ts:90](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L90)
+Defined in: [types.ts:90](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L90)
 
 ###### Deprecated [#deprecated-7]
 
@@ -4479,7 +4479,7 @@ Use nativeEvent.
 optional nodeId?: string;
 ```
 
-Defined in: [types.ts:92](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L92)
+Defined in: [types.ts:92](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L92)
 
 Compatibility fields for existing consumers.
 
@@ -4489,7 +4489,7 @@ Compatibility fields for existing consumers.
 optional edgeId?: string;
 ```
 
-Defined in: [types.ts:93](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L93)
+Defined in: [types.ts:93](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L93)
 
 ##### comboId? [#comboid-1]
 
@@ -4497,7 +4497,7 @@ Defined in: [types.ts:93](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional comboId?: string;
 ```
 
-Defined in: [types.ts:94](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L94)
+Defined in: [types.ts:94](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L94)
 
 ##### edgeIndex? [#edgeindex-1]
 
@@ -4505,7 +4505,7 @@ Defined in: [types.ts:94](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional edgeIndex?: number;
 ```
 
-Defined in: [types.ts:95](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L95)
+Defined in: [types.ts:95](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L95)
 
 ##### source? [#source-3]
 
@@ -4513,7 +4513,7 @@ Defined in: [types.ts:95](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional source?: string;
 ```
 
-Defined in: [types.ts:96](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L96)
+Defined in: [types.ts:96](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L96)
 
 ##### target? [#target-3]
 
@@ -4521,13 +4521,13 @@ Defined in: [types.ts:96](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d
 optional target?: string;
 ```
 
-Defined in: [types.ts:97](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L97)
+Defined in: [types.ts:97](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L97)
 
 ***
 
 ### GraphEdge [#graphedge]
 
-Defined in: [types.ts:107](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L107)
+Defined in: [types.ts:107](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L107)
 
 Edge: at least source and target (node ids); optional data and states.
 
@@ -4539,7 +4539,7 @@ Edge: at least source and target (node ids); optional data and states.
 optional id?: string;
 ```
 
-Defined in: [types.ts:108](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L108)
+Defined in: [types.ts:108](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L108)
 
 ##### source [#source-4]
 
@@ -4547,7 +4547,7 @@ Defined in: [types.ts:108](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 source: string;
 ```
 
-Defined in: [types.ts:109](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L109)
+Defined in: [types.ts:109](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L109)
 
 ##### target [#target-4]
 
@@ -4555,7 +4555,7 @@ Defined in: [types.ts:109](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 target: string;
 ```
 
-Defined in: [types.ts:110](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L110)
+Defined in: [types.ts:110](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L110)
 
 ##### data? [#data-10]
 
@@ -4563,7 +4563,7 @@ Defined in: [types.ts:110](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional data?: EdgeData;
 ```
 
-Defined in: [types.ts:111](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L111)
+Defined in: [types.ts:111](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L111)
 
 ##### states? [#states-3]
 
@@ -4571,13 +4571,13 @@ Defined in: [types.ts:111](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional states?: ElementState[];
 ```
 
-Defined in: [types.ts:112](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L112)
+Defined in: [types.ts:112](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L112)
 
 ***
 
 ### NodeModel [#nodemodel]
 
-Defined in: [types.ts:119](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L119)
+Defined in: [types.ts:119](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L119)
 
 Read-only normalized node view returned by Graph query APIs.
 The view is backed by Graph; update it through Graph data/state APIs.
@@ -4590,7 +4590,7 @@ The view is backed by Graph; update it through Graph data/state APIs.
 readonly id: string;
 ```
 
-Defined in: [types.ts:120](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L120)
+Defined in: [types.ts:120](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L120)
 
 ##### name? [#name-2]
 
@@ -4598,7 +4598,7 @@ Defined in: [types.ts:120](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly optional name?: string;
 ```
 
-Defined in: [types.ts:121](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L121)
+Defined in: [types.ts:121](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L121)
 
 ##### x [#x-17]
 
@@ -4606,7 +4606,7 @@ Defined in: [types.ts:121](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly x: number;
 ```
 
-Defined in: [types.ts:122](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L122)
+Defined in: [types.ts:122](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L122)
 
 ##### y [#y-17]
 
@@ -4614,7 +4614,7 @@ Defined in: [types.ts:122](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly y: number;
 ```
 
-Defined in: [types.ts:123](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L123)
+Defined in: [types.ts:123](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L123)
 
 ##### data? [#data-11]
 
@@ -4622,7 +4622,7 @@ Defined in: [types.ts:123](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly optional data?: Readonly<Record<string, unknown>>;
 ```
 
-Defined in: [types.ts:124](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L124)
+Defined in: [types.ts:124](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L124)
 
 ##### states [#states-4]
 
@@ -4630,13 +4630,13 @@ Defined in: [types.ts:124](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly states: ReadonlySet<ElementState>;
 ```
 
-Defined in: [types.ts:125](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L125)
+Defined in: [types.ts:125](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L125)
 
 ***
 
 ### EdgeModel [#edgemodel]
 
-Defined in: [types.ts:132](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L132)
+Defined in: [types.ts:132](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L132)
 
 Read-only normalized edge view returned by Graph query APIs.
 The view is backed by Graph; update it through Graph data/state APIs.
@@ -4649,7 +4649,7 @@ The view is backed by Graph; update it through Graph data/state APIs.
 readonly id: string;
 ```
 
-Defined in: [types.ts:133](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L133)
+Defined in: [types.ts:133](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L133)
 
 ##### source [#source-5]
 
@@ -4657,7 +4657,7 @@ Defined in: [types.ts:133](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly source: string;
 ```
 
-Defined in: [types.ts:134](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L134)
+Defined in: [types.ts:134](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L134)
 
 ##### target [#target-5]
 
@@ -4665,7 +4665,7 @@ Defined in: [types.ts:134](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly target: string;
 ```
 
-Defined in: [types.ts:135](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L135)
+Defined in: [types.ts:135](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L135)
 
 ##### data? [#data-12]
 
@@ -4673,7 +4673,7 @@ Defined in: [types.ts:135](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly optional data?: Readonly<Record<string, unknown>>;
 ```
 
-Defined in: [types.ts:136](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L136)
+Defined in: [types.ts:136](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L136)
 
 ##### states [#states-5]
 
@@ -4681,13 +4681,13 @@ Defined in: [types.ts:136](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly states: ReadonlySet<ElementState>;
 ```
 
-Defined in: [types.ts:137](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L137)
+Defined in: [types.ts:137](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L137)
 
 ***
 
 ### ParallelEdgesConfig [#paralleledgesconfig]
 
-Defined in: [types.ts:141](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L141)
+Defined in: [types.ts:141](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L141)
 
 Configuration for automatic same-endpoint edge separation.
 
@@ -4699,7 +4699,7 @@ Configuration for automatic same-endpoint edge separation.
 optional enabled?: boolean;
 ```
 
-Defined in: [types.ts:142](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L142)
+Defined in: [types.ts:142](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L142)
 
 ##### offset? [#offset-1]
 
@@ -4707,7 +4707,7 @@ Defined in: [types.ts:142](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional offset?: number;
 ```
 
-Defined in: [types.ts:144](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L144)
+Defined in: [types.ts:144](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L144)
 
 Offset step in graph coordinates. Defaults to 20.
 
@@ -4717,7 +4717,7 @@ Offset step in graph coordinates. Defaults to 20.
 optional mergeBy?: ("source" | "target")[];
 ```
 
-Defined in: [types.ts:146](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L146)
+Defined in: [types.ts:146](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L146)
 
 Grouping fields. Currently only source/target grouping is supported.
 
@@ -4727,7 +4727,7 @@ Grouping fields. Currently only source/target grouping is supported.
 optional includeReverse?: boolean;
 ```
 
-Defined in: [types.ts:148](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L148)
+Defined in: [types.ts:148](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L148)
 
 Whether A->B and B->A belong to the same separation group. Defaults to true.
 
@@ -4737,7 +4737,7 @@ Whether A->B and B->A belong to the same separation group. Defaults to true.
 optional minOffset?: number;
 ```
 
-Defined in: [types.ts:150](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L150)
+Defined in: [types.ts:150](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L150)
 
 Clamp minimum absolute offset for non-center parallel edges. Defaults to 0.
 
@@ -4747,7 +4747,7 @@ Clamp minimum absolute offset for non-center parallel edges. Defaults to 0.
 optional maxOffset?: number;
 ```
 
-Defined in: [types.ts:152](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L152)
+Defined in: [types.ts:152](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L152)
 
 Clamp maximum absolute offset. Defaults to 80.
 
@@ -4755,7 +4755,7 @@ Clamp maximum absolute offset. Defaults to 80.
 
 ### GraphData [#graphdata]
 
-Defined in: [types.ts:169](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L169)
+Defined in: [types.ts:169](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L169)
 
 Graph data: nodes, edges, and optional combos.
 
@@ -4767,7 +4767,7 @@ Graph data: nodes, edges, and optional combos.
 nodes: GraphNode[];
 ```
 
-Defined in: [types.ts:170](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L170)
+Defined in: [types.ts:170](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L170)
 
 ##### edges [#edges]
 
@@ -4775,7 +4775,7 @@ Defined in: [types.ts:170](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 edges: GraphEdge[];
 ```
 
-Defined in: [types.ts:171](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L171)
+Defined in: [types.ts:171](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L171)
 
 ##### combos? [#combos-1]
 
@@ -4783,13 +4783,13 @@ Defined in: [types.ts:171](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional combos?: ComboData[];
 ```
 
-Defined in: [types.ts:172](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L172)
+Defined in: [types.ts:172](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L172)
 
 ***
 
 ### NodeStateStyleOverride [#nodestatestyleoverride]
 
-Defined in: [types.ts:179](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L179)
+Defined in: [types.ts:179](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L179)
 
 Style overrides applied per node state.
 
@@ -4801,7 +4801,7 @@ Style overrides applied per node state.
 optional fill?: string;
 ```
 
-Defined in: [types.ts:180](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L180)
+Defined in: [types.ts:180](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L180)
 
 ##### stroke? [#stroke]
 
@@ -4809,7 +4809,7 @@ Defined in: [types.ts:180](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional stroke?: string;
 ```
 
-Defined in: [types.ts:181](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L181)
+Defined in: [types.ts:181](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L181)
 
 ##### strokeWidth? [#strokewidth]
 
@@ -4817,7 +4817,7 @@ Defined in: [types.ts:181](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional strokeWidth?: number;
 ```
 
-Defined in: [types.ts:182](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L182)
+Defined in: [types.ts:182](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L182)
 
 ##### opacity? [#opacity]
 
@@ -4825,7 +4825,7 @@ Defined in: [types.ts:182](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional opacity?: number;
 ```
 
-Defined in: [types.ts:183](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L183)
+Defined in: [types.ts:183](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L183)
 
 ##### haloWidth? [#halowidth]
 
@@ -4833,13 +4833,13 @@ Defined in: [types.ts:183](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional haloWidth?: number;
 ```
 
-Defined in: [types.ts:184](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L184)
+Defined in: [types.ts:184](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L184)
 
 ***
 
 ### NodeBadgeItem [#nodebadgeitem]
 
-Defined in: [types.ts:197](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L197)
+Defined in: [types.ts:197](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L197)
 
 #### Properties [#properties-35]
 
@@ -4849,7 +4849,7 @@ Defined in: [types.ts:197](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 kind: NodeBadgeKind;
 ```
 
-Defined in: [types.ts:198](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L198)
+Defined in: [types.ts:198](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L198)
 
 ##### value? [#value]
 
@@ -4857,7 +4857,7 @@ Defined in: [types.ts:198](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional value?: string | number;
 ```
 
-Defined in: [types.ts:199](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L199)
+Defined in: [types.ts:199](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L199)
 
 ##### text? [#text]
 
@@ -4865,7 +4865,7 @@ Defined in: [types.ts:199](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional text?: string;
 ```
 
-Defined in: [types.ts:200](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L200)
+Defined in: [types.ts:200](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L200)
 
 ##### icon? [#icon]
 
@@ -4873,7 +4873,7 @@ Defined in: [types.ts:200](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional icon?: string;
 ```
 
-Defined in: [types.ts:201](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L201)
+Defined in: [types.ts:201](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L201)
 
 ##### iconFontFamily? [#iconfontfamily]
 
@@ -4881,7 +4881,7 @@ Defined in: [types.ts:201](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional iconFontFamily?: string;
 ```
 
-Defined in: [types.ts:202](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L202)
+Defined in: [types.ts:202](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L202)
 
 ##### fill? [#fill-1]
 
@@ -4889,7 +4889,7 @@ Defined in: [types.ts:202](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional fill?: string;
 ```
 
-Defined in: [types.ts:203](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L203)
+Defined in: [types.ts:203](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L203)
 
 ##### color? [#color]
 
@@ -4897,13 +4897,13 @@ Defined in: [types.ts:203](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional color?: string;
 ```
 
-Defined in: [types.ts:204](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L204)
+Defined in: [types.ts:204](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L204)
 
 ***
 
 ### ResolvedLabelStyle [#resolvedlabelstyle]
 
-Defined in: [types.ts:214](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L214)
+Defined in: [types.ts:214](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L214)
 
 Final, function-free label style passed to a custom label renderer.
 
@@ -4915,7 +4915,7 @@ Final, function-free label style passed to a custom label renderer.
 labelFontSize: number;
 ```
 
-Defined in: [types.ts:216](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L216)
+Defined in: [types.ts:216](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L216)
 
 Canvas backing-store pixels after DPR/zoom conversion.
 
@@ -4925,7 +4925,7 @@ Canvas backing-store pixels after DPR/zoom conversion.
 labelFontFamily: string;
 ```
 
-Defined in: [types.ts:217](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L217)
+Defined in: [types.ts:217](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L217)
 
 ##### labelFontWeight [#labelfontweight]
 
@@ -4933,7 +4933,7 @@ Defined in: [types.ts:217](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 labelFontWeight: string;
 ```
 
-Defined in: [types.ts:218](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L218)
+Defined in: [types.ts:218](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L218)
 
 ##### labelColor [#labelcolor]
 
@@ -4941,7 +4941,7 @@ Defined in: [types.ts:218](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 labelColor: string;
 ```
 
-Defined in: [types.ts:219](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L219)
+Defined in: [types.ts:219](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L219)
 
 ##### labelPlacement [#labelplacement]
 
@@ -4949,7 +4949,7 @@ Defined in: [types.ts:219](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 labelPlacement: "center" | "top" | "bottom" | "left" | "right" | "start" | "end";
 ```
 
-Defined in: [types.ts:220](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L220)
+Defined in: [types.ts:220](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L220)
 
 ##### labelOffsetX [#labeloffsetx]
 
@@ -4957,7 +4957,7 @@ Defined in: [types.ts:220](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 labelOffsetX: number;
 ```
 
-Defined in: [types.ts:222](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L222)
+Defined in: [types.ts:222](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L222)
 
 Canvas backing-store pixels after DPR/zoom conversion.
 
@@ -4967,7 +4967,7 @@ Canvas backing-store pixels after DPR/zoom conversion.
 labelOffsetY: number;
 ```
 
-Defined in: [types.ts:224](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L224)
+Defined in: [types.ts:224](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L224)
 
 Canvas backing-store pixels after DPR/zoom conversion.
 
@@ -4977,7 +4977,7 @@ Canvas backing-store pixels after DPR/zoom conversion.
 labelBackground: string | false;
 ```
 
-Defined in: [types.ts:225](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L225)
+Defined in: [types.ts:225](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L225)
 
 ##### labelBackgroundPadding [#labelbackgroundpadding]
 
@@ -4985,7 +4985,7 @@ Defined in: [types.ts:225](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 labelBackgroundPadding: number;
 ```
 
-Defined in: [types.ts:227](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L227)
+Defined in: [types.ts:227](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L227)
 
 Canvas backing-store pixels after DPR/zoom conversion.
 
@@ -4995,7 +4995,7 @@ Canvas backing-store pixels after DPR/zoom conversion.
 labelMaxWidth: number;
 ```
 
-Defined in: [types.ts:229](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L229)
+Defined in: [types.ts:229](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L229)
 
 Canvas backing-store pixels after DPR/zoom conversion; 0 means unlimited.
 
@@ -5005,13 +5005,13 @@ Canvas backing-store pixels after DPR/zoom conversion; 0 means unlimited.
 labelAutoRotate: boolean;
 ```
 
-Defined in: [types.ts:230](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L230)
+Defined in: [types.ts:230](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L230)
 
 ***
 
 ### LabelLayout [#labellayout]
 
-Defined in: [types.ts:234](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L234)
+Defined in: [types.ts:234](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L234)
 
 Measurement result returned by a custom label renderer.
 
@@ -5029,7 +5029,7 @@ Measurement result returned by a custom label renderer.
 width: number;
 ```
 
-Defined in: [types.ts:236](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L236)
+Defined in: [types.ts:236](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L236)
 
 Full visual width in Canvas backing-store pixels.
 
@@ -5039,7 +5039,7 @@ Full visual width in Canvas backing-store pixels.
 height: number;
 ```
 
-Defined in: [types.ts:238](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L238)
+Defined in: [types.ts:238](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L238)
 
 Full visual height in Canvas backing-store pixels.
 
@@ -5049,7 +5049,7 @@ Full visual height in Canvas backing-store pixels.
 optional data?: T;
 ```
 
-Defined in: [types.ts:240](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L240)
+Defined in: [types.ts:240](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L240)
 
 Renderer-owned data passed from measure() to draw() for the same label.
 
@@ -5057,7 +5057,7 @@ Renderer-owned data passed from measure() to draw() for the same label.
 
 ### NodeLabelParams [#nodelabelparams]
 
-Defined in: [types.ts:252](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L252)
+Defined in: [types.ts:252](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L252)
 
 Custom label renderer context for a node label.
 
@@ -5073,7 +5073,7 @@ Custom label renderer context for a node label.
 ctx: CanvasRenderingContext2D;
 ```
 
-Defined in: [types.ts:244](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L244)
+Defined in: [types.ts:244](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L244)
 
 ###### Inherited from [#inherited-from-23]
 
@@ -5087,7 +5087,7 @@ LabelParamsBase.ctx
 text: string;
 ```
 
-Defined in: [types.ts:245](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L245)
+Defined in: [types.ts:245](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L245)
 
 ###### Inherited from [#inherited-from-24]
 
@@ -5101,7 +5101,7 @@ LabelParamsBase.text
 style: Readonly<ResolvedLabelStyle>;
 ```
 
-Defined in: [types.ts:246](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L246)
+Defined in: [types.ts:246](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L246)
 
 ###### Inherited from [#inherited-from-25]
 
@@ -5115,7 +5115,7 @@ LabelParamsBase.style
 dpr: number;
 ```
 
-Defined in: [types.ts:247](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L247)
+Defined in: [types.ts:247](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L247)
 
 ###### Inherited from [#inherited-from-26]
 
@@ -5129,7 +5129,7 @@ LabelParamsBase.dpr
 zoom: number;
 ```
 
-Defined in: [types.ts:248](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L248)
+Defined in: [types.ts:248](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L248)
 
 ###### Inherited from [#inherited-from-27]
 
@@ -5143,7 +5143,7 @@ LabelParamsBase.zoom
 type: "node";
 ```
 
-Defined in: [types.ts:253](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L253)
+Defined in: [types.ts:253](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L253)
 
 ##### item [#item]
 
@@ -5151,7 +5151,7 @@ Defined in: [types.ts:253](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 item: GraphNode;
 ```
 
-Defined in: [types.ts:254](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L254)
+Defined in: [types.ts:254](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L254)
 
 ##### node [#node-4]
 
@@ -5159,13 +5159,13 @@ Defined in: [types.ts:254](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 node: GraphNode;
 ```
 
-Defined in: [types.ts:255](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L255)
+Defined in: [types.ts:255](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L255)
 
 ***
 
 ### EdgeLabelParams [#edgelabelparams]
 
-Defined in: [types.ts:259](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L259)
+Defined in: [types.ts:259](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L259)
 
 Custom label renderer context for an edge label.
 
@@ -5181,7 +5181,7 @@ Custom label renderer context for an edge label.
 ctx: CanvasRenderingContext2D;
 ```
 
-Defined in: [types.ts:244](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L244)
+Defined in: [types.ts:244](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L244)
 
 ###### Inherited from [#inherited-from-28]
 
@@ -5195,7 +5195,7 @@ LabelParamsBase.ctx
 text: string;
 ```
 
-Defined in: [types.ts:245](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L245)
+Defined in: [types.ts:245](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L245)
 
 ###### Inherited from [#inherited-from-29]
 
@@ -5209,7 +5209,7 @@ LabelParamsBase.text
 style: Readonly<ResolvedLabelStyle>;
 ```
 
-Defined in: [types.ts:246](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L246)
+Defined in: [types.ts:246](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L246)
 
 ###### Inherited from [#inherited-from-30]
 
@@ -5223,7 +5223,7 @@ LabelParamsBase.style
 dpr: number;
 ```
 
-Defined in: [types.ts:247](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L247)
+Defined in: [types.ts:247](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L247)
 
 ###### Inherited from [#inherited-from-31]
 
@@ -5237,7 +5237,7 @@ LabelParamsBase.dpr
 zoom: number;
 ```
 
-Defined in: [types.ts:248](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L248)
+Defined in: [types.ts:248](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L248)
 
 ###### Inherited from [#inherited-from-32]
 
@@ -5251,7 +5251,7 @@ LabelParamsBase.zoom
 type: "edge";
 ```
 
-Defined in: [types.ts:260](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L260)
+Defined in: [types.ts:260](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L260)
 
 ##### item [#item-1]
 
@@ -5259,7 +5259,7 @@ Defined in: [types.ts:260](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 item: GraphEdge;
 ```
 
-Defined in: [types.ts:261](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L261)
+Defined in: [types.ts:261](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L261)
 
 ##### edge [#edge]
 
@@ -5267,7 +5267,7 @@ Defined in: [types.ts:261](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 edge: GraphEdge;
 ```
 
-Defined in: [types.ts:262](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L262)
+Defined in: [types.ts:262](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L262)
 
 ##### source [#source-6]
 
@@ -5275,7 +5275,7 @@ Defined in: [types.ts:262](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 source: GraphNode;
 ```
 
-Defined in: [types.ts:263](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L263)
+Defined in: [types.ts:263](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L263)
 
 ##### target [#target-6]
 
@@ -5283,13 +5283,13 @@ Defined in: [types.ts:263](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 target: GraphNode;
 ```
 
-Defined in: [types.ts:264](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L264)
+Defined in: [types.ts:264](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L264)
 
 ***
 
 ### LabelRenderer [#labelrenderer]
 
-Defined in: [types.ts:276](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L276)
+Defined in: [types.ts:276](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L276)
 
 Shared custom label renderer protocol for node and edge labels.
 
@@ -5307,7 +5307,7 @@ Shared custom label renderer protocol for node and edge labels.
 measure(params: LabelMeasureParams): LabelLayout<T>;
 ```
 
-Defined in: [types.ts:277](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L277)
+Defined in: [types.ts:277](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L277)
 
 ###### Parameters [#parameters-107]
 
@@ -5325,7 +5325,7 @@ Defined in: [types.ts:277](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 draw(params: LabelDrawParams<T>): void;
 ```
 
-Defined in: [types.ts:278](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L278)
+Defined in: [types.ts:278](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L278)
 
 ###### Parameters [#parameters-108]
 
@@ -5341,7 +5341,7 @@ Defined in: [types.ts:278](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 
 ### NodeDecorationConfig [#nodedecorationconfig]
 
-Defined in: [types.ts:281](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L281)
+Defined in: [types.ts:281](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L281)
 
 #### Type Parameters [#type-parameters-18]
 
@@ -5357,7 +5357,7 @@ Defined in: [types.ts:281](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 renderer: string;
 ```
 
-Defined in: [types.ts:282](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L282)
+Defined in: [types.ts:282](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L282)
 
 ##### placement? [#placement-1]
 
@@ -5365,7 +5365,7 @@ Defined in: [types.ts:282](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional placement?: NodeStyleValue<NodeDecorationPlacement>;
 ```
 
-Defined in: [types.ts:283](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L283)
+Defined in: [types.ts:283](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L283)
 
 ##### attachment? [#attachment]
 
@@ -5373,7 +5373,7 @@ Defined in: [types.ts:283](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional attachment?: NodeDecorationAttachment;
 ```
 
-Defined in: [types.ts:285](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L285)
+Defined in: [types.ts:285](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L285)
 
 Defaults to `boundary`, which centers the decoration on the node edge.
 
@@ -5383,7 +5383,7 @@ Defaults to `boundary`, which centers the decoration on the node edge.
 optional anchor?: NodeDecorationAnchor;
 ```
 
-Defined in: [types.ts:287](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L287)
+Defined in: [types.ts:287](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L287)
 
 Which edge of the decoration box is aligned to the node-side anchor.
 
@@ -5393,7 +5393,7 @@ Which edge of the decoration box is aligned to the node-side anchor.
 optional crossOffsetRatio?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:289](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L289)
+Defined in: [types.ts:289](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L289)
 
 Cross-axis offset relative to the node width/height.
 
@@ -5403,7 +5403,7 @@ Cross-axis offset relative to the node width/height.
 optional boundaryOverlap?: NodeStyleValue<number | "half-badge">;
 ```
 
-Defined in: [types.ts:291](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L291)
+Defined in: [types.ts:291](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L291)
 
 With `anchor: start`, overlap by CSS pixels or half the boundary-adjacent badge height.
 
@@ -5413,7 +5413,7 @@ With `anchor: start`, overlap by CSS pixels or half the boundary-adjacent badge 
 optional layout?: "single" | "stack";
 ```
 
-Defined in: [types.ts:293](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L293)
+Defined in: [types.ts:293](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L293)
 
 Enables engine-managed vertical item stacking.
 
@@ -5423,7 +5423,7 @@ Enables engine-managed vertical item stacking.
 optional items?: T[] | ((node: GraphNode) => T[]);
 ```
 
-Defined in: [types.ts:294](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L294)
+Defined in: [types.ts:294](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L294)
 
 ##### sort? [#sort]
 
@@ -5431,7 +5431,7 @@ Defined in: [types.ts:294](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional sort?: "none" | "width-desc";
 ```
 
-Defined in: [types.ts:295](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L295)
+Defined in: [types.ts:295](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L295)
 
 ##### maxVisible? [#maxvisible]
 
@@ -5439,7 +5439,7 @@ Defined in: [types.ts:295](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional maxVisible?: number;
 ```
 
-Defined in: [types.ts:296](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L296)
+Defined in: [types.ts:296](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L296)
 
 ##### overflow? [#overflow]
 
@@ -5447,7 +5447,7 @@ Defined in: [types.ts:296](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional overflow?: "clip" | "hover-expand";
 ```
 
-Defined in: [types.ts:297](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L297)
+Defined in: [types.ts:297](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L297)
 
 ##### overflowData? [#overflowdata]
 
@@ -5457,7 +5457,7 @@ optional overflowData?:
   | ((hiddenCount: number, node: GraphNode) => T);
 ```
 
-Defined in: [types.ts:298](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L298)
+Defined in: [types.ts:298](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L298)
 
 ##### itemGap? [#itemgap]
 
@@ -5465,7 +5465,7 @@ Defined in: [types.ts:298](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional itemGap?: number;
 ```
 
-Defined in: [types.ts:299](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L299)
+Defined in: [types.ts:299](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L299)
 
 ##### offsetX? [#offsetx]
 
@@ -5473,7 +5473,7 @@ Defined in: [types.ts:299](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional offsetX?: number;
 ```
 
-Defined in: [types.ts:300](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L300)
+Defined in: [types.ts:300](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L300)
 
 ##### offsetY? [#offsety]
 
@@ -5481,7 +5481,7 @@ Defined in: [types.ts:300](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional offsetY?: number;
 ```
 
-Defined in: [types.ts:301](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L301)
+Defined in: [types.ts:301](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L301)
 
 ##### data? [#data-14]
 
@@ -5489,13 +5489,13 @@ Defined in: [types.ts:301](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional data?: T | ((node: GraphNode) => T);
 ```
 
-Defined in: [types.ts:302](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L302)
+Defined in: [types.ts:302](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L302)
 
 ***
 
 ### NodeStyleConfig [#nodestyleconfig]
 
-Defined in: [types.ts:305](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L305)
+Defined in: [types.ts:305](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L305)
 
 #### Properties [#properties-41]
 
@@ -5505,7 +5505,7 @@ Defined in: [types.ts:305](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional fill?: NodeStyleValue<string>;
 ```
 
-Defined in: [types.ts:306](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L306)
+Defined in: [types.ts:306](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L306)
 
 ##### size? [#size]
 
@@ -5513,7 +5513,7 @@ Defined in: [types.ts:306](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional size?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:307](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L307)
+Defined in: [types.ts:307](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L307)
 
 ##### width? [#width-2]
 
@@ -5521,7 +5521,7 @@ Defined in: [types.ts:307](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional width?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:308](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L308)
+Defined in: [types.ts:308](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L308)
 
 ##### height? [#height-2]
 
@@ -5529,7 +5529,7 @@ Defined in: [types.ts:308](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional height?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:309](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L309)
+Defined in: [types.ts:309](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L309)
 
 ##### stroke? [#stroke-1]
 
@@ -5537,7 +5537,7 @@ Defined in: [types.ts:309](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional stroke?: NodeStyleValue<string>;
 ```
 
-Defined in: [types.ts:310](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L310)
+Defined in: [types.ts:310](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L310)
 
 ##### strokeWidth? [#strokewidth-1]
 
@@ -5545,7 +5545,7 @@ Defined in: [types.ts:310](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional strokeWidth?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:311](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L311)
+Defined in: [types.ts:311](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L311)
 
 ##### opacity? [#opacity-1]
 
@@ -5553,7 +5553,7 @@ Defined in: [types.ts:311](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional opacity?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:312](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L312)
+Defined in: [types.ts:312](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L312)
 
 ##### borderRadius? [#borderradius-1]
 
@@ -5561,7 +5561,7 @@ Defined in: [types.ts:312](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional borderRadius?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:313](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L313)
+Defined in: [types.ts:313](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L313)
 
 ##### label? [#label]
 
@@ -5569,7 +5569,7 @@ Defined in: [types.ts:313](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional label?: NodeStyleValue<string | false>;
 ```
 
-Defined in: [types.ts:314](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L314)
+Defined in: [types.ts:314](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L314)
 
 ##### labelFontSize? [#labelfontsize-1]
 
@@ -5577,7 +5577,7 @@ Defined in: [types.ts:314](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelFontSize?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:315](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L315)
+Defined in: [types.ts:315](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L315)
 
 ##### labelFontFamily? [#labelfontfamily-1]
 
@@ -5585,7 +5585,7 @@ Defined in: [types.ts:315](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelFontFamily?: NodeStyleValue<string>;
 ```
 
-Defined in: [types.ts:316](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L316)
+Defined in: [types.ts:316](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L316)
 
 ##### labelFontWeight? [#labelfontweight-1]
 
@@ -5593,7 +5593,7 @@ Defined in: [types.ts:316](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelFontWeight?: NodeStyleValue<string>;
 ```
 
-Defined in: [types.ts:317](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L317)
+Defined in: [types.ts:317](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L317)
 
 ##### labelColor? [#labelcolor-1]
 
@@ -5601,7 +5601,7 @@ Defined in: [types.ts:317](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelColor?: NodeStyleValue<string>;
 ```
 
-Defined in: [types.ts:318](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L318)
+Defined in: [types.ts:318](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L318)
 
 ##### labelPlacement? [#labelplacement-1]
 
@@ -5609,7 +5609,7 @@ Defined in: [types.ts:318](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelPlacement?: NodeStyleValue<LabelPlacement>;
 ```
 
-Defined in: [types.ts:319](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L319)
+Defined in: [types.ts:319](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L319)
 
 ##### labelOffsetX? [#labeloffsetx-1]
 
@@ -5617,7 +5617,7 @@ Defined in: [types.ts:319](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelOffsetX?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:320](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L320)
+Defined in: [types.ts:320](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L320)
 
 ##### labelOffsetY? [#labeloffsety-1]
 
@@ -5625,7 +5625,7 @@ Defined in: [types.ts:320](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelOffsetY?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:321](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L321)
+Defined in: [types.ts:321](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L321)
 
 ##### labelBackground? [#labelbackground-1]
 
@@ -5633,7 +5633,7 @@ Defined in: [types.ts:321](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelBackground?: NodeStyleValue<string | false>;
 ```
 
-Defined in: [types.ts:322](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L322)
+Defined in: [types.ts:322](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L322)
 
 ##### labelBackgroundPadding? [#labelbackgroundpadding-1]
 
@@ -5641,7 +5641,7 @@ Defined in: [types.ts:322](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelBackgroundPadding?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:323](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L323)
+Defined in: [types.ts:323](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L323)
 
 ##### labelMaxWidth? [#labelmaxwidth-1]
 
@@ -5649,7 +5649,7 @@ Defined in: [types.ts:323](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelMaxWidth?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:324](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L324)
+Defined in: [types.ts:324](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L324)
 
 ##### icon? [#icon-1]
 
@@ -5657,7 +5657,7 @@ Defined in: [types.ts:324](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional icon?: NodeStyleValue<string | false>;
 ```
 
-Defined in: [types.ts:325](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L325)
+Defined in: [types.ts:325](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L325)
 
 ##### iconWidth? [#iconwidth]
 
@@ -5665,7 +5665,7 @@ Defined in: [types.ts:325](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional iconWidth?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:326](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L326)
+Defined in: [types.ts:326](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L326)
 
 ##### iconHeight? [#iconheight]
 
@@ -5673,7 +5673,7 @@ Defined in: [types.ts:326](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional iconHeight?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:327](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L327)
+Defined in: [types.ts:327](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L327)
 
 ##### iconType? [#icontype]
 
@@ -5681,7 +5681,7 @@ Defined in: [types.ts:327](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional iconType?: NodeStyleValue<"text" | "image">;
 ```
 
-Defined in: [types.ts:328](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L328)
+Defined in: [types.ts:328](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L328)
 
 ##### iconFontFamily? [#iconfontfamily-1]
 
@@ -5689,7 +5689,7 @@ Defined in: [types.ts:328](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional iconFontFamily?: NodeStyleValue<string>;
 ```
 
-Defined in: [types.ts:329](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L329)
+Defined in: [types.ts:329](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L329)
 
 ##### iconFontSize? [#iconfontsize]
 
@@ -5697,7 +5697,7 @@ Defined in: [types.ts:329](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional iconFontSize?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:330](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L330)
+Defined in: [types.ts:330](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L330)
 
 ##### iconColor? [#iconcolor]
 
@@ -5705,7 +5705,7 @@ Defined in: [types.ts:330](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional iconColor?: NodeStyleValue<string>;
 ```
 
-Defined in: [types.ts:331](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L331)
+Defined in: [types.ts:331](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L331)
 
 ##### iconOffsetX? [#iconoffsetx]
 
@@ -5713,7 +5713,7 @@ Defined in: [types.ts:331](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional iconOffsetX?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:332](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L332)
+Defined in: [types.ts:332](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L332)
 
 ##### iconOffsetY? [#iconoffsety]
 
@@ -5721,13 +5721,13 @@ Defined in: [types.ts:332](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional iconOffsetY?: NodeStyleValue<number>;
 ```
 
-Defined in: [types.ts:333](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L333)
+Defined in: [types.ts:333](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L333)
 
 ***
 
 ### NodeConfig [#nodeconfig]
 
-Defined in: [types.ts:337](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L337)
+Defined in: [types.ts:337](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L337)
 
 Node config: type and style (WebGL-capable only).
 
@@ -5743,7 +5743,7 @@ optional type?:
   | "rect";
 ```
 
-Defined in: [types.ts:338](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L338)
+Defined in: [types.ts:338](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L338)
 
 ##### labelRenderer? [#labelrenderer-1]
 
@@ -5751,7 +5751,7 @@ Defined in: [types.ts:338](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelRenderer?: string;
 ```
 
-Defined in: [types.ts:340](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L340)
+Defined in: [types.ts:340](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L340)
 
 Registered custom label renderer name.
 
@@ -5761,7 +5761,7 @@ Registered custom label renderer name.
 optional decorations?: NodeDecorationConfig<unknown>[];
 ```
 
-Defined in: [types.ts:341](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L341)
+Defined in: [types.ts:341](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L341)
 
 ##### autoExternalLabelPlacement? [#autoexternallabelplacement]
 
@@ -5769,7 +5769,7 @@ Defined in: [types.ts:341](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional autoExternalLabelPlacement?: boolean;
 ```
 
-Defined in: [types.ts:343](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L343)
+Defined in: [types.ts:343](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L343)
 
 Keeps the default node label below decorated nodes unless labelPlacement is explicit.
 
@@ -5781,7 +5781,7 @@ optional style?:
   | ((node: GraphNode) => Partial<NodeStyleConfig>);
 ```
 
-Defined in: [types.ts:344](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L344)
+Defined in: [types.ts:344](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L344)
 
 ##### stateStyles? [#statestyles-4]
 
@@ -5789,13 +5789,13 @@ Defined in: [types.ts:344](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional stateStyles?: Partial<Record<ElementState, NodeStateStyleOverride>>;
 ```
 
-Defined in: [types.ts:345](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L345)
+Defined in: [types.ts:345](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L345)
 
 ***
 
 ### EdgeStateStyleOverride [#edgestatestyleoverride]
 
-Defined in: [types.ts:352](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L352)
+Defined in: [types.ts:352](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L352)
 
 Style overrides applied per edge state.
 
@@ -5807,7 +5807,7 @@ Style overrides applied per edge state.
 optional stroke?: string;
 ```
 
-Defined in: [types.ts:353](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L353)
+Defined in: [types.ts:353](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L353)
 
 ##### lineWidth? [#linewidth]
 
@@ -5815,7 +5815,7 @@ Defined in: [types.ts:353](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional lineWidth?: number;
 ```
 
-Defined in: [types.ts:354](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L354)
+Defined in: [types.ts:354](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L354)
 
 ##### opacity? [#opacity-2]
 
@@ -5823,7 +5823,7 @@ Defined in: [types.ts:354](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional opacity?: number;
 ```
 
-Defined in: [types.ts:355](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L355)
+Defined in: [types.ts:355](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L355)
 
 ##### lineDash? [#linedash]
 
@@ -5831,13 +5831,13 @@ Defined in: [types.ts:355](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional lineDash?: number[];
 ```
 
-Defined in: [types.ts:356](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L356)
+Defined in: [types.ts:356](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L356)
 
 ***
 
 ### EdgeConfig [#edgeconfig]
 
-Defined in: [types.ts:360](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L360)
+Defined in: [types.ts:360](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L360)
 
 Edge config: type and style (WebGL-capable only).
 
@@ -5855,7 +5855,7 @@ optional type?:
   | "cubic";
 ```
 
-Defined in: [types.ts:361](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L361)
+Defined in: [types.ts:361](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L361)
 
 ##### labelRenderer? [#labelrenderer-2]
 
@@ -5863,7 +5863,7 @@ Defined in: [types.ts:361](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelRenderer?: string;
 ```
 
-Defined in: [types.ts:363](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L363)
+Defined in: [types.ts:363](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L363)
 
 Registered custom label renderer name.
 
@@ -5873,7 +5873,7 @@ Registered custom label renderer name.
 optional parallelEdges?: boolean | ParallelEdgesConfig;
 ```
 
-Defined in: [types.ts:364](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L364)
+Defined in: [types.ts:364](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L364)
 
 ##### style? [#style-7]
 
@@ -5903,7 +5903,7 @@ optional style?: {
 };
 ```
 
-Defined in: [types.ts:365](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L365)
+Defined in: [types.ts:365](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L365)
 
 ###### stroke? [#stroke-3]
 
@@ -6037,13 +6037,13 @@ optional labelAutoRotate?: EdgeStyleValue<boolean>;
 optional stateStyles?: Partial<Record<ElementState, EdgeStateStyleOverride>>;
 ```
 
-Defined in: [types.ts:389](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L389)
+Defined in: [types.ts:389](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L389)
 
 ***
 
 ### LayoutConfig [#layoutconfig]
 
-Defined in: [types.ts:393](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L393)
+Defined in: [types.ts:393](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L393)
 
 Layout config: type + algorithm-specific options (aligned with @antv/layout).
 
@@ -6061,7 +6061,7 @@ Layout config: type + algorithm-specific options (aligned with @antv/layout).
 type: string;
 ```
 
-Defined in: [types.ts:394](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L394)
+Defined in: [types.ts:394](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L394)
 
 ##### worker? [#worker]
 
@@ -6069,7 +6069,7 @@ Defined in: [types.ts:394](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional worker?: boolean;
 ```
 
-Defined in: [types.ts:396](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L396)
+Defined in: [types.ts:396](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L396)
 
 Run layout in a Web Worker to avoid blocking the main thread.
 
@@ -6079,7 +6079,7 @@ Run layout in a Web Worker to avoid blocking the main thread.
 optional width?: number;
 ```
 
-Defined in: [types.ts:398](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L398)
+Defined in: [types.ts:398](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L398)
 
 Layout viewport width; defaults to the canvas width (injected by Graph).
 
@@ -6089,7 +6089,7 @@ Layout viewport width; defaults to the canvas width (injected by Graph).
 optional height?: number;
 ```
 
-Defined in: [types.ts:400](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L400)
+Defined in: [types.ts:400](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L400)
 
 Layout viewport height; defaults to the canvas height (injected by Graph).
 
@@ -6099,7 +6099,7 @@ Layout viewport height; defaults to the canvas height (injected by Graph).
 optional center?: [number, number];
 ```
 
-Defined in: [types.ts:402](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L402)
+Defined in: [types.ts:402](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L402)
 
 Layout center point; defaults to \[width/2, height/2].
 
@@ -6107,7 +6107,7 @@ Layout center point; defaults to \[width/2, height/2].
 
 ### PluginOption [#pluginoption]
 
-Defined in: [types.ts:415](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L415)
+Defined in: [types.ts:415](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L415)
 
 #### Indexable [#indexable-3]
 
@@ -6123,13 +6123,13 @@ Defined in: [types.ts:415](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 type: string;
 ```
 
-Defined in: [types.ts:416](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L416)
+Defined in: [types.ts:416](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L416)
 
 ***
 
 ### ThemeTokens [#themetokens]
 
-Defined in: [types.ts:421](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L421)
+Defined in: [types.ts:421](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L421)
 
 Theme tokens (partial list; extend as needed).
 
@@ -6141,7 +6141,7 @@ Theme tokens (partial list; extend as needed).
 optional nodeFill?: string;
 ```
 
-Defined in: [types.ts:422](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L422)
+Defined in: [types.ts:422](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L422)
 
 ##### nodeSize? [#nodesize-1]
 
@@ -6149,7 +6149,7 @@ Defined in: [types.ts:422](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional nodeSize?: number;
 ```
 
-Defined in: [types.ts:423](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L423)
+Defined in: [types.ts:423](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L423)
 
 ##### nodeStroke? [#nodestroke]
 
@@ -6157,7 +6157,7 @@ Defined in: [types.ts:423](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional nodeStroke?: string;
 ```
 
-Defined in: [types.ts:424](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L424)
+Defined in: [types.ts:424](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L424)
 
 ##### nodeStrokeWidth? [#nodestrokewidth]
 
@@ -6165,7 +6165,7 @@ Defined in: [types.ts:424](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional nodeStrokeWidth?: number;
 ```
 
-Defined in: [types.ts:425](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L425)
+Defined in: [types.ts:425](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L425)
 
 ##### edgeStroke? [#edgestroke]
 
@@ -6173,7 +6173,7 @@ Defined in: [types.ts:425](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional edgeStroke?: string;
 ```
 
-Defined in: [types.ts:426](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L426)
+Defined in: [types.ts:426](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L426)
 
 ##### edgeLineWidth? [#edgelinewidth]
 
@@ -6181,7 +6181,7 @@ Defined in: [types.ts:426](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional edgeLineWidth?: number;
 ```
 
-Defined in: [types.ts:427](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L427)
+Defined in: [types.ts:427](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L427)
 
 ##### canvasBackground? [#canvasbackground]
 
@@ -6189,7 +6189,7 @@ Defined in: [types.ts:427](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional canvasBackground?: string;
 ```
 
-Defined in: [types.ts:428](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L428)
+Defined in: [types.ts:428](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L428)
 
 ##### edgeDefaultColor? [#edgedefaultcolor]
 
@@ -6197,7 +6197,7 @@ Defined in: [types.ts:428](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional edgeDefaultColor?: string;
 ```
 
-Defined in: [types.ts:429](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L429)
+Defined in: [types.ts:429](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L429)
 
 ##### edgeCategoryPalette? [#edgecategorypalette]
 
@@ -6205,7 +6205,7 @@ Defined in: [types.ts:429](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional edgeCategoryPalette?: string[];
 ```
 
-Defined in: [types.ts:430](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L430)
+Defined in: [types.ts:430](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L430)
 
 ##### edgeArrow? [#edgearrow]
 
@@ -6213,7 +6213,7 @@ Defined in: [types.ts:430](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional edgeArrow?: boolean;
 ```
 
-Defined in: [types.ts:431](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L431)
+Defined in: [types.ts:431](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L431)
 
 ##### edgeStateStyles? [#edgestatestyles]
 
@@ -6221,7 +6221,7 @@ Defined in: [types.ts:431](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional edgeStateStyles?: Partial<Record<ElementState, EdgeStateStyleOverride>>;
 ```
 
-Defined in: [types.ts:432](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L432)
+Defined in: [types.ts:432](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L432)
 
 ##### nodeStateStyles? [#nodestatestyles]
 
@@ -6229,13 +6229,13 @@ Defined in: [types.ts:432](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional nodeStateStyles?: Partial<Record<ElementState, NodeStateStyleOverride>>;
 ```
 
-Defined in: [types.ts:433](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L433)
+Defined in: [types.ts:433](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L433)
 
 ***
 
 ### ComboData [#combodata]
 
-Defined in: [types.ts:440](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L440)
+Defined in: [types.ts:440](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L440)
 
 Combo (group container) user data.
 
@@ -6247,7 +6247,7 @@ Combo (group container) user data.
 id: string;
 ```
 
-Defined in: [types.ts:441](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L441)
+Defined in: [types.ts:441](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L441)
 
 ##### parentId? [#parentid]
 
@@ -6255,7 +6255,7 @@ Defined in: [types.ts:441](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional parentId?: string;
 ```
 
-Defined in: [types.ts:442](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L442)
+Defined in: [types.ts:442](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L442)
 
 ##### collapsed? [#collapsed]
 
@@ -6263,7 +6263,7 @@ Defined in: [types.ts:442](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional collapsed?: boolean;
 ```
 
-Defined in: [types.ts:443](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L443)
+Defined in: [types.ts:443](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L443)
 
 ##### style? [#style-8]
 
@@ -6271,7 +6271,7 @@ Defined in: [types.ts:443](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional style?: Partial<ComboStyleConfig>;
 ```
 
-Defined in: [types.ts:444](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L444)
+Defined in: [types.ts:444](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L444)
 
 ##### data? [#data-15]
 
@@ -6279,7 +6279,7 @@ Defined in: [types.ts:444](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional data?: Record<string, unknown>;
 ```
 
-Defined in: [types.ts:445](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L445)
+Defined in: [types.ts:445](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L445)
 
 ##### states? [#states-6]
 
@@ -6287,13 +6287,13 @@ Defined in: [types.ts:445](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional states?: ElementState[];
 ```
 
-Defined in: [types.ts:446](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L446)
+Defined in: [types.ts:446](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L446)
 
 ***
 
 ### ComboStateStyleOverride [#combostatestyleoverride]
 
-Defined in: [types.ts:453](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L453)
+Defined in: [types.ts:453](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L453)
 
 Style overrides applied per combo state.
 
@@ -6305,7 +6305,7 @@ Style overrides applied per combo state.
 optional fill?: ComboStyleValue<string>;
 ```
 
-Defined in: [types.ts:454](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L454)
+Defined in: [types.ts:454](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L454)
 
 ##### stroke? [#stroke-4]
 
@@ -6313,7 +6313,7 @@ Defined in: [types.ts:454](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional stroke?: ComboStyleValue<string>;
 ```
 
-Defined in: [types.ts:455](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L455)
+Defined in: [types.ts:455](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L455)
 
 ##### strokeWidth? [#strokewidth-2]
 
@@ -6321,7 +6321,7 @@ Defined in: [types.ts:455](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional strokeWidth?: ComboStyleValue<number>;
 ```
 
-Defined in: [types.ts:456](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L456)
+Defined in: [types.ts:456](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L456)
 
 ##### opacity? [#opacity-4]
 
@@ -6329,7 +6329,7 @@ Defined in: [types.ts:456](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional opacity?: ComboStyleValue<number>;
 ```
 
-Defined in: [types.ts:457](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L457)
+Defined in: [types.ts:457](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L457)
 
 ##### borderRadius? [#borderradius-2]
 
@@ -6337,7 +6337,7 @@ Defined in: [types.ts:457](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional borderRadius?: ComboStyleValue<number>;
 ```
 
-Defined in: [types.ts:458](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L458)
+Defined in: [types.ts:458](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L458)
 
 ##### label? [#label-2]
 
@@ -6345,7 +6345,7 @@ Defined in: [types.ts:458](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional label?: ComboStyleValue<string | false>;
 ```
 
-Defined in: [types.ts:459](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L459)
+Defined in: [types.ts:459](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L459)
 
 ##### labelFontSize? [#labelfontsize-3]
 
@@ -6353,7 +6353,7 @@ Defined in: [types.ts:459](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelFontSize?: ComboStyleValue<number>;
 ```
 
-Defined in: [types.ts:460](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L460)
+Defined in: [types.ts:460](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L460)
 
 ##### labelColor? [#labelcolor-3]
 
@@ -6361,13 +6361,13 @@ Defined in: [types.ts:460](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelColor?: ComboStyleValue<string>;
 ```
 
-Defined in: [types.ts:461](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L461)
+Defined in: [types.ts:461](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L461)
 
 ***
 
 ### ComboStyleConfig [#combostyleconfig]
 
-Defined in: [types.ts:465](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L465)
+Defined in: [types.ts:465](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L465)
 
 Combo style configuration.
 
@@ -6379,7 +6379,7 @@ Combo style configuration.
 optional fill?: ComboStyleValue<string>;
 ```
 
-Defined in: [types.ts:466](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L466)
+Defined in: [types.ts:466](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L466)
 
 ##### stroke? [#stroke-5]
 
@@ -6387,7 +6387,7 @@ Defined in: [types.ts:466](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional stroke?: ComboStyleValue<string>;
 ```
 
-Defined in: [types.ts:467](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L467)
+Defined in: [types.ts:467](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L467)
 
 ##### strokeWidth? [#strokewidth-3]
 
@@ -6395,7 +6395,7 @@ Defined in: [types.ts:467](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional strokeWidth?: ComboStyleValue<number>;
 ```
 
-Defined in: [types.ts:468](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L468)
+Defined in: [types.ts:468](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L468)
 
 ##### opacity? [#opacity-5]
 
@@ -6403,7 +6403,7 @@ Defined in: [types.ts:468](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional opacity?: ComboStyleValue<number>;
 ```
 
-Defined in: [types.ts:469](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L469)
+Defined in: [types.ts:469](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L469)
 
 ##### borderRadius? [#borderradius-3]
 
@@ -6411,7 +6411,7 @@ Defined in: [types.ts:469](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional borderRadius?: ComboStyleValue<number>;
 ```
 
-Defined in: [types.ts:470](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L470)
+Defined in: [types.ts:470](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L470)
 
 ##### padding? [#padding-1]
 
@@ -6419,7 +6419,7 @@ Defined in: [types.ts:470](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional padding?: number | [number, number, number, number];
 ```
 
-Defined in: [types.ts:471](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L471)
+Defined in: [types.ts:471](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L471)
 
 ##### label? [#label-3]
 
@@ -6427,7 +6427,7 @@ Defined in: [types.ts:471](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional label?: ComboStyleValue<string | false>;
 ```
 
-Defined in: [types.ts:472](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L472)
+Defined in: [types.ts:472](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L472)
 
 ##### labelFontSize? [#labelfontsize-4]
 
@@ -6435,7 +6435,7 @@ Defined in: [types.ts:472](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelFontSize?: ComboStyleValue<number>;
 ```
 
-Defined in: [types.ts:473](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L473)
+Defined in: [types.ts:473](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L473)
 
 ##### labelColor? [#labelcolor-4]
 
@@ -6443,7 +6443,7 @@ Defined in: [types.ts:473](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelColor?: ComboStyleValue<string>;
 ```
 
-Defined in: [types.ts:474](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L474)
+Defined in: [types.ts:474](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L474)
 
 ##### labelPlacement? [#labelplacement-3]
 
@@ -6451,7 +6451,7 @@ Defined in: [types.ts:474](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional labelPlacement?: "center" | "top" | "bottom" | "inside";
 ```
 
-Defined in: [types.ts:475](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L475)
+Defined in: [types.ts:475](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L475)
 
 ##### collapsedType? [#collapsedtype]
 
@@ -6459,7 +6459,7 @@ Defined in: [types.ts:475](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional collapsedType?: "circle" | "rect";
 ```
 
-Defined in: [types.ts:476](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L476)
+Defined in: [types.ts:476](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L476)
 
 ##### collapsedSize? [#collapsedsize]
 
@@ -6467,7 +6467,7 @@ Defined in: [types.ts:476](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional collapsedSize?: ComboStyleValue<number | [number, number]>;
 ```
 
-Defined in: [types.ts:477](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L477)
+Defined in: [types.ts:477](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L477)
 
 ##### size? [#size-1]
 
@@ -6475,7 +6475,7 @@ Defined in: [types.ts:477](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional size?: ComboStyleValue<number | [number, number]>;
 ```
 
-Defined in: [types.ts:478](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L478)
+Defined in: [types.ts:478](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L478)
 
 ##### count? [#count]
 
@@ -6486,7 +6486,7 @@ optional count?:
   | ((combo: ComboModel) => string | boolean);
 ```
 
-Defined in: [types.ts:479](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L479)
+Defined in: [types.ts:479](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L479)
 
 ##### stateStyles? [#statestyles-6]
 
@@ -6494,13 +6494,13 @@ Defined in: [types.ts:479](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional stateStyles?: Partial<Record<ElementState, ComboStateStyleOverride>>;
 ```
 
-Defined in: [types.ts:480](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L480)
+Defined in: [types.ts:480](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L480)
 
 ***
 
 ### ComboConfig [#comboconfig]
 
-Defined in: [types.ts:484](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L484)
+Defined in: [types.ts:484](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L484)
 
 Combo config in GraphOptions.
 
@@ -6512,13 +6512,13 @@ Combo config in GraphOptions.
 optional style?: ComboStyleConfig;
 ```
 
-Defined in: [types.ts:485](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L485)
+Defined in: [types.ts:485](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L485)
 
 ***
 
 ### ComboModel [#combomodel]
 
-Defined in: [types.ts:492](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L492)
+Defined in: [types.ts:492](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L492)
 
 Read-only normalized combo view returned by Graph query APIs.
 The view is backed by Graph; update it through Graph data/state APIs.
@@ -6531,7 +6531,7 @@ The view is backed by Graph; update it through Graph data/state APIs.
 readonly id: string;
 ```
 
-Defined in: [types.ts:493](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L493)
+Defined in: [types.ts:493](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L493)
 
 ##### parentId? [#parentid-1]
 
@@ -6539,7 +6539,7 @@ Defined in: [types.ts:493](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly optional parentId?: string;
 ```
 
-Defined in: [types.ts:494](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L494)
+Defined in: [types.ts:494](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L494)
 
 ##### childNodeIds [#childnodeids]
 
@@ -6547,7 +6547,7 @@ Defined in: [types.ts:494](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly childNodeIds: ReadonlySet<string>;
 ```
 
-Defined in: [types.ts:495](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L495)
+Defined in: [types.ts:495](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L495)
 
 ##### childComboIds [#childcomboids]
 
@@ -6555,7 +6555,7 @@ Defined in: [types.ts:495](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly childComboIds: ReadonlySet<string>;
 ```
 
-Defined in: [types.ts:496](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L496)
+Defined in: [types.ts:496](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L496)
 
 ##### collapsed [#collapsed-1]
 
@@ -6563,7 +6563,7 @@ Defined in: [types.ts:496](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly collapsed: boolean;
 ```
 
-Defined in: [types.ts:497](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L497)
+Defined in: [types.ts:497](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L497)
 
 ##### x [#x-18]
 
@@ -6571,7 +6571,7 @@ Defined in: [types.ts:497](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly x: number;
 ```
 
-Defined in: [types.ts:498](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L498)
+Defined in: [types.ts:498](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L498)
 
 ##### y [#y-18]
 
@@ -6579,7 +6579,7 @@ Defined in: [types.ts:498](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly y: number;
 ```
 
-Defined in: [types.ts:499](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L499)
+Defined in: [types.ts:499](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L499)
 
 ##### width [#width-4]
 
@@ -6587,7 +6587,7 @@ Defined in: [types.ts:499](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly width: number;
 ```
 
-Defined in: [types.ts:500](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L500)
+Defined in: [types.ts:500](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L500)
 
 ##### height [#height-4]
 
@@ -6595,7 +6595,7 @@ Defined in: [types.ts:500](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly height: number;
 ```
 
-Defined in: [types.ts:501](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L501)
+Defined in: [types.ts:501](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L501)
 
 ##### style? [#style-10]
 
@@ -6603,7 +6603,7 @@ Defined in: [types.ts:501](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly optional style?: Readonly<Partial<ComboStyleConfig>>;
 ```
 
-Defined in: [types.ts:502](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L502)
+Defined in: [types.ts:502](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L502)
 
 ##### data? [#data-16]
 
@@ -6611,7 +6611,7 @@ Defined in: [types.ts:502](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly optional data?: Readonly<Record<string, unknown>>;
 ```
 
-Defined in: [types.ts:503](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L503)
+Defined in: [types.ts:503](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L503)
 
 ##### states [#states-7]
 
@@ -6619,13 +6619,13 @@ Defined in: [types.ts:503](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 readonly states: ReadonlySet<ElementState>;
 ```
 
-Defined in: [types.ts:504](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L504)
+Defined in: [types.ts:504](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L504)
 
 ***
 
 ### GraphOptions [#graphoptions]
 
-Defined in: [types.ts:527](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L527)
+Defined in: [types.ts:527](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L527)
 
 Full graph options.
 
@@ -6637,7 +6637,7 @@ Full graph options.
 container: string | HTMLElement;
 ```
 
-Defined in: [types.ts:528](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L528)
+Defined in: [types.ts:528](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L528)
 
 ##### data [#data-17]
 
@@ -6645,7 +6645,7 @@ Defined in: [types.ts:528](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 data: GraphData;
 ```
 
-Defined in: [types.ts:529](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L529)
+Defined in: [types.ts:529](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L529)
 
 ##### node? [#node-5]
 
@@ -6653,7 +6653,7 @@ Defined in: [types.ts:529](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional node?: NodeConfig;
 ```
 
-Defined in: [types.ts:530](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L530)
+Defined in: [types.ts:530](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L530)
 
 ##### edge? [#edge-1]
 
@@ -6661,7 +6661,7 @@ Defined in: [types.ts:530](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional edge?: EdgeConfig;
 ```
 
-Defined in: [types.ts:531](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L531)
+Defined in: [types.ts:531](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L531)
 
 ##### combo? [#combo]
 
@@ -6669,7 +6669,7 @@ Defined in: [types.ts:531](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional combo?: ComboConfig;
 ```
 
-Defined in: [types.ts:532](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L532)
+Defined in: [types.ts:532](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L532)
 
 ##### layout? [#layout-3]
 
@@ -6677,7 +6677,7 @@ Defined in: [types.ts:532](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional layout?: LayoutConfig;
 ```
 
-Defined in: [types.ts:533](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L533)
+Defined in: [types.ts:533](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L533)
 
 ##### behaviors? [#behaviors]
 
@@ -6685,7 +6685,7 @@ Defined in: [types.ts:533](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional behaviors?: BehaviorOption[];
 ```
 
-Defined in: [types.ts:534](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L534)
+Defined in: [types.ts:534](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L534)
 
 ##### transforms? [#transforms]
 
@@ -6693,7 +6693,7 @@ Defined in: [types.ts:534](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional transforms?: TransformOption[];
 ```
 
-Defined in: [types.ts:535](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L535)
+Defined in: [types.ts:535](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L535)
 
 ##### plugins? [#plugins]
 
@@ -6701,7 +6701,7 @@ Defined in: [types.ts:535](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional plugins?: PluginOption[];
 ```
 
-Defined in: [types.ts:536](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L536)
+Defined in: [types.ts:536](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L536)
 
 ##### theme? [#theme]
 
@@ -6709,7 +6709,7 @@ Defined in: [types.ts:536](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 optional theme?: ThemeOption;
 ```
 
-Defined in: [types.ts:537](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L537)
+Defined in: [types.ts:537](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L537)
 
 ## Type Aliases [#type-aliases]
 
@@ -6730,7 +6730,7 @@ type BehaviorName =
   | "tooltip";
 ```
 
-Defined in: [behaviors/index.ts:41](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/behaviors/index.ts#L41)
+Defined in: [behaviors/index.ts:41](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/behaviors/index.ts#L41)
 
 ***
 
@@ -6740,7 +6740,7 @@ Defined in: [behaviors/index.ts:41](https://github.com/antvis/G6Lite/blob/3c62ec
 type Handler<Args> = (...args: Args) => void;
 ```
 
-Defined in: [events.ts:5](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/events.ts#L5)
+Defined in: [events.ts:5](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/events.ts#L5)
 
 Lightweight typed event emitter.
 
@@ -6776,7 +6776,7 @@ type ExtensionCategory =
   | "plugin";
 ```
 
-Defined in: [extensions/contracts.ts:13](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L13)
+Defined in: [extensions/contracts.ts:13](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L13)
 
 ***
 
@@ -6786,7 +6786,7 @@ Defined in: [extensions/contracts.ts:13](https://github.com/antvis/G6Lite/blob/3
 type ExtensionFactory<T> = () => T;
 ```
 
-Defined in: [extensions/contracts.ts:152](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L152)
+Defined in: [extensions/contracts.ts:152](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L152)
 
 Recommended registration form for stateful extensions.
 
@@ -6808,7 +6808,7 @@ Recommended registration form for stateful extensions.
 type ExtensionConstructor<T> = () => T;
 ```
 
-Defined in: [extensions/contracts.ts:158](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L158)
+Defined in: [extensions/contracts.ts:158](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L158)
 
 #### Type Parameters [#type-parameters-21]
 
@@ -6836,7 +6836,7 @@ type ExtensionInput<T> =
 | ExtensionConstructor<T>;
 ```
 
-Defined in: [extensions/contracts.ts:159](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/contracts.ts#L159)
+Defined in: [extensions/contracts.ts:159](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/contracts.ts#L159)
 
 #### Type Parameters [#type-parameters-22]
 
@@ -6852,7 +6852,7 @@ Defined in: [extensions/contracts.ts:159](https://github.com/antvis/G6Lite/blob/
 type NodeExtensionInput = ExtensionInput<NodeExtension>;
 ```
 
-Defined in: [extensions/node.ts:49](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L49)
+Defined in: [extensions/node.ts:49](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L49)
 
 ***
 
@@ -6867,7 +6867,7 @@ type LayoutResult = {
 };
 ```
 
-Defined in: [layout/runLayout.ts:27](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/layout/runLayout.ts#L27)
+Defined in: [layout/runLayout.ts:27](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/layout/runLayout.ts#L27)
 
 #### Properties [#properties-54]
 
@@ -6880,7 +6880,7 @@ nodes: GraphNode & {
 }[];
 ```
 
-Defined in: [layout/runLayout.ts:27](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/layout/runLayout.ts#L27)
+Defined in: [layout/runLayout.ts:27](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/layout/runLayout.ts#L27)
 
 ***
 
@@ -6890,7 +6890,7 @@ Defined in: [layout/runLayout.ts:27](https://github.com/antvis/G6Lite/blob/3c62e
 type EdgeData = Record<string, unknown>;
 ```
 
-Defined in: [types.ts:25](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L25)
+Defined in: [types.ts:25](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L25)
 
 Extended payload attached to an edge.
 
@@ -6909,7 +6909,7 @@ type BuiltInElementState =
   | "hidden";
 ```
 
-Defined in: [types.ts:28](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L28)
+Defined in: [types.ts:28](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L28)
 
 Shared state type for nodes and edges.
 
@@ -6924,7 +6924,7 @@ type ElementState =
 };
 ```
 
-Defined in: [types.ts:32](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L32)
+Defined in: [types.ts:32](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L32)
 
 Built-in states plus application-defined state names.
 
@@ -6936,7 +6936,7 @@ Built-in states plus application-defined state names.
 type NodeState = ElementState;
 ```
 
-Defined in: [types.ts:101](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L101)
+Defined in: [types.ts:101](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L101)
 
 Node states for visual differentiation.
 
@@ -6948,7 +6948,7 @@ Node states for visual differentiation.
 type EdgeState = ElementState;
 ```
 
-Defined in: [types.ts:104](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L104)
+Defined in: [types.ts:104](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L104)
 
 Edge states for visual differentiation.
 
@@ -6960,7 +6960,7 @@ Edge states for visual differentiation.
 type NodeStyleValue<T> = T | ((node: GraphNode) => T);
 ```
 
-Defined in: [types.ts:176](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L176)
+Defined in: [types.ts:176](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L176)
 
 Style value or function for node.
 
@@ -6978,7 +6978,7 @@ Style value or function for node.
 type LabelPlacement = "center" | "top" | "bottom" | "left" | "right";
 ```
 
-Defined in: [types.ts:188](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L188)
+Defined in: [types.ts:188](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L188)
 
 Label placement relative to node.
 
@@ -6990,7 +6990,7 @@ Label placement relative to node.
 type NodeDecorationAttachment = "boundary" | "outside" | "inside";
 ```
 
-Defined in: [types.ts:191](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L191)
+Defined in: [types.ts:191](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L191)
 
 How a node decoration is attached relative to the selected node side.
 
@@ -7002,7 +7002,7 @@ How a node decoration is attached relative to the selected node side.
 type NodeDecorationAnchor = "start" | "center" | "end";
 ```
 
-Defined in: [types.ts:192](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L192)
+Defined in: [types.ts:192](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L192)
 
 ***
 
@@ -7012,7 +7012,7 @@ Defined in: [types.ts:192](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 type NodeDecorationPlacement = LabelPlacement | "follow-label";
 ```
 
-Defined in: [types.ts:193](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L193)
+Defined in: [types.ts:193](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L193)
 
 ***
 
@@ -7022,7 +7022,7 @@ Defined in: [types.ts:193](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 type NodeBadgeKind = "count" | "lock" | "warning" | "favorite" | "text" | "icon";
 ```
 
-Defined in: [types.ts:195](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L195)
+Defined in: [types.ts:195](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L195)
 
 ***
 
@@ -7032,7 +7032,7 @@ Defined in: [types.ts:195](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5
 type EdgeLabelPlacement = "start" | "center" | "end";
 ```
 
-Defined in: [types.ts:208](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L208)
+Defined in: [types.ts:208](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L208)
 
 Edge label placement along the edge.
 
@@ -7044,7 +7044,7 @@ Edge label placement along the edge.
 type LabelType = "node" | "edge";
 ```
 
-Defined in: [types.ts:211](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L211)
+Defined in: [types.ts:211](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L211)
 
 Label owner type shared by node and edge label renderers.
 
@@ -7058,7 +7058,7 @@ type LabelMeasureParams =
   | EdgeLabelParams;
 ```
 
-Defined in: [types.ts:268](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L268)
+Defined in: [types.ts:268](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L268)
 
 Parameters passed to LabelRenderer.measure().
 
@@ -7076,7 +7076,7 @@ type LabelDrawParams<T> =
 };
 ```
 
-Defined in: [types.ts:271](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L271)
+Defined in: [types.ts:271](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L271)
 
 Parameters passed to LabelRenderer.draw().
 
@@ -7096,7 +7096,7 @@ type EdgeStyleValue<T> =
   | ((source: GraphNode, target: GraphNode, edge: GraphEdge) => T);
 ```
 
-Defined in: [types.ts:349](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L349)
+Defined in: [types.ts:349](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L349)
 
 Style value or function for edge (node1, node2, edge).
 
@@ -7119,7 +7119,7 @@ type BehaviorOption =
 };
 ```
 
-Defined in: [types.ts:407](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L407)
+Defined in: [types.ts:407](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L407)
 
 Behavior: string name or config object.
 
@@ -7139,7 +7139,7 @@ type TransformOption =
 };
 ```
 
-Defined in: [types.ts:410](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L410)
+Defined in: [types.ts:410](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L410)
 
 Data transform config.
 
@@ -7156,7 +7156,7 @@ type ThemeOption =
 } & Partial<ThemeTokens>;
 ```
 
-Defined in: [types.ts:437](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L437)
+Defined in: [types.ts:437](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L437)
 
 Theme: preset name or object with type and overrides.
 
@@ -7168,7 +7168,7 @@ Theme: preset name or object with type and overrides.
 type ComboStyleValue<T> = T | ((combo: ComboModel) => T);
 ```
 
-Defined in: [types.ts:450](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L450)
+Defined in: [types.ts:450](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L450)
 
 Style value or function for combo.
 
@@ -7189,7 +7189,7 @@ type ElementModel =
   | ComboModel;
 ```
 
-Defined in: [types.ts:508](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/types.ts#L508)
+Defined in: [types.ts:508](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/types.ts#L508)
 
 Normalized graph element model returned by Graph.getElementData().
 
@@ -7206,7 +7206,7 @@ function register(
    extension: NodeExtensionInput): void;
 ```
 
-Defined in: [extensions/index.ts:26](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/index.ts#L26)
+Defined in: [extensions/index.ts:26](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/index.ts#L26)
 
 ##### Parameters [#parameters-110]
 
@@ -7229,7 +7229,7 @@ function register<T>(
    renderer: ExtensionInput<LabelRenderer<T>>): void;
 ```
 
-Defined in: [extensions/index.ts:27](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/index.ts#L27)
+Defined in: [extensions/index.ts:27](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/index.ts#L27)
 
 ##### Type Parameters [#type-parameters-27]
 
@@ -7258,7 +7258,7 @@ function register(
    extension: ExtensionInput<EdgeExtension>): void;
 ```
 
-Defined in: [extensions/index.ts:32](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/index.ts#L32)
+Defined in: [extensions/index.ts:32](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/index.ts#L32)
 
 ##### Parameters [#parameters-112]
 
@@ -7281,7 +7281,7 @@ function register(
    extension: ExtensionInput<DecorationRenderer<unknown>>): void;
 ```
 
-Defined in: [extensions/index.ts:37](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/index.ts#L37)
+Defined in: [extensions/index.ts:37](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/index.ts#L37)
 
 ##### Parameters [#parameters-113]
 
@@ -7304,7 +7304,7 @@ function register(
    extension: ExtensionInput<LayoutExtension<Record<string, unknown>>>): void;
 ```
 
-Defined in: [extensions/index.ts:42](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/index.ts#L42)
+Defined in: [extensions/index.ts:42](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/index.ts#L42)
 
 ##### Parameters [#parameters-114]
 
@@ -7327,7 +7327,7 @@ function register(
    extension: ExtensionInput<BehaviorExtension<Record<string, unknown>>>): void;
 ```
 
-Defined in: [extensions/index.ts:47](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/index.ts#L47)
+Defined in: [extensions/index.ts:47](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/index.ts#L47)
 
 ##### Parameters [#parameters-115]
 
@@ -7350,7 +7350,7 @@ function register(
    extension: ExtensionInput<TransformExtension<Record<string, unknown>>>): void;
 ```
 
-Defined in: [extensions/index.ts:52](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/index.ts#L52)
+Defined in: [extensions/index.ts:52](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/index.ts#L52)
 
 ##### Parameters [#parameters-116]
 
@@ -7373,7 +7373,7 @@ function register(
    extension: ExtensionInput<PluginExtension<Record<string, unknown>>>): void;
 ```
 
-Defined in: [extensions/index.ts:57](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/index.ts#L57)
+Defined in: [extensions/index.ts:57](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/index.ts#L57)
 
 ##### Parameters [#parameters-117]
 
@@ -7395,7 +7395,7 @@ Defined in: [extensions/index.ts:57](https://github.com/antvis/G6Lite/blob/3c62e
 function registerNode(name: string, extension: NodeExtensionInput): void;
 ```
 
-Defined in: [extensions/node.ts:54](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/node.ts#L54)
+Defined in: [extensions/node.ts:54](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/node.ts#L54)
 
 #### Parameters [#parameters-118]
 
@@ -7420,7 +7420,7 @@ Use the unified register('node', name, extension) API.
 function extensionFactory<T>(factory: ExtensionFactory<T>): ExtensionFactory<T>;
 ```
 
-Defined in: [extensions/registry.ts:21](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/extensions/registry.ts#L21)
+Defined in: [extensions/registry.ts:21](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/extensions/registry.ts#L21)
 
 Marks a function as the preferred extension factory form.
 
@@ -7455,7 +7455,7 @@ function runLayout(
 runtime?: LayoutRuntime): Promise<LayoutResult>;
 ```
 
-Defined in: [layout/runLayout.ts:294](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/layout/runLayout.ts#L294)
+Defined in: [layout/runLayout.ts:294](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/layout/runLayout.ts#L294)
 
 Run the configured layout on graph data; returns nodes with positions.
 Registered extensions and built-in functional layouts take precedence over
@@ -7490,7 +7490,7 @@ function resolveTheme(theme:
 } & Partial<ThemeTokens>): ThemeTokens;
 ```
 
-Defined in: [theme.ts:81](https://github.com/antvis/G6Lite/blob/3c62ec26fa4eef5d2a722fee94d421fb69c20380/src/theme.ts#L81)
+Defined in: [theme.ts:81](https://github.com/antvis/G6Lite/blob/07109c09c38e6b42acb4d819bf987063830fdc6d/src/theme.ts#L81)
 
 Resolve theme option to a full ThemeTokens object.
 String -> preset; object -> preset + overrides.

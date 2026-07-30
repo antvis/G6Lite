@@ -2,7 +2,7 @@
 
 
 
-G6-GL requires WebGL 1.0 and a modern browser capable of running the ESM/ES2020 package. Canvas 2D is used for labels and combo outlines. WebGL 2.0 is not required.
+G6-GL prefers WebGL 2.0 and falls back to WebGL 1.0. Canvas 2D is used for labels and combo outlines, so WebGL 2.0 is not a hard requirement.
 
 ## Minimum versions [#minimum-versions]
 
@@ -33,5 +33,7 @@ The sigma.js v3 README describes a WebGL renderer for graphs with thousands of n
 An omitted matrix should not be interpreted as legacy-browser support. Both libraries require WebGL and a modern JavaScript toolchain; G6-GL explicitly documents the syntax floor of its untranspiled package, while sigma.js consumers need to validate their own build target.
 
 G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
+
+The renderer uses `regl`, which dynamically compiles WebGL commands. If the host enables Content Security Policy, `script-src` must allow `'unsafe-eval'`; `'wasm-unsafe-eval'` alone is not sufficient. Hosts that cannot allow this directive are not supported by the current renderer.
 
 Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.

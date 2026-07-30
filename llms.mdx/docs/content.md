@@ -40,7 +40,7 @@ G6-GL 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL 引
 
 * **WebGL 高性能渲染**：节点和边通过 GPU 批量绘制，适合大规模图数据。
 * **增量更新**：高亮、选中、隐藏等状态变化走分级刷新和局部 patch。
-* **布局能力**：内置 force、circular、grid、dagre、mindmap、fishbone 等布局。
+* **布局能力**：提供 force、circular、grid、dagre、radial、mds、mindmap、fishbone 等布局，并按类型自动加载对应算法。
 * **交互行为**：缩放、拖拽、选择、高亮、框选、套索、Tooltip 开箱可用。
 * **轻量扩展**：支持主题覆盖、Combo、标签、图标和节点扩展。
 

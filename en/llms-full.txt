@@ -138,7 +138,7 @@ Combo collapse, nesting, and runtime regrouping remain experimental. Read the [C
 
 
 
-G6-GL requires WebGL 1.0 and a modern browser capable of running the ESM/ES2020 package. Canvas 2D is used for labels and combo outlines. WebGL 2.0 is not required.
+G6-GL prefers WebGL 2.0 and falls back to WebGL 1.0. Canvas 2D is used for labels and combo outlines, so WebGL 2.0 is not a hard requirement.
 
 ## Minimum versions [#minimum-versions]
 
@@ -169,6 +169,8 @@ The sigma.js v3 README describes a WebGL renderer for graphs with thousands of n
 An omitted matrix should not be interpreted as legacy-browser support. Both libraries require WebGL and a modern JavaScript toolchain; G6-GL explicitly documents the syntax floor of its untranspiled package, while sigma.js consumers need to validate their own build target.
 
 G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
+
+The renderer uses `regl`, which dynamically compiles WebGL commands. If the host enables Content Security Policy, `script-src` must allow `'unsafe-eval'`; `'wasm-unsafe-eval'` alone is not sufficient. Hosts that cannot allow this directive are not supported by the current renderer.
 
 Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
 
@@ -207,80 +209,6 @@ Review these boundaries before adopting or upgrading G6-GL:
 </Cards>
 
 G6-GL needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.
-
-
-# Data model (/en/docs/concepts/data-model)
-
-
-
-`GraphData` contains `nodes`, `edges`, and optional `combos`:
-
-```ts
-const data = {
-  nodes: [
-    { id: 'gateway', data: { label: 'Gateway' } },
-    { id: 'orders', data: { label: 'Orders' } },
-  ],
-  edges: [{ source: 'gateway', target: 'orders', data: { qps: 1200 } }],
-};
-```
-
-Node IDs must be stable. Put business fields under `data`; use `x` and `y` when coordinates are already available. Edges declare `source` and `target` and may provide a stable `id`. Combos group nodes through `comboId` and remain experimental during the `0.1.x` beta.
-
-Use states for selection, highlighting, and dimming:
-
-```ts
-graph.batchSetState([
-  { id: 'gateway', state: 'selected', value: true },
-  { id: 'orders', state: 'inactive', value: true },
-]);
-```
-
-Query APIs return normalized read-only model views. Modify graph-owned data through update, position, and state APIs instead of mutating query results.
-
-
-# Graph lifecycle (/en/docs/concepts/graph-lifecycle)
-
-
-
-`Graph` is the main public entry point.
-
-```ts
-const graph = new Graph({ container: 'graph', data, layout: { type: 'force' } });
-await graph.render();
-```
-
-Construction resolves the container and prepares the rendering surface. `render()` sizes the canvases, resolves the theme, runs layout, initializes data and transforms, starts WebGL and interaction layers, fits the viewport, and emits `afterrender`.
-
-Use `setData()` for complete replacement. Use `addNode`, `addEdge`, update, remove, and state APIs for incremental changes. To run another layout:
-
-```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR' });
-await graph.layout();
-```
-
-Viewport APIs include `fitView()`, `focusItem()`, `setCamera()`, `screenToGraph()`, and `graphToScreen()`. Always call `graph.destroy()` during page or component cleanup.
-
-
-# What is G6-GL? (/en/docs/concepts/overview)
-
-
-
-G6-GL is a lightweight WebGL graph visualization engine. It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
-
-## Good fits [#good-fits]
-
-* Relationship exploration, topology, knowledge graphs, and dependency analysis.
-* Frequent highlighting, selection, neighbor focus, and state switching.
-* Products that need AntV layouts with a controlled package and extension boundary.
-
-## Evaluate carefully [#evaluate-carefully]
-
-* Extremely large graphs where first-paint speed is the only requirement.
-* Products that need the full G6 plugin, animation, and element ecosystem.
-* SVG/DOM-level customization or server-side image rendering.
-
-G6 v5 is the broader general-purpose framework. G6-GL is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
 
 
 # Minimal graph (/en/docs/examples/basic)
@@ -1118,6 +1046,8 @@ layout: { type: 'force', linkDistance: 100, worker: true }
 
 Use circular or grid for deterministic overviews, dagre for hierarchies, force and d3-force for networks, and mindmap, indented, or fishbone for tree-oriented presentation. If coordinates already exist, omit layout and use node `x` / `y`.
 
+Official layouts are loaded automatically by type. G6-GL keeps each algorithm behind an internal dynamic import, so no separate registration or enable call is required.
+
 Run another layout at runtime:
 
 ```ts
@@ -1213,14 +1143,14 @@ Use application-safe rendering when content contains user input. Tooltip positio
 
 
 
-G6-GL measures the `dist/index.js` package entry and all reachable dependencies with size-limit. The repository budget is **120 kB after minification and brotli compression**.
+G6-GL measures the initial `dist/index.js` payload and each real layout usage path with size-limit. The initial entry has a **90 kB minified and brotli-compressed budget**; the initial entry plus any one official layout keeps the existing **120 kB budget**.
 
 ```bash
 npm run build
 npm run size
 ```
 
-The 2026-07-24 verification result for this workspace was **115.49 kB brotli**, below the budget. Treat that number as version-specific acceptance evidence; run the command on the current checkout for the latest value.
+The 2026-07-30 workspace result is **83.17 kB / 90 kB** before a layout is loaded. The official layout paths range from **86.70 kB to 119.48 kB / 120 kB**, with Dagre currently the largest. Layout algorithms are selected through internal dynamic imports; users do not need separate registration calls. Run the command on the current checkout for the latest result.
 
 Import from the package root, use a tree-shaking bundler, enable production compression, and inspect the final application bundle. Do not compare libraries unless feature scope and dependency boundaries are equivalent.
 
@@ -1287,3 +1217,77 @@ For example, a first-render comparison is invalid when sigma.js reuses existing 
 * Record median, P95, samples, and error instead of drawing conclusions from one run.
 * Measure drag, zoom, picking, highlighting, batch updates, and post-destroy memory trends in addition to first render.
 * Archive candidate versions, adapters, full configuration, and reports together.
+
+
+# Data model (/en/docs/concepts/data-model)
+
+
+
+`GraphData` contains `nodes`, `edges`, and optional `combos`:
+
+```ts
+const data = {
+  nodes: [
+    { id: 'gateway', data: { label: 'Gateway' } },
+    { id: 'orders', data: { label: 'Orders' } },
+  ],
+  edges: [{ source: 'gateway', target: 'orders', data: { qps: 1200 } }],
+};
+```
+
+Node IDs must be stable. Put business fields under `data`; use `x` and `y` when coordinates are already available. Edges declare `source` and `target` and may provide a stable `id`. Combos group nodes through `comboId` and remain experimental during the `0.1.x` beta.
+
+Use states for selection, highlighting, and dimming:
+
+```ts
+graph.batchSetState([
+  { id: 'gateway', state: 'selected', value: true },
+  { id: 'orders', state: 'inactive', value: true },
+]);
+```
+
+Query APIs return normalized read-only model views. Modify graph-owned data through update, position, and state APIs instead of mutating query results.
+
+
+# Graph lifecycle (/en/docs/concepts/graph-lifecycle)
+
+
+
+`Graph` is the main public entry point.
+
+```ts
+const graph = new Graph({ container: 'graph', data, layout: { type: 'force' } });
+await graph.render();
+```
+
+Construction resolves the container and prepares the rendering surface. `render()` sizes the canvases, resolves the theme, runs layout, initializes data and transforms, starts WebGL and interaction layers, fits the viewport, and emits `afterrender`.
+
+Use `setData()` for complete replacement. Use `addNode`, `addEdge`, update, remove, and state APIs for incremental changes. To run another layout:
+
+```ts
+graph.setLayout({ type: 'dagre', rankdir: 'LR' });
+await graph.layout();
+```
+
+Viewport APIs include `fitView()`, `focusItem()`, `setCamera()`, `screenToGraph()`, and `graphToScreen()`. Always call `graph.destroy()` during page or component cleanup.
+
+
+# What is G6-GL? (/en/docs/concepts/overview)
+
+
+
+G6-GL is a lightweight WebGL graph visualization engine. It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
+
+## Good fits [#good-fits]
+
+* Relationship exploration, topology, knowledge graphs, and dependency analysis.
+* Frequent highlighting, selection, neighbor focus, and state switching.
+* Products that need AntV layouts with a controlled package and extension boundary.
+
+## Evaluate carefully [#evaluate-carefully]
+
+* Extremely large graphs where first-paint speed is the only requirement.
+* Products that need the full G6 plugin, animation, and element ecosystem.
+* SVG/DOM-level customization or server-side image rendering.
+
+G6 v5 is the broader general-purpose framework. G6-GL is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.

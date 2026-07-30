@@ -2,14 +2,14 @@
 
 
 
-G6-GL 使用 [size-limit](https://github.com/ai/size-limit) 对真实包入口和完整依赖树进行体积约束。仓库当前预算为 &#x2A;*120 kB（minify + brotli）**，避免功能迭代无意扩大业务最终产物。
+G6-GL 使用 [size-limit](https://github.com/ai/size-limit) 对真实首屏入口和各布局使用路径进行体积约束。未加载布局时的初始入口保持 &#x2A;*90 kB（minify + brotli）** 门槛，初始入口加任一官方布局继续保持既有 **120 kB** 门槛。
 
 ## 测量口径 [#测量口径]
 
 * 入口：`dist/index.js`，对应 `import { Graph } from '@antv/g6-gl'`。
-* 范围：核心引擎、`@antv/graphlib`、`@antv/layout` 及入口可达依赖。
+* 范围：核心引擎、regl、事件依赖，以及用户实际选择的单个官方布局算法。
 * 处理：size-limit 使用打包器模拟生产 bundle，执行 minify 与 brotli 压缩。
-* 门槛：根目录 `.size-limit.json` 中的 `120 KB`。
+* 门槛：根目录 `.size-limit.mjs` 分别约束初始入口和“初始入口 + 单个布局”的真实加载路径；官方布局由内部动态 import 按类型加载，用户无需手动注册。
 
 ## 复现 [#复现]
 
@@ -18,7 +18,7 @@ npm run build
 npm run size
 ```
 
-2026-07-24 在当前工作区执行的结果为 **115.49 kB brotli**，低于 120 kB 预算。该数字用于本次版本验收，不应脱离版本和构建配置长期硬编码；最新结果以你当前 checkout 执行 `npm run size` 为准。
+2026-07-30 当前工作区结果为：初始入口 **83.17 kB / 90 kB**；各官方布局使用路径为 **86.70–119.48 kB / 120 kB**，其中 Dagre 当前最大。最新结果以当前 checkout 执行 `npm run size` 为准。
 
 ## 使用建议 [#使用建议]
 

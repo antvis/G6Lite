@@ -1,0 +1,1 @@
+const w=d=>{const{width:n,height:e,center:i}=d,t=n??(typeof window<"u"?window.innerWidth:0),o=e??(typeof window<"u"?window.innerHeight:0),r=i??[t/2,o/2];return{width:t,height:o,center:r}};export{w as n};

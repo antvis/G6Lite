@@ -5,7 +5,7 @@
  */
 
 import { encodeId } from '../picking';
-import type { AttributeLayout, RenderParams } from './program';
+import type { AttributeLayout } from './program';
 import { Program } from './program';
 import { fragmentShader } from './shaders/nodeCircle.frag';
 import { vertexShader } from './shaders/nodeCircle.vert';
@@ -26,7 +26,7 @@ export class NodeCircleProgram extends Program {
     return 1;
   }
   getDrawMethod() {
-    return this.gl.POINTS;
+    return 'points' as const;
   }
 
   getAttributeLayout(): AttributeLayout[] {
@@ -40,13 +40,6 @@ export class NodeCircleProgram extends Program {
       { name: 'a_opacity', size: 1 },
       { name: 'a_haloWidth', size: 1 },
     ];
-  }
-
-  setUniforms(params: RenderParams): void {
-    const gl = this.gl;
-    gl.uniform2f(this.uniform('u_translate'), params.camera.x, params.camera.y);
-    gl.uniform1f(this.uniform('u_scale'), params.camera.zoom);
-    gl.uniform2f(this.uniform('u_resolution'), params.width, params.height);
   }
 
   processNode(

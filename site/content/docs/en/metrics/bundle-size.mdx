@@ -3,13 +3,13 @@ title: Bundle size
 description: Reproduce the size-limit measurement and enforce the 120 kB brotli budget
 ---
 
-G6-GL measures the `dist/index.js` package entry and all reachable dependencies with size-limit. The repository budget is **120 kB after minification and brotli compression**.
+G6-GL measures the initial `dist/index.js` payload and each real layout usage path with size-limit. The initial entry has a **90 kB minified and brotli-compressed budget**; the initial entry plus any one official layout keeps the existing **120 kB budget**.
 
 ```bash
 npm run build
 npm run size
 ```
 
-The 2026-07-24 verification result for this workspace was **115.49 kB brotli**, below the budget. Treat that number as version-specific acceptance evidence; run the command on the current checkout for the latest value.
+The 2026-07-30 workspace result is **83.17 kB / 90 kB** before a layout is loaded. The official layout paths range from **86.70 kB to 119.48 kB / 120 kB**, with Dagre currently the largest. Layout algorithms are selected through internal dynamic imports; users do not need separate registration calls. Run the command on the current checkout for the latest result.
 
 Import from the package root, use a tree-shaking bundler, enable production compression, and inspect the final application bundle. Do not compare libraries unless feature scope and dependency boundaries are equivalent.

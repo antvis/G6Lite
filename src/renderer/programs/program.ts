@@ -5,13 +5,16 @@
  */
 
 import type { Camera } from '../camera';
-import { createProgram } from '../gl';
+import type { Regl, ReglBuffer, ReglFramebuffer } from '../regl';
 
 export interface RenderParams {
   width: number;
   height: number;
   camera: Camera;
   picking?: boolean;
+  framebuffer?: ReglFramebuffer | null;
+  viewportWidth?: number;
+  viewportHeight?: number;
 }
 
 export interface AttributeLayout {
@@ -19,50 +22,123 @@ export interface AttributeLayout {
   size: number; // components (1, 2, 3, or 4)
 }
 
+type Primitive = 'points' | 'lines' | 'triangles' | 'triangle strip';
+
+interface ProgramDrawProps extends RenderParams {
+  count: number;
+  offset: number;
+}
+
+type DrawCommand = (props: ProgramDrawProps) => void;
+
 export abstract class Program {
-  protected gl: WebGLRenderingContext;
-  protected glProgram: WebGLProgram;
-  protected buffer: WebGLBuffer;
+  protected regl: Regl;
+  protected buffer!: ReglBuffer;
   protected array: Float32Array = new Float32Array(0);
   protected itemCount = 0;
+  private attributes!: Record<string, { buffer: ReglBuffer; stride: number; offset: number }>;
+  private normalDrawCommand!: DrawCommand;
+  private pickingDrawCommand: DrawCommand | null = null;
+  private readonly translateUniform = new Float32Array(2);
+  private readonly resolutionUniform = new Float32Array(2);
+  private readonly drawProps: ProgramDrawProps = {
+    width: 0,
+    height: 0,
+    camera: { x: 0, y: 0, zoom: 1 },
+    count: 0,
+    offset: 0,
+  };
+  private gpuAvailable = false;
   private gpuByteLength = 0;
   private dirtyItemMarks: Uint8Array = new Uint8Array(0);
   private dirtyItemIndices: number[] = [];
-  private uniforms = new Map<string, WebGLUniformLocation | null>();
-  private attributes = new Map<string, number>();
 
-  constructor(gl: WebGLRenderingContext) {
-    this.gl = gl;
-    this.glProgram = createProgram(gl, this.getVertexShader(), this.getFragmentShader());
-    const buffer = gl.createBuffer();
-    if (!buffer) {
-      gl.deleteProgram(this.glProgram);
-      throw new Error('Unable to create WebGL buffer');
+  constructor(regl: Regl) {
+    this.regl = regl;
+    this.createGPUResources();
+  }
+
+  private createGPUResources(): void {
+    this.buffer = this.regl.buffer({ length: 0, type: 'float', usage: 'static' });
+    this.attributes = {};
+    const stride = this.getFloatsPerVertex() * 4;
+    let offset = 0;
+    for (const attribute of this.getAttributeLayout()) {
+      this.attributes[attribute.name] = { buffer: this.buffer, stride, offset };
+      offset += attribute.size * 4;
     }
-    this.buffer = buffer;
+
+    this.normalDrawCommand = this.createDrawCommand(false);
+    this.gpuAvailable = true;
+  }
+
+  private createDrawCommand(picking: boolean): DrawCommand {
+    const config = {
+      vert: this.getVertexShader(),
+      frag: this.getFragmentShader(),
+      attributes: this.attributes,
+      uniforms: {
+        u_translate: () => this.translateUniform,
+        u_scale: (_context: unknown, props: ProgramDrawProps) => props.camera.zoom,
+        u_resolution: () => this.resolutionUniform,
+        u_picking: picking,
+      },
+      primitive: this.getDrawMethod(),
+      count: (_context: unknown, props: ProgramDrawProps) => props.count,
+      offset: (_context: unknown, props: ProgramDrawProps) => props.offset,
+      framebuffer: picking
+        ? (_context: unknown, props: ProgramDrawProps) => props.framebuffer ?? null
+        : null,
+      viewport: {
+        x: 0,
+        y: 0,
+        width: (_context: unknown, props: ProgramDrawProps) =>
+          picking ? (props.viewportWidth ?? props.width) : props.width,
+        height: (_context: unknown, props: ProgramDrawProps) =>
+          picking ? (props.viewportHeight ?? props.height) : props.height,
+      },
+      depth: { enable: false },
+      blend: {
+        enable: !picking,
+        func: { src: 'src alpha', dst: 'one minus src alpha' },
+      },
+    };
+    return this.regl(config as never) as unknown as DrawCommand;
+  }
+
+  private getPickingDrawCommand(): DrawCommand {
+    if (!this.pickingDrawCommand) {
+      this.pickingDrawCommand = this.createDrawCommand(true);
+    }
+    return this.pickingDrawCommand;
+  }
+
+  private draw(params: RenderParams, offset: number, count: number): void {
+    const props = this.drawProps;
+    props.width = params.width;
+    props.height = params.height;
+    props.camera = params.camera;
+    props.picking = params.picking;
+    props.framebuffer = params.framebuffer;
+    props.viewportWidth = params.viewportWidth;
+    props.viewportHeight = params.viewportHeight;
+    props.offset = offset;
+    props.count = count;
+    this.translateUniform[0] = params.camera.x;
+    this.translateUniform[1] = params.camera.y;
+    this.resolutionUniform[0] = params.width;
+    this.resolutionUniform[1] = params.height;
+
+    if (params.picking) this.getPickingDrawCommand()(props);
+    else this.normalDrawCommand(props);
   }
 
   abstract getVertexShader(): string;
   abstract getFragmentShader(): string;
   abstract getFloatsPerVertex(): number;
   abstract getVerticesPerItem(): number;
-  abstract getDrawMethod(): number;
+  abstract getDrawMethod(): Primitive;
   abstract getAttributeLayout(): AttributeLayout[];
-  abstract setUniforms(params: RenderParams): void;
-
-  protected uniform(name: string): WebGLUniformLocation | null {
-    if (!this.uniforms.has(name)) {
-      this.uniforms.set(name, this.gl.getUniformLocation(this.glProgram, name));
-    }
-    return this.uniforms.get(name) ?? null;
-  }
-
-  protected attribute(name: string): number {
-    if (!this.attributes.has(name)) {
-      this.attributes.set(name, this.gl.getAttribLocation(this.glProgram, name));
-    }
-    return this.attributes.get(name) ?? -1;
-  }
 
   reallocate(count: number): void {
     this.itemCount = count;
@@ -112,18 +188,17 @@ export abstract class Program {
   }
 
   upload(): void {
-    const gl = this.gl;
+    if (!this.gpuAvailable) return;
     const fpv = this.getFloatsPerVertex();
     const vpn = this.getVerticesPerItem();
     const usedFloats = this.itemCount * vpn * fpv;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     if (usedFloats > 0) {
       const usedBytes = usedFloats * 4;
-      gl.bufferData(gl.ARRAY_BUFFER, usedBytes, gl.STATIC_DRAW);
-      gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.array.subarray(0, usedFloats));
+      this.buffer({ length: usedBytes, type: 'float', usage: 'static' });
+      this.buffer.subdata(this.array.subarray(0, usedFloats), 0);
       this.gpuByteLength = usedBytes;
     } else {
-      gl.bufferData(gl.ARRAY_BUFFER, 0, gl.STATIC_DRAW);
+      this.buffer({ length: 0, type: 'float', usage: 'static' });
       this.gpuByteLength = 0;
     }
     this.clearDirtyItems();
@@ -151,33 +226,8 @@ export abstract class Program {
   }
 
   render(params: RenderParams): void {
-    if (this.itemCount <= 0) return;
-    const gl = this.gl;
-
-    gl.useProgram(this.glProgram);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-
-    // Bind attribute pointers
-    const layout = this.getAttributeLayout();
-    const stride = this.getFloatsPerVertex() * 4;
-    let offset = 0;
-    for (const attr of layout) {
-      const loc = this.attribute(attr.name);
-      if (loc >= 0) {
-        gl.enableVertexAttribArray(loc);
-        gl.vertexAttribPointer(loc, attr.size, gl.FLOAT, false, stride, offset);
-      }
-      offset += attr.size * 4;
-    }
-
-    this.setUniforms(params);
-
-    // Set picking uniform
-    const pickingLoc = this.uniform('u_picking');
-    gl.uniform1i(pickingLoc, params.picking ? 1 : 0);
-
-    const vertexCount = this.itemCount * this.getVerticesPerItem();
-    gl.drawArrays(this.getDrawMethod(), 0, vertexCount);
+    if (!this.gpuAvailable || this.itemCount <= 0) return;
+    this.draw(params, 0, this.itemCount * this.getVerticesPerItem());
   }
 
   /**
@@ -186,32 +236,8 @@ export abstract class Program {
    * @param itemCount - Number of items to render
    */
   renderRange(params: RenderParams, firstItem: number, itemCount: number): void {
-    if (itemCount <= 0) return;
-    const gl = this.gl;
-
-    gl.useProgram(this.glProgram);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-
-    const layout = this.getAttributeLayout();
-    const stride = this.getFloatsPerVertex() * 4;
-    let offset = 0;
-    for (const attr of layout) {
-      const loc = this.attribute(attr.name);
-      if (loc >= 0) {
-        gl.enableVertexAttribArray(loc);
-        gl.vertexAttribPointer(loc, attr.size, gl.FLOAT, false, stride, offset);
-      }
-      offset += attr.size * 4;
-    }
-
-    this.setUniforms(params);
-
-    const pickingLoc = this.uniform('u_picking');
-    gl.uniform1i(pickingLoc, params.picking ? 1 : 0);
-
-    const firstVertex = firstItem * this.getVerticesPerItem();
-    const vertexCount = itemCount * this.getVerticesPerItem();
-    gl.drawArrays(this.getDrawMethod(), firstVertex, vertexCount);
+    if (!this.gpuAvailable || itemCount <= 0) return;
+    this.draw(params, firstItem * this.getVerticesPerItem(), itemCount * this.getVerticesPerItem());
   }
 
   /**
@@ -280,6 +306,7 @@ export abstract class Program {
 
   /** Upload only dirty logical items after patching. */
   reupload(): void {
+    if (!this.gpuAvailable) return;
     const itemFloats = this.getVerticesPerItem() * this.getFloatsPerVertex();
     const usedBytes = this.itemCount * itemFloats * 4;
     if (usedBytes !== this.gpuByteLength) {
@@ -289,9 +316,6 @@ export abstract class Program {
     if (this.dirtyItemIndices.length === 0) return;
 
     this.dirtyItemIndices.sort((a, b) => a - b);
-    const gl = this.gl;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-
     let rangeStart = this.dirtyItemIndices[0];
     let rangeEnd = rangeStart + 1;
     for (let i = 1; i <= this.dirtyItemIndices.length; i++) {
@@ -303,7 +327,7 @@ export abstract class Program {
 
       const startFloat = rangeStart * itemFloats;
       const endFloat = rangeEnd * itemFloats;
-      gl.bufferSubData(gl.ARRAY_BUFFER, startFloat * 4, this.array.subarray(startFloat, endFloat));
+      this.buffer.subdata(this.array.subarray(startFloat, endFloat), startFloat * 4);
       if (i < this.dirtyItemIndices.length) {
         rangeStart = itemIndex;
         rangeEnd = itemIndex + 1;
@@ -317,8 +341,21 @@ export abstract class Program {
     return this.array;
   }
 
+  /** Stop issuing WebGL calls while the owning context is lost. */
+  suspend(): void {
+    this.gpuAvailable = false;
+  }
+
+  /** Reupload the CPU mirror after regl has restored its GPU resources. */
+  restore(): void {
+    this.gpuAvailable = true;
+    this.gpuByteLength = 0;
+    this.upload();
+  }
+
   destroy(): void {
-    this.gl.deleteBuffer(this.buffer);
-    this.gl.deleteProgram(this.glProgram);
+    if (!this.gpuAvailable) return;
+    this.buffer.destroy();
+    this.gpuAvailable = false;
   }
 }

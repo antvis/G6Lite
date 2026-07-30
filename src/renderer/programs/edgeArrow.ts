@@ -6,7 +6,7 @@
  */
 
 import { encodeId } from '../picking';
-import type { AttributeLayout, RenderParams } from './program';
+import type { AttributeLayout } from './program';
 import { Program } from './program';
 import { fragmentShader } from './shaders/edgeArrow.frag';
 import { vertexShader } from './shaders/edgeArrow.vert';
@@ -43,7 +43,7 @@ export class EdgeArrowProgram extends Program {
     return VERTICES_PER_ITEM;
   }
   getDrawMethod() {
-    return this.gl.TRIANGLES;
+    return 'triangles' as const;
   }
 
   getAttributeLayout(): AttributeLayout[] {
@@ -58,13 +58,6 @@ export class EdgeArrowProgram extends Program {
       { name: 'a_pickingColor', size: 3 },
       { name: 'a_opacity', size: 1 },
     ];
-  }
-
-  setUniforms(params: RenderParams): void {
-    const gl = this.gl;
-    gl.uniform2f(this.uniform('u_translate'), params.camera.x, params.camera.y);
-    gl.uniform1f(this.uniform('u_scale'), params.camera.zoom);
-    gl.uniform2f(this.uniform('u_resolution'), params.width, params.height);
   }
 
   processArrow(

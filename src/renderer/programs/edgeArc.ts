@@ -11,7 +11,7 @@
  * retaining a fixed per-edge allocation and zoom-independent geometry.
  */
 
-import type { AttributeLayout, RenderParams } from './program';
+import type { AttributeLayout } from './program';
 import { Program } from './program';
 import { fragmentShader } from './shaders/edgeArc.frag';
 import { vertexShader } from './shaders/edgeArc.vert';
@@ -64,7 +64,7 @@ export class EdgeArcProgram extends Program {
     return VERTICES_PER_ITEM;
   }
   getDrawMethod() {
-    return this.gl.TRIANGLE_STRIP;
+    return 'triangle strip' as const;
   }
 
   getAttributeLayout(): AttributeLayout[] {
@@ -75,13 +75,6 @@ export class EdgeArcProgram extends Program {
       { name: 'a_color', size: 3 },
       { name: 'a_pickingIndex', size: 1 },
     ];
-  }
-
-  setUniforms(params: RenderParams): void {
-    const gl = this.gl;
-    gl.uniform2f(this.uniform('u_translate'), params.camera.x, params.camera.y);
-    gl.uniform1f(this.uniform('u_scale'), params.camera.zoom);
-    gl.uniform2f(this.uniform('u_resolution'), params.width, params.height);
   }
 
   processEdge(

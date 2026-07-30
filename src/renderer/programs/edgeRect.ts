@@ -9,7 +9,7 @@
  */
 
 import { encodeId } from '../picking';
-import type { AttributeLayout, RenderParams } from './program';
+import type { AttributeLayout } from './program';
 import { Program } from './program';
 import { fragmentShader } from './shaders/edgeRect.frag';
 import { vertexShader } from './shaders/edgeRect.vert';
@@ -42,7 +42,7 @@ export class EdgeRectProgram extends Program {
     return VERTICES_PER_ITEM;
   }
   getDrawMethod() {
-    return this.gl.TRIANGLES;
+    return 'triangles' as const;
   }
 
   getAttributeLayout(): AttributeLayout[] {
@@ -61,13 +61,6 @@ export class EdgeRectProgram extends Program {
       { name: 'a_srcArrowPx', size: 1 },
       { name: 'a_tgtArrowPx', size: 1 },
     ];
-  }
-
-  setUniforms(params: RenderParams): void {
-    const gl = this.gl;
-    gl.uniform2f(this.uniform('u_translate'), params.camera.x, params.camera.y);
-    gl.uniform1f(this.uniform('u_scale'), params.camera.zoom);
-    gl.uniform2f(this.uniform('u_resolution'), params.width, params.height);
   }
 
   processEdge(

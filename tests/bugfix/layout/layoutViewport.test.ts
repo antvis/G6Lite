@@ -8,43 +8,27 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // radial/etc. by the window aspect ratio. runLayout must inject the CANVAS
 // width/height/center, and must NOT override values the user provided.
 //
-// We mock @antv/layout so every layout class records the opts it was
+// We mock the lazily loaded @antv/layout algorithms so each class records the opts it was
 // constructed with, then assert what runLayout passed through.
 // ============================================================
 
 const captured: { opts: Record<string, unknown> | undefined } = { opts: undefined };
 
-vi.mock('@antv/layout', () => {
-  class FakeLayout {
-    constructor(opts?: Record<string, unknown>) {
-      captured.opts = opts;
-    }
-    async execute(data: { nodes: Array<{ id: string; x: number; y: number }> }) {
-      // leave positions as-is
-      this._nodes = data.nodes;
-    }
-    forEachNode(fn: (n: { id: string; x: number; y: number }) => void) {
-      (this._nodes ?? []).forEach(fn);
-    }
-    _nodes: Array<{ id: string; x: number; y: number }> = [];
+class FakeLayout {
+  constructor(opts?: Record<string, unknown>) {
+    captured.opts = opts;
   }
-  const names = [
-    'CircularLayout',
-    'ConcentricLayout',
-    'DagreLayout',
-    'D3ForceLayout',
-    'ForceLayout',
-    'ForceAtlas2Layout',
-    'FruchtermanLayout',
-    'GridLayout',
-    'MDSLayout',
-    'RandomLayout',
-    'RadialLayout',
-  ];
-  const exports: Record<string, unknown> = {};
-  for (const n of names) exports[n] = FakeLayout;
-  return exports;
-});
+  async execute(data: { nodes: Array<{ id: string; x: number; y: number }> }) {
+    this._nodes = data.nodes;
+  }
+  forEachNode(fn: (n: { id: string; x: number; y: number }) => void) {
+    this._nodes.forEach(fn);
+  }
+  _nodes: Array<{ id: string; x: number; y: number }> = [];
+}
+
+vi.mock('@antv/layout/lib/algorithm/force/index.js', () => ({ ForceLayout: FakeLayout }));
+vi.mock('@antv/layout/lib/algorithm/circular/index.js', () => ({ CircularLayout: FakeLayout }));
 
 // Import AFTER the mock is registered.
 const { runLayout } = await import('@src/layout/runLayout.js');

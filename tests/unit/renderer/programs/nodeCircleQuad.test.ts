@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { encodeId } from '@src/renderer/picking.js';
 import { NodeCircleQuadProgram } from '@src/renderer/programs/nodeCircleQuad.js';
+import { createRegl } from '@src/renderer/regl.js';
 
 const FLOATS_PER_VERTEX = 17;
 const VERTICES_PER_ITEM = 6;
@@ -39,17 +40,21 @@ function makeGLStub(): WebGLRenderingContext {
   return new Proxy({}, handler) as unknown as WebGLRenderingContext;
 }
 
+function makeReglStub() {
+  return createRegl(makeGLStub());
+}
+
 function usedBuffer(program: NodeCircleQuadProgram, itemCount = 1): Float32Array {
   return program.getArray().slice(0, itemCount * VERTICES_PER_ITEM * FLOATS_PER_VERTEX);
 }
 
 describe('NodeCircleQuadProgram buffer encoding', () => {
   it('declares the 17-float triangle-quad attribute layout', () => {
-    const program = new NodeCircleQuadProgram(makeGLStub());
+    const program = new NodeCircleQuadProgram(makeReglStub());
 
     expect(program.getFloatsPerVertex()).toBe(FLOATS_PER_VERTEX);
     expect(program.getVerticesPerItem()).toBe(VERTICES_PER_ITEM);
-    expect(program.getDrawMethod()).toBe(4);
+    expect(program.getDrawMethod()).toBe('triangles');
     expect(program.getAttributeLayout()).toEqual([
       { name: 'a_center', size: 2 },
       { name: 'a_size', size: 1 },
@@ -67,7 +72,7 @@ describe('NodeCircleQuadProgram buffer encoding', () => {
   });
 
   it('writes six complete vertices with the expected two-triangle corners', () => {
-    const program = new NodeCircleQuadProgram(makeGLStub());
+    const program = new NodeCircleQuadProgram(makeReglStub());
     const pickingIndex = 0x123456;
     const [pr, pg, pb] = encodeId(pickingIndex);
 
@@ -135,8 +140,8 @@ describe('NodeCircleQuadProgram buffer encoding', () => {
       expect(template[offset + 16]).toBeCloseTo(style.haloWidth);
     }
 
-    const dynamicProgram = new NodeCircleQuadProgram(makeGLStub());
-    const staticProgram = new NodeCircleQuadProgram(makeGLStub());
+    const dynamicProgram = new NodeCircleQuadProgram(makeReglStub());
+    const staticProgram = new NodeCircleQuadProgram(makeReglStub());
     dynamicProgram.reallocate(1);
     staticProgram.reallocate(1);
 
@@ -158,7 +163,7 @@ describe('NodeCircleQuadProgram buffer encoding', () => {
   });
 
   it('patches every style vertex of one node without changing geometry or adjacent nodes', () => {
-    const program = new NodeCircleQuadProgram(makeGLStub());
+    const program = new NodeCircleQuadProgram(makeReglStub());
     program.reallocate(2);
     program.processNode(0, 1, 2, 20, [0.1, 0.2, 0.3], 10, 1, [0.4, 0.5, 0.6], 0.8, 2);
     program.processNode(1, 30, 40, 50, [0.2, 0.3, 0.4], 20, 4, [0.5, 0.6, 0.7], 0.9, 5);

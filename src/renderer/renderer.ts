@@ -29,8 +29,9 @@ import {
   type EdgePath,
   type NodeBoundary,
 } from './edgePath';
-import { getGL } from './gl';
+import type { GLContext } from './gl';
 import { PickingManager } from './picking';
+import { createRegl, type Regl } from './regl';
 import { getRendererEdge, getRendererEdges, getRendererNode, getRendererNodes } from './renderData';
 import type { RendererData } from './renderData';
 import { EdgeArcProgram } from './programs/edgeArc';
@@ -45,6 +46,8 @@ import { NodeRectProgram } from './programs/nodeRect';
 import type { Program, RenderParams } from './programs/program';
 import type { ResolvedEdgeStyle } from './style';
 import { edgeConfigCache, nodeConfigCache, resolveEdgeStyle, resolveNodeStyle } from './style';
+import { WebGLContextManager } from './webglContext';
+import type { WebGLContextInfo } from './webglContext';
 
 const HOVER_DIM_STRENGTH = 0.25;
 
@@ -100,7 +103,10 @@ function nodeHasStates(node: LayoutNode): boolean {
 
 export class Renderer {
   private canvas: HTMLCanvasElement;
-  private gl: WebGLRenderingContext;
+  private contextManager: WebGLContextManager;
+  private gl: GLContext;
+  private regl: Regl;
+  private readonly clearColor: [number, number, number, number] = [1, 1, 1, 1];
 
   // Programs (created lazily on first use to avoid upfront shader compilation)
   private _programs: Partial<{
@@ -121,7 +127,7 @@ export class Renderer {
   private activeEdgeType: EdgeProgramType = 'line';
   private circleRenderMode: CircleRenderMode = 'point';
   private maxCircleExtent = 0;
-  private readonly maxPointSize: number;
+  private maxPointSize: number;
 
   // Picking
   private picking: PickingManager;
@@ -211,11 +217,46 @@ export class Renderer {
     if (!el || !(el instanceof HTMLCanvasElement))
       throw new Error('Container must be a canvas or canvas selector');
     this.canvas = el;
-    this.gl = getGL(this.canvas);
-    this.maxPointSize = this.resolveMaxPointSize();
-    this.gl.enable(this.gl.BLEND);
-    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-    this.picking = new PickingManager(this.gl);
+    this.contextManager = new WebGLContextManager(this.canvas, {
+      onLost: () => this.handleContextLost(),
+      onRestored: (info) => this.handleContextRestored(info),
+      onRestoreFailed: (error) => this.handleContextRestoreFailed(error),
+    });
+    this.gl = this.contextManager.gl;
+    this.regl = createRegl(this.gl);
+    this.maxPointSize = this.contextManager.capabilities.maxPointSize;
+    this.picking = new PickingManager(this.regl, this.contextManager.capabilities);
+  }
+
+  private handleContextLost(): void {
+    if (this.renderFrame !== null) {
+      cancelAnimationFrame(this.renderFrame);
+      this.renderFrame = null;
+    }
+    for (const program of Object.values(this._programs)) program?.suspend();
+    this.picking?.suspend();
+  }
+
+  private handleContextRestored(info: WebGLContextInfo): void {
+    this.gl = info.gl;
+    this.maxPointSize = info.capabilities.maxPointSize;
+    queueMicrotask(() => {
+      if (!this.contextManager.isActive) return;
+      for (const program of Object.values(this._programs)) program?.restore();
+      this.picking.restore(info.capabilities);
+      if (this.updateCircleRenderMode(this.maxCircleExtent, this.camera.zoom)) {
+        this.needToProcess = true;
+      }
+      this.needPickingRender = true;
+      this.scheduleRender();
+    });
+  }
+
+  private handleContextRestoreFailed(error: unknown): void {
+    console.error(
+      `[G6-GL] WebGL context restoration failed (WebGL ${this.contextManager.version})`,
+      error,
+    );
   }
 
   private getProgram<K extends keyof typeof this._programs>(
@@ -224,34 +265,34 @@ export class Renderer {
     if (!this._programs[key]) {
       switch (key) {
         case 'nodeCircle':
-          this._programs.nodeCircle = new NodeCircleProgram(this.gl);
+          this._programs.nodeCircle = new NodeCircleProgram(this.regl);
           break;
         case 'nodeCircleQuad':
-          this._programs.nodeCircleQuad = new NodeCircleQuadProgram(this.gl);
+          this._programs.nodeCircleQuad = new NodeCircleQuadProgram(this.regl);
           break;
         case 'nodeRect':
-          this._programs.nodeRect = new NodeRectProgram(this.gl);
+          this._programs.nodeRect = new NodeRectProgram(this.regl);
           break;
         case 'edgeLine':
-          this._programs.edgeLine = new EdgeLineProgram(this.gl);
+          this._programs.edgeLine = new EdgeLineProgram(this.regl);
           break;
         case 'edgeRect':
-          this._programs.edgeRect = new EdgeRectProgram(this.gl);
+          this._programs.edgeRect = new EdgeRectProgram(this.regl);
           break;
         case 'edgeArc':
-          this._programs.edgeArc = new EdgeArcProgram(this.gl);
+          this._programs.edgeArc = new EdgeArcProgram(this.regl);
           break;
         case 'edgeCubic':
-          this._programs.edgeCubic = new EdgeCubicProgram(this.gl);
+          this._programs.edgeCubic = new EdgeCubicProgram(this.regl);
           break;
         case 'edgeArrow':
-          this._programs.edgeArrow = new EdgeArrowProgram(this.gl);
+          this._programs.edgeArrow = new EdgeArrowProgram(this.regl);
           break;
         case 'edgeLoop':
-          this._programs.edgeLoop = new EdgeLoopProgram(this.gl);
+          this._programs.edgeLoop = new EdgeLoopProgram(this.regl);
           break;
         case 'edgePolyline':
-          this._programs.edgePolyline = new EdgeRectProgram(this.gl);
+          this._programs.edgePolyline = new EdgeRectProgram(this.regl);
           break;
       }
     }
@@ -263,13 +304,6 @@ export class Renderer {
     return this.circleRenderMode === 'quad'
       ? this.getProgram('nodeCircleQuad')
       : this.getProgram('nodeCircle');
-  }
-
-  private resolveMaxPointSize(): number {
-    const range = this.gl.getParameter(this.gl.ALIASED_POINT_SIZE_RANGE) as
-      ArrayLike<number> | null | undefined;
-    const max = Number(range?.[1]);
-    return Number.isFinite(max) && max > 0 ? max : 64;
   }
 
   /** Switch circle backends only when crossing hysteresis thresholds. */
@@ -698,6 +732,10 @@ export class Renderer {
 
   /** Build GPU buffers from current state. */
   private process(): void {
+    if (!this.contextManager.isActive) {
+      this.needToProcess = true;
+      return;
+    }
     this.edgePathCache.clear();
     const nodeBuffers = this.processNodeBuffers();
     if (!nodeBuffers) return;
@@ -1583,6 +1621,11 @@ export class Renderer {
 
   patchPositions(dataModel: DataModel, movedNodeIds: Set<string>): void {
     if (movedNodeIds.size === 0) return;
+    if (!this.contextManager.isActive) {
+      this.needToProcess = true;
+      this.needPickingRender = true;
+      return;
+    }
 
     const nodeProgram = this.activeNodeProgram;
     const affectedEdgeIndices = this.collectPositionPatchEdges(
@@ -1755,6 +1798,11 @@ export class Renderer {
     changedNodeIds: Set<string>,
     changedEdgeIds: Set<string>,
   ): void {
+    if (!this.contextManager.isActive) {
+      this.needToProcess = true;
+      this.needPickingRender = true;
+      return;
+    }
     const background = parseColor(this.theme.canvasBackground ?? '#fff');
     const hasHighlight = this.highlightNodeIds.size > 0;
     if (changedNodeIds.size > 0) {
@@ -1836,6 +1884,12 @@ export class Renderer {
     // Resolve active program types
     this.activeNodeType = getNodeBaseType(this.nodeConfig);
     this.activeEdgeType = this.resolveEdgeType(this.edgeConfig);
+
+    if (!this.contextManager.isActive) {
+      this.needToProcess = true;
+      this.needPickingRender = true;
+      return;
+    }
 
     // Use incremental processing if only adding nodes/edges
     if (addedNodeIds?.length || addedEdgeIds?.length) {
@@ -1945,6 +1999,7 @@ export class Renderer {
 
   /** Schedule a render on the next animation frame. */
   scheduleRender(): void {
+    if (!this.contextManager.isActive) return;
     if (this.renderFrame !== null) return;
     this.renderFrame = requestAnimationFrame(() => {
       this.renderFrame = null;
@@ -1969,6 +2024,7 @@ export class Renderer {
 
   /** Immediate draw: process if needed, then picking pass + normal pass. */
   draw(): void {
+    if (!this.contextManager.isActive) return;
     if (this.suppressDraw) {
       this.pendingDraw = true;
       return;
@@ -1981,7 +2037,6 @@ export class Renderer {
     if (this.needHighlightUpdate) this.processHighlightDelta();
     if (this.needToProcess) this.process();
 
-    const gl = this.gl;
     const w = this.canvas.width;
     const h = this.canvas.height;
     if (w <= 0 || h <= 0) return;
@@ -2001,10 +2056,12 @@ export class Renderer {
     }
 
     // Normal pass
-    gl.viewport(0, 0, w, h);
+    this.regl.poll();
     const bg = parseColor(this.theme.canvasBackground ?? '#fff');
-    gl.clearColor(bg[0], bg[1], bg[2], 1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    this.clearColor[0] = bg[0];
+    this.clearColor[1] = bg[1];
+    this.clearColor[2] = bg[2];
+    this.regl.clear({ framebuffer: null, color: this.clearColor });
 
     // Draw combo underlay before WebGL content
     this.beforeDrawCallback?.();
@@ -2040,24 +2097,37 @@ export class Renderer {
     h: number,
     nodeProgram: Program,
     edgeProgram: Program,
-  ): void {
-    const gl = this.gl;
-    this.picking.resize(w, h);
-    this.picking.bind();
-    gl.disable(gl.BLEND);
-    const pickParams: RenderParams = {
-      width: w,
-      height: h,
-      camera: this.camera,
-      picking: true,
-    };
-    edgeProgram.render(pickParams);
-    this.getProgram('edgeLoop').render(pickParams);
-    this.getProgram('edgeArrow').render(pickParams);
-    nodeProgram.render(pickParams);
-    this.picking.unbind(w, h);
-    gl.enable(gl.BLEND);
-    this.needPickingRender = false;
+  ): boolean {
+    if (!this.contextManager.isActive || !this.picking.resize(w, h)) {
+      this.needPickingRender = false;
+      return false;
+    }
+    try {
+      const framebuffer = this.picking.begin();
+      if (!framebuffer) {
+        this.needPickingRender = false;
+        return false;
+      }
+      const pickParams: RenderParams = {
+        width: w,
+        height: h,
+        camera: this.camera,
+        picking: true,
+        framebuffer,
+        viewportWidth: this.picking.viewportWidth,
+        viewportHeight: this.picking.viewportHeight,
+      };
+      edgeProgram.render(pickParams);
+      this.getProgram('edgeLoop').render(pickParams);
+      this.getProgram('edgeArrow').render(pickParams);
+      nodeProgram.render(pickParams);
+      this.needPickingRender = false;
+      return true;
+    } catch (error) {
+      this.picking.markFailed('Color picking render failed', error);
+      this.needPickingRender = false;
+      return false;
+    }
   }
 
   resize(width: number, height: number): void {
@@ -2080,15 +2150,13 @@ export class Renderer {
   /** Clear the canvas with the theme background color immediately.
    *  Called before layout so the user sees a white canvas instead of a black void. */
   clearWithTheme(theme: { canvasBackground?: string }): void {
-    const gl = this.gl;
-    const w = this.canvas.width || this.canvas.clientWidth || 800;
-    const h = this.canvas.height || this.canvas.clientHeight || 600;
-    if (w > 0 && h > 0) {
-      gl.viewport(0, 0, w, h);
-    }
+    if (!this.contextManager.isActive) return;
+    this.regl.poll();
     const bg = parseColor(theme.canvasBackground ?? '#fff');
-    gl.clearColor(bg[0], bg[1], bg[2], 1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    this.clearColor[0] = bg[0];
+    this.clearColor[1] = bg[1];
+    this.clearColor[2] = bg[2];
+    this.regl.clear({ framebuffer: null, color: this.clearColor });
   }
 
   getCamera(): Camera {
@@ -2127,6 +2195,7 @@ export class Renderer {
     screenX: number,
     screenY: number,
   ): { type: 'node'; id: string } | { type: 'edge'; index: number } | null {
+    if (!this.contextManager.isActive) return this.pickAtCPU(screenX, screenY);
     // A zoom threshold can switch the circle backend before the scheduled draw.
     // Process and refresh picking synchronously so interaction never observes an
     // empty new program or a framebuffer rendered with the previous backend.
@@ -2151,7 +2220,7 @@ export class Renderer {
     const py = (screenY - rect.top) * scaleY;
 
     const result = this.picking.pickAt(px, py, this.canvas.width, this.canvas.height);
-    if (!result) return null;
+    if (!result) return this.picking.isAvailable ? null : this.pickAtCPU(screenX, screenY);
 
     if (result.type === 'node') {
       const node = this.nodes[result.index];
@@ -2161,6 +2230,17 @@ export class Renderer {
       return { type: 'edge', index: result.index };
     }
     return null;
+  }
+
+  private pickAtCPU(
+    screenX: number,
+    screenY: number,
+  ): { type: 'node'; id: string } | { type: 'edge'; index: number } | null {
+    const [graphX, graphY] = this.screenToGraph(screenX, screenY);
+    const nodeId = this.hitTestNode(graphX, graphY);
+    if (nodeId) return { type: 'node', id: nodeId };
+    const edgeIndex = this.hitTestEdge(graphX, graphY);
+    return edgeIndex >= 0 ? { type: 'edge', index: edgeIndex } : null;
   }
 
   /** @deprecated Use pickAt() for O(1) hit detection. */
@@ -2266,6 +2346,8 @@ export class Renderer {
     this._programs.edgeLoop?.destroy();
     this._programs.edgePolyline?.destroy();
     this.picking.destroy();
+    this.regl.destroy();
+    this.contextManager.destroy();
     // Release WebGL context to free GPU memory and avoid context limit
     const ext = this.gl.getExtension('WEBGL_lose_context');
     if (ext) ext.loseContext();

@@ -18,14 +18,6 @@ export type DemoCategory =
 
 export type DemoKind = 'functional' | 'regression' | 'scenario' | 'performance' | 'dataset';
 export type DemoAudience = 'playground' | 'site';
-export type DemoDocsGroup =
-  | 'getting-started'
-  | 'data-and-lifecycle'
-  | 'node-edge-label-combo'
-  | 'layout'
-  | 'interaction-state-viewport'
-  | 'extension'
-  | 'scenario-and-dataset';
 export type DemoReleaseCheck = 'smoke' | 'visual' | 'full' | false;
 export type DemoCaptureMode = 'visual' | 'artifact' | 'none';
 
@@ -43,7 +35,6 @@ export interface DemoCatalogEntry {
   category: DemoCategory;
   kind: DemoKind;
   audiences: DemoAudience[];
-  docsGroup?: DemoDocsGroup;
   coverage: string[];
   releaseCheck: DemoReleaseCheck;
   capture: DemoCaptureConfig;

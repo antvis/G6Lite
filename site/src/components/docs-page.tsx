@@ -29,17 +29,6 @@ export async function DocsPageContent({ slug, locale }: { slug?: string[]; local
     ? page.path
     : `${locale}/${page.path}`;
   const githubUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/site/content/docs/${localizedSourcePath}`;
-  const isExamplesRoute = page.slugs[0] === 'examples';
-
-  if (isExamplesRoute) {
-    return (
-      <DocsPage toc={[]} full>
-        <DocsBody className="examples-docs-body">
-          <MDX components={getMDXComponents({ a: createRelativeLink(source, page) })} />
-        </DocsBody>
-      </DocsPage>
-    );
-  }
 
   return (
     <>

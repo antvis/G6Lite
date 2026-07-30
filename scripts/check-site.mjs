@@ -151,20 +151,8 @@ for (const demo of catalog.filter((item) => item.audiences.includes('site'))) {
     `site/content/docs/zh/examples/${demo.id}.mdx`,
     `site/content/docs/en/examples/${demo.id}.mdx`,
     `site/public/examples/${demo.id}.png`,
-    `site/public/example-sources/${demo.id}.txt`,
   ]) {
     if (!existsSync(path.join(root, file))) fail(`Site demo ${demo.id} is missing ${file}`);
-  }
-
-  const publicSourcePath = `site/public/example-sources/${demo.id}.txt`;
-  if (existsSync(path.join(root, publicSourcePath))) {
-    const publicSource = read(publicSourcePath);
-    if (publicSource.includes('../../src/')) {
-      fail(`Site demo ${demo.id} exposes a source-deep import`);
-    }
-    if (!publicSource.includes("from '@antv/g6-gl")) {
-      fail(`Site demo ${demo.id} does not expose a public package import`);
-    }
   }
 }
 

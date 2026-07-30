@@ -1,9 +1,25 @@
 ---
-title: Data-driven node styles
-description: Map business fields to node colors, sizes, and highlight interactions
-full: true
+title: Node styles
+description: Map business fields to node colors, sizes, labels, and highlight states
 ---
 
-import { ExampleDetail } from '@/components/example-detail';
+import { withBasePath } from '@/lib/shared';
 
-<ExampleDetail id="node-style" locale="en" />
+<div className="example-hero">
+  <img src={withBasePath('/examples/node-style.png')} alt="G6-GL functional node styles" />
+</div>
+
+<div className="example-actions">
+  <a href={withBasePath('/playground/#node-style')} target="_blank" rel="noreferrer">
+    Run online
+  </a>
+  <a
+    href="https://github.com/antvis/G6Lite/tree/master/playground/demos/node-style.ts"
+    target="_blank"
+    rel="noreferrer"
+  >
+    View source
+  </a>
+</div>
+
+Functional styles read normalized node data. State styles handle highlight and dimming without replacing the complete dataset. See [nodes](/en/docs/guides/node) and [interactions](/en/docs/guides/interactions).

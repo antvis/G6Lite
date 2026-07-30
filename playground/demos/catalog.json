@@ -482,9 +482,8 @@
     "title": "公开扩展 API 综合示例",
     "description": "组合验证 decoration、edge、layout、transform、behavior 和 plugin 扩展。",
     "category": "extension",
-    "docsGroup": "extension",
     "kind": "functional",
-    "audiences": ["playground", "site"],
+    "audiences": ["playground"],
     "coverage": ["extension.decoration", "extension.edge", "extension.layout", "extension.transform", "extension.behavior", "extension.plugin"],
     "releaseCheck": "smoke",
     "capture": { "mode": "artifact", "settleMs": 700, "deviceScaleFactor": 2 }
@@ -495,9 +494,8 @@
     "title": "节点与边增删改",
     "description": "集中验证节点和边的单个/批量新增、更新、删除和事件。",
     "category": "data",
-    "docsGroup": "data-and-lifecycle",
     "kind": "functional",
-    "audiences": ["playground", "site"],
+    "audiences": ["playground"],
     "coverage": ["data.node-add", "data.node-update", "data.node-remove", "data.edge-add", "data.edge-update", "data.edge-remove", "event.data-mutation"],
     "releaseCheck": "smoke",
     "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
@@ -508,9 +506,8 @@
     "title": "查询、批量状态与可见性",
     "description": "集中验证元素查询、邻接查询、状态搜索、批量状态和清理。",
     "category": "data",
-    "docsGroup": "data-and-lifecycle",
     "kind": "functional",
-    "audiences": ["playground", "site"],
+    "audiences": ["playground"],
     "coverage": ["query.element", "query.adjacency", "query.state", "state.batch", "state.clear", "state.visibility", "combo.query"],
     "releaseCheck": "smoke",
     "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
@@ -521,9 +518,8 @@
     "title": "视口与坐标转换",
     "description": "验证 camera、fit、zoom、focus、resize 和坐标互转。",
     "category": "interaction",
-    "docsGroup": "interaction-state-viewport",
     "kind": "functional",
-    "audiences": ["playground", "site"],
+    "audiences": ["playground"],
     "coverage": ["viewport.camera", "viewport.fit", "viewport.zoom", "viewport.focus", "viewport.resize", "viewport.coordinates"],
     "releaseCheck": "smoke",
     "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
@@ -534,9 +530,8 @@
     "title": "内置布局补全",
     "description": "覆盖 radial、concentric、ForceAtlas2、fruchterman、MDS 和 random。",
     "category": "layout",
-    "docsGroup": "layout",
     "kind": "functional",
-    "audiences": ["playground", "site"],
+    "audiences": ["playground"],
     "coverage": ["layout.radial", "layout.concentric", "layout.force-atlas2", "layout.fruchterman", "layout.mds", "layout.random"],
     "releaseCheck": "visual",
     "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
@@ -559,12 +554,11 @@
     "title": "选择行为组合",
     "description": "组合验证 click、brush 和 lasso 选择。",
     "category": "interaction",
-    "docsGroup": "interaction-state-viewport",
     "kind": "functional",
-    "audiences": ["playground", "site"],
+    "audiences": ["playground"],
     "coverage": ["behavior.click-select", "behavior.brush-select", "behavior.lasso-select"],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": { "mode": "none" }
   },
   {
     "id": "drag-edge",

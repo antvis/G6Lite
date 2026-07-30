@@ -174,13 +174,6 @@ for (const file of htmlFiles) {
     fail(`Unavailable local-run action leaked into ${path.relative(root, file)}`);
   }
 
-  if (
-    path.relative(outRoot, file).replace(/\\/g, '/').includes('docs/examples') &&
-    /\/playground\//.test(html)
-  ) {
-    fail(`Playground entry leaked into website examples: ${path.relative(root, file)}`);
-  }
-
   if (!siteHtmlFiles.includes(file)) continue;
 
   const robots = getMetaContent(html, 'robots')?.toLowerCase() ?? '';

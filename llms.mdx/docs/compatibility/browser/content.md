@@ -18,16 +18,33 @@ G6-GL 基于 **WebGL 1.0** 渲染，辅以 **Canvas 2D** 绘制文本标签与 C
 
 下表是当前未额外转译产物的语法下限，主要由 optional chaining、nullish coalescing、原生 ESM 与 WebGL 1.0 的共同支持范围决定：
 
-| 浏览器                      | 最低版本          | WebGL 1.0 | 备注               |
-| ------------------------ | ------------- | --------- | ---------------- |
-| Chrome                   | 80+           | ✅         | 推荐最新稳定版          |
-| Firefox                  | 74+           | ✅         | 推荐最新稳定版          |
-| Safari（macOS）            | 13.1+         | ✅         | 由 ES2020 语法下限决定  |
-| Safari（iOS）              | 13.4+         | ✅         | 移动端需注意纹理上限与显存    |
-| Edge                     | 80+（Chromium） | ✅         | EdgeHTML 不在支持范围  |
-| Android WebView / Chrome | 80+           | ✅         | 低端机显存受限，建议控制渲染规模 |
+| 浏览器                      | 最低版本          | 发布年份 | WebGL 1.0 | 主要限制来源                   |
+| ------------------------ | ------------- | ---- | --------- | ------------------------ |
+| Chrome                   | 80+           | 2020 | ✅         | ES2020 语法、原生 ESM；推荐最新稳定版 |
+| Firefox                  | 74+           | 2020 | ✅         | ES2020 语法、原生 ESM；推荐最新稳定版 |
+| Safari（macOS）            | 13.1+         | 2020 | ✅         | ES2020 语法下限              |
+| Safari（iOS）              | 13.4+         | 2020 | ✅         | ES2020 语法下限；移动端需注意显存     |
+| Edge                     | 80+（Chromium） | 2020 | ✅         | Chromium 内核；EdgeHTML 不支持 |
+| Android WebView / Chrome | 80+           | 2020 | ✅         | ES2020 语法；低端机需控制渲染规模     |
 
-> 这些版本是语法与平台能力下限，不等于完整真机认证矩阵。G6-GL 产物为 ESM-only；如需兼容更老环境，业务侧需要自行转译并补齐所需 polyfill。
+G6-GL **不支持 Internet Explorer**，也不支持旧版 EdgeHTML。上述版本是语法与平台能力下限，不等于完整真机认证矩阵。当前包根为 ESM-only；如需兼容更老环境，业务侧需要自行转译并补齐所需 polyfill。
+
+版本依据可交叉查看 [Can I Use：Optional chaining](https://caniuse.com/mdn-javascript_operators_optional_chaining)、[Chrome 80](https://developer.chrome.com/blog/new-in-chrome-80)、[Firefox 74](https://www.mozilla.org/firefox/74.0/releasenotes/) 和 [Safari 13.1](https://webkit.org/blog/10247/new-webkit-features-in-safari-13-1/)。
+
+## 覆盖率参考 [#覆盖率参考]
+
+按 **2026-07-29** 获取的 `caniuse-lite@1.0.30001806` 全球使用数据估算：
+
+* 上表明确列出的浏览器家族及最低版本约覆盖 &#x2A;*90.4%** 的全球浏览器使用量。
+* 在 Can I Use 收录的全部浏览器中，同时具备 WebGL 1.0 与原生 ESM 的版本约覆盖 &#x2A;*94.8%**。
+
+计算来源为 [Can I Use：WebGL](https://caniuse.com/webgl)、[Can I Use：JavaScript modules](https://caniuse.com/es6-module) 和 [caniuse-lite](https://github.com/browserslist/caniuse-lite)。这些数字会随统计样本变化，只用于早期选型；它们不是 G6-GL 的真机通过率，也不能替代目标地区、企业内网、WebView 和低端设备测试。
+
+## 与 sigma.js 的浏览器口径 [#与-sigmajs-的浏览器口径]
+
+sigma.js v3 的官方 README 将产品描述为基于 WebGL、面向数千节点和边的图渲染库，并要求搭配 Graphology；其 `sigma@3.0.3` 包同时提供 ESM 和 CommonJS 构建。核对其 [README](https://github.com/jacomyal/sigma.js#readme) 与 [package.json](https://github.com/jacomyal/sigma.js/blob/main/packages/sigma/package.json) 时，官方没有给出类似本页的最低浏览器版本矩阵。
+
+因此不能把“未写最低版本”理解为支持旧浏览器。两者都依赖 WebGL 和现代 JavaScript 工具链；区别是 G6-GL 在此明确公布未转译包的语法下限，而 sigma.js 需要使用方结合自身构建目标验证。
 
 ## WebGL 支持矩阵 [#webgl-支持矩阵]
 
@@ -48,4 +65,4 @@ G6-GL 基于 **WebGL 1.0** 渲染，辅以 **Canvas 2D** 绘制文本标签与 C
 
 ## 测试范围说明 [#测试范围说明]
 
-当前兼容性数据以 **Chrome / Firefox / Safari / Edge 的最新稳定版**为主要测试目标，移动端以 iOS Safari 与 Android Chrome 为参考。更广泛的真机矩阵（含低端机型）将在后续版本通过 BrowserStack 抽样补充。
+当前兼容性数据以 **Chrome / Firefox / Safari / Edge 的最新稳定版**为主要测试目标，移动端以 iOS Safari 与 Android Chrome 为参考。尚未执行的 BrowserStack 扩展矩阵不作为当前版本承诺。

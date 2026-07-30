@@ -104,6 +104,111 @@ Package-root types cover graph options and data, nodes, edges, combos, labels, s
 The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).
 
 
+# API stability and release boundary (/en/docs/compatibility/api-stability)
+
+
+
+G6-GL remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
+
+Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
+
+## ESM and CommonJS [#esm-and-commonjs]
+
+The package root is ESM-only and does not provide a `require('@antv/g6-gl')` condition. A CommonJS feasibility test confirmed that a synchronous entry and declarations can be emitted, but a dual package must also preserve two runtime contracts:
+
+* ESM and CommonJS consumers must share one extension registry when both formats are loaded by the same application.
+* After application bundling, `layout.worker: true` must still resolve and load the package's module Worker instead of silently falling back to the main thread.
+
+The current CommonJS consumer build cannot reliably preserve that Worker asset relationship and requests a missing Worker file; independent dual builds also create separate module-scoped registries. This release therefore does not publish a partial CommonJS build whose synchronous import works while Worker or extension behavior differs.
+
+Applications that still use a CommonJS toolchain can cross the client boundary with dynamic import:
+
+```js
+const { Graph } = await import('@antv/g6-gl');
+```
+
+This does not change the requirement for a real DOM, Canvas, and WebGL environment.
+
+Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
+
+Combo collapse, nesting, and runtime regrouping remain experimental. Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.
+
+
+# Browsers and runtime environment (/en/docs/compatibility/browser)
+
+
+
+G6-GL requires WebGL 1.0 and a modern browser capable of running the ESM/ES2020 package. Canvas 2D is used for labels and combo outlines. WebGL 2.0 is not required.
+
+## Minimum versions [#minimum-versions]
+
+| Browser                  | Minimum        | Release year | Main boundary                                     |
+| ------------------------ | -------------- | ------------ | ------------------------------------------------- |
+| Chrome                   | 80+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
+| Firefox                  | 74+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
+| Safari on macOS          | 13.1+          | 2020         | ES2020 syntax and WebGL 1.0                       |
+| Safari on iOS            | 13.4+          | 2020         | ES2020 syntax; mobile GPU limits still apply      |
+| Edge                     | 80+ (Chromium) | 2020         | Chromium-based Edge only; EdgeHTML is unsupported |
+| Android WebView / Chrome | 80+            | 2020         | ES2020 syntax; validate low-end GPU capacity      |
+
+Internet Explorer and EdgeHTML are not supported. These are syntax and platform boundaries for the untranspiled ESM-only package, not a complete certified device matrix. See [Can I Use optional chaining](https://caniuse.com/mdn-javascript_operators_optional_chaining), [Chrome 80](https://developer.chrome.com/blog/new-in-chrome-80), [Firefox 74](https://www.mozilla.org/firefox/74.0/releasenotes/), and [Safari 13.1](https://webkit.org/blog/10247/new-webkit-features-in-safari-13-1/).
+
+## Coverage reference [#coverage-reference]
+
+Using global usage data from `caniuse-lite@1.0.30001806`, retrieved on **2026-07-29**:
+
+* The browser families and minimum versions explicitly listed above account for approximately &#x2A;*90.4%** of global browser usage.
+* Across every browser tracked by Can I Use, versions supporting both WebGL 1.0 and native ESM account for approximately &#x2A;*94.8%**.
+
+Sources: [Can I Use WebGL](https://caniuse.com/webgl), [JavaScript modules](https://caniuse.com/es6-module), and [caniuse-lite](https://github.com/browserslist/caniuse-lite). These figures are selection references, not G6-GL device certification rates. Enterprise browsers, embedded WebViews, disabled GPU acceleration, and low-end devices require separate validation.
+
+## Comparison with sigma.js [#comparison-with-sigmajs]
+
+The sigma.js v3 README describes a WebGL renderer for graphs with thousands of nodes and edges, built on Graphology. Its `sigma@3.0.3` package provides both ESM and CommonJS builds. The official [README](https://github.com/jacomyal/sigma.js#readme) and [package metadata](https://github.com/jacomyal/sigma.js/blob/main/packages/sigma/package.json) checked on 2026-07-29 do not publish an equivalent minimum-browser matrix.
+
+An omitted matrix should not be interpreted as legacy-browser support. Both libraries require WebGL and a modern JavaScript toolchain; G6-GL explicitly documents the syntax floor of its untranspiled package, while sigma.js consumers need to validate their own build target.
+
+G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
+
+Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
+
+
+# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
+
+
+
+G6-GL borrows G6 configuration concepts but is not a complete replacement for G6 v5. Migration is most suitable when large-graph interaction and state updates are the primary bottleneck and the product uses core node, edge, layout, and behavior capabilities.
+
+Do not migrate blindly when the project depends on the complete plugin ecosystem, animation system, complex Canvas element customization, or built-in graph analysis.
+
+Suggested process:
+
+1. Reproduce one real workflow in the deployed Playground.
+2. Normalize data to nodes, edges, and optional combos.
+3. Map styles and states through package-root Graph options.
+4. Replace G6 behavior names with supported G6-GL behaviors.
+5. Verify layouts, events, incremental updates, compatibility, and performance on target devices.
+
+Keep the original implementation until the real-data acceptance suite passes.
+
+
+# Compatibility overview (/en/docs/compatibility)
+
+
+
+Review these boundaries before adopting or upgrading G6-GL:
+
+<Cards>
+  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
+
+  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
+
+  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
+</Cards>
+
+G6-GL needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.
+
+
 # Data model (/en/docs/concepts/data-model)
 
 
@@ -459,123 +564,6 @@ export function GraphView() {
 ```
 
 Give the container a real height. Cleanup is especially important because React Strict Mode can run effects twice during development. Keep the graph in a ref when props change, then call `setData()` or an incremental update API from a separate effect.
-
-
-# API stability and release boundary (/en/docs/compatibility/api-stability)
-
-
-
-G6-GL remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
-
-Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
-
-Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
-
-Combo collapse, nesting, and runtime regrouping remain experimental. Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.
-
-
-# Browsers and runtime environment (/en/docs/compatibility/browser)
-
-
-
-G6-GL requires WebGL 1.0 and a modern browser capable of running the ESM/ES2020 package. Canvas 2D is used for labels and combo outlines. WebGL 2.0 is not required.
-
-Recommended minimums for the untranspiled package are Chrome/Edge 80+, Firefox 74+, Safari 13.1+, and iOS Safari 13.4+. These are syntax and platform capability boundaries, not a complete certified device matrix.
-
-G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
-
-Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
-
-
-# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
-
-
-
-G6-GL borrows G6 configuration concepts but is not a complete replacement for G6 v5. Migration is most suitable when large-graph interaction and state updates are the primary bottleneck and the product uses core node, edge, layout, and behavior capabilities.
-
-Do not migrate blindly when the project depends on the complete plugin ecosystem, animation system, complex Canvas element customization, or built-in graph analysis.
-
-Suggested process:
-
-1. Reproduce one real workflow in the deployed Playground.
-2. Normalize data to nodes, edges, and optional combos.
-3. Map styles and states through package-root Graph options.
-4. Replace G6 behavior names with supported G6-GL behaviors.
-5. Verify layouts, events, incremental updates, compatibility, and performance on target devices.
-
-Keep the original implementation until the real-data acceptance suite passes.
-
-
-# Compatibility overview (/en/docs/compatibility)
-
-
-
-Review these boundaries before adopting or upgrading G6-GL:
-
-<Cards>
-  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
-
-  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
-
-  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
-</Cards>
-
-G6-GL needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.
-
-
-# Bundle size (/en/docs/metrics/bundle-size)
-
-
-
-G6-GL measures the `dist/index.js` package entry and all reachable dependencies with size-limit. The repository budget is **120 kB after minification and brotli compression**.
-
-```bash
-npm run build
-npm run size
-```
-
-The 2026-07-24 verification result for this workspace was **115.49 kB brotli**, below the budget. Treat that number as version-specific acceptance evidence; run the command on the current checkout for the latest value.
-
-Import from the package root, use a tree-shaking bundler, enable production compression, and inspect the final application bundle. Do not compare libraries unless feature scope and dependency boundaries are equivalent.
-
-
-# Performance tuning (/en/docs/metrics/performance-tuning)
-
-
-
-* Reuse backend coordinates when available and omit layout.
-* Control iterations for force layouts and consider `worker: true`.
-* Prefer deterministic layouts for large overview screens.
-* Use state and batch update APIs for high-frequency interaction.
-* Keep functional style callbacks inexpensive and precompute complex mappings.
-* Limit initial labels; reveal more by zoom, focus, or selection.
-
-```bash
-npm run benchmark -- --suite all --mode quick
-npm run benchmark -- --suite browser --mode full
-```
-
-Compare only equivalent environments and configurations. Desktop Headless Chrome cannot replace real mobile or low-end device testing.
-
-
-# Benchmark and performance metrics (/en/docs/metrics/performance)
-
-
-
-G6-GL uses one repository runner for Node microbenchmarks and browser scenarios. Results are comparable only when version, commit, hardware, runtime, data, configuration, and sampling mode match.
-
-```bash
-npm run benchmark -- --suite all --mode quick
-```
-
-* `--suite node` covers DataModel and layout microbenchmarks.
-* `--suite browser` covers public Graph API updates, first render, viewport interaction, picking, and memory trends.
-* `--mode quick` validates the runner and release path.
-* `--mode full` expands workloads and samples for reviewed baselines.
-
-Reports are written to `performance/` as JSON and Markdown. Raw local reports are not committed by default. Public comparisons must record the G6-GL version and Git state, Node and Chromium versions, operating system, CPU, user agent, viewport, DPR, data scale, layout configuration, sample count, RME, and warnings.
-
-Quick results are smoke evidence, not marketing baselines. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
 
 
 # Combos (/en/docs/guides/combo)
@@ -1219,3 +1207,83 @@ behaviors: [
 ```
 
 Use application-safe rendering when content contains user input. Tooltip positioning follows the shared pointer and picking pipeline. Style the generated surface through the documented tooltip class names or your own controlled content.
+
+
+# Bundle size (/en/docs/metrics/bundle-size)
+
+
+
+G6-GL measures the `dist/index.js` package entry and all reachable dependencies with size-limit. The repository budget is **120 kB after minification and brotli compression**.
+
+```bash
+npm run build
+npm run size
+```
+
+The 2026-07-24 verification result for this workspace was **115.49 kB brotli**, below the budget. Treat that number as version-specific acceptance evidence; run the command on the current checkout for the latest value.
+
+Import from the package root, use a tree-shaking bundler, enable production compression, and inspect the final application bundle. Do not compare libraries unless feature scope and dependency boundaries are equivalent.
+
+
+# Performance tuning (/en/docs/metrics/performance-tuning)
+
+
+
+* Reuse backend coordinates when available and omit layout.
+* Control iterations for force layouts and consider `worker: true`.
+* Prefer deterministic layouts for large overview screens.
+* Use state and batch update APIs for high-frequency interaction.
+* Keep functional style callbacks inexpensive and precompute complex mappings.
+* Limit initial labels; reveal more by zoom, focus, or selection.
+
+```bash
+npm run benchmark -- --suite all --mode quick
+npm run benchmark -- --suite browser --mode full
+```
+
+Compare only equivalent environments and configurations. Desktop Headless Chrome cannot replace real mobile or low-end device testing.
+
+
+# Performance metrics (/en/docs/metrics/performance)
+
+
+
+G6-GL uses one repository runner for Node microbenchmarks and browser scenarios. Results are comparable only when version, commit, hardware, runtime, data, configuration, and sampling mode match.
+
+This page documents measurement and selection boundaries. It does not claim that G6-GL is faster for every graph, layout, and device. Layout, rendering without layout, and post-render interaction updates must be evaluated separately.
+
+```bash
+npm run benchmark -- --suite all --mode quick
+```
+
+* `--suite node` covers DataModel and layout microbenchmarks.
+* `--suite browser` covers public Graph API updates, first render, viewport interaction, picking, and memory trends.
+* `--mode quick` validates the runner and release path.
+* `--mode full` expands workloads and samples for reviewed baselines.
+
+Reports are written to `performance/` as JSON and Markdown. Raw local reports are not committed by default. Public comparisons must record the G6-GL version and Git state, Node and Chromium versions, operating system, CPU, user agent, viewport, DPR, data scale, layout configuration, sample count, RME, and warnings.
+
+Quick results are smoke evidence, not marketing baselines. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
+
+## Selecting a graph library [#selecting-a-graph-library]
+
+The following summary was checked against public project documentation on **2026-07-29**. It compares product scope rather than presenting cross-project benchmark rankings.
+
+| Option           | Focus and rendering                                                                                                         | Data and layout                                                                                                                   | Extension ecosystem                                                                                         | Best fit                                                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **G6-GL**        | WebGL batches nodes and edges, while Canvas 2D handles labels and combos; optimized for incremental updates after rendering | One Graph data API with AntV Layout integration                                                                                   | Package-root registration for elements, behaviors, layouts, transforms, and plugins; currently `0.1.x` beta | Products that need a small WebGL engine, frequent large-graph interaction, AntV layouts, and controlled extension boundaries |
+| **AntV G6 v5**   | Full graph visualization framework covering rendering, layout, analysis, interaction, animation, and components             | Broader built-in configuration and graph capabilities                                                                             | More mature element, behavior, plugin, animation, and component ecosystem                                   | Products that need the complete graph visualization stack and ecosystem rather than the smallest runtime                     |
+| **sigma.js v3**  | WebGL renderer aimed at graphs with thousands of nodes and edges                                                            | Uses Graphology as the graph model; layouts are commonly supplied by Graphology layout packages or precomputed by the application | Custom programs plus the Graphology ecosystem                                                               | Graphology-based products with coordinates or a separate layout pipeline, focused on large-graph exploration                 |
+| **Cytoscape.js** | Graph theory model with an optional interactive renderer, also usable for analysis in Node.js                               | Rich graph queries, algorithms, and layouts                                                                                       | Large extension ecosystem, including scientific and biological-network use cases                            | Applications that need graph algorithms, analysis, mature extensions, and browser interaction together                       |
+
+Sources: [AntV G6](https://g6.antv.antgroup.com/en/manual/introduction/what-is-g6), [sigma.js](https://github.com/jacomyal/sigma.js#readme), and [Cytoscape.js](https://js.cytoscape.org/#introduction).
+
+For example, a first-render comparison is invalid when sigma.js reuses existing coordinates while G6-GL recomputes a force layout. Record layout time and rendering without layout independently.
+
+## Rules for numerical comparisons [#rules-for-numerical-comparisons]
+
+* Keep data, coordinates, styles, label policy, viewport, DPR, browser, and hardware fixed.
+* Report preset-coordinate and relayout scenarios separately.
+* Record median, P95, samples, and error instead of drawing conclusions from one run.
+* Measure drag, zoom, picking, highlighting, batch updates, and post-destroy memory trends in addition to first render.
+* Archive candidate versions, adapters, full configuration, and reports together.

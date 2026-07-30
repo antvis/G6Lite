@@ -37,7 +37,7 @@
   - [平行边自动错开](/docs/examples/parallel-edges): 处理同源同目标的多条边和反向边
   - [真实数据集](/docs/examples/real-dataset): 使用 AI Papers 真实数据集验证 G6-GL 的大图渲染
 - 技术指标
-  - [Benchmark 与性能指标](/docs/metrics/performance): G6-GL 的可复现 Benchmark 入口、指标口径、环境记录与结果使用边界
+  - [性能指标](/docs/metrics/performance): G6-GL 的可复现 Benchmark 入口、指标口径、环境记录与结果使用边界
   - [性能调优](/docs/metrics/performance-tuning): 大图首屏、交互、标签、状态与布局的优化建议和度量方法
   - [包体积](/docs/metrics/bundle-size): G6-GL 的 size-limit 测量口径、120 kB brotli 预算与复现方法
 - 兼容性
@@ -87,7 +87,7 @@
   - [Parallel edges](/en/docs/examples/parallel-edges): Separate same-direction, reverse, and self-loop edges
   - [Real dataset](/en/docs/examples/real-dataset): Validate rendering and interaction with the AI Papers relationship dataset
 - Technical metrics
-  - [Benchmark and performance metrics](/en/docs/metrics/performance): Reproduce G6-GL Node and browser benchmarks with explicit environments and result boundaries
+  - [Performance metrics](/en/docs/metrics/performance): Reproduce G6-GL Node and browser benchmarks with explicit environments and result boundaries
   - [Performance tuning](/en/docs/metrics/performance-tuning): Measure and optimize first render, layout, updates, labels, and viewport interaction
   - [Bundle size](/en/docs/metrics/bundle-size): Reproduce the size-limit measurement and enforce the 120 kB brotli budget
 - Compatibility

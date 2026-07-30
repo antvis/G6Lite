@@ -17,6 +17,7 @@ import {
   RadialLayout,
 } from '@antv/layout';
 import type { GraphData, GraphEdge, GraphNode } from '../types';
+import { normalizeLibraryLayoutOptions } from './layoutOptions';
 
 type LayoutInstance = {
   execute: (data: GraphData) => Promise<void>;
@@ -51,47 +52,11 @@ interface WorkerResponse {
 
 self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
   const { id, nodes, edges, config } = e.data;
-  const { type, ...opts } = config;
-  delete opts.worker;
+  const { type } = config;
 
   const LayoutClass = LAYOUT_MAP[type] ?? RandomLayout;
   const nodeCount = nodes.length;
-
-  // Apply same auto-tuning as main-thread runLayout
-  if ('iterations' in opts && !('maxIteration' in opts)) {
-    opts.maxIteration = opts.iterations;
-  }
-  delete opts.iterations;
-
-  if (nodeCount > 500 && opts.animate === undefined) {
-    opts.animate = false;
-  }
-
-  if ((type === 'force' || type === 'fruchterman' || type === 'd3-force') && nodeCount > 1000) {
-    if (nodeCount > 5000) {
-      if (opts.maxIteration === undefined) opts.maxIteration = 50;
-      if (opts.minMovement === undefined) opts.minMovement = 2.0;
-    } else {
-      if (opts.maxIteration === undefined) opts.maxIteration = 200;
-      if (opts.minMovement === undefined) opts.minMovement = 1.5;
-    }
-  }
-
-  // ForceAtlas2: cap maxIteration (default 0 → @antv/layout auto-expands to 950)
-  // and disable `prune`, whose finishing pass runs a pure O(n²) tick(100) with
-  // barnesHut forced off (5000 nodes: 37s → ~1s, measured). The real options are
-  // `barnesHut`/`prune`; `barnesHutOptimize` was an invalid no-op and is removed.
-  if (type === 'force-atlas2') {
-    if (opts.barnesHut === undefined) opts.barnesHut = true;
-    if (opts.prune === undefined && nodeCount > 200) opts.prune = false;
-    if (nodeCount > 5000) {
-      if (opts.maxIteration === undefined) opts.maxIteration = 50;
-    } else if (nodeCount >= 1000) {
-      if (opts.maxIteration === undefined) opts.maxIteration = 100;
-    } else {
-      if (opts.maxIteration === undefined) opts.maxIteration = 100;
-    }
-  }
+  const opts = normalizeLibraryLayoutOptions(type, config, nodeCount);
 
   // Spread initial positions for force layouts
   const spread = Math.max(200, Math.sqrt(nodeCount) * 30);

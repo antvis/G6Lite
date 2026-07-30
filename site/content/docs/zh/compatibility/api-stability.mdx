@@ -19,6 +19,23 @@ import type { GraphData, GraphOptions } from '@antv/g6-gl';
 
 不要从 `@antv/g6-gl/src/...` 或构建产物内部路径导入。发布包虽然包含 `src/`，但它不是额外的公开 API 面。
 
+## ESM 与 CommonJS
+
+当前包根只提供 ESM，不提供 `require('@antv/g6-gl')` 条件。CommonJS 可行性验证表明，同步 `require` 入口和类型声明本身可以生成，但双产物还必须同时保证两项运行时契约：
+
+- ESM 与 CommonJS 入口共享同一套扩展注册状态，避免同一应用混用两种入口时出现重复或不可见的注册项。
+- `layout.worker: true` 经业务打包器处理后仍能定位并加载包内的模块 Worker，不能因 Worker 资源丢失而静默回退主线程。
+
+当前 CommonJS 消费构建无法可靠保留 Worker 的静态资源关联，验证中会请求不存在的 Worker 文件；独立双构建也会产生两份模块级注册表。因此本版本不发布“只能同步加载、但 Worker 或扩展边界不完整”的 CommonJS 产物。
+
+仍使用 CommonJS 工具链的应用可以在客户端边界使用动态导入：
+
+```js
+const { Graph } = await import('@antv/g6-gl');
+```
+
+这不会改变 `Graph` 依赖真实 DOM、Canvas 和 WebGL 的运行环境要求。
+
 ## 弃用兼容层
 
 以下能力为现有项目保留，但新代码应迁移到推荐入口：

@@ -324,13 +324,17 @@ describe('P1: repeated render resource lifecycle', () => {
     expect(graph.layoutAbortController).toBeNull();
   });
 
-  it('does not start layout after cancellation during the pre-layout frame yield', async () => {
-    let resumeFrame: FrameRequestCallback | undefined;
-    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
-      resumeFrame = callback;
-      return 1;
-    });
-    const executeLayout = vi.fn();
+  it('starts initial layout without an extra animation-frame yield', async () => {
+    const requestFrame = vi.fn();
+    vi.stubGlobal('requestAnimationFrame', requestFrame);
+    let finishLayout:
+      ((result: { nodes: Array<{ id: string; x: number; y: number }> }) => void) | undefined;
+    const executeLayout = vi.fn(
+      () =>
+        new Promise<{ nodes: Array<{ id: string; x: number; y: number }> }>((resolve) => {
+          finishLayout = resolve;
+        }),
+    );
     const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
     Object.assign(graph, {
       _destroyed: false,
@@ -348,11 +352,13 @@ describe('P1: repeated render resource lifecycle', () => {
     });
 
     const rendering = graph.render();
+    expect(requestFrame).not.toHaveBeenCalled();
+    expect(executeLayout).toHaveBeenCalledTimes(1);
     graph.cancelLayout();
-    resumeFrame?.(0);
+    finishLayout?.({ nodes: [{ id: 'node', x: 0, y: 0 }] });
     await rendering;
 
-    expect(executeLayout).not.toHaveBeenCalled();
+    expect(requestFrame).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
 

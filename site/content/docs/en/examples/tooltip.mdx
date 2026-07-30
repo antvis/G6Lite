@@ -1,25 +1,9 @@
 ---
 title: Tooltip
-description: Show custom node and edge details through the tooltip behavior
+description: Show custom business information while hovering nodes or edges
+full: true
 ---
 
-import { withBasePath } from '@/lib/shared';
+import { ExampleDetail } from '@/components/example-detail';
 
-<div className="example-hero">
-  <img src={withBasePath('/examples/tooltip.png')} alt="G6-GL tooltip" />
-</div>
-
-<div className="example-actions">
-  <a href={withBasePath('/playground/#tooltip')} target="_blank" rel="noreferrer">
-    Run online
-  </a>
-  <a
-    href="https://github.com/antvis/G6Lite/tree/master/playground/demos/tooltip.ts"
-    target="_blank"
-    rel="noreferrer"
-  >
-    View source
-  </a>
-</div>
-
-The behavior consumes the shared picking and pointer pipeline. See [tooltip configuration](/en/docs/guides/tooltip) and [events](/en/docs/guides/events).
+<ExampleDetail id="tooltip" locale="en" />

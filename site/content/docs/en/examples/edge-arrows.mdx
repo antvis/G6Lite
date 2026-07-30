@@ -1,25 +1,9 @@
 ---
-title: Edge arrows
-description: Compare direction and arrow rendering across several edge configurations
+title: Edge arrow directions
+description: Compare no-arrow, one-way, bidirectional, and wide-arrow edges
+full: true
 ---
 
-import { withBasePath } from '@/lib/shared';
+import { ExampleDetail } from '@/components/example-detail';
 
-<div className="example-hero">
-  <img src={withBasePath('/examples/edge-arrows.png')} alt="G6-GL edge arrow variants" />
-</div>
-
-<div className="example-actions">
-  <a href={withBasePath('/playground/#edge-arrows')} target="_blank" rel="noreferrer">
-    Run online
-  </a>
-  <a
-    href="https://github.com/antvis/G6Lite/tree/master/playground/demos/edge-arrows.ts"
-    target="_blank"
-    rel="noreferrer"
-  >
-    View source
-  </a>
-</div>
-
-Use edge style configuration for no arrow, start or end arrows, and line-width variations. See [edges](/en/docs/guides/edge).
+<ExampleDetail id="edge-arrows" locale="en" />

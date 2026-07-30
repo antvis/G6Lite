@@ -1,7 +1,7 @@
+import { DocsRouteLayout } from '@/components/docs-route-layout';
 import { getDocsNavigationTree } from '@/lib/docs-tree';
 import { baseOptions } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import type { ReactNode } from 'react';
 
@@ -10,14 +10,9 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <HomeLayout {...baseOptions('en')}>
-      <DocsLayout
-        tree={tree}
-        nav={{ enabled: false }}
-        searchToggle={{ enabled: false }}
-        themeSwitch={{ enabled: false }}
-      >
+      <DocsRouteLayout locale="en" tree={tree}>
         {children}
-      </DocsLayout>
+      </DocsRouteLayout>
     </HomeLayout>
   );
 }

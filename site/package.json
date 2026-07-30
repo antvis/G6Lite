@@ -3,11 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "prebuild": "npm run examples:generate",
     "build": "fumadocs-mdx && _FUMADOCS_MDX=1 next build",
+    "predev": "npm run examples:generate",
     "dev": "next dev",
     "start": "serve out",
+    "pretypes:check": "npm run examples:generate",
     "types:check": "fumadocs-mdx && _FUMADOCS_MDX=1 next typegen && tsc --noEmit",
     "postinstall": "fumadocs-mdx",
+    "examples:generate": "node scripts/generate-example-sources.mjs",
     "lint": "eslint",
     "thumbnails:capture": "(cd .. && vite --config vite.config.ts --port 5179 --no-open) & sleep 5 && node scripts/capture-thumbnails.mjs; kill %1",
     "examples:capture": "(cd .. && vite --config vite.config.ts --port 5179 --no-open) & sleep 5 && node scripts/capture-demo-thumbnails.mjs; kill %1"

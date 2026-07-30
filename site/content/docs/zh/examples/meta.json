@@ -3,12 +3,18 @@
   "pages": [
     "index",
     "basic",
+    "data-mutations",
+    "queries-and-states",
     "node-style",
     "edge-arrows",
-    "layouts",
-    "tooltip",
-    "combo",
     "parallel-edges",
+    "combo",
+    "layouts",
+    "layout-gallery",
+    "tooltip",
+    "selection-behaviors",
+    "viewport-controls",
+    "extension-system",
     "real-dataset"
   ]
 }

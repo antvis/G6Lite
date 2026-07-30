@@ -1,7 +1,7 @@
+import { DocsRouteLayout } from '@/components/docs-route-layout';
 import { getDocsNavigationTree } from '@/lib/docs-tree';
 import { baseOptions } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 
 export default function Layout({ children }: LayoutProps<'/docs'>) {
@@ -12,14 +12,9 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
   // 关闭其自带顶栏,并隐藏侧栏底部的搜索/主题控件(这些由顶栏 HomeLayout 提供)。
   return (
     <HomeLayout {...baseOptions('zh')}>
-      <DocsLayout
-        tree={tree}
-        nav={{ enabled: false }}
-        searchToggle={{ enabled: false }}
-        themeSwitch={{ enabled: false }}
-      >
+      <DocsRouteLayout locale="zh" tree={tree}>
         {children}
-      </DocsLayout>
+      </DocsRouteLayout>
     </HomeLayout>
   );
 }

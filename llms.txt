@@ -27,15 +27,21 @@
 - API 参考
   - [API 参考](/docs/api): 由 TypeDoc 从 src/index.ts 的公共 API 类型自动生成
 - 示例
-  - [示例总览](/docs/examples): 查看从 Playground 验证并筛选出的真实 G6-GL 示例
-  - [最简示例](/docs/examples/basic): 使用 G6-GL 渲染一个最小关系图
-  - [节点样式](/docs/examples/node-style): 按业务字段动态设置节点颜色和大小
-  - [箭头方向](/docs/examples/edge-arrows): 配置无箭头、单向箭头、双向箭头和粗边箭头
-  - [布局切换](/docs/examples/layouts): 在同一份数据上切换 circular、force、grid 和 dagre
+  - [图表示例](/docs/examples): 按 G6-GL 公开能力分类浏览并直接运行官网示例
+  - [最简关系图](/docs/examples/basic): 使用最少配置渲染一个可缩放、可拖拽的关系图
+  - [节点与边增删改](/docs/examples/data-mutations): 集中演示节点和边的单个、批量新增、更新和删除
+  - [查询、批量状态与可见性](/docs/examples/queries-and-states): 验证元素、邻接、状态查询，以及批量状态和可见性控制
+  - [节点数据映射样式](/docs/examples/node-style): 按业务字段动态设置节点颜色、尺寸和高亮交互
+  - [边与箭头方向](/docs/examples/edge-arrows): 比较无箭头、单向、双向和粗边箭头
+  - [平行边与反向边](/docs/examples/parallel-edges): 自动错开同源同目标的多条边、反向边和单边
+  - [Combo 分组容器](/docs/examples/combo): 展示嵌套分组、折叠展开、运行时归组和数据导出
+  - [常用布局切换](/docs/examples/layouts): 在同一份数据上切换 circular、force、grid 和 dagre
+  - [更多内置布局](/docs/examples/layout-gallery): 比较 radial、concentric、ForceAtlas2、fruchterman、MDS 和 random
   - [Tooltip 浮层](/docs/examples/tooltip): 悬停节点或边时展示自定义业务信息
-  - [Combo 分组容器](/docs/examples/combo): 用固定坐标的应用架构图演示嵌套分组、折叠展开和动态归属
-  - [平行边自动错开](/docs/examples/parallel-edges): 处理同源同目标的多条边和反向边
-  - [真实数据集](/docs/examples/real-dataset): 使用 AI Papers 真实数据集验证 G6-GL 的大图渲染
+  - [点选、框选与拉索选择](/docs/examples/selection-behaviors): 在同一示例中比较 click、brush 和 lasso 选择行为
+  - [视口与坐标转换](/docs/examples/viewport-controls): 验证 camera、fit、zoom、focus、resize 和屏幕/图坐标互转
+  - [扩展系统综合示例](/docs/examples/extension-system): 组合验证 decoration、edge、layout、transform、behavior 和 plugin 扩展
+  - [AI Papers 大规模关系图](/docs/examples/real-dataset): 使用真实论文引用网络验证大图渲染和交互链路
 - 技术指标
   - [性能指标](/docs/metrics/performance): G6-GL 的可复现 Benchmark 入口、指标口径、环境记录与结果使用边界
   - [性能调优](/docs/metrics/performance-tuning): 大图首屏、交互、标签、状态与布局的优化建议和度量方法
@@ -77,15 +83,21 @@
 - API reference
   - [API reference](/en/docs/api): Public package-root exports for Graph, layouts, extensions, configuration, data, and behaviors
 - Examples
-  - [Examples](/en/docs/examples): Browse runnable G6-GL examples grouped by public API concepts
-  - [Minimal graph](/en/docs/examples/basic): Render a small interactive relationship graph with minimal configuration
-  - [Node styles](/en/docs/examples/node-style): Map business fields to node colors, sizes, labels, and highlight states
-  - [Edge arrows](/en/docs/examples/edge-arrows): Compare direction and arrow rendering across several edge configurations
-  - [Layout switching](/en/docs/examples/layouts): Switch circular, force, grid, and dagre layouts on one dataset
-  - [Tooltip](/en/docs/examples/tooltip): Show custom node and edge details through the tooltip behavior
-  - [Combo containers](/en/docs/examples/combo): Explore nested groups, collapse, expansion, dragging, and runtime regrouping
-  - [Parallel edges](/en/docs/examples/parallel-edges): Separate same-direction, reverse, and self-loop edges
-  - [Real dataset](/en/docs/examples/real-dataset): Validate rendering and interaction with the AI Papers relationship dataset
+  - [Graph examples](/en/docs/examples): Browse and run website examples organized by G6-GL public capabilities
+  - [Minimal graph](/en/docs/examples/basic): Render a zoomable and draggable graph with minimal configuration
+  - [Node and edge mutations](/en/docs/examples/data-mutations): Demonstrate individual and batch node and edge additions, updates, and removals
+  - [Queries, batch states, and visibility](/en/docs/examples/queries-and-states): Inspect elements, adjacency, and states while controlling batch states and visibility
+  - [Data-driven node styles](/en/docs/examples/node-style): Map business fields to node colors, sizes, and highlight interactions
+  - [Edge arrow directions](/en/docs/examples/edge-arrows): Compare no-arrow, one-way, bidirectional, and wide-arrow edges
+  - [Parallel and reverse edges](/en/docs/examples/parallel-edges): Separate same-direction parallel edges, reverse edges, and single edges automatically
+  - [Combo containers](/en/docs/examples/combo): Explore nested groups, collapse and expand, runtime regrouping, and data export
+  - [Common layout switching](/en/docs/examples/layouts): Switch between circular, force, grid, and dagre with the same data
+  - [More built-in layouts](/en/docs/examples/layout-gallery): Compare radial, concentric, ForceAtlas2, fruchterman, MDS, and random layouts
+  - [Tooltip](/en/docs/examples/tooltip): Show custom business information while hovering nodes or edges
+  - [Click, brush, and lasso selection](/en/docs/examples/selection-behaviors): Compare click, brush, and lasso selection behaviors in one example
+  - [Viewport and coordinate conversion](/en/docs/examples/viewport-controls): Validate camera, fit, zoom, focus, resize, and screen/graph coordinate conversion
+  - [Extension system showcase](/en/docs/examples/extension-system): Combine decoration, edge, layout, transform, behavior, and plugin extensions
+  - [AI Papers large relationship graph](/en/docs/examples/real-dataset): Validate large-graph rendering and interaction with a real paper citation network
 - Technical metrics
   - [Performance metrics](/en/docs/metrics/performance): Reproduce G6-GL Node and browser benchmarks with explicit environments and result boundaries
   - [Performance tuning](/en/docs/metrics/performance-tuning): Measure and optimize first render, layout, updates, labels, and viewport interaction

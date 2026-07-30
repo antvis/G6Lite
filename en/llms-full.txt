@@ -104,315 +104,78 @@ Package-root types cover graph options and data, nodes, edges, combos, labels, s
 The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).
 
 
-# API stability and release boundary (/en/docs/compatibility/api-stability)
+# Data model (/en/docs/concepts/data-model)
 
 
 
-G6-GL remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
+`GraphData` contains `nodes`, `edges`, and optional `combos`:
 
-Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
-
-## ESM and CommonJS [#esm-and-commonjs]
-
-The package root is ESM-only and does not provide a `require('@antv/g6-gl')` condition. A CommonJS feasibility test confirmed that a synchronous entry and declarations can be emitted, but a dual package must also preserve two runtime contracts:
-
-* ESM and CommonJS consumers must share one extension registry when both formats are loaded by the same application.
-* After application bundling, `layout.worker: true` must still resolve and load the package's module Worker instead of silently falling back to the main thread.
-
-The current CommonJS consumer build cannot reliably preserve that Worker asset relationship and requests a missing Worker file; independent dual builds also create separate module-scoped registries. This release therefore does not publish a partial CommonJS build whose synchronous import works while Worker or extension behavior differs.
-
-Applications that still use a CommonJS toolchain can cross the client boundary with dynamic import:
-
-```js
-const { Graph } = await import('@antv/g6-gl');
+```ts
+const data = {
+  nodes: [
+    { id: 'gateway', data: { label: 'Gateway' } },
+    { id: 'orders', data: { label: 'Orders' } },
+  ],
+  edges: [{ source: 'gateway', target: 'orders', data: { qps: 1200 } }],
+};
 ```
 
-This does not change the requirement for a real DOM, Canvas, and WebGL environment.
+Node IDs must be stable. Put business fields under `data`; use `x` and `y` when coordinates are already available. Edges declare `source` and `target` and may provide a stable `id`. Combos group nodes through `comboId` and remain experimental during the `0.1.x` beta.
 
-Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
+Use states for selection, highlighting, and dimming:
 
-Combo collapse, nesting, and runtime regrouping remain experimental. Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.
+```ts
+graph.batchSetState([
+  { id: 'gateway', state: 'selected', value: true },
+  { id: 'orders', state: 'inactive', value: true },
+]);
+```
 
+Query APIs return normalized read-only model views. Modify graph-owned data through update, position, and state APIs instead of mutating query results.
 
-# Browsers and runtime environment (/en/docs/compatibility/browser)
 
+# Graph lifecycle (/en/docs/concepts/graph-lifecycle)
 
 
-G6-GL prefers WebGL 2.0 and falls back to WebGL 1.0. Canvas 2D is used for labels and combo outlines, so WebGL 2.0 is not a hard requirement.
 
-## Minimum versions [#minimum-versions]
+`Graph` is the main public entry point.
 
-| Browser                  | Minimum        | Release year | Main boundary                                     |
-| ------------------------ | -------------- | ------------ | ------------------------------------------------- |
-| Chrome                   | 80+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
-| Firefox                  | 74+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
-| Safari on macOS          | 13.1+          | 2020         | ES2020 syntax and WebGL 1.0                       |
-| Safari on iOS            | 13.4+          | 2020         | ES2020 syntax; mobile GPU limits still apply      |
-| Edge                     | 80+ (Chromium) | 2020         | Chromium-based Edge only; EdgeHTML is unsupported |
-| Android WebView / Chrome | 80+            | 2020         | ES2020 syntax; validate low-end GPU capacity      |
+```ts
+const graph = new Graph({ container: 'graph', data, layout: { type: 'force' } });
+await graph.render();
+```
 
-Internet Explorer and EdgeHTML are not supported. These are syntax and platform boundaries for the untranspiled ESM-only package, not a complete certified device matrix. See [Can I Use optional chaining](https://caniuse.com/mdn-javascript_operators_optional_chaining), [Chrome 80](https://developer.chrome.com/blog/new-in-chrome-80), [Firefox 74](https://www.mozilla.org/firefox/74.0/releasenotes/), and [Safari 13.1](https://webkit.org/blog/10247/new-webkit-features-in-safari-13-1/).
+Construction resolves the container and prepares the rendering surface. `render()` sizes the canvases, resolves the theme, runs layout, initializes data and transforms, starts WebGL and interaction layers, fits the viewport, and emits `afterrender`.
 
-## Coverage reference [#coverage-reference]
+Use `setData()` for complete replacement. Use `addNode`, `addEdge`, update, remove, and state APIs for incremental changes. To run another layout:
 
-Using global usage data from `caniuse-lite@1.0.30001806`, retrieved on **2026-07-29**:
+```ts
+graph.setLayout({ type: 'dagre', rankdir: 'LR' });
+await graph.layout();
+```
 
-* The browser families and minimum versions explicitly listed above account for approximately &#x2A;*90.4%** of global browser usage.
-* Across every browser tracked by Can I Use, versions supporting both WebGL 1.0 and native ESM account for approximately &#x2A;*94.8%**.
+Viewport APIs include `fitView()`, `focusItem()`, `setCamera()`, `screenToGraph()`, and `graphToScreen()`. Always call `graph.destroy()` during page or component cleanup.
 
-Sources: [Can I Use WebGL](https://caniuse.com/webgl), [JavaScript modules](https://caniuse.com/es6-module), and [caniuse-lite](https://github.com/browserslist/caniuse-lite). These figures are selection references, not G6-GL device certification rates. Enterprise browsers, embedded WebViews, disabled GPU acceleration, and low-end devices require separate validation.
 
-## Comparison with sigma.js [#comparison-with-sigmajs]
+# What is G6-GL? (/en/docs/concepts/overview)
 
-The sigma.js v3 README describes a WebGL renderer for graphs with thousands of nodes and edges, built on Graphology. Its `sigma@3.0.3` package provides both ESM and CommonJS builds. The official [README](https://github.com/jacomyal/sigma.js#readme) and [package metadata](https://github.com/jacomyal/sigma.js/blob/main/packages/sigma/package.json) checked on 2026-07-29 do not publish an equivalent minimum-browser matrix.
 
-An omitted matrix should not be interpreted as legacy-browser support. Both libraries require WebGL and a modern JavaScript toolchain; G6-GL explicitly documents the syntax floor of its untranspiled package, while sigma.js consumers need to validate their own build target.
 
-G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
+G6-GL is a lightweight WebGL graph visualization engine. It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
 
-The renderer uses `regl`, which dynamically compiles WebGL commands. If the host enables Content Security Policy, `script-src` must allow `'unsafe-eval'`; `'wasm-unsafe-eval'` alone is not sufficient. Hosts that cannot allow this directive are not supported by the current renderer.
+## Good fits [#good-fits]
 
-Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
+* Relationship exploration, topology, knowledge graphs, and dependency analysis.
+* Frequent highlighting, selection, neighbor focus, and state switching.
+* Products that need AntV layouts with a controlled package and extension boundary.
 
+## Evaluate carefully [#evaluate-carefully]
 
-# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
+* Extremely large graphs where first-paint speed is the only requirement.
+* Products that need the full G6 plugin, animation, and element ecosystem.
+* SVG/DOM-level customization or server-side image rendering.
 
-
-
-G6-GL borrows G6 configuration concepts but is not a complete replacement for G6 v5. Migration is most suitable when large-graph interaction and state updates are the primary bottleneck and the product uses core node, edge, layout, and behavior capabilities.
-
-Do not migrate blindly when the project depends on the complete plugin ecosystem, animation system, complex Canvas element customization, or built-in graph analysis.
-
-Suggested process:
-
-1. Reproduce one real workflow in the deployed Playground.
-2. Normalize data to nodes, edges, and optional combos.
-3. Map styles and states through package-root Graph options.
-4. Replace G6 behavior names with supported G6-GL behaviors.
-5. Verify layouts, events, incremental updates, compatibility, and performance on target devices.
-
-Keep the original implementation until the real-data acceptance suite passes.
-
-
-# Compatibility overview (/en/docs/compatibility)
-
-
-
-Review these boundaries before adopting or upgrading G6-GL:
-
-<Cards>
-  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
-
-  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
-
-  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
-</Cards>
-
-G6-GL needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.
-
-
-# Minimal graph (/en/docs/examples/basic)
-
-
-
-
-
-<div className="example-hero">
-  <img src="withBasePath('/examples/basic.png')" alt="Minimal G6-GL graph" />
-</div>
-
-<div className="example-actions">
-  <a href="withBasePath('/playground/#basic')" target="_blank" rel="noreferrer">
-    Run online
-  </a>
-
-  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/basic.ts" target="_blank" rel="noreferrer">
-    View source
-  </a>
-</div>
-
-The example passes nodes and edges, runs a circular layout, and enables viewport navigation. It is the best starting point before adding styles or element-level behaviors.
-
-See [quick start](/en/docs/getting-started/quick-start) and [data configuration](/en/docs/guides/data).
-
-
-# Combo containers (/en/docs/examples/combo)
-
-
-
-
-
-<div className="example-hero">
-  <img src="withBasePath('/examples/combo.png')" alt="G6-GL combo containers" />
-</div>
-
-<div className="example-actions">
-  <a href="withBasePath('/playground/#combo')" target="_blank" rel="noreferrer">
-    Run online
-  </a>
-
-  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/combo.ts" target="_blank" rel="noreferrer">
-    View source
-  </a>
-</div>
-
-Combo APIs are experimental in `0.1.x`. Validate nesting, collapse, and incremental data updates with your own topology before production use. See [combos](/en/docs/guides/combo).
-
-
-# Edge arrows (/en/docs/examples/edge-arrows)
-
-
-
-
-
-<div className="example-hero">
-  <img src="withBasePath('/examples/edge-arrows.png')" alt="G6-GL edge arrow variants" />
-</div>
-
-<div className="example-actions">
-  <a href="withBasePath('/playground/#edge-arrows')" target="_blank" rel="noreferrer">
-    Run online
-  </a>
-
-  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/edge-arrows.ts" target="_blank" rel="noreferrer">
-    View source
-  </a>
-</div>
-
-Use edge style configuration for no arrow, start or end arrows, and line-width variations. See [edges](/en/docs/guides/edge).
-
-
-# Examples (/en/docs/examples)
-
-
-
-
-
-These examples are selected from `playground/demos/catalog.json`. The website, screenshots, source files, and release checks use the same catalog.
-
-<ExamplesGrid locale="en" />
-
-## Run and inspect [#run-and-inspect]
-
-* <a href="withBasePath('/playground/')">
-    Open the deployed Playground
-  </a>
-* [Browse every example source file](https://github.com/antvis/G6Lite/tree/master/playground/demos)
-
-
-# Layout switching (/en/docs/examples/layouts)
-
-
-
-
-
-<div className="example-hero">
-  <img src="withBasePath('/examples/layouts.png')" alt="G6-GL layout switching" />
-</div>
-
-<div className="example-actions">
-  <a href="withBasePath('/playground/#layouts')" target="_blank" rel="noreferrer">
-    Run online
-  </a>
-
-  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/layouts.ts" target="_blank" rel="noreferrer">
-    View source
-  </a>
-</div>
-
-Circular supports overview, force supports network exploration, grid creates a deterministic matrix, and dagre presents hierarchy. See [layout configuration](/en/docs/guides/layout).
-
-
-# Node styles (/en/docs/examples/node-style)
-
-
-
-
-
-<div className="example-hero">
-  <img src="withBasePath('/examples/node-style.png')" alt="G6-GL functional node styles" />
-</div>
-
-<div className="example-actions">
-  <a href="withBasePath('/playground/#node-style')" target="_blank" rel="noreferrer">
-    Run online
-  </a>
-
-  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/node-style.ts" target="_blank" rel="noreferrer">
-    View source
-  </a>
-</div>
-
-Functional styles read normalized node data. State styles handle highlight and dimming without replacing the complete dataset. See [nodes](/en/docs/guides/node) and [interactions](/en/docs/guides/interactions).
-
-
-# Parallel edges (/en/docs/examples/parallel-edges)
-
-
-
-
-
-<div className="example-hero">
-  <img src="withBasePath('/examples/parallel-edges.png')" alt="G6-GL parallel edges" />
-</div>
-
-<div className="example-actions">
-  <a href="withBasePath('/playground/#parallel-edges')" target="_blank" rel="noreferrer">
-    Run online
-  </a>
-
-  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/parallel-edges.ts" target="_blank" rel="noreferrer">
-    View source
-  </a>
-</div>
-
-The `process-parallel-edges` transform assigns distinct paths while preserving edge identity. See [parallel and self-loop edges](/en/docs/guides/parallel-edges).
-
-
-# Real dataset (/en/docs/examples/real-dataset)
-
-
-
-
-
-<div className="example-hero">
-  <img src="withBasePath('/examples/real-dataset.png')" alt="G6-GL real dataset" />
-</div>
-
-<div className="example-actions">
-  <a href="withBasePath('/playground/#real-dataset')" target="_blank" rel="noreferrer">
-    Run online
-  </a>
-
-  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/real-dataset.ts" target="_blank" rel="noreferrer">
-    View source
-  </a>
-</div>
-
-The example reuses dataset coordinates instead of running a new layout. It is useful for checking large-graph rendering, zooming, dragging, and neighbor focus with a more realistic topology. Measure your own target devices before using it as a performance baseline.
-
-
-# Tooltip (/en/docs/examples/tooltip)
-
-
-
-
-
-<div className="example-hero">
-  <img src="withBasePath('/examples/tooltip.png')" alt="G6-GL tooltip" />
-</div>
-
-<div className="example-actions">
-  <a href="withBasePath('/playground/#tooltip')" target="_blank" rel="noreferrer">
-    Run online
-  </a>
-
-  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/tooltip.ts" target="_blank" rel="noreferrer">
-    View source
-  </a>
-</div>
-
-The behavior consumes the shared picking and pointer pipeline. See [tooltip configuration](/en/docs/guides/tooltip) and [events](/en/docs/guides/events).
+G6 v5 is the broader general-purpose framework. G6-GL is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
 
 
 # Install and render your first graph (/en/docs/getting-started/quick-start)
@@ -1219,75 +982,243 @@ For example, a first-render comparison is invalid when sigma.js reuses existing 
 * Archive candidate versions, adapters, full configuration, and reports together.
 
 
-# Data model (/en/docs/concepts/data-model)
+# Minimal graph (/en/docs/examples/basic)
 
 
 
-`GraphData` contains `nodes`, `edges`, and optional `combos`:
 
-```ts
-const data = {
-  nodes: [
-    { id: 'gateway', data: { label: 'Gateway' } },
-    { id: 'orders', data: { label: 'Orders' } },
-  ],
-  edges: [{ source: 'gateway', target: 'orders', data: { qps: 1200 } }],
-};
+
+<ExampleDetail id="basic" locale="en" />
+
+
+# Combo containers (/en/docs/examples/combo)
+
+
+
+
+
+<ExampleDetail id="combo" locale="en" />
+
+
+# Node and edge mutations (/en/docs/examples/data-mutations)
+
+
+
+
+
+<ExampleDetail id="data-mutations" locale="en" />
+
+
+# Edge arrow directions (/en/docs/examples/edge-arrows)
+
+
+
+
+
+<ExampleDetail id="edge-arrows" locale="en" />
+
+
+# Extension system showcase (/en/docs/examples/extension-system)
+
+
+
+
+
+<ExampleDetail id="extension-system" locale="en" />
+
+
+# Graph examples (/en/docs/examples)
+
+
+
+
+
+<ExamplesCenter locale="en" />
+
+
+# More built-in layouts (/en/docs/examples/layout-gallery)
+
+
+
+
+
+<ExampleDetail id="layout-gallery" locale="en" />
+
+
+# Common layout switching (/en/docs/examples/layouts)
+
+
+
+
+
+<ExampleDetail id="layouts" locale="en" />
+
+
+# Data-driven node styles (/en/docs/examples/node-style)
+
+
+
+
+
+<ExampleDetail id="node-style" locale="en" />
+
+
+# Parallel and reverse edges (/en/docs/examples/parallel-edges)
+
+
+
+
+
+<ExampleDetail id="parallel-edges" locale="en" />
+
+
+# Queries, batch states, and visibility (/en/docs/examples/queries-and-states)
+
+
+
+
+
+<ExampleDetail id="queries-and-states" locale="en" />
+
+
+# AI Papers large relationship graph (/en/docs/examples/real-dataset)
+
+
+
+
+
+<ExampleDetail id="real-dataset" locale="en" />
+
+
+# Click, brush, and lasso selection (/en/docs/examples/selection-behaviors)
+
+
+
+
+
+<ExampleDetail id="selection-behaviors" locale="en" />
+
+
+# Tooltip (/en/docs/examples/tooltip)
+
+
+
+
+
+<ExampleDetail id="tooltip" locale="en" />
+
+
+# Viewport and coordinate conversion (/en/docs/examples/viewport-controls)
+
+
+
+
+
+<ExampleDetail id="viewport-controls" locale="en" />
+
+
+# API stability and release boundary (/en/docs/compatibility/api-stability)
+
+
+
+G6-GL remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
+
+Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
+
+## ESM and CommonJS [#esm-and-commonjs]
+
+The package root is ESM-only and does not provide a `require('@antv/g6-gl')` condition. A CommonJS feasibility test confirmed that a synchronous entry and declarations can be emitted, but a dual package must also preserve two runtime contracts:
+
+* ESM and CommonJS consumers must share one extension registry when both formats are loaded by the same application.
+* After application bundling, `layout.worker: true` must still resolve and load the package's module Worker instead of silently falling back to the main thread.
+
+The current CommonJS consumer build cannot reliably preserve that Worker asset relationship and requests a missing Worker file; independent dual builds also create separate module-scoped registries. This release therefore does not publish a partial CommonJS build whose synchronous import works while Worker or extension behavior differs.
+
+Applications that still use a CommonJS toolchain can cross the client boundary with dynamic import:
+
+```js
+const { Graph } = await import('@antv/g6-gl');
 ```
 
-Node IDs must be stable. Put business fields under `data`; use `x` and `y` when coordinates are already available. Edges declare `source` and `target` and may provide a stable `id`. Combos group nodes through `comboId` and remain experimental during the `0.1.x` beta.
+This does not change the requirement for a real DOM, Canvas, and WebGL environment.
 
-Use states for selection, highlighting, and dimming:
+Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
 
-```ts
-graph.batchSetState([
-  { id: 'gateway', state: 'selected', value: true },
-  { id: 'orders', state: 'inactive', value: true },
-]);
-```
-
-Query APIs return normalized read-only model views. Modify graph-owned data through update, position, and state APIs instead of mutating query results.
+Combo collapse, nesting, and runtime regrouping remain experimental. Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.
 
 
-# Graph lifecycle (/en/docs/concepts/graph-lifecycle)
+# Browsers and runtime environment (/en/docs/compatibility/browser)
 
 
 
-`Graph` is the main public entry point.
+G6-GL prefers WebGL 2.0 and falls back to WebGL 1.0. Canvas 2D is used for labels and combo outlines, so WebGL 2.0 is not a hard requirement.
 
-```ts
-const graph = new Graph({ container: 'graph', data, layout: { type: 'force' } });
-await graph.render();
-```
+## Minimum versions [#minimum-versions]
 
-Construction resolves the container and prepares the rendering surface. `render()` sizes the canvases, resolves the theme, runs layout, initializes data and transforms, starts WebGL and interaction layers, fits the viewport, and emits `afterrender`.
+| Browser                  | Minimum        | Release year | Main boundary                                     |
+| ------------------------ | -------------- | ------------ | ------------------------------------------------- |
+| Chrome                   | 80+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
+| Firefox                  | 74+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
+| Safari on macOS          | 13.1+          | 2020         | ES2020 syntax and WebGL 1.0                       |
+| Safari on iOS            | 13.4+          | 2020         | ES2020 syntax; mobile GPU limits still apply      |
+| Edge                     | 80+ (Chromium) | 2020         | Chromium-based Edge only; EdgeHTML is unsupported |
+| Android WebView / Chrome | 80+            | 2020         | ES2020 syntax; validate low-end GPU capacity      |
 
-Use `setData()` for complete replacement. Use `addNode`, `addEdge`, update, remove, and state APIs for incremental changes. To run another layout:
+Internet Explorer and EdgeHTML are not supported. These are syntax and platform boundaries for the untranspiled ESM-only package, not a complete certified device matrix. See [Can I Use optional chaining](https://caniuse.com/mdn-javascript_operators_optional_chaining), [Chrome 80](https://developer.chrome.com/blog/new-in-chrome-80), [Firefox 74](https://www.mozilla.org/firefox/74.0/releasenotes/), and [Safari 13.1](https://webkit.org/blog/10247/new-webkit-features-in-safari-13-1/).
 
-```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR' });
-await graph.layout();
-```
+## Coverage reference [#coverage-reference]
 
-Viewport APIs include `fitView()`, `focusItem()`, `setCamera()`, `screenToGraph()`, and `graphToScreen()`. Always call `graph.destroy()` during page or component cleanup.
+Using global usage data from `caniuse-lite@1.0.30001806`, retrieved on **2026-07-29**:
+
+* The browser families and minimum versions explicitly listed above account for approximately &#x2A;*90.4%** of global browser usage.
+* Across every browser tracked by Can I Use, versions supporting both WebGL 1.0 and native ESM account for approximately &#x2A;*94.8%**.
+
+Sources: [Can I Use WebGL](https://caniuse.com/webgl), [JavaScript modules](https://caniuse.com/es6-module), and [caniuse-lite](https://github.com/browserslist/caniuse-lite). These figures are selection references, not G6-GL device certification rates. Enterprise browsers, embedded WebViews, disabled GPU acceleration, and low-end devices require separate validation.
+
+## Comparison with sigma.js [#comparison-with-sigmajs]
+
+The sigma.js v3 README describes a WebGL renderer for graphs with thousands of nodes and edges, built on Graphology. Its `sigma@3.0.3` package provides both ESM and CommonJS builds. The official [README](https://github.com/jacomyal/sigma.js#readme) and [package metadata](https://github.com/jacomyal/sigma.js/blob/main/packages/sigma/package.json) checked on 2026-07-29 do not publish an equivalent minimum-browser matrix.
+
+An omitted matrix should not be interpreted as legacy-browser support. Both libraries require WebGL and a modern JavaScript toolchain; G6-GL explicitly documents the syntax floor of its untranspiled package, while sigma.js consumers need to validate their own build target.
+
+G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
+
+The renderer uses `regl`, which dynamically compiles WebGL commands. If the host enables Content Security Policy, `script-src` must allow `'unsafe-eval'`; `'wasm-unsafe-eval'` alone is not sufficient. Hosts that cannot allow this directive are not supported by the current renderer.
+
+Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
 
 
-# What is G6-GL? (/en/docs/concepts/overview)
+# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
 
 
 
-G6-GL is a lightweight WebGL graph visualization engine. It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
+G6-GL borrows G6 configuration concepts but is not a complete replacement for G6 v5. Migration is most suitable when large-graph interaction and state updates are the primary bottleneck and the product uses core node, edge, layout, and behavior capabilities.
 
-## Good fits [#good-fits]
+Do not migrate blindly when the project depends on the complete plugin ecosystem, animation system, complex Canvas element customization, or built-in graph analysis.
 
-* Relationship exploration, topology, knowledge graphs, and dependency analysis.
-* Frequent highlighting, selection, neighbor focus, and state switching.
-* Products that need AntV layouts with a controlled package and extension boundary.
+Suggested process:
 
-## Evaluate carefully [#evaluate-carefully]
+1. Reproduce one real workflow in the deployed Playground.
+2. Normalize data to nodes, edges, and optional combos.
+3. Map styles and states through package-root Graph options.
+4. Replace G6 behavior names with supported G6-GL behaviors.
+5. Verify layouts, events, incremental updates, compatibility, and performance on target devices.
 
-* Extremely large graphs where first-paint speed is the only requirement.
-* Products that need the full G6 plugin, animation, and element ecosystem.
-* SVG/DOM-level customization or server-side image rendering.
+Keep the original implementation until the real-data acceptance suite passes.
 
-G6 v5 is the broader general-purpose framework. G6-GL is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
+
+# Compatibility overview (/en/docs/compatibility)
+
+
+
+Review these boundaries before adopting or upgrading G6-GL:
+
+<Cards>
+  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
+
+  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
+
+  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
+</Cards>
+
+G6-GL needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.

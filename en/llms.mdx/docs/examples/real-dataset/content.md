@@ -1,21 +1,7 @@
-# Real dataset (/en/docs/examples/real-dataset)
+# AI Papers large relationship graph (/en/docs/examples/real-dataset)
 
 
 
 
 
-<div className="example-hero">
-  <img src="withBasePath('/examples/real-dataset.png')" alt="G6-GL real dataset" />
-</div>
-
-<div className="example-actions">
-  <a href="withBasePath('/playground/#real-dataset')" target="_blank" rel="noreferrer">
-    Run online
-  </a>
-
-  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/real-dataset.ts" target="_blank" rel="noreferrer">
-    View source
-  </a>
-</div>
-
-The example reuses dataset coordinates instead of running a new layout. It is useful for checking large-graph rendering, zooming, dragging, and neighbor focus with a more realistic topology. Measure your own target devices before using it as a performance baseline.
+<ExampleDetail id="real-dataset" locale="en" />

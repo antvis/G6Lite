@@ -1,21 +1,7 @@
-# Edge arrows (/en/docs/examples/edge-arrows)
+# Edge arrow directions (/en/docs/examples/edge-arrows)
 
 
 
 
 
-<div className="example-hero">
-  <img src="withBasePath('/examples/edge-arrows.png')" alt="G6-GL edge arrow variants" />
-</div>
-
-<div className="example-actions">
-  <a href="withBasePath('/playground/#edge-arrows')" target="_blank" rel="noreferrer">
-    Run online
-  </a>
-
-  <a href="https://github.com/antvis/G6Lite/tree/master/playground/demos/edge-arrows.ts" target="_blank" rel="noreferrer">
-    View source
-  </a>
-</div>
-
-Use edge style configuration for no arrow, start or end arrows, and line-width variations. See [edges](/en/docs/guides/edge).
+<ExampleDetail id="edge-arrows" locale="en" />

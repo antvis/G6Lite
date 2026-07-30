@@ -21,6 +21,7 @@ import { createExtension, destroyExtension, initializeExtension } from '../exten
 import type { GraphData, GraphNode, LayoutConfig } from '../types';
 import { executeFishboneLayout, type FishboneLayoutOptions } from './fishboneLayout';
 import { executeIndentedLayout, type IndentedLayoutOptions } from './indentedLayout';
+import { normalizeLibraryLayoutOptions } from './layoutOptions';
 import { executeMindmapLayout, type MindmapLayoutOptions } from './mindmapLayout';
 import { runLayoutInWorker } from './workerLayout';
 
@@ -162,53 +163,6 @@ async function runWorkerLayout(
   }
 }
 
-function normalizeLibraryLayoutOptions(
-  config: LayoutConfig,
-  nodeCount: number,
-): Record<string, unknown> {
-  const type = config.type;
-  const options = { ...(config as Record<string, unknown>) };
-  delete options.type;
-  delete options.worker;
-
-  if ('iterations' in options && !('maxIteration' in options)) {
-    options.maxIteration = options.iterations;
-  }
-  delete options.iterations;
-  if (options.animate === undefined) options.animate = false;
-
-  if (type === 'force' || type === 'fruchterman') {
-    if (nodeCount > 5000) {
-      if (options.maxIteration === undefined) options.maxIteration = 50;
-      if (options.minMovement === undefined) options.minMovement = 2;
-    } else if (nodeCount >= 1000) {
-      if (options.maxIteration === undefined) options.maxIteration = 200;
-      if (options.minMovement === undefined) options.minMovement = 1.5;
-    } else {
-      if (options.maxIteration === undefined) options.maxIteration = 100;
-      if (options.minMovement === undefined) options.minMovement = 1;
-    }
-  }
-
-  // ForceAtlas2's default pruning finishing pass disables Barnes-Hut and turns
-  // large layouts into an O(n²) operation. Keep the optimized path by default.
-  if (type === 'force-atlas2') {
-    if (options.barnesHut === undefined) options.barnesHut = true;
-    if (options.prune === undefined && nodeCount > 200) options.prune = false;
-    if (options.maxIteration === undefined) {
-      options.maxIteration = nodeCount > 5000 ? 50 : 100;
-    }
-  }
-
-  if (type === 'd3-force') {
-    if (options.alphaDecay === undefined) options.alphaDecay = 0.1;
-    if (options.linkDistance === undefined) {
-      options.linkDistance = Math.max(200, Math.sqrt(nodeCount) * 80);
-    }
-  }
-  return options;
-}
-
 function createLibraryLayoutData(data: GraphData): GraphData {
   const spread = Math.max(200, Math.sqrt(data.nodes.length) * 30);
   return {
@@ -277,7 +231,11 @@ async function runLibraryLayout(
   runtime: LayoutRuntime,
 ): Promise<LayoutResult> {
   const LayoutClass = LAYOUT_MAP[config.type] ?? RandomLayout;
-  const options = normalizeLibraryLayoutOptions(config, data.nodes.length);
+  const options = normalizeLibraryLayoutOptions(
+    config.type,
+    config as Record<string, unknown>,
+    data.nodes.length,
+  );
   const layout = new LayoutClass(options);
   const layoutData = createLibraryLayoutData(data);
   await executeLibraryLayout(layout, config.type, layoutData, options);

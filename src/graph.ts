@@ -122,7 +122,7 @@ export class Graph {
     if (!this.isGenerationCurrent(generation)) return;
     const theme = resolveTheme((this.options.theme as ThemeOption) ?? 'light');
     this.prepareCanvas(theme);
-    const nodes = await this.runConfiguredLayout(data, generation, true);
+    const nodes = await this.runConfiguredLayout(data, generation);
     if (!nodes || !this.isGenerationCurrent(generation)) return;
 
     this.teardownRenderRuntime();
@@ -1337,7 +1337,6 @@ export class Graph {
   private async runConfiguredLayout(
     data: GraphData,
     generation: number,
-    yieldBeforeLayout = false,
   ): Promise<LayoutNode[] | null> {
     const fallbackNodes = data.nodes.map((node) => ({
       ...node,
@@ -1346,11 +1345,6 @@ export class Graph {
     })) as LayoutNode[];
     const layout = this.resolveEffectiveLayout(data.nodes.length);
     if (!layout || data.nodes.length === 0) return fallbackNodes;
-
-    if (yieldBeforeLayout) {
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-      if (!this.isGenerationCurrent(generation)) return null;
-    }
 
     this.eventEmitter.emit('beforelayout', { nodeCount: data.nodes.length });
     this.eventEmitter.emit('layout:start', { nodeCount: data.nodes.length });

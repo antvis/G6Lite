@@ -1,9 +1,11 @@
 ---
-title: Benchmark and performance metrics
+title: Performance metrics
 description: Reproduce G6-GL Node and browser benchmarks with explicit environments and result boundaries
 ---
 
 G6-GL uses one repository runner for Node microbenchmarks and browser scenarios. Results are comparable only when version, commit, hardware, runtime, data, configuration, and sampling mode match.
+
+This page documents measurement and selection boundaries. It does not claim that G6-GL is faster for every graph, layout, and device. Layout, rendering without layout, and post-render interaction updates must be evaluated separately.
 
 ```bash
 npm run benchmark -- --suite all --mode quick
@@ -17,3 +19,26 @@ npm run benchmark -- --suite all --mode quick
 Reports are written to `performance/` as JSON and Markdown. Raw local reports are not committed by default. Public comparisons must record the G6-GL version and Git state, Node and Chromium versions, operating system, CPU, user agent, viewport, DPR, data scale, layout configuration, sample count, RME, and warnings.
 
 Quick results are smoke evidence, not marketing baselines. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
+
+## Selecting a graph library
+
+The following summary was checked against public project documentation on **2026-07-29**. It compares product scope rather than presenting cross-project benchmark rankings.
+
+| Option           | Focus and rendering                                                                                                         | Data and layout                                                                                                                   | Extension ecosystem                                                                                         | Best fit                                                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **G6-GL**        | WebGL batches nodes and edges, while Canvas 2D handles labels and combos; optimized for incremental updates after rendering | One Graph data API with AntV Layout integration                                                                                   | Package-root registration for elements, behaviors, layouts, transforms, and plugins; currently `0.1.x` beta | Products that need a small WebGL engine, frequent large-graph interaction, AntV layouts, and controlled extension boundaries |
+| **AntV G6 v5**   | Full graph visualization framework covering rendering, layout, analysis, interaction, animation, and components             | Broader built-in configuration and graph capabilities                                                                             | More mature element, behavior, plugin, animation, and component ecosystem                                   | Products that need the complete graph visualization stack and ecosystem rather than the smallest runtime                     |
+| **sigma.js v3**  | WebGL renderer aimed at graphs with thousands of nodes and edges                                                            | Uses Graphology as the graph model; layouts are commonly supplied by Graphology layout packages or precomputed by the application | Custom programs plus the Graphology ecosystem                                                               | Graphology-based products with coordinates or a separate layout pipeline, focused on large-graph exploration                 |
+| **Cytoscape.js** | Graph theory model with an optional interactive renderer, also usable for analysis in Node.js                               | Rich graph queries, algorithms, and layouts                                                                                       | Large extension ecosystem, including scientific and biological-network use cases                            | Applications that need graph algorithms, analysis, mature extensions, and browser interaction together                       |
+
+Sources: [AntV G6](https://g6.antv.antgroup.com/en/manual/introduction/what-is-g6), [sigma.js](https://github.com/jacomyal/sigma.js#readme), and [Cytoscape.js](https://js.cytoscape.org/#introduction).
+
+For example, a first-render comparison is invalid when sigma.js reuses existing coordinates while G6-GL recomputes a force layout. Record layout time and rendering without layout independently.
+
+## Rules for numerical comparisons
+
+- Keep data, coordinates, styles, label policy, viewport, DPR, browser, and hardware fixed.
+- Report preset-coordinate and relayout scenarios separately.
+- Record median, P95, samples, and error instead of drawing conclusions from one run.
+- Measure drag, zoom, picking, highlighting, batch updates, and post-destroy memory trends in addition to first render.
+- Archive candidate versions, adapters, full configuration, and reports together.

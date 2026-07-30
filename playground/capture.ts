@@ -7,11 +7,6 @@
 
 import { attachLabelsCanvas, type GraphInstanceWithTools } from './tooling.ts';
 import type { GraphData, GraphNode, LayoutConfig } from '../src/index.ts';
-import { enableDagreLayout } from '../src/layout/optional/dagre.ts';
-import { enableRadialLayout } from '../src/layout/optional/radial.ts';
-
-enableDagreLayout();
-enableRadialLayout();
 
 // 截图必须保留绘制缓冲,否则跨次导航 playwright 截到的是上一帧/空白帧。
 // ES import 会被提升,所以在补丁后用动态 import 引入 Graph。

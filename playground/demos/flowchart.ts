@@ -2,10 +2,7 @@
  * Demo: 流程图 — 性能诊断决策树 (dagre TB + 矩形节点 + 边标签)
  */
 import { Graph } from '../../src/index.ts';
-import { enableDagreLayout } from '../../src/layout/optional/dagre.ts';
 import { attachLabelsCanvas, attachEdgeLabelsCanvas, type GraphInstanceWithTools } from '../tooling.ts';
-
-enableDagreLayout();
 
 const COLORS: Record<string, string> = {
   start: '#5B8FF9',

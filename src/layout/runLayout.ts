@@ -8,7 +8,7 @@ import { createExtension, destroyExtension, initializeExtension } from '../exten
 import type { GraphData, GraphNode, LayoutConfig } from '../types';
 import { executeFishboneLayout, type FishboneLayoutOptions } from './fishboneLayout';
 import { executeIndentedLayout, type IndentedLayoutOptions } from './indentedLayout';
-import { assertLayoutAvailable, loadLayout, type LayoutInstance } from './layoutLoader';
+import { loadLayout, type LayoutInstance } from './layoutLoader';
 import { normalizeLibraryLayoutOptions } from './layoutOptions';
 import { executeMindmapLayout, type MindmapLayoutOptions } from './mindmapLayout';
 import { runLayoutInWorker } from './workerLayout';
@@ -232,8 +232,6 @@ export async function runLayout(
 
   const builtInResult = runBuiltInLayout(data, resolvedConfig, runtime);
   if (builtInResult) return builtInResult;
-
-  assertLayoutAvailable(resolvedConfig.type);
 
   if (resolvedConfig.worker) {
     const workerResult = await runWorkerLayout(data, resolvedConfig, runtime);

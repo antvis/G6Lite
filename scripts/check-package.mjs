@@ -63,6 +63,7 @@ async function assertModuleSpecifierStyle(directory, includeFile, isValid, expec
 
 const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 const rootExport = packageJson.exports?.['.'];
+const publicExportPaths = Object.keys(packageJson.exports ?? {}).sort();
 const publishedDirectories = [...(packageJson.files ?? [])].sort();
 
 if (
@@ -73,6 +74,10 @@ if (
   Object.hasOwn(rootExport ?? {}, 'require')
 ) {
   throw new Error('Package root must expose dist/index.js as ESM-only');
+}
+
+if (JSON.stringify(publicExportPaths) !== JSON.stringify(['.'])) {
+  throw new Error(`Unexpected package export paths: ${publicExportPaths.join(', ')}`);
 }
 
 if (JSON.stringify(publishedDirectories) !== JSON.stringify(['dist', 'src'])) {
@@ -117,16 +122,4 @@ if (JSON.stringify(actualRuntimeExports) !== JSON.stringify(expectedRuntimeExpor
 }
 
 await access(new URL('../dist/layout/layoutWorker.js', import.meta.url));
-const optionalLayouts = await Promise.all([
-  import('@antv/g6-gl/layouts/dagre'),
-  import('@antv/g6-gl/layouts/mds'),
-  import('@antv/g6-gl/layouts/radial'),
-]);
-const optionalLayoutExports = optionalLayouts.map((module) => Object.keys(module).sort());
-if (
-  JSON.stringify(optionalLayoutExports) !==
-  JSON.stringify([['enableDagreLayout'], ['enableMDSLayout'], ['enableRadialLayout']])
-) {
-  throw new Error(`Optional layout exports changed: ${JSON.stringify(optionalLayoutExports)}`);
-}
 await access(new URL('../src/index.ts', import.meta.url));

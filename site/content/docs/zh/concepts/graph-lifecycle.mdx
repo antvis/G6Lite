@@ -67,9 +67,6 @@ graph.batchSetState([
 ## 重新布局
 
 ```ts
-import { enableDagreLayout } from '@antv/g6-gl/layouts/dagre';
-
-enableDagreLayout();
 graph.setLayout({ type: 'dagre', rankdir: 'LR' });
 await graph.layout();
 ```

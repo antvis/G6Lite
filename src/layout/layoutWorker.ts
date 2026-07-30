@@ -23,20 +23,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
   const { id, nodes, edges, config } = e.data;
   const { type } = config;
 
-  const LayoutClass: LayoutConstructor =
-    type === 'dagre'
-      ? await import('@antv/layout/lib/algorithm/dagre/index.js').then(
-          ({ DagreLayout }) => DagreLayout as unknown as LayoutConstructor,
-        )
-      : type === 'mds'
-        ? await import('@antv/layout/lib/algorithm/mds/index.js').then(
-            ({ MDSLayout }) => MDSLayout as unknown as LayoutConstructor,
-          )
-        : type === 'radial'
-          ? await import('@antv/layout/lib/algorithm/radial/index.js').then(
-              ({ RadialLayout }) => RadialLayout as unknown as LayoutConstructor,
-            )
-          : await loadLayout(type);
+  const LayoutClass: LayoutConstructor = await loadLayout(type);
   const nodeCount = nodes.length;
   const opts = normalizeLibraryLayoutOptions(type, config, nodeCount);
 

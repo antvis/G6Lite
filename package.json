@@ -10,18 +10,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./layouts/dagre": {
-      "types": "./dist/layout/optional/dagre.d.ts",
-      "import": "./dist/layout/optional/dagre.js"
-    },
-    "./layouts/mds": {
-      "types": "./dist/layout/optional/mds.d.ts",
-      "import": "./dist/layout/optional/mds.js"
-    },
-    "./layouts/radial": {
-      "types": "./dist/layout/optional/radial.d.ts",
-      "import": "./dist/layout/optional/radial.js"
     }
   },
   "files": [

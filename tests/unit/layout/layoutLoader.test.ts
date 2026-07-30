@@ -6,23 +6,23 @@ class FakeLayout {
 }
 
 vi.mock('@antv/layout/lib/algorithm/dagre/index.js', () => ({ DagreLayout: FakeLayout }));
+vi.mock('@antv/layout/lib/algorithm/mds/index.js', () => ({ MDSLayout: FakeLayout }));
+vi.mock('@antv/layout/lib/algorithm/radial/index.js', () => ({ RadialLayout: FakeLayout }));
 vi.mock('@antv/layout/lib/algorithm/random/index.js', () => ({ RandomLayout: FakeLayout }));
 
 const { loadLayout } = await import('@src/layout/layoutLoader.js');
 
 describe('layoutLoader', () => {
-  it('requires explicit enablement for heavyweight optional layouts', () => {
-    expect(() => loadLayout('dagre')).toThrow(/enable function.*@antv\/g6-gl\/layouts\/dagre/);
-  });
-
-  it('loads an optional layout after its public enable function is called', async () => {
-    const { enableDagreLayout } = await import('@src/layout/optional/dagre.js');
-    enableDagreLayout();
-
+  it('loads dagre without explicit enablement', async () => {
     await expect(loadLayout('dagre')).resolves.toBe(FakeLayout);
   });
 
-  it('preserves the random fallback for unknown non-optional layout names', async () => {
+  it('loads mds and radial without explicit enablement', async () => {
+    await expect(loadLayout('mds')).resolves.toBe(FakeLayout);
+    await expect(loadLayout('radial')).resolves.toBe(FakeLayout);
+  });
+
+  it('preserves the random fallback for unknown layout names', async () => {
     await expect(loadLayout('unknown-layout')).resolves.toBe(FakeLayout);
   });
 });

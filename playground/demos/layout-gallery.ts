@@ -1,10 +1,5 @@
 import { Graph, type LayoutConfig } from '../../src/index.ts';
-import { enableMDSLayout } from '../../src/layout/optional/mds.ts';
-import { enableRadialLayout } from '../../src/layout/optional/radial.ts';
 import { buttonStyle, createDemoPanel } from './demo-panel.ts';
-
-enableMDSLayout();
-enableRadialLayout();
 
 const NODES = Array.from({ length: 18 }, (_, index) => ({ id: String(index), data: { label: String(index) } }));
 const EDGES = Array.from({ length: 17 }, (_, index) => ({ id: `e-${index}`, source: String(Math.floor(index / 2)), target: String(index + 1) }));

@@ -51,7 +51,7 @@ function edgeStates(states: ReadonlySet<string>): GraphEdge['states'] {
  * branches on are overridden explicitly. `readPixels` writes a controllable
  * pixel so we can drive the GPU picking decode path deterministically.
  */
-function makeGLStub(): {
+function makeGLStub(extraOverrides: Record<string, unknown> = {}): {
   gl: WebGLRenderingContext;
   setPickPixel: (rgba: [number, number, number, number]) => void;
 } {
@@ -73,6 +73,7 @@ function makeGLStub(): {
     createFramebuffer: () => ({}),
     createTexture: () => ({}),
     createRenderbuffer: () => ({}),
+    checkFramebufferStatus: () => 1,
     // picking.pickAt() reads one pixel from the picking framebuffer.
     readPixels: (
       _x: number,
@@ -88,6 +89,7 @@ function makeGLStub(): {
       out[2] = pickPixel[2];
       out[3] = pickPixel[3];
     },
+    ...extraOverrides,
   };
 
   // Numeric GL enums are accessed as properties (gl.BLEND, gl.RGBA, ...).
@@ -111,12 +113,12 @@ function makeGLStub(): {
   };
 }
 
-function makeCanvas(): {
+function makeCanvas(extraOverrides: Record<string, unknown> = {}): {
   canvas: HTMLCanvasElement;
   setPickPixel: (rgba: [number, number, number, number]) => void;
 } {
   const canvas = document.createElement('canvas');
-  const { gl, setPickPixel } = makeGLStub();
+  const { gl, setPickPixel } = makeGLStub(extraOverrides);
   // Renderer calls canvas.getContext('webgl', ...) via getGL().
   (canvas as unknown as { getContext: () => unknown }).getContext = () => gl;
   // jsdom returns a zero-size rect; give picking a stable mapping.
@@ -148,6 +150,109 @@ describe('Renderer — construction', () => {
   it('rejects a non-canvas container', () => {
     const div = document.createElement('div');
     expect(() => new Renderer(div as unknown as HTMLCanvasElement)).toThrow(/canvas/);
+  });
+});
+
+describe('Renderer — WebGL context lifecycle', () => {
+  it('pauses GPU work while lost and reuploads current data after regl restores resources', async () => {
+    const createProgram = vi.fn(() => ({}));
+    const createBuffer = vi.fn(() => ({}));
+    const bufferSubData = vi.fn();
+    const drawArrays = vi.fn();
+    const readPixels = vi.fn();
+    const { canvas } = makeCanvas({
+      createProgram,
+      createBuffer,
+      bufferSubData,
+      drawArrays,
+      readPixels,
+    });
+    const renderer = new Renderer(canvas);
+    renderer.resize(800, 600);
+    renderer.setData(rendererData([{ id: 'a', x: 0, y: 0 }], []));
+    renderer.draw();
+    const initialProgramCreates = createProgram.mock.calls.length;
+
+    bufferSubData.mockClear();
+    drawArrays.mockClear();
+    readPixels.mockClear();
+    const lost = new Event('webglcontextlost', { cancelable: true });
+    canvas.dispatchEvent(lost);
+    renderer.setData(rendererData([{ id: 'b', x: 30, y: 40 }], []));
+    renderer.draw();
+
+    expect(lost.defaultPrevented).toBe(true);
+    expect(drawArrays).not.toHaveBeenCalled();
+    expect(bufferSubData).not.toHaveBeenCalled();
+    expect(readPixels).not.toHaveBeenCalled();
+    expect(renderer.pickAt(30, 40)).toEqual({ type: 'node', id: 'b' });
+
+    canvas.dispatchEvent(new Event('webglcontextrestored'));
+    await Promise.resolve();
+    expect(createProgram).toHaveBeenCalledTimes(initialProgramCreates);
+    expect(bufferSubData).toHaveBeenCalled();
+
+    renderer.draw();
+    const program = rendererInternals(renderer).activeNodeProgram;
+    expect(Array.from(program.array.slice(0, 2))).toEqual([30, 40]);
+    expect(drawArrays).toHaveBeenCalled();
+    renderer.destroy();
+  });
+
+  it('falls back to CPU picking without repeatedly rebuilding an incomplete framebuffer', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const createFramebuffer = vi.fn(() => ({}));
+    const { canvas } = makeCanvas({
+      createFramebuffer,
+      checkFramebufferStatus: () => 999,
+    });
+    const renderer = new Renderer(canvas);
+    renderer.resize(800, 600);
+    renderer.setData(rendererData([{ id: 'a', x: 0, y: 0 }], []));
+    renderer.draw();
+
+    expect(renderer.pickAt(0, 0)).toEqual({ type: 'node', id: 'a' });
+    expect(renderer.pickAt(0, 0)).toEqual({ type: 'node', id: 'a' });
+    expect(createFramebuffer).toHaveBeenCalledTimes(1);
+    expect(warning).toHaveBeenCalledTimes(1);
+    renderer.destroy();
+    warning.mockRestore();
+  });
+
+  it('falls back to CPU picking when readPixels fails', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const readPixels = vi.fn(() => {
+      throw new Error('readback failed');
+    });
+    const { canvas } = makeCanvas({ readPixels });
+    const renderer = new Renderer(canvas);
+    renderer.resize(800, 600);
+    renderer.setData(rendererData([{ id: 'a', x: 0, y: 0 }], []));
+    renderer.draw();
+
+    expect(renderer.pickAt(0, 0)).toEqual({ type: 'node', id: 'a' });
+    expect(renderer.pickAt(0, 0)).toEqual({ type: 'node', id: 'a' });
+    expect(readPixels).toHaveBeenCalledTimes(1);
+    renderer.destroy();
+    warning.mockRestore();
+  });
+
+  it('removes context lifecycle listeners before destruction', () => {
+    const createProgram = vi.fn(() => ({}));
+    const { canvas } = makeCanvas({ createProgram });
+    const renderer = new Renderer(canvas);
+    renderer.resize(800, 600);
+    renderer.setData(rendererData([{ id: 'a', x: 0, y: 0 }], []));
+    renderer.draw();
+    renderer.destroy();
+    createProgram.mockClear();
+
+    const lost = new Event('webglcontextlost', { cancelable: true });
+    canvas.dispatchEvent(lost);
+    canvas.dispatchEvent(new Event('webglcontextrestored'));
+
+    expect(lost.defaultPrevented).toBe(false);
+    expect(createProgram).not.toHaveBeenCalled();
   });
 });
 

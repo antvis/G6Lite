@@ -49,6 +49,7 @@ function makeGLStub(): {
     createFramebuffer: () => ({}),
     createTexture: () => ({}),
     createRenderbuffer: () => ({}),
+    checkFramebufferStatus: () => 1,
     readPixels: (
       _x: number,
       _y: number,

@@ -117,4 +117,16 @@ if (JSON.stringify(actualRuntimeExports) !== JSON.stringify(expectedRuntimeExpor
 }
 
 await access(new URL('../dist/layout/layoutWorker.js', import.meta.url));
+const optionalLayouts = await Promise.all([
+  import('@antv/g6-gl/layouts/dagre'),
+  import('@antv/g6-gl/layouts/mds'),
+  import('@antv/g6-gl/layouts/radial'),
+]);
+const optionalLayoutExports = optionalLayouts.map((module) => Object.keys(module).sort());
+if (
+  JSON.stringify(optionalLayoutExports) !==
+  JSON.stringify([['enableDagreLayout'], ['enableMDSLayout'], ['enableRadialLayout']])
+) {
+  throw new Error(`Optional layout exports changed: ${JSON.stringify(optionalLayoutExports)}`);
+}
 await access(new URL('../src/index.ts', import.meta.url));

@@ -4,6 +4,7 @@ import { EdgeArcProgram } from '@src/renderer/programs/edgeArc.js';
 import { EdgeLineProgram } from '@src/renderer/programs/edgeLine.js';
 import { EdgeLoopProgram } from '@src/renderer/programs/edgeLoop.js';
 import { EdgeRectProgram } from '@src/renderer/programs/edgeRect.js';
+import { createRegl } from '@src/renderer/regl.js';
 
 // ============================================================
 // Edge program buffer encoding (GL-free).
@@ -45,6 +46,10 @@ function makeGLStub(extraOverrides: Record<string, unknown> = {}): WebGLRenderin
   return new Proxy({}, handler) as unknown as WebGLRenderingContext;
 }
 
+function makeReglStub(extraOverrides: Record<string, unknown> = {}) {
+  return createRegl(makeGLStub(extraOverrides));
+}
+
 // Expose the protected buffer for assertions.
 class TestEdgeLine extends EdgeLineProgram {
   peek(): Float32Array {
@@ -78,19 +83,87 @@ const LOOP_VERTICES_PER_ITEM = (LOOP_SEGMENTS + 1) * 2 + 2;
 
 describe('EdgeLine processEdge buffer encoding', () => {
   it('fails clearly when WebGL cannot allocate a shader, program, or buffer', () => {
-    expect(() => new TestEdgeLine(makeGLStub({ createShader: () => null }))).toThrow(
+    expect(() => new TestEdgeLine(makeReglStub({ createShader: () => null }))).toThrow(
       /create WebGL shader/,
     );
-    expect(() => new TestEdgeLine(makeGLStub({ createProgram: () => null }))).toThrow(
+    expect(() => new TestEdgeLine(makeReglStub({ createProgram: () => null }))).toThrow(
       /create WebGL program/,
     );
-    expect(() => new TestEdgeLine(makeGLStub({ createBuffer: () => null }))).toThrow(
+    expect(() => new TestEdgeLine(makeReglStub({ createBuffer: () => null }))).toThrow(
       /create WebGL buffer/,
     );
   });
 
+  it('reuploads the latest CPU buffer after regl restores GPU resources', () => {
+    const bufferData = vi.fn();
+    const bufferSubData = vi.fn();
+    const prog = new TestEdgeLine(makeReglStub({ bufferData, bufferSubData }));
+    prog.reallocate(1);
+    prog.processEdge(0, 10, 20, 110, 220, [0.1, 0.2, 0.3], 42);
+    prog.upload();
+    prog.suspend();
+    prog.patchEdgeEndpoints(0, 1, 2, 3, 4);
+    bufferData.mockClear();
+    bufferSubData.mockClear();
+
+    prog.restore();
+
+    expect(bufferData).toHaveBeenCalledTimes(1);
+    expect(bufferSubData).toHaveBeenCalledTimes(1);
+    expect(Array.from((bufferSubData.mock.calls[0][2] as Float32Array).slice(0, 4))).toEqual([
+      1, 2, 3, 4,
+    ]);
+  });
+
+  it('keeps the normal command static and creates the picking command lazily', () => {
+    const regl = makeReglStub() as ReturnType<typeof makeReglStub> & {
+      __commands: ReturnType<typeof vi.fn>[];
+      __commandConfigs: Array<{
+        blend: { enable: boolean };
+        framebuffer: unknown;
+        uniforms: { u_picking: boolean };
+      }>;
+    };
+    const prog = new TestEdgeLine(regl);
+    prog.reallocate(1);
+    prog.processEdge(0, 10, 20, 110, 220, [0.1, 0.2, 0.3], 42);
+    prog.upload();
+
+    expect(regl.__commands).toHaveLength(1);
+    expect(regl.__commandConfigs[0].blend.enable).toBe(true);
+    expect(regl.__commandConfigs[0].framebuffer).toBeNull();
+    expect(regl.__commandConfigs[0].uniforms.u_picking).toBe(false);
+
+    const camera = { x: 0, y: 0, zoom: 1 };
+    prog.render({ width: 800, height: 600, camera });
+    prog.render({
+      width: 800,
+      height: 600,
+      camera,
+      picking: true,
+      framebuffer: {} as never,
+      viewportWidth: 400,
+      viewportHeight: 300,
+    });
+    prog.render({
+      width: 800,
+      height: 600,
+      camera,
+      picking: true,
+      framebuffer: {} as never,
+      viewportWidth: 400,
+      viewportHeight: 300,
+    });
+
+    expect(regl.__commands).toHaveLength(2);
+    expect(regl.__commands[0]).toHaveBeenCalledTimes(1);
+    expect(regl.__commands[1]).toHaveBeenCalledTimes(2);
+    expect(regl.__commandConfigs[1].blend.enable).toBe(false);
+    expect(regl.__commandConfigs[1].uniforms.u_picking).toBe(true);
+  });
+
   it('encodes both endpoints + clamp inputs, with a_posCoef selecting the end', () => {
-    const prog = new TestEdgeLine(makeGLStub());
+    const prog = new TestEdgeLine(makeReglStub());
     prog.reallocate(1);
     const color: [number, number, number] = [0.1, 0.2, 0.3];
     const pick = 42;
@@ -129,7 +202,7 @@ describe('EdgeLine processEdge buffer encoding', () => {
   });
 
   it('patchEdgeEndpoints rewrites only positions, leaving clamp/color intact', () => {
-    const prog = new TestEdgeLine(makeGLStub());
+    const prog = new TestEdgeLine(makeReglStub());
     prog.reallocate(1);
     prog.processEdge(0, 10, 20, 110, 220, [0.1, 0.2, 0.3], 42, 5, 7, 0, 10);
     prog.patchEdgeEndpoints(0, 1, 2, 3, 4);
@@ -151,7 +224,7 @@ describe('EdgeLine processEdge buffer encoding', () => {
   it('reuploads only dirty item ranges without reallocating the GPU buffer', () => {
     const bufferData = vi.fn();
     const bufferSubData = vi.fn();
-    const prog = new TestEdgeLine(makeGLStub({ bufferData, bufferSubData }));
+    const prog = new TestEdgeLine(makeReglStub({ bufferData, bufferSubData }));
     prog.reallocate(3);
     for (let i = 0; i < 3; i++) {
       prog.processEdge(i, i * 10, 0, i * 10 + 5, 0, [0.1, 0.2, 0.3], i);
@@ -187,7 +260,7 @@ describe('EdgeLine processEdge buffer encoding', () => {
   });
 
   it('patchEdgeStyle updates opacity for hidden line edges', () => {
-    const prog = new TestEdgeLine(makeGLStub());
+    const prog = new TestEdgeLine(makeReglStub());
     prog.reallocate(1);
     prog.processEdge(0, 10, 20, 110, 220, [0.1, 0.2, 0.3], 42, 5, 7, 0, 10);
 
@@ -199,7 +272,7 @@ describe('EdgeLine processEdge buffer encoding', () => {
   });
 
   it('patchEdgeStyle updates every optional line style attribute', () => {
-    const prog = new TestEdgeLine(makeGLStub());
+    const prog = new TestEdgeLine(makeReglStub());
     prog.reallocate(1);
     prog.processEdge(0, 10, 20, 110, 220, [0.1, 0.2, 0.3], 42, 5, 7, 0, 10);
 
@@ -228,7 +301,7 @@ describe('EdgeLine processEdge buffer encoding', () => {
 
 describe('EdgeRect processEdge buffer encoding', () => {
   it('encodes graph radius + arrow px in the tail (no baked zoom), keeping head offsets', () => {
-    const prog = new TestEdgeRect(makeGLStub());
+    const prog = new TestEdgeRect(makeReglStub());
     prog.reallocate(1);
     const color: [number, number, number] = [0.4, 0.5, 0.6];
     // ...lineWidth=4, dashCycle=0, opacity=0.8, srcRadius=6, tgtRadius=8, srcArrowPx=0, tgtArrowPx=12
@@ -250,7 +323,7 @@ describe('EdgeRect processEdge buffer encoding', () => {
   });
 
   it('patchEdgeStyle updates every optional rect style attribute', () => {
-    const prog = new TestEdgeRect(makeGLStub());
+    const prog = new TestEdgeRect(makeReglStub());
     prog.reallocate(1);
     prog.processEdge(0, 0, 0, 100, 0, [0.1, 0.2, 0.3], 7, 2);
 
@@ -284,7 +357,7 @@ describe('EdgeRect processEdge buffer encoding', () => {
 
 describe('EdgeArc processEdge buffer encoding', () => {
   it('tessellates the curve into a compact thick strip with style and picking attributes', () => {
-    const prog = new TestEdgeArc(makeGLStub());
+    const prog = new TestEdgeArc(makeReglStub());
     prog.reallocate(1);
     const color: [number, number, number] = [0.2, 0.3, 0.4];
     const pickingIndex = 9;
@@ -292,7 +365,7 @@ describe('EdgeArc processEdge buffer encoding', () => {
 
     const a = prog.peek();
 
-    expect(prog.getDrawMethod()).toBe(makeGLStub().TRIANGLE_STRIP);
+    expect(prog.getDrawMethod()).toBe('triangle strip');
     expect(prog.getVerticesPerItem()).toBe(ARC_VERTICES_PER_ITEM);
     expect(prog.getFloatsPerVertex()).toBe(STRIDE_ARC);
 
@@ -324,7 +397,7 @@ describe('EdgeArc processEdge buffer encoding', () => {
   });
 
   it('accumulates a continuous path distance across segment boundaries', () => {
-    const prog = new TestEdgeArc(makeGLStub());
+    const prog = new TestEdgeArc(makeReglStub());
     prog.reallocate(1);
     prog.processEdge(0, 10, 20, 110, 220, [0.1, 0.2, 0.3], 42, 0.45, 3, 10, 0.8);
 
@@ -358,7 +431,7 @@ describe('EdgeArc processEdge buffer encoding', () => {
   });
 
   it('keeps long high-curvature arc chord error below the visual threshold', () => {
-    const prog = new TestEdgeArc(makeGLStub());
+    const prog = new TestEdgeArc(makeReglStub());
     prog.reallocate(1);
     prog.processEdge(0, 0, 0, 1000, 0, [0.1, 0.2, 0.3], 42, 0.4, 1, 0, 1);
 
@@ -387,7 +460,7 @@ describe('EdgeArc processEdge buffer encoding', () => {
   });
 
   it('keeps degenerate arc vertices finite', () => {
-    const prog = new TestEdgeArc(makeGLStub());
+    const prog = new TestEdgeArc(makeReglStub());
     prog.reallocate(1);
     prog.processEdge(0, 5, 5, 5, 5, [1, 0, 0], 3, 0.5, 2, 0, 0);
 
@@ -399,7 +472,7 @@ describe('EdgeArc processEdge buffer encoding', () => {
 
 describe('EdgeLoop processLoop buffer encoding', () => {
   it('tessellates loops into a finite continuous thick strip', () => {
-    const prog = new TestEdgeLoop(makeGLStub());
+    const prog = new TestEdgeLoop(makeReglStub());
     prog.reallocate(1);
     const color: [number, number, number] = [0.2, 0.4, 0.6];
     const pickingIndex = 17;
@@ -407,7 +480,7 @@ describe('EdgeLoop processLoop buffer encoding', () => {
     const radius = 10;
     prog.processLoop(0, 30, 40, radius, angle, 25, color, pickingIndex, 3, 10, 0.35);
 
-    expect(prog.getDrawMethod()).toBe(makeGLStub().TRIANGLE_STRIP);
+    expect(prog.getDrawMethod()).toBe('triangle strip');
     expect(prog.getVerticesPerItem()).toBe(LOOP_VERTICES_PER_ITEM);
     expect(prog.getFloatsPerVertex()).toBe(STRIDE_LOOP);
     expect(prog.getAttributeLayout()).toEqual([
@@ -450,7 +523,7 @@ describe('EdgeLoop processLoop buffer encoding', () => {
   });
 
   it('keeps degenerate loop geometry finite', () => {
-    const prog = new TestEdgeLoop(makeGLStub());
+    const prog = new TestEdgeLoop(makeReglStub());
     prog.reallocate(1);
     prog.processLoop(0, 5, 5, 0, 0, 0, [1, 0, 0], 3, 2, 0, 0);
 

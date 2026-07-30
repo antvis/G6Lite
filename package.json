@@ -10,6 +10,18 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./layouts/dagre": {
+      "types": "./dist/layout/optional/dagre.d.ts",
+      "import": "./dist/layout/optional/dagre.js"
+    },
+    "./layouts/mds": {
+      "types": "./dist/layout/optional/mds.d.ts",
+      "import": "./dist/layout/optional/mds.js"
+    },
+    "./layouts/radial": {
+      "types": "./dist/layout/optional/radial.d.ts",
+      "import": "./dist/layout/optional/radial.js"
     }
   },
   "files": [
@@ -70,7 +82,8 @@
   },
   "dependencies": {
     "@antv/event-emitter": "^0.1.3",
-    "@antv/layout": "^2.0.0"
+    "@antv/layout": "^2.0.0",
+    "regl": "^2.1.1"
   },
   "engines": {
     "node": ">=20"

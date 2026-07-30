@@ -2,7 +2,10 @@
  * Demo: 组织架构图 — 科技公司 (dagre TB + 大矩形节点 + 多行文字自动换行 + 曲线树边)
  */
 import { Graph } from '../../src/index.ts';
+import { enableDagreLayout } from '../../src/layout/optional/dagre.ts';
 import { attachLabelsCanvas, type GraphInstanceWithTools } from '../tooling.ts';
+
+enableDagreLayout();
 
 const LEVEL_COLORS: Record<string, string> = {
   ceo: '#4A7DC0',

@@ -2,6 +2,9 @@
  * Demo: 布局 — 同一数据切换 circular / force / grid / dagre
  */
 import { Graph } from '../../src/index.ts';
+import { enableDagreLayout } from '../../src/layout/optional/dagre.ts';
+
+enableDagreLayout();
 
 const data = {
   nodes: [

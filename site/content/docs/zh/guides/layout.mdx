@@ -9,6 +9,16 @@ description: 内置布局类型、选型建议、常用参数与 Worker 支持
 layout: { type: 'force', linkDistance: 100 }
 ```
 
+为保持默认包体，`dagre`、`radial` 和 `mds` 使用前需要从独立子入口显式启用：
+
+```ts
+import { enableDagreLayout } from '@antv/g6-gl/layouts/dagre';
+
+enableDagreLayout();
+```
+
+`radial` 和 `mds` 分别使用 `@antv/g6-gl/layouts/radial`、`@antv/g6-gl/layouts/mds`。其他布局不需要额外启用。
+
 ## 布局选型
 
 | 目标               | 推荐布局                                              | 说明                          |
@@ -29,10 +39,10 @@ layout: { type: 'force', linkDistance: 100 }
 | `fruchterman`  | Fruchterman 力导向 | `gravity`, `speed`              |
 | `circular`     | 环形               | `radius`, `center`              |
 | `concentric`   | 同心圆             | `center`, `minNodeSpacing`      |
-| `radial`       | 辐射               | `center`, `unitRadius`          |
+| `radial`       | 辐射（显式启用）   | `center`, `unitRadius`          |
 | `grid`         | 网格               | `rows`, `cols`                  |
-| `dagre`        | 有向无环图 / 层级  | `rankdir`, `nodesep`, `ranksep` |
-| `mds`          | 多维标度           | `linkDistance`                  |
+| `dagre`        | 有向无环图 / 层级（显式启用） | `rankdir`, `nodesep`, `ranksep` |
+| `mds`          | 多维标度（显式启用） | `linkDistance`                  |
 | `random`       | 随机               | `center`                        |
 | `mindmap`      | 脑图               | `direction`, `hGap`, `vGap`     |
 | `indented`     | 缩进树             | `indent`, `rowHeight`           |
@@ -53,6 +63,10 @@ layout: { type: 'circular', radius: 150 }
 ```
 
 ```ts
+import { enableDagreLayout } from '@antv/g6-gl/layouts/dagre';
+
+enableDagreLayout();
+
 layout: { type: 'dagre', rankdir: 'TB', nodesep: 40, ranksep: 60 }
 ```
 

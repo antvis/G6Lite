@@ -5,6 +5,7 @@ export default defineConfig({
   root: 'playground',
   base: './',
   server: { open: true },
+  worker: { format: 'es' },
   resolve: {
     alias: {
       '@antv/g6-gl': new URL('./src/index.ts', import.meta.url).pathname,

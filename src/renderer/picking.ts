@@ -2,79 +2,84 @@
  * Framebuffer picking: O(1) hit detection via color-encoded IDs.
  *
  * Each node/edge is assigned a unique index encoded as RGB (24-bit = 16M items).
- * A downscaled off-screen framebuffer renders items with their encoded color.
+ * A downscaled color-only framebuffer renders items with their encoded color.
  * On query, readPixels decodes the color back to an index.
  */
 
+import type { Regl, ReglFramebuffer, ReglTexture } from './regl';
+import type { GLCapabilities } from './webglContext';
+
 const DOWNSAMPLE = 2; // framebuffer at half resolution
+const PICKING_CLEAR_COLOR: [number, number, number, number] = [0, 0, 0, 0];
 
 export interface PickingResult {
   type: 'node' | 'edge';
   index: number;
 }
 
+type PickingState = 'uninitialized' | 'ready' | 'failed' | 'suspended' | 'destroyed';
+
 export class PickingManager {
-  private gl: WebGLRenderingContext;
-  private framebuffer: WebGLFramebuffer | null = null;
-  private colorTexture: WebGLTexture | null = null;
-  private renderbufferDepth: WebGLRenderbuffer | null = null;
+  private regl: Regl;
+  private capabilities: GLCapabilities;
+  private framebuffer: ReglFramebuffer | null = null;
+  private colorTexture: ReglTexture | null = null;
   private width = 0;
   private height = 0;
   private nodeCount = 0;
   private pixel = new Uint8Array(4);
+  private state: PickingState = 'uninitialized';
 
-  constructor(gl: WebGLRenderingContext) {
-    this.gl = gl;
+  constructor(regl: Regl, capabilities: GLCapabilities) {
+    this.regl = regl;
+    this.capabilities = capabilities;
   }
 
-  /** Ensure framebuffer matches canvas size (downscaled). */
-  resize(canvasWidth: number, canvasHeight: number): void {
-    const w = Math.max(1, (canvasWidth / DOWNSAMPLE) | 0);
-    const h = Math.max(1, (canvasHeight / DOWNSAMPLE) | 0);
-    if (w === this.width && h === this.height) return;
+  get isAvailable(): boolean {
+    return this.state === 'ready';
+  }
 
+  /** Ensure framebuffer matches canvas size (downscaled and device-limited). */
+  resize(canvasWidth: number, canvasHeight: number): boolean {
+    if (this.state === 'destroyed' || this.state === 'suspended') return false;
+    const maxWidth = Math.min(
+      this.capabilities.maxTextureSize,
+      this.capabilities.maxViewportDimensions[0],
+    );
+    const maxHeight = Math.min(
+      this.capabilities.maxTextureSize,
+      this.capabilities.maxViewportDimensions[1],
+    );
+    const w = Math.min(maxWidth, Math.max(1, (canvasWidth / DOWNSAMPLE) | 0));
+    const h = Math.min(maxHeight, Math.max(1, (canvasHeight / DOWNSAMPLE) | 0));
+    if (w === this.width && h === this.height) return this.state === 'ready';
+
+    this.releaseResources(true);
+    this.state = 'uninitialized';
     this.width = w;
     this.height = h;
-    const gl = this.gl;
+    try {
+      this.colorTexture = this.regl.texture({
+        width: w,
+        height: h,
+        format: 'rgba',
+        type: 'uint8',
+        min: 'nearest',
+        mag: 'nearest',
+        wrap: 'clamp',
+      });
+      this.framebuffer = this.regl.framebuffer({
+        color: this.colorTexture,
+        depth: false,
+        stencil: false,
+      });
 
-    // Cleanup previous
-    if (this.framebuffer) gl.deleteFramebuffer(this.framebuffer);
-    if (this.colorTexture) gl.deleteTexture(this.colorTexture);
-    if (this.renderbufferDepth) gl.deleteRenderbuffer(this.renderbufferDepth);
-
-    this.framebuffer = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-
-    // Color attachment: texture with RGBA/UNSIGNED_BYTE for full 8-bit precision per channel
-    this.colorTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, this.colorTexture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      this.colorTexture,
-      0,
-    );
-
-    // Depth renderbuffer (needed for correct z-order)
-    this.renderbufferDepth = gl.createRenderbuffer();
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbufferDepth);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, w, h);
-    gl.framebufferRenderbuffer(
-      gl.FRAMEBUFFER,
-      gl.DEPTH_ATTACHMENT,
-      gl.RENDERBUFFER,
-      this.renderbufferDepth,
-    );
-
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+      this.state = 'ready';
+      return true;
+    } catch (error) {
+      this.fail('Color picking framebuffer creation failed', error);
+      return false;
+    }
   }
 
   /** Set the node count so we know the boundary between node and edge IDs. */
@@ -82,25 +87,16 @@ export class PickingManager {
     this.nodeCount = count;
   }
 
-  /** Bind the picking framebuffer for rendering. */
-  bind(): void {
-    const gl = this.gl;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-    gl.viewport(0, 0, this.width, this.height);
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  }
-
-  /** Unbind back to the default framebuffer. */
-  unbind(canvasWidth: number, canvasHeight: number): void {
-    const gl = this.gl;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.viewport(0, 0, canvasWidth, canvasHeight);
+  /** Clear and return the picking target for Program commands. */
+  begin(): ReglFramebuffer | null {
+    if (!this.isAvailable || !this.framebuffer) return null;
+    this.regl.clear({ framebuffer: this.framebuffer, color: PICKING_CLEAR_COLOR });
+    return this.framebuffer;
   }
 
   /**
    * Read the picking framebuffer at the given screen coordinates.
-   * Returns the identified item or null if nothing is there.
+   * Returns the identified item or null if nothing is there or GPU picking failed.
    */
   pickAt(
     screenX: number,
@@ -108,17 +104,31 @@ export class PickingManager {
     canvasWidth: number,
     canvasHeight: number,
   ): PickingResult | null {
-    const gl = this.gl;
-    // Convert screen coords to picking framebuffer coords
-    const x = ((screenX / canvasWidth) * this.width) | 0;
-    const y = ((1 - screenY / canvasHeight) * this.height) | 0; // flip Y
+    if (!this.isAvailable || !this.framebuffer || canvasWidth <= 0 || canvasHeight <= 0) {
+      return null;
+    }
+    const x = Math.max(0, Math.min(this.width - 1, ((screenX / canvasWidth) * this.width) | 0));
+    const y = Math.max(
+      0,
+      Math.min(this.height - 1, ((1 - screenY / canvasHeight) * this.height) | 0),
+    );
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-    gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, this.pixel);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    try {
+      this.regl.read({
+        framebuffer: this.framebuffer,
+        x,
+        y,
+        width: 1,
+        height: 1,
+        data: this.pixel,
+      });
+    } catch (error) {
+      this.fail('Color picking readPixels failed', error);
+      return null;
+    }
 
     const [r, g, b, a] = this.pixel;
-    if (a === 0) return null; // background (cleared to alpha=0)
+    if (a === 0) return null;
 
     const id = decodeId(r, g, b);
     if (id < 0) return null;
@@ -129,11 +139,50 @@ export class PickingManager {
     return { type: 'edge', index: id - this.nodeCount };
   }
 
+  /** Stop WebGL access until the browser restores the owning context. */
+  suspend(): void {
+    if (this.state !== 'destroyed') this.state = 'suspended';
+  }
+
+  /** Resume after regl has restored the framebuffer and texture resources. */
+  restore(capabilities: GLCapabilities): void {
+    this.capabilities = capabilities;
+    this.state = this.framebuffer && this.colorTexture ? 'ready' : 'uninitialized';
+  }
+
+  markFailed(message: string, error?: unknown): void {
+    this.fail(message, error);
+  }
+
+  private fail(message: string, error?: unknown): void {
+    if (this.state === 'failed' || this.state === 'destroyed') return;
+    this.releaseResources(true);
+    this.state = 'failed';
+    if (error === undefined) console.warn(`[G6-GL] ${message}; falling back to CPU picking`);
+    else console.warn(`[G6-GL] ${message}; falling back to CPU picking`, error);
+  }
+
+  private releaseResources(deleteResources: boolean): void {
+    if (deleteResources) {
+      this.framebuffer?.destroy();
+      this.colorTexture?.destroy();
+    }
+    this.framebuffer = null;
+    this.colorTexture = null;
+  }
+
   destroy(): void {
-    const gl = this.gl;
-    if (this.framebuffer) gl.deleteFramebuffer(this.framebuffer);
-    if (this.colorTexture) gl.deleteTexture(this.colorTexture);
-    if (this.renderbufferDepth) gl.deleteRenderbuffer(this.renderbufferDepth);
+    if (this.state === 'destroyed') return;
+    this.releaseResources(true);
+    this.state = 'destroyed';
+  }
+
+  get viewportWidth(): number {
+    return this.width;
+  }
+
+  get viewportHeight(): number {
+    return this.height;
   }
 }
 

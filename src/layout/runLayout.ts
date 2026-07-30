@@ -3,24 +3,12 @@
  * OpenSpec: layout spec — thin wrapper over @antv/layout.
  */
 
-import {
-  CircularLayout,
-  ConcentricLayout,
-  D3ForceLayout,
-  DagreLayout,
-  ForceAtlas2Layout,
-  ForceLayout,
-  FruchtermanLayout,
-  GridLayout,
-  MDSLayout,
-  RadialLayout,
-  RandomLayout,
-} from '@antv/layout';
 import type { ExtensionContext, LayoutExtension } from '../extensions/contracts';
 import { createExtension, destroyExtension, initializeExtension } from '../extensions/registry';
 import type { GraphData, GraphNode, LayoutConfig } from '../types';
 import { executeFishboneLayout, type FishboneLayoutOptions } from './fishboneLayout';
 import { executeIndentedLayout, type IndentedLayoutOptions } from './indentedLayout';
+import { assertLayoutAvailable, loadLayout, type LayoutInstance } from './layoutLoader';
 import { normalizeLibraryLayoutOptions } from './layoutOptions';
 import { executeMindmapLayout, type MindmapLayoutOptions } from './mindmapLayout';
 import { runLayoutInWorker } from './workerLayout';
@@ -32,11 +20,6 @@ interface LayoutRuntime {
   extensionContext?: ExtensionContext;
 }
 
-type LayoutInstance = {
-  execute: (data: GraphData) => Promise<void>;
-  forEachNode: (fn: (node: { id: string; x: number; y: number }) => void) => void;
-};
-
 type D3LayoutInstance = LayoutInstance & {
   tick: (iterations?: number) => void;
   stop: () => void;
@@ -44,20 +27,6 @@ type D3LayoutInstance = LayoutInstance & {
 };
 
 type BuiltInLayoutExecutor = (data: GraphData, config: LayoutConfig) => LayoutResult;
-
-const LAYOUT_MAP = {
-  circular: CircularLayout,
-  concentric: ConcentricLayout,
-  dagre: DagreLayout,
-  'd3-force': D3ForceLayout,
-  force: ForceLayout,
-  'force-atlas2': ForceAtlas2Layout,
-  fruchterman: FruchtermanLayout,
-  grid: GridLayout,
-  mds: MDSLayout,
-  random: RandomLayout,
-  radial: RadialLayout,
-} as Record<string, new (options?: Record<string, unknown>) => LayoutInstance>;
 
 const BUILTIN_EXECUTOR_MAP: Record<string, BuiltInLayoutExecutor> = {
   indented: (data, config) => executeIndentedLayout(data, config as IndentedLayoutOptions),
@@ -230,7 +199,8 @@ async function runLibraryLayout(
   config: LayoutConfig,
   runtime: LayoutRuntime,
 ): Promise<LayoutResult> {
-  const LayoutClass = LAYOUT_MAP[config.type] ?? RandomLayout;
+  const LayoutClass = await loadLayout(config.type);
+  if (runtime.signal?.aborted) return createFallbackResult(data);
   const options = normalizeLibraryLayoutOptions(
     config.type,
     config as Record<string, unknown>,
@@ -262,6 +232,8 @@ export async function runLayout(
 
   const builtInResult = runBuiltInLayout(data, resolvedConfig, runtime);
   if (builtInResult) return builtInResult;
+
+  assertLayoutAvailable(resolvedConfig.type);
 
   if (resolvedConfig.worker) {
     const workerResult = await runWorkerLayout(data, resolvedConfig, runtime);

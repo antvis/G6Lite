@@ -4,6 +4,9 @@
  */
 
 import { Graph, register, type NodeExtension } from '../../src/index.ts';
+import { enableDagreLayout } from '../../src/layout/optional/dagre.ts';
+
+enableDagreLayout();
 
 const statusBadgeNode: NodeExtension = {
   base: 'rect',

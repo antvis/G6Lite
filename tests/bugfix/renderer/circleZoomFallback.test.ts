@@ -37,6 +37,7 @@ function makeGLStub(maxPointSize: number): WebGLRenderingContext {
     createFramebuffer: () => ({}),
     createTexture: () => ({}),
     createRenderbuffer: () => ({}),
+    checkFramebufferStatus: () => 1,
     readPixels: (
       _x: number,
       _y: number,

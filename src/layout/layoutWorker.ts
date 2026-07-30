@@ -3,40 +3,9 @@
  * Receives graph data + layout config, executes layout, posts back positions.
  */
 
-import {
-  CircularLayout,
-  ConcentricLayout,
-  DagreLayout,
-  D3ForceLayout,
-  ForceLayout,
-  ForceAtlas2Layout,
-  FruchtermanLayout,
-  GridLayout,
-  MDSLayout,
-  RandomLayout,
-  RadialLayout,
-} from '@antv/layout';
 import type { GraphData, GraphEdge, GraphNode } from '../types';
+import { loadLayout, type LayoutConstructor } from './layoutLoader';
 import { normalizeLibraryLayoutOptions } from './layoutOptions';
-
-type LayoutInstance = {
-  execute: (data: GraphData) => Promise<void>;
-  forEachNode: (fn: (node: GraphNode & { x: number; y: number }) => void) => void;
-};
-
-const LAYOUT_MAP = {
-  circular: CircularLayout,
-  concentric: ConcentricLayout,
-  dagre: DagreLayout,
-  'd3-force': D3ForceLayout,
-  force: ForceLayout,
-  'force-atlas2': ForceAtlas2Layout,
-  fruchterman: FruchtermanLayout,
-  grid: GridLayout,
-  mds: MDSLayout,
-  random: RandomLayout,
-  radial: RadialLayout,
-} as Record<string, new (opts?: Record<string, unknown>) => LayoutInstance>;
 
 interface WorkerMessage {
   id: number;
@@ -54,7 +23,20 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
   const { id, nodes, edges, config } = e.data;
   const { type } = config;
 
-  const LayoutClass = LAYOUT_MAP[type] ?? RandomLayout;
+  const LayoutClass: LayoutConstructor =
+    type === 'dagre'
+      ? await import('@antv/layout/lib/algorithm/dagre/index.js').then(
+          ({ DagreLayout }) => DagreLayout as unknown as LayoutConstructor,
+        )
+      : type === 'mds'
+        ? await import('@antv/layout/lib/algorithm/mds/index.js').then(
+            ({ MDSLayout }) => MDSLayout as unknown as LayoutConstructor,
+          )
+        : type === 'radial'
+          ? await import('@antv/layout/lib/algorithm/radial/index.js').then(
+              ({ RadialLayout }) => RadialLayout as unknown as LayoutConstructor,
+            )
+          : await loadLayout(type);
   const nodeCount = nodes.length;
   const opts = normalizeLibraryLayoutOptions(type, config, nodeCount);
 

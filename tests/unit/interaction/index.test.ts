@@ -43,6 +43,7 @@ function setup(initialPick: Pick = null) {
         ]),
     ),
     getCamera: vi.fn(() => ({ zoom: 1, x: 0, y: 0 })),
+    screenToGraph: vi.fn((x: number, y: number) => [x, y] as [number, number]),
     setPickingSuspended: vi.fn(),
   };
   const graph = {

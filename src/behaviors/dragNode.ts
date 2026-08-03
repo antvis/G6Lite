@@ -11,6 +11,7 @@
 import type { Graph } from '../graph';
 import { GESTURE_CONSUME_EVENT } from '../interaction/gesture';
 import type { Renderer } from '../renderer/renderer';
+import { getGraphDragDelta } from './dragCoordinates';
 
 export function dragNode(renderer: Renderer, graph: Graph): () => void {
   let draggingIds: string[] = [];
@@ -65,9 +66,10 @@ export function dragNode(renderer: Renderer, graph: Graph): () => void {
 
   const onMove = (e: MouseEvent) => {
     if (!draggingIds.length && !draggingComboId) return;
-    const camera = renderer.getCamera();
-    const dx = (e.clientX - startMouse.x) / camera.zoom;
-    const dy = (e.clientY - startMouse.y) / camera.zoom;
+    const { dx, dy } = getGraphDragDelta(renderer, startMouse, {
+      x: e.clientX,
+      y: e.clientY,
+    });
     if (!dragStarted) {
       if (Math.hypot(e.clientX - startMouse.x, e.clientY - startMouse.y) <= dragThreshold) return;
       dragStarted = true;

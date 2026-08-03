@@ -1,5 +1,5 @@
 // Local presentation helpers in this repository are used only for the example controls.
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: string | HTMLElement) {

@@ -254,7 +254,7 @@ export class Renderer {
 
   private handleContextRestoreFailed(error: unknown): void {
     console.error(
-      `[G6-GL] WebGL context restoration failed (WebGL ${this.contextManager.version})`,
+      `[G6Lite] WebGL context restoration failed (WebGL ${this.contextManager.version})`,
       error,
     );
   }

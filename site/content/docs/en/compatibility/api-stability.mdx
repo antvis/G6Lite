@@ -3,13 +3,13 @@ title: API stability and release boundary
 description: Public package entry points, deprecated compatibility APIs, and experimental capabilities
 ---
 
-G6-GL remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
+G6Lite remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
 
 Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
 
 ## ESM and CommonJS
 
-The package root is ESM-only and does not provide a `require('@antv/g6-gl')` condition. A CommonJS feasibility test confirmed that a synchronous entry and declarations can be emitted, but a dual package must also preserve two runtime contracts:
+The package root is ESM-only and does not provide a `require('@antv/g6-lite')` condition. A CommonJS feasibility test confirmed that a synchronous entry and declarations can be emitted, but a dual package must also preserve two runtime contracts:
 
 - ESM and CommonJS consumers must share one extension registry when both formats are loaded by the same application.
 - After application bundling, `layout.worker: true` must still resolve and load the package's module Worker instead of silently falling back to the main thread.
@@ -19,7 +19,7 @@ The current CommonJS consumer build cannot reliably preserve that Worker asset r
 Applications that still use a CommonJS toolchain can cross the client boundary with dynamic import:
 
 ```js
-const { Graph } = await import('@antv/g6-gl');
+const { Graph } = await import('@antv/g6-lite');
 ```
 
 This does not change the requirement for a real DOM, Canvas, and WebGL environment.

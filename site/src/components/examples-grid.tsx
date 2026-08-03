@@ -36,7 +36,7 @@ const groupLabels = {
     extension: ['Extensions', 'Customize capabilities through the public extension API.'],
     'scenario-and-dataset': [
       'Scenarios and datasets',
-      'Validate G6-GL with realistic data and combined workflows.',
+      'Validate G6Lite with realistic data and combined workflows.',
     ],
   },
 } as const;

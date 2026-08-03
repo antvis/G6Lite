@@ -406,7 +406,7 @@ export class LabelLayerRenderer {
         renderer,
         { ctx, node, data, dpr, zoom, nodeWidth, nodeHeight },
         `decoration:${rendererName}:measure`,
-        `[G6-GL] Decoration renderer "${rendererName}" threw during measure; skipping it.`,
+        `[G6Lite] Decoration renderer "${rendererName}" threw during measure; skipping it.`,
       );
       if (layout) measuredItems.push({ data, layout, index });
     }
@@ -464,7 +464,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `decoration:${rendererName}:draw`,
-        `[G6-GL] Decoration renderer "${rendererName}" threw during draw; skipping it.`,
+        `[G6Lite] Decoration renderer "${rendererName}" threw during draw; skipping it.`,
         error,
       );
       return false;
@@ -619,7 +619,7 @@ export class LabelLayerRenderer {
       if (!renderer) {
         this.warnOnce(
           `decoration:${decoration.renderer}:missing`,
-          `[G6-GL] Decoration renderer "${decoration.renderer}" is not registered; skipping it.`,
+          `[G6Lite] Decoration renderer "${decoration.renderer}" is not registered; skipping it.`,
         );
         continue;
       }
@@ -661,7 +661,7 @@ export class LabelLayerRenderer {
             renderer,
             { ctx, node, data: overflowData, dpr, zoom, nodeWidth, nodeHeight },
             `decoration:${decoration.renderer}:overflow-measure`,
-            `[G6-GL] Decoration renderer "${decoration.renderer}" threw while measuring overflow; clipping it.`,
+            `[G6Lite] Decoration renderer "${decoration.renderer}" threw while measuring overflow; clipping it.`,
           );
           if (overflowLayout) {
             visibleItems.push({
@@ -741,7 +741,7 @@ export class LabelLayerRenderer {
     if (!renderer) {
       this.warnOnce(
         `${type}:${name}:missing`,
-        `[G6-GL] Label renderer "${name}" is not registered for ${type} labels; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${name}" is not registered for ${type} labels; falling back to the default renderer.`,
       );
     }
     return renderer;
@@ -787,7 +787,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `node:${rendererName}:measure`,
-        `[G6-GL] Label renderer "${rendererName}" threw during node label measure; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" threw during node label measure; falling back to the default renderer.`,
         error,
       );
       return false;
@@ -798,7 +798,7 @@ export class LabelLayerRenderer {
     if (!isValidLabelLayout(layout)) {
       this.warnOnce(
         `node:${rendererName}:layout`,
-        `[G6-GL] Label renderer "${rendererName}" returned an invalid node label layout; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" returned an invalid node label layout; falling back to the default renderer.`,
       );
       return false;
     }
@@ -833,7 +833,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `node:${rendererName}:draw`,
-        `[G6-GL] Label renderer "${rendererName}" threw during node label draw; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" threw during node label draw; falling back to the default renderer.`,
         error,
       );
     } finally {
@@ -1151,7 +1151,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `edge:${rendererName}:measure`,
-        `[G6-GL] Label renderer "${rendererName}" threw during edge label measure; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" threw during edge label measure; falling back to the default renderer.`,
         error,
       );
       return false;
@@ -1162,7 +1162,7 @@ export class LabelLayerRenderer {
     if (!isValidLabelLayout(layout)) {
       this.warnOnce(
         `edge:${rendererName}:layout`,
-        `[G6-GL] Label renderer "${rendererName}" returned an invalid edge label layout; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" returned an invalid edge label layout; falling back to the default renderer.`,
       );
       return false;
     }
@@ -1186,7 +1186,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `edge:${rendererName}:draw`,
-        `[G6-GL] Label renderer "${rendererName}" threw during edge label draw; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" threw during edge label draw; falling back to the default renderer.`,
         error,
       );
     } finally {

@@ -99,7 +99,7 @@ await assertModuleSpecifierStyle(
 );
 
 // Resolve through package.json#exports so this exercises the published root entry.
-const publicApi = await import('@antv/g6-gl');
+const publicApi = await import('@antv/g6-lite');
 const expectedRuntimeExports = [
   'BaseNode',
   'BreathingNode',

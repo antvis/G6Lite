@@ -1,5 +1,5 @@
 {
-  "name": "@antv/g6-gl",
+  "name": "@antv/g6-lite",
   "version": "0.1.0-beta.22",
   "description": "A lightweight, high-performance WebGL graph visualization engine.",
   "type": "module",

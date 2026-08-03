@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: `${siteConfig.name} 是${siteConfig.description.zh}，提供数据、布局、交互、状态与扩展的一体化 API。`,
-  keywords: ['G6-GL', 'graph', 'visualization', 'webgl', 'antv', 'g6', '图可视化', '图分析'],
+  keywords: ['G6Lite', 'graph', 'visualization', 'webgl', 'antv', 'g6', '图可视化', '图分析'],
   authors: [{ name: 'AntV' }],
   applicationName: siteConfig.name,
   manifest: '/manifest.webmanifest',

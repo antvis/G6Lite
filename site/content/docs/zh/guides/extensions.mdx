@@ -3,7 +3,7 @@ title: 扩展体系
 description: 通过配置、函数式映射和公开扩展 API 完成受控业务定制
 ---
 
-G6-GL 的定制能力分为三层：配置优先，函数式映射解决差异化需求，只有配置无法表达时才注册扩展。
+G6Lite 的定制能力分为三层：配置优先，函数式映射解决差异化需求，只有配置无法表达时才注册扩展。
 
 ## 先使用配置
 
@@ -28,7 +28,7 @@ const graph = new Graph({
 配置无法表达时，从包主入口使用统一的 `register()`：
 
 ```ts
-import { extensionFactory, Graph, register } from '@antv/g6-gl';
+import { extensionFactory, Graph, register } from '@antv/g6-lite';
 
 register('edge', 'business-relation', {
   base: 'arc',
@@ -52,7 +52,7 @@ register('edge', 'business-relation', {
 有内部状态的 Layout、Behavior、Transform 和 Plugin 应使用工厂注册，确保每个 Graph 获得独立实例：
 
 ```ts
-import { extensionFactory, register, type ExtensionContext } from '@antv/g6-gl';
+import { extensionFactory, register, type ExtensionContext } from '@antv/g6-lite';
 
 register(
   'behavior',
@@ -112,7 +112,7 @@ import {
   type ExtensionContext,
   type GraphData,
   type LayoutExtension,
-} from '@antv/g6-gl';
+} from '@antv/g6-lite';
 
 interface ColumnLayoutOptions extends Record<string, unknown> {
   type: string;
@@ -186,7 +186,7 @@ Transform 同样必须以 `beforeRender(data)` 的参数作为本次转换输入
 
 ## Decoration Renderer
 
-Decoration 只负责内容测量和绘制，G6-GL 负责定位、碰撞、裁剪和调度：
+Decoration 只负责内容测量和绘制，G6Lite 负责定位、碰撞、裁剪和调度：
 
 ```ts
 register('decoration', 'score-badge', {
@@ -215,7 +215,7 @@ const graph = new Graph({
 
 `attachment` 控制 Decoration 如何挂载到节点：`boundary`（默认）把装饰中心贴在节点边界，适合 badge；`outside` 将装饰完整放在节点外，适合外部名称；`inside` 将装饰完整收进节点内部。
 
-多个 badge 可交给 G6-GL 统一排列、排序和折叠：
+多个 badge 可交给 G6Lite 统一排列、排序和折叠：
 
 ```ts
 {
@@ -256,6 +256,6 @@ type NodeBadgeItem =
 - 扩展不直接访问 Renderer、DataModel、WebGL context 或 GPU buffer。
 - Behavior、Transform 和 Plugin 只能通过 `ExtensionContext` 的公开能力修改引擎状态。
 - Edge Extension 复用内置 WebGL 边基型，保留批处理、拾取和箭头能力。
-- Label 与 Decoration 只负责内容，定位、旋转、碰撞和刷新由 G6-GL 管理。
+- Label 与 Decoration 只负责内容，定位、旋转、碰撞和刷新由 G6Lite 管理。
 
 完整可运行代码见 `playground/demos/extension-system.ts`。

@@ -591,7 +591,7 @@ describe('runtime extension registry', () => {
 
     expect(healthyHandler).toHaveBeenCalledTimes(1);
     expect(consoleError).toHaveBeenCalledWith(
-      '[G6-GL] behavior extension "failing-event-behavior" failed during event:node:click',
+      '[G6Lite] behavior extension "failing-event-behavior" failed during event:node:click',
       failure,
     );
 

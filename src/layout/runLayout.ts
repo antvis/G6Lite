@@ -81,7 +81,7 @@ async function runExtensionLayout(
     return runtime.signal?.aborted ? createFallbackResult(data) : result;
   } catch (error) {
     if (!runtime.signal?.aborted) {
-      console.error(`[G6-GL] layout extension "${config.type}" failed during execute`, error);
+      console.error(`[G6Lite] layout extension "${config.type}" failed during execute`, error);
     }
     return createFallbackResult(data);
   } finally {
@@ -102,7 +102,7 @@ function runBuiltInLayout(
     return runtime.signal?.aborted ? createFallbackResult(data) : result;
   } catch (error) {
     if (!runtime.signal?.aborted) {
-      console.error(`[G6-GL] built-in layout "${config.type}" failed during execute`, error);
+      console.error(`[G6Lite] built-in layout "${config.type}" failed during execute`, error);
     }
     return createFallbackResult(data);
   }

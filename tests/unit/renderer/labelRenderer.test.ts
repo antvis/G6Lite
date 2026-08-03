@@ -626,7 +626,7 @@ describe('LabelLayerRenderer custom lifecycle', () => {
       expect.any(Number),
     );
     expect(report).toHaveBeenCalledWith(
-      '[G6-GL] node extension "throwing-label-node-style" failed during getStyle',
+      '[G6Lite] node extension "throwing-label-node-style" failed during getStyle',
       error,
     );
     layer.destroy();
@@ -659,7 +659,7 @@ describe('LabelLayerRenderer custom lifecycle', () => {
       expect.any(Number),
     );
     expect(report).toHaveBeenCalledWith(
-      '[G6-GL] node extension "throwing-overlay-node" failed during drawOverlay',
+      '[G6Lite] node extension "throwing-overlay-node" failed during drawOverlay',
       error,
     );
     layer.destroy();
@@ -706,7 +706,7 @@ describe('LabelLayerRenderer custom lifecycle', () => {
     expect(translateY).toBeCloseTo(100);
     expect(draw).toHaveBeenCalledOnce();
     expect(report).toHaveBeenCalledWith(
-      '[G6-GL] node extension "throwing-boundary-node" failed during getBoundaryAnchor',
+      '[G6Lite] node extension "throwing-boundary-node" failed during getBoundaryAnchor',
       error,
     );
     layer.destroy();

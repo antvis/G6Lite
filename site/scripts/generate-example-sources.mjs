@@ -19,11 +19,11 @@ for (const example of examples) {
   const publicSource = source
     .replace(
       /from\s+(['"])\.\.\/\.\.\/src\/index\.ts\1/g,
-      "from '@antv/g6-gl'",
+      "from '@antv/g6-lite'",
     )
     .replace(
       /from\s+(['"])\.\.\/\.\.\/src\/layout\/optional\/([a-z0-9-]+)\.ts\1/g,
-      (_match, _quote, layout) => `from '@antv/g6-gl/layouts/${layout}'`,
+      (_match, _quote, layout) => `from '@antv/g6-lite/layouts/${layout}'`,
     )
     .replace(/\r\n/g, '\n')
     .trim();

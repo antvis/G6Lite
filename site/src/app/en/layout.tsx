@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: `${siteConfig.name} is ${siteConfig.description.en.toLowerCase()}, with one API for data, layouts, interactions, states, and extensions.`,
-  keywords: ['G6-GL', 'graph visualization', 'WebGL', 'AntV', 'graph rendering', 'TypeScript'],
+  keywords: ['G6Lite', 'graph visualization', 'WebGL', 'AntV', 'graph rendering', 'TypeScript'],
   authors: [{ name: 'AntV' }],
   applicationName: siteConfig.name,
   manifest: '/manifest.webmanifest',

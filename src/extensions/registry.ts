@@ -252,7 +252,7 @@ export function safeExtensionCall<T>(
   try {
     return fn();
   } catch (error) {
-    console.error(`[G6-GL] ${category} extension "${name}" failed during ${phase}`, error);
+    console.error(`[G6Lite] ${category} extension "${name}" failed during ${phase}`, error);
     return fallback;
   }
 }

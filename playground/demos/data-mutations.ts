@@ -118,5 +118,11 @@ export async function run(container: string | HTMLElement) {
   });
 
   renderStatus();
-  return { destroy: () => { graph.destroy(); ui.panel.remove(); } };
+  return {
+    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
+    destroy: () => {
+      graph.destroy();
+      ui.panel.remove();
+    },
+  };
 }

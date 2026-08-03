@@ -43,7 +43,7 @@ export async function DocsPageContent({ slug, locale }: { slug?: string[]; local
             image,
           })}
         />
-        <DocsPage toc={[]} full>
+        <DocsPage toc={[]} full footer={{ enabled: false }}>
           <DocsBody className="examples-docs-body">
             <MDX components={getMDXComponents({ a: createRelativeLink(source, page) })} />
           </DocsBody>

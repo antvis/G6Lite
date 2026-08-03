@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { codeToHtml } from 'shiki';
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repositoryRoot = path.resolve(siteRoot, '..');
@@ -31,7 +32,15 @@ for (const example of examples) {
     ? '// Local presentation helpers in this repository are used only for the example controls.\n'
     : '';
   const generated = `${helperNote}${publicSource}\n`;
+  const highlightedSource = generated.endsWith('\n') ? generated.slice(0, -1) : generated;
+  const highlighted = await codeToHtml(highlightedSource, {
+    lang: 'ts',
+    themes: { light: 'github-light', dark: 'github-dark' },
+    defaultColor: false,
+  });
+
   await writeFile(path.join(outputDirectory, `${example.id}.txt`), generated, 'utf8');
+  await writeFile(path.join(outputDirectory, `${example.id}.highlighted.txt`), highlighted, 'utf8');
 }
 
-console.log(`Generated ${examples.length} website example source files.`);
+console.log(`Generated ${examples.length} website example source and highlighted text files.`);

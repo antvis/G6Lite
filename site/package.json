@@ -36,6 +36,7 @@
     "playwright": "^1.60.0",
     "postcss": "^8.5.15",
     "serve": "^14.2.6",
+    "shiki": "^4.2.0",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3"
   }

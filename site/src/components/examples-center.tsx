@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import { useMemo, useState } from 'react';
 
 import { localizedPath, type Locale } from '@/lib/i18n';
 import {
@@ -11,130 +14,161 @@ import {
 import { withBasePath } from '@/lib/shared';
 
 export function ExamplesCenter({ locale }: { locale: Locale }) {
+  const [query, setQuery] = useState('');
   const copy =
     locale === 'zh'
       ? {
+          back: '返回文档',
+          directory: '图表示例',
+          search: '搜索示例、能力或 API',
           eyebrow: 'G6-GL 图表示例',
-          title: '从真实运行效果理解图可视化 API',
+          title: '图表示例',
           description:
-            '按能力分类浏览示例，进入详情页直接体验图形交互、查看源码与数据，不需要跳转到研发 Playground。',
-          examples: '个官网示例',
-          categories: '个能力分类',
-          detail: '查看示例详情',
-          docs: '阅读快速开始',
+            '按能力浏览可直接运行的图可视化示例。查看真实效果、源码与数据，快速理解每个公开 API 的使用方式。',
+          examples: '官网示例',
+          categories: '能力分类',
+          empty: '没有找到匹配的示例，请尝试其他关键词。',
         }
       : {
+          back: 'Back to docs',
+          directory: 'Graph examples',
+          search: 'Search examples, capabilities, or APIs',
           eyebrow: 'G6-GL graph examples',
-          title: 'Learn graph visualization APIs through live examples',
+          title: 'Graph examples',
           description:
-            'Browse examples by capability, then run the graph, inspect source and data, and interact without leaving the website.',
+            'Browse live graph visualization examples by capability. Inspect real output, source, and data to understand each public API.',
           examples: 'website examples',
           categories: 'capability groups',
-          detail: 'Open example',
-          docs: 'Read quick start',
+          empty: 'No examples match this search. Try another keyword.',
         };
+
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const matchedExamples = useMemo(() => {
+    if (!normalizedQuery) return siteExamples;
+
+    return siteExamples.filter((example) => {
+      const category = siteExampleCategories.find((item) => item.id === example.category);
+      const haystack = [
+        localizedText(example.title, locale),
+        localizedText(example.description, locale),
+        localizedText(example.group, locale),
+        category ? localizedText(category.title, locale) : '',
+        ...example.tags,
+      ]
+        .join(' ')
+        .toLocaleLowerCase();
+      return haystack.includes(normalizedQuery);
+    });
+  }, [locale, normalizedQuery]);
 
   return (
     <main className="examples-center">
-      <section className="examples-center-hero">
-        <div>
-          <span className="examples-center-eyebrow">{copy.eyebrow}</span>
-          <h1>{copy.title}</h1>
-          <p>{copy.description}</p>
-          <div className="examples-center-actions">
-            <a href="#example-categories">{copy.detail}</a>
-            <a href={withBasePath(localizedPath('/docs/getting-started/quick-start', locale))}>
-              {copy.docs}
+      <div className="examples-center-layout">
+        <aside className="examples-center-directory">
+          <div className="examples-center-directory-sticky">
+            <a className="examples-center-back" href={withBasePath(localizedPath('/docs', locale))}>
+              <span aria-hidden="true">←</span>
+              {copy.back}
             </a>
+            <h2>{copy.directory}</h2>
+            <label className="examples-center-search">
+              <span aria-hidden="true">⌕</span>
+              <input
+                aria-label={copy.search}
+                placeholder={copy.search}
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+            </label>
+            <nav aria-label={copy.directory}>
+              {siteExampleCategories.map((category) => (
+                <a href={`#${category.id}`} key={category.id}>
+                  <span>{localizedText(category.title, locale)}</span>
+                  <small>{getExamplesByCategory(category.id).length}</small>
+                </a>
+              ))}
+            </nav>
           </div>
-        </div>
-        <div className="examples-center-summary" aria-label={copy.eyebrow}>
-          <div>
-            <strong>{siteExamples.length}</strong>
-            <span>{copy.examples}</span>
-          </div>
-          <div>
-            <strong>{siteExampleCategories.length}</strong>
-            <span>{copy.categories}</span>
-          </div>
-        </div>
-      </section>
+        </aside>
 
-      <nav className="examples-category-nav" aria-label={copy.eyebrow}>
-        {siteExampleCategories.map((category) => (
-          <a href={`#${category.id}`} key={category.id}>
-            {localizedText(category.title, locale)}
-          </a>
-        ))}
-      </nav>
+        <div className="examples-center-content">
+          <header className="examples-center-header">
+            <div>
+              <span className="examples-center-eyebrow">{copy.eyebrow}</span>
+              <h1>{copy.title}</h1>
+              <p>{copy.description}</p>
+            </div>
+            <div className="examples-center-summary" aria-label={copy.eyebrow}>
+              <div>
+                <strong>{siteExamples.length}</strong>
+                <span>{copy.examples}</span>
+              </div>
+              <div>
+                <strong>{siteExampleCategories.length}</strong>
+                <span>{copy.categories}</span>
+              </div>
+            </div>
+          </header>
 
-      <div id="example-categories" className="examples-category-sections">
-        {siteExampleCategories.map((category) => {
-          const examples = getExamplesByCategory(category.id);
-          if (examples.length === 0) return null;
+          <div id="example-categories" className="examples-category-sections">
+            {siteExampleCategories.map((category, categoryIndex) => {
+              const examples = getExamplesByCategory(category.id).filter((example) =>
+                matchedExamples.includes(example),
+              );
+              if (examples.length === 0) return null;
 
-          const groups = Array.from(
-            new Map(examples.map((example) => [localizedText(example.group, locale), example.group])).values(),
-          );
-
-          return (
-            <section className="examples-category-section" id={category.id} key={category.id}>
-              <header className="examples-category-heading">
-                <span>{String(siteExampleCategories.indexOf(category) + 1).padStart(2, '0')}</span>
-                <div>
-                  <h2>{localizedText(category.title, locale)}</h2>
-                  <p>{localizedText(category.description, locale)}</p>
-                </div>
-              </header>
-
-              {groups.map((group) => {
-                const groupName = localizedText(group, locale);
-                const groupExamples = examples.filter(
-                  (example) => localizedText(example.group, locale) === groupName,
-                );
-
-                return (
-                  <div className="examples-topic" key={groupName}>
-                    <h3>{groupName}</h3>
-                    <div className="examples-card-grid">
-                      {groupExamples.map((example) => (
-                        <a
-                          className="examples-center-card"
-                          href={withBasePath(localizedExamplePath(example.id, locale))}
-                          key={example.id}
-                        >
-                          <span className="examples-center-card-image">
-                            <Image
-                              src={withBasePath(`/examples/${example.id}.png`)}
-                              alt={localizedText(example.title, locale)}
-                              width={960}
-                              height={600}
-                              loading={example.id === siteExamples[0]?.id ? 'eager' : 'lazy'}
-                              unoptimized
-                            />
-                          </span>
-                          <span className="examples-center-card-body">
-                            <span className="examples-center-card-title">
-                              {localizedText(example.title, locale)}
-                            </span>
-                            <span className="examples-center-card-description">
-                              {localizedText(example.description, locale)}
-                            </span>
-                            <span className="examples-center-card-tags">
-                              {example.tags.slice(0, 3).map((tag) => (
-                                <span key={tag}>{tag}</span>
-                              ))}
-                            </span>
-                          </span>
-                        </a>
-                      ))}
+              return (
+                <section className="examples-category-section" id={category.id} key={category.id}>
+                  <header className="examples-category-heading">
+                    <div className="examples-category-title">
+                      <span>{String(categoryIndex + 1).padStart(2, '0')}</span>
+                      <h2>{localizedText(category.title, locale)}</h2>
                     </div>
+                    <p>{localizedText(category.description, locale)}</p>
+                    <small>{examples.length}</small>
+                  </header>
+
+                  <div className="examples-card-grid">
+                    {examples.map((example) => (
+                      <a
+                        className="examples-center-card"
+                        href={withBasePath(localizedExamplePath(example.id, locale))}
+                        key={example.id}
+                      >
+                        <span className="examples-center-card-image">
+                          <Image
+                            src={withBasePath(`/examples/${example.id}.png`)}
+                            alt={localizedText(example.title, locale)}
+                            width={960}
+                            height={600}
+                            loading={example.id === siteExamples[0]?.id ? 'eager' : 'lazy'}
+                            unoptimized
+                          />
+                          <span>{localizedText(example.group, locale)}</span>
+                        </span>
+                        <span className="examples-center-card-body">
+                          <span className="examples-center-card-title">
+                            {localizedText(example.title, locale)}
+                          </span>
+                          <span className="examples-center-card-description">
+                            {localizedText(example.description, locale)}
+                          </span>
+                          <span className="examples-center-card-tags">
+                            {example.tags.slice(0, 3).map((tag) => (
+                              <span key={tag}>{tag}</span>
+                            ))}
+                          </span>
+                        </span>
+                      </a>
+                    ))}
                   </div>
-                );
-              })}
-            </section>
-          );
-        })}
+                </section>
+              );
+            })}
+            {matchedExamples.length === 0 ? <p className="examples-center-empty">{copy.empty}</p> : null}
+          </div>
+        </div>
       </div>
     </main>
   );

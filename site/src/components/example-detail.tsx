@@ -1,6 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
+import {
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { runSiteExample, type SiteExampleHandle } from '@/lib/example-runtime';
 import { localizedPath, type Locale } from '@/lib/i18n';
@@ -13,23 +22,41 @@ import {
 } from '@/lib/site-examples';
 import { withBasePath } from '@/lib/shared';
 
-type DetailTab = 'source' | 'data';
+type DetailTab = 'guide' | 'source' | 'data';
 type PreviewStatus = 'loading' | 'ready' | 'error';
+
+const DEFAULT_WORKSPACE_SPLIT = 68;
+const MIN_PREVIEW_WIDTH = 560;
+const MIN_CODE_WIDTH = 360;
+const WORKSPACE_RESIZER_WIDTH = 12;
+const WORKSPACE_SPLIT_STORAGE_KEY = 'g6lite-example-workspace-split';
 
 export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
   const example = getSiteExample(id);
   const previewRef = useRef<HTMLDivElement>(null);
   const previewPanelRef = useRef<HTMLDivElement>(null);
+  const workspaceRef = useRef<HTMLElement>(null);
+  const activeHandleRef = useRef<SiteExampleHandle | null>(null);
+  const resizeFrameRef = useRef<number | null>(null);
+  const splitRatioRef = useRef(DEFAULT_WORKSPACE_SPLIT);
   const [revision, setRevision] = useState(0);
   const [status, setStatus] = useState<PreviewStatus>('loading');
   const [error, setError] = useState('');
   const [renderDuration, setRenderDuration] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<DetailTab>('source');
-  const [sourceResult, setSourceResult] = useState({ id: '', source: '', error: '' });
+  const [activeTab, setActiveTab] = useState<DetailTab>('guide');
+  const [sourceResult, setSourceResult] = useState({
+    id: '',
+    source: '',
+    highlighted: '',
+    error: '',
+  });
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
+  const [wrapSource, setWrapSource] = useState(false);
   const [query, setQuery] = useState('');
   const [directoryOpen, setDirectoryOpen] = useState(false);
   const [previewExpanded, setPreviewExpanded] = useState(false);
+  const [splitRatio, setSplitRatio] = useState(DEFAULT_WORKSPACE_SPLIT);
+  const [workspaceResizing, setWorkspaceResizing] = useState(false);
 
   const currentIndex = siteExamples.findIndex((item) => item.id === id);
   const previous = currentIndex > 0 ? siteExamples[currentIndex - 1] : undefined;
@@ -60,6 +87,7 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
     const container = previewRef.current;
     if (!container) return;
 
+    activeHandleRef.current = null;
     container.replaceChildren();
     setStatus('loading');
     setError('');
@@ -74,6 +102,7 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
           nextHandle.destroy();
           return;
         }
+        activeHandleRef.current = nextHandle;
         setRenderDuration(performance.now() - startedAt);
         setStatus('ready');
       })
@@ -86,6 +115,7 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
 
     return () => {
       cancelled = true;
+      if (activeHandleRef.current === handle) activeHandleRef.current = null;
       handle?.destroy();
       container.replaceChildren();
     };
@@ -95,19 +125,26 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
     if (!example) return;
     let cancelled = false;
 
-    void fetch(withBasePath(`/example-sources/${example.id}.txt`))
-      .then((response) => {
+    void Promise.all([
+      fetch(withBasePath(`/example-sources/${example.id}.txt`)).then((response) => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.text();
-      })
-      .then((value) => {
-        if (!cancelled) setSourceResult({ id: example.id, source: value, error: '' });
+      }),
+      fetch(withBasePath(`/example-sources/${example.id}.highlighted.txt`))
+        .then((response) => (response.ok ? response.text() : ''))
+        .catch(() => ''),
+    ])
+      .then(([source, highlighted]) => {
+        if (!cancelled) {
+          setSourceResult({ id: example.id, source, highlighted, error: '' });
+        }
       })
       .catch((reason: unknown) => {
         if (!cancelled) {
           setSourceResult({
             id: example.id,
             source: '',
+            highlighted: '',
             error: reason instanceof Error ? reason.message : String(reason),
           });
         }
@@ -136,7 +173,31 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
     };
   }, [previewExpanded]);
 
+  useEffect(() => {
+    const storedValue = window.localStorage.getItem(WORKSPACE_SPLIT_STORAGE_KEY);
+    if (storedValue === null) return;
+
+    const storedRatio = Number(storedValue);
+    if (!Number.isFinite(storedRatio)) return;
+
+    const nextRatio = Math.min(85, Math.max(20, storedRatio));
+    const frame = requestAnimationFrame(() => {
+      splitRatioRef.current = nextRatio;
+      setSplitRatio(nextRatio);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(
+    () => () => {
+      document.body.classList.remove('example-workspace-resizing');
+      if (resizeFrameRef.current !== null) cancelAnimationFrame(resizeFrameRef.current);
+    },
+    [],
+  );
+
   const source = sourceResult.id === example?.id ? sourceResult.source : '';
+  const highlightedSource = sourceResult.id === example?.id ? sourceResult.highlighted : '';
   const sourceError = sourceResult.id === example?.id ? sourceResult.error : '';
 
   if (!example) {
@@ -158,9 +219,18 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
           search: '搜索示例、能力或 API',
           source: '源码',
           data: '数据',
+          guide: '说明',
+          guideTitle: '示例说明',
+          tryTitle: '如何体验',
+          dataContext: '数据背景',
+          capabilities: '关键能力',
           copy: '复制源码',
           copied: '已复制',
+          wrap: '自动换行',
+          unwrap: '取消换行',
+          lines: '行',
           preview: '实时预览',
+          fit: '适应画布',
           refresh: '刷新',
           fullscreen: '全屏',
           exitFullscreen: '退出全屏',
@@ -176,6 +246,7 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
           sourceError: '源码读取失败',
           browseDirectory: '浏览示例目录',
           closeDirectory: '收起示例目录',
+          resizeWorkspace: '调整画布和源码宽度',
         }
       : {
           back: 'All examples',
@@ -183,9 +254,18 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
           search: 'Search examples, capabilities, or APIs',
           source: 'Source',
           data: 'Data',
+          guide: 'Guide',
+          guideTitle: 'Example guide',
+          tryTitle: 'How to try it',
+          dataContext: 'Data context',
+          capabilities: 'Key capabilities',
           copy: 'Copy source',
           copied: 'Copied',
+          wrap: 'Wrap lines',
+          unwrap: 'No wrap',
+          lines: 'lines',
           preview: 'Live preview',
+          fit: 'Fit view',
           refresh: 'Refresh',
           fullscreen: 'Fullscreen',
           exitFullscreen: 'Exit fullscreen',
@@ -201,6 +281,7 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
           sourceError: 'Unable to load source',
           browseDirectory: 'Browse directory',
           closeDirectory: 'Close directory',
+          resizeWorkspace: 'Resize preview and source panels',
         };
 
   async function copySource() {
@@ -210,8 +291,103 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
     window.setTimeout(() => setCopyState('idle'), 1600);
   }
 
+  async function fitPreview() {
+    const handle = activeHandleRef.current;
+    if (!handle) return;
+
+    window.dispatchEvent(new Event('resize'));
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await handle.fitView();
+  }
+
+  function scheduleWorkspaceResize() {
+    if (resizeFrameRef.current !== null) cancelAnimationFrame(resizeFrameRef.current);
+    resizeFrameRef.current = requestAnimationFrame(() => {
+      resizeFrameRef.current = null;
+      window.dispatchEvent(new Event('resize'));
+    });
+  }
+
+  function getWorkspaceMeasurements() {
+    const workspace = workspaceRef.current;
+    if (!workspace) return null;
+
+    const rect = workspace.getBoundingClientRect();
+    const styles = window.getComputedStyle(workspace);
+    const paddingLeft = Number.parseFloat(styles.paddingLeft) || 0;
+    const paddingRight = Number.parseFloat(styles.paddingRight) || 0;
+    const availableWidth = rect.width - paddingLeft - paddingRight - WORKSPACE_RESIZER_WIDTH;
+
+    if (availableWidth <= MIN_PREVIEW_WIDTH + MIN_CODE_WIDTH) return null;
+    return {
+      availableWidth,
+      contentLeft: rect.left + paddingLeft,
+    };
+  }
+
+  function updateWorkspaceSplit(previewWidth: number, persist = false) {
+    const measurements = getWorkspaceMeasurements();
+    if (!measurements) return;
+
+    const clampedWidth = Math.min(
+      measurements.availableWidth - MIN_CODE_WIDTH,
+      Math.max(MIN_PREVIEW_WIDTH, previewWidth),
+    );
+    const nextRatio = (clampedWidth / measurements.availableWidth) * 100;
+    splitRatioRef.current = nextRatio;
+    setSplitRatio(nextRatio);
+    if (persist) {
+      window.localStorage.setItem(WORKSPACE_SPLIT_STORAGE_KEY, nextRatio.toFixed(3));
+    }
+    scheduleWorkspaceResize();
+  }
+
+  function handleWorkspacePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setWorkspaceResizing(true);
+    document.body.classList.add('example-workspace-resizing');
+
+    const measurements = getWorkspaceMeasurements();
+    if (measurements) updateWorkspaceSplit(event.clientX - measurements.contentLeft);
+  }
+
+  function handleWorkspacePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+    const measurements = getWorkspaceMeasurements();
+    if (measurements) updateWorkspaceSplit(event.clientX - measurements.contentLeft);
+  }
+
+  function finishWorkspaceResize(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    setWorkspaceResizing(false);
+    document.body.classList.remove('example-workspace-resizing');
+    window.localStorage.setItem(WORKSPACE_SPLIT_STORAGE_KEY, splitRatioRef.current.toFixed(3));
+    scheduleWorkspaceResize();
+  }
+
+  function handleWorkspaceKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    const measurements = getWorkspaceMeasurements();
+    if (!measurements) return;
+
+    event.preventDefault();
+    const currentWidth = (splitRatioRef.current / 100) * measurements.availableWidth;
+    updateWorkspaceSplit(currentWidth + (event.key === 'ArrowRight' ? 24 : -24), true);
+  }
+
+  const sourceLineCount = source ? source.replace(/\n$/, '').split('\n').length : 0;
+  const sourceFilename = example.file.split('/').at(-1) ?? example.file;
+  const workspaceStyle = {
+    '--example-preview-fr': `${splitRatio}fr`,
+    '--example-code-fr': `${100 - splitRatio}fr`,
+  } as CSSProperties;
+
   return (
-    <main className="example-detail-page">
+    <main className="example-detail-page not-prose">
       <aside className="example-directory">
         <div className="example-directory-sticky">
           <div className="example-directory-header">
@@ -251,7 +427,10 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
 
                 return (
                   <details key={category.id} open={containsCurrent || query.length > 0}>
-                    <summary>{localizedText(category.title, locale)}</summary>
+                    <summary>
+                      <span>{localizedText(category.title, locale)}</span>
+                      <small>{entries.length}</small>
+                    </summary>
                     <div>
                       {entries.map((item) => (
                         <a
@@ -259,8 +438,18 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                           href={withBasePath(localizedExamplePath(item.id, locale))}
                           key={item.id}
                         >
-                          <span>{localizedText(item.title, locale)}</span>
-                          <small>{localizedText(item.group, locale)}</small>
+                          <Image
+                            src={withBasePath(`/examples/${item.id}.png`)}
+                            alt=""
+                            width={96}
+                            height={60}
+                            loading={item.id === example.id ? 'eager' : 'lazy'}
+                            unoptimized
+                          />
+                          <span>
+                            <strong>{localizedText(item.title, locale)}</strong>
+                            <small>{localizedText(item.group, locale)}</small>
+                          </span>
                         </a>
                       ))}
                     </div>
@@ -274,85 +463,32 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
 
       <article className="example-detail-content">
         <header className="example-detail-header">
-          <div className="example-detail-kicker">
-            {localizedText(
-              siteExampleCategories.find((category) => category.id === example.category)!.title,
-              locale,
-            )}
-            <span>/</span>
-            {localizedText(example.group, locale)}
-          </div>
-          <h1>{localizedText(example.title, locale)}</h1>
-          <p>{localizedText(example.description, locale)}</p>
-          <div className="example-detail-tags">
-            {example.tags.map((tag) => (
-              <span key={tag}>{tag}</span>
-            ))}
-          </div>
-          <div className="example-detail-metrics">
-            {example.metrics.map((metric) => (
-              <div key={localizedText(metric.label, locale)}>
-                <strong>{metric.value}</strong>
-                <span>{localizedText(metric.label, locale)}</span>
+          <div className="example-detail-copy">
+            <div className="example-detail-kicker">
+              {localizedText(
+                siteExampleCategories.find((category) => category.id === example.category)!.title,
+                locale,
+              )}
+              <span>/</span>
+              {localizedText(example.group, locale)}
+            </div>
+            <h1>{localizedText(example.title, locale)}</h1>
+            <div className="example-detail-description">
+              <p>{localizedText(example.description, locale)}</p>
+              <div className="example-detail-tags">
+                {example.tags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </header>
 
-        <section className="example-workspace">
-          <div className="example-code-panel">
-            <div className="example-panel-toolbar">
-              <div className="example-tabs" role="tablist">
-                <button
-                  aria-selected={activeTab === 'source'}
-                  className={activeTab === 'source' ? 'is-active' : undefined}
-                  onClick={() => setActiveTab('source')}
-                  role="tab"
-                  type="button"
-                >
-                  {copy.source}
-                </button>
-                <button
-                  aria-selected={activeTab === 'data'}
-                  className={activeTab === 'data' ? 'is-active' : undefined}
-                  onClick={() => setActiveTab('data')}
-                  role="tab"
-                  type="button"
-                >
-                  {copy.data}
-                </button>
-              </div>
-              {activeTab === 'source' ? (
-                <button className="example-utility-button" onClick={copySource} type="button">
-                  {copyState === 'copied' ? copy.copied : copy.copy}
-                </button>
-              ) : null}
-            </div>
-            <div className="example-code-content">
-              {activeTab === 'source' ? (
-                source ? (
-                  <pre tabIndex={0}>
-                    <code>{source}</code>
-                  </pre>
-                ) : (
-                  <div className="example-panel-message">
-                    {sourceError ? `${copy.sourceError}: ${sourceError}` : copy.sourceLoading}
-                  </div>
-                )
-              ) : (
-                <div className="example-data-panel">
-                  <div>
-                    <h2>{copy.dataTitle}</h2>
-                    <p>{localizedText(example.dataDescription, locale)}</p>
-                  </div>
-                  <pre>
-                    <code>{example.dataPreview}</code>
-                  </pre>
-                </div>
-              )}
-            </div>
-          </div>
-
+        <section
+          className={`example-workspace${workspaceResizing ? ' is-resizing' : ''}`}
+          ref={workspaceRef}
+          style={workspaceStyle}
+        >
           <div
             className={`example-preview-panel${previewExpanded ? ' is-fullscreen' : ''}`}
             ref={previewPanelRef}
@@ -367,9 +503,19 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
               <div className="example-preview-actions">
                 <button
                   className="example-utility-button"
+                  disabled={status !== 'ready'}
+                  onClick={() => void fitPreview()}
+                  type="button"
+                >
+                  <span aria-hidden="true">◎</span>
+                  {copy.fit}
+                </button>
+                <button
+                  className="example-utility-button"
                   onClick={() => setRevision((value) => value + 1)}
                   type="button"
                 >
+                  <span aria-hidden="true">↻</span>
                   {status === 'error' ? copy.retry : copy.refresh}
                 </button>
                 <button
@@ -378,6 +524,7 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                   onClick={() => setPreviewExpanded((value) => !value)}
                   type="button"
                 >
+                  <span aria-hidden="true">⛶</span>
                   {previewExpanded ? copy.exitFullscreen : copy.fullscreen}
                 </button>
               </div>
@@ -407,6 +554,164 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                   {copy.renderTime} {Math.round(renderDuration)}ms
                 </span>
               ) : null}
+            </footer>
+          </div>
+
+          <div
+            aria-label={copy.resizeWorkspace}
+            aria-orientation="vertical"
+            aria-valuemax={100}
+            aria-valuemin={0}
+            aria-valuenow={Math.round(splitRatio)}
+            className="example-workspace-resizer"
+            onDoubleClick={() => {
+              splitRatioRef.current = DEFAULT_WORKSPACE_SPLIT;
+              setSplitRatio(DEFAULT_WORKSPACE_SPLIT);
+              window.localStorage.setItem(
+                WORKSPACE_SPLIT_STORAGE_KEY,
+                String(DEFAULT_WORKSPACE_SPLIT),
+              );
+              scheduleWorkspaceResize();
+            }}
+            onKeyDown={handleWorkspaceKeyDown}
+            onPointerCancel={finishWorkspaceResize}
+            onPointerDown={handleWorkspacePointerDown}
+            onPointerMove={handleWorkspacePointerMove}
+            onPointerUp={finishWorkspaceResize}
+            role="separator"
+            tabIndex={0}
+          >
+            <span aria-hidden="true" />
+          </div>
+
+          <div className="example-code-panel">
+            <div className="example-panel-toolbar">
+              <div className="example-code-toolbar-main">
+                <div className="example-tabs" role="tablist">
+                  <button
+                    aria-selected={activeTab === 'guide'}
+                    className={activeTab === 'guide' ? 'is-active' : undefined}
+                    onClick={() => setActiveTab('guide')}
+                    role="tab"
+                    type="button"
+                  >
+                    {copy.guide}
+                  </button>
+                  <button
+                    aria-selected={activeTab === 'source'}
+                    className={activeTab === 'source' ? 'is-active' : undefined}
+                    onClick={() => setActiveTab('source')}
+                    role="tab"
+                    type="button"
+                  >
+                    {copy.source}
+                  </button>
+                  <button
+                    aria-selected={activeTab === 'data'}
+                    className={activeTab === 'data' ? 'is-active' : undefined}
+                    onClick={() => setActiveTab('data')}
+                    role="tab"
+                    type="button"
+                  >
+                    {copy.data}
+                  </button>
+                </div>
+                {activeTab === 'source' ? (
+                  <span className="example-code-filename">{sourceFilename}</span>
+                ) : null}
+              </div>
+              {activeTab === 'source' ? (
+                <div className="example-code-actions">
+                  <button
+                    aria-pressed={wrapSource}
+                    className="example-utility-button"
+                    onClick={() => setWrapSource((value) => !value)}
+                    type="button"
+                  >
+                    <span aria-hidden="true">↩</span>
+                    {wrapSource ? copy.unwrap : copy.wrap}
+                  </button>
+                  <button className="example-utility-button" onClick={copySource} type="button">
+                    <span aria-hidden="true">⧉</span>
+                    {copyState === 'copied' ? copy.copied : copy.copy}
+                  </button>
+                </div>
+              ) : null}
+            </div>
+            <div className="example-code-content">
+              {activeTab === 'guide' ? (
+                <article className="example-guide-panel">
+                  <header>
+                    <span>{localizedText(example.group, locale)}</span>
+                    <h2>{copy.guideTitle}</h2>
+                    <p>{localizedText(example.description, locale)}</p>
+                  </header>
+                  <section>
+                    <h3>{copy.tryTitle}</h3>
+                    <p>{localizedText(example.interaction, locale)}</p>
+                  </section>
+                  <section>
+                    <h3>{copy.dataContext}</h3>
+                    <p>{localizedText(example.dataDescription, locale)}</p>
+                  </section>
+                  <section>
+                    <h3>{copy.capabilities}</h3>
+                    <div className="example-guide-tags">
+                      {example.tags.map((tag) => (
+                        <span key={tag}>{tag}</span>
+                      ))}
+                    </div>
+                  </section>
+                </article>
+              ) : activeTab === 'source' ? (
+                source ? (
+                  highlightedSource ? (
+                    <div
+                      className={`example-highlighted-code shiki-host${wrapSource ? ' is-wrapped' : ''}`}
+                      dangerouslySetInnerHTML={{ __html: highlightedSource }}
+                      tabIndex={0}
+                    />
+                  ) : (
+                    <pre className={wrapSource ? 'is-wrapped' : undefined} tabIndex={0}>
+                      <code>{source}</code>
+                    </pre>
+                  )
+                ) : (
+                  <div className="example-panel-message">
+                    {sourceError ? `${copy.sourceError}: ${sourceError}` : copy.sourceLoading}
+                  </div>
+                )
+              ) : (
+                <div className="example-data-panel">
+                  <div>
+                    <h2>{copy.dataTitle}</h2>
+                    <p>{localizedText(example.dataDescription, locale)}</p>
+                  </div>
+                  <pre>
+                    <code>{example.dataPreview}</code>
+                  </pre>
+                </div>
+              )}
+            </div>
+            <footer className="example-code-footer">
+              {activeTab === 'guide' ? (
+                <>
+                  <span>{copy.guideTitle}</span>
+                  <span>{localizedText(example.group, locale)}</span>
+                </>
+              ) : activeTab === 'source' ? (
+                <>
+                  <span>
+                    TypeScript · ESM{sourceLineCount ? ` · ${sourceLineCount} ${copy.lines}` : ''}
+                  </span>
+                  <span>{example.file}</span>
+                </>
+              ) : (
+                <>
+                  <span>JSON</span>
+                  <span>{copy.dataTitle}</span>
+                </>
+              )}
             </footer>
           </div>
         </section>

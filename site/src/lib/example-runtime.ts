@@ -2,6 +2,7 @@
 
 export interface SiteExampleHandle {
   destroy(): void;
+  fitView(): void | Promise<void>;
   ready?: Promise<void>;
 }
 
@@ -37,6 +38,9 @@ export async function runSiteExample(
   const handle = await demoModule.run(container);
   if (!handle || typeof handle.destroy !== 'function') {
     throw new Error(`Site example ${id} did not return a destroyable handle`);
+  }
+  if (typeof handle.fitView !== 'function') {
+    throw new Error(`Site example ${id} did not return a fitView-capable handle`);
   }
 
   return handle;

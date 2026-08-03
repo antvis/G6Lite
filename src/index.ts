@@ -132,4 +132,5 @@ export type {
   LassoSelectOptions,
   TooltipContext,
   TooltipOptions,
+  ZoomCanvasOptions,
 } from './behaviors/index';

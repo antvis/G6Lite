@@ -22,6 +22,7 @@ import type {
   NodeGraphEvent,
   PluginExtension,
   TransformExtension,
+  ZoomCanvasOptions,
 } from '@antv/g6-lite';
 
 type Equal<Left, Right> =
@@ -55,6 +56,12 @@ type DestroyEventArguments = Assert<Equal<GraphEventMap['destroy'], []>>;
 type BuiltInBehaviorNames = Assert<Equal<keyof BuiltInBehaviorOptionsMap, BehaviorName>>;
 type DragCanvasModifierOption = Assert<
   Equal<BuiltInBehaviorOptionsMap['drag-canvas']['ignoreModifierKeys'], boolean | undefined>
+>;
+type ZoomCanvasSensitivityOption = Assert<
+  Equal<BuiltInBehaviorOptionsMap['zoom-canvas']['sensitivity'], number | undefined>
+>;
+type ZoomCanvasMinimumOption = Assert<
+  Equal<BuiltInBehaviorOptionsMap['zoom-canvas']['minZoom'], ZoomCanvasOptions['minZoom']>
 >;
 type BrushSelectMapType = Assert<
   Equal<BuiltInBehaviorOptionsMap['brush-select']['key'], BrushSelectOptions['key']>
@@ -176,6 +183,8 @@ export type PublicApiTypeAssertions =
   | DestroyEventArguments
   | BuiltInBehaviorNames
   | DragCanvasModifierOption
+  | ZoomCanvasSensitivityOption
+  | ZoomCanvasMinimumOption
   | BrushSelectMapType
   | ClickSelectMapType
   | BehaviorHasNoUpdate

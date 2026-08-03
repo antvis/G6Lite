@@ -136,6 +136,12 @@ for (const dependency of ['@orama/orama', 'flexsearch']) {
 }
 
 const catalog = JSON.parse(read('playground/demos/catalog.json'));
+const exampleRuntimeSource = read('site/src/lib/example-runtime.ts');
+const runtimeLoaderById = new Map(
+  [...exampleRuntimeSource.matchAll(
+    /^\s*(?:'([^']+)'|([a-z0-9]+(?:-[a-z0-9]+)*)):\s*\(\)\s*=>\s*import\('([^']+)'\),?$/gm,
+  )].map((match) => [match[1] ?? match[2], match[3]]),
+);
 const docsGroups = new Set([
   'getting-started',
   'data-and-lifecycle',
@@ -147,6 +153,15 @@ const docsGroups = new Set([
 ]);
 for (const demo of catalog.filter((item) => item.audiences.includes('site'))) {
   if (!docsGroups.has(demo.docsGroup)) fail(`Site demo ${demo.id} has no valid docsGroup`);
+  const expectedRuntimeImport = `../../../playground/demos/${demo.file}`;
+  const actualRuntimeImport = runtimeLoaderById.get(demo.id);
+  if (!actualRuntimeImport) {
+    fail(`Site demo ${demo.id} has no runtime loader in site/src/lib/example-runtime.ts`);
+  } else if (actualRuntimeImport !== expectedRuntimeImport) {
+    fail(
+      `Site demo ${demo.id} runtime loader points to ${actualRuntimeImport}, expected ${expectedRuntimeImport}`,
+    );
+  }
   for (const file of [
     `site/content/docs/zh/examples/${demo.id}.mdx`,
     `site/content/docs/en/examples/${demo.id}.mdx`,

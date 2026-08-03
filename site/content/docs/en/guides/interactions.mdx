@@ -20,6 +20,24 @@ Each behavior can be a string or an object with options. Picking and element eve
 
 `BuiltInBehaviorOptionsMap` maps each built-in name to its supported object configuration, while `BuiltInBehaviorConfig` is the union of all built-in configurations. Custom Behaviors should declare a literal `type`, a dedicated options type, and use `satisfies` at activation sites.
 
+## Zoom feel and bounds
+
+`zoom-canvas` uses continuous wheel-delta scaling for both mouse wheels and trackpads. The default sensitivity is `0.0015`, with a default zoom range of `0.1` to `20`.
+
+```ts
+behaviors: [
+  {
+    type: 'zoom-canvas',
+    sensitivity: 0.0005,
+    minZoom: 0.2,
+    maxZoom: 8,
+  },
+  'drag-canvas',
+];
+```
+
+Use a smaller `sensitivity` for gentler zooming. Invalid or non-positive values fall back to safe defaults.
+
 ## Built-in Behaviors
 
 - `zoom-canvas`: wheel zoom.

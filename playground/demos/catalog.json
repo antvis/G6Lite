@@ -13,6 +13,19 @@
     "capture": { "mode": "visual", "settleMs": 450, "deviceScaleFactor": 2 }
   },
   {
+    "id": "default-theme",
+    "file": "default-theme.ts",
+    "title": "默认主题与状态",
+    "description": "并排验证 light、dark 预设主题及默认交互状态。",
+    "category": "theme",
+    "docsGroup": "getting-started",
+    "kind": "functional",
+    "audiences": ["playground", "site"],
+    "coverage": ["theme.light", "theme.dark", "theme.states", "behavior.zoom-canvas-options"],
+    "releaseCheck": "visual",
+    "capture": { "mode": "visual", "settleMs": 500, "deviceScaleFactor": 2 }
+  },
+  {
     "id": "node-style",
     "file": "node-style.ts",
     "title": "节点样式",

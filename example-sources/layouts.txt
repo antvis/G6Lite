@@ -64,6 +64,7 @@ export async function run(container: string | HTMLElement) {
   await renderLayout(0);
 
   return {
+    fitView: () => currentGraph?.fitView({ padding: 64, maxZoom: 1.5 }),
     destroy: () => {
       currentGraph?.destroy();
       currentGraph = null;

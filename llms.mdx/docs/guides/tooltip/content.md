@@ -2,7 +2,7 @@
 
 
 
-启用 `tooltip` behavior 后，G6-GL 会在命中节点或边时显示浮层。
+启用 `tooltip` behavior 后，G6Lite 会在命中节点或边时显示浮层。
 
 ```ts
 behaviors: ['tooltip'];

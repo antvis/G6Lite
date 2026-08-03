@@ -2,12 +2,12 @@
 
 
 
-G6-GL 支持注册自定义 Label Renderer。业务只负责内容的测量和绘制，节点与边遍历、函数式样式解析、定位、路径采样、自动旋转、DPR/zoom 换算、碰撞检测和刷新调度仍由 G6-GL 负责。
+G6Lite 支持注册自定义 Label Renderer。业务只负责内容的测量和绘制，节点与边遍历、函数式样式解析、定位、路径采样、自动旋转、DPR/zoom 换算、碰撞检测和刷新调度仍由 G6Lite 负责。
 
 ## 注册与使用 [#注册与使用]
 
 ```ts
-import { Graph, register, type LabelRenderer } from '@antv/g6-gl';
+import { Graph, register, type LabelRenderer } from '@antv/g6-lite';
 
 const multiline: LabelRenderer<string[]> = {
   measure({ ctx, text, style }) {

@@ -55,7 +55,7 @@ Derived events are emitted only when the corresponding Behavior is active.
 `GraphEventMap` values are argument tuples rather than single payload types, so both ordinary events and zero-argument events are represented exactly:
 
 ```ts
-import type { GraphEventMap } from '@antv/g6-gl';
+import type { GraphEventMap } from '@antv/g6-lite';
 
 type NodeClickPayload = GraphEventMap['node:click'][0];
 type DestroyArguments = GraphEventMap['destroy']; // []

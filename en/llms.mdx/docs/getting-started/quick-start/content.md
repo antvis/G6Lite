@@ -5,7 +5,7 @@
 Install the package:
 
 ```bash
-npm install @antv/g6-gl
+npm install @antv/g6-lite
 ```
 
 The container must have an explicit size:
@@ -17,7 +17,7 @@ The container must have an explicit size:
 Create and render the graph using package-root APIs:
 
 ```ts
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
   container: 'graph',

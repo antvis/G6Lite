@@ -2,14 +2,14 @@
 
 
 
-G6-GL 的最小使用链路是：安装依赖、准备一个有宽高的容器、创建 `Graph`、传入数据与配置、调用 `render()`。
+G6Lite 的最小使用链路是：安装依赖、准备一个有宽高的容器、创建 `Graph`、传入数据与配置、调用 `render()`。
 
 画布默认支持滚轮缩放和拖拽平移；只有节点拖拽、选择、高亮等元素级交互需要显式配置。
 
 ## 安装 [#安装]
 
 ```bash
-npm install @antv/g6-gl
+npm install @antv/g6-lite
 ```
 
 ## 准备容器 [#准备容器]
@@ -33,7 +33,7 @@ npm install @antv/g6-gl
 ## 渲染基础图 [#渲染基础图]
 
 ```ts
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
   container: 'graph',

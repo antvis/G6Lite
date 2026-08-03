@@ -2,11 +2,11 @@
 
 
 
-G6-GL 使用 [size-limit](https://github.com/ai/size-limit) 对真实首屏入口和各布局使用路径进行体积约束。未加载布局时的初始入口保持 &#x2A;*90 kB（minify + brotli）** 门槛，初始入口加任一官方布局继续保持既有 **120 kB** 门槛。
+G6Lite 使用 [size-limit](https://github.com/ai/size-limit) 对真实首屏入口和各布局使用路径进行体积约束。未加载布局时的初始入口保持 &#x2A;*90 kB（minify + brotli）** 门槛，初始入口加任一官方布局继续保持既有 **120 kB** 门槛。
 
 ## 测量口径 [#测量口径]
 
-* 入口：`dist/index.js`，对应 `import { Graph } from '@antv/g6-gl'`。
+* 入口：`dist/index.js`，对应 `import { Graph } from '@antv/g6-lite'`。
 * 范围：核心引擎、regl、事件依赖，以及用户实际选择的单个官方布局算法。
 * 处理：size-limit 使用打包器模拟生产 bundle，执行 minify 与 brotli 压缩。
 * 门槛：根目录 `.size-limit.mjs` 分别约束初始入口和“初始入口 + 单个布局”的真实加载路径；官方布局由内部动态 import 按类型加载，用户无需手动注册。
@@ -25,6 +25,6 @@ npm run size
 * 从包根导入公开 API，让业务打包器可以正确分析依赖。
 * 使用支持 tree-shaking 的 Vite、Rollup、esbuild 或等价工具；包已声明 `sideEffects: false`。
 * 生产 CDN 开启 brotli 或 gzip，并以业务最终 bundle analyzer 结果评估真实增量。
-* 不把 G6-GL 与功能范围、依赖口径不同的图库做未经复现的体积倍数比较。
+* 不把 G6Lite 与功能范围、依赖口径不同的图库做未经复现的体积倍数比较。
 
 体积门槛是工程约束，不代表所有业务只增加同等下载量；业务打包器版本、去重策略和已有共享依赖都会影响最终结果。

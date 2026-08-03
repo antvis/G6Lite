@@ -2,7 +2,7 @@
 
 
 
-G6-GL 的数据通过 `GraphData` 传入，核心字段是 `nodes`、`edges` 和可选的 `combos`。
+G6Lite 的数据通过 `GraphData` 传入，核心字段是 `nodes`、`edges` 和可选的 `combos`。
 
 ```ts
 const data = {
@@ -28,7 +28,7 @@ const data = {
 | `states`  | 初始状态，如 `['selected']` |
 | `comboId` | 所属 Combo id           |
 
-业务字段建议放在 `data` 中，避免和 G6-GL 的保留字段冲突。
+业务字段建议放在 `data` 中，避免和 G6Lite 的保留字段冲突。
 
 ## 边 [#边]
 

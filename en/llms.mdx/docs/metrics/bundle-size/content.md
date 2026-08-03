@@ -2,7 +2,7 @@
 
 
 
-G6-GL measures the initial `dist/index.js` payload and each real layout usage path with size-limit. The initial entry has a **90 kB minified and brotli-compressed budget**; the initial entry plus any one official layout keeps the existing **120 kB budget**.
+G6Lite measures the initial `dist/index.js` payload and each real layout usage path with size-limit. The initial entry has a **90 kB minified and brotli-compressed budget**; the initial entry plus any one official layout keeps the existing **120 kB budget**.
 
 ```bash
 npm run build

@@ -1,11 +1,11 @@
-# Use G6-GL with React (/en/docs/getting-started/react)
+# Use G6Lite with React (/en/docs/getting-started/react)
 
 
 
 Create the graph after the DOM container mounts and destroy it in the effect cleanup:
 
 ```tsx
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 import { useEffect, useRef } from 'react';
 
 export function GraphView() {

@@ -54,7 +54,7 @@ import {
   type BehaviorOptions,
   type ElementState,
   type ExtensionContext,
-} from '@antv/g6-gl';
+} from '@antv/g6-lite';
 
 export const BUSINESS_SELECT_BEHAVIOR = 'business-select' as const;
 
@@ -171,7 +171,7 @@ Listeners on `window` or `document`, timers, observers, and asynchronous work cr
 
 ## Boundaries and replacement [#boundaries-and-replacement]
 
-* Import public APIs only from the `@antv/g6-gl` package root.
+* Import public APIs only from the `@antv/g6-lite` package root.
 * Use `context.data`, `context.state`, `context.viewport`, `requestRender()`, and `isDestroyed()`; new code must not depend on deprecated `context.graph`.
 * Do not access Renderer, picking, DataModel, WebGL state, or GPU buffers.
 * A registered Behavior replaces a built-in Behavior with the same name. A failing registered implementation does not fall back to the built-in implementation.

@@ -8,7 +8,7 @@ layout: { type: 'force', linkDistance: 100, worker: true }
 
 Use circular or grid for deterministic overviews, dagre for hierarchies, force and d3-force for networks, and mindmap, indented, or fishbone for tree-oriented presentation. If coordinates already exist, omit layout and use node `x` / `y`.
 
-Official layouts are loaded automatically by type. G6-GL keeps each algorithm behind an internal dynamic import, so no separate registration or enable call is required.
+Official layouts are loaded automatically by type. G6Lite keeps each algorithm behind an internal dynamic import, so no separate registration or enable call is required.
 
 Run another layout at runtime:
 

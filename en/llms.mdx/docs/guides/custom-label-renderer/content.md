@@ -5,7 +5,7 @@
 Register a label renderer through the package-root API when standard text labels are not enough:
 
 ```ts
-import { register, type LabelRenderer } from '@antv/g6-gl';
+import { register, type LabelRenderer } from '@antv/g6-lite';
 
 const multiline: LabelRenderer<string[]> = {
   measure({ ctx, text }) {
@@ -24,4 +24,4 @@ const multiline: LabelRenderer<string[]> = {
 register('label', 'multiline', multiline);
 ```
 
-The renderer owns content measurement and drawing. G6-GL continues to handle node and edge traversal, functional style resolution, placement, path sampling, rotation, DPR/zoom conversion, collision, and refresh scheduling. Release any renderer-owned resources during cleanup.
+The renderer owns content measurement and drawing. G6Lite continues to handle node and edge traversal, functional style resolution, placement, path sampling, rotation, DPR/zoom conversion, collision, and refresh scheduling. Release any renderer-owned resources during cleanup.

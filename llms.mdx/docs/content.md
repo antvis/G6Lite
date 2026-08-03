@@ -2,7 +2,7 @@
 
 
 
-G6-GL 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL 引擎。文档按任务组织：先完成第一个图，再深入数据、样式、布局、交互、性能和 API。
+G6Lite 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL 引擎。文档按任务组织：先完成第一个图，再深入数据、样式、布局、交互、性能和 API。
 
 ## 先从这里开始 [#先从这里开始]
 
@@ -19,7 +19,7 @@ G6-GL 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL 引
 ## 按任务阅读 [#按任务阅读]
 
 <Cards>
-  <Card title="理解 G6-GL" href="/docs/concepts/overview" />
+  <Card title="理解 G6Lite" href="/docs/concepts/overview" />
 
   <Card title="配置数据" href="/docs/guides/data" />
 
@@ -46,7 +46,7 @@ G6-GL 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL 引
 
 ## 选型提示 [#选型提示]
 
-G6-GL 更适合大规模关系图和高频分析交互。如果你需要完整插件生态、复杂动画和更广的图可视化能力，请优先评估 [G6 v5](https://g6.antv.antgroup.com/)。
+G6Lite 更适合大规模关系图和高频分析交互。如果你需要完整插件生态、复杂动画和更广的图可视化能力，请优先评估 [G6 v5](https://g6.antv.antgroup.com/)。
 
 <Cards>
   <Card title="性能指标" href="/docs/metrics/performance" />

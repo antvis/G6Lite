@@ -1,8 +1,8 @@
-# What is G6-GL? (/en/docs/concepts/overview)
+# What is G6Lite? (/en/docs/concepts/overview)
 
 
 
-G6-GL is a lightweight WebGL graph visualization engine. It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
+G6Lite is a lightweight WebGL graph visualization engine. It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
 
 ## Good fits [#good-fits]
 
@@ -16,4 +16,4 @@ G6-GL is a lightweight WebGL graph visualization engine. It keeps the familiar d
 * Products that need the full G6 plugin, animation, and element ecosystem.
 * SVG/DOM-level customization or server-side image rendering.
 
-G6 v5 is the broader general-purpose framework. G6-GL is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
+G6 v5 is the broader general-purpose framework. G6Lite is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.

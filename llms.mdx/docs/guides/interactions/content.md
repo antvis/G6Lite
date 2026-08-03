@@ -60,7 +60,7 @@ behaviors: ['drag-canvas', { type: 'brush-select', key: 'shift' }];
 
 ## 事件分发模型 [#事件分发模型]
 
-G6-GL 内部由 `InteractionDispatcher` 统一处理指针事件。它每次只做一次拾取，然后按 `node -> edge -> combo -> canvas` 的优先级发出规范事件。所有 behavior 都消费这些事件。
+G6Lite 内部由 `InteractionDispatcher` 统一处理指针事件。它每次只做一次拾取，然后按 `node -> edge -> combo -> canvas` 的优先级发出规范事件。所有 behavior 都消费这些事件。
 
 这意味着单击、双击、右键、滚轮、悬停等元素事件默认可监听，不需要额外启用单独的 click behavior。
 

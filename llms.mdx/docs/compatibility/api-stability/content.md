@@ -2,7 +2,7 @@
 
 
 
-G6-GL 仍处于 `0.1.x` beta 阶段。公开 API 以 npm 包根入口和 `package.json#exports` 为唯一边界；`src/` 中未从包根导出的模块属于内部实现，不承诺深层路径兼容性。
+G6Lite 仍处于 `0.1.x` beta 阶段。公开 API 以 npm 包根入口和 `package.json#exports` 为唯一边界；`src/` 中未从包根导出的模块属于内部实现，不承诺深层路径兼容性。
 
 ## 推荐公开入口 [#推荐公开入口]
 
@@ -12,15 +12,15 @@ G6-GL 仍处于 `0.1.x` beta 阶段。公开 API 以 npm 包根入口和 `packag
 * 从包根导出的配置、数据、行为和扩展类型。
 
 ```ts
-import { Graph, register, runLayout } from '@antv/g6-gl';
-import type { GraphData, GraphOptions } from '@antv/g6-gl';
+import { Graph, register, runLayout } from '@antv/g6-lite';
+import type { GraphData, GraphOptions } from '@antv/g6-lite';
 ```
 
-不要从 `@antv/g6-gl/src/...` 或构建产物内部路径导入。发布包虽然包含 `src/`，但它不是额外的公开 API 面。
+不要从 `@antv/g6-lite/src/...` 或构建产物内部路径导入。发布包虽然包含 `src/`，但它不是额外的公开 API 面。
 
 ## ESM 与 CommonJS [#esm-与-commonjs]
 
-当前包根只提供 ESM，不提供 `require('@antv/g6-gl')` 条件。CommonJS 可行性验证表明，同步 `require` 入口和类型声明本身可以生成，但双产物还必须同时保证两项运行时契约：
+当前包根只提供 ESM，不提供 `require('@antv/g6-lite')` 条件。CommonJS 可行性验证表明，同步 `require` 入口和类型声明本身可以生成，但双产物还必须同时保证两项运行时契约：
 
 * ESM 与 CommonJS 入口共享同一套扩展注册状态，避免同一应用混用两种入口时出现重复或不可见的注册项。
 * `layout.worker: true` 经业务打包器处理后仍能定位并加载包内的模块 Worker，不能因 Worker 资源丢失而静默回退主线程。
@@ -30,7 +30,7 @@ import type { GraphData, GraphOptions } from '@antv/g6-gl';
 仍使用 CommonJS 工具链的应用可以在客户端边界使用动态导入：
 
 ```js
-const { Graph } = await import('@antv/g6-gl');
+const { Graph } = await import('@antv/g6-lite');
 ```
 
 这不会改变 `Graph` 依赖真实 DOM、Canvas 和 WebGL 的运行环境要求。

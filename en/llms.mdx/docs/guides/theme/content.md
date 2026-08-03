@@ -19,4 +19,4 @@ theme: {
 }
 ```
 
-Explicit node and edge styles take precedence over theme defaults. Keep application design tokens in one place and map them to G6-GL theme tokens.
+Explicit node and edge styles take precedence over theme defaults. Keep application design tokens in one place and map them to G6Lite theme tokens.

@@ -55,7 +55,7 @@ graph.once('destroy', () => {
 `GraphEventMap` 的值是参数元组，而不是单个 payload 类型，因此能够同时表达普通单参数事件和 `destroy: []` 这类零参数事件：
 
 ```ts
-import type { GraphEventMap } from '@antv/g6-gl';
+import type { GraphEventMap } from '@antv/g6-lite';
 
 type NodeClickPayload = GraphEventMap['node:click'][0];
 type DestroyArguments = GraphEventMap['destroy']; // []

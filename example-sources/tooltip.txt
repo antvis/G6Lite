@@ -5,7 +5,7 @@
  * - 边 hover:显示「源 → 目标(关系)」
  * - tooltip 开箱即用,命中事件由交互调度层统一分发,不依赖其它 behavior
  */
-import { Graph, type TooltipContext } from '@antv/g6-gl';
+import { Graph, type TooltipContext } from '@antv/g6-lite';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({

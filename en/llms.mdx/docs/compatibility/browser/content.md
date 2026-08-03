@@ -2,7 +2,7 @@
 
 
 
-G6-GL prefers WebGL 2.0 and falls back to WebGL 1.0. Canvas 2D is used for labels and combo outlines, so WebGL 2.0 is not a hard requirement.
+G6Lite prefers WebGL 2.0 and falls back to WebGL 1.0. Canvas 2D is used for labels and combo outlines, so WebGL 2.0 is not a hard requirement.
 
 ## Minimum versions [#minimum-versions]
 
@@ -24,15 +24,15 @@ Using global usage data from `caniuse-lite@1.0.30001806`, retrieved on **2026-07
 * The browser families and minimum versions explicitly listed above account for approximately &#x2A;*90.4%** of global browser usage.
 * Across every browser tracked by Can I Use, versions supporting both WebGL 1.0 and native ESM account for approximately &#x2A;*94.8%**.
 
-Sources: [Can I Use WebGL](https://caniuse.com/webgl), [JavaScript modules](https://caniuse.com/es6-module), and [caniuse-lite](https://github.com/browserslist/caniuse-lite). These figures are selection references, not G6-GL device certification rates. Enterprise browsers, embedded WebViews, disabled GPU acceleration, and low-end devices require separate validation.
+Sources: [Can I Use WebGL](https://caniuse.com/webgl), [JavaScript modules](https://caniuse.com/es6-module), and [caniuse-lite](https://github.com/browserslist/caniuse-lite). These figures are selection references, not G6Lite device certification rates. Enterprise browsers, embedded WebViews, disabled GPU acceleration, and low-end devices require separate validation.
 
 ## Comparison with sigma.js [#comparison-with-sigmajs]
 
 The sigma.js v3 README describes a WebGL renderer for graphs with thousands of nodes and edges, built on Graphology. Its `sigma@3.0.3` package provides both ESM and CommonJS builds. The official [README](https://github.com/jacomyal/sigma.js#readme) and [package metadata](https://github.com/jacomyal/sigma.js/blob/main/packages/sigma/package.json) checked on 2026-07-29 do not publish an equivalent minimum-browser matrix.
 
-An omitted matrix should not be interpreted as legacy-browser support. Both libraries require WebGL and a modern JavaScript toolchain; G6-GL explicitly documents the syntax floor of its untranspiled package, while sigma.js consumers need to validate their own build target.
+An omitted matrix should not be interpreted as legacy-browser support. Both libraries require WebGL and a modern JavaScript toolchain; G6Lite explicitly documents the syntax floor of its untranspiled package, while sigma.js consumers need to validate their own build target.
 
-G6-GL needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
+G6Lite needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
 
 The renderer uses `regl`, which dynamically compiles WebGL commands. If the host enables Content Security Policy, `script-src` must allow `'unsafe-eval'`; `'wasm-unsafe-eval'` alone is not sufficient. Hosts that cannot allow this directive are not supported by the current renderer.
 

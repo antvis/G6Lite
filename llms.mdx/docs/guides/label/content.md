@@ -2,7 +2,7 @@
 
 
 
-G6-GL 用 Canvas 2D 在 WebGL 画布上方绘制文本标签与图标。GPU 负责海量节点和边，Canvas 2D 负责文本排版。
+G6Lite 用 Canvas 2D 在 WebGL 画布上方绘制文本标签与图标。GPU 负责海量节点和边，Canvas 2D 负责文本排版。
 
 ## 节点标签 [#节点标签]
 

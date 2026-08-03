@@ -6,7 +6,7 @@ React 中推荐在 `useEffect` 内创建 `Graph`，通过 `ref` 传入真实 DOM
 
 ```tsx
 import { useEffect, useRef } from 'react';
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 
 export function GraphView() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -51,7 +51,7 @@ export function GraphView() {
 * 容器需要有明确高度，只有 `width: 100%` 不够。
 * React Strict Mode 在开发环境可能会重复执行 effect，cleanup 中调用 `graph.destroy()` 可以避免残留 canvas 和事件监听。
 * 如果数据来自请求，建议在拿到数据后创建实例；或先创建空图，再调用 `await graph.setData(data)`。
-* 如果父容器尺寸会变化，G6-GL 会通过 ResizeObserver 同步 canvas 尺寸。
+* 如果父容器尺寸会变化，G6Lite 会通过 ResizeObserver 同步 canvas 尺寸。
 
 ## 数据变化 [#数据变化]
 

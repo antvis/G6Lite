@@ -2,11 +2,11 @@
 
 
 
-## G6-GL 和 G6 v5 怎么选？ [#g6-gl-和-g6-v5-怎么选]
+## G6Lite 和 G6 v5 怎么选？ [#g6lite-和-g6-v5-怎么选]
 
-G6-GL 聚焦 WebGL 渲染、高频状态更新和受控能力边界；G6 v5 提供更完整的插件、动画、元素与通用图可视化生态。请用真实数据验证目标场景，不按未经复现的绝对跑分或体积倍数选型。
+G6Lite 聚焦 WebGL 渲染、高频状态更新和受控能力边界；G6 v5 提供更完整的插件、动画、元素与通用图可视化生态。请用真实数据验证目标场景，不按未经复现的绝对跑分或体积倍数选型。
 
-如果核心问题是大规模关系图的浏览器渲染和分析交互，可以优先评估 G6-GL；如果重度依赖完整插件生态、复杂动画或图论能力，应优先评估 G6 v5。
+如果核心问题是大规模关系图的浏览器渲染和分析交互，可以优先评估 G6Lite；如果重度依赖完整插件生态、复杂动画或图论能力，应优先评估 G6 v5。
 
 ## 力导向布局首屏慢怎么办？ [#力导向布局首屏慢怎么办]
 
@@ -23,7 +23,7 @@ G6-GL 聚焦 WebGL 渲染、高频状态更新和受控能力边界；G6 v5 提�
 
 ## 浏览器和 WebGL 要求是什么？ [#浏览器和-webgl-要求是什么]
 
-G6-GL 需要 WebGL 1.0、Canvas 2D 和现代 ESM/ES2020 浏览器环境，不要求 WebGL 2.0。最低版本、移动端注意事项和硬件加速边界见 [浏览器与运行环境](/docs/compatibility/browser)。
+G6Lite 需要 WebGL 1.0、Canvas 2D 和现代 ESM/ES2020 浏览器环境，不要求 WebGL 2.0。最低版本、移动端注意事项和硬件加速边界见 [浏览器与运行环境](/docs/compatibility/browser)。
 
 ## 能在 Node.js 或 SSR 阶段直接运行吗？ [#能在-nodejs-或-ssr-阶段直接运行吗]
 
@@ -34,8 +34,8 @@ G6-GL 需要 WebGL 1.0、Canvas 2D 和现代 ESM/ES2020 浏览器环境，不要
 值和类型都从包根导入：
 
 ```ts
-import { Graph } from '@antv/g6-gl';
-import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
+import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-lite';
 ```
 
 `src/` 深层路径不是公开 API。详细边界见 [API 稳定性](/docs/compatibility/api-stability)。

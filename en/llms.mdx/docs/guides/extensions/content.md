@@ -2,12 +2,12 @@
 
 
 
-G6-GL uses **Extension** as the umbrella term. Node, Edge, Label, Decoration, Layout, Behavior, Transform, and Plugin are extension categories. A **Plugin** is only the category for peripheral DOM or stateful capabilities such as a toolbar or minimap; a custom Behavior is an extension, not a Plugin.
+G6Lite uses **Extension** as the umbrella term. Node, Edge, Label, Decoration, Layout, Behavior, Transform, and Plugin are extension categories. A **Plugin** is only the category for peripheral DOM or stateful capabilities such as a toolbar or minimap; a custom Behavior is an extension, not a Plugin.
 
 Prefer configuration and functional style mappings first. Register an extension only when configuration cannot express the capability.
 
 ```ts
-import { register } from '@antv/g6-gl';
+import { register } from '@antv/g6-lite';
 
 register('edge', 'business-relation', {
   base: 'arc',
@@ -22,7 +22,7 @@ Registration assigns an implementation to a stable name. A Graph activates it by
 Stateful Layout, Behavior, Transform, and Plugin extensions should use `extensionFactory()` so each runtime scope receives a fresh instance:
 
 ```ts
-import { extensionFactory, register, type ExtensionContext } from '@antv/g6-gl';
+import { extensionFactory, register, type ExtensionContext } from '@antv/g6-lite';
 
 register(
   'behavior',

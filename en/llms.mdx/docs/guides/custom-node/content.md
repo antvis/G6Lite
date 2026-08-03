@@ -3,7 +3,7 @@
 
 
 ```ts
-import { register } from '@antv/g6-gl';
+import { register } from '@antv/g6-lite';
 
 register('node', 'status-node', {
   type: 'rect',

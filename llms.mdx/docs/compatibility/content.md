@@ -2,7 +2,7 @@
 
 
 
-在接入或升级 G6-GL 前，确认以下边界：
+在接入或升级 G6Lite 前，确认以下边界：
 
 <Cards>
   <Card title="浏览器与运行环境" href="/docs/compatibility/browser" />
@@ -12,4 +12,4 @@
   <Card title="从 G6 v5 迁移" href="/docs/compatibility/g6-v5-migration" />
 </Cards>
 
-G6-GL 需要现代 ESM 浏览器、真实 DOM/Canvas 和 WebGL 1.0。当前仍处于 `0.1.x` beta，Combo 的折叠、嵌套和运行时归组属于实验性能力。
+G6Lite 需要现代 ESM 浏览器、真实 DOM/Canvas 和 WebGL 1.0。当前仍处于 `0.1.x` beta，Combo 的折叠、嵌套和运行时归组属于实验性能力。

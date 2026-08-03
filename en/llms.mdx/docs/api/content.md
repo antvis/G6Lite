@@ -2,11 +2,11 @@
 
 
 
-All supported imports come from `@antv/g6-gl`.
+All supported imports come from `@antv/g6-lite`.
 
 ```ts
-import { Graph, extensionFactory, register, runLayout } from '@antv/g6-gl';
-import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-gl';
+import { Graph, extensionFactory, register, runLayout } from '@antv/g6-lite';
+import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-lite';
 ```
 
 ## Main runtime APIs [#main-runtime-apis]

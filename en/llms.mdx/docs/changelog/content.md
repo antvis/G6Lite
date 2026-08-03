@@ -2,7 +2,7 @@
 
 
 
-G6-GL is currently in the `0.1.0-beta` series. Recent work has concentrated on package-root API boundaries, functional extensions, isolated extension lifecycle, read-only query models, layout cancellation, combo consistency, interaction dispatch, package size governance, examples, and reproducible benchmarks.
+G6Lite is currently in the `0.1.0-beta` series. Recent work has concentrated on package-root API boundaries, functional extensions, isolated extension lifecycle, read-only query models, layout cancellation, combo consistency, interaction dispatch, package size governance, examples, and reproducible benchmarks.
 
 ## Extension and Behavior contracts — 2026-07-29 [#extension-and-behavior-contracts--2026-07-29]
 

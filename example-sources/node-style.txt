@@ -1,7 +1,7 @@
 /**
  * Demo: 节点样式 — 按 data 用函数设置 fill、size
  */
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({

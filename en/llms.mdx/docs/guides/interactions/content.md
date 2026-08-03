@@ -2,7 +2,7 @@
 
 
 
-Without an explicit list, G6-GL enables zoom and canvas dragging. Passing `behaviors: []` disables the defaults.
+Without an explicit list, G6Lite enables zoom and canvas dragging. Passing `behaviors: []` disables the defaults.
 
 ```ts
 behaviors: [

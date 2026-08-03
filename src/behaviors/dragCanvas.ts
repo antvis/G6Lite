@@ -7,6 +7,7 @@
 
 import type { Graph } from '../graph';
 import type { Renderer } from '../renderer/renderer';
+import { getGraphDragDelta } from './dragCoordinates';
 
 export interface DragCanvasOptions {
   /** Keep modifier-key gestures available for brush/lasso selection. Default: true. */
@@ -31,10 +32,8 @@ export function dragCanvas(
   };
   const onMove = (e: MouseEvent) => {
     if (!down) return;
-    const dx = e.clientX - down.x;
-    const dy = e.clientY - down.y;
-    const zoom = renderer.getCamera().zoom;
-    renderer.setCamera({ x: down.camX + dx / zoom, y: down.camY + dy / zoom });
+    const { dx, dy } = getGraphDragDelta(renderer, down, { x: e.clientX, y: e.clientY });
+    renderer.setCamera({ x: down.camX + dx, y: down.camY + dy });
     renderer.scheduleRender();
   };
   const onUp = () => {

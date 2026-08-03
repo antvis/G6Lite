@@ -7,7 +7,7 @@ import { withBasePath } from '@/lib/shared';
 import { LegacyCodeBlock } from './legacy-code-block';
 // import { StatsBand } from './stats-band';
 
-// 缩略图为真实 g6-gl(WebGL)渲染的截图,见 public/layouts/*.png。
+// 缩略图为真实 G6Lite（WebGL）渲染的截图,见 public/layouts/*.png。
 // 重新生成:npx vite --port 5179 --no-open & 然后 node scripts/capture-thumbnails.mjs。
 const relationshipLayouts = [
   { type: 'force', title: '力导向', desc: '社群结构自然展开', bg: '#f8fbff' },
@@ -104,7 +104,7 @@ const heroShowcases = [
 
 const heroMarqueeCases = [...heroShowcases, ...heroShowcases];
 
-// 高频交互指标：聚焦 G6-GL 渲染后的增量更新路径。
+// 高频交互指标：聚焦 G6Lite 渲染后的增量更新路径。
 const perf = [
   {
     action: '节点高亮',
@@ -134,7 +134,7 @@ const perfSummary = [
 
 const perfFlow = ['命中元素', '状态变更', 'GPU patch', '局部刷新'];
 
-const codeExample = `import { Graph } from '@antv/g6-gl';
+const codeExample = `import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
   container: 'container',
@@ -158,7 +158,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center px-6 pb-14 pt-8 lg:pb-16">
           <div className="animate-in-up mt-12 flex w-full flex-col items-center text-center sm:mt-16">
             <h1 className="home-hero-title mt-7 max-w-4xl text-[2.6rem] font-medium leading-[1.12] text-fd-foreground sm:text-[4.25rem]">
-              <span className="home-hero-title-accent">G6-GL</span> · 图可视化引擎
+              <span className="home-hero-title-accent">G6Lite</span> · 图可视化引擎
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-fd-muted-foreground">
               面向大规模图分析的轻量引擎。以 WebGL
@@ -382,16 +382,16 @@ export default function HomePage() {
         <div className="home-features-shell mx-auto w-full max-w-7xl px-6 py-20 sm:py-24">
           <div className="home-live-graph-layout">
             <div className="home-live-graph-copy">
-              <span className="home-kicker">Why G6-GL</span>
+              <span className="home-kicker">Why G6Lite</span>
               <h2 className="home-live-graph-title mt-4 text-3xl font-semibold text-fd-foreground">
                 <span>轻量内核，全能体验</span>
               </h2>
               <p className="mt-3 leading-7 text-fd-muted-foreground">
-                G6-GL 是面向大规模关系网络的可视化底座。融合 WebGL 加速、GPU
+                G6Lite 是面向大规模关系网络的可视化底座。融合 WebGL 加速、GPU
                 拾取与常用布局算法，让复杂图在浏览器中流畅运行。
               </p>
 
-              <div className="home-live-graph-metrics" aria-label="G6-GL 性能指标">
+              <div className="home-live-graph-metrics" aria-label="G6Lite 性能指标">
                 <div className="home-live-graph-primary-metric">
                   <strong>~0ms</strong>
                   <span>实时状态更新</span>
@@ -425,7 +425,7 @@ export default function HomePage() {
           <div>
             <span className="home-kicker">Start Building</span>
             <h2 className="mt-4 text-3xl font-semibold text-fd-foreground sm:text-4xl">
-              开始使用 G6-GL
+              开始使用 G6Lite
             </h2>
             <p className="mt-3 max-w-xl leading-7 text-fd-muted-foreground">
               一行命令安装，30 分钟跑通你的第一个大规模图可视化场景。
@@ -446,7 +446,7 @@ export default function HomePage() {
               </div>
               <div className="home-install-command">
                 <span className="home-install-prompt">$</span>
-                <span className="truncate">npm install @antv/g6-gl</span>
+                <span className="truncate">npm install @antv/g6-lite</span>
               </div>
             </div>
           </div>
@@ -575,7 +575,7 @@ function FeatureGraphShowcase() {
       <div className="home-graph-process-core">
         <div className="home-graph-process-core-head">
           <Network className="size-5" />
-          <div><strong>G6-GL</strong><small>WEBGL GRAPH ENGINE</small></div>
+          <div><strong>G6Lite</strong><small>WEBGL GRAPH ENGINE</small></div>
         </div>
         <div className="home-graph-process-steps">
           <span><Layers3 className="size-3.5" /><b>Layout</b><small>自动布局</small></span>

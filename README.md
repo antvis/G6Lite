@@ -1,16 +1,16 @@
 [简体中文](./README.zh-CN.md) | English
 
-<h1 align="center">G6-GL</h1>
+<h1 align="center">G6Lite</h1>
 
 <p align="center">
   A lightweight, high-performance WebGL engine for interactive graph visualization.
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@antv/g6-gl"><img alt="npm version" src="https://img.shields.io/npm/v/@antv/g6-gl.svg"></a>
+  <a href="https://www.npmjs.com/package/@antv/g6-lite"><img alt="npm version" src="https://img.shields.io/npm/v/@antv/g6-lite.svg"></a>
   <a href="https://github.com/antvis/G6Lite/actions/workflows/build.yml"><img alt="build" src="https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg"></a>
-  <a href="https://bundlephobia.com/package/@antv/g6-gl"><img alt="minified and gzipped size" src="https://img.shields.io/bundlephobia/minzip/@antv/g6-gl"></a>
-  <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/npm/l/@antv/g6-gl.svg"></a>
+  <a href="https://bundlephobia.com/package/@antv/g6-lite"><img alt="minified and gzipped size" src="https://img.shields.io/bundlephobia/minzip/@antv/g6-lite"></a>
+  <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/npm/l/@antv/g6-lite.svg"></a>
 </p>
 
 <p align="center">
@@ -20,9 +20,9 @@
   <a href="https://g6-gl.antv.vision/en/docs/examples">Examples</a>
 </p>
 
-![G6-GL rendering a large relationship graph](./site/public/examples/large.png)
+![G6Lite rendering a large relationship graph](./site/public/examples/large.png)
 
-## Why G6-GL
+## Why G6Lite
 
 - **GPU-first graph rendering** — Nodes and edges share a batched WebGL pipeline designed for responsive relationship exploration.
 - **Incremental by design** — State, position, and data changes are scheduled by refresh level, avoiding unrelated full rebuilds.
@@ -32,7 +32,7 @@
 ## Install
 
 ```bash
-npm install @antv/g6-gl
+npm install @antv/g6-lite
 ```
 
 ## Quick Start
@@ -46,7 +46,7 @@ Create a container with an explicit size:
 Then create and render an interactive graph:
 
 ```ts
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
   container: 'graph',
@@ -76,7 +76,7 @@ const graph = new Graph({
 await graph.render();
 ```
 
-Only package-root exports from `@antv/g6-gl` and `package.json#exports` are public API. Deep `src/` paths are internal and may change without notice.
+Only package-root exports from `@antv/g6-lite` and `package.json#exports` are public API. Deep `src/` paths are internal and may change without notice.
 
 ## Learn More
 

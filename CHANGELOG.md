@@ -1,6 +1,12 @@
-# @antv/g6-gl
+# @antv/g6-lite
 
 ## Unreleased
+
+### Branding and package name
+
+- Restore the product brand to `G6Lite` and the published package coordinate to `@antv/g6-lite`.
+- Treat `G6-GL` and `@antv/g6-gl` as historical names only; current installation and import examples use `@antv/g6-lite`.
+- Keep the GitHub repository at `antvis/G6Lite`. Website domain naming and configuration are outside this rename and remain unchanged.
 
 ### Beta API rebaseline
 
@@ -22,7 +28,7 @@ See the [G6 v5 migration guide](./site/content/docs/zh/compatibility/g6-v5-migra
 
 ### Patch Changes
 
-- First public release of G6-GL (0.1.0).
+- First public release under the historical G6-GL brand (0.1.0).
 
   A high-performance WebGL graph analysis engine for large-scale graph data.
 

@@ -158,8 +158,8 @@ export class PickingManager {
     if (this.state === 'failed' || this.state === 'destroyed') return;
     this.releaseResources(true);
     this.state = 'failed';
-    if (error === undefined) console.warn(`[G6-GL] ${message}; falling back to CPU picking`);
-    else console.warn(`[G6-GL] ${message}; falling back to CPU picking`, error);
+    if (error === undefined) console.warn(`[G6Lite] ${message}; falling back to CPU picking`);
+    else console.warn(`[G6Lite] ${message}; falling back to CPU picking`, error);
   }
 
   private releaseResources(deleteResources: boolean): void {

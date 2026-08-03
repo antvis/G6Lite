@@ -3,10 +3,10 @@ title: 自定义节点
 description: 使用统一 register 和函数式 NodeExtension 扩展节点表现形式
 ---
 
-G6-GL 推荐通过统一的 `register()` 注册函数式节点扩展，不要求继承引擎内部基类。
+G6Lite 推荐通过统一的 `register()` 注册函数式节点扩展，不要求继承引擎内部基类。
 
 ```ts
-import { register, type NodeExtension } from '@antv/g6-gl';
+import { register, type NodeExtension } from '@antv/g6-lite';
 
 const statusNode: NodeExtension = {
   base: 'rect',
@@ -29,7 +29,7 @@ register('node', 'status-node', statusNode);
 
 ## 内置扩展
 
-`breathing-node` 已由 G6-GL 内置注册，可以直接在配置中使用：
+`breathing-node` 已由 G6Lite 内置注册，可以直接在配置中使用：
 
 ```ts
 const graph = new Graph({

@@ -1,5 +1,5 @@
 /**
- * G6-GL Performance Benchmark — browser-based benchmark runner.
+ * G6Lite Performance Benchmark — browser-based benchmark runner.
  * Runs 5 test scenarios across configurable data scale tiers.
  */
 

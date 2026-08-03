@@ -17,7 +17,7 @@ import {
   type PluginExtension,
   type PluginOptions,
   type TransformExtension,
-} from '@antv/g6-gl';
+} from '@antv/g6-lite';
 
 const externalNameRenderer: DecorationRenderer<string> = {
   measure({ ctx, data }) {

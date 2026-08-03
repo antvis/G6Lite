@@ -1,7 +1,7 @@
 /**
  * Demo: process-parallel-edges
  */
-import { Graph, type TooltipContext } from '@antv/g6-gl';
+import { Graph, type TooltipContext } from '@antv/g6-lite';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({

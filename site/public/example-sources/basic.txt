@@ -1,7 +1,7 @@
 /**
  * Demo: 最简示例 — 少量节点边 + 环形布局
  */
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({

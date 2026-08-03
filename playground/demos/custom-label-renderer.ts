@@ -1,6 +1,6 @@
 /**
  * Demo: unified custom node/edge LabelRenderer lifecycle.
- * The multiline behavior lives entirely in this demo, not in G6-GL core.
+ * The multiline behavior lives entirely in this demo, not in G6Lite core.
  */
 import { Graph, register, type LabelRenderer } from '../../src/index.ts';
 

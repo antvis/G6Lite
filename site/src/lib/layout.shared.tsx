@@ -22,7 +22,7 @@ export function baseOptions(locale: Locale): BaseLayoutProps {
         <span className="site-brand">
           <AntVLogo className="site-brand-logo" />
           <span className="site-brand-divider" />
-          <span className="site-brand-product">G6-GL</span>
+          <span className="site-brand-product">G6Lite</span>
         </span>
       ),
     },

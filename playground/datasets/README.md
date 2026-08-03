@@ -17,7 +17,7 @@
 
 ## 数据格式
 
-转换后为 G6-GL 标准 `GraphData`:
+转换后为 G6Lite 标准 `GraphData`:
 
 ```jsonc
 {

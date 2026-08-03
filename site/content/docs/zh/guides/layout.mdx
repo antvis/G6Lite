@@ -9,7 +9,7 @@ description: 内置布局类型、选型建议、常用参数与 Worker 支持
 layout: { type: 'force', linkDistance: 100 }
 ```
 
-所有官方布局都可以直接通过 `type` 使用。G6-GL 会在内部按需加载对应算法，不需要额外导入或调用启用函数。
+所有官方布局都可以直接通过 `type` 使用。G6Lite 会在内部按需加载对应算法，不需要额外导入或调用启用函数。
 
 ## 布局选型
 
@@ -64,7 +64,7 @@ layout: { type: 'force', linkDistance: 100, worker: true }
 
 ## Worker
 
-`layout.worker: true` 会将布局计算放到 Web Worker 中，避免阻塞主线程。G6-GL 会对大图的 force 系布局自动启用 worker。
+`layout.worker: true` 会将布局计算放到 Web Worker 中，避免阻塞主线程。G6Lite 会对大图的 force 系布局自动启用 worker。
 
 `mindmap`、`indented`、`fishbone` 是 O(V+E) 的内置函数式树布局，始终在主线程执行；即使配置 `worker: true` 也不会退化为其他布局。
 
@@ -82,7 +82,7 @@ graph.setLayout({ type: 'grid', cols: 6 });
 await graph.layout();
 ```
 
-不传 `layout` 时，G6-GL 会使用节点自带的 `x` / `y`，缺省为 0。
+不传 `layout` 时，G6Lite 会使用节点自带的 `x` / `y`，缺省为 0。
 
 ## 相关
 

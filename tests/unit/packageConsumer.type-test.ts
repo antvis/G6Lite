@@ -13,7 +13,7 @@ import {
   type NodeModel,
   type PluginExtension,
   type PluginOptions,
-} from '@antv/g6-gl';
+} from '@antv/g6-lite';
 
 declare const options: GraphOptions;
 declare const graph: Graph;

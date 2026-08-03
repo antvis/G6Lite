@@ -1,15 +1,15 @@
-# G6-GL
+# G6Lite
 
 English | [简体中文](./README.md)
 
-[![npm version](https://img.shields.io/npm/v/@antv/g6-gl.svg)](https://www.npmjs.com/package/@antv/g6-gl)
+[![npm version](https://img.shields.io/npm/v/@antv/g6-lite.svg)](https://www.npmjs.com/package/@antv/g6-lite)
 [![build](https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg)](https://github.com/antvis/G6Lite/actions/workflows/build.yml)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@antv/g6-gl)](https://bundlephobia.com/package/@antv/g6-gl)
-[![license](https://img.shields.io/npm/l/@antv/g6-gl.svg)](./LICENSE)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@antv/g6-lite)](https://bundlephobia.com/package/@antv/g6-lite)
+[![license](https://img.shields.io/npm/l/@antv/g6-lite.svg)](./LICENSE)
 
 A lightweight, high-performance WebGL graph visualization engine.
 
-![G6-GL rendering a large relationship graph](./site/public/examples/large.png)
+![G6Lite rendering a large relationship graph](./site/public/examples/large.png)
 
 ## Core values
 
@@ -21,7 +21,7 @@ A lightweight, high-performance WebGL graph visualization engine.
 ## Install
 
 ```bash
-npm install @antv/g6-gl
+npm install @antv/g6-lite
 ```
 
 ## Minimal example
@@ -35,7 +35,7 @@ Prepare a container with an explicit size:
 Then create and render a graph:
 
 ```ts
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
   container: 'graph',
@@ -53,7 +53,7 @@ const graph = new Graph({
 await graph.render();
 ```
 
-Only package-root exports from `@antv/g6-gl` and `package.json#exports` are public API. Deep `src/` paths are not compatibility boundaries.
+Only package-root exports from `@antv/g6-lite` and `package.json#exports` are public API. Deep `src/` paths are not compatibility boundaries.
 
 ## Continue reading
 

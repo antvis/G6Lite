@@ -22,7 +22,7 @@ import type {
   NodeGraphEvent,
   PluginExtension,
   TransformExtension,
-} from '@antv/g6-gl';
+} from '@antv/g6-lite';
 
 type Equal<Left, Right> =
   (<Value>() => Value extends Left ? 1 : 2) extends <Value>() => Value extends Right ? 1 : 2
@@ -155,11 +155,11 @@ const comboStyle: ComboStyleValue<number> = (combo) => {
 void comboStyle;
 
 // @ts-expect-error Internal storage records are not exported from the package root.
-type InternalNodeExport = import('@antv/g6-gl').InternalNode;
+type InternalNodeExport = import('@antv/g6-lite').InternalNode;
 // @ts-expect-error Internal storage records are not exported from the package root.
-type InternalEdgeExport = import('@antv/g6-gl').InternalEdge;
+type InternalEdgeExport = import('@antv/g6-lite').InternalEdge;
 // @ts-expect-error Internal storage records are not exported from the package root.
-type InternalComboExport = import('@antv/g6-gl').InternalCombo;
+type InternalComboExport = import('@antv/g6-lite').InternalCombo;
 
 export type PublicApiTypeAssertions =
   | NodeGetter

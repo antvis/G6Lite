@@ -21,7 +21,7 @@ export function ExamplesCenter({ locale }: { locale: Locale }) {
           back: '返回文档',
           directory: '图表示例',
           search: '搜索示例、能力或 API',
-          eyebrow: 'G6-GL 图表示例',
+          eyebrow: 'G6Lite 图表示例',
           title: '图表示例',
           description:
             '按能力浏览可直接运行的图可视化示例。查看真实效果、源码与数据，快速理解每个公开 API 的使用方式。',
@@ -33,7 +33,7 @@ export function ExamplesCenter({ locale }: { locale: Locale }) {
           back: 'Back to docs',
           directory: 'Graph examples',
           search: 'Search examples, capabilities, or APIs',
-          eyebrow: 'G6-GL graph examples',
+          eyebrow: 'G6Lite graph examples',
           title: 'Graph examples',
           description:
             'Browse live graph visualization examples by capability. Inspect real output, source, and data to understand each public API.',

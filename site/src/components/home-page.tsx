@@ -6,7 +6,7 @@ import { siteConfig } from '@/lib/site-config';
 import { withBasePath } from '@/lib/shared';
 import { CodeBlock } from './home-code-block';
 
-const codeExample = `import { Graph } from '@antv/g6-gl';
+const codeExample = `import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
   container: 'graph',
@@ -28,7 +28,7 @@ const content = {
     eyebrow: 'AntV 图可视化引擎',
     title: '让大规模关系图保持轻量、清晰、可交互',
     description:
-      'G6-GL 以 WebGL 批渲染和增量更新为核心，提供数据、布局、交互、状态与扩展的一体化 API。',
+      'G6Lite 以 WebGL 批渲染和增量更新为核心，提供数据、布局、交互、状态与扩展的一体化 API。',
     start: '快速开始',
     examples: '查看示例',
     valuesTitle: '为分析型图可视化设计',
@@ -56,14 +56,14 @@ const content = {
     ],
     metricsLink: '查看技术指标',
     ctaTitle: '从第一个可交互关系图开始',
-    ctaDescription: '安装 @antv/g6-gl，按照快速开始完成容器、数据、布局和销毁链路。',
+    ctaDescription: '安装 @antv/g6-lite，按照快速开始完成容器、数据、布局和销毁链路。',
     docs: '阅读文档',
   },
   en: {
     eyebrow: 'AntV graph visualization engine',
     title: 'Keep large relationship graphs lightweight, clear, and interactive',
     description:
-      'G6-GL combines WebGL batch rendering with incremental updates through one API for data, layouts, interactions, states, and extensions.',
+      'G6Lite combines WebGL batch rendering with incremental updates through one API for data, layouts, interactions, states, and extensions.',
     start: 'Quick start',
     examples: 'Explore examples',
     valuesTitle: 'Designed for analytical graph visualization',
@@ -106,7 +106,7 @@ const content = {
     metricsLink: 'Read technical metrics',
     ctaTitle: 'Start with your first interactive relationship graph',
     ctaDescription:
-      'Install @antv/g6-gl and follow the quick start for the container, data, layout, and cleanup lifecycle.',
+      'Install @antv/g6-lite and follow the quick start for the container, data, layout, and cleanup lifecycle.',
     docs: 'Read documentation',
   },
 } as const;
@@ -161,7 +161,7 @@ export function HomePage({ locale }: { locale: Locale }) {
             </div>
             <div className="landing-install" aria-label="npm install command">
               <span>$</span>
-              <code>npm install @antv/g6-gl</code>
+              <code>npm install @antv/g6-lite</code>
             </div>
           </div>
           <Link
@@ -172,8 +172,8 @@ export function HomePage({ locale }: { locale: Locale }) {
               src={withBasePath('/examples/real-dataset.png')}
               alt={
                 locale === 'zh'
-                  ? 'G6-GL 真实数据集渲染示例'
-                  : 'G6-GL real dataset rendering example'
+                  ? 'G6Lite 真实数据集渲染示例'
+                  : 'G6Lite real dataset rendering example'
               }
               fill
               priority

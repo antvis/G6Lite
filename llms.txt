@@ -29,6 +29,7 @@
 - 示例
   - [图表示例](/docs/examples): 按 G6Lite 公开能力分类浏览并直接运行官网示例
   - [最简关系图](/docs/examples/basic): 使用最少配置渲染一个可缩放、可拖拽的关系图
+  - [默认主题与交互状态](/docs/examples/default-theme): 并排检查 light、dark 预设主题和节点、边默认状态
   - [节点与边增删改](/docs/examples/data-mutations): 集中演示节点和边的单个、批量新增、更新和删除
   - [查询、批量状态与可见性](/docs/examples/queries-and-states): 验证元素、邻接、状态查询，以及批量状态和可见性控制
   - [节点数据映射样式](/docs/examples/node-style): 按业务字段动态设置节点颜色、尺寸和高亮交互
@@ -50,7 +51,8 @@
   - [兼容性总览](/docs/compatibility): 浏览器、运行环境、公开 API 稳定性与 G6 v5 迁移边界
   - [浏览器与运行环境](/docs/compatibility/browser): G6Lite 的 WebGL 支持矩阵、最低浏览器版本与已知问题
   - [API 稳定性与发布边界](/docs/compatibility/api-stability): G6Lite 的公开入口、稳定能力、弃用兼容层与实验性能力说明
-  - [从 G6 v5 迁移](/docs/compatibility/g6-v5-migration): 评估从 G6 v5 迁移到 G6Lite 时的能力差异、边界与改造点
+  - [常用图库能力对比](/docs/compatibility/library-comparison): 按渲染、布局、元素、交互、扩展、算法和运行环境对比 G6Lite、G6 v5、sigma.js 与 Cytoscape.js
+  - [从 G6 v5 迁移](/docs/compatibility/g6-v5-migration): 按配置、数据、Behavior、事件、Graph API 和扩展体系迁移到 G6Lite
 - [常见问题](/docs/faq): G6Lite 的选型、性能、兼容性、SSR、TypeScript 与 Combo 高频问题
 - [更新日志](/docs/changelog): G6Lite 的版本与变更记录
 
@@ -85,6 +87,7 @@
 - Examples
   - [Graph examples](/en/docs/examples): Browse and run website examples organized by G6Lite public capabilities
   - [Minimal graph](/en/docs/examples/basic): Render a zoomable and draggable graph with minimal configuration
+  - [Default themes and interaction states](/en/docs/examples/default-theme): Inspect light and dark presets together with built-in node and edge states
   - [Node and edge mutations](/en/docs/examples/data-mutations): Demonstrate individual and batch node and edge additions, updates, and removals
   - [Queries, batch states, and visibility](/en/docs/examples/queries-and-states): Inspect elements, adjacency, and states while controlling batch states and visibility
   - [Data-driven node styles](/en/docs/examples/node-style): Map business fields to node colors, sizes, and highlight interactions
@@ -106,6 +109,7 @@
   - [Compatibility overview](/en/docs/compatibility): Browser, runtime, public API stability, and G6 v5 migration boundaries
   - [Browsers and runtime environment](/en/docs/compatibility/browser): WebGL, ESM, browser support, SSR boundaries, and known runtime constraints
   - [API stability and release boundary](/en/docs/compatibility/api-stability): Public package entry points, deprecated compatibility APIs, and experimental capabilities
-  - [Migrate from G6 v5](/en/docs/compatibility/g6-v5-migration): Evaluate capability differences and migration work before moving a G6 v5 project to G6Lite
+  - [Graph library comparison](/en/docs/compatibility/library-comparison): Compare G6Lite, G6 v5, sigma.js, and Cytoscape.js across rendering, layout, elements, interaction, extensions, algorithms, and runtimes
+  - [Migrate from G6 v5](/en/docs/compatibility/g6-v5-migration): Migrate configuration, data, Behaviors, events, Graph APIs, and extensions from G6 v5 to G6Lite
 - [FAQ](/en/docs/faq): Selection, performance, compatibility, SSR, TypeScript, and combo questions
 - [Changelog](/en/docs/changelog): Important G6Lite beta changes and migration boundaries

@@ -17,4 +17,4 @@ edge: {
 }
 ```
 
-Use line, arc, cubic, quadratic, or polyline edges according to the topology. Enable `process-parallel-edges` when multiple edges share endpoints. See [parallel edges](/en/docs/guides/parallel-edges).
+Use line, arc, cubic, or polyline edges according to the topology. Enable `process-parallel-edges` when multiple edges share endpoints. See [parallel edges](/en/docs/guides/parallel-edges).

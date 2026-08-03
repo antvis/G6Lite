@@ -104,6 +104,477 @@ Package-root types cover graph options and data, nodes, edges, combos, labels, s
 The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).
 
 
+# API stability and release boundary (/en/docs/compatibility/api-stability)
+
+
+
+G6Lite remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
+
+Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
+
+## ESM and CommonJS [#esm-and-commonjs]
+
+The package root is ESM-only and does not provide a `require('@antv/g6-lite')` condition. A CommonJS feasibility test confirmed that a synchronous entry and declarations can be emitted, but a dual package must also preserve two runtime contracts:
+
+* ESM and CommonJS consumers must share one extension registry when both formats are loaded by the same application.
+* After application bundling, `layout.worker: true` must still resolve and load the package's module Worker instead of silently falling back to the main thread.
+
+The current CommonJS consumer build cannot reliably preserve that Worker asset relationship and requests a missing Worker file; independent dual builds also create separate module-scoped registries. This release therefore does not publish a partial CommonJS build whose synchronous import works while Worker or extension behavior differs.
+
+Applications that still use a CommonJS toolchain can cross the client boundary with dynamic import:
+
+```js
+const { Graph } = await import('@antv/g6-lite');
+```
+
+This does not change the requirement for a real DOM, Canvas, and WebGL environment.
+
+Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
+
+Combo collapse, nesting, and runtime regrouping remain experimental. Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.
+
+
+# Browsers and runtime environment (/en/docs/compatibility/browser)
+
+
+
+G6Lite prefers WebGL 2.0 and falls back to WebGL 1.0. Canvas 2D is used for labels and combo outlines, so WebGL 2.0 is not a hard requirement.
+
+## Minimum versions [#minimum-versions]
+
+| Browser                  | Minimum        | Release year | Main boundary                                     |
+| ------------------------ | -------------- | ------------ | ------------------------------------------------- |
+| Chrome                   | 80+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
+| Firefox                  | 74+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
+| Safari on macOS          | 13.1+          | 2020         | ES2020 syntax and WebGL 1.0                       |
+| Safari on iOS            | 13.4+          | 2020         | ES2020 syntax; mobile GPU limits still apply      |
+| Edge                     | 80+ (Chromium) | 2020         | Chromium-based Edge only; EdgeHTML is unsupported |
+| Android WebView / Chrome | 80+            | 2020         | ES2020 syntax; validate low-end GPU capacity      |
+
+Internet Explorer and EdgeHTML are not supported. These are syntax and platform boundaries for the untranspiled ESM-only package, not a complete certified device matrix. See [Can I Use optional chaining](https://caniuse.com/mdn-javascript_operators_optional_chaining), [Chrome 80](https://developer.chrome.com/blog/new-in-chrome-80), [Firefox 74](https://www.mozilla.org/firefox/74.0/releasenotes/), and [Safari 13.1](https://webkit.org/blog/10247/new-webkit-features-in-safari-13-1/).
+
+## Coverage reference [#coverage-reference]
+
+Using global usage data from `caniuse-lite@1.0.30001806`, retrieved on **2026-07-29**:
+
+* The browser families and minimum versions explicitly listed above account for approximately &#x2A;*90.4%** of global browser usage.
+* Across every browser tracked by Can I Use, versions supporting both WebGL 1.0 and native ESM account for approximately &#x2A;*94.8%**.
+
+Sources: [Can I Use WebGL](https://caniuse.com/webgl), [JavaScript modules](https://caniuse.com/es6-module), and [caniuse-lite](https://github.com/browserslist/caniuse-lite). These figures are selection references, not G6Lite device certification rates. Enterprise browsers, embedded WebViews, disabled GPU acceleration, and low-end devices require separate validation.
+
+## Comparison with sigma.js [#comparison-with-sigmajs]
+
+The sigma.js v3 README describes a WebGL renderer for graphs with thousands of nodes and edges, built on Graphology. Its `sigma@3.0.3` package provides both ESM and CommonJS builds. The official [README](https://github.com/jacomyal/sigma.js#readme) and [package metadata](https://github.com/jacomyal/sigma.js/blob/main/packages/sigma/package.json) checked on 2026-07-29 do not publish an equivalent minimum-browser matrix.
+
+An omitted matrix should not be interpreted as legacy-browser support. Both libraries require WebGL and a modern JavaScript toolchain; G6Lite explicitly documents the syntax floor of its untranspiled package, while sigma.js consumers need to validate their own build target.
+
+G6Lite needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
+
+The renderer uses `regl`, which dynamically compiles WebGL commands. If the host enables Content Security Policy, `script-src` must allow `'unsafe-eval'`; `'wasm-unsafe-eval'` alone is not sufficient. Hosts that cannot allow this directive are not supported by the current renderer.
+
+Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
+
+
+# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
+
+
+
+G6Lite keeps several G6 configuration concepts, but it is not a compatibility build of `@antv/g6` and does not promise source-compatible options or instance methods. This page compares `@antv/g6@5.1.1` with `@antv/g6-lite@0.1.0-beta.22`, checked on **2026-08-03**.
+
+## Decide whether to migrate [#decide-whether-to-migrate]
+
+A strong candidate normally meets all of these conditions: target browsers reliably support WebGL; the bottleneck is picking, state, and batch updates after rendering a large graph; the product mainly uses circle/rect nodes, common edges, labels, combos, and core interaction; and the team can accept the API stability boundary of a `0.1.x` beta.
+
+Do not migrate directly when the application depends on G6 v5 multiple renderers, Node.js server rendering, React nodes, 3D, general animation orchestration, the mature plugin catalog, graph algorithms, or many arbitrary Canvas/SVG scene-graph shapes. Read the [graph library comparison](/en/docs/compatibility/library-comparison) and run both implementations on real data first.
+
+## Installation and imports [#installation-and-imports]
+
+```bash
+npm install @antv/g6-lite
+```
+
+```ts
+// G6 v5
+import { Graph, NodeEvent } from '@antv/g6';
+
+// G6Lite: consume the package-root public API only
+import { Graph, register, extensionFactory } from '@antv/g6-lite';
+import type { GraphData, GraphEventMap, GraphOptions } from '@antv/g6-lite';
+```
+
+Do not replace `@antv/g6/lib/...` imports with G6Lite `src/...` paths. The G6Lite public contract is limited to `package.json#exports` and package-root exports.
+
+## Minimal configuration side by side [#minimal-configuration-side-by-side]
+
+G6 v5:
+
+```ts
+import { Graph } from '@antv/g6';
+
+const graph = new Graph({
+  container: 'container',
+  data: {
+    nodes: [
+      { id: 'a', data: { label: 'A' } },
+      { id: 'b', data: { label: 'B' } },
+    ],
+    edges: [{ id: 'a-b', source: 'a', target: 'b' }],
+  },
+  node: {
+    type: 'circle',
+    style: {
+      size: 24,
+      fill: '#1783FF',
+      labelText: (datum) => String(datum.data?.label ?? datum.id),
+    },
+  },
+  edge: { type: 'line', style: { stroke: '#B8C2D1', endArrow: true } },
+  layout: { type: 'force', linkDistance: 100 },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-element', 'click-select'],
+});
+
+await graph.render();
+```
+
+Equivalent G6Lite starting point:
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: 'container',
+  data: {
+    nodes: [
+      { id: 'a', data: { label: 'A' } },
+      { id: 'b', data: { label: 'B' } },
+    ],
+    edges: [{ id: 'a-b', source: 'a', target: 'b' }],
+  },
+  node: {
+    type: 'circle',
+    style: {
+      size: 24,
+      fill: '#1783FF',
+      label: (node) => String(node.data?.label ?? node.id),
+    },
+  },
+  edge: { type: 'line', style: { stroke: '#B8C2D1', endArrow: true } },
+  layout: { type: 'force', linkDistance: 100 },
+  behaviors: [
+    { type: 'zoom-canvas', sensitivity: 0.0015, minZoom: 0.1, maxZoom: 20 },
+    'drag-canvas',
+    'drag-node',
+    'click-select',
+  ],
+});
+
+await graph.render();
+```
+
+The immediate differences are `labelText` becoming `label`, `drag-element` becoming `drag-node`, and every node, edge, and extension style field needing validation against G6Lite package-root types.
+
+## GraphOptions mapping [#graphoptions-mapping]
+
+| Option                    | G6 v5                            | G6Lite migration                                                                                     |
+| ------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `container`               | String or container              | String or `HTMLElement`                                                                              |
+| `data`                    | nodes / edges / combos           | Same concepts, but G6Lite requires `nodes` and `edges` arrays to exist                               |
+| `node` / `edge` / `combo` | Full element configuration       | All supported, but types, style fields, and extension mechanisms are not field-compatible            |
+| `layout`                  | Built-in and custom layouts      | 14 built-ins plus registered layouts; validate algorithm options individually                        |
+| `behaviors`               | Behavior names or objects        | Strings or objects; names and options are mapped below                                               |
+| `transforms`              | Built-in and custom Transforms   | `process-parallel-edges` and registered Transforms are supported with a different lifecycle contract |
+| `plugins`                 | Rich built-in and custom plugins | Registered Plugin lifecycle is supported; built-ins and ecosystem are currently smaller              |
+| `theme`                   | Theme and palette system         | `light` / `dark` plus a limited `ThemeTokens` override surface; fields differ                        |
+| `animation`               | General animation configuration  | No equivalent GraphOptions animation system                                                          |
+| `width` / `height`        | Constructor options and resize   | Container-driven; use `graph.setSize(width, height)` at runtime                                      |
+| renderer                  | Canvas / SVG / WebGL and others  | Fixed hybrid path: WebGL for nodes/edges, Canvas 2D for labels/combos                                |
+
+`graph.updateOptions()` currently updates `node`, `edge`, and `theme` only. Do not assume G6 v5 `setOptions()` semantics for replacing Behaviors, Plugins, Transforms, or Layout. Use `setLayout()` for layouts and rebuild or update Graph through the documented lifecycle for other configuration changes.
+
+## Data field mapping [#data-field-mapping]
+
+| G6 v5 field              | G6Lite                                 | Notes                                                                                |
+| ------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------ |
+| `GraphData.nodes`        | `GraphData.nodes`                      | Required; pass `[]` when empty                                                       |
+| `GraphData.edges`        | `GraphData.edges`                      | Required                                                                             |
+| `GraphData.combos`       | `GraphData.combos?`                    | Supported, but collapse, nesting, and runtime regrouping remain experimental in beta |
+| `node.id`                | `node.id`                              | Required and unique                                                                  |
+| `node.data`              | `node.data`                            | Store business fields here; do not rely on G6 v5 internal model fields               |
+| `node.style`             | `options.node.style`                   | Move shared styles to GraphOptions and use functions for per-node mapping            |
+| `node.states`            | `node.states`                          | Initial states are supported; mutate with runtime state APIs                         |
+| `node.combo` / `comboId` | `node.comboId`                         | Normalize to `comboId`                                                               |
+| `node.x` / `node.y`      | Same names                             | Initial coordinates when layout is omitted                                           |
+| `edge.id`                | `edge.id?`                             | Keep a stable explicit id for state and update APIs                                  |
+| `edge.source` / `target` | Same names                             | Must reference existing node ids                                                     |
+| `edge.data`              | `edge.data`                            | Business fields consumed by functional style mapping                                 |
+| `combo.parentId`         | `combo.parentId`                       | Defines nested combos                                                                |
+| `combo.style`            | `combo.style` or `options.combo.style` | Per-combo overrides and global configuration are both supported                      |
+
+Nodes in the initial `GraphData` may omit coordinates when a layout is configured. Runtime `addNode()` requires `x` and `y`; migrate bulk creation to one `setData()` plus layout, or calculate coordinates before calling `addNode(s)`.
+
+## Node, Edge, and Combo configuration [#node-edge-and-combo-configuration]
+
+G6Lite builds in `circle` and `rect` nodes and `line`, `arc`, `polyline`, and `cubic` edges. `NodeConfig.type` and `EdgeConfig.type` also accept registered names, but custom extensions reuse built-in WebGL primitives and overlays rather than arbitrary G6 scene-graph shape trees.
+
+Common mappings:
+
+* Node text: migrate G6 v5 `labelText` to G6Lite `node.style.label`.
+* Node size: use `size` for circles; rectangles can use `width`, `height`, and `borderRadius`.
+* Edge arrows: use `startArrow`, `endArrow`, and `arrowSize`.
+* Edge curves: do not copy quadratic and other type names blindly; choose `arc`, `cubic`, or `polyline` and configure `curvature`, `curveOffset`, `radius`, or `router`.
+* Labels: node and edge labels support backgrounds, font styling, and placement; register a `label` extension for complex drawing instead of reaching into internal Canvas layers.
+* State styles: use `node.stateStyles` and `edge.stateStyles`; combo state styles live under `combo.style.stateStyles`.
+* Parallel edges: enable `edge.parallelEdges` or the `process-parallel-edges` Transform.
+
+Combo declaration, nesting, collapse, runtime regrouping, states, and group drag are supported. See [Combo](/en/docs/guides/combo) and discard older migration notes that claimed G6Lite had no Combo support.
+
+## Behavior mapping [#behavior-mapping]
+
+| Common G6 v5 Behavior | G6Lite                | Migration note                                                                                                    |
+| --------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `zoom-canvas`         | `zoom-canvas`         | Same name; G6Lite adds `sensitivity`, `minZoom`, and `maxZoom`                                                    |
+| `drag-canvas`         | `drag-canvas`         | Same name; enabled with zoom when behaviors is omitted                                                            |
+| `drag-element`        | `drag-node`           | Drags nodes and also drags a hit Combo as a group                                                                 |
+| `click-select`        | `click-select`        | Single/multi-select options are supported; rebind payload types                                                   |
+| `hover-activate`      | `hover-highlight`     | `highlight-node` and `highlight-edge` are also available                                                          |
+| `brush-select`        | `brush-select`        | Shift/ctrl trigger options are supported                                                                          |
+| `lasso-select`        | `lasso-select`        | Shift/ctrl trigger options are supported                                                                          |
+| `collapse-expand`     | No same-name Behavior | Call `collapseCombo()`, `expandCombo()`, or `toggleCombo()`, or register an application Behavior                  |
+| `create-edge`         | No direct equivalent  | `drag-edge` reconnects existing endpoints only; create a new edge in application interaction and call `addEdge()` |
+| `focus-element`       | No same-name Behavior | Call `focusItem()` from the application event handler                                                             |
+| `shortcuts-call`      | No same-name Behavior | Use the application shortcut layer or a custom Behavior                                                           |
+
+The current 11 built-ins are `zoom-canvas`, `drag-canvas`, `highlight-node`, `highlight-edge`, `hover-highlight`, `drag-node`, `click-select`, `drag-edge`, `brush-select`, `lasso-select`, and `tooltip`.
+
+When `behaviors` is omitted entirely, G6Lite enables `zoom-canvas` and `drag-canvas`. Passing `behaviors: []` disables those defaults. This differs from migration code that treats an empty list as “use defaults.”
+
+## Layout migration [#layout-migration]
+
+G6Lite currently supports `force`, `d3-force`, `force-atlas2`, `fruchterman`, `circular`, `concentric`, `radial`, `grid`, `dagre`, `mds`, `random`, `mindmap`, `indented`, and `fishbone`.
+
+```ts
+graph.setLayout({ type: 'dagre', rankdir: 'LR', nodesep: 40, ranksep: 80 });
+await graph.layout();
+
+// Starting another layout or destroying Graph also cancels the old run.
+graph.cancelLayout();
+```
+
+Matching names do not guarantee matching options or defaults. Pin node size, center, direction, iteration limits, and link distance, then compare each layout on real data. Large graphs can try `worker: true`, while still reporting layout and rendering-only time separately.
+
+Custom layouts use `register('layout', name, extensionFactory(...))`, implement `init → execute → destroy`, and respond to `AbortSignal` in long-running work. This is not a direct copy of a G6 v5 `BaseLayout` subclass.
+
+## Event migration [#event-migration]
+
+G6Lite does not export `NodeEvent`, `EdgeEvent`, `CanvasEvent`, `ComboEvent`, or `GraphEvent` enums. Use string event names and derive exact payloads from `GraphEventMap`.
+
+```ts
+import type { GraphEventMap } from '@antv/g6-lite';
+
+const onNodeClick = ({ nodeId, data, nativeEvent }: GraphEventMap['node:click'][0]) => {
+  console.log(nodeId, data, nativeEvent.clientX);
+};
+
+graph.on('node:click', onNodeClick);
+graph.once('afterrender', ({ nodeCount, edgeCount }) => console.log(nodeCount, edgeCount));
+graph.off('node:click', onNodeClick);
+```
+
+Common names still include `node:click`, `edge:click`, `canvas:click`, `afterrender`, and `afterlayout`, but do not reuse G6 v5 payload types. Node events expose `nodeId`; edge events expose `edgeId`, `edgeIndex`, `source`, and `target`; combo events expose `comboId`; and the original event is `nativeEvent`. Selection, drag, brush, and lasso derived events are emitted only when the matching Behavior is active.
+
+## Graph API mapping [#graph-api-mapping]
+
+| Common G6 v5 API                  | G6Lite                                                              | Difference                                                |
+| --------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------- |
+| `render()` / `draw()`             | `render()`                                                          | Returns `Promise<void>`                                   |
+| `getData()`                       | `getData()` / `toData()`                                            | Reads current graph data                                  |
+| `setData(data)`                   | `await setData(data, options?)`                                     | Optional `fitView` controls the post-replacement viewport |
+| `getNodeData(id?)`                | `getNodeData(id)` / `getNodes()`                                    | Single and list queries are separate                      |
+| `getEdgeData(id?)`                | `getEdgeData(id)` / `getEdges()`                                    | Single and list queries are separate                      |
+| `getElementData(id)`              | `getElementData(id)`                                                | Returns a read-only node, edge, or combo model            |
+| `addNodeData()`                   | `addNode()` / `addNodes()`                                          | Runtime nodes require coordinates                         |
+| `updateNodeData()`                | `updateNodeData()` / `updateNodePosition(s)`                        | Business data and coordinates are separate                |
+| `removeNodeData()`                | `removeNode()` / `removeNodes()`                                    | Connected edges are handled                               |
+| `addEdgeData()`                   | `addEdge()` / `addEdges()`                                          | Prefer stable explicit edge ids                           |
+| `updateEdgeData()`                | `updateEdgeData()`                                                  | Can update data, source, and target                       |
+| `removeEdgeData()`                | `removeEdge()` / `removeEdges()`                                    | Addressed by edge id                                      |
+| `setElementState()`               | `setElementStates()` or `setItemState()`                            | Replace a state array or toggle one state                 |
+| `getElementState()`               | `getItemStates()`                                                   | Returns a state array                                     |
+| Query by state                    | `findNodesByState()` / `findEdgesByState()` / `findCombosByState()` | Returns id arrays                                         |
+| `hideElement()` / `showElement()` | `hideItem()` / `showItem()`                                         | Different names                                           |
+| `focusElement()`                  | `focusItem()`                                                       | Accepts one id or an id array                             |
+| `fitView()` / `fitCenter()`       | Same names                                                          | `fitView` accepts padding, minZoom, and maxZoom           |
+| `getZoom()` / `zoomTo()`          | Same names plus `zoomBy()`                                          | Optional center keeps a screen point fixed                |
+| Camera API                        | `getCamera()` / `setCamera()` / `resetCamera()`                     | Direct camera management                                  |
+| `resize()`                        | `setSize()`                                                         | Update container CSS dimensions as well                   |
+| `setLayout()` / `layout()`        | Same names plus `cancelLayout()`                                    | Layout execution is cancellable                           |
+| `setOptions()`                    | `updateOptions()`                                                   | Updates node, edge, and theme only                        |
+| `destroy()` / destroyed           | `destroy()` / `destroyed` / `isDestroyed()`                         | Public APIs have defined destroyed-state safety           |
+
+G6Lite also provides `batchSetState()`, `setElementStates(stateMap)`, neighbor and adjacent-edge queries, combo lifecycle APIs, and screen/graph coordinate conversion. Use the [API reference](/en/docs/api) and package-root types; do not create new dependencies on internal methods such as `getCanvas()` or low-level `updateData()` that are outside the reviewed package-root contract.
+
+## Extension, Transform, and Plugin migration [#extension-transform-and-plugin-migration]
+
+G6Lite supports eight categories: `node`, `edge`, `label`, `decoration`, `layout`, `behavior`, `transform`, and `plugin`. Use `extensionFactory()` for stateful instances:
+
+```ts
+import { extensionFactory, register } from '@antv/g6-lite';
+
+register(
+  'behavior',
+  'business-select',
+  extensionFactory(() => ({
+    init(context) {
+      // Keep the public ExtensionContext only.
+    },
+    getEvents() {
+      return { 'node:click': ({ nodeId }) => console.log(nodeId) };
+    },
+    destroy() {},
+  })),
+);
+```
+
+Migration rules:
+
+* Custom Node and Edge implementations do not inherit G6 scene-graph classes; use built-in primitives, functional styles, and controlled overlays.
+* Label and Decoration Renderers own measurement and drawing only. The engine owns placement, rotation, collision, clipping, and refresh scheduling.
+* Behavior, Transform, and Plugin code modifies Graph only through `ExtensionContext` data, state, viewport, and `requestRender()` capabilities.
+* A Transform instance belongs to one Graph and one configuration position; a Plugin is created on mount and cleaned up on destroy. There is no public equivalent of G6 v5 `getPluginInstance()`.
+* Extension failures are isolated and diagnosed. Do not access Renderer, DataModel, WebGL context, or deep source paths directly.
+
+See [Extension system](/en/docs/guides/extensions) and [Custom Behavior](/en/docs/guides/custom-behavior).
+
+## Unsupported capabilities and alternatives [#unsupported-capabilities-and-alternatives]
+
+* **General animation orchestration**: keep the G6 v5 implementation or update data/camera over frames in application code; do not migrate the `animation` option blindly.
+* **Complete graph algorithms**: run `@antv/algorithm` or another standalone algorithm package in application code, then write results into G6Lite data and states.
+* **Multiple renderers, SSR, and 3D**: G6Lite Graph requires a real DOM, Canvas, and WebGL client lifecycle; prefer G6 v5 for these cases.
+* **React/DOM nodes and arbitrary scene-graph shapes**: reduce the visual to G6Lite primitives and extension protocols, or keep that page on G6 v5.
+* **Mature built-in plugins**: toolbar, minimap, history, and similar features require an application Plugin, external component, or retained G6 v5 implementation.
+* **Unmapped Behaviors**: compose application events with Graph APIs or register a custom Behavior; do not use `drag-edge` as an edge-creation substitute.
+
+## Migration acceptance checklist [#migration-acceptance-checklist]
+
+1. Pin both library versions and keep the G6 v5 implementation as the rollback baseline.
+2. Normalize data to explicit `nodes`, `edges`, and optional `combos`, preserving stable edge ids.
+3. Migrate node, edge, and combo types, style functions, labels, arrows, and states field by field; drop unknown fields.
+4. Replace Behaviors using the mapping and verify empty-list, default zoom, modifier-key, and derived-event semantics.
+5. Rebind event payload types and verify nodeId, edgeId, comboId, coordinates, and nativeEvent.
+6. Cover setData, mutations, batch state, visibility, focus, viewport, relayout, and destroy workflows.
+7. Test lifecycle and error isolation for every custom element, Behavior, Transform, and Plugin.
+8. Record layout, rendering-only, drag, zoom, picking, highlight, batch-update, and memory trends with real data.
+9. Validate target browsers, DPR, GPU, CSP, and container sizes instead of relying on one development machine.
+10. Remove the G6 v5 fallback only after visual, interaction, data-consistency, and performance acceptance all pass.
+
+See the Playground `g6-v5-compat` demo for a runnable compatibility example and the [default theme example](/en/docs/examples/default-theme) for the visual state baseline.
+
+
+# Compatibility overview (/en/docs/compatibility)
+
+
+
+Review these boundaries before adopting or upgrading G6Lite:
+
+<Cards>
+  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
+
+  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
+
+  <Card title="Graph library comparison" href="/en/docs/compatibility/library-comparison" />
+
+  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
+</Cards>
+
+G6Lite needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental. Compare capability boundaries before selecting a library, then validate configuration, events, and runtime APIs during a G6 v5 migration.
+
+
+# Graph library comparison (/en/docs/compatibility/library-comparison)
+
+
+
+This page is a capability guide, not a performance ranking. Versions were checked on **2026-08-03**: G6Lite `0.1.0-beta.22`, AntV G6 `5.1.1`, sigma.js `3.0.3`, and Cytoscape.js `3.34.0`. Sigma v4 was still alpha, so the stable v3 line is used here.
+
+Status terms: **Supported** means the core package or an official built-in capability can be used directly; **Partial** means clear boundaries apply; **External** means an official companion package, ecosystem extension, or application code is normally required; **Not supported** means the current public API has no equivalent.
+
+## Short recommendation [#short-recommendation]
+
+* **G6Lite** is a compact WebGL graph engine for products that need frequent picking, state, and incremental updates after a large graph is rendered and can work within a controlled extension surface.
+* **AntV G6 v5** is a full graph visualization framework for rich elements, animation, components, plugins, multiple renderers, and the broader AntV ecosystem.
+* **sigma.js v3** is a WebGL renderer built on Graphology, well suited to large-network exploration with existing coordinates or a separate layout pipeline.
+* **Cytoscape.js** combines a graph-theory model with interactive visualization and fits applications that need graph queries, algorithms, mature extensions, and Node.js analysis.
+
+## Rendering, data, and layout [#rendering-data-and-layout]
+
+| Dimension                | G6Lite                                                                                         | AntV G6 v5                                                                                               | sigma.js v3                                                                            | Cytoscape.js                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Rendering                | **Supported**: WebGL 2/1 for nodes and edges; Canvas 2D for labels and combos                  | **Supported**: AntV G renderers include Canvas, SVG, and WebGL, plus documented Node.js server rendering | **Supported**: WebGL renderer aimed at graphs with thousands of nodes and edges        | **Supported**: browser Canvas renderer; graph model can also run without a renderer |
+| Data model               | **Supported**: `GraphData` and one Graph API with business `data` and states                   | **Supported**: complete graph and element model                                                          | **External**: Graphology is the required graph model                                   | **Supported**: built-in graph-theory model, collections, selectors, and queries     |
+| Layouts                  | **Supported**: 14 layouts from AntV Layout plus mindmap, indented, and fishbone                | **Supported**: more than ten layouts and custom layout support                                           | **External**: normally Graphology layout packages, workers, or precomputed coordinates | **Supported**: core layouts plus a large layout-extension ecosystem                 |
+| Worker / parallel layout | **Partial**: common layouts accept `worker: true`; custom layouts receive cancellation signals | **Supported**: official layout system includes parallel and extension options                            | **External**: Graphology layout workers or application infrastructure                  | **External**: depends on the selected layout extension                              |
+| Incremental updates      | **Supported**: node, edge, state, visibility, and camera batch/incremental APIs                | **Supported**: complete runtime data and element update APIs                                             | **Supported**: renderer reacts to Graphology mutations                                 | **Supported**: collection mutations, batching, and style updates                    |
+
+Layout time and rendering-only time must be measured separately. A sigma.js case that reuses coordinates cannot be fairly compared with another candidate that recomputes a force layout as part of first render.
+
+## Elements, labels, and grouping [#elements-labels-and-grouping]
+
+| Dimension             | G6Lite                                                                                                                 | AntV G6 v5                                                                      | sigma.js v3                                                                                                         | Cytoscape.js                                                         |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Nodes                 | **Partial**: circle and rect built in; registered extensions reuse built-in primitives and overlays                    | **Supported**: rich built-in nodes, custom elements, and a React-node ecosystem | **Partial**: built-in node programs and custom WebGL programs                                                       | **Supported**: multiple shapes, mapped styles, and extensions        |
+| Edges                 | **Partial**: line, arc, polyline, cubic, arrows, routing, parallel edges, and edge extensions                          | **Supported**: rich edge types, routing, decorations, and custom elements       | **Partial**: built-in edge programs and custom WebGL programs                                                       | **Supported**: multiple curves, arrows, endpoints, and mapped styles |
+| Labels                | **Supported**: Canvas 2D labels, backgrounds, rotation, width limits, and custom Label Renderers                       | **Supported**: node, edge, and combo labels with rich styling                   | **Partial**: node labels are core; edge labels and advanced typography commonly require extensions or customization | **Supported**: node and edge labels with rich text styling           |
+| Combo / compound node | **Partial**: declaration, nesting, collapse, regrouping, states, and group drag are supported but experimental in beta | **Supported**: complete Combo element and interaction ecosystem                 | **Not supported**: no equivalent visual group container in the core renderer                                        | **Supported**: compound nodes are part of the core model             |
+| Visual states         | **Supported**: built-in/custom states, batching, state styles, queries, and visibility                                 | **Supported**: element states and interaction integration                       | **Partial**: commonly represented with Graphology attributes, reducers, and application state                       | **Supported**: classes, selectors, styles, and interaction state     |
+
+G6Lite node and edge extensions preserve its WebGL batching primitives. They are not direct replacements for arbitrary G6 v5 Canvas/SVG scene-graph subclasses. Validate G6 v5 or Cytoscape.js first when the product requires arbitrary paths, complex DOM/React nodes, or a complete shape tree.
+
+## Interaction, extension, and ecosystem [#interaction-extension-and-ecosystem]
+
+| Dimension            | G6Lite                                                                                                               | AntV G6 v5                                                                                          | sigma.js v3                                                                                                       | Cytoscape.js                                                                                    |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Built-in interaction | **Supported**: 11 Behaviors for zoom, pan, drag, selection, highlight, brush, lasso, tooltip, and edge endpoint drag | **Supported**: more than ten Behaviors with a broader feature surface                               | **Partial**: camera, hover, click, and basic drag building blocks; editing is usually composed in the application | **Supported**: core gestures, selection, dragging, and events                                   |
+| Custom interaction   | **Supported**: Behavior registration with `create → init → getEvents → destroy`                                      | **Supported**: BaseBehavior and registration system                                                 | **Supported**: events, camera, reducers, and application logic                                                    | **Supported**: event system, extensions, and application logic                                  |
+| Extension categories | **Supported**: node, edge, label, decoration, layout, behavior, transform, plugin                                    | **Supported**: full element, Behavior, Layout, Transform, and Plugin system                         | **Partial**: custom programs, renderer settings, and the Graphology ecosystem                                     | **Supported**: layout, renderer, interaction, import/export, and analysis extensions            |
+| Plugins              | **Partial**: public Plugin lifecycle exists, but built-ins and community ecosystem are still small                   | **Supported**: mature built-in and ecosystem plugins such as toolbar, minimap, tooltip, and history | **External**: community packages and framework integrations provide many product components                       | **Supported**: mature extension directory across layout, analysis, and UI                       |
+| Animation            | **Partial**: no general Graph animation orchestration API; isolated element effects or extensions are possible       | **Supported**: element, layout, viewport, and transition animation system                           | **Partial**: camera and node-attribute animation utilities; complex timelines stay in application code            | **Supported**: element and viewport animation APIs                                              |
+| Graph algorithms     | **Not supported**: neighbor and adjacent-edge queries only; no built-in shortest-path or centrality suite            | **Supported**: official package integrates `@antv/algorithm`                                        | **External**: use Graphology standard-library algorithm packages                                                  | **Supported**: traversal, shortest paths, centrality, connectivity, and other graph-theory APIs |
+
+## Runtime and package shape [#runtime-and-package-shape]
+
+| Dimension            | G6Lite                                                         | AntV G6 v5                                                               | sigma.js v3                                                                                               | Cytoscape.js                                                        |
+| -------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Browser requirements | Modern ESM, real DOM/Canvas, and WebGL 1.0+                    | Depends on the selected renderer and build target                        | Modern browser with WebGL                                                                                 | Browser Canvas; can also run headless                               |
+| Node.js / SSR        | **No rendering**: create Graph only in a client lifecycle      | **Supported**: official documentation describes Node.js server rendering | **Partial**: Graphology runs in Node.js, while the Sigma renderer still needs a browser/WebGL environment | **Supported**: graph model and algorithms run headlessly in Node.js |
+| TypeScript           | Bundled types; package-root exports define the public contract | TypeScript source and complete types                                     | Bundled types                                                                                             | Type declarations included                                          |
+| Maturity             | `0.1.x` beta with a controlled API surface and young ecosystem | Stable `5.1.1` with the broader AntV ecosystem                           | Stable `3.0.3`; v4 is alpha                                                                               | Stable `3.34.0` with long-running maintenance and extensions        |
+
+## How to choose [#how-to-choose]
+
+Prefer G6Lite when the target environment reliably supports WebGL; post-render picking, state, and batch updates are the main bottleneck; circle/rect nodes, common edge primitives, and controlled extensions cover the visual requirements; and SSR, a general animation system, and graph algorithms are not required.
+
+Prefer G6 v5 when the product needs rich elements, the complete plugin and animation systems, multiple renderers, React nodes, 3D, or server-side rendering, and a broader capability surface matters more than the smallest runtime.
+
+Prefer sigma.js when the team already uses Graphology, coordinates come from a backend or separate layout pipeline, and the main product workflow is browsing, filtering, and exploring large networks.
+
+Prefer Cytoscape.js when graph-theory analysis, compound nodes, complex selectors, headless Node.js, and mature scientific/network-analysis extensions are central requirements.
+
+## Fair validation checklist [#fair-validation-checklist]
+
+1. Pin candidate versions, data, coordinates, styles, label policy, viewport, DPR, browser, and hardware.
+2. Split preset-coordinate and relayout cases, and report layout versus rendering-only time separately.
+3. Test drag, zoom, picking, highlighting, batch updates, and post-destroy memory trends in addition to first render.
+4. Use realistic combos, labels, arrows, and state counts instead of bare points and lines only.
+5. Record median, P95, sample count, and error, and archive the complete adapter and configuration.
+
+See [performance metrics](/en/docs/metrics/performance) and [performance tuning](/en/docs/metrics/performance-tuning) for the G6Lite measurement workflow.
+
+## Official sources [#official-sources]
+
+* [AntV G6 README](https://github.com/antvis/G6#readme) and [G6 documentation](https://g6.antv.antgroup.com/)
+* [sigma.js README](https://github.com/jacomyal/sigma.js#readme), [sigma.js documentation](https://www.sigmajs.org/docs/), and [Graphology](https://graphology.github.io/)
+* [Cytoscape.js README](https://github.com/cytoscape/cytoscape.js#readme) and [Cytoscape.js documentation](https://js.cytoscape.org/)
+
+
 # Data model (/en/docs/concepts/data-model)
 
 
@@ -203,6 +674,15 @@ G6 v5 is the broader general-purpose framework. G6Lite is the smaller performanc
 
 
 <ExampleDetail id="data-mutations" locale="en" />
+
+
+# Default themes and interaction states (/en/docs/examples/default-theme)
+
+
+
+
+
+<ExampleDetail id="default-theme" locale="en" />
 
 
 # Edge arrow directions (/en/docs/examples/edge-arrows)
@@ -322,6 +802,8 @@ Install the package:
 ```bash
 npm install @antv/g6-lite
 ```
+
+The canvas enables smooth wheel zoom and canvas dragging when `behaviors` is omitted. Node dragging, selection, and highlighting remain explicit. See [zoom feel and bounds](/en/docs/guides/interactions#zoom-feel-and-bounds) for sensitivity configuration.
 
 The container must have an explicit size:
 
@@ -690,7 +1172,7 @@ edge: {
 }
 ```
 
-Use line, arc, cubic, quadratic, or polyline edges according to the topology. Enable `process-parallel-edges` when multiple edges share endpoints. See [parallel edges](/en/docs/guides/parallel-edges).
+Use line, arc, cubic, or polyline edges according to the topology. Enable `process-parallel-edges` when multiple edges share endpoints. See [parallel edges](/en/docs/guides/parallel-edges).
 
 
 # Events (/en/docs/guides/events)
@@ -893,6 +1375,24 @@ Each behavior can be a string or an object with options. Picking and element eve
 
 `BuiltInBehaviorOptionsMap` maps each built-in name to its supported object configuration, while `BuiltInBehaviorConfig` is the union of all built-in configurations. Custom Behaviors should declare a literal `type`, a dedicated options type, and use `satisfies` at activation sites.
 
+## Zoom feel and bounds [#zoom-feel-and-bounds]
+
+`zoom-canvas` uses continuous wheel-delta scaling for both mouse wheels and trackpads. The default sensitivity is `0.0015`, with a default zoom range of `0.1` to `20`.
+
+```ts
+behaviors: [
+  {
+    type: 'zoom-canvas',
+    sensitivity: 0.0005,
+    minZoom: 0.2,
+    maxZoom: 8,
+  },
+  'drag-canvas',
+];
+```
+
+Use a smaller `sensitivity` for gentler zooming. Invalid or non-positive values fall back to safe defaults.
+
 ## Built-in Behaviors [#built-in-behaviors]
 
 * `zoom-canvas`: wheel zoom.
@@ -967,7 +1467,7 @@ node: {
   type: 'circle',
   style: {
     size: (node) => node.data?.important ? 28 : 18,
-    fill: (node) => node.data?.group === 'core' ? '#5B8FF9' : '#61DDAA',
+    fill: (node) => node.data?.group === 'core' ? '#1783FF' : '#00C9C9',
     label: (node) => String(node.data?.label ?? node.id),
   },
   stateStyles: {
@@ -1009,15 +1509,25 @@ Override only the tokens your product needs:
 ```ts
 theme: {
   type: 'light',
-  tokens: {
-    nodeFill: '#5B8FF9',
-    edgeStroke: '#AAB7C4',
-    background: '#F7F9FC',
-  },
+  nodeFill: '#1783FF',
+  edgeStroke: '#AAB7C4',
+  canvasBackground: '#F7F9FC',
 }
 ```
 
 Explicit node and edge styles take precedence over theme defaults. Keep application design tokens in one place and map them to G6Lite theme tokens.
+
+## Default visual semantics [#default-visual-semantics]
+
+G6Lite uses the light preset when `theme` is omitted:
+
+* The default node size is `24` and the primary AntV color is `#1783FF`.
+* The light canvas is white with low-contrast blue-gray edges. The dark canvas is `#1a1a1a` with brighter blue-gray edges.
+* `active`, `selected`, and `highlight` use emphasis colors, outlines, or halos without changing node size or base edge width.
+* `inactive` and `disabled` reduce opacity while preserving graph context.
+* Labels are opt-in and render only when `node.style.label` or `edge.style.label` is configured.
+
+Open [Default themes and interaction states](/en/docs/examples/default-theme) to inspect both presets and all six built-in states side by side.
 
 
 # Tooltip configuration (/en/docs/guides/tooltip)
@@ -1095,16 +1605,9 @@ Quick results are smoke evidence, not marketing baselines. Use realistic data an
 
 ## Selecting a graph library [#selecting-a-graph-library]
 
-The following summary was checked against public project documentation on **2026-07-29**. It compares product scope rather than presenting cross-project benchmark rankings.
+In short, G6Lite focuses on a compact WebGL runtime and post-render incremental interaction; G6 v5 provides a broader element, animation, plugin, and multi-environment surface; sigma.js focuses on WebGL network rendering over Graphology; and Cytoscape.js combines a graph-theory model, algorithms, and interactive visualization.
 
-| Option           | Focus and rendering                                                                                                         | Data and layout                                                                                                                   | Extension ecosystem                                                                                         | Best fit                                                                                                                     |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **G6Lite**       | WebGL batches nodes and edges, while Canvas 2D handles labels and combos; optimized for incremental updates after rendering | One Graph data API with AntV Layout integration                                                                                   | Package-root registration for elements, behaviors, layouts, transforms, and plugins; currently `0.1.x` beta | Products that need a small WebGL engine, frequent large-graph interaction, AntV layouts, and controlled extension boundaries |
-| **AntV G6 v5**   | Full graph visualization framework covering rendering, layout, analysis, interaction, animation, and components             | Broader built-in configuration and graph capabilities                                                                             | More mature element, behavior, plugin, animation, and component ecosystem                                   | Products that need the complete graph visualization stack and ecosystem rather than the smallest runtime                     |
-| **sigma.js v3**  | WebGL renderer aimed at graphs with thousands of nodes and edges                                                            | Uses Graphology as the graph model; layouts are commonly supplied by Graphology layout packages or precomputed by the application | Custom programs plus the Graphology ecosystem                                                               | Graphology-based products with coordinates or a separate layout pipeline, focused on large-graph exploration                 |
-| **Cytoscape.js** | Graph theory model with an optional interactive renderer, also usable for analysis in Node.js                               | Rich graph queries, algorithms, and layouts                                                                                       | Large extension ecosystem, including scientific and biological-network use cases                            | Applications that need graph algorithms, analysis, mature extensions, and browser interaction together                       |
-
-Sources: [AntV G6](https://g6.antv.antgroup.com/en/manual/introduction/what-is-g6), [sigma.js](https://github.com/jacomyal/sigma.js#readme), and [Cytoscape.js](https://js.cytoscape.org/#introduction).
+The detailed rendering, layout, element, combo, interaction, extension, animation, algorithm, SSR, and TypeScript matrix now lives in [graph library comparison](/en/docs/compatibility/library-comparison). This page keeps measurement guidance only, avoiding two capability matrices that drift across releases.
 
 For example, a first-render comparison is invalid when sigma.js reuses existing coordinates while G6Lite recomputes a force layout. Record layout time and rendering without layout independently.
 
@@ -1115,110 +1618,3 @@ For example, a first-render comparison is invalid when sigma.js reuses existing 
 * Record median, P95, samples, and error instead of drawing conclusions from one run.
 * Measure drag, zoom, picking, highlighting, batch updates, and post-destroy memory trends in addition to first render.
 * Archive candidate versions, adapters, full configuration, and reports together.
-
-
-# API stability and release boundary (/en/docs/compatibility/api-stability)
-
-
-
-G6Lite remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
-
-Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
-
-## ESM and CommonJS [#esm-and-commonjs]
-
-The package root is ESM-only and does not provide a `require('@antv/g6-lite')` condition. A CommonJS feasibility test confirmed that a synchronous entry and declarations can be emitted, but a dual package must also preserve two runtime contracts:
-
-* ESM and CommonJS consumers must share one extension registry when both formats are loaded by the same application.
-* After application bundling, `layout.worker: true` must still resolve and load the package's module Worker instead of silently falling back to the main thread.
-
-The current CommonJS consumer build cannot reliably preserve that Worker asset relationship and requests a missing Worker file; independent dual builds also create separate module-scoped registries. This release therefore does not publish a partial CommonJS build whose synchronous import works while Worker or extension behavior differs.
-
-Applications that still use a CommonJS toolchain can cross the client boundary with dynamic import:
-
-```js
-const { Graph } = await import('@antv/g6-lite');
-```
-
-This does not change the requirement for a real DOM, Canvas, and WebGL environment.
-
-Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
-
-Combo collapse, nesting, and runtime regrouping remain experimental. Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.
-
-
-# Browsers and runtime environment (/en/docs/compatibility/browser)
-
-
-
-G6Lite prefers WebGL 2.0 and falls back to WebGL 1.0. Canvas 2D is used for labels and combo outlines, so WebGL 2.0 is not a hard requirement.
-
-## Minimum versions [#minimum-versions]
-
-| Browser                  | Minimum        | Release year | Main boundary                                     |
-| ------------------------ | -------------- | ------------ | ------------------------------------------------- |
-| Chrome                   | 80+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
-| Firefox                  | 74+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
-| Safari on macOS          | 13.1+          | 2020         | ES2020 syntax and WebGL 1.0                       |
-| Safari on iOS            | 13.4+          | 2020         | ES2020 syntax; mobile GPU limits still apply      |
-| Edge                     | 80+ (Chromium) | 2020         | Chromium-based Edge only; EdgeHTML is unsupported |
-| Android WebView / Chrome | 80+            | 2020         | ES2020 syntax; validate low-end GPU capacity      |
-
-Internet Explorer and EdgeHTML are not supported. These are syntax and platform boundaries for the untranspiled ESM-only package, not a complete certified device matrix. See [Can I Use optional chaining](https://caniuse.com/mdn-javascript_operators_optional_chaining), [Chrome 80](https://developer.chrome.com/blog/new-in-chrome-80), [Firefox 74](https://www.mozilla.org/firefox/74.0/releasenotes/), and [Safari 13.1](https://webkit.org/blog/10247/new-webkit-features-in-safari-13-1/).
-
-## Coverage reference [#coverage-reference]
-
-Using global usage data from `caniuse-lite@1.0.30001806`, retrieved on **2026-07-29**:
-
-* The browser families and minimum versions explicitly listed above account for approximately &#x2A;*90.4%** of global browser usage.
-* Across every browser tracked by Can I Use, versions supporting both WebGL 1.0 and native ESM account for approximately &#x2A;*94.8%**.
-
-Sources: [Can I Use WebGL](https://caniuse.com/webgl), [JavaScript modules](https://caniuse.com/es6-module), and [caniuse-lite](https://github.com/browserslist/caniuse-lite). These figures are selection references, not G6Lite device certification rates. Enterprise browsers, embedded WebViews, disabled GPU acceleration, and low-end devices require separate validation.
-
-## Comparison with sigma.js [#comparison-with-sigmajs]
-
-The sigma.js v3 README describes a WebGL renderer for graphs with thousands of nodes and edges, built on Graphology. Its `sigma@3.0.3` package provides both ESM and CommonJS builds. The official [README](https://github.com/jacomyal/sigma.js#readme) and [package metadata](https://github.com/jacomyal/sigma.js/blob/main/packages/sigma/package.json) checked on 2026-07-29 do not publish an equivalent minimum-browser matrix.
-
-An omitted matrix should not be interpreted as legacy-browser support. Both libraries require WebGL and a modern JavaScript toolchain; G6Lite explicitly documents the syntax floor of its untranspiled package, while sigma.js consumers need to validate their own build target.
-
-G6Lite needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
-
-The renderer uses `regl`, which dynamically compiles WebGL commands. If the host enables Content Security Policy, `script-src` must allow `'unsafe-eval'`; `'wasm-unsafe-eval'` alone is not sufficient. Hosts that cannot allow this directive are not supported by the current renderer.
-
-Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
-
-
-# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
-
-
-
-G6Lite borrows G6 configuration concepts but is not a complete replacement for G6 v5. Migration is most suitable when large-graph interaction and state updates are the primary bottleneck and the product uses core node, edge, layout, and behavior capabilities.
-
-Do not migrate blindly when the project depends on the complete plugin ecosystem, animation system, complex Canvas element customization, or built-in graph analysis.
-
-Suggested process:
-
-1. Reproduce one real workflow in the deployed Playground.
-2. Normalize data to nodes, edges, and optional combos.
-3. Map styles and states through package-root Graph options.
-4. Replace G6 behavior names with supported G6Lite behaviors.
-5. Verify layouts, events, incremental updates, compatibility, and performance on target devices.
-
-Keep the original implementation until the real-data acceptance suite passes.
-
-
-# Compatibility overview (/en/docs/compatibility)
-
-
-
-Review these boundaries before adopting or upgrading G6Lite:
-
-<Cards>
-  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
-
-  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
-
-  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
-</Cards>
-
-G6Lite needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.

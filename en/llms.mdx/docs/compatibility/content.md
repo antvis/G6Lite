@@ -9,7 +9,9 @@ Review these boundaries before adopting or upgrading G6Lite:
 
   <Card title="API stability" href="/en/docs/compatibility/api-stability" />
 
+  <Card title="Graph library comparison" href="/en/docs/compatibility/library-comparison" />
+
   <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
 </Cards>
 
-G6Lite needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental.
+G6Lite needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental. Compare capability boundaries before selecting a library, then validate configuration, events, and runtime APIs during a G6 v5 migration.

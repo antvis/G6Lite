@@ -20,7 +20,7 @@ theme: 'dark';
 theme: {
   type: 'light',
   canvasBackground: '#f7f8fa',
-  nodeFill: '#5B8FF9',
+  nodeFill: '#1783FF',
   edgeStroke: '#d9d9d9',
   edgeLineWidth: 2,
 }
@@ -45,7 +45,7 @@ theme: {
 
 ```ts
 new Graph({
-  theme: { type: 'light', nodeFill: '#5B8FF9' },
+  theme: { type: 'light', nodeFill: '#1783FF' },
   node: {
     style: { fill: '#61DDAA' },
   },
@@ -53,6 +53,18 @@ new Graph({
 ```
 
 上例中节点会使用 `node.style.fill`。
+
+## 默认视觉 [#默认视觉]
+
+未传 `theme` 时使用 light 预设。当前预设遵循以下语义：
+
+* 默认节点尺寸为 `24`，主色为 AntV `#1783FF`。
+* light 画布为白色，边使用低对比度蓝灰色；dark 画布为 `#1a1a1a`，边使用更亮的蓝灰色。
+* `active`、`selected`、`highlight` 使用强调色、描边或 halo 表达，不改变节点尺寸和基础边宽。
+* `inactive`、`disabled` 通过透明度弱化，仍保留上下文关系。
+* 标签属于按需配置能力；设置 `node.style.label` 或 `edge.style.label` 后才会绘制。
+
+可在 [默认主题与交互状态](/docs/examples/default-theme) 中并排检查 light、dark 和六种内置状态。
 
 ## 相关 [#相关]
 

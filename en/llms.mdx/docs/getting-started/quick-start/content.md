@@ -8,6 +8,8 @@ Install the package:
 npm install @antv/g6-lite
 ```
 
+The canvas enables smooth wheel zoom and canvas dragging when `behaviors` is omitted. Node dragging, selection, and highlighting remain explicit. See [zoom feel and bounds](/en/docs/guides/interactions#zoom-feel-and-bounds) for sensitivity configuration.
+
 The container must have an explicit size:
 
 ```html

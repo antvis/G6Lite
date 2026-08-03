@@ -9,7 +9,7 @@ node: {
   type: 'circle',
   style: {
     size: (node) => node.data?.important ? 28 : 18,
-    fill: (node) => node.data?.group === 'core' ? '#5B8FF9' : '#61DDAA',
+    fill: (node) => node.data?.group === 'core' ? '#1783FF' : '#00C9C9',
     label: (node) => String(node.data?.label ?? node.id),
   },
   stateStyles: {

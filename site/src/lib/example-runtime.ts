@@ -12,6 +12,7 @@ interface SiteExampleModule {
 
 const loaders: Record<string, () => Promise<SiteExampleModule>> = {
   basic: () => import('../../../playground/demos/basic.ts'),
+  'default-theme': () => import('../../../playground/demos/default-theme.ts'),
   'data-mutations': () => import('../../../playground/demos/data-mutations.ts'),
   'queries-and-states': () => import('../../../playground/demos/queries-and-states.ts'),
   'node-style': () => import('../../../playground/demos/node-style.ts'),

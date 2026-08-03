@@ -59,6 +59,24 @@ Shift 框选，避免和拖拽画布冲突：
 behaviors: ['drag-canvas', { type: 'brush-select', key: 'shift' }];
 ```
 
+## 缩放手感与范围
+
+`zoom-canvas` 默认按 wheel delta 连续缩放，对鼠标滚轮和触控板使用同一套归一化规则。默认灵敏度为 `0.0015`，默认范围为 `0.1` 到 `20`。
+
+```ts
+behaviors: [
+  {
+    type: 'zoom-canvas',
+    sensitivity: 0.0005,
+    minZoom: 0.2,
+    maxZoom: 8,
+  },
+  'drag-canvas',
+];
+```
+
+减小 `sensitivity` 会让缩放更缓和；无效或非正数配置会回退到安全默认值。
+
 ## 事件分发模型
 
 G6Lite 内部由 `InteractionDispatcher` 统一处理指针事件。它每次只做一次拾取，然后按 `node -> edge -> combo -> canvas` 的优先级发出规范事件。所有 behavior 都消费这些事件。

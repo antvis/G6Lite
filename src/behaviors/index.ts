@@ -29,7 +29,7 @@ import { highlightNode } from './highlightNode';
 import { hoverHighlight, type HoverHighlightConfig } from './hoverHighlight';
 import { lassoSelect, type LassoSelectOptions } from './lassoSelect';
 import { tooltip, type TooltipOptions } from './tooltip';
-import { zoomCanvas } from './zoomCanvas';
+import { resolveZoomCanvasOptions, zoomCanvas, type ZoomCanvasOptions } from './zoomCanvas';
 
 export type { BrushSelectOptions } from './brushSelect';
 export type { ClickSelectConfig } from './clickSelect';
@@ -37,6 +37,7 @@ export type { DragCanvasOptions } from './dragCanvas';
 export type { HoverHighlightConfig } from './hoverHighlight';
 export type { LassoSelectOptions } from './lassoSelect';
 export type { TooltipContext, TooltipOptions } from './tooltip';
+export type { ZoomCanvasOptions } from './zoomCanvas';
 
 export type BehaviorName =
   | 'zoom-canvas'
@@ -53,7 +54,7 @@ export type BehaviorName =
 
 /** Built-in behavior name to its supported object configuration. */
 export interface BuiltInBehaviorOptionsMap {
-  'zoom-canvas': BehaviorConfig<'zoom-canvas'>;
+  'zoom-canvas': BehaviorConfig<'zoom-canvas', ZoomCanvasOptions>;
   'drag-canvas': BehaviorConfig<'drag-canvas', DragCanvasOptions>;
   'highlight-node': BehaviorConfig<'highlight-node'>;
   'highlight-edge': BehaviorConfig<'highlight-edge'>;
@@ -71,7 +72,8 @@ export type BuiltInBehaviorConfig = BuiltInBehaviorOptionsMap[keyof BuiltInBehav
 type BehaviorFactory = (renderer: Renderer, graph: Graph, config?: BehaviorConfig) => () => void;
 
 const BEHAVIORS: Record<string, BehaviorFactory> = {
-  'zoom-canvas': (r) => zoomCanvas(r),
+  'zoom-canvas': (r, _g, config) =>
+    zoomCanvas(r, resolveZoomCanvasOptions(resolveZoomCanvasConfig(config))),
   'drag-canvas': (r, g, config) =>
     dragCanvas(r, g, {
       ignoreModifierKeys:
@@ -182,6 +184,15 @@ function resolveHoverHighlightConfig(config?: BehaviorConfig): HoverHighlightCon
     type: config.type,
     degree: typeof config.degree === 'number' ? config.degree : undefined,
     inactiveState: typeof config.inactiveState === 'string' ? config.inactiveState : undefined,
+  };
+}
+
+function resolveZoomCanvasConfig(config?: BehaviorConfig): ZoomCanvasOptions | undefined {
+  if (!config) return undefined;
+  return {
+    sensitivity: typeof config.sensitivity === 'number' ? config.sensitivity : undefined,
+    minZoom: typeof config.minZoom === 'number' ? config.minZoom : undefined,
+    maxZoom: typeof config.maxZoom === 'number' ? config.maxZoom : undefined,
   };
 }
 

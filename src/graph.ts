@@ -930,8 +930,7 @@ export class Graph {
 
   setSize(width: number, height: number): void {
     if (this._destroyed) return;
-    this.renderer.resize(width, height);
-    this.eventEmitter.emit('resize', { width, height });
+    this.resizeViewport(width, height);
   }
 
   getZoom(): number {
@@ -1428,10 +1427,18 @@ export class Graph {
       if (width === lastWidth && height === lastHeight) return;
       lastWidth = width;
       lastHeight = height;
-      this.renderer.resize(width, height);
-      this.eventEmitter.emit('resize', { width, height });
+      this.resizeViewport(width, height);
     });
     this.resizeObserver.observe(this.containerEl);
+  }
+
+  private resizeViewport(width: number, height: number): void {
+    this.renderer.resize(width, height);
+    const autoFit = this.options.autoFitOnResize;
+    if (autoFit !== undefined && autoFit !== false) {
+      this.fitView(autoFit === true ? 0.9 : autoFit);
+    }
+    this.eventEmitter.emit('resize', { width, height });
   }
 
   private getRuntime(): GraphRuntime | null {

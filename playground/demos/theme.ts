@@ -31,6 +31,7 @@ export async function run(container: string | HTMLElement) {
       ? { type: 'light' as const, edgeLineWidth: 3, canvasBackground: '#f0f4ff' }
       : theme;
     currentGraph = new Graph({
+      autoFitOnResize: true,
       container: canvasParent,
       data,
       node: { type: 'circle', style: { size: 14 } },

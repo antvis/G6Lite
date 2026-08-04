@@ -557,6 +557,105 @@ describe('P1: public camera and coordinate boundary', () => {
   });
 });
 
+describe('P1: viewport resize fitting policy', () => {
+  function createResizeGraph(autoFitOnResize?: boolean | number | object) {
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    const rendererResize = vi.fn();
+    const fitView = vi.fn();
+    const eventEmitter = new EventEmitter();
+    Object.assign(graph, {
+      _destroyed: false,
+      options: {
+        data: { nodes: [], edges: [] },
+        autoFitOnResize,
+      },
+      renderer: { resize: rendererResize },
+      eventEmitter,
+      fitView,
+    });
+    return { eventEmitter, fitView, graph, rendererResize };
+  }
+
+  it.each([undefined, false])('preserves the camera by default (%s)', (autoFitOnResize) => {
+    const { eventEmitter, fitView, graph, rendererResize } = createResizeGraph(autoFitOnResize);
+    const onResize = vi.fn();
+    eventEmitter.on('resize', onResize);
+
+    graph.setSize(320, 240);
+
+    expect(rendererResize).toHaveBeenCalledWith(320, 240);
+    expect(fitView).not.toHaveBeenCalled();
+    expect(onResize).toHaveBeenCalledWith({ width: 320, height: 240 });
+  });
+
+  it('resizes, applies the default fit, then emits resize when enabled', () => {
+    const order: string[] = [];
+    const { eventEmitter, graph } = createResizeGraph(true);
+    Object.assign(graph, {
+      renderer: { resize: () => order.push('resize') },
+      fitView: (options: number) => {
+        order.push(`fit:${options}`);
+      },
+    });
+    eventEmitter.on('resize', () => order.push('emit'));
+
+    graph.setSize(320, 240);
+
+    expect(order).toEqual(['resize', 'fit:0.9', 'emit']);
+  });
+
+  it('passes numeric and object fit options through without truthy coercion', () => {
+    const fitOptions = { padding: 24, minZoom: 0.2, maxZoom: 1.5 };
+    const zeroScale = createResizeGraph(0);
+    const objectOptions = createResizeGraph(fitOptions);
+
+    zeroScale.graph.setSize(320, 240);
+    objectOptions.graph.setSize(640, 480);
+
+    expect(zeroScale.fitView).toHaveBeenCalledWith(0);
+    expect(objectOptions.fitView).toHaveBeenCalledWith(fitOptions);
+  });
+
+  it('applies the same policy to observed container size changes', () => {
+    let resizeCallback: ResizeObserverCallback | undefined;
+    const observe = vi.fn();
+    class ResizeObserverStub {
+      constructor(callback: ResizeObserverCallback) {
+        resizeCallback = callback;
+      }
+
+      observe = observe;
+      unobserve = vi.fn();
+      disconnect = vi.fn();
+      takeRecords = () => [];
+    }
+    vi.stubGlobal('ResizeObserver', ResizeObserverStub);
+
+    const viewport = { width: 400, height: 300 };
+    const { fitView, graph, rendererResize } = createResizeGraph(0.75);
+    Object.assign(graph, {
+      containerEl: {
+        get clientWidth() {
+          return viewport.width;
+        },
+        get clientHeight() {
+          return viewport.height;
+        },
+      },
+    });
+
+    (graph as unknown as { observeContainerResize(): void }).observeContainerResize();
+    viewport.width = 280;
+    viewport.height = 220;
+    resizeCallback?.([], {} as ResizeObserver);
+    vi.unstubAllGlobals();
+
+    expect(observe).toHaveBeenCalledTimes(1);
+    expect(rendererResize).toHaveBeenCalledWith(280, 220);
+    expect(fitView).toHaveBeenCalledWith(0.75);
+  });
+});
+
 describe('P1: Graph batch state scheduling', () => {
   function createStateGraph() {
     const dataModel = new DataModel({ theme: {} });

@@ -131,6 +131,7 @@ export async function run(container: string | HTMLElement) {
       const surface = graphCards.get(theme)!.surface;
       surface.replaceChildren();
       const graph = new Graph({
+        autoFitOnResize: true,
         container: surface,
         data,
         node: {

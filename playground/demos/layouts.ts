@@ -39,6 +39,7 @@ export async function run(container: string | HTMLElement) {
     currentGraph?.destroy();
     const layout = LAYOUTS[index];
     currentGraph = new Graph({
+      autoFitOnResize: true,
       container: canvasParent,
       data,
       node: { type: 'circle', style: { size: 10 } },

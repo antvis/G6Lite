@@ -1,0 +1,63 @@
+const n=`/**
+ * Demo: 5000 节点 + 标签 — 性能与标签验证
+ */
+import { Graph } from '../../src/index.ts';
+import { attachLabelsCanvas } from '../tooling.ts';
+
+function generateData(nodeCount: number, degree: number) {
+  const nodes = Array.from({ length: nodeCount }, (_, i) => ({
+    id: String(i),
+    name: \`N\${i}\`,
+    data: { cluster: i % 3 === 0 ? 'a' : i % 3 === 1 ? 'b' : 'c' },
+  }));
+  const edges: Array<{ source: string; target: string; data: { label: string } }> = [];
+  for (let i = 0; i < nodeCount; i++) {
+    const k = Math.min(degree, nodeCount - 1);
+    for (let j = 0; j < k; j++) {
+      const t = (i + 1 + j * 13) % nodeCount;
+      if (t !== i) {
+        edges.push({
+          source: String(i),
+          target: String(t),
+          data: { label: \`e\${i}-\${t}\` },
+        });
+      }
+    }
+  }
+  return { nodes, edges };
+}
+
+export async function run(container: string | HTMLElement) {
+  const wrap = typeof container === 'string' ? (document.querySelector(container) as HTMLElement) : container;
+  const { nodes, edges } = generateData(5000, 3);
+
+  const graph = new Graph({
+    autoFitOnResize: true,
+    container: wrap,
+    data: { nodes, edges },
+    node: {
+      type: 'circle',
+      style: {
+        fill: (d) => {
+          const c = (d.data?.cluster as string) ?? 'a';
+          return c === 'a' ? '#5B8FF9' : c === 'b' ? '#61DDAA' : '#F6BD16';
+        },
+        size: 4,
+      },
+    },
+    edge: { type: 'line', style: { lineWidth: 0.5 } },
+    layout: { type: 'force', linkDistance: 25 },
+    behaviors: ['zoom-canvas', 'drag-canvas'],
+    theme: 'light',
+  });
+
+  await graph.render();
+
+  attachLabelsCanvas(wrap, graph as any, {
+    nodeLabel: (n) => n.name ?? n.id,
+  });
+
+  return graph;
+}
+
+`;export{n as default};

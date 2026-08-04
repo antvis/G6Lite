@@ -21,6 +21,7 @@ export function GraphView() {
         edges: [{ source: 'a', target: 'b' }],
       },
       layout: { type: 'circular', radius: 120 },
+      autoFitOnResize: { padding: 24, maxZoom: 1.5 },
       behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
     });
 
@@ -33,3 +34,5 @@ export function GraphView() {
 ```
 
 Give the container a real height. Cleanup is especially important because React Strict Mode can run effects twice during development. Keep the graph in a ref when props change, then call `setData()` or an incremental update API from a separate effect.
+
+G6Lite observes container size changes and keeps the canvas dimensions in sync. The current camera is preserved by default. Set `autoFitOnResize: true` when a resizable panel should keep the whole graph visible, or pass `FitViewOptions` to control padding and zoom limits.

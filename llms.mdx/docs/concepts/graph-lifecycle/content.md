@@ -90,6 +90,26 @@ const graphPoint = graph.screenToGraph(clientX, clientY);
 const screenPoint = graph.graphToScreen(x, y);
 ```
 
+### 容器尺寸变化 [#容器尺寸变化]
+
+G6Lite 会通过 `ResizeObserver` 自动同步容器与 canvas 尺寸，调用 `setSize(width, height)` 时也会走相同的视口更新流程。默认情况下，这两种变化都会保留当前 camera，避免覆盖用户手动缩放和平移。
+
+可变分栏、侧栏展开收起等场景可以在创建 Graph 时开启自动适应：
+
+```ts
+const graph = new Graph({
+  container: 'container',
+  data,
+  autoFitOnResize: {
+    padding: 24,
+    minZoom: 0.2,
+    maxZoom: 1.5,
+  },
+});
+```
+
+`autoFitOnResize: true` 等价于尺寸变化后调用 `fitView(0.9)`，也可以直接传数值缩放系数或 `FitViewOptions`。自动适应完成后才会触发 `resize` 事件，因此监听器读取到的是最终 camera。大图或需要保留用户视口的场景建议保持默认关闭。
+
 ## 销毁 [#销毁]
 
 ```ts

@@ -154,6 +154,7 @@ register('plugin', EXTENSION_HINT_PLUGIN, extensionFactory(createExtensionHintPl
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
+    autoFitOnResize: true,
     container,
     data: {
       nodes: [

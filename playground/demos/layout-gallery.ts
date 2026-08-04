@@ -15,6 +15,7 @@ const LAYOUTS: Array<{ label: string; config: LayoutConfig }> = [
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
+    autoFitOnResize: true,
     container,
     data: { nodes: NODES, edges: EDGES },
     layout: LAYOUTS[0].config,
@@ -44,7 +45,6 @@ export async function run(container: string | HTMLElement) {
 
   ui.setStatus('Radial complete');
   return {
-    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.4 }),
     destroy: () => {
       graph.destroy();
       ui.panel.remove();

@@ -5,6 +5,7 @@ import { Graph, type TooltipContext } from '../../src/index.ts';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
+    autoFitOnResize: true,
     container,
     data: {
       nodes: [
@@ -80,7 +81,6 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
-    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
     destroy: () => graph.destroy(),
   };
 }

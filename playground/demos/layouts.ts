@@ -39,6 +39,7 @@ export async function run(container: string | HTMLElement) {
     currentGraph?.destroy();
     const layout = LAYOUTS[index];
     currentGraph = new Graph({
+      autoFitOnResize: true,
       container: canvasParent,
       data,
       node: { type: 'circle', style: { size: 10 } },
@@ -64,7 +65,6 @@ export async function run(container: string | HTMLElement) {
   await renderLayout(0);
 
   return {
-    fitView: () => currentGraph?.fitView({ padding: 64, maxZoom: 1.5 }),
     destroy: () => {
       currentGraph?.destroy();
       currentGraph = null;

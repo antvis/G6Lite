@@ -52,7 +52,6 @@ export interface DemoCatalogEntry {
 
 export interface DemoHandle {
   destroy(): void;
-  fitView?(): void | Promise<void>;
   ready?: Promise<void>;
 }
 
@@ -137,6 +136,5 @@ export async function runDemo(demo: DemoItem, container: HTMLElement): Promise<D
     throw new Error(`Demo ${demo.id} must return a handle with destroy()`);
   }
   const destroy = result.destroy.bind(result);
-  const fitView = typeof result.fitView === 'function' ? result.fitView.bind(result) : undefined;
-  return { destroy, fitView, ready: 'ready' in result ? result.ready : undefined };
+  return { destroy, ready: 'ready' in result ? result.ready : undefined };
 }

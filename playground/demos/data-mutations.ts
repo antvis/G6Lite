@@ -18,6 +18,7 @@ const button = (action: string, label: string) =>
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
+    autoFitOnResize: true,
     container,
     data: INITIAL_DATA,
     node: {
@@ -119,7 +120,6 @@ export async function run(container: string | HTMLElement) {
 
   renderStatus();
   return {
-    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
     destroy: () => {
       graph.destroy();
       ui.panel.remove();

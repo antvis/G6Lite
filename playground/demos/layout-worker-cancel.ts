@@ -16,6 +16,7 @@ const button = (action: string, label: string) =>
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
+    autoFitOnResize: true,
     container,
     data: createData(),
     layout: { type: 'grid', rows: 15, cols: 16 },

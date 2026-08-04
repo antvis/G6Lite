@@ -84,7 +84,7 @@ const graph = new Graph({
   edge: { type: 'line', style: { stroke: '#B8C2D1', endArrow: true } },
   layout: { type: 'force', linkDistance: 100 },
   behaviors: [
-    { type: 'zoom-canvas', sensitivity: 0.0015, minZoom: 0.1, maxZoom: 20 },
+    { type: 'zoom-canvas', sensitivity: 1, minZoom: 0.1, maxZoom: 20 },
     'drag-canvas',
     'drag-node',
     'click-select',
@@ -155,7 +155,7 @@ Combo declaration, nesting, collapse, runtime regrouping, states, and group drag
 
 | Common G6 v5 Behavior | G6Lite                | Migration note                                                                                                    |
 | --------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `zoom-canvas`         | `zoom-canvas`         | Same name; G6Lite adds `sensitivity`, `minZoom`, and `maxZoom`                                                    |
+| `zoom-canvas`         | `zoom-canvas`         | Same name and G6-style delta-percentage `sensitivity`; G6Lite also batches per frame and caps each frame at 15%   |
 | `drag-canvas`         | `drag-canvas`         | Same name; enabled with zoom when behaviors is omitted                                                            |
 | `drag-element`        | `drag-node`           | Drags nodes and also drags a hit Combo as a group                                                                 |
 | `click-select`        | `click-select`        | Single/multi-select options are supported; rebind payload types                                                   |

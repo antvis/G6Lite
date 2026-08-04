@@ -60,13 +60,13 @@ behaviors: ['drag-canvas', { type: 'brush-select', key: 'shift' }];
 
 ## 缩放手感与范围 [#缩放手感与范围]
 
-`zoom-canvas` 默认按 wheel delta 连续缩放，对鼠标滚轮和触控板使用同一套归一化规则。默认灵敏度为 `0.0015`，默认范围为 `0.1` 到 `20`。
+`zoom-canvas` 默认按归一化 wheel delta 的百分比连续缩放，对鼠标滚轮和触控板使用同一套规则。默认 `sensitivity` 为 `1`，同一动画帧内的同方向事件会合并，单帧缩放变化最多为 `15%`，默认范围为 `0.1` 到 `20`。
 
 ```ts
 behaviors: [
   {
     type: 'zoom-canvas',
-    sensitivity: 0.0005,
+    sensitivity: 0.5,
     minZoom: 0.2,
     maxZoom: 8,
   },
@@ -74,7 +74,7 @@ behaviors: [
 ];
 ```
 
-减小 `sensitivity` 会让缩放更缓和；无效或非正数配置会回退到安全默认值。
+`sensitivity` 是 wheel delta 的百分比乘数：例如默认配置下 `deltaY = -10` 会放大约 `10%`，`sensitivity: 0.5` 会将响应减半。减小该值会让缩放更缓和；无效或非正数配置会回退到安全默认值。
 
 ## 事件分发模型 [#事件分发模型]
 

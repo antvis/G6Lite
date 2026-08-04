@@ -48,14 +48,14 @@ describe('Playground resize fitting policy', () => {
     expect(missing).toEqual([]);
   });
 
-  it('keeps the Playground shell and DemoHandle free of camera resize orchestration', () => {
+  it('keeps resize fitting in Graph config while preserving manual fitView handles', () => {
     const mainSource = readFileSync(path.join(repositoryRoot, 'playground/main.ts'), 'utf8');
     const demosIndexSource = readFileSync(path.join(demosDirectory, 'index.ts'), 'utf8');
 
     expect(mainSource).not.toContain('new ResizeObserver');
     expect(mainSource).not.toContain('scheduleFitView');
     expect(mainSource).not.toContain('scheduleFinalFitView');
-    expect(demosIndexSource).not.toContain('fitView?');
-    expect(demosIndexSource).not.toContain('result.fitView');
+    expect(demosIndexSource).toContain('fitView?');
+    expect(demosIndexSource).toContain('result.fitView');
   });
 });

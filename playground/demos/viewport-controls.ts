@@ -71,6 +71,7 @@ export async function run(container: string | HTMLElement) {
 
   showCamera('ready');
   return {
+    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
     destroy: () => {
       graph.destroy();
       ui.panel.remove();

@@ -167,6 +167,10 @@ export async function run(container: string | HTMLElement) {
     }
   };
 
+  const fitGraphs = () => {
+    graphs.forEach((graph) => graph.fitView({ padding: 56, maxZoom: 1.4 }));
+  };
+
   const updateView = () => {
     const view = viewSelect.select.value;
     for (const theme of ['light', 'dark'] as const) {
@@ -190,6 +194,9 @@ export async function run(container: string | HTMLElement) {
   updateView();
 
   return {
+    fitView() {
+      fitGraphs();
+    },
     destroy() {
       graphs.forEach((graph) => graph.destroy());
       graphs = [];

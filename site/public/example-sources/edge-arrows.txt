@@ -5,6 +5,7 @@ import { Graph } from '@antv/g6-lite';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
+    autoFitOnResize: true,
     container,
     data: {
       nodes: [

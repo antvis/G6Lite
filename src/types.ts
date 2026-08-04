@@ -713,6 +713,11 @@ export interface InternalCombo {
 export interface GraphOptions {
   container: string | HTMLElement;
   data: GraphData;
+  /**
+   * Refit the graph after its viewport size changes.
+   * Defaults to false so resizing preserves the current camera.
+   */
+  autoFitOnResize?: boolean | number | FitViewOptions;
   node?: NodeConfig;
   edge?: EdgeConfig;
   combo?: ComboConfig;

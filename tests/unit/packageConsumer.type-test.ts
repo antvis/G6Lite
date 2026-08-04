@@ -122,6 +122,7 @@ register('plugin', PACKAGE_PLUGIN, extensionFactory(createPackagePlugin));
 const typedOptions: GraphOptions = {
   container: 'container',
   data: { nodes: [], edges: [] },
+  autoFitOnResize: { padding: 24, minZoom: 0.2, maxZoom: 1.5 },
   behaviors: [
     {
       type: 'zoom-canvas',

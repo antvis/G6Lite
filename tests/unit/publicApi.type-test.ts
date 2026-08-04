@@ -15,8 +15,10 @@ import type {
   ExtensionContext,
   ExtensionEdgeData,
   ExtensionNodeData,
+  FitViewOptions,
   Graph,
   GraphEventMap,
+  GraphOptions,
   Handler,
   NodeModel,
   NodeGraphEvent,
@@ -77,6 +79,9 @@ type PluginHasNoUpdate = Assert<
 >;
 type TransformHasUpdate = Assert<
   Equal<'update' extends keyof TransformExtension ? true : false, true>
+>;
+type AutoFitOnResizeOption = Assert<
+  Equal<GraphOptions['autoFitOnResize'], boolean | number | FitViewOptions | undefined>
 >;
 
 declare const emitter: EventEmitter;
@@ -190,6 +195,7 @@ export type PublicApiTypeAssertions =
   | BehaviorHasNoUpdate
   | PluginHasNoUpdate
   | TransformHasUpdate
+  | AutoFitOnResizeOption
   | InternalNodeExport
   | InternalEdgeExport
   | InternalComboExport;

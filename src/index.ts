@@ -87,6 +87,7 @@ export type {
   LabelDrawParams,
   LabelLayout,
   LabelMeasureParams,
+  LabelOptions,
   LabelPlacement,
   LabelRenderer,
   LabelType,

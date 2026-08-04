@@ -99,6 +99,204 @@ describe('LabelRenderer zoom scaling helpers', () => {
     expect(toLabelScreenPx(12, 2, 4)).toBe(48);
     expect(toLabelScreenPx(12, 2, 0.1)).toBe(6);
   });
+
+  it('resolves label dimensions in screen space at neutral zoom', () => {
+    const resolved = resolveNodeLabelStyle(
+      {
+        labelFontSize: 12,
+        labelOffsetX: 3,
+        labelBackgroundPadding: 2,
+        labelMaxWidth: 80,
+      },
+      { id: 'n1' },
+      2,
+      1,
+    );
+
+    expect(resolved).toMatchObject({
+      labelFontSize: 24,
+      labelOffsetX: 6,
+      labelBackgroundPadding: 4,
+      labelMaxWidth: 160,
+    });
+  });
+});
+
+describe('LabelLayerRenderer rendering policies', () => {
+  it('keeps low-zoom labels hidden by default and draws them when configured', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const nodes: LayoutNode[] = [
+      { id: 'source', x: 100, y: 100 },
+      { id: 'target', x: 300, y: 100 },
+    ];
+    const edges: GraphEdge[] = [{ id: 'edge', source: 'source', target: 'target' }];
+    const nodeConfig: NodeConfig = {
+      style: { label: (node) => (node.id === 'source' ? 'node' : false) },
+    };
+    const edgeConfig: EdgeConfig = { style: { label: 'edge' } };
+    const nodeIdToIndex = new Map([
+      ['source', 0],
+      ['target', 1],
+    ]);
+
+    layer.draw(nodes, edges, { x: 0, y: 0, zoom: 0.1 }, nodeConfig, edgeConfig, nodeIdToIndex);
+    expect(ctx.fillText).not.toHaveBeenCalled();
+
+    layer.draw(
+      nodes,
+      edges,
+      { x: 0, y: 0, zoom: 0.1 },
+      nodeConfig,
+      edgeConfig,
+      nodeIdToIndex,
+      undefined,
+      undefined,
+      undefined,
+      { hideOnLowZoom: false, hideOnCollision: false },
+    );
+
+    expect(vi.mocked(ctx.fillText).mock.calls.map(([text]) => text)).toEqual(['node', 'edge']);
+    layer.destroy();
+  });
+
+  it('keeps default node labels at a fixed screen font size when configured', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx, 2);
+    const nodeConfig: NodeConfig = { style: { label: 'node', labelFontSize: 12 } };
+
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 0.1 },
+      nodeConfig,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { scaleWithZoom: false, hideOnLowZoom: false },
+    );
+    expect(ctx.font).toContain('24px');
+
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 2 },
+      nodeConfig,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { scaleWithZoom: false },
+    );
+    expect(ctx.font).toContain('24px');
+    layer.destroy();
+  });
+
+  it('passes fixed screen dimensions to custom node renderers when configured', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx, 2);
+    const measure = vi.fn(() => ({ width: 40, height: 20 }));
+    registerLabelRenderer('test-fixed-node-label', { measure, draw: vi.fn() });
+
+    layer.draw(
+      [{ id: 'n1', x: 100, y: 100 }],
+      [],
+      { x: 0, y: 0, zoom: 0.1 },
+      {
+        labelRenderer: 'test-fixed-node-label',
+        style: {
+          label: 'node',
+          labelFontSize: 12,
+          labelOffsetX: 3,
+          labelBackgroundPadding: 2,
+          labelMaxWidth: 80,
+        },
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { scaleWithZoom: false, hideOnLowZoom: false },
+    );
+
+    expect(measure.mock.calls[0][0].style).toMatchObject({
+      labelFontSize: 24,
+      labelOffsetX: 6,
+      labelBackgroundPadding: 4,
+      labelMaxWidth: 160,
+    });
+    layer.destroy();
+  });
+
+  it('draws colliding default node labels when collision hiding is disabled', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const nodes: LayoutNode[] = [
+      { id: 'n1', x: 100, y: 100 },
+      { id: 'n2', x: 100, y: 100 },
+    ];
+    const nodeConfig: NodeConfig = { style: { label: (node) => node.id } };
+
+    layer.draw(nodes, [], { x: 0, y: 0, zoom: 1 }, nodeConfig);
+    expect(ctx.fillText).toHaveBeenCalledTimes(1);
+
+    vi.mocked(ctx.fillText).mockClear();
+    layer.draw(
+      nodes,
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      nodeConfig,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { hideOnCollision: false },
+    );
+    expect(ctx.fillText).toHaveBeenCalledTimes(2);
+    layer.destroy();
+  });
+
+  it('draws colliding default edge labels when collision hiding is disabled', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const nodes: LayoutNode[] = [
+      { id: 'source', x: 100, y: 100 },
+      { id: 'target', x: 300, y: 100 },
+    ];
+    const edges: GraphEdge[] = [
+      { id: 'edge-1', source: 'source', target: 'target' },
+      { id: 'edge-2', source: 'source', target: 'target' },
+    ];
+    const edgeConfig: EdgeConfig = { style: { label: (_source, _target, edge) => edge.id } };
+    const nodeIdToIndex = new Map([
+      ['source', 0],
+      ['target', 1],
+    ]);
+
+    layer.draw(nodes, edges, { x: 0, y: 0, zoom: 1 }, undefined, edgeConfig, nodeIdToIndex);
+    expect(ctx.fillText).toHaveBeenCalledTimes(1);
+
+    vi.mocked(ctx.fillText).mockClear();
+    layer.draw(
+      nodes,
+      edges,
+      { x: 0, y: 0, zoom: 1 },
+      undefined,
+      edgeConfig,
+      nodeIdToIndex,
+      undefined,
+      undefined,
+      undefined,
+      { hideOnCollision: false },
+    );
+    expect(ctx.fillText).toHaveBeenCalledTimes(2);
+    layer.destroy();
+  });
 });
 
 describe('custom label helpers', () => {
@@ -1017,6 +1215,78 @@ describe('LabelLayerRenderer custom lifecycle', () => {
 
     expect(custom.measure).toHaveBeenCalledTimes(2);
     expect(custom.draw).toHaveBeenCalledTimes(1);
+
+    vi.mocked(custom.measure).mockClear();
+    vi.mocked(custom.draw).mockClear();
+    layer.draw(
+      [
+        { id: 'n1', x: 100, y: 100 },
+        { id: 'n2', x: 100, y: 100 },
+      ],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      {
+        labelRenderer: 'test-node-collision',
+        style: { label: (node) => node.id },
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { hideOnCollision: false },
+    );
+
+    expect(custom.measure).toHaveBeenCalledTimes(2);
+    expect(custom.draw).toHaveBeenCalledTimes(2);
+    layer.destroy();
+  });
+
+  it('can disable collision hiding for custom edge labels', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const custom: LabelRenderer = {
+      measure: vi.fn(() => ({ width: 80, height: 20 })),
+      draw: vi.fn(),
+    };
+    registerLabelRenderer('test-edge-collision-options', custom);
+    const nodes: LayoutNode[] = [
+      { id: 'source', x: 100, y: 100 },
+      { id: 'target', x: 300, y: 100 },
+    ];
+    const edges: GraphEdge[] = [
+      { id: 'edge-1', source: 'source', target: 'target' },
+      { id: 'edge-2', source: 'source', target: 'target' },
+    ];
+    const edgeConfig: EdgeConfig = {
+      labelRenderer: 'test-edge-collision-options',
+      style: { label: (_source, _target, edge) => edge.id ?? '' },
+    };
+    const nodeIdToIndex = new Map([
+      ['source', 0],
+      ['target', 1],
+    ]);
+
+    layer.draw(nodes, edges, { x: 0, y: 0, zoom: 1 }, undefined, edgeConfig, nodeIdToIndex);
+    expect(custom.measure).toHaveBeenCalledTimes(2);
+    expect(custom.draw).toHaveBeenCalledTimes(1);
+
+    vi.mocked(custom.measure).mockClear();
+    vi.mocked(custom.draw).mockClear();
+    layer.draw(
+      nodes,
+      edges,
+      { x: 0, y: 0, zoom: 1 },
+      undefined,
+      edgeConfig,
+      nodeIdToIndex,
+      undefined,
+      undefined,
+      undefined,
+      { hideOnCollision: false },
+    );
+    expect(custom.measure).toHaveBeenCalledTimes(2);
+    expect(custom.draw).toHaveBeenCalledTimes(2);
     layer.destroy();
   });
 

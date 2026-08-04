@@ -20,6 +20,7 @@ import type {
   GraphEventMap,
   GraphOptions,
   Handler,
+  LabelOptions,
   NodeModel,
   NodeGraphEvent,
   PluginExtension,
@@ -82,6 +83,10 @@ type TransformHasUpdate = Assert<
 >;
 type AutoFitOnResizeOption = Assert<
   Equal<GraphOptions['autoFitOnResize'], boolean | number | FitViewOptions | undefined>
+>;
+type GraphLabelOption = Assert<Equal<GraphOptions['label'], LabelOptions | undefined>>;
+type UpdateLabelOption = Assert<
+  Equal<Parameters<Graph['updateOptions']>[0]['label'], LabelOptions | undefined>
 >;
 
 declare const emitter: EventEmitter;
@@ -196,6 +201,8 @@ export type PublicApiTypeAssertions =
   | PluginHasNoUpdate
   | TransformHasUpdate
   | AutoFitOnResizeOption
+  | GraphLabelOption
+  | UpdateLabelOption
   | InternalNodeExport
   | InternalEdgeExport
   | InternalComboExport;

@@ -3,6 +3,7 @@ import { DataModel } from '@src/dataModel.js';
 import { EventEmitter } from '@src/events.js';
 import { Graph } from '@src/graph.js';
 import type { Renderer } from '@src/renderer/renderer.js';
+import { RefreshLevel } from '@src/scheduler.js';
 
 function asRenderer<T>(renderer: T): Renderer {
   return renderer as unknown as Renderer;
@@ -653,6 +654,39 @@ describe('P1: viewport resize fitting policy', () => {
     expect(observe).toHaveBeenCalledTimes(1);
     expect(rendererResize).toHaveBeenCalledWith(280, 220);
     expect(fitView).toHaveBeenCalledWith(0.75);
+  });
+});
+
+describe('P1: label rendering options', () => {
+  it('merges runtime label options and schedules a full visual refresh', () => {
+    const dataModel = new DataModel({ theme: {} });
+    const forceFlush = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      initialized: true,
+      options: {
+        data: { nodes: [], edges: [] },
+        label: { scaleWithZoom: false, hideOnLowZoom: true },
+      },
+      dataModel,
+      scheduler: { forceFlush },
+    });
+
+    graph.updateOptions({
+      label: { hideOnLowZoom: false, hideOnCollision: false },
+    });
+
+    expect(graph).toMatchObject({
+      options: {
+        label: {
+          scaleWithZoom: false,
+          hideOnLowZoom: false,
+          hideOnCollision: false,
+        },
+      },
+    });
+    expect(forceFlush).toHaveBeenCalledWith(RefreshLevel.FULL_PROCESS);
   });
 });
 

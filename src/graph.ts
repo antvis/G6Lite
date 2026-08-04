@@ -217,8 +217,8 @@ export class Graph {
     });
   }
 
-  /** Update node, edge, and theme visual options, then fully re-process styles. */
-  updateOptions(opts: Partial<Pick<GraphOptions, 'node' | 'edge' | 'theme'>>): void {
+  /** Update node, edge, label, and theme visual options, then fully re-process styles. */
+  updateOptions(opts: Partial<Pick<GraphOptions, 'node' | 'edge' | 'label' | 'theme'>>): void {
     const runtime = this.getRuntime();
     if (!runtime) return;
     if (opts.node) {
@@ -242,6 +242,9 @@ export class Graph {
         ...opts.edge,
         style: { ...this.options.edge?.style, ...opts.edge.style },
       };
+    }
+    if (opts.label) {
+      this.options.label = { ...this.options.label, ...opts.label };
     }
     if (opts.theme) this.options.theme = opts.theme;
     const themeTokens = resolveTheme((this.options.theme as ThemeOption) ?? 'light');
@@ -1416,6 +1419,7 @@ export class Graph {
         this.renderer.getEdgePathCache(),
         this.dataModel?.theme,
         (id) => this.renderer.getNodeDimensions(id),
+        this.options.label,
       );
     });
   }

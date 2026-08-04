@@ -125,7 +125,7 @@ const typedOptions: GraphOptions = {
   behaviors: [
     {
       type: 'zoom-canvas',
-      sensitivity: 0.0005,
+      sensitivity: 0.5,
       minZoom: 0.2,
       maxZoom: 8,
     } satisfies ZoomCanvasOptions & { type: 'zoom-canvas' },

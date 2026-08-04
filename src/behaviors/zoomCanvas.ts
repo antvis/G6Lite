@@ -5,7 +5,7 @@
 import type { Renderer } from '../renderer/renderer';
 
 export interface ZoomCanvasOptions {
-  /** Wheel/trackpad sensitivity. Must be a finite positive number. */
+  /** Wheel/trackpad delta percentage multiplier. Defaults to 1. */
   sensitivity?: number;
   /** Minimum camera zoom. Defaults to 0.1. */
   minZoom?: number;
@@ -20,13 +20,12 @@ interface ResolvedZoomCanvasOptions {
 }
 
 export const DEFAULT_ZOOM_CANVAS_OPTIONS: Readonly<ResolvedZoomCanvasOptions> = {
-  sensitivity: 0.0015,
+  sensitivity: 1,
   minZoom: 0.1,
   maxZoom: 20,
 };
 
-const MIN_EVENT_ZOOM_FACTOR = 0.85;
-const MAX_EVENT_ZOOM_FACTOR = 1.18;
+const MAX_FRAME_ZOOM_STEP = 15;
 const LINE_HEIGHT_PX = 16;
 
 function isFinitePositive(value: unknown): value is number {
@@ -66,19 +65,20 @@ function clamp(value: number, min: number, max: number): number {
 export function zoomCanvas(renderer: Renderer, options?: ZoomCanvasOptions): () => void {
   const canvas = renderer.getCanvas();
   const { sensitivity, minZoom, maxZoom } = resolveZoomCanvasOptions(options);
-  const onWheel = (e: WheelEvent) => {
-    e.preventDefault();
-    const normalizedDelta = normalizeWheelDelta(e, canvas);
-    if (normalizedDelta === 0) return;
+  let pendingDelta = 0;
+  let frameId: number | null = null;
+
+  const flush = () => {
+    frameId = null;
+    const frameDelta = pendingDelta;
+    pendingDelta = 0;
+    if (frameDelta === 0) return;
 
     renderer.setMoving(true);
     renderer.setMoving(false); // triggers 150ms debounce restore
     const cam = renderer.getCamera();
-    const factor = clamp(
-      Math.exp(-normalizedDelta * sensitivity),
-      MIN_EVENT_ZOOM_FACTOR,
-      MAX_EVENT_ZOOM_FACTOR,
-    );
+    const zoomStep = clamp(-frameDelta * sensitivity, -MAX_FRAME_ZOOM_STEP, MAX_FRAME_ZOOM_STEP);
+    const factor = 1 + zoomStep / 100;
     const newZoom = clamp(cam.zoom * factor, minZoom, maxZoom);
     if (newZoom === cam.zoom) return;
 
@@ -95,6 +95,24 @@ export function zoomCanvas(renderer: Renderer, options?: ZoomCanvasOptions): () 
     renderer.setCamera({ zoom: newZoom, x: nextCamX, y: nextCamY });
     renderer.scheduleRender();
   };
+
+  const onWheel = (e: WheelEvent) => {
+    e.preventDefault();
+    const normalizedDelta = normalizeWheelDelta(e, canvas);
+    if (normalizedDelta === 0) return;
+
+    if (pendingDelta !== 0 && Math.sign(normalizedDelta) !== Math.sign(pendingDelta)) {
+      pendingDelta = normalizedDelta;
+    } else {
+      pendingDelta += normalizedDelta;
+    }
+    if (frameId === null) frameId = requestAnimationFrame(flush);
+  };
   canvas.addEventListener('wheel', onWheel, { passive: false });
-  return () => canvas.removeEventListener('wheel', onWheel);
+  return () => {
+    canvas.removeEventListener('wheel', onWheel);
+    if (frameId !== null) cancelAnimationFrame(frameId);
+    frameId = null;
+    pendingDelta = 0;
+  };
 }

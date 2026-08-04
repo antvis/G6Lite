@@ -1,6 +1,6 @@
 {
   "name": "@antv/g6-lite",
-  "version": "0.1.0-beta.22",
+  "version": "0.1.0-beta.23",
   "description": "A lightweight, high-performance WebGL graph visualization engine.",
   "type": "module",
   "main": "dist/index.js",

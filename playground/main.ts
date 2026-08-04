@@ -83,10 +83,36 @@ function initCopy(): void {
 function initResize(): void {
   const handle = document.getElementById('resize-handle')!;
   const codePanel = document.getElementById('code-panel')!;
+  const graphContainer = document.getElementById('graph-container')!;
+  let resizing = false;
+  let fitFrame: number | null = null;
+
+  const fitCurrentView = () => {
+    fitFrame = null;
+    void currentHandle?.fitView?.();
+  };
+
+  const scheduleFitView = () => {
+    if (fitFrame !== null) return;
+    fitFrame = requestAnimationFrame(fitCurrentView);
+  };
+
+  const scheduleFinalFitView = () => {
+    if (fitFrame !== null) cancelAnimationFrame(fitFrame);
+    fitFrame = requestAnimationFrame(() => {
+      fitFrame = requestAnimationFrame(fitCurrentView);
+    });
+  };
+
+  const resizeObserver = new ResizeObserver(() => {
+    if (resizing) scheduleFitView();
+  });
+  resizeObserver.observe(graphContainer);
 
   handle.addEventListener('mousedown', (event) => {
     const startX = event.clientX;
     const startWidth = codePanel.offsetWidth;
+    resizing = true;
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
 
@@ -95,6 +121,8 @@ function initResize(): void {
       codePanel.style.width = `${Math.max(280, Math.min(window.innerWidth * 0.6, nextWidth))}px`;
     };
     const onUp = () => {
+      resizing = false;
+      scheduleFinalFitView();
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
       document.removeEventListener('mousemove', onMove);

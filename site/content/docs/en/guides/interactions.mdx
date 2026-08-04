@@ -22,13 +22,13 @@ Each behavior can be a string or an object with options. Picking and element eve
 
 ## Zoom feel and bounds
 
-`zoom-canvas` uses continuous wheel-delta scaling for both mouse wheels and trackpads. The default sensitivity is `0.0015`, with a default zoom range of `0.1` to `20`.
+`zoom-canvas` treats normalized wheel delta as a percentage for both mouse wheels and trackpads. The default `sensitivity` is `1`. Same-direction events within one animation frame are combined, each frame is capped at a `15%` zoom change, and the default zoom range is `0.1` to `20`.
 
 ```ts
 behaviors: [
   {
     type: 'zoom-canvas',
-    sensitivity: 0.0005,
+    sensitivity: 0.5,
     minZoom: 0.2,
     maxZoom: 8,
   },
@@ -36,7 +36,7 @@ behaviors: [
 ];
 ```
 
-Use a smaller `sensitivity` for gentler zooming. Invalid or non-positive values fall back to safe defaults.
+`sensitivity` multiplies the wheel-delta percentage: with the default, `deltaY = -10` zooms in by about `10%`; `sensitivity: 0.5` halves that response. Use a smaller value for gentler zooming. Invalid or non-positive values fall back to safe defaults.
 
 ## Built-in Behaviors
 

@@ -85,7 +85,7 @@ const graph = new Graph({
   edge: { type: 'line', style: { stroke: '#B8C2D1', endArrow: true } },
   layout: { type: 'force', linkDistance: 100 },
   behaviors: [
-    { type: 'zoom-canvas', sensitivity: 0.0015, minZoom: 0.1, maxZoom: 20 },
+    { type: 'zoom-canvas', sensitivity: 1, minZoom: 0.1, maxZoom: 20 },
     'drag-canvas',
     'drag-node',
     'click-select',
@@ -156,7 +156,7 @@ Combo 数据、折叠、嵌套、运行时归组、状态和整体拖拽均已�
 
 | G6 v5 常见 Behavior | G6Lite | 迁移说明 |
 | --- | --- | --- |
-| `zoom-canvas` | `zoom-canvas` | 同名；G6Lite 可配置 `sensitivity`、`minZoom`、`maxZoom` |
+| `zoom-canvas` | `zoom-canvas` | 同名；`sensitivity` 与 G6 一样按 delta 百分比缩放，G6Lite 额外按帧合并并限制单帧变化为 15% |
 | `drag-canvas` | `drag-canvas` | 同名；未配置 behaviors 时与 zoom 默认启用 |
 | `drag-element` | `drag-node` | 拖动节点；命中 Combo 时也支持整体拖动 |
 | `click-select` | `click-select` | 支持单选和组合键多选配置，payload 需重接 |

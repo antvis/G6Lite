@@ -76,6 +76,11 @@
   "engines": {
     "node": ">=20"
   },
+  "overrides": {
+    "@size-limit/esbuild": {
+      "esbuild": "0.28.0"
+    }
+  },
   "publishConfig": {
     "access": "public"
   },

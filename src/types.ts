@@ -381,6 +381,22 @@ export type EdgeLabelPlacement = 'start' | 'center' | 'end';
 /** Label owner type shared by node and edge label renderers. */
 export type LabelType = 'node' | 'edge';
 
+/** Engine-managed rendering policies shared by node and edge labels. */
+export interface LabelOptions {
+  /**
+   * Whether engine-managed label dimensions scale with camera zoom.
+   * Defaults to true. Edge labels already use fixed screen-space dimensions.
+   */
+  scaleWithZoom?: boolean;
+  /**
+   * Whether labels are hidden below the built-in low-zoom thresholds.
+   * Defaults to true. The thresholds are 0.3 for nodes and 0.5 for edges.
+   */
+  hideOnLowZoom?: boolean;
+  /** Whether labels that collide with an earlier label are hidden. Defaults to true. */
+  hideOnCollision?: boolean;
+}
+
 /** Final, function-free label style passed to a custom label renderer. */
 export interface ResolvedLabelStyle {
   /** Canvas backing-store pixels after DPR/zoom conversion. */
@@ -718,6 +734,8 @@ export interface GraphOptions {
    * Defaults to false so resizing preserves the current camera.
    */
   autoFitOnResize?: boolean | number | FitViewOptions;
+  /** Engine-managed node and edge label rendering policies. */
+  label?: LabelOptions;
   node?: NodeConfig;
   edge?: EdgeConfig;
   combo?: ComboConfig;

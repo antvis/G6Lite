@@ -439,6 +439,18 @@
     "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
   },
   {
+    "id": "label-rendering-options",
+    "file": "label-rendering-options.ts",
+    "title": "标签渲染策略开关",
+    "description": "对比固定字号、低 zoom 持续绘制和关闭碰撞隐藏后的标签效果。",
+    "category": "label",
+    "kind": "functional",
+    "audiences": ["playground"],
+    "coverage": ["label.options", "label.zoom-scaling", "label.low-zoom", "label.collision", "options.update"],
+    "releaseCheck": "visual",
+    "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
+  },
+  {
     "id": "custom-label-renderer",
     "file": "custom-label-renderer.ts",
     "title": "自定义 Label Renderer",

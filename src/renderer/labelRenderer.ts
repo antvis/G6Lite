@@ -15,6 +15,7 @@ import type {
   GraphEdge,
   GraphNode,
   LabelLayout,
+  LabelOptions,
   LabelPlacement,
   LabelRenderer,
   LayoutNode,
@@ -54,6 +55,9 @@ import {
   toLabelScreenPx,
 } from './labelStyle';
 import { resolveNodeStyle } from './style';
+
+const NODE_LABEL_MIN_ZOOM = 0.3;
+const EDGE_LABEL_MIN_ZOOM = 0.5;
 
 export {
   getBuiltInNodeBoundaryAnchor,
@@ -177,6 +181,7 @@ export class LabelLayerRenderer {
     edgePathCache?: Map<number, EdgePath>,
     theme: ThemeTokens = {},
     getNodeDimensions?: (id: string) => { width: number; height: number } | undefined,
+    labelOptions?: LabelOptions,
   ): void {
     this.redrawScheduled = false;
     this.decorationHoverRegions = [];
@@ -211,14 +216,30 @@ export class LabelLayerRenderer {
     this.grid.reset(w, h);
     this.decorationGrid.reset(w, h);
     const zoom = camera.zoom;
+    const scaleWithZoom = labelOptions?.scaleWithZoom !== false;
+    const hideOnLowZoom = labelOptions?.hideOnLowZoom !== false;
+    const hideOnCollision = labelOptions?.hideOnCollision !== false;
 
     // Draw node icons and labels
     if (hasNodeLabels || hasNodeIcons || hasNodeOverlay || hasNodeDecorations) {
-      this.drawNodes(nodes, camera, nodeConfig, w, h, dpr, zoom, theme, getNodeDimensions);
+      this.drawNodes(
+        nodes,
+        camera,
+        nodeConfig,
+        w,
+        h,
+        dpr,
+        zoom,
+        theme,
+        scaleWithZoom,
+        hideOnLowZoom,
+        hideOnCollision,
+        getNodeDimensions,
+      );
     }
 
     // Draw edge labels
-    if (hasEdgeLabels && zoom >= 0.5) {
+    if (hasEdgeLabels && (!hideOnLowZoom || zoom >= EDGE_LABEL_MIN_ZOOM)) {
       this.drawEdges(
         edges,
         nodes,
@@ -228,6 +249,7 @@ export class LabelLayerRenderer {
         h,
         dpr,
         zoom,
+        hideOnCollision,
         nodeIdToIndex,
         edgePathCache,
       );
@@ -243,6 +265,9 @@ export class LabelLayerRenderer {
     dpr: number,
     zoom: number,
     theme: ThemeTokens,
+    scaleWithZoom: boolean,
+    hideOnLowZoom: boolean,
+    hideOnCollision: boolean,
     getNodeDimensions?: (id: string) => { width: number; height: number } | undefined,
   ): void {
     const ctx = this.ctx;
@@ -337,8 +362,8 @@ export class LabelLayerRenderer {
         }
       }
 
-      // Draw label (skip at very low zoom)
-      if (style.label !== undefined && zoom >= 0.3) {
+      // Draw label (skip at very low zoom when the optimization is enabled)
+      if (style.label !== undefined && (!hideOnLowZoom || zoom >= NODE_LABEL_MIN_ZOOM)) {
         const text = resolveNodeValue(style.label, node, false as string | false);
         if (text && typeof text === 'string') {
           const renderedByCustomRenderer =
@@ -357,9 +382,22 @@ export class LabelLayerRenderer {
               zoom,
               w,
               h,
+              scaleWithZoom,
+              hideOnCollision,
             );
           if (!renderedByCustomRenderer)
-            this.drawNodeLabel(ctx, text, px, py, node, style, dpr, zoom);
+            this.drawNodeLabel(
+              ctx,
+              text,
+              px,
+              py,
+              node,
+              style,
+              dpr,
+              zoom,
+              scaleWithZoom,
+              hideOnCollision,
+            );
         }
       }
 
@@ -767,8 +805,10 @@ export class LabelLayerRenderer {
     zoom: number,
     viewW: number,
     viewH: number,
+    scaleWithZoom: boolean,
+    hideOnCollision: boolean,
   ): boolean {
-    const resolvedStyle = resolveNodeLabelStyle(style, node, dpr, zoom);
+    const resolvedStyle = resolveNodeLabelStyle(style, node, dpr, scaleWithZoom ? zoom : 1);
     const params: NodeLabelParams = {
       ctx,
       text,
@@ -806,7 +846,7 @@ export class LabelLayerRenderer {
     const nodeSize = resolveNodeValue(style.size, node, 8);
     const nodeWidth = resolveNodeValue(style.width, node, nodeSize) * zoom;
     const nodeHeight = resolveNodeValue(style.height, node, nodeSize) * zoom;
-    const horizontalGap = 4 * dpr * getLabelZoom(zoom);
+    const horizontalGap = 4 * dpr * (scaleWithZoom ? getLabelZoom(zoom) : 1);
     const anchor = getCustomNodeLabelAnchor(
       px,
       py,
@@ -822,7 +862,9 @@ export class LabelLayerRenderer {
     if (bboxX + layout.width < 0 || bboxX > viewW || bboxY + layout.height < 0 || bboxY > viewH) {
       return true;
     }
-    if (this.grid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) return true;
+    if (hideOnCollision && this.grid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) {
+      return true;
+    }
 
     let drawn = false;
     ctx.save();
@@ -841,7 +883,7 @@ export class LabelLayerRenderer {
     }
 
     if (!drawn) return false;
-    this.grid.register(bboxX, bboxY, layout.width, layout.height);
+    if (hideOnCollision) this.grid.register(bboxX, bboxY, layout.width, layout.height);
     return true;
   }
 
@@ -854,6 +896,8 @@ export class LabelLayerRenderer {
     style: NodeStyleConfig,
     dpr: number,
     zoom: number,
+    scaleWithZoom: boolean,
+    hideOnCollision: boolean,
   ): void {
     const fontSize = resolveNodeValue(style.labelFontSize, node, 12);
     const fontFamily = resolveNodeValue(style.labelFontFamily, node, DEFAULT_FONT_FAMILY);
@@ -866,8 +910,8 @@ export class LabelLayerRenderer {
     const bgPadding = resolveNodeValue(style.labelBackgroundPadding, node, 2);
     const maxWidth = resolveNodeValue(style.labelMaxWidth, node, 0);
 
-    const labelZoom = getLabelZoom(zoom);
-    const fontSizePx = toLabelScreenPx(fontSize, dpr, zoom);
+    const labelZoom = scaleWithZoom ? getLabelZoom(zoom) : 1;
+    const fontSizePx = toLabelScreenPx(fontSize, dpr, scaleWithZoom ? zoom : dpr);
     ctx.font = `${fontWeight} ${fontSizePx}px ${fontFamily}`;
 
     // Measure text
@@ -913,8 +957,8 @@ export class LabelLayerRenderer {
     const bboxX =
       textAlign === 'center' ? labelX - textW / 2 : textAlign === 'right' ? labelX - textW : labelX;
     const bboxY = labelY - textH / 2;
-    if (this.grid.hasOverlap(bboxX, bboxY, textW, textH)) return;
-    this.grid.register(bboxX, bboxY, textW, textH);
+    if (hideOnCollision && this.grid.hasOverlap(bboxX, bboxY, textW, textH)) return;
+    if (hideOnCollision) this.grid.register(bboxX, bboxY, textW, textH);
 
     // Draw background
     if (background && typeof background === 'string') {
@@ -994,6 +1038,7 @@ export class LabelLayerRenderer {
     h: number,
     dpr: number,
     zoom: number,
+    hideOnCollision: boolean,
     nodeIdToIndex?: Map<string, number>,
     edgePathCache?: Map<number, EdgePath>,
   ): void {
@@ -1105,12 +1150,25 @@ export class LabelLayerRenderer {
           zoom,
           w,
           h,
+          hideOnCollision,
         )
       ) {
         continue;
       }
 
-      this.drawDefaultEdgeLabel(ctx, text, px, py, angle, srcNode, tgtNode, edge, style, dpr);
+      this.drawDefaultEdgeLabel(
+        ctx,
+        text,
+        px,
+        py,
+        angle,
+        srcNode,
+        tgtNode,
+        edge,
+        style,
+        dpr,
+        hideOnCollision,
+      );
     }
   }
 
@@ -1130,6 +1188,7 @@ export class LabelLayerRenderer {
     zoom: number,
     viewW: number,
     viewH: number,
+    hideOnCollision: boolean,
   ): boolean {
     const params: EdgeLabelParams = {
       ctx,
@@ -1174,7 +1233,9 @@ export class LabelLayerRenderer {
     if (bboxX + layout.width < 0 || bboxX > viewW || bboxY + layout.height < 0 || bboxY > viewH) {
       return true;
     }
-    if (this.grid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) return true;
+    if (hideOnCollision && this.grid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) {
+      return true;
+    }
 
     let drawn = false;
     ctx.save();
@@ -1194,7 +1255,7 @@ export class LabelLayerRenderer {
     }
 
     if (!drawn) return false;
-    this.grid.register(bboxX, bboxY, layout.width, layout.height);
+    if (hideOnCollision) this.grid.register(bboxX, bboxY, layout.width, layout.height);
     return true;
   }
 
@@ -1209,6 +1270,7 @@ export class LabelLayerRenderer {
     edge: GraphEdge,
     style: NonNullable<EdgeConfig['style']>,
     dpr: number,
+    hideOnCollision: boolean,
   ): void {
     const fontSize = resolveEdgeValue(style.labelFontSize, source, target, edge, 10);
     const fontFamily = resolveEdgeValue(
@@ -1233,8 +1295,8 @@ export class LabelLayerRenderer {
     const textH = fontSizePx;
     const bboxX = px - textW / 2;
     const bboxY = py - textH / 2;
-    if (this.grid.hasOverlap(bboxX, bboxY, textW, textH)) return;
-    this.grid.register(bboxX, bboxY, textW, textH);
+    if (hideOnCollision && this.grid.hasOverlap(bboxX, bboxY, textW, textH)) return;
+    if (hideOnCollision) this.grid.register(bboxX, bboxY, textW, textH);
 
     ctx.save();
     ctx.translate(px, py);

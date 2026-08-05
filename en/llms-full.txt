@@ -79,6 +79,269 @@ G6Lite is a lightweight WebGL graph visualization engine for large relationship 
 Use G6Lite when WebGL rendering, incremental state updates, AntV layouts, and a controlled extension boundary match your product. If you need the complete G6 plugin and animation ecosystem, evaluate G6 v5 first.
 
 
+# API reference (/en/docs/api)
+
+
+
+All supported imports come from `@antv/g6-lite`.
+
+```ts
+import { Graph, extensionFactory, register, runLayout } from '@antv/g6-lite';
+import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-lite';
+```
+
+## Main runtime APIs [#main-runtime-apis]
+
+* `Graph`: create, render, update, query, relayout, control the viewport, and destroy a graph.
+* `runLayout()`: run a supported layout independently.
+* `register()`: register node, edge, label, behavior, layout, transform, decoration, or plugin extensions.
+* `extensionFactory()`: provide isolated stateful extension instances.
+
+## Type groups [#type-groups]
+
+Package-root types cover graph options and data, nodes, edges, combos, labels, states, themes, layouts, viewport operations, behaviors, transforms, plugins, and extension context.
+
+The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).
+
+
+# Data model (/en/docs/concepts/data-model)
+
+
+
+`GraphData` contains `nodes`, `edges`, and optional `combos`:
+
+```ts
+const data = {
+  nodes: [
+    { id: 'gateway', data: { label: 'Gateway' } },
+    { id: 'orders', data: { label: 'Orders' } },
+  ],
+  edges: [{ source: 'gateway', target: 'orders', data: { qps: 1200 } }],
+};
+```
+
+Node IDs must be stable. Put business fields under `data`; use `x` and `y` when coordinates are already available. Edges declare `source` and `target` and may provide a stable `id`. Combos group nodes through `comboId` and remain experimental during the `0.1.x` beta.
+
+Use states for selection, highlighting, and dimming:
+
+```ts
+graph.batchSetState([
+  { id: 'gateway', state: 'selected', value: true },
+  { id: 'orders', state: 'inactive', value: true },
+]);
+```
+
+Query APIs return normalized read-only model views. Modify graph-owned data through update, position, and state APIs instead of mutating query results.
+
+
+# Graph lifecycle (/en/docs/concepts/graph-lifecycle)
+
+
+
+`Graph` is the main public entry point.
+
+```ts
+const graph = new Graph({ container: 'graph', data, layout: { type: 'force' } });
+await graph.render();
+```
+
+Construction resolves the container and prepares the rendering surface. `render()` sizes the canvases, resolves the theme, runs layout, initializes data and transforms, starts WebGL and interaction layers, fits the viewport, and emits `afterrender`.
+
+Use `setData()` for complete replacement. Use `addNode`, `addEdge`, update, remove, and state APIs for incremental changes. To run another layout:
+
+```ts
+graph.setLayout({ type: 'dagre', rankdir: 'LR' });
+await graph.layout();
+```
+
+Viewport APIs include `fitView()`, `focusItem()`, `setCamera()`, `screenToGraph()`, and `graphToScreen()`. Always call `graph.destroy()` during page or component cleanup.
+
+## Container resize [#container-resize]
+
+G6Lite uses `ResizeObserver` to keep the canvas dimensions synchronized with its container. Calling `setSize(width, height)` uses the same viewport update path. Both preserve the current camera by default so a user's zoom and pan are not overwritten.
+
+Enable automatic fitting for resizable panels or expanding sidebars:
+
+```ts
+const graph = new Graph({
+  container: 'graph',
+  data,
+  autoFitOnResize: {
+    padding: 24,
+    minZoom: 0.2,
+    maxZoom: 1.5,
+  },
+});
+```
+
+`autoFitOnResize: true` is equivalent to calling `fitView(0.9)` after a size change. A numeric scale or `FitViewOptions` can also be passed directly. The `resize` event is emitted after the optional fit finishes, so listeners observe the final camera. Leave the option disabled for large graphs or flows that must preserve the user's viewport.
+
+
+# What is G6Lite? (/en/docs/concepts/overview)
+
+
+
+G6Lite is a lightweight WebGL graph visualization engine. It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
+
+## Good fits [#good-fits]
+
+* Relationship exploration, topology, knowledge graphs, and dependency analysis.
+* Frequent highlighting, selection, neighbor focus, and state switching.
+* Products that need AntV layouts with a controlled package and extension boundary.
+
+## Evaluate carefully [#evaluate-carefully]
+
+* Extremely large graphs where first-paint speed is the only requirement.
+* Products that need the full G6 plugin, animation, and element ecosystem.
+* SVG/DOM-level customization or server-side image rendering.
+
+G6 v5 is the broader general-purpose framework. G6Lite is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
+
+
+# Minimal graph (/en/docs/examples/basic)
+
+
+
+
+
+<ExampleDetail id="basic" locale="en" />
+
+
+# Combo containers (/en/docs/examples/combo)
+
+
+
+
+
+<ExampleDetail id="combo" locale="en" />
+
+
+# Node and edge mutations (/en/docs/examples/data-mutations)
+
+
+
+
+
+<ExampleDetail id="data-mutations" locale="en" />
+
+
+# Default themes and interaction states (/en/docs/examples/default-theme)
+
+
+
+
+
+<ExampleDetail id="default-theme" locale="en" />
+
+
+# Edge arrow directions (/en/docs/examples/edge-arrows)
+
+
+
+
+
+<ExampleDetail id="edge-arrows" locale="en" />
+
+
+# Extension system showcase (/en/docs/examples/extension-system)
+
+
+
+
+
+<ExampleDetail id="extension-system" locale="en" />
+
+
+# Graph examples (/en/docs/examples)
+
+
+
+
+
+<ExamplesCenter locale="en" />
+
+
+# More built-in layouts (/en/docs/examples/layout-gallery)
+
+
+
+
+
+<ExampleDetail id="layout-gallery" locale="en" />
+
+
+# Common layout switching (/en/docs/examples/layouts)
+
+
+
+
+
+<ExampleDetail id="layouts" locale="en" />
+
+
+# Data-driven node styles (/en/docs/examples/node-style)
+
+
+
+
+
+<ExampleDetail id="node-style" locale="en" />
+
+
+# Parallel and reverse edges (/en/docs/examples/parallel-edges)
+
+
+
+
+
+<ExampleDetail id="parallel-edges" locale="en" />
+
+
+# Queries, batch states, and visibility (/en/docs/examples/queries-and-states)
+
+
+
+
+
+<ExampleDetail id="queries-and-states" locale="en" />
+
+
+# AI Papers large relationship graph (/en/docs/examples/real-dataset)
+
+
+
+
+
+<ExampleDetail id="real-dataset" locale="en" />
+
+
+# Click, brush, and lasso selection (/en/docs/examples/selection-behaviors)
+
+
+
+
+
+<ExampleDetail id="selection-behaviors" locale="en" />
+
+
+# Tooltip (/en/docs/examples/tooltip)
+
+
+
+
+
+<ExampleDetail id="tooltip" locale="en" />
+
+
+# Viewport and coordinate conversion (/en/docs/examples/viewport-controls)
+
+
+
+
+
+<ExampleDetail id="viewport-controls" locale="en" />
+
+
 # API stability and release boundary (/en/docs/compatibility/api-stability)
 
 
@@ -548,269 +811,6 @@ See [performance metrics](/en/docs/metrics/performance) and [performance tuning]
 * [AntV G6 README](https://github.com/antvis/G6#readme) and [G6 documentation](https://g6.antv.antgroup.com/)
 * [sigma.js README](https://github.com/jacomyal/sigma.js#readme), [sigma.js documentation](https://www.sigmajs.org/docs/), and [Graphology](https://graphology.github.io/)
 * [Cytoscape.js README](https://github.com/cytoscape/cytoscape.js#readme) and [Cytoscape.js documentation](https://js.cytoscape.org/)
-
-
-# API reference (/en/docs/api)
-
-
-
-All supported imports come from `@antv/g6-lite`.
-
-```ts
-import { Graph, extensionFactory, register, runLayout } from '@antv/g6-lite';
-import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-lite';
-```
-
-## Main runtime APIs [#main-runtime-apis]
-
-* `Graph`: create, render, update, query, relayout, control the viewport, and destroy a graph.
-* `runLayout()`: run a supported layout independently.
-* `register()`: register node, edge, label, behavior, layout, transform, decoration, or plugin extensions.
-* `extensionFactory()`: provide isolated stateful extension instances.
-
-## Type groups [#type-groups]
-
-Package-root types cover graph options and data, nodes, edges, combos, labels, states, themes, layouts, viewport operations, behaviors, transforms, plugins, and extension context.
-
-The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).
-
-
-# Data model (/en/docs/concepts/data-model)
-
-
-
-`GraphData` contains `nodes`, `edges`, and optional `combos`:
-
-```ts
-const data = {
-  nodes: [
-    { id: 'gateway', data: { label: 'Gateway' } },
-    { id: 'orders', data: { label: 'Orders' } },
-  ],
-  edges: [{ source: 'gateway', target: 'orders', data: { qps: 1200 } }],
-};
-```
-
-Node IDs must be stable. Put business fields under `data`; use `x` and `y` when coordinates are already available. Edges declare `source` and `target` and may provide a stable `id`. Combos group nodes through `comboId` and remain experimental during the `0.1.x` beta.
-
-Use states for selection, highlighting, and dimming:
-
-```ts
-graph.batchSetState([
-  { id: 'gateway', state: 'selected', value: true },
-  { id: 'orders', state: 'inactive', value: true },
-]);
-```
-
-Query APIs return normalized read-only model views. Modify graph-owned data through update, position, and state APIs instead of mutating query results.
-
-
-# Graph lifecycle (/en/docs/concepts/graph-lifecycle)
-
-
-
-`Graph` is the main public entry point.
-
-```ts
-const graph = new Graph({ container: 'graph', data, layout: { type: 'force' } });
-await graph.render();
-```
-
-Construction resolves the container and prepares the rendering surface. `render()` sizes the canvases, resolves the theme, runs layout, initializes data and transforms, starts WebGL and interaction layers, fits the viewport, and emits `afterrender`.
-
-Use `setData()` for complete replacement. Use `addNode`, `addEdge`, update, remove, and state APIs for incremental changes. To run another layout:
-
-```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR' });
-await graph.layout();
-```
-
-Viewport APIs include `fitView()`, `focusItem()`, `setCamera()`, `screenToGraph()`, and `graphToScreen()`. Always call `graph.destroy()` during page or component cleanup.
-
-## Container resize [#container-resize]
-
-G6Lite uses `ResizeObserver` to keep the canvas dimensions synchronized with its container. Calling `setSize(width, height)` uses the same viewport update path. Both preserve the current camera by default so a user's zoom and pan are not overwritten.
-
-Enable automatic fitting for resizable panels or expanding sidebars:
-
-```ts
-const graph = new Graph({
-  container: 'graph',
-  data,
-  autoFitOnResize: {
-    padding: 24,
-    minZoom: 0.2,
-    maxZoom: 1.5,
-  },
-});
-```
-
-`autoFitOnResize: true` is equivalent to calling `fitView(0.9)` after a size change. A numeric scale or `FitViewOptions` can also be passed directly. The `resize` event is emitted after the optional fit finishes, so listeners observe the final camera. Leave the option disabled for large graphs or flows that must preserve the user's viewport.
-
-
-# What is G6Lite? (/en/docs/concepts/overview)
-
-
-
-G6Lite is a lightweight WebGL graph visualization engine. It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
-
-## Good fits [#good-fits]
-
-* Relationship exploration, topology, knowledge graphs, and dependency analysis.
-* Frequent highlighting, selection, neighbor focus, and state switching.
-* Products that need AntV layouts with a controlled package and extension boundary.
-
-## Evaluate carefully [#evaluate-carefully]
-
-* Extremely large graphs where first-paint speed is the only requirement.
-* Products that need the full G6 plugin, animation, and element ecosystem.
-* SVG/DOM-level customization or server-side image rendering.
-
-G6 v5 is the broader general-purpose framework. G6Lite is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
-
-
-# Minimal graph (/en/docs/examples/basic)
-
-
-
-
-
-<ExampleDetail id="basic" locale="en" />
-
-
-# Combo containers (/en/docs/examples/combo)
-
-
-
-
-
-<ExampleDetail id="combo" locale="en" />
-
-
-# Node and edge mutations (/en/docs/examples/data-mutations)
-
-
-
-
-
-<ExampleDetail id="data-mutations" locale="en" />
-
-
-# Default themes and interaction states (/en/docs/examples/default-theme)
-
-
-
-
-
-<ExampleDetail id="default-theme" locale="en" />
-
-
-# Edge arrow directions (/en/docs/examples/edge-arrows)
-
-
-
-
-
-<ExampleDetail id="edge-arrows" locale="en" />
-
-
-# Extension system showcase (/en/docs/examples/extension-system)
-
-
-
-
-
-<ExampleDetail id="extension-system" locale="en" />
-
-
-# Graph examples (/en/docs/examples)
-
-
-
-
-
-<ExamplesCenter locale="en" />
-
-
-# More built-in layouts (/en/docs/examples/layout-gallery)
-
-
-
-
-
-<ExampleDetail id="layout-gallery" locale="en" />
-
-
-# Common layout switching (/en/docs/examples/layouts)
-
-
-
-
-
-<ExampleDetail id="layouts" locale="en" />
-
-
-# Data-driven node styles (/en/docs/examples/node-style)
-
-
-
-
-
-<ExampleDetail id="node-style" locale="en" />
-
-
-# Parallel and reverse edges (/en/docs/examples/parallel-edges)
-
-
-
-
-
-<ExampleDetail id="parallel-edges" locale="en" />
-
-
-# Queries, batch states, and visibility (/en/docs/examples/queries-and-states)
-
-
-
-
-
-<ExampleDetail id="queries-and-states" locale="en" />
-
-
-# AI Papers large relationship graph (/en/docs/examples/real-dataset)
-
-
-
-
-
-<ExampleDetail id="real-dataset" locale="en" />
-
-
-# Click, brush, and lasso selection (/en/docs/examples/selection-behaviors)
-
-
-
-
-
-<ExampleDetail id="selection-behaviors" locale="en" />
-
-
-# Tooltip (/en/docs/examples/tooltip)
-
-
-
-
-
-<ExampleDetail id="tooltip" locale="en" />
-
-
-# Viewport and coordinate conversion (/en/docs/examples/viewport-controls)
-
-
-
-
-
-<ExampleDetail id="viewport-controls" locale="en" />
 
 
 # Install and render your first graph (/en/docs/getting-started/quick-start)

@@ -22,9 +22,6 @@ void main() {
   vec2 dir = tgtPx - srcPx;
   float len = length(dir);
   vec2 unitDir = len > 0.001 ? dir / len : vec2(1.0, 0.0);
-  // Clamp each end inward by node radius (graph coords → px via u_scale) plus a
-  // fixed arrow pixel offset. Done in the shader so it stays correct on zoom
-  // (zoom updates u_scale only; process() does not re-run).
   srcPx += unitDir * (a_srcRadius * u_scale + a_srcArrowPx);
   tgtPx -= unitDir * (a_tgtRadius * u_scale + a_tgtArrowPx);
   vec2 posPx = mix(srcPx, tgtPx, a_posCoef);

@@ -667,14 +667,19 @@ describe('P1: label rendering options', () => {
       initialized: true,
       options: {
         data: { nodes: [], edges: [] },
-        label: { scaleWithZoom: false, hideOnLowZoom: true },
+        label: { scaleWithZoom: false, hideOnLowZoom: true, nodeMinZoom: 0.3 },
       },
       dataModel,
       scheduler: { forceFlush },
     });
 
     graph.updateOptions({
-      label: { hideOnLowZoom: false, hideOnCollision: false },
+      label: {
+        hideOnLowZoom: false,
+        hideOnCollision: false,
+        nodeMinZoom: 0.5,
+        edgeMinZoom: 0.5,
+      },
     });
 
     expect(graph).toMatchObject({
@@ -683,6 +688,8 @@ describe('P1: label rendering options', () => {
           scaleWithZoom: false,
           hideOnLowZoom: false,
           hideOnCollision: false,
+          nodeMinZoom: 0.5,
+          edgeMinZoom: 0.5,
         },
       },
     });

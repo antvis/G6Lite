@@ -26,8 +26,6 @@ void main() {
   vec2 dir = tgtPx - srcPx;
   float len = length(dir);
   vec2 unitDir = len > 0.001 ? dir / len : vec2(1.0, 0.0);
-  // Clamp endpoints to meet the arrow base: node radius (graph → px via u_scale)
-  // plus fixed arrow pixels. Shader-side so it stays correct on zoom.
   srcPx += unitDir * (a_srcRadius * u_scale + a_srcArrowPx);
   tgtPx -= unitDir * (a_tgtRadius * u_scale + a_tgtArrowPx);
   vec2 basePx = mix(srcPx, tgtPx, a_posCoef);

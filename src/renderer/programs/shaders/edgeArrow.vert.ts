@@ -22,17 +22,12 @@ void main() {
   vec2 unitDir = len > 0.001 ? dir / len : vec2(1.0, 0.0);
   vec2 unitNormal = vec2(-unitDir.y, unitDir.x);
 
-  // Offset arrow tip to node edge (nodeRadius is in graph coords, convert to px)
   float radiusPx = a_nodeRadius * u_scale;
   vec2 tipPx = tgtPx - unitDir * radiusPx;
 
   float arrowLength = a_arrowSize;
-  // Arrow base wider than edge: lineWidth + 12px (6px overshoot each side)
   float arrowWidth = a_lineWidth + 12.0;
 
-  // a_barycentric encodes vertex position:
-  //   x: perpendicular offset (0=left, 0.5=center, 1=right)
-  //   y: along-edge position (0=base, 1=tip, 0.2=indent)
   vec2 posPx = tipPx
     - unitDir * arrowLength * (1.0 - a_barycentric.y)
     + unitNormal * arrowWidth * (a_barycentric.x - 0.5);

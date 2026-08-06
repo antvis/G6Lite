@@ -389,12 +389,16 @@ export interface LabelOptions {
    */
   scaleWithZoom?: boolean;
   /**
-   * Whether labels are hidden below the built-in low-zoom thresholds.
-   * Defaults to true. The thresholds are 0.3 for nodes and 0.5 for edges.
+   * Whether labels are hidden below their low-zoom thresholds.
+   * Defaults to true. Configure the thresholds with nodeMinZoom and edgeMinZoom.
    */
   hideOnLowZoom?: boolean;
   /** Whether labels that collide with an earlier label are hidden. Defaults to true. */
   hideOnCollision?: boolean;
+  /** Minimum camera zoom for node labels. Defaults to 0.3. */
+  nodeMinZoom?: number;
+  /** Minimum camera zoom for edge labels. Defaults to 0.5. */
+  edgeMinZoom?: number;
 }
 
 /** Final, function-free label style passed to a custom label renderer. */
@@ -467,6 +471,10 @@ export interface LabelRenderer<T = unknown> {
 
 export interface NodeDecorationConfig<T = unknown> {
   renderer: string;
+  /** Minimum camera zoom for this decoration. Defaults to 0. */
+  minZoom?: number;
+  /** Whether collisions hide this decoration. Defaults to true. */
+  hideOnCollision?: boolean;
   placement?: NodeStyleValue<NodeDecorationPlacement>;
   /** Defaults to `boundary`, which centers the decoration on the node edge. */
   attachment?: NodeDecorationAttachment;

@@ -73,6 +73,32 @@ edge: {
 | `labelBackgroundPadding` | 底色内边距                      |
 | `labelAutoRotate`        | 是否随边方向旋转                   |
 
+## 全局标签策略 [#全局标签策略]
+
+通过 Graph 顶层 `label` 配置控制节点与边标签的缩放、低 zoom 隐藏和碰撞策略：
+
+```ts
+const graph = new Graph({
+  label: {
+    scaleWithZoom: true,
+    hideOnLowZoom: true,
+    hideOnCollision: true,
+    nodeMinZoom: 0.5,
+    edgeMinZoom: 0.5,
+  },
+});
+```
+
+| 字段                | 默认值    | 说明                       |
+| ----------------- | ------ | ------------------------ |
+| `scaleWithZoom`   | `true` | 节点标签尺寸是否随 camera zoom 缩放 |
+| `hideOnLowZoom`   | `true` | 是否启用节点与边标签的最小 zoom 隐藏    |
+| `hideOnCollision` | `true` | 是否隐藏与先绘制标签发生碰撞的标签        |
+| `nodeMinZoom`     | `0.3`  | 节点标签最小展示 zoom            |
+| `edgeMinZoom`     | `0.5`  | 边标签最小展示 zoom             |
+
+`hideOnLowZoom: false` 时会忽略两个数值阈值。运行时可通过 `graph.updateOptions({ label: ... })` 更新策略，不会重新执行布局。
+
 ## 性能提示 [#性能提示]
 
 * 大规模图不建议全量显示所有标签。

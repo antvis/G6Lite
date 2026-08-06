@@ -201,46 +201,6 @@
 <priority>0.7</priority>
 </url>
 <url>
-<loc>https://g6-gl.antv.vision/docs/compatibility/api-stability</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/api-stability" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/api-stability" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/api-stability" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6-gl.antv.vision/docs/compatibility/browser</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/browser" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/browser" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/browser" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6-gl.antv.vision/docs/compatibility/g6-v5-migration</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/g6-v5-migration" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/g6-v5-migration" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/g6-v5-migration" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6-gl.antv.vision/docs/compatibility</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6-gl.antv.vision/docs/compatibility/library-comparison</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/library-comparison" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/library-comparison" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/library-comparison" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
 <loc>https://g6-gl.antv.vision/docs/getting-started/quick-start</loc>
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/getting-started/quick-start" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/getting-started/quick-start" />
@@ -397,6 +357,46 @@
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/metrics/performance" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/metrics/performance" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/metrics/performance" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/docs/compatibility/api-stability</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/api-stability" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/api-stability" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/api-stability" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/docs/compatibility/browser</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/browser" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/browser" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/browser" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/docs/compatibility/g6-v5-migration</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/g6-v5-migration" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/g6-v5-migration" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/g6-v5-migration" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/docs/compatibility</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/docs/compatibility/library-comparison</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/library-comparison" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/library-comparison" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/library-comparison" />
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
 </url>
@@ -585,46 +585,6 @@
 <priority>0.7</priority>
 </url>
 <url>
-<loc>https://g6-gl.antv.vision/en/docs/compatibility/api-stability</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/api-stability" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/api-stability" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/api-stability" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6-gl.antv.vision/en/docs/compatibility/browser</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/browser" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/browser" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/browser" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6-gl.antv.vision/en/docs/compatibility/g6-v5-migration</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/g6-v5-migration" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/g6-v5-migration" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/g6-v5-migration" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6-gl.antv.vision/en/docs/compatibility</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6-gl.antv.vision/en/docs/compatibility/library-comparison</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/library-comparison" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/library-comparison" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/library-comparison" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
 <loc>https://g6-gl.antv.vision/en/docs/getting-started/quick-start</loc>
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/getting-started/quick-start" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/getting-started/quick-start" />
@@ -781,6 +741,46 @@
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/metrics/performance" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/metrics/performance" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/metrics/performance" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/en/docs/compatibility/api-stability</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/api-stability" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/api-stability" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/api-stability" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/en/docs/compatibility/browser</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/browser" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/browser" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/browser" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/en/docs/compatibility/g6-v5-migration</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/g6-v5-migration" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/g6-v5-migration" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/g6-v5-migration" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/en/docs/compatibility</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/en/docs/compatibility/library-comparison</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/compatibility/library-comparison" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/compatibility/library-comparison" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/compatibility/library-comparison" />
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
 </url>

@@ -71,6 +71,27 @@ If a registered Behavior uses the same name as a built-in Behavior, the register
 
 See [Custom Behavior](/en/docs/guides/custom-behavior) for the complete typed extension template.
 
+## Decoration visibility [#decoration-visibility]
+
+Node decorations can opt into a minimum zoom and can disable engine collision hiding:
+
+```ts
+const graph = new Graph({
+  node: {
+    decorations: [
+      {
+        renderer: 'business-badge',
+        minZoom: 0.5,
+        hideOnCollision: false,
+        data: (node) => node.data?.badge,
+      },
+    ],
+  },
+});
+```
+
+`minZoom` defaults to `0`. `hideOnCollision` defaults to `true`; when disabled, the decoration may overlap other decorations and does not reserve collision-grid space.
+
 ## Choosing a category [#choosing-a-category]
 
 * Use Behavior for graph interaction driven by public events.

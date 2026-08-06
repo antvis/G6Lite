@@ -9,7 +9,6 @@
 import type { Regl, ReglFramebuffer, ReglTexture } from './regl';
 import type { GLCapabilities } from './webglContext';
 
-const DOWNSAMPLE = 2; // framebuffer at half resolution
 const PICKING_CLEAR_COLOR: [number, number, number, number] = [0, 0, 0, 0];
 
 export interface PickingResult {
@@ -50,8 +49,9 @@ export class PickingManager {
       this.capabilities.maxTextureSize,
       this.capabilities.maxViewportDimensions[1],
     );
-    const w = Math.min(maxWidth, Math.max(1, (canvasWidth / DOWNSAMPLE) | 0));
-    const h = Math.min(maxHeight, Math.max(1, (canvasHeight / DOWNSAMPLE) | 0));
+    const requestedScale = Math.min(0.5, maxWidth / canvasWidth, maxHeight / canvasHeight);
+    const w = Math.max(1, Math.floor(canvasWidth * requestedScale));
+    const h = Math.max(1, Math.floor(canvasHeight * requestedScale));
     if (w === this.width && h === this.height) return this.state === 'ready';
 
     this.releaseResources(true);

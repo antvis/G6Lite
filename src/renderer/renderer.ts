@@ -2245,20 +2245,30 @@ export class Renderer {
 
   /** @deprecated Use pickAt() for O(1) hit detection. */
   hitTestNode(graphX: number, graphY: number): string | null {
-    let found: string | null = null;
-    let minDist = Infinity;
-    for (const node of this.nodes) {
+    for (let i = this.nodes.length - 1; i >= 0; i--) {
+      const node = this.nodes[i];
       const dx = node.x - graphX;
       const dy = node.y - graphY;
       const style = resolveNodeStyle(node, this.nodeConfig, this.theme);
-      const r = style.size;
-      const d = dx * dx + dy * dy;
-      if (d <= r * r && r * r < minDist) {
-        minDist = r * r;
-        found = node.id;
+      if (this.activeNodeType === 'rect') {
+        const halfWidth = Math.max(0, style.width) / 2;
+        const halfHeight = Math.max(0, style.height) / 2;
+        const radius = Math.max(0, Math.min(style.borderRadius, halfWidth, halfHeight));
+        const x = Math.abs(dx) - halfWidth + radius;
+        const y = Math.abs(dy) - halfHeight + radius;
+        if (
+          halfWidth > 0 &&
+          halfHeight > 0 &&
+          Math.hypot(Math.max(x, 0), Math.max(y, 0)) + Math.min(Math.max(x, y), 0) <= radius
+        ) {
+          return node.id;
+        }
+      } else {
+        const radius = Math.max(0, style.size) / 2;
+        if (dx * dx + dy * dy <= radius * radius) return node.id;
       }
     }
-    return found;
+    return null;
   }
 
   /** @deprecated Use pickAt() for O(1) hit detection. */

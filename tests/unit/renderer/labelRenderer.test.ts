@@ -160,6 +160,73 @@ describe('LabelLayerRenderer rendering policies', () => {
     layer.destroy();
   });
 
+  it('supports independent node and edge minimum zoom thresholds', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const nodes: LayoutNode[] = [
+      { id: 'source', x: 100, y: 100 },
+      { id: 'target', x: 300, y: 100 },
+    ];
+    const edges: GraphEdge[] = [{ id: 'edge', source: 'source', target: 'target' }];
+    const nodeConfig: NodeConfig = {
+      style: { label: (node) => (node.id === 'source' ? 'node' : false) },
+    };
+    const edgeConfig: EdgeConfig = { style: { label: 'edge' } };
+    const nodeIdToIndex = new Map([
+      ['source', 0],
+      ['target', 1],
+    ]);
+
+    layer.draw(
+      nodes,
+      edges,
+      { x: 0, y: 0, zoom: 0.49 },
+      nodeConfig,
+      edgeConfig,
+      nodeIdToIndex,
+      undefined,
+      undefined,
+      undefined,
+      { nodeMinZoom: 0.5, edgeMinZoom: 0.5, hideOnCollision: false },
+    );
+    expect(ctx.fillText).not.toHaveBeenCalled();
+
+    layer.draw(
+      nodes,
+      edges,
+      { x: 0, y: 0, zoom: 0.5 },
+      nodeConfig,
+      edgeConfig,
+      nodeIdToIndex,
+      undefined,
+      undefined,
+      undefined,
+      { nodeMinZoom: 0.5, edgeMinZoom: 0.5, hideOnCollision: false },
+    );
+    expect(vi.mocked(ctx.fillText).mock.calls.map(([text]) => text)).toEqual(['node', 'edge']);
+
+    vi.mocked(ctx.fillText).mockClear();
+    layer.draw(
+      nodes,
+      edges,
+      { x: 0, y: 0, zoom: 0.1 },
+      nodeConfig,
+      edgeConfig,
+      nodeIdToIndex,
+      undefined,
+      undefined,
+      undefined,
+      {
+        hideOnLowZoom: false,
+        nodeMinZoom: 0.9,
+        edgeMinZoom: 0.9,
+        hideOnCollision: false,
+      },
+    );
+    expect(vi.mocked(ctx.fillText).mock.calls.map(([text]) => text)).toEqual(['node', 'edge']);
+    layer.destroy();
+  });
+
   it('keeps default node labels at a fixed screen font size when configured', () => {
     const ctx = makeContext();
     const layer = createLayer(ctx, 2);
@@ -574,6 +641,105 @@ describe('LabelLayerRenderer custom lifecycle', () => {
     expect(measure).toHaveBeenCalledWith(
       expect.objectContaining({ dpr: 2, zoom: 2, nodeWidth: 40, nodeHeight: 40 }),
     );
+    layer.destroy();
+  });
+
+  it('skips decoration measurement and drawing below its minimum zoom', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const measure = vi.fn(() => ({ width: 20, height: 10 }));
+    const draw = vi.fn();
+    registerDecoration('minimum-zoom-badge', { measure, draw });
+    const config: NodeConfig = {
+      decorations: [{ renderer: 'minimum-zoom-badge', minZoom: 0.5, data: {} }],
+    };
+
+    layer.draw([{ id: 'n1', x: 100, y: 100 }], [], { x: 0, y: 0, zoom: 0.49 }, config);
+    expect(measure).not.toHaveBeenCalled();
+    expect(draw).not.toHaveBeenCalled();
+
+    layer.draw([{ id: 'n1', x: 100, y: 100 }], [], { x: 0, y: 0, zoom: 0.5 }, config);
+    expect(measure).toHaveBeenCalledTimes(1);
+    expect(draw).toHaveBeenCalledTimes(1);
+    layer.destroy();
+  });
+
+  it('draws colliding decorations when collision hiding is disabled', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const draw = vi.fn();
+    registerDecoration('collision-optional-badge', {
+      measure: () => ({ width: 40, height: 20 }),
+      draw,
+    });
+    const nodes: LayoutNode[] = [
+      { id: 'n1', x: 100, y: 100 },
+      { id: 'n2', x: 100, y: 100 },
+    ];
+
+    layer.draw(
+      nodes,
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      {
+        decorations: [{ renderer: 'collision-optional-badge', data: {} }],
+      },
+    );
+    expect(draw).toHaveBeenCalledTimes(1);
+
+    draw.mockClear();
+    layer.draw(
+      nodes,
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      {
+        decorations: [{ renderer: 'collision-optional-badge', hideOnCollision: false, data: {} }],
+      },
+    );
+    expect(draw).toHaveBeenCalledTimes(2);
+    layer.destroy();
+  });
+
+  it('does not let collision-disabled decorations suppress later collision-aware ones', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const drawFree = vi.fn();
+    const drawAware = vi.fn();
+    registerDecoration('collision-free-source', {
+      measure: ({ data }) =>
+        data ? { width: 40, height: 20 } : { width: Number.NaN, height: Number.NaN },
+      draw: drawFree,
+    });
+    registerDecoration('collision-aware-target', {
+      measure: ({ data }) =>
+        data ? { width: 40, height: 20 } : { width: Number.NaN, height: Number.NaN },
+      draw: drawAware,
+    });
+
+    layer.draw(
+      [
+        { id: 'n1', x: 100, y: 100 },
+        { id: 'n2', x: 100, y: 100 },
+      ],
+      [],
+      { x: 0, y: 0, zoom: 1 },
+      {
+        decorations: [
+          {
+            renderer: 'collision-free-source',
+            hideOnCollision: false,
+            data: (node) => (node.id === 'n1' ? {} : undefined),
+          },
+          {
+            renderer: 'collision-aware-target',
+            data: (node) => (node.id === 'n2' ? {} : undefined),
+          },
+        ],
+      },
+    );
+
+    expect(drawFree).toHaveBeenCalledTimes(1);
+    expect(drawAware).toHaveBeenCalledTimes(1);
     layer.destroy();
   });
 

@@ -122,6 +122,16 @@ register('plugin', PACKAGE_PLUGIN, extensionFactory(createPackagePlugin));
 const typedOptions: GraphOptions = {
   container: 'container',
   data: { nodes: [], edges: [] },
+  label: { nodeMinZoom: 0.5, edgeMinZoom: 0.5 },
+  node: {
+    decorations: [
+      {
+        renderer: 'builtin-badge',
+        minZoom: 0.5,
+        hideOnCollision: false,
+      },
+    ],
+  },
   autoFitOnResize: { padding: 24, minZoom: 0.2, maxZoom: 1.5 },
   behaviors: [
     {

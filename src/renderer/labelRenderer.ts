@@ -59,6 +59,10 @@ import { resolveNodeStyle } from './style';
 const NODE_LABEL_MIN_ZOOM = 0.3;
 const EDGE_LABEL_MIN_ZOOM = 0.5;
 
+function resolveMinZoom(value: unknown, fallback: number): number {
+  return Number.isFinite(value) && (value as number) >= 0 ? (value as number) : fallback;
+}
+
 export {
   getBuiltInNodeBoundaryAnchor,
   getCustomNodeLabelAnchor,
@@ -219,6 +223,9 @@ export class LabelLayerRenderer {
     const scaleWithZoom = labelOptions?.scaleWithZoom !== false;
     const hideOnLowZoom = labelOptions?.hideOnLowZoom !== false;
     const hideOnCollision = labelOptions?.hideOnCollision !== false;
+    const nodeMinZoom = resolveMinZoom(labelOptions?.nodeMinZoom, NODE_LABEL_MIN_ZOOM);
+    const edgeMinZoom = resolveMinZoom(labelOptions?.edgeMinZoom, EDGE_LABEL_MIN_ZOOM);
+    const showNodeLabels = !hideOnLowZoom || zoom >= nodeMinZoom;
 
     // Draw node icons and labels
     if (hasNodeLabels || hasNodeIcons || hasNodeOverlay || hasNodeDecorations) {
@@ -232,14 +239,14 @@ export class LabelLayerRenderer {
         zoom,
         theme,
         scaleWithZoom,
-        hideOnLowZoom,
         hideOnCollision,
+        showNodeLabels,
         getNodeDimensions,
       );
     }
 
     // Draw edge labels
-    if (hasEdgeLabels && (!hideOnLowZoom || zoom >= EDGE_LABEL_MIN_ZOOM)) {
+    if (hasEdgeLabels && (!hideOnLowZoom || zoom >= edgeMinZoom)) {
       this.drawEdges(
         edges,
         nodes,
@@ -266,8 +273,8 @@ export class LabelLayerRenderer {
     zoom: number,
     theme: ThemeTokens,
     scaleWithZoom: boolean,
-    hideOnLowZoom: boolean,
     hideOnCollision: boolean,
+    showNodeLabels: boolean,
     getNodeDimensions?: (id: string) => { width: number; height: number } | undefined,
   ): void {
     const ctx = this.ctx;
@@ -363,7 +370,7 @@ export class LabelLayerRenderer {
       }
 
       // Draw label (skip at very low zoom when the optimization is enabled)
-      if (style.label !== undefined && (!hideOnLowZoom || zoom >= NODE_LABEL_MIN_ZOOM)) {
+      if (style.label !== undefined && showNodeLabels) {
         const text = resolveNodeValue(style.label, node, false as string | false);
         if (text && typeof text === 'string') {
           const renderedByCustomRenderer =
@@ -650,9 +657,11 @@ export class LabelLayerRenderer {
     const nodeSize = resolveNodeValue(style.size, node, 8);
     const nodeWidth = resolveNodeValue(style.width, node, nodeSize) * zoom;
     const nodeHeight = resolveNodeValue(style.height, node, nodeSize) * zoom;
-    const drawnBounds: Array<{ x: number; y: number; width: number; height: number }> = [];
+    const drawnBounds: [number, number, number, number][] = [];
 
     for (const decoration of nodeConfig.decorations ?? []) {
+      if (zoom < resolveMinZoom(decoration.minZoom, 0)) continue;
+      const hideOnCollision = decoration.hideOnCollision !== false;
       const renderer = getDecorationRenderer(decoration.renderer);
       if (!renderer) {
         this.warnOnce(
@@ -733,7 +742,11 @@ export class LabelLayerRenderer {
       const bboxY = y - layout.height / 2;
       if (bboxX + layout.width < 0 || bboxX > viewW || bboxY + layout.height < 0 || bboxY > viewH)
         continue;
-      if (this.decorationGrid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) continue;
+      if (
+        hideOnCollision &&
+        this.decorationGrid.hasOverlap(bboxX, bboxY, layout.width, layout.height)
+      )
+        continue;
 
       const drawn = this.drawDecorationGroup(
         renderer,
@@ -753,7 +766,7 @@ export class LabelLayerRenderer {
         nodeHeight,
       );
       if (drawn) {
-        drawnBounds.push({ x: bboxX, y: bboxY, width: layout.width, height: layout.height });
+        if (hideOnCollision) drawnBounds.push([bboxX, bboxY, layout.width, layout.height]);
         if (isStack && decoration.overflow === 'hover-expand') {
           this.registerDecorationHoverRegion(
             node.id,
@@ -769,9 +782,7 @@ export class LabelLayerRenderer {
       }
     }
 
-    for (const bounds of drawnBounds) {
-      this.decorationGrid.register(bounds.x, bounds.y, bounds.width, bounds.height);
-    }
+    for (const bounds of drawnBounds) this.decorationGrid.register(...bounds);
   }
 
   private resolveCustomRenderer(type: 'node' | 'edge', name: string): LabelRenderer | undefined {

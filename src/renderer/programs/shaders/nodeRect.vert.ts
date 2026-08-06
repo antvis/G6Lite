@@ -23,7 +23,6 @@ varying float v_haloWidth;
 varying float v_borderRadius;
 varying vec2 v_pixelCoord;
 void main() {
-  // Expand quad to accommodate halo
   float haloExpand = a_haloWidth;
   vec2 expandedSize = a_size + vec2(haloExpand * 2.0);
   vec2 pos = a_center + a_corner * expandedSize * 0.5;
@@ -39,7 +38,6 @@ void main() {
   v_opacity = a_opacity;
   v_haloWidth = a_haloWidth * u_scale;
   v_borderRadius = a_borderRadius * u_scale;
-  // Pixel coordinate relative to node center
   v_pixelCoord = a_corner * expandedSize * 0.5 * u_scale;
 }
 `;

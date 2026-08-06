@@ -67,6 +67,21 @@ describe('PickingManager', () => {
     expect(createRenderbuffer).not.toHaveBeenCalled();
     expect(picking.begin()).not.toBeNull();
     expect(gl.clear).toHaveBeenCalledWith(gl.COLOR_BUFFER_BIT);
+    expect(picking.viewportWidth).toBe(400);
+    expect(picking.viewportHeight).toBe(300);
+  });
+
+  it('preserves the canvas aspect ratio when device limits reduce the framebuffer', () => {
+    const constrainedCapabilities: GLCapabilities = {
+      ...capabilities,
+      maxTextureSize: 300,
+      maxViewportDimensions: [300, 200],
+    };
+    const picking = new PickingManager(createRegl(makeGLStub()), constrainedCapabilities);
+
+    expect(picking.resize(1000, 1000)).toBe(true);
+    expect(picking.viewportWidth).toBe(200);
+    expect(picking.viewportHeight).toBe(200);
   });
 
   it('falls back once for an incomplete framebuffer and retries after resize or restore', () => {

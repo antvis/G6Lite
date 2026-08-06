@@ -206,6 +206,8 @@ const graph = new Graph({
         renderer: 'score-badge',
         placement: 'top',
         attachment: 'boundary',
+        minZoom: 0.5,
+        hideOnCollision: false,
         data: (node) => node.data?.score,
       },
     ],
@@ -214,6 +216,8 @@ const graph = new Graph({
 ```
 
 `attachment` 控制 Decoration 如何挂载到节点：`boundary`（默认）把装饰中心贴在节点边界，适合 badge；`outside` 将装饰完整放在节点外，适合外部名称；`inside` 将装饰完整收进节点内部。
+
+`minZoom` 控制单个 Decoration 的最小展示 zoom，默认 `0`。`hideOnCollision` 默认为 `true`；设置为 `false` 后该 Decoration 允许与其他 Decoration 重叠，也不会占用碰撞网格抑制后续内容。
 
 多个 badge 可交给 G6Lite 统一排列、排序和折叠：
 

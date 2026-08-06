@@ -23,6 +23,7 @@ import type {
   LabelOptions,
   NodeModel,
   NodeGraphEvent,
+  NodeDecorationConfig,
   PluginExtension,
   TransformExtension,
   ZoomCanvasOptions,
@@ -87,6 +88,12 @@ type AutoFitOnResizeOption = Assert<
 type GraphLabelOption = Assert<Equal<GraphOptions['label'], LabelOptions | undefined>>;
 type UpdateLabelOption = Assert<
   Equal<Parameters<Graph['updateOptions']>[0]['label'], LabelOptions | undefined>
+>;
+type NodeLabelMinimumZoom = Assert<Equal<LabelOptions['nodeMinZoom'], number | undefined>>;
+type EdgeLabelMinimumZoom = Assert<Equal<LabelOptions['edgeMinZoom'], number | undefined>>;
+type DecorationMinimumZoom = Assert<Equal<NodeDecorationConfig['minZoom'], number | undefined>>;
+type DecorationCollisionOption = Assert<
+  Equal<NodeDecorationConfig['hideOnCollision'], boolean | undefined>
 >;
 
 declare const emitter: EventEmitter;
@@ -203,6 +210,10 @@ export type PublicApiTypeAssertions =
   | AutoFitOnResizeOption
   | GraphLabelOption
   | UpdateLabelOption
+  | NodeLabelMinimumZoom
+  | EdgeLabelMinimumZoom
+  | DecorationMinimumZoom
+  | DecorationCollisionOption
   | InternalNodeExport
   | InternalEdgeExport
   | InternalComboExport;

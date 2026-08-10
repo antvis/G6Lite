@@ -33,13 +33,13 @@ function includeOnlyLayout(selectedLayout) {
 
 export default [
   {
-    name: '@antv/g6-gl (initial entry before layout, brotli)',
+    name: '@antv/g6-lite (initial entry before layout, brotli)',
     path: 'dist/index.js',
     ignore: ['@antv/layout'],
     limit: '90 KB',
   },
   ...officialLayouts.map((layout) => ({
-    name: `@antv/g6-gl (initial entry + ${layout} layout, brotli)`,
+    name: `@antv/g6-lite (initial entry + ${layout} layout, brotli)`,
     path: 'dist/index.js',
     modifyEsbuildConfig: includeOnlyLayout(layout),
     limit: '120 KB',

@@ -45,6 +45,7 @@ export async function run(container: string | HTMLElement) {
   el.appendChild(toolbar);
 
   const graph = new Graph({
+    autoFitOnResize: true,
     container: el,
     data: DATA,
     layout: { type: 'circular', radius: 180 },

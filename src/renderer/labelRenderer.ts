@@ -15,6 +15,7 @@ import type {
   GraphEdge,
   GraphNode,
   LabelLayout,
+  LabelOptions,
   LabelPlacement,
   LabelRenderer,
   LayoutNode,
@@ -54,6 +55,13 @@ import {
   toLabelScreenPx,
 } from './labelStyle';
 import { resolveNodeStyle } from './style';
+
+const NODE_LABEL_MIN_ZOOM = 0.3;
+const EDGE_LABEL_MIN_ZOOM = 0.5;
+
+function resolveMinZoom(value: unknown, fallback: number): number {
+  return Number.isFinite(value) && (value as number) >= 0 ? (value as number) : fallback;
+}
 
 export {
   getBuiltInNodeBoundaryAnchor,
@@ -177,6 +185,7 @@ export class LabelLayerRenderer {
     edgePathCache?: Map<number, EdgePath>,
     theme: ThemeTokens = {},
     getNodeDimensions?: (id: string) => { width: number; height: number } | undefined,
+    labelOptions?: LabelOptions,
   ): void {
     this.redrawScheduled = false;
     this.decorationHoverRegions = [];
@@ -211,14 +220,33 @@ export class LabelLayerRenderer {
     this.grid.reset(w, h);
     this.decorationGrid.reset(w, h);
     const zoom = camera.zoom;
+    const scaleWithZoom = labelOptions?.scaleWithZoom !== false;
+    const hideOnLowZoom = labelOptions?.hideOnLowZoom !== false;
+    const hideOnCollision = labelOptions?.hideOnCollision !== false;
+    const nodeMinZoom = resolveMinZoom(labelOptions?.nodeMinZoom, NODE_LABEL_MIN_ZOOM);
+    const edgeMinZoom = resolveMinZoom(labelOptions?.edgeMinZoom, EDGE_LABEL_MIN_ZOOM);
+    const showNodeLabels = !hideOnLowZoom || zoom >= nodeMinZoom;
 
     // Draw node icons and labels
     if (hasNodeLabels || hasNodeIcons || hasNodeOverlay || hasNodeDecorations) {
-      this.drawNodes(nodes, camera, nodeConfig, w, h, dpr, zoom, theme, getNodeDimensions);
+      this.drawNodes(
+        nodes,
+        camera,
+        nodeConfig,
+        w,
+        h,
+        dpr,
+        zoom,
+        theme,
+        scaleWithZoom,
+        hideOnCollision,
+        showNodeLabels,
+        getNodeDimensions,
+      );
     }
 
     // Draw edge labels
-    if (hasEdgeLabels && zoom >= 0.5) {
+    if (hasEdgeLabels && (!hideOnLowZoom || zoom >= edgeMinZoom)) {
       this.drawEdges(
         edges,
         nodes,
@@ -228,6 +256,7 @@ export class LabelLayerRenderer {
         h,
         dpr,
         zoom,
+        hideOnCollision,
         nodeIdToIndex,
         edgePathCache,
       );
@@ -243,6 +272,9 @@ export class LabelLayerRenderer {
     dpr: number,
     zoom: number,
     theme: ThemeTokens,
+    scaleWithZoom: boolean,
+    hideOnCollision: boolean,
+    showNodeLabels: boolean,
     getNodeDimensions?: (id: string) => { width: number; height: number } | undefined,
   ): void {
     const ctx = this.ctx;
@@ -337,8 +369,8 @@ export class LabelLayerRenderer {
         }
       }
 
-      // Draw label (skip at very low zoom)
-      if (style.label !== undefined && zoom >= 0.3) {
+      // Draw label (skip at very low zoom when the optimization is enabled)
+      if (style.label !== undefined && showNodeLabels) {
         const text = resolveNodeValue(style.label, node, false as string | false);
         if (text && typeof text === 'string') {
           const renderedByCustomRenderer =
@@ -357,9 +389,22 @@ export class LabelLayerRenderer {
               zoom,
               w,
               h,
+              scaleWithZoom,
+              hideOnCollision,
             );
           if (!renderedByCustomRenderer)
-            this.drawNodeLabel(ctx, text, px, py, node, style, dpr, zoom);
+            this.drawNodeLabel(
+              ctx,
+              text,
+              px,
+              py,
+              node,
+              style,
+              dpr,
+              zoom,
+              scaleWithZoom,
+              hideOnCollision,
+            );
         }
       }
 
@@ -406,7 +451,7 @@ export class LabelLayerRenderer {
         renderer,
         { ctx, node, data, dpr, zoom, nodeWidth, nodeHeight },
         `decoration:${rendererName}:measure`,
-        `[G6-GL] Decoration renderer "${rendererName}" threw during measure; skipping it.`,
+        `[G6Lite] Decoration renderer "${rendererName}" threw during measure; skipping it.`,
       );
       if (layout) measuredItems.push({ data, layout, index });
     }
@@ -464,7 +509,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `decoration:${rendererName}:draw`,
-        `[G6-GL] Decoration renderer "${rendererName}" threw during draw; skipping it.`,
+        `[G6Lite] Decoration renderer "${rendererName}" threw during draw; skipping it.`,
         error,
       );
       return false;
@@ -612,14 +657,16 @@ export class LabelLayerRenderer {
     const nodeSize = resolveNodeValue(style.size, node, 8);
     const nodeWidth = resolveNodeValue(style.width, node, nodeSize) * zoom;
     const nodeHeight = resolveNodeValue(style.height, node, nodeSize) * zoom;
-    const drawnBounds: Array<{ x: number; y: number; width: number; height: number }> = [];
+    const drawnBounds: [number, number, number, number][] = [];
 
     for (const decoration of nodeConfig.decorations ?? []) {
+      if (zoom < resolveMinZoom(decoration.minZoom, 0)) continue;
+      const hideOnCollision = decoration.hideOnCollision !== false;
       const renderer = getDecorationRenderer(decoration.renderer);
       if (!renderer) {
         this.warnOnce(
           `decoration:${decoration.renderer}:missing`,
-          `[G6-GL] Decoration renderer "${decoration.renderer}" is not registered; skipping it.`,
+          `[G6Lite] Decoration renderer "${decoration.renderer}" is not registered; skipping it.`,
         );
         continue;
       }
@@ -661,7 +708,7 @@ export class LabelLayerRenderer {
             renderer,
             { ctx, node, data: overflowData, dpr, zoom, nodeWidth, nodeHeight },
             `decoration:${decoration.renderer}:overflow-measure`,
-            `[G6-GL] Decoration renderer "${decoration.renderer}" threw while measuring overflow; clipping it.`,
+            `[G6Lite] Decoration renderer "${decoration.renderer}" threw while measuring overflow; clipping it.`,
           );
           if (overflowLayout) {
             visibleItems.push({
@@ -695,7 +742,11 @@ export class LabelLayerRenderer {
       const bboxY = y - layout.height / 2;
       if (bboxX + layout.width < 0 || bboxX > viewW || bboxY + layout.height < 0 || bboxY > viewH)
         continue;
-      if (this.decorationGrid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) continue;
+      if (
+        hideOnCollision &&
+        this.decorationGrid.hasOverlap(bboxX, bboxY, layout.width, layout.height)
+      )
+        continue;
 
       const drawn = this.drawDecorationGroup(
         renderer,
@@ -715,7 +766,7 @@ export class LabelLayerRenderer {
         nodeHeight,
       );
       if (drawn) {
-        drawnBounds.push({ x: bboxX, y: bboxY, width: layout.width, height: layout.height });
+        if (hideOnCollision) drawnBounds.push([bboxX, bboxY, layout.width, layout.height]);
         if (isStack && decoration.overflow === 'hover-expand') {
           this.registerDecorationHoverRegion(
             node.id,
@@ -731,9 +782,7 @@ export class LabelLayerRenderer {
       }
     }
 
-    for (const bounds of drawnBounds) {
-      this.decorationGrid.register(bounds.x, bounds.y, bounds.width, bounds.height);
-    }
+    for (const bounds of drawnBounds) this.decorationGrid.register(...bounds);
   }
 
   private resolveCustomRenderer(type: 'node' | 'edge', name: string): LabelRenderer | undefined {
@@ -741,7 +790,7 @@ export class LabelLayerRenderer {
     if (!renderer) {
       this.warnOnce(
         `${type}:${name}:missing`,
-        `[G6-GL] Label renderer "${name}" is not registered for ${type} labels; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${name}" is not registered for ${type} labels; falling back to the default renderer.`,
       );
     }
     return renderer;
@@ -767,8 +816,10 @@ export class LabelLayerRenderer {
     zoom: number,
     viewW: number,
     viewH: number,
+    scaleWithZoom: boolean,
+    hideOnCollision: boolean,
   ): boolean {
-    const resolvedStyle = resolveNodeLabelStyle(style, node, dpr, zoom);
+    const resolvedStyle = resolveNodeLabelStyle(style, node, dpr, scaleWithZoom ? zoom : 1);
     const params: NodeLabelParams = {
       ctx,
       text,
@@ -787,7 +838,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `node:${rendererName}:measure`,
-        `[G6-GL] Label renderer "${rendererName}" threw during node label measure; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" threw during node label measure; falling back to the default renderer.`,
         error,
       );
       return false;
@@ -798,7 +849,7 @@ export class LabelLayerRenderer {
     if (!isValidLabelLayout(layout)) {
       this.warnOnce(
         `node:${rendererName}:layout`,
-        `[G6-GL] Label renderer "${rendererName}" returned an invalid node label layout; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" returned an invalid node label layout; falling back to the default renderer.`,
       );
       return false;
     }
@@ -806,7 +857,7 @@ export class LabelLayerRenderer {
     const nodeSize = resolveNodeValue(style.size, node, 8);
     const nodeWidth = resolveNodeValue(style.width, node, nodeSize) * zoom;
     const nodeHeight = resolveNodeValue(style.height, node, nodeSize) * zoom;
-    const horizontalGap = 4 * dpr * getLabelZoom(zoom);
+    const horizontalGap = 4 * dpr * (scaleWithZoom ? getLabelZoom(zoom) : 1);
     const anchor = getCustomNodeLabelAnchor(
       px,
       py,
@@ -822,7 +873,9 @@ export class LabelLayerRenderer {
     if (bboxX + layout.width < 0 || bboxX > viewW || bboxY + layout.height < 0 || bboxY > viewH) {
       return true;
     }
-    if (this.grid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) return true;
+    if (hideOnCollision && this.grid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) {
+      return true;
+    }
 
     let drawn = false;
     ctx.save();
@@ -833,7 +886,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `node:${rendererName}:draw`,
-        `[G6-GL] Label renderer "${rendererName}" threw during node label draw; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" threw during node label draw; falling back to the default renderer.`,
         error,
       );
     } finally {
@@ -841,7 +894,7 @@ export class LabelLayerRenderer {
     }
 
     if (!drawn) return false;
-    this.grid.register(bboxX, bboxY, layout.width, layout.height);
+    if (hideOnCollision) this.grid.register(bboxX, bboxY, layout.width, layout.height);
     return true;
   }
 
@@ -854,6 +907,8 @@ export class LabelLayerRenderer {
     style: NodeStyleConfig,
     dpr: number,
     zoom: number,
+    scaleWithZoom: boolean,
+    hideOnCollision: boolean,
   ): void {
     const fontSize = resolveNodeValue(style.labelFontSize, node, 12);
     const fontFamily = resolveNodeValue(style.labelFontFamily, node, DEFAULT_FONT_FAMILY);
@@ -866,8 +921,8 @@ export class LabelLayerRenderer {
     const bgPadding = resolveNodeValue(style.labelBackgroundPadding, node, 2);
     const maxWidth = resolveNodeValue(style.labelMaxWidth, node, 0);
 
-    const labelZoom = getLabelZoom(zoom);
-    const fontSizePx = toLabelScreenPx(fontSize, dpr, zoom);
+    const labelZoom = scaleWithZoom ? getLabelZoom(zoom) : 1;
+    const fontSizePx = toLabelScreenPx(fontSize, dpr, scaleWithZoom ? zoom : dpr);
     ctx.font = `${fontWeight} ${fontSizePx}px ${fontFamily}`;
 
     // Measure text
@@ -913,8 +968,8 @@ export class LabelLayerRenderer {
     const bboxX =
       textAlign === 'center' ? labelX - textW / 2 : textAlign === 'right' ? labelX - textW : labelX;
     const bboxY = labelY - textH / 2;
-    if (this.grid.hasOverlap(bboxX, bboxY, textW, textH)) return;
-    this.grid.register(bboxX, bboxY, textW, textH);
+    if (hideOnCollision && this.grid.hasOverlap(bboxX, bboxY, textW, textH)) return;
+    if (hideOnCollision) this.grid.register(bboxX, bboxY, textW, textH);
 
     // Draw background
     if (background && typeof background === 'string') {
@@ -994,6 +1049,7 @@ export class LabelLayerRenderer {
     h: number,
     dpr: number,
     zoom: number,
+    hideOnCollision: boolean,
     nodeIdToIndex?: Map<string, number>,
     edgePathCache?: Map<number, EdgePath>,
   ): void {
@@ -1105,12 +1161,25 @@ export class LabelLayerRenderer {
           zoom,
           w,
           h,
+          hideOnCollision,
         )
       ) {
         continue;
       }
 
-      this.drawDefaultEdgeLabel(ctx, text, px, py, angle, srcNode, tgtNode, edge, style, dpr);
+      this.drawDefaultEdgeLabel(
+        ctx,
+        text,
+        px,
+        py,
+        angle,
+        srcNode,
+        tgtNode,
+        edge,
+        style,
+        dpr,
+        hideOnCollision,
+      );
     }
   }
 
@@ -1130,6 +1199,7 @@ export class LabelLayerRenderer {
     zoom: number,
     viewW: number,
     viewH: number,
+    hideOnCollision: boolean,
   ): boolean {
     const params: EdgeLabelParams = {
       ctx,
@@ -1151,7 +1221,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `edge:${rendererName}:measure`,
-        `[G6-GL] Label renderer "${rendererName}" threw during edge label measure; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" threw during edge label measure; falling back to the default renderer.`,
         error,
       );
       return false;
@@ -1162,7 +1232,7 @@ export class LabelLayerRenderer {
     if (!isValidLabelLayout(layout)) {
       this.warnOnce(
         `edge:${rendererName}:layout`,
-        `[G6-GL] Label renderer "${rendererName}" returned an invalid edge label layout; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" returned an invalid edge label layout; falling back to the default renderer.`,
       );
       return false;
     }
@@ -1174,7 +1244,9 @@ export class LabelLayerRenderer {
     if (bboxX + layout.width < 0 || bboxX > viewW || bboxY + layout.height < 0 || bboxY > viewH) {
       return true;
     }
-    if (this.grid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) return true;
+    if (hideOnCollision && this.grid.hasOverlap(bboxX, bboxY, layout.width, layout.height)) {
+      return true;
+    }
 
     let drawn = false;
     ctx.save();
@@ -1186,7 +1258,7 @@ export class LabelLayerRenderer {
     } catch (error) {
       this.warnOnce(
         `edge:${rendererName}:draw`,
-        `[G6-GL] Label renderer "${rendererName}" threw during edge label draw; falling back to the default renderer.`,
+        `[G6Lite] Label renderer "${rendererName}" threw during edge label draw; falling back to the default renderer.`,
         error,
       );
     } finally {
@@ -1194,7 +1266,7 @@ export class LabelLayerRenderer {
     }
 
     if (!drawn) return false;
-    this.grid.register(bboxX, bboxY, layout.width, layout.height);
+    if (hideOnCollision) this.grid.register(bboxX, bboxY, layout.width, layout.height);
     return true;
   }
 
@@ -1209,6 +1281,7 @@ export class LabelLayerRenderer {
     edge: GraphEdge,
     style: NonNullable<EdgeConfig['style']>,
     dpr: number,
+    hideOnCollision: boolean,
   ): void {
     const fontSize = resolveEdgeValue(style.labelFontSize, source, target, edge, 10);
     const fontFamily = resolveEdgeValue(
@@ -1233,8 +1306,8 @@ export class LabelLayerRenderer {
     const textH = fontSizePx;
     const bboxX = px - textW / 2;
     const bboxY = py - textH / 2;
-    if (this.grid.hasOverlap(bboxX, bboxY, textW, textH)) return;
-    this.grid.register(bboxX, bboxY, textW, textH);
+    if (hideOnCollision && this.grid.hasOverlap(bboxX, bboxY, textW, textH)) return;
+    if (hideOnCollision) this.grid.register(bboxX, bboxY, textW, textH);
 
     ctx.save();
     ctx.translate(px, py);

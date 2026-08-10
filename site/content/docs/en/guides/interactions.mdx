@@ -3,7 +3,7 @@ title: Interaction configuration
 description: Combine viewport, element, selection, highlight, and tooltip behaviors
 ---
 
-Without an explicit list, G6-GL enables zoom and canvas dragging. Passing `behaviors: []` disables the defaults.
+Without an explicit list, G6Lite enables zoom and canvas dragging. Passing `behaviors: []` disables the defaults.
 
 ```ts
 behaviors: [
@@ -19,6 +19,24 @@ behaviors: [
 Each behavior can be a string or an object with options. Picking and element event dispatch are shared, so behaviors consume one consistent interaction stream. See [events](/en/docs/guides/events).
 
 `BuiltInBehaviorOptionsMap` maps each built-in name to its supported object configuration, while `BuiltInBehaviorConfig` is the union of all built-in configurations. Custom Behaviors should declare a literal `type`, a dedicated options type, and use `satisfies` at activation sites.
+
+## Zoom feel and bounds
+
+`zoom-canvas` treats normalized wheel delta as a percentage for both mouse wheels and trackpads. The default `sensitivity` is `1`. Same-direction events within one animation frame are combined, each frame is capped at a `15%` zoom change, and the default zoom range is `0.1` to `20`.
+
+```ts
+behaviors: [
+  {
+    type: 'zoom-canvas',
+    sensitivity: 0.5,
+    minZoom: 0.2,
+    maxZoom: 8,
+  },
+  'drag-canvas',
+];
+```
+
+`sensitivity` multiplies the wheel-delta percentage: with the default, `deltaY = -10` zooms in by about `10%`; `sensitivity: 0.5` halves that response. Use a smaller value for gentler zooming. Invalid or non-positive values fall back to safe defaults.
 
 ## Built-in Behaviors
 

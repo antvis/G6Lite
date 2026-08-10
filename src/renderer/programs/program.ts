@@ -82,6 +82,13 @@ export abstract class Program {
         u_scale: (_context: unknown, props: ProgramDrawProps) => props.camera.zoom,
         u_resolution: () => this.resolutionUniform,
         u_picking: picking,
+        u_pointScale: picking
+          ? (_context: unknown, props: ProgramDrawProps) =>
+              Math.min(
+                (props.viewportWidth ?? props.width) / props.width,
+                (props.viewportHeight ?? props.height) / props.height,
+              )
+          : 1,
       },
       primitive: this.getDrawMethod(),
       count: (_context: unknown, props: ProgramDrawProps) => props.count,

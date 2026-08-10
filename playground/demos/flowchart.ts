@@ -58,6 +58,7 @@ export async function run(container: string | HTMLElement) {
   wrapper.style.position = 'relative';
 
   const graph = new Graph({
+    autoFitOnResize: true,
     container: wrapper,
     data,
     node: {

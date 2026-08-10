@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "basic",
+    "default-theme",
     "data-mutations",
     "queries-and-states",
     "node-style",

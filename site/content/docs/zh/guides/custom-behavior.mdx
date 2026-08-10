@@ -55,7 +55,7 @@ import {
   type BehaviorOptions,
   type ElementState,
   type ExtensionContext,
-} from '@antv/g6-gl';
+} from '@antv/g6-lite';
 
 export const BUSINESS_SELECT_BEHAVIOR = 'business-select' as const;
 
@@ -172,7 +172,7 @@ Behavior 自己创建的 `window` / `document` 监听、timer、Observer 或异�
 
 ## 边界与覆盖规则
 
-- 只从 `@antv/g6-gl` 包根导入公开 API，不深层导入源码。
+- 只从 `@antv/g6-lite` 包根导入公开 API，不深层导入源码。
 - 使用 `context.data`、`context.state`、`context.viewport`、`requestRender()` 和 `isDestroyed()`；新代码不依赖已弃用的 `context.graph`。
 - 不访问 Renderer、Picking、DataModel、WebGL context 或 GPU buffer。
 - 自定义 Behavior 与内置 Behavior 同名时，注册版本优先；注册版本失败不会自动回退内置实现。

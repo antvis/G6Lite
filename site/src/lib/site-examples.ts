@@ -135,6 +135,32 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     ],
   },
   {
+    id: 'default-theme',
+    file: 'default-theme.ts',
+    category: 'getting-started',
+    group: { zh: '默认体验', en: 'Default experience' },
+    title: { zh: '默认主题与交互状态', en: 'Default themes and interaction states' },
+    description: {
+      zh: '并排检查 light、dark 预设主题，以及节点和边的默认状态表现。',
+      en: 'Inspect the light and dark presets together with built-in node and edge states.',
+    },
+    interaction: {
+      zh: '切换节点、边类型或单独查看某个主题，并使用平滑滚轮缩放。',
+      en: 'Switch node and edge shapes, isolate one preset, and use smooth wheel zoom.',
+    },
+    dataDescription: {
+      zh: '6 个节点与 6 条边分别承载 default、active、selected、highlight、inactive、disabled 状态。',
+      en: 'Six nodes and six edges cover default, active, selected, highlight, inactive, and disabled states.',
+    },
+    dataPreview:
+      '{\n  "themes": ["light", "dark"],\n  "states": ["default", "active", "selected", "highlight", "inactive", "disabled"]\n}',
+    tags: ['theme', 'light', 'dark', 'states', 'zoom sensitivity'],
+    metrics: [
+      { label: { zh: '主题', en: 'Themes' }, value: '2' },
+      { label: { zh: '状态', en: 'States' }, value: '6' },
+    ],
+  },
+  {
     id: 'data-mutations',
     file: 'data-mutations.ts',
     category: 'data-and-state',

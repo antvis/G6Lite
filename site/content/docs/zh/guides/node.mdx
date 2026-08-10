@@ -12,7 +12,7 @@ node: {
   type: 'circle',
   style: {
     size: 16,
-    fill: '#5B8FF9',
+    fill: '#1783FF',
   },
 }
 ```
@@ -43,7 +43,7 @@ node: {
 node: {
   style: {
     size: (node) => ((node.data?.value as number) ?? 1) * 4 + 12,
-    fill: (node) => (node.data?.cluster === 'a' ? '#5B8FF9' : '#61DDAA'),
+    fill: (node) => (node.data?.cluster === 'a' ? '#1783FF' : '#00C9C9'),
   },
 }
 ```

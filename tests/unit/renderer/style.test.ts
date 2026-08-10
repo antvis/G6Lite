@@ -151,7 +151,7 @@ describe('style state resolution: Set vs Array', () => {
 
       expect(style).toMatchObject({ fill: '#123456', size: 24 });
       expect(report).toHaveBeenCalledWith(
-        '[G6-GL] node extension "throwing-node-style" failed during getStyle',
+        '[G6Lite] node extension "throwing-node-style" failed during getStyle',
         error,
       );
       report.mockRestore();
@@ -349,7 +349,7 @@ describe('style state resolution: Set vs Array', () => {
 
       expect(style).toMatchObject({ stroke: '#654321', lineWidth: 6 });
       expect(report).toHaveBeenCalledWith(
-        '[G6-GL] edge extension "throwing-edge-style" failed during getStyle',
+        '[G6Lite] edge extension "throwing-edge-style" failed during getStyle',
         error,
       );
       report.mockRestore();

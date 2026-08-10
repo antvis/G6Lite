@@ -1,4 +1,4 @@
-# G6-GL Playground Demos
+# G6Lite Playground Demos
 
 本目录保存 Playground 的可运行案例。案例 ID、名称、分类、覆盖能力、截图策略、发布检查级别和官网选择统一定义在 [`catalog.json`](./catalog.json)，不要在 README、截图脚本或官网中再次维护独立名单。
 

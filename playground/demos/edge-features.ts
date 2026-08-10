@@ -28,6 +28,7 @@ export async function run(container: string | HTMLElement) {
   // ---- Section 1: Edge types (line + dashed) ----
   const sec1 = makeSection(root, 'Edge types: solid / dashed / arc', '22%');
   const g1 = new Graph({
+    autoFitOnResize: true,
     container: sec1,
     data: {
       nodes: [
@@ -66,6 +67,7 @@ export async function run(container: string | HTMLElement) {
   sec1arc.style.cssText = 'position:absolute;right:60px;top:0;width:200px;height:100%;';
   sec1.appendChild(sec1arc);
   const g1arc = new Graph({
+    autoFitOnResize: true,
     container: sec1arc,
     data: {
       nodes: [
@@ -95,6 +97,7 @@ export async function run(container: string | HTMLElement) {
     colorEdges.push({ source: `cs${i}`, target: `ct${i}`, data: { idx: i } });
   }
   const g2 = new Graph({
+    autoFitOnResize: true,
     container: sec2,
     data: { nodes: colorNodes, edges: colorEdges },
     node: { type: 'circle', style: { fill: '#5B8FF9', size: 16 } },
@@ -114,6 +117,7 @@ export async function run(container: string | HTMLElement) {
   // ---- Section 3: Arrow directions ----
   const sec3 = makeSection(root, 'Arrow directions: none / forward / bidirectional', '22%');
   const g3 = new Graph({
+    autoFitOnResize: true,
     container: sec3,
     data: {
       nodes: [
@@ -157,6 +161,7 @@ export async function run(container: string | HTMLElement) {
     curveEdges.push({ source: `qs${i}`, target: `qt${i}`, data: { ci: i } });
   }
   const g4 = new Graph({
+    autoFitOnResize: true,
     container: sec4,
     data: { nodes: curveNodes, edges: curveEdges },
     node: { type: 'circle', style: { fill: '#5B8FF9', size: 24 } },
@@ -176,6 +181,7 @@ export async function run(container: string | HTMLElement) {
   // ---- Section 5: Self-loop edges ----
   const sec5 = makeSection(root, 'Self-loop edges: single / multiple', '22%');
   const g5 = new Graph({
+    autoFitOnResize: true,
     container: sec5,
     data: {
       nodes: [

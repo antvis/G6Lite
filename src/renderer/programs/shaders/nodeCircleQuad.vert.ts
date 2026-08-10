@@ -34,7 +34,6 @@ void main() {
   v_strokeWidthRatio = totalSize > 0.0 ? a_strokeWidth / totalSize : 0.0;
   v_opacity = a_opacity;
   v_haloRatio = totalSize > 0.0 ? a_haloWidth / totalSize : 0.0;
-  // AA width in normalized circle space: ~0.8 pixels.
   v_aa = renderedSize > 0.0 ? 0.8 / renderedSize : 0.005;
 }
 `;

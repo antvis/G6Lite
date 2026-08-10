@@ -1,5 +1,5 @@
 // Local presentation helpers in this repository are used only for the example controls.
-import { Graph, type GraphData } from '@antv/g6-gl';
+import { Graph, type GraphData } from '@antv/g6-lite';
 import { buttonStyle, createDemoPanel } from './demo-panel.ts';
 
 const INITIAL_DATA: GraphData = {
@@ -19,6 +19,7 @@ const button = (action: string, label: string) =>
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
+    autoFitOnResize: true,
     container,
     data: INITIAL_DATA,
     node: {

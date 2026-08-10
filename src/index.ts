@@ -1,5 +1,5 @@
 /**
- * @antv/g6-gl
+ * @antv/g6-lite
  * A high-performance graph analysis engine based on WebGL, designed for large-scale graph data analysis.
  *
  * Public API surface is being re-baselined during the 0.1.0 beta period.
@@ -87,6 +87,7 @@ export type {
   LabelDrawParams,
   LabelLayout,
   LabelMeasureParams,
+  LabelOptions,
   LabelPlacement,
   LabelRenderer,
   LabelType,
@@ -132,4 +133,5 @@ export type {
   LassoSelectOptions,
   TooltipContext,
   TooltipOptions,
+  ZoomCanvasOptions,
 } from './behaviors/index';

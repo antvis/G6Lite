@@ -217,8 +217,8 @@ export class Graph {
     });
   }
 
-  /** Update node, edge, and theme visual options, then fully re-process styles. */
-  updateOptions(opts: Partial<Pick<GraphOptions, 'node' | 'edge' | 'theme'>>): void {
+  /** Update node, edge, label, and theme visual options, then fully re-process styles. */
+  updateOptions(opts: Partial<Pick<GraphOptions, 'node' | 'edge' | 'label' | 'theme'>>): void {
     const runtime = this.getRuntime();
     if (!runtime) return;
     if (opts.node) {
@@ -242,6 +242,9 @@ export class Graph {
         ...opts.edge,
         style: { ...this.options.edge?.style, ...opts.edge.style },
       };
+    }
+    if (opts.label) {
+      this.options.label = { ...this.options.label, ...opts.label };
     }
     if (opts.theme) this.options.theme = opts.theme;
     const themeTokens = resolveTheme((this.options.theme as ThemeOption) ?? 'light');
@@ -930,8 +933,7 @@ export class Graph {
 
   setSize(width: number, height: number): void {
     if (this._destroyed) return;
-    this.renderer.resize(width, height);
-    this.eventEmitter.emit('resize', { width, height });
+    this.resizeViewport(width, height);
   }
 
   getZoom(): number {
@@ -1417,6 +1419,7 @@ export class Graph {
         this.renderer.getEdgePathCache(),
         this.dataModel?.theme,
         (id) => this.renderer.getNodeDimensions(id),
+        this.options.label,
       );
     });
   }
@@ -1428,10 +1431,18 @@ export class Graph {
       if (width === lastWidth && height === lastHeight) return;
       lastWidth = width;
       lastHeight = height;
-      this.renderer.resize(width, height);
-      this.eventEmitter.emit('resize', { width, height });
+      this.resizeViewport(width, height);
     });
     this.resizeObserver.observe(this.containerEl);
+  }
+
+  private resizeViewport(width: number, height: number): void {
+    this.renderer.resize(width, height);
+    const autoFit = this.options.autoFitOnResize;
+    if (autoFit !== undefined && autoFit !== false) {
+      this.fitView(autoFit === true ? 0.9 : autoFit);
+    }
+    this.eventEmitter.emit('resize', { width, height });
   }
 
   private getRuntime(): GraphRuntime | null {

@@ -1,0 +1,206 @@
+/**
+ * Demo: default light/dark theme, built-in states, node shapes, and edge shapes.
+ */
+import {
+  Graph,
+  type EdgeLabelPlacement,
+  type EdgeState,
+  type NodeState,
+} from '../../src/index.ts';
+
+type NodeType = 'circle' | 'rect';
+type EdgeType = 'line' | 'arc' | 'cubic' | 'polyline';
+type ThemeName = 'light' | 'dark';
+
+const nodeStates: Array<{ state: NodeState; label: string }> = [
+  { state: 'default', label: 'Default' },
+  { state: 'active', label: 'Active' },
+  { state: 'selected', label: 'Selected' },
+  { state: 'highlight', label: 'Highlight' },
+  { state: 'inactive', label: 'Inactive' },
+  { state: 'disabled', label: 'Disabled' },
+];
+
+const edgeStates: EdgeState[] = ['default', 'selected', 'highlight', 'inactive', 'disabled', 'active'];
+const edgeLabelPlacements: EdgeLabelPlacement[] = ['end', 'center', 'start'];
+
+const data = {
+  nodes: [
+    ...nodeStates.map(({ state, label }, index) => ({
+      id: `node-${state}`,
+      data: { label },
+      x: index % 2 === 0 ? 60 : 260,
+      y: 48 + Math.floor(index / 2) * 200,
+      states: state === 'default' ? undefined : [state],
+    })),
+    ...edgeStates.flatMap((state, index) => [
+      {
+        id: `edge-${state}-source`,
+        data: { sampleAnchor: true },
+        x: 340,
+        y: 48 + index * 62,
+      },
+      {
+        id: `edge-${state}-target`,
+        data: { sampleAnchor: true },
+        x: 520,
+        y: 48 + index * 62,
+      },
+    ]),
+  ],
+  edges: edgeStates.map((state, index) => ({
+    id: `edge-${state}`,
+    source: `edge-${state}-source`,
+    target: `edge-${state}-target`,
+    data: {
+      label: state === 'default' ? 'Default edge' : state,
+      placement: edgeLabelPlacements[index % edgeLabelPlacements.length],
+    },
+    states: state === 'default' ? undefined : [state],
+  })),
+};
+
+function createSelect<T extends string>(label: string, values: readonly T[], selected: T) {
+  const wrapper = document.createElement('label');
+  wrapper.style.cssText = 'display:flex;align-items:center;gap:6px;color:#475569;font-size:12px;';
+  wrapper.append(`${label} `);
+  const select = document.createElement('select');
+  select.style.cssText =
+    'height:30px;padding:0 26px 0 9px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#0f172a;font:12px system-ui;';
+  for (const value of values) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    option.selected = value === selected;
+    select.appendChild(option);
+  }
+  wrapper.appendChild(select);
+  return { wrapper, select };
+}
+
+export async function run(container: string | HTMLElement) {
+  const root =
+    typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+  root.replaceChildren();
+  root.style.cssText =
+    'display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:system-ui;';
+
+  const toolbar = document.createElement('div');
+  toolbar.style.cssText =
+    'height:54px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#fff;border-bottom:1px solid #dbe3ee;';
+  const heading = document.createElement('div');
+  heading.innerHTML =
+    '<strong style="display:block;color:#0f172a;font-size:14px">Built-in theme baseline</strong><span style="color:#64748b;font-size:11px">Default theme tokens and interaction states</span>';
+  const controls = document.createElement('div');
+  controls.style.cssText = 'display:flex;align-items:center;gap:12px;';
+  const nodeSelect = createSelect('Node', ['circle', 'rect'] as const, 'circle');
+  const edgeSelect = createSelect('Edge', ['line', 'arc', 'cubic', 'polyline'] as const, 'line');
+  const viewSelect = createSelect('View', ['light + dark', 'light', 'dark'] as const, 'light + dark');
+  controls.append(nodeSelect.wrapper, edgeSelect.wrapper, viewSelect.wrapper);
+  toolbar.append(heading, controls);
+
+  const grid = document.createElement('div');
+  grid.style.cssText =
+    'flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;';
+  root.append(toolbar, grid);
+
+  const graphCards = new Map<ThemeName, { card: HTMLElement; surface: HTMLElement }>();
+  for (const theme of ['light', 'dark'] as const) {
+    const card = document.createElement('section');
+    card.style.cssText =
+      'min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;border:1px solid #cbd5e1;border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.08);';
+    const cardHeader = document.createElement('div');
+    cardHeader.style.cssText =
+      'height:38px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 13px;border-bottom:1px solid #dbe3ee;background:#fff;color:#0f172a;font-size:12px;';
+    cardHeader.innerHTML = `<strong>${theme === 'light' ? 'Light preset' : 'Dark preset'}</strong><code style="color:#64748b">theme: '${theme}'</code>`;
+    const surface = document.createElement('div');
+    surface.style.cssText = 'position:relative;flex:1;min-height:0;';
+    card.append(cardHeader, surface);
+    grid.appendChild(card);
+    graphCards.set(theme, { card, surface });
+  }
+
+  let graphs: Graph[] = [];
+  let nodeType: NodeType = 'circle';
+  let edgeType: EdgeType = 'line';
+
+  const renderGraphs = async () => {
+    graphs.forEach((graph) => graph.destroy());
+    graphs = [];
+    for (const theme of ['light', 'dark'] as const) {
+      const surface = graphCards.get(theme)!.surface;
+      surface.replaceChildren();
+      const graph = new Graph({
+        autoFitOnResize: true,
+        container: surface,
+        data,
+        node: {
+          type: nodeType,
+          style: {
+            opacity: (node) => (node.data?.sampleAnchor === true ? 0 : 1),
+            label: (node) =>
+              node.data?.sampleAnchor === true ? false : String(node.data?.label ?? node.id),
+            labelPlacement: 'bottom',
+            labelColor: theme === 'light' ? '#334155' : '#dbeafe',
+          },
+        },
+        edge: {
+          type: edgeType,
+          style: {
+            curvature: edgeType === 'arc' ? 0.22 : 0,
+            curveOffset: edgeType === 'cubic' ? 42 : 0,
+            radius: edgeType === 'polyline' ? 10 : 0,
+            label: (_source, _target, edge) => String(edge.data?.label ?? edge.id),
+            labelPlacement: (_source, _target, edge) =>
+              (edge.data?.placement as EdgeLabelPlacement | undefined) ?? 'center',
+            labelColor: theme === 'light' ? '#475569' : '#dbeafe',
+            labelBackground:
+              theme === 'light' ? 'rgba(255,255,255,0.9)' : 'rgba(26,26,26,0.9)',
+          },
+        },
+        behaviors: ['zoom-canvas', 'drag-canvas'],
+        theme,
+      });
+      await graph.render();
+      graph.fitView({ padding: 56, maxZoom: 1.4 });
+      graphs.push(graph);
+    }
+  };
+
+  const fitGraphs = () => {
+    graphs.forEach((graph) => graph.fitView({ padding: 56, maxZoom: 1.4 }));
+  };
+
+  const updateView = () => {
+    const view = viewSelect.select.value;
+    for (const theme of ['light', 'dark'] as const) {
+      graphCards.get(theme)!.card.style.display =
+        view === 'light + dark' || view === theme ? 'flex' : 'none';
+    }
+    grid.style.gridTemplateColumns = view === 'light + dark' ? '1fr 1fr' : '1fr';
+  };
+
+  nodeSelect.select.addEventListener('change', async () => {
+    nodeType = nodeSelect.select.value as NodeType;
+    await renderGraphs();
+  });
+  edgeSelect.select.addEventListener('change', async () => {
+    edgeType = edgeSelect.select.value as EdgeType;
+    await renderGraphs();
+  });
+  viewSelect.select.addEventListener('change', updateView);
+
+  await renderGraphs();
+  updateView();
+
+  return {
+    fitView() {
+      fitGraphs();
+    },
+    destroy() {
+      graphs.forEach((graph) => graph.destroy());
+      graphs = [];
+      root.replaceChildren();
+    },
+  };
+}

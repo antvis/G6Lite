@@ -1,5 +1,5 @@
 /**
- * 拉取 sigma.js 官网首页所用的两个真实图数据集,并转换成 G6-GL 的 GraphData 格式,
+ * 拉取 sigma.js 官网首页所用的两个真实图数据集,并转换成 G6Lite 的 GraphData 格式,
  * 供 playground 压测页 / 大图 demo 使用。
  *
  * 数据来源(均为 sigma.js 官方仓库,MIT License):
@@ -67,7 +67,7 @@ function parseCSVRow(line) {
   return fields;
 }
 
-/** 1. Wikipedia: sigma JSON -> G6-GL GraphData */
+/** 1. Wikipedia: sigma JSON -> G6Lite GraphData */
 function convertWikipedia(json) {
   const raw = JSON.parse(json);
   const clusterColor = Object.fromEntries((raw.clusters ?? []).map((c) => [c.key, c.color]));
@@ -89,7 +89,7 @@ function convertWikipedia(json) {
   return { nodes, edges };
 }
 
-/** 2. AI papers: nodes.csv + edges.csv -> G6-GL GraphData(节点 id = 行号) */
+/** 2. AI papers: nodes.csv + edges.csv -> G6Lite GraphData(节点 id = 行号) */
 function convertAIPapers(nodesCsv, edgesCsv) {
   const nodeLines = nodesCsv.trim().split('\n').slice(1);
   const edgeLines = edgesCsv.trim().split('\n').slice(1);
@@ -138,7 +138,7 @@ async function main() {
   writeFileSync(resolve(RAW_DIR, 'ai-papers-nodes.csv'), aiNodesRaw);
   writeFileSync(resolve(RAW_DIR, 'ai-papers-edges.csv'), aiEdgesRaw);
 
-  console.log('⇄ 转换为 G6-GL GraphData ...');
+  console.log('⇄ 转换为 G6Lite GraphData ...');
   const wiki = convertWikipedia(wikiRaw);
   const ai = convertAIPapers(aiNodesRaw, aiEdgesRaw);
 

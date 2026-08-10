@@ -40,6 +40,7 @@ describe('dragCanvas behavior', () => {
     const { dragCanvas } = await import('@src/behaviors/dragCanvas.js');
     const renderer = {
       getCamera: vi.fn(() => ({ x: 0, y: 0, zoom: 1 })),
+      screenToGraph: vi.fn((x: number, y: number) => [x, y]),
       setCamera: vi.fn(),
       scheduleRender: vi.fn(),
     };
@@ -57,6 +58,7 @@ describe('dragCanvas behavior', () => {
     const { dragCanvas } = await import('@src/behaviors/dragCanvas.js');
     const renderer = {
       getCamera: vi.fn(() => ({ x: 0, y: 0, zoom: 1 })),
+      screenToGraph: vi.fn((x: number, y: number) => [x, y]),
       setCamera: vi.fn(),
       scheduleRender: vi.fn(),
     };
@@ -480,6 +482,7 @@ describe('dragNode behavior', () => {
     const { dragNode } = await import('@src/behaviors/dragNode.js');
     const renderer = createMockRenderer();
     renderer.getCamera.mockReturnValue({ zoom: 2, x: 0, y: 0 });
+    renderer.screenToGraph.mockImplementation((x: number, y: number) => [x / 2, y / 2]);
     const graph = createMockGraph();
     graph.getComboData.mockReturnValue({ id: 'root' });
     graph.getComboChildren.mockImplementation((comboId: string) =>

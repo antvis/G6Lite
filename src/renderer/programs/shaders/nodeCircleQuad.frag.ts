@@ -23,12 +23,10 @@ void main() {
     return;
   }
 
-  // Halo region
   if (v_haloRatio > 0.001 && dist > nodeEdge - aa) {
     if (dist > outerEdge + aa) discard;
     float haloAlpha = 1.0 - smoothstep(nodeEdge, outerEdge, dist);
     haloAlpha = haloAlpha * 0.25;
-    // Smooth inner blend with stroke/fill
     float innerBlend = smoothstep(nodeEdge - aa, nodeEdge + aa, dist);
     if (innerBlend < 1.0) {
       vec3 innerColor = v_strokeWidthRatio > 0.001 ? v_strokeColor : v_color;
@@ -41,10 +39,8 @@ void main() {
     return;
   }
 
-  // Outside node (no halo)
   if (dist > nodeEdge + aa) discard;
 
-  // Stroke region
   if (v_strokeWidthRatio > 0.001) {
     float outerAlpha = 1.0 - smoothstep(nodeEdge - aa, nodeEdge + aa, dist);
     float strokeMix = smoothstep(strokeInner - aa, strokeInner + aa, dist);
@@ -53,7 +49,6 @@ void main() {
     return;
   }
 
-  // Fill only
   float alpha = 1.0 - smoothstep(nodeEdge - aa, nodeEdge + aa, dist);
   gl_FragColor = vec4(v_color, v_opacity * alpha);
 }

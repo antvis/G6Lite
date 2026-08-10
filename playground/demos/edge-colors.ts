@@ -17,6 +17,7 @@ export async function run(container: string | HTMLElement) {
   }
 
   const graph = new Graph({
+    autoFitOnResize: true,
     container,
     data: { nodes, edges },
     node: { type: 'circle', style: { fill: '#5B8FF9', size: 20 } },

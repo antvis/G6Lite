@@ -736,6 +736,59 @@ describe('Renderer — CPU geometry picking (hitTest)', () => {
     expect(renderer.hitTestNode(200, 0)).toBe('b');
   });
 
+  it('treats circle size as diameter and excludes stroke and halo from picking', () => {
+    expect(renderer.hitTestNode(10, 0)).toBe('a');
+    expect(renderer.hitTestNode(10.01, 0)).toBeNull();
+
+    const strokedConfig = {
+      type: 'circle' as const,
+      style: { size: 20, strokeWidth: 8 },
+      stateStyles: { selected: { haloWidth: 20, strokeWidth: 10 } },
+    };
+    analyzeNodeConfig(strokedConfig, theme);
+    renderer.setData({
+      nodes: [{ id: 'selected', x: 0, y: 0, states: ['selected'] }],
+      edges: [],
+      theme,
+      nodeConfig: strokedConfig,
+    });
+
+    expect(renderer.hitTestNode(10, 0)).toBe('selected');
+    expect(renderer.hitTestNode(10.01, 0)).toBeNull();
+  });
+
+  it('uses rounded-rect geometry for rect nodes', () => {
+    const rectConfig = {
+      type: 'rect' as const,
+      style: { width: 40, height: 20, borderRadius: 10 },
+    };
+    analyzeNodeConfig(rectConfig, theme);
+    renderer.setData({
+      nodes: [{ id: 'rect', x: 0, y: 0 }],
+      edges: [],
+      theme,
+      nodeConfig: rectConfig,
+    });
+
+    expect(renderer.hitTestNode(0, 0)).toBe('rect');
+    expect(renderer.hitTestNode(19, 0)).toBe('rect');
+    expect(renderer.hitTestNode(19, 9)).toBeNull();
+  });
+
+  it('matches GPU draw order when node hit areas overlap', () => {
+    renderer.setData({
+      nodes: [
+        { id: 'back', x: 0, y: 0 },
+        { id: 'front', x: 0, y: 0 },
+      ],
+      edges: [],
+      theme,
+      nodeConfig: { type: 'circle', style: { size: 20 } },
+    });
+
+    expect(renderer.hitTestNode(0, 0)).toBe('front');
+  });
+
   it('returns null when the point falls outside every node', () => {
     expect(renderer.hitTestNode(1000, 1000)).toBeNull();
   });

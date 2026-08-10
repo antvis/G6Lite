@@ -1,16 +1,16 @@
 简体中文 | [English](./README.md)
 
-<h1 align="center">G6-GL</h1>
+<h1 align="center">G6Lite</h1>
 
 <p align="center">
   面向交互式图可视化的轻量、高性能 WebGL 引擎。
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@antv/g6-gl"><img alt="npm 版本" src="https://img.shields.io/npm/v/@antv/g6-gl.svg"></a>
+  <a href="https://www.npmjs.com/package/@antv/g6-lite"><img alt="npm 版本" src="https://img.shields.io/npm/v/@antv/g6-lite.svg"></a>
   <a href="https://github.com/antvis/G6Lite/actions/workflows/build.yml"><img alt="构建" src="https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg"></a>
-  <a href="https://bundlephobia.com/package/@antv/g6-gl"><img alt="压缩后体积" src="https://img.shields.io/bundlephobia/minzip/@antv/g6-gl"></a>
-  <a href="./LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/@antv/g6-gl.svg"></a>
+  <a href="https://bundlephobia.com/package/@antv/g6-lite"><img alt="压缩后体积" src="https://img.shields.io/bundlephobia/minzip/@antv/g6-lite"></a>
+  <a href="./LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/@antv/g6-lite.svg"></a>
 </p>
 
 <p align="center">
@@ -20,9 +20,9 @@
   <a href="https://g6-gl.antv.vision/docs/examples">示例</a>
 </p>
 
-![G6-GL 大规模关系图渲染效果](./site/public/examples/large.png)
+![G6Lite 大规模关系图渲染效果](./site/public/examples/large.png)
 
-## 为什么选择 G6-GL
+## 为什么选择 G6Lite
 
 - **面向图数据的 GPU 渲染** — 节点与边共享 WebGL 批量渲染管线，为流畅探索关系数据而设计。
 - **按变化增量更新** — 状态、位置和业务数据变更按刷新级别调度，避免无关的全量重建。
@@ -32,7 +32,7 @@
 ## 安装
 
 ```bash
-npm install @antv/g6-gl
+npm install @antv/g6-lite
 ```
 
 ## 快速开始
@@ -46,7 +46,7 @@ npm install @antv/g6-gl
 然后创建并渲染一个可交互的图：
 
 ```ts
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
   container: 'graph',
@@ -76,7 +76,7 @@ const graph = new Graph({
 await graph.render();
 ```
 
-公开 API 只以 `@antv/g6-gl` 包根导出和 `package.json#exports` 为准。`src/` 深层路径属于内部实现，可能随版本调整。
+公开 API 只以 `@antv/g6-lite` 包根导出和 `package.json#exports` 为准。`src/` 深层路径属于内部实现，可能随版本调整。
 
 ## 继续阅读
 

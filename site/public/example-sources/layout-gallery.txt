@@ -1,5 +1,5 @@
 // Local presentation helpers in this repository are used only for the example controls.
-import { Graph, type LayoutConfig } from '@antv/g6-gl';
+import { Graph, type LayoutConfig } from '@antv/g6-lite';
 import { buttonStyle, createDemoPanel } from './demo-panel.ts';
 
 const NODES = Array.from({ length: 18 }, (_, index) => ({ id: String(index), data: { label: String(index) } }));
@@ -16,6 +16,7 @@ const LAYOUTS: Array<{ label: string; config: LayoutConfig }> = [
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
+    autoFitOnResize: true,
     container,
     data: { nodes: NODES, edges: EDGES },
     layout: LAYOUTS[0].config,

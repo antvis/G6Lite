@@ -1,7 +1,7 @@
 /**
  * Demo: 布局 — 同一数据切换 circular / force / grid / dagre
  */
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 
 const data = {
   nodes: [
@@ -39,6 +39,7 @@ export async function run(container: string | HTMLElement) {
     currentGraph?.destroy();
     const layout = LAYOUTS[index];
     currentGraph = new Graph({
+      autoFitOnResize: true,
       container: canvasParent,
       data,
       node: { type: 'circle', style: { size: 10 } },

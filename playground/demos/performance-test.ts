@@ -2,7 +2,7 @@ export async function run(container: string | HTMLElement) {
   const containerEl =
     typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
   const frame = document.createElement('iframe');
-  frame.title = 'G6-GL Performance Benchmark';
+  frame.title = 'G6Lite Performance Benchmark';
   frame.src = new URL('./performance.html', window.location.href).href;
   frame.style.cssText = 'width:100%;height:100%;border:0;background:#f5f5f5;';
   containerEl.replaceChildren(frame);

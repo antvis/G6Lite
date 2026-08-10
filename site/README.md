@@ -1,4 +1,4 @@
-# G6-GL website
+# G6Lite website
 
 The product website and API documentation live in this directory. It uses Next.js, Fumadocs, MDX, and static export.
 

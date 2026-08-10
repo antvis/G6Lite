@@ -13,7 +13,8 @@ import {
   type NodeModel,
   type PluginExtension,
   type PluginOptions,
-} from '@antv/g6-gl';
+  type ZoomCanvasOptions,
+} from '@antv/g6-lite';
 
 declare const options: GraphOptions;
 declare const graph: Graph;
@@ -121,7 +122,26 @@ register('plugin', PACKAGE_PLUGIN, extensionFactory(createPackagePlugin));
 const typedOptions: GraphOptions = {
   container: 'container',
   data: { nodes: [], edges: [] },
-  behaviors: [{ type: PACKAGE_BEHAVIOR, state: 'active' } satisfies PackageBehaviorOptions],
+  label: { nodeMinZoom: 0.5, edgeMinZoom: 0.5 },
+  node: {
+    decorations: [
+      {
+        renderer: 'builtin-badge',
+        minZoom: 0.5,
+        hideOnCollision: false,
+      },
+    ],
+  },
+  autoFitOnResize: { padding: 24, minZoom: 0.2, maxZoom: 1.5 },
+  behaviors: [
+    {
+      type: 'zoom-canvas',
+      sensitivity: 0.5,
+      minZoom: 0.2,
+      maxZoom: 8,
+    } satisfies ZoomCanvasOptions & { type: 'zoom-canvas' },
+    { type: PACKAGE_BEHAVIOR, state: 'active' } satisfies PackageBehaviorOptions,
+  ],
   plugins: [{ type: PACKAGE_PLUGIN, label: 'Package plugin' } satisfies PackagePluginOptions],
 };
 

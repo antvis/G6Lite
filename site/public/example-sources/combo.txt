@@ -4,7 +4,7 @@
  * membership changes, runtime combo creation, and data export.
  */
 
-import { Graph } from '@antv/g6-gl';
+import { Graph } from '@antv/g6-lite';
 
 const NODE_COLORS: Record<string, string> = {
   client: '#7D9FD3',
@@ -21,6 +21,7 @@ export async function run(container: string | HTMLElement) {
   containerEl.style.position = 'relative';
 
   const graph = new Graph({
+    autoFitOnResize: true,
     container: containerEl,
     data: {
       nodes: [

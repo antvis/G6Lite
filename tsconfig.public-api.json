@@ -5,7 +5,7 @@
     "noEmit": true,
     "rootDir": ".",
     "paths": {
-      "@antv/g6-gl": ["./src/index.ts"]
+      "@antv/g6-lite": ["./src/index.ts"]
     }
   },
   "include": ["tests/unit/publicApi.type-test.ts"],

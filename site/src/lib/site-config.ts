@@ -1,7 +1,7 @@
 import packageJson from '../../../package.json';
 
 export const siteConfig = {
-  name: 'G6-GL',
+  name: 'G6Lite',
   packageName: packageJson.name,
   version: packageJson.version,
   description: {
@@ -10,5 +10,5 @@ export const siteConfig = {
   },
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://g6-gl.antv.vision',
   repository: 'https://github.com/antvis/G6Lite',
-  npm: 'https://www.npmjs.com/package/@antv/g6-gl',
+  npm: 'https://www.npmjs.com/package/@antv/g6-lite',
 } as const;

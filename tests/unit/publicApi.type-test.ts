@@ -15,14 +15,19 @@ import type {
   ExtensionContext,
   ExtensionEdgeData,
   ExtensionNodeData,
+  FitViewOptions,
   Graph,
   GraphEventMap,
+  GraphOptions,
   Handler,
+  LabelOptions,
   NodeModel,
   NodeGraphEvent,
+  NodeDecorationConfig,
   PluginExtension,
   TransformExtension,
-} from '@antv/g6-gl';
+  ZoomCanvasOptions,
+} from '@antv/g6-lite';
 
 type Equal<Left, Right> =
   (<Value>() => Value extends Left ? 1 : 2) extends <Value>() => Value extends Right ? 1 : 2
@@ -56,6 +61,12 @@ type BuiltInBehaviorNames = Assert<Equal<keyof BuiltInBehaviorOptionsMap, Behavi
 type DragCanvasModifierOption = Assert<
   Equal<BuiltInBehaviorOptionsMap['drag-canvas']['ignoreModifierKeys'], boolean | undefined>
 >;
+type ZoomCanvasSensitivityOption = Assert<
+  Equal<BuiltInBehaviorOptionsMap['zoom-canvas']['sensitivity'], number | undefined>
+>;
+type ZoomCanvasMinimumOption = Assert<
+  Equal<BuiltInBehaviorOptionsMap['zoom-canvas']['minZoom'], ZoomCanvasOptions['minZoom']>
+>;
 type BrushSelectMapType = Assert<
   Equal<BuiltInBehaviorOptionsMap['brush-select']['key'], BrushSelectOptions['key']>
 >;
@@ -70,6 +81,19 @@ type PluginHasNoUpdate = Assert<
 >;
 type TransformHasUpdate = Assert<
   Equal<'update' extends keyof TransformExtension ? true : false, true>
+>;
+type AutoFitOnResizeOption = Assert<
+  Equal<GraphOptions['autoFitOnResize'], boolean | number | FitViewOptions | undefined>
+>;
+type GraphLabelOption = Assert<Equal<GraphOptions['label'], LabelOptions | undefined>>;
+type UpdateLabelOption = Assert<
+  Equal<Parameters<Graph['updateOptions']>[0]['label'], LabelOptions | undefined>
+>;
+type NodeLabelMinimumZoom = Assert<Equal<LabelOptions['nodeMinZoom'], number | undefined>>;
+type EdgeLabelMinimumZoom = Assert<Equal<LabelOptions['edgeMinZoom'], number | undefined>>;
+type DecorationMinimumZoom = Assert<Equal<NodeDecorationConfig['minZoom'], number | undefined>>;
+type DecorationCollisionOption = Assert<
+  Equal<NodeDecorationConfig['hideOnCollision'], boolean | undefined>
 >;
 
 declare const emitter: EventEmitter;
@@ -155,11 +179,11 @@ const comboStyle: ComboStyleValue<number> = (combo) => {
 void comboStyle;
 
 // @ts-expect-error Internal storage records are not exported from the package root.
-type InternalNodeExport = import('@antv/g6-gl').InternalNode;
+type InternalNodeExport = import('@antv/g6-lite').InternalNode;
 // @ts-expect-error Internal storage records are not exported from the package root.
-type InternalEdgeExport = import('@antv/g6-gl').InternalEdge;
+type InternalEdgeExport = import('@antv/g6-lite').InternalEdge;
 // @ts-expect-error Internal storage records are not exported from the package root.
-type InternalComboExport = import('@antv/g6-gl').InternalCombo;
+type InternalComboExport = import('@antv/g6-lite').InternalCombo;
 
 export type PublicApiTypeAssertions =
   | NodeGetter
@@ -176,11 +200,20 @@ export type PublicApiTypeAssertions =
   | DestroyEventArguments
   | BuiltInBehaviorNames
   | DragCanvasModifierOption
+  | ZoomCanvasSensitivityOption
+  | ZoomCanvasMinimumOption
   | BrushSelectMapType
   | ClickSelectMapType
   | BehaviorHasNoUpdate
   | PluginHasNoUpdate
   | TransformHasUpdate
+  | AutoFitOnResizeOption
+  | GraphLabelOption
+  | UpdateLabelOption
+  | NodeLabelMinimumZoom
+  | EdgeLabelMinimumZoom
+  | DecorationMinimumZoom
+  | DecorationCollisionOption
   | InternalNodeExport
   | InternalEdgeExport
   | InternalComboExport;

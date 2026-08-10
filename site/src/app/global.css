@@ -53,6 +53,10 @@ html > body[data-scroll-locked] {
   --fd-layout-width: 80rem;
 }
 
+#nd-docs-layout:not(.examples-route-layout) {
+  --fd-layout-width: 87.5rem;
+}
+
 #nd-nav nav {
   width: 100%;
   max-width: 76rem;

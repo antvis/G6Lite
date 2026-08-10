@@ -1,6 +1,6 @@
 {
-  "name": "@antv/g6-gl",
-  "version": "0.1.0-beta.22",
+  "name": "@antv/g6-lite",
+  "version": "0.1.0-beta.24",
   "description": "A lightweight, high-performance WebGL graph visualization engine.",
   "type": "module",
   "main": "dist/index.js",
@@ -75,6 +75,11 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "overrides": {
+    "@size-limit/esbuild": {
+      "esbuild": "0.28.0"
+    }
   },
   "publishConfig": {
     "access": "public"

@@ -1,5 +1,5 @@
 /**
- * 截图页:用真实 g6-gl 渲染单个布局,供 scripts/capture-thumbnails 截图。
+ * 截图页:用真实 G6Lite 渲染单个布局,供 scripts/capture-thumbnails 截图。
  * 布局与配色由 URL hash 决定,如 #force|5B8FF9
  *
  * 逐节点的颜色/大小写入 node.data(color/size),由 node.style 的回调函数读取。

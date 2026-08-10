@@ -1,5 +1,5 @@
 /**
- * Graph data and options types for G6-GL.
+ * Graph data and options types for G6Lite.
  * Aligned with OpenSpec graph-rendering and theme specs.
  */
 
@@ -381,6 +381,26 @@ export type EdgeLabelPlacement = 'start' | 'center' | 'end';
 /** Label owner type shared by node and edge label renderers. */
 export type LabelType = 'node' | 'edge';
 
+/** Engine-managed rendering policies shared by node and edge labels. */
+export interface LabelOptions {
+  /**
+   * Whether engine-managed label dimensions scale with camera zoom.
+   * Defaults to true. Edge labels already use fixed screen-space dimensions.
+   */
+  scaleWithZoom?: boolean;
+  /**
+   * Whether labels are hidden below their low-zoom thresholds.
+   * Defaults to true. Configure the thresholds with nodeMinZoom and edgeMinZoom.
+   */
+  hideOnLowZoom?: boolean;
+  /** Whether labels that collide with an earlier label are hidden. Defaults to true. */
+  hideOnCollision?: boolean;
+  /** Minimum camera zoom for node labels. Defaults to 0.3. */
+  nodeMinZoom?: number;
+  /** Minimum camera zoom for edge labels. Defaults to 0.5. */
+  edgeMinZoom?: number;
+}
+
 /** Final, function-free label style passed to a custom label renderer. */
 export interface ResolvedLabelStyle {
   /** Canvas backing-store pixels after DPR/zoom conversion. */
@@ -451,6 +471,10 @@ export interface LabelRenderer<T = unknown> {
 
 export interface NodeDecorationConfig<T = unknown> {
   renderer: string;
+  /** Minimum camera zoom for this decoration. Defaults to 0. */
+  minZoom?: number;
+  /** Whether collisions hide this decoration. Defaults to true. */
+  hideOnCollision?: boolean;
   placement?: NodeStyleValue<NodeDecorationPlacement>;
   /** Defaults to `boundary`, which centers the decoration on the node edge. */
   attachment?: NodeDecorationAttachment;
@@ -713,6 +737,13 @@ export interface InternalCombo {
 export interface GraphOptions {
   container: string | HTMLElement;
   data: GraphData;
+  /**
+   * Refit the graph after its viewport size changes.
+   * Defaults to false so resizing preserves the current camera.
+   */
+  autoFitOnResize?: boolean | number | FitViewOptions;
+  /** Engine-managed node and edge label rendering policies. */
+  label?: LabelOptions;
   node?: NodeConfig;
   edge?: EdgeConfig;
   combo?: ComboConfig;

@@ -229,15 +229,15 @@ describe('Renderer dense edge-slot mapping', () => {
     expect(Array.from(internals.edgeDrawStart.slice(0, 2))).toEqual([-1, 0]);
     expect(edgeRect.itemCount).toBe(1);
     expect(Array.from(edgeRect.array.slice(0, 4))).toEqual([100, 0, 200, 0]);
-    expect(edgeRect.array[15]).toBeCloseTo(40);
     expect(edgeRect.array[16]).toBeCloseTo(40);
+    expect(edgeRect.array[17]).toBeCloseTo(40);
 
     dataModel.updateNodePosition('c', 100, 100);
     renderer.patchPositions(dataModel, new Set(['c']));
 
     expect(Array.from(edgeRect.array.slice(0, 4))).toEqual([100, 0, 100, 100]);
-    expect(edgeRect.array[15]).toBeCloseTo(10);
     expect(edgeRect.array[16]).toBeCloseTo(10);
+    expect(edgeRect.array[17]).toBeCloseTo(10);
   });
 
   it('applies highlight colors through original-edge-index to dense-slot mapping', () => {
@@ -294,7 +294,7 @@ describe('Renderer dense edge-slot mapping', () => {
 
     const internals = renderer as unknown as RendererInternals;
     const edgeLoop = internals._programs.edgeLoop!;
-    const floatsPerLoop = ((24 + 1) * 2 + 2) * 13;
+    const floatsPerLoop = ((24 + 1) * 2 + 2) * 14;
     const colorOffset = 9;
     const firstVisibleColor = Array.from(edgeLoop.array.slice(colorOffset, colorOffset + 3));
     const highlightedColor = Array.from(

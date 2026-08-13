@@ -26,7 +26,10 @@ import {
   findPathBoundarySample,
   getParallelEdgeCurvature,
   getRectBoundaryDistance,
+  pointToEdgePathDistance,
+  pointToPolylineDistance,
   type EdgePath,
+  type Point,
   type NodeBoundary,
 } from './edgePath';
 import type { GLContext } from './gl';
@@ -74,6 +77,19 @@ interface ClassifiedEdges {
   arrowCount: number;
   dynamicStyleCache: ResolvedEdgeStyle[] | null;
   hasStates: boolean;
+}
+
+interface CPUNodeGeometry {
+  halfWidths: Float64Array;
+  heights: Float64Array;
+}
+
+interface ArrowGeometry {
+  source: Point;
+  target: Point;
+  arrowSize: number;
+  width: number;
+  nodeRadius: number;
 }
 
 const CIRCLE_QUAD_ENTER_RATIO = 0.9;
@@ -416,14 +432,18 @@ export class Renderer {
     if (baseType === 'cubic') return 'cubic' as EdgeProgramType;
     if (this.hasParallelEdges()) return 'arc';
     const lw = config?.style?.lineWidth;
+    const hitAreaWidth = config?.style?.hitAreaWidth;
     if (typeof lw === 'number' && lw > 1) return 'rect';
     if (typeof lw === 'undefined' && (this.theme.edgeLineWidth ?? 1) > 1) return 'rect';
     if (typeof lw === 'function') return 'rect';
+    if (typeof hitAreaWidth === 'number' && hitAreaWidth > 1) return 'rect';
+    if (typeof hitAreaWidth === 'function') return 'rect';
     const stateStyles = config?.stateStyles;
     if (stateStyles) {
       for (const style of Object.values(stateStyles)) {
         if (!style) continue;
         if ((style.lineWidth ?? 1) > 1) return 'rect';
+        if ((style.hitAreaWidth ?? 1) > 1) return 'rect';
         if (style.opacity !== undefined && style.opacity < 1) return 'rect';
         if (style.lineDash && style.lineDash.length > 0) return 'rect';
       }
@@ -934,6 +954,7 @@ export class Renderer {
         color,
         pickingIndex,
         style.lineWidth,
+        style.hitAreaWidth,
         dashCycle,
         opacity,
       );
@@ -949,6 +970,7 @@ export class Renderer {
           node.y + nodeRadius * Math.sin(endAngle),
           style.arrowSize,
           style.lineWidth,
+          style.hitAreaWidth,
           0,
           color,
           pickingIndex,
@@ -1070,6 +1092,7 @@ export class Renderer {
         endTipY,
         style.arrowSize,
         style.lineWidth,
+        style.hitAreaWidth,
         endTipAtCenter ? targetRadius : 0,
         color,
         pickingIndex,
@@ -1085,6 +1108,7 @@ export class Renderer {
         startTipY,
         style.arrowSize,
         style.lineWidth,
+        style.hitAreaWidth,
         startTipAtCenter ? sourceRadius : 0,
         color,
         pickingIndex,
@@ -1196,6 +1220,7 @@ export class Renderer {
               color,
               pickIdx,
               style.lineWidth,
+              style.hitAreaWidth,
               dashCycle,
               opacity,
               0,
@@ -1232,6 +1257,7 @@ export class Renderer {
             pickIdx,
             arcCurvature,
             style.lineWidth,
+            style.hitAreaWidth,
             dashCycle,
             opacity,
           );
@@ -1257,6 +1283,9 @@ export class Renderer {
             pickIdx,
             curveOffset,
             direction,
+            style.lineWidth,
+            style.hitAreaWidth,
+            dashCycle,
             opacity,
           );
         } else if (this.activeEdgeType === 'rect') {
@@ -1272,6 +1301,7 @@ export class Renderer {
             color,
             pickIdx,
             style.lineWidth,
+            style.hitAreaWidth,
             dashCycle,
             opacity,
             srcRadius,
@@ -1590,6 +1620,7 @@ export class Renderer {
             tgt.y,
             style.arrowSize,
             style.lineWidth,
+            style.hitAreaWidth,
             tgtRadius,
             color,
             pickIdx,
@@ -1605,6 +1636,7 @@ export class Renderer {
             src.y,
             style.arrowSize,
             style.lineWidth,
+            style.hitAreaWidth,
             srcRadius,
             color,
             pickIdx,
@@ -1768,6 +1800,12 @@ export class Renderer {
       const source = this.nodes[sourceIndex];
       const target = this.nodes[targetIndex];
       const style = resolveEdgeStyle(source, target, edge, this.edgeConfig, this.theme);
+      const expectedArrowCount = Number(style.endArrow) + Number(style.startArrow);
+      const mappedArrowCount = this.edgeArrowCount[index] ?? 0;
+      if (expectedArrowCount > 0 || mappedArrowCount > 0) {
+        this.needToProcess = true;
+        continue;
+      }
       const active = !hasHighlight || this.highlightEdgeIndices.has(index);
       const baseColor = style.strokeRGB ?? parseColor(style.stroke);
       const color: RGBColor = active
@@ -1784,6 +1822,7 @@ export class Renderer {
         (edgeProgram as EdgeRectProgram).patchEdgeStyle(drawStart, {
           color,
           lineWidth: style.lineWidth,
+          hitAreaWidth: style.hitAreaWidth,
           dashCycle,
           opacity,
         });
@@ -2275,19 +2314,378 @@ export class Renderer {
 
   /** @deprecated Use pickAt() for O(1) hit detection. */
   hitTestEdge(graphX: number, graphY: number): number {
-    const threshold = 8;
+    const point = { x: graphX, y: graphY };
+    const nodeGeometry = this.resolveCPUNodeGeometry();
+    const polylineRoutes =
+      this.activeEdgeType === 'polyline' ? this.createCPUPolylineRoutes(nodeGeometry) : null;
+    const selfLoopPaths = this.createCPUSelfLoopPaths(nodeGeometry);
     let found = -1;
+
+    // Regular paths are rendered first, in source edge order.
     for (let i = 0; i < this.edges.length; i++) {
       const e = this.edges[i];
-      const sIdx = this.nodeIdToIndex.get(e.source);
-      const tIdx = this.nodeIdToIndex.get(e.target);
-      if (sIdx === undefined || tIdx === undefined) continue;
-      const s = this.nodes[sIdx];
-      const t = this.nodes[tIdx];
-      const d = pointToSegmentDist(graphX, graphY, s.x, s.y, t.x, t.y);
-      if (d <= threshold) found = i;
+      if (edgeHasState(e, 'hidden') || e.source === e.target) continue;
+      const style = this.resolveEdgeStyleForIndex(i);
+      if (!style) continue;
+      const threshold = style.hitAreaWidth / Math.max(this.camera.zoom, 1e-6) / 2;
+      const route = polylineRoutes?.get(i);
+      const path = route ? undefined : this.createCPURegularEdgePath(i, style, nodeGeometry);
+      const distance = route
+        ? pointToPolylineDistance(point, route)
+        : path
+          ? pointToEdgePathDistance(point, path)
+          : Infinity;
+      if (distance <= threshold) found = i;
+    }
+
+    // Self-loops render after regular edge paths.
+    for (let i = 0; i < this.edges.length; i++) {
+      const path = selfLoopPaths.get(i);
+      if (!path) continue;
+      const style = this.resolveEdgeStyleForIndex(i);
+      if (!style) continue;
+      const threshold = style.hitAreaWidth / Math.max(this.camera.zoom, 1e-6) / 2;
+      if (pointToEdgePathDistance(point, path) <= threshold) found = i;
+    }
+
+    // Regular arrowheads render after all paths.
+    for (let i = 0; i < this.edges.length; i++) {
+      const e = this.edges[i];
+      if (edgeHasState(e, 'hidden') || e.source === e.target) continue;
+      const style = this.resolveEdgeStyleForIndex(i);
+      if (!style || (!style.endArrow && !style.startArrow)) continue;
+      const arrows = this.createCPURegularEdgeArrows(i, style, nodeGeometry, polylineRoutes);
+      if (arrows.some((arrow) => pointInArrow(point, arrow, this.camera.zoom))) found = i;
+    }
+
+    // Self-loop arrowheads are appended after regular arrows in the GPU buffer.
+    for (let i = 0; i < this.edges.length; i++) {
+      const e = this.edges[i];
+      if (edgeHasState(e, 'hidden') || e.source !== e.target) continue;
+      const style = this.resolveEdgeStyleForIndex(i);
+      if (!style?.endArrow) continue;
+      const arrows = this.createCPUSelfLoopArrows(i, style, selfLoopPaths);
+      if (arrows.some((arrow) => pointInArrow(point, arrow, this.camera.zoom))) found = i;
     }
     return found;
+  }
+
+  private resolveCPUNodeGeometry(): CPUNodeGeometry {
+    const halfWidths = new Float64Array(this.nodes.length);
+    const heights = new Float64Array(this.nodes.length);
+    for (let index = 0; index < this.nodes.length; index++) {
+      const style = resolveNodeStyle(this.nodes[index], this.nodeConfig, this.theme);
+      halfWidths[index] =
+        this.activeNodeType === 'rect' ? Math.max(0, style.width) / 2 : Math.max(0, style.size) / 2;
+      heights[index] =
+        this.activeNodeType === 'rect' ? Math.max(0, style.height) : Math.max(0, style.size);
+    }
+    return { halfWidths, heights };
+  }
+
+  private resolveEdgeStyleForIndex(index: number): ResolvedEdgeStyle | undefined {
+    const sourceIndex = this.edgeSourceIdx[index];
+    const targetIndex = this.edgeTargetIdx[index];
+    if (sourceIndex < 0 || targetIndex < 0) return undefined;
+    return resolveEdgeStyle(
+      this.nodes[sourceIndex],
+      this.nodes[targetIndex],
+      this.edges[index],
+      this.edgeConfig,
+      this.theme,
+    );
+  }
+
+  private createCPURegularEdgePath(
+    index: number,
+    style: ResolvedEdgeStyle,
+    nodeGeometry: CPUNodeGeometry,
+  ): EdgePath | undefined {
+    const sourceIndex = this.edgeSourceIdx[index];
+    const targetIndex = this.edgeTargetIdx[index];
+    if (sourceIndex < 0 || targetIndex < 0) return undefined;
+    const source = this.nodes[sourceIndex];
+    const target = this.nodes[targetIndex];
+
+    if (this.activeEdgeType === 'arc') {
+      return createQuadraticPath(
+        source,
+        target,
+        getParallelEdgeCurvature(this.edges[index], source, target, style.curvature),
+      );
+    }
+    if (this.activeEdgeType === 'cubic') {
+      const directionSign = source.x < target.x ? 1 : -1;
+      const sourceX = source.x + nodeGeometry.halfWidths[sourceIndex] * directionSign;
+      const targetX = target.x - nodeGeometry.halfWidths[targetIndex] * directionSign;
+      return createCubicPath(
+        { x: sourceX, y: source.y },
+        { x: sourceX + style.curveOffset * directionSign, y: source.y },
+        { x: targetX - style.curveOffset * directionSign, y: target.y },
+        { x: targetX, y: target.y },
+      );
+    }
+    const directionX = target.x - source.x;
+    const directionY = target.y - source.y;
+    const length = Math.hypot(directionX, directionY);
+    if (length <= 1e-8) return createLinePath(source, target);
+    const unitX = directionX / length;
+    const unitY = directionY / length;
+    const sourceRadius = this.getNodeBoundaryDistance(
+      sourceIndex,
+      directionX,
+      directionY,
+      nodeGeometry.halfWidths,
+      nodeGeometry.heights,
+    );
+    const targetRadius = this.getNodeBoundaryDistance(
+      targetIndex,
+      -directionX,
+      -directionY,
+      nodeGeometry.halfWidths,
+      nodeGeometry.heights,
+    );
+    const pixelScale = Math.max(this.camera.zoom, 1e-6);
+    const sourceInset = sourceRadius + (style.startArrow ? style.arrowSize / pixelScale : 0);
+    const targetInset = targetRadius + (style.endArrow ? style.arrowSize / pixelScale : 0);
+    return createLinePath(
+      { x: source.x + unitX * sourceInset, y: source.y + unitY * sourceInset },
+      { x: target.x - unitX * targetInset, y: target.y - unitY * targetInset },
+    );
+  }
+
+  private createCPUPolylineRoutes(nodeGeometry: CPUNodeGeometry): Map<number, Waypoint[]> {
+    const routes = new Map<number, Waypoint[]>();
+    const edgeRects: Array<{ index: number; src: NodeRect; tgt: NodeRect }> = [];
+    const radiusByIndex = new Map<number, number>();
+
+    for (let index = 0; index < this.edges.length; index++) {
+      const edge = this.edges[index];
+      if (edgeHasState(edge, 'hidden') || edge.source === edge.target) continue;
+      const sourceIndex = this.edgeSourceIdx[index];
+      const targetIndex = this.edgeTargetIdx[index];
+      if (sourceIndex < 0 || targetIndex < 0) continue;
+      const source = this.nodes[sourceIndex];
+      const target = this.nodes[targetIndex];
+      const style = this.resolveEdgeStyleForIndex(index);
+      if (!style) continue;
+      const sourceRect = {
+        x: source.x,
+        y: source.y,
+        width: nodeGeometry.halfWidths[sourceIndex] * 2,
+        height: nodeGeometry.heights[sourceIndex],
+      };
+      const targetRect = {
+        x: target.x,
+        y: target.y,
+        width: nodeGeometry.halfWidths[targetIndex] * 2,
+        height: nodeGeometry.heights[targetIndex],
+      };
+      radiusByIndex.set(index, style.radius);
+      edgeRects.push({ index, src: sourceRect, tgt: targetRect });
+
+      if (this.polylineRouter === 'tree' || this.polylineRouter === 'indented') continue;
+      const rawRoute =
+        this.polylineRouter === 'fishbone'
+          ? computeFishboneRoute(sourceRect, targetRect, this.layoutDirection)
+          : computeOrthogonalRoute(sourceRect, targetRect, this.layoutDirection);
+      routes.set(index, style.radius > 0 ? applyRoundedCorners(rawRoute, style.radius) : rawRoute);
+    }
+
+    if (this.polylineRouter === 'tree' || this.polylineRouter === 'indented') {
+      const computed =
+        this.polylineRouter === 'indented'
+          ? computeIndentedRoutes(edgeRects, this.layoutDirection, this.indentTarget, this.trunkGap)
+          : computeTreeRoutes(edgeRects, this.layoutDirection, 'cubic');
+      for (const [index, rawRoute] of computed) {
+        const radius = radiusByIndex.get(index) ?? 0;
+        routes.set(
+          index,
+          this.polylineRouter === 'indented' && radius > 0
+            ? applyRoundedCorners(rawRoute, radius)
+            : rawRoute,
+        );
+      }
+    }
+    return routes;
+  }
+
+  private createCPUSelfLoopPaths(nodeGeometry: CPUNodeGeometry): Map<number, EdgePath> {
+    const paths = new Map<number, EdgePath>();
+    const loopNodeCounter = new Map<string, number>();
+    const angle = -Math.PI / 2;
+    const spread = 0.5;
+    const startAngle = angle - spread;
+    const endAngle = angle + spread;
+
+    for (let index = 0; index < this.edges.length; index++) {
+      const edge = this.edges[index];
+      if (edgeHasState(edge, 'hidden') || edge.source !== edge.target) continue;
+      const nodeIndex = this.edgeSourceIdx[index];
+      if (nodeIndex < 0) continue;
+      const node = this.nodes[nodeIndex];
+      const loopIndex = loopNodeCounter.get(edge.source) ?? 0;
+      loopNodeCounter.set(edge.source, loopIndex + 1);
+      const radius = this.getNodeBoundaryDistance(
+        nodeIndex,
+        Math.cos(endAngle),
+        Math.sin(endAngle),
+        nodeGeometry.halfWidths,
+        nodeGeometry.heights,
+      );
+      const extent = radius + SELF_LOOP_BASE_SIZE + loopIndex * SELF_LOOP_LEVEL_GAP;
+      paths.set(
+        index,
+        createCubicPath(
+          {
+            x: node.x + radius * Math.cos(startAngle),
+            y: node.y + radius * Math.sin(startAngle),
+          },
+          {
+            x: node.x + extent * Math.cos(startAngle),
+            y: node.y + extent * Math.sin(startAngle),
+          },
+          {
+            x: node.x + extent * Math.cos(endAngle),
+            y: node.y + extent * Math.sin(endAngle),
+          },
+          {
+            x: node.x + radius * Math.cos(endAngle),
+            y: node.y + radius * Math.sin(endAngle),
+          },
+        ),
+      );
+    }
+    return paths;
+  }
+
+  private createCPURegularEdgeArrows(
+    index: number,
+    style: ResolvedEdgeStyle,
+    nodeGeometry: CPUNodeGeometry,
+    polylineRoutes: Map<number, Waypoint[]> | null,
+  ): ArrowGeometry[] {
+    const sourceIndex = this.edgeSourceIdx[index];
+    const targetIndex = this.edgeTargetIdx[index];
+    if (sourceIndex < 0 || targetIndex < 0) return [];
+    const source = this.nodes[sourceIndex];
+    const target = this.nodes[targetIndex];
+    const directionX = target.x - source.x;
+    const directionY = target.y - source.y;
+    const sourceRadius = this.getNodeBoundaryDistance(
+      sourceIndex,
+      directionX,
+      directionY,
+      nodeGeometry.halfWidths,
+      nodeGeometry.heights,
+    );
+    const targetRadius = this.getNodeBoundaryDistance(
+      targetIndex,
+      -directionX,
+      -directionY,
+      nodeGeometry.halfWidths,
+      nodeGeometry.heights,
+    );
+
+    let endSource: Point = source;
+    let endTarget: Point = target;
+    let endRadius = targetRadius;
+    let startSource: Point = target;
+    let startTarget: Point = source;
+    let startRadius = sourceRadius;
+
+    const route = polylineRoutes?.get(index);
+    if (route && route.length >= 2) {
+      endSource = route[route.length - 2];
+      endTarget = route[route.length - 1];
+      endRadius = 0;
+      startSource = route[1];
+      startTarget = route[0];
+      startRadius = 0;
+    } else if (this.activeEdgeType === 'arc') {
+      const path = createQuadraticPath(
+        source,
+        target,
+        getParallelEdgeCurvature(this.edges[index], source, target, style.curvature),
+      );
+      const endSample = findPathBoundarySample(
+        path,
+        target,
+        this.getNodeBoundary(targetIndex, nodeGeometry.halfWidths, nodeGeometry.heights),
+        'target',
+      );
+      const startSample = findPathBoundarySample(
+        path,
+        source,
+        this.getNodeBoundary(sourceIndex, nodeGeometry.halfWidths, nodeGeometry.heights),
+        'source',
+      );
+      const endLength = Math.hypot(endSample.tangent.x, endSample.tangent.y) || 1;
+      const startLength = Math.hypot(startSample.tangent.x, startSample.tangent.y) || 1;
+      endTarget = endSample.point;
+      endSource = {
+        x: endTarget.x - endSample.tangent.x / endLength,
+        y: endTarget.y - endSample.tangent.y / endLength,
+      };
+      endRadius = 0;
+      startTarget = startSample.point;
+      startSource = {
+        x: startTarget.x + startSample.tangent.x / startLength,
+        y: startTarget.y + startSample.tangent.y / startLength,
+      };
+      startRadius = 0;
+    } else if (this.activeEdgeType === 'cubic') {
+      const directionSign = source.x < target.x ? 1 : -1;
+      const sourceX = source.x + nodeGeometry.halfWidths[sourceIndex] * directionSign;
+      const targetX = target.x - nodeGeometry.halfWidths[targetIndex] * directionSign;
+      endTarget = { x: targetX, y: target.y };
+      endSource = { x: targetX - style.curveOffset * directionSign, y: target.y };
+      endRadius = 0;
+      startTarget = { x: sourceX, y: source.y };
+      startSource = { x: sourceX + style.curveOffset * directionSign, y: source.y };
+      startRadius = 0;
+    }
+
+    const width = Math.max(style.lineWidth + 12, style.hitAreaWidth);
+    const arrows: ArrowGeometry[] = [];
+    if (style.endArrow) {
+      arrows.push({
+        source: endSource,
+        target: endTarget,
+        arrowSize: style.arrowSize,
+        width,
+        nodeRadius: endRadius,
+      });
+    }
+    if (style.startArrow) {
+      arrows.push({
+        source: startSource,
+        target: startTarget,
+        arrowSize: style.arrowSize,
+        width,
+        nodeRadius: startRadius,
+      });
+    }
+    return arrows;
+  }
+
+  private createCPUSelfLoopArrows(
+    index: number,
+    style: ResolvedEdgeStyle,
+    selfLoopPaths: Map<number, EdgePath>,
+  ): ArrowGeometry[] {
+    if (!style.endArrow) return [];
+    const path = selfLoopPaths.get(index);
+    if (!path || path.type !== 'cubic') return [];
+    return [
+      {
+        source: path.cp2,
+        target: path.p1,
+        arrowSize: style.arrowSize,
+        width: Math.max(style.lineWidth + 12, style.hitAreaWidth),
+        nodeRadius: 0,
+      },
+    ];
   }
 
   /** Hide edges during camera movement, restore after delay. */
@@ -2385,19 +2783,41 @@ export class Renderer {
   }
 }
 
-function pointToSegmentDist(
-  px: number,
-  py: number,
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-): number {
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const len = Math.hypot(dx, dy) || 1e-6;
-  const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / (len * len)));
-  const projX = x1 + t * dx;
-  const projY = y1 + t * dy;
-  return Math.hypot(px - projX, py - projY);
+function pointInArrow(point: Point, arrow: ArrowGeometry, zoom: number): boolean {
+  const dx = arrow.target.x - arrow.source.x;
+  const dy = arrow.target.y - arrow.source.y;
+  const length = Math.hypot(dx, dy);
+  if (length <= 1e-8) return false;
+  const unitX = dx / length;
+  const unitY = dy / length;
+  const normalX = -unitY;
+  const normalY = unitX;
+  const safeZoom = Math.max(zoom, 1e-6);
+  const tip = {
+    x: arrow.target.x - unitX * arrow.nodeRadius,
+    y: arrow.target.y - unitY * arrow.nodeRadius,
+  };
+  const arrowLength = arrow.arrowSize / safeZoom;
+  const halfWidth = arrow.width / safeZoom / 2;
+  const baseCenter = { x: tip.x - unitX * arrowLength, y: tip.y - unitY * arrowLength };
+  const left = { x: baseCenter.x - normalX * halfWidth, y: baseCenter.y - normalY * halfWidth };
+  const right = { x: baseCenter.x + normalX * halfWidth, y: baseCenter.y + normalY * halfWidth };
+  const indent = {
+    x: tip.x - unitX * arrowLength * 0.8,
+    y: tip.y - unitY * arrowLength * 0.8,
+  };
+  return pointInTriangle(point, tip, left, indent) || pointInTriangle(point, tip, indent, right);
+}
+
+function pointInTriangle(point: Point, a: Point, b: Point, c: Point): boolean {
+  const d1 = signedTriangleArea(point, a, b);
+  const d2 = signedTriangleArea(point, b, c);
+  const d3 = signedTriangleArea(point, c, a);
+  const hasNegative = d1 < 0 || d2 < 0 || d3 < 0;
+  const hasPositive = d1 > 0 || d2 > 0 || d3 > 0;
+  return !(hasNegative && hasPositive);
+}
+
+function signedTriangleArea(point: Point, a: Point, b: Point): number {
+  return (point.x - b.x) * (a.y - b.y) - (a.x - b.x) * (point.y - b.y);
 }

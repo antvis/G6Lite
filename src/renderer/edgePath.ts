@@ -5,6 +5,9 @@ export interface Point {
   y: number;
 }
 
+/** Shared curve tessellation density for GPU strips and CPU picking. */
+export const EDGE_CURVE_SEGMENTS = 24;
+
 export interface QuadraticEdgePath {
   type: 'quadratic';
   p0: Point;
@@ -146,6 +149,47 @@ export function sampleEdgePath(path: EdgePath, t: number): { point: Point; tange
       y: 2 * mt * (path.cp.y - path.p0.y) + 2 * tt * (path.p1.y - path.cp.y),
     },
   };
+}
+
+/** Minimum distance from a point to a rendered edge path in graph coordinates. */
+export function pointToEdgePathDistance(
+  point: Point,
+  path: EdgePath,
+  segments = EDGE_CURVE_SEGMENTS,
+): number {
+  if (path.type === 'line') {
+    return pointToSegmentDistance(point, path.p0, path.p1);
+  }
+
+  let minimum = Infinity;
+  let previous = sampleEdgePath(path, 0).point;
+  for (let segment = 1; segment <= segments; segment++) {
+    const current = sampleEdgePath(path, segment / segments).point;
+    minimum = Math.min(minimum, pointToSegmentDistance(point, previous, current));
+    previous = current;
+  }
+  return minimum;
+}
+
+/** Minimum distance from a point to a polyline in graph coordinates. */
+export function pointToPolylineDistance(point: Point, points: readonly Point[]): number {
+  let minimum = Infinity;
+  for (let index = 1; index < points.length; index++) {
+    minimum = Math.min(minimum, pointToSegmentDistance(point, points[index - 1], points[index]));
+  }
+  return minimum;
+}
+
+function pointToSegmentDistance(point: Point, start: Point, end: Point): number {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared <= 1e-12) return Math.hypot(point.x - start.x, point.y - start.y);
+  const t = Math.max(
+    0,
+    Math.min(1, ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared),
+  );
+  return Math.hypot(point.x - (start.x + t * dx), point.y - (start.y + t * dy));
 }
 
 function isRectBoundary(boundary: NodeBoundary): boundary is RectBoundary {

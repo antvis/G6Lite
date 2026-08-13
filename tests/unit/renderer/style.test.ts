@@ -172,6 +172,7 @@ describe('style state resolution: Set vs Array', () => {
       const style = resolveEdgeStyle(src, tgt, edge, config, theme);
       expect(style.stroke).toBe('#00f');
       expect(style.lineWidth).toBe(3);
+      expect(style.hitAreaWidth).toBe(3);
     });
 
     it('applies edge state override from an Array', () => {
@@ -194,7 +195,76 @@ describe('style state resolution: Set vs Array', () => {
       );
 
       expect(highlighted.lineWidth).toBe(2);
+      expect(highlighted.hitAreaWidth).toBe(2);
       expect(highlighted.stroke).toBe(ANTV_PRIMARY_COLOR);
+    });
+
+    it('resolves an independent edge hit area without changing visual width', () => {
+      const hitAreaConfig: EdgeConfig = {
+        style: { stroke: '#99ADD1', lineWidth: 1.5, hitAreaWidth: 16 },
+      };
+      analyzeEdgeConfig(hitAreaConfig, theme);
+
+      const style = resolveEdgeStyle(src, tgt, { source: 's', target: 't' }, hitAreaConfig, theme);
+
+      expect(style.lineWidth).toBe(1.5);
+      expect(style.hitAreaWidth).toBe(16);
+    });
+
+    it('supports dynamic and state hit-area overrides and never shrinks below lineWidth', () => {
+      const hitAreaConfig: EdgeConfig = {
+        style: {
+          lineWidth: (_source, _target, edge) => (edge.id === 'wide' ? 4 : 1),
+          hitAreaWidth: (_source, _target, edge) => (edge.id === 'wide' ? 2 : 12),
+        },
+        stateStyles: { selected: { lineWidth: 3, hitAreaWidth: 18 } },
+      };
+      analyzeEdgeConfig(hitAreaConfig, theme);
+
+      expect(
+        resolveEdgeStyle(src, tgt, { id: 'wide', source: 's', target: 't' }, hitAreaConfig, theme),
+      ).toMatchObject({ lineWidth: 4, hitAreaWidth: 4 });
+      expect(
+        resolveEdgeStyle(src, tgt, { id: 'thin', source: 's', target: 't' }, hitAreaConfig, theme),
+      ).toMatchObject({ lineWidth: 1, hitAreaWidth: 12 });
+      expect(
+        resolveEdgeStyle(
+          src,
+          tgt,
+          { id: 'thin', source: 's', target: 't', states: ['selected'] },
+          hitAreaConfig,
+          theme,
+        ),
+      ).toMatchObject({ lineWidth: 3, hitAreaWidth: 18 });
+    });
+
+    it('falls back to final lineWidth for invalid hit-area values', () => {
+      const hitAreaConfig: EdgeConfig = {
+        style: { lineWidth: 2, hitAreaWidth: () => Number.NaN },
+      };
+      analyzeEdgeConfig(hitAreaConfig, theme);
+
+      expect(
+        resolveEdgeStyle(src, tgt, { source: 's', target: 't' }, hitAreaConfig, theme),
+      ).toMatchObject({ lineWidth: 2, hitAreaWidth: 2 });
+    });
+
+    it('recomputes an explicit narrow hit area from the state lineWidth', () => {
+      const hitAreaConfig: EdgeConfig = {
+        style: { lineWidth: 4, hitAreaWidth: 0 },
+        stateStyles: { selected: { lineWidth: 1 } },
+      };
+      analyzeEdgeConfig(hitAreaConfig, theme);
+
+      expect(
+        resolveEdgeStyle(
+          src,
+          tgt,
+          { source: 's', target: 't', states: ['selected'] },
+          hitAreaConfig,
+          theme,
+        ),
+      ).toMatchObject({ lineWidth: 1, hitAreaWidth: 1 });
     });
 
     it('hidden edge state sets opacity 0 (Set)', () => {

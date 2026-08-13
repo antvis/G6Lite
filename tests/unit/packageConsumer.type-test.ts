@@ -6,6 +6,7 @@ import {
   type BehaviorOptions,
   type ComboModel,
   type EdgeModel,
+  type EdgeConfig,
   type ElementState,
   type ExtensionContext,
   type GraphEventMap,
@@ -132,6 +133,10 @@ const typedOptions: GraphOptions = {
       },
     ],
   },
+  edge: {
+    style: { lineWidth: 1.5, hitAreaWidth: 16 },
+    stateStyles: { selected: { hitAreaWidth: 20 } },
+  } satisfies EdgeConfig,
   autoFitOnResize: { padding: 24, minZoom: 0.2, maxZoom: 1.5 },
   behaviors: [
     {

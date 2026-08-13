@@ -1,19 +1,60 @@
 /**
- * EdgeCubic: renders cubic bezier edges as tessellated GL_LINES.
- * Used for mind map S-curve edges.
- * CPU computes curve points; each edge → SEGMENTS line segments → SEGMENTS*2 vertices.
- * Stride: 9 floats per vertex (position.xy, color.rgb, pickingColor.rgb, opacity).
+ * EdgeCubic: renders mind-map S-curves as continuous thick triangle strips.
+ * Visual and picking widths are independent, while dash distance remains
+ * continuous across the tessellated cubic path.
  */
 
-import { encodeId } from '../picking';
 import type { AttributeLayout } from './program';
 import { Program } from './program';
-import { fragmentShader } from './shaders/edgeCubic.frag';
-import { vertexShader } from './shaders/edgeCubic.vert';
+import { EDGE_CURVE_SEGMENTS } from '../edgePath';
+import { fragmentShader } from './shaders/edgeArc.frag';
+import { vertexShader } from './shaders/edgeArc.vert';
 
-const FLOATS_PER_VERTEX = 9;
-const SEGMENTS = 16;
-const VERTICES_PER_ITEM = SEGMENTS * 2;
+const FLOATS_PER_VERTEX = 14;
+export const EDGE_CUBIC_SEGMENTS = EDGE_CURVE_SEGMENTS;
+const VERTICES_PER_ITEM = (EDGE_CUBIC_SEGMENTS + 1) * 2 + 2;
+
+function cubicBezier(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  const mt = 1 - t;
+  return mt * mt * mt * p0 + 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t * p3;
+}
+
+function cubicTangent(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  const mt = 1 - t;
+  return 3 * mt * mt * (p1 - p0) + 6 * mt * t * (p2 - p1) + 3 * t * t * (p3 - p2);
+}
+
+function writeVertex(
+  array: Float32Array,
+  offset: number,
+  x: number,
+  y: number,
+  normalX: number,
+  normalY: number,
+  normalCoef: number,
+  lineWidth: number,
+  dashCycle: number,
+  pathDistance: number,
+  opacity: number,
+  color: [number, number, number],
+  pickingIndex: number,
+  hitAreaWidth: number,
+): void {
+  array[offset] = x;
+  array[offset + 1] = y;
+  array[offset + 2] = normalX;
+  array[offset + 3] = normalY;
+  array[offset + 4] = normalCoef;
+  array[offset + 5] = lineWidth;
+  array[offset + 6] = dashCycle;
+  array[offset + 7] = pathDistance;
+  array[offset + 8] = opacity;
+  array[offset + 9] = color[0];
+  array[offset + 10] = color[1];
+  array[offset + 11] = color[2];
+  array[offset + 12] = pickingIndex;
+  array[offset + 13] = hitAreaWidth;
+}
 
 export class EdgeCubicProgram extends Program {
   getVertexShader() {
@@ -29,15 +70,17 @@ export class EdgeCubicProgram extends Program {
     return VERTICES_PER_ITEM;
   }
   getDrawMethod() {
-    return 'lines' as const;
+    return 'triangle strip' as const;
   }
 
   getAttributeLayout(): AttributeLayout[] {
     return [
       { name: 'a_position', size: 2 },
+      { name: 'a_normalSide', size: 3 },
+      { name: 'a_style', size: 4 },
       { name: 'a_color', size: 3 },
-      { name: 'a_pickingColor', size: 3 },
-      { name: 'a_opacity', size: 1 },
+      { name: 'a_pickingIndex', size: 1 },
+      { name: 'a_hitAreaWidth', size: 1 },
     ];
   }
 
@@ -51,70 +94,110 @@ export class EdgeCubicProgram extends Program {
     pickingIndex: number,
     curveOffset: number,
     direction: 'LR' | 'RL' = 'LR',
+    lineWidth = 1,
+    hitAreaWidth = lineWidth,
+    dashCycle = 0,
     opacity = 1,
   ): void {
-    const [pr, pg, pb] = encodeId(pickingIndex);
-    const pR = pr / 255,
-      pG = pg / 255,
-      pB = pb / 255;
-
-    // Cubic bezier control points for S-curve
-    let cpx1: number, cpy1: number, cpx2: number, cpy2: number;
-
-    if (direction === 'LR') {
-      cpx1 = sx + curveOffset;
-      cpy1 = sy;
-      cpx2 = tx - curveOffset;
-      cpy2 = ty;
-    } else {
-      cpx1 = sx - curveOffset;
-      cpy1 = sy;
-      cpx2 = tx + curveOffset;
-      cpy2 = ty;
-    }
-
+    const directionSign = direction === 'LR' ? 1 : -1;
+    const cpx1 = sx + curveOffset * directionSign;
+    const cpy1 = sy;
+    const cpx2 = tx - curveOffset * directionSign;
+    const cpy2 = ty;
     const base = index * VERTICES_PER_ITEM * FLOATS_PER_VERTEX;
 
-    for (let i = 0; i < SEGMENTS; i++) {
-      const t0 = i / SEGMENTS;
-      const t1 = (i + 1) / SEGMENTS;
-
-      const x0 = cubicBezier(sx, cpx1, cpx2, tx, t0);
-      const y0 = cubicBezier(sy, cpy1, cpy2, ty, t0);
-      const x1 = cubicBezier(sx, cpx1, cpx2, tx, t1);
-      const y1 = cubicBezier(sy, cpy1, cpy2, ty, t1);
-
-      const o = base + i * 2 * FLOATS_PER_VERTEX;
-      // Start vertex
-      this.array[o] = x0;
-      this.array[o + 1] = y0;
-      this.array[o + 2] = color[0];
-      this.array[o + 3] = color[1];
-      this.array[o + 4] = color[2];
-      this.array[o + 5] = pR;
-      this.array[o + 6] = pG;
-      this.array[o + 7] = pB;
-      this.array[o + 8] = opacity;
-      // End vertex
-      this.array[o + 9] = x1;
-      this.array[o + 10] = y1;
-      this.array[o + 11] = color[0];
-      this.array[o + 12] = color[1];
-      this.array[o + 13] = color[2];
-      this.array[o + 14] = pR;
-      this.array[o + 15] = pG;
-      this.array[o + 16] = pB;
-      this.array[o + 17] = opacity;
+    let x = sx;
+    let y = sy;
+    let pathDistance = 0;
+    let tangentX = cubicTangent(sx, cpx1, cpx2, tx, 0);
+    let tangentY = cubicTangent(sy, cpy1, cpy2, ty, 0);
+    let tangentLength = Math.hypot(tangentX, tangentY);
+    if (tangentLength < 1e-8) {
+      tangentX = tx - sx;
+      tangentY = ty - sy;
+      tangentLength = Math.hypot(tangentX, tangentY);
     }
-  }
-}
+    let normalX = tangentLength > 1e-8 ? -tangentY / tangentLength : 0;
+    let normalY = tangentLength > 1e-8 ? tangentX / tangentLength : 1;
+    let vertex = 0;
 
-/** Cubic bezier: B(t) = (1-t)³P0 + 3(1-t)²tP1 + 3(1-t)t²P2 + t³P3 */
-function cubicBezier(p0: number, p1: number, p2: number, p3: number, t: number): number {
-  const mt = 1 - t;
-  const mt2 = mt * mt;
-  const mt3 = mt2 * mt;
-  const t2 = t * t;
-  const t3 = t2 * t;
-  return mt3 * p0 + 3 * mt2 * t * p1 + 3 * mt * t2 * p2 + t3 * p3;
+    for (const side of [-1, -1, 1]) {
+      writeVertex(
+        this.array,
+        base + vertex++ * FLOATS_PER_VERTEX,
+        x,
+        y,
+        normalX,
+        normalY,
+        side,
+        lineWidth,
+        dashCycle,
+        pathDistance,
+        opacity,
+        color,
+        pickingIndex,
+        hitAreaWidth,
+      );
+    }
+
+    for (let segment = 0; segment < EDGE_CUBIC_SEGMENTS; segment++) {
+      const t = (segment + 1) / EDGE_CUBIC_SEGMENTS;
+      const nextX = cubicBezier(sx, cpx1, cpx2, tx, t);
+      const nextY = cubicBezier(sy, cpy1, cpy2, ty, t);
+      const segmentX = nextX - x;
+      const segmentY = nextY - y;
+      pathDistance += Math.hypot(segmentX, segmentY);
+
+      tangentX = cubicTangent(sx, cpx1, cpx2, tx, t);
+      tangentY = cubicTangent(sy, cpy1, cpy2, ty, t);
+      tangentLength = Math.hypot(tangentX, tangentY);
+      if (tangentLength < 1e-8) {
+        tangentX = segmentX;
+        tangentY = segmentY;
+        tangentLength = Math.hypot(tangentX, tangentY);
+      }
+      if (tangentLength >= 1e-8) {
+        normalX = -tangentY / tangentLength;
+        normalY = tangentX / tangentLength;
+      }
+
+      for (const side of [-1, 1]) {
+        writeVertex(
+          this.array,
+          base + vertex++ * FLOATS_PER_VERTEX,
+          nextX,
+          nextY,
+          normalX,
+          normalY,
+          side,
+          lineWidth,
+          dashCycle,
+          pathDistance,
+          opacity,
+          color,
+          pickingIndex,
+          hitAreaWidth,
+        );
+      }
+      x = nextX;
+      y = nextY;
+    }
+
+    writeVertex(
+      this.array,
+      base + vertex * FLOATS_PER_VERTEX,
+      x,
+      y,
+      normalX,
+      normalY,
+      1,
+      lineWidth,
+      dashCycle,
+      pathDistance,
+      opacity,
+      color,
+      pickingIndex,
+      hitAreaWidth,
+    );
+  }
 }

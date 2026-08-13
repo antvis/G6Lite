@@ -2,7 +2,7 @@
  * EdgeArrow: renders arrow heads as dart/chevron shapes (concave base).
  * 4 logical vertices -> 2 triangles -> 6 vertices per arrow.
  *
- * Stride: 15 floats per vertex.
+ * Stride: 17 floats per vertex.
  */
 
 import { encodeId } from '../picking';
@@ -11,7 +11,7 @@ import { Program } from './program';
 import { fragmentShader } from './shaders/edgeArrow.frag';
 import { vertexShader } from './shaders/edgeArrow.vert';
 
-const FLOATS_PER_VERTEX = 16;
+const FLOATS_PER_VERTEX = 17;
 const VERTICES_PER_ITEM = 6;
 
 // Indent depth: 20% of arrowLength from base toward tip
@@ -53,6 +53,7 @@ export class EdgeArrowProgram extends Program {
       { name: 'a_barycentric', size: 2 },
       { name: 'a_arrowSize', size: 1 },
       { name: 'a_lineWidth', size: 1 },
+      { name: 'a_hitAreaWidth', size: 1 },
       { name: 'a_nodeRadius', size: 1 },
       { name: 'a_color', size: 3 },
       { name: 'a_pickingColor', size: 3 },
@@ -68,6 +69,7 @@ export class EdgeArrowProgram extends Program {
     ty: number,
     arrowSize: number,
     lineWidth: number,
+    hitAreaWidth: number,
     nodeRadius: number,
     color: [number, number, number],
     pickingIndex: number,
@@ -89,14 +91,15 @@ export class EdgeArrowProgram extends Program {
       this.array[o + 5] = cy;
       this.array[o + 6] = arrowSize;
       this.array[o + 7] = lineWidth;
-      this.array[o + 8] = nodeRadius;
-      this.array[o + 9] = color[0];
-      this.array[o + 10] = color[1];
-      this.array[o + 11] = color[2];
-      this.array[o + 12] = pR;
-      this.array[o + 13] = pG;
-      this.array[o + 14] = pB;
-      this.array[o + 15] = opacity;
+      this.array[o + 8] = hitAreaWidth;
+      this.array[o + 9] = nodeRadius;
+      this.array[o + 10] = color[0];
+      this.array[o + 11] = color[1];
+      this.array[o + 12] = color[2];
+      this.array[o + 13] = pR;
+      this.array[o + 14] = pG;
+      this.array[o + 15] = pB;
+      this.array[o + 16] = opacity;
     }
   }
 
@@ -109,6 +112,7 @@ export class EdgeArrowProgram extends Program {
     ty: number,
     arrowSize: number,
     lineWidth: number,
+    hitAreaWidth: number,
     nodeRadius: number,
     color: [number, number, number],
     pickingIndex: number,
@@ -122,6 +126,7 @@ export class EdgeArrowProgram extends Program {
       ty,
       arrowSize,
       lineWidth,
+      hitAreaWidth,
       nodeRadius,
       color,
       pickingIndex,

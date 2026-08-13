@@ -5,11 +5,13 @@
 
 import type { AttributeLayout } from './program';
 import { Program } from './program';
+import { EDGE_CURVE_SEGMENTS } from '../edgePath';
 import { fragmentShader } from './shaders/edgeArc.frag';
 import { vertexShader } from './shaders/edgeArc.vert';
 
-const FLOATS_PER_VERTEX = 13;
-const SEGMENTS = 24;
+const FLOATS_PER_VERTEX = 14;
+export const EDGE_LOOP_SEGMENTS = EDGE_CURVE_SEGMENTS;
+const SEGMENTS = EDGE_LOOP_SEGMENTS;
 const VERTICES_PER_ITEM = (SEGMENTS + 1) * 2 + 2;
 
 function cubicBezier(p0: number, p1: number, p2: number, p3: number, t: number): number {
@@ -36,6 +38,7 @@ function writeVertex(
   opacity: number,
   color: [number, number, number],
   pickingIndex: number,
+  hitAreaWidth: number,
 ): void {
   array[offset] = x;
   array[offset + 1] = y;
@@ -50,6 +53,7 @@ function writeVertex(
   array[offset + 10] = color[1];
   array[offset + 11] = color[2];
   array[offset + 12] = pickingIndex;
+  array[offset + 13] = hitAreaWidth;
 }
 
 export class EdgeLoopProgram extends Program {
@@ -76,6 +80,7 @@ export class EdgeLoopProgram extends Program {
       { name: 'a_style', size: 4 },
       { name: 'a_color', size: 3 },
       { name: 'a_pickingIndex', size: 1 },
+      { name: 'a_hitAreaWidth', size: 1 },
     ];
   }
 
@@ -89,6 +94,7 @@ export class EdgeLoopProgram extends Program {
     color: [number, number, number],
     pickingIndex: number,
     lineWidth = 1,
+    hitAreaWidth = lineWidth,
     dashCycle = 0,
     opacity = 1,
   ): void {
@@ -138,6 +144,7 @@ export class EdgeLoopProgram extends Program {
         opacity,
         color,
         pickingIndex,
+        hitAreaWidth,
       );
     }
     writeVertex(
@@ -154,6 +161,7 @@ export class EdgeLoopProgram extends Program {
       opacity,
       color,
       pickingIndex,
+      hitAreaWidth,
     );
 
     for (let segment = 0; segment < SEGMENTS; segment++) {
@@ -192,6 +200,7 @@ export class EdgeLoopProgram extends Program {
           opacity,
           color,
           pickingIndex,
+          hitAreaWidth,
         );
       }
       x0 = x;
@@ -214,6 +223,7 @@ export class EdgeLoopProgram extends Program {
       opacity,
       color,
       pickingIndex,
+      hitAreaWidth,
     );
   }
 }

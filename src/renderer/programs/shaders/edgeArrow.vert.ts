@@ -4,6 +4,7 @@ attribute vec2 a_target;
 attribute vec2 a_barycentric;
 attribute float a_arrowSize;
 attribute float a_lineWidth;
+attribute float a_hitAreaWidth;
 attribute float a_nodeRadius;
 attribute vec3 a_color;
 attribute vec3 a_pickingColor;
@@ -26,7 +27,8 @@ void main() {
   vec2 tipPx = tgtPx - unitDir * radiusPx;
 
   float arrowLength = a_arrowSize;
-  float arrowWidth = a_lineWidth + 12.0;
+  float visibleArrowWidth = a_lineWidth + 12.0;
+  float arrowWidth = u_picking ? max(visibleArrowWidth, a_hitAreaWidth) : visibleArrowWidth;
 
   vec2 posPx = tipPx
     - unitDir * arrowLength * (1.0 - a_barycentric.y)

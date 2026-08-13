@@ -19,6 +19,8 @@ import type {
   Graph,
   GraphEventMap,
   GraphOptions,
+  EdgeConfig,
+  EdgeStyleValue,
   Handler,
   LabelOptions,
   NodeModel,
@@ -94,6 +96,9 @@ type EdgeLabelMinimumZoom = Assert<Equal<LabelOptions['edgeMinZoom'], number | u
 type DecorationMinimumZoom = Assert<Equal<NodeDecorationConfig['minZoom'], number | undefined>>;
 type DecorationCollisionOption = Assert<
   Equal<NodeDecorationConfig['hideOnCollision'], boolean | undefined>
+>;
+type EdgeHitAreaWidth = Assert<
+  Equal<NonNullable<NonNullable<EdgeConfig['style']>['hitAreaWidth']>, EdgeStyleValue<number>>
 >;
 
 declare const emitter: EventEmitter;
@@ -214,6 +219,7 @@ export type PublicApiTypeAssertions =
   | EdgeLabelMinimumZoom
   | DecorationMinimumZoom
   | DecorationCollisionOption
+  | EdgeHitAreaWidth
   | InternalNodeExport
   | InternalEdgeExport
   | InternalComboExport;

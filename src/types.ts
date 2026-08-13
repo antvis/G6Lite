@@ -547,6 +547,8 @@ export type EdgeStyleValue<T> = T | ((source: GraphNode, target: GraphNode, edge
 export interface EdgeStateStyleOverride {
   stroke?: string;
   lineWidth?: number;
+  /** Total picking width in screen-rendering pixels. Defaults to the final visual lineWidth. */
+  hitAreaWidth?: number;
   opacity?: number;
   lineDash?: number[];
 }
@@ -560,6 +562,8 @@ export interface EdgeConfig {
   style?: {
     stroke?: EdgeStyleValue<string>;
     lineWidth?: EdgeStyleValue<number>;
+    /** Total picking width in screen-rendering pixels. Defaults to the final visual lineWidth. */
+    hitAreaWidth?: EdgeStyleValue<number>;
     curvature?: EdgeStyleValue<number>;
     curveOffset?: EdgeStyleValue<number>;
     endArrow?: EdgeStyleValue<boolean>;

@@ -3,8 +3,8 @@
  * Degenerate vertices isolate adjacent edge strips inside a single draw call.
  * Adjacent curve samples reuse the analytic normal, avoiding cracks at joins.
  *
- * Stride: 13 floats per vertex (position.xy, normalSide.xyz,
- * style[lineWidth,dashCycle,pathDistance,opacity], color.rgb, pickingIndex).
+ * Stride: 14 floats per vertex (position.xy, normalSide.xyz,
+ * style[lineWidth,dashCycle,pathDistance,opacity], color.rgb, pickingIndex, hitAreaWidth).
  * pathDistance is accumulated in graph coordinates and converted to pixels in
  * the vertex shader so dash phase remains continuous across every segment.
  * Twenty-four segments keep long, highly curved edges visually smooth while
@@ -13,11 +13,13 @@
 
 import type { AttributeLayout } from './program';
 import { Program } from './program';
+import { EDGE_CURVE_SEGMENTS } from '../edgePath';
 import { fragmentShader } from './shaders/edgeArc.frag';
 import { vertexShader } from './shaders/edgeArc.vert';
 
-const FLOATS_PER_VERTEX = 13;
-const SEGMENTS = 24;
+const FLOATS_PER_VERTEX = 14;
+export const EDGE_ARC_SEGMENTS = EDGE_CURVE_SEGMENTS;
+const SEGMENTS = EDGE_ARC_SEGMENTS;
 const VERTICES_PER_ITEM = (SEGMENTS + 1) * 2 + 2;
 
 function writeVertex(
@@ -34,6 +36,7 @@ function writeVertex(
   opacity: number,
   color: [number, number, number],
   pickingIndex: number,
+  hitAreaWidth: number,
 ): void {
   array[offset] = x;
   array[offset + 1] = y;
@@ -48,6 +51,7 @@ function writeVertex(
   array[offset + 10] = color[1];
   array[offset + 11] = color[2];
   array[offset + 12] = pickingIndex;
+  array[offset + 13] = hitAreaWidth;
 }
 
 export class EdgeArcProgram extends Program {
@@ -74,6 +78,7 @@ export class EdgeArcProgram extends Program {
       { name: 'a_style', size: 4 },
       { name: 'a_color', size: 3 },
       { name: 'a_pickingIndex', size: 1 },
+      { name: 'a_hitAreaWidth', size: 1 },
     ];
   }
 
@@ -87,6 +92,7 @@ export class EdgeArcProgram extends Program {
     pickingIndex: number,
     curvature: number,
     lineWidth: number = 1,
+    hitAreaWidth: number = lineWidth,
     dashCycle: number = 0,
     opacity: number = 1,
   ): void {
@@ -133,6 +139,7 @@ export class EdgeArcProgram extends Program {
       opacity,
       color,
       pickingIndex,
+      hitAreaWidth,
     );
     writeVertex(
       this.array,
@@ -148,6 +155,7 @@ export class EdgeArcProgram extends Program {
       opacity,
       color,
       pickingIndex,
+      hitAreaWidth,
     );
     writeVertex(
       this.array,
@@ -163,6 +171,7 @@ export class EdgeArcProgram extends Program {
       opacity,
       color,
       pickingIndex,
+      hitAreaWidth,
     );
 
     for (let segment = 0; segment < SEGMENTS; segment++) {
@@ -198,6 +207,7 @@ export class EdgeArcProgram extends Program {
         opacity,
         color,
         pickingIndex,
+        hitAreaWidth,
       );
       writeVertex(
         this.array,
@@ -213,6 +223,7 @@ export class EdgeArcProgram extends Program {
         opacity,
         color,
         pickingIndex,
+        hitAreaWidth,
       );
 
       x0 = x1;
@@ -238,6 +249,7 @@ export class EdgeArcProgram extends Program {
       opacity,
       color,
       pickingIndex,
+      hitAreaWidth,
     );
   }
 }

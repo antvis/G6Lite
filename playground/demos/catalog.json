@@ -198,6 +198,18 @@
     "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
   },
   {
+    "id": "edge-hit-area",
+    "file": "edge-hit-area.ts",
+    "title": "细边交互热区",
+    "description": "保持细线视觉，同时扩大直线、曲线、折线、自环和箭头的拾取范围。",
+    "category": "edge",
+    "kind": "functional",
+    "audiences": ["playground"],
+    "coverage": ["edge.hit-area", "edge.picking", "edge.loop", "edge.arrow"],
+    "releaseCheck": "smoke",
+    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+  },
+  {
     "id": "parallel-edges",
     "file": "parallel-edges.ts",
     "title": "平行边自动错开",

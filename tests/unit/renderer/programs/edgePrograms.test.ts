@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { encodeId } from '@src/renderer/picking.js';
 import { EdgeArcProgram } from '@src/renderer/programs/edgeArc.js';
+import { EdgeArrowProgram } from '@src/renderer/programs/edgeArrow.js';
+import { EdgeCubicProgram } from '@src/renderer/programs/edgeCubic.js';
 import { EdgeLineProgram } from '@src/renderer/programs/edgeLine.js';
 import { EdgeLoopProgram } from '@src/renderer/programs/edgeLoop.js';
 import { EdgeRectProgram } from '@src/renderer/programs/edgeRect.js';
@@ -71,13 +73,23 @@ class TestEdgeLoop extends EdgeLoopProgram {
     return (this as unknown as { array: Float32Array }).array;
   }
 }
+class TestEdgeCubic extends EdgeCubicProgram {
+  peek(): Float32Array {
+    return (this as unknown as { array: Float32Array }).array;
+  }
+}
+class TestEdgeArrow extends EdgeArrowProgram {
+  peek(): Float32Array {
+    return (this as unknown as { array: Float32Array }).array;
+  }
+}
 
 const STRIDE_LINE = 16;
-const STRIDE_RECT = 19;
-const STRIDE_ARC = 13;
+const STRIDE_RECT = 20;
+const STRIDE_ARC = 14;
 const ARC_SEGMENTS = 24;
 const ARC_VERTICES_PER_ITEM = (ARC_SEGMENTS + 1) * 2 + 2;
-const STRIDE_LOOP = 13;
+const STRIDE_LOOP = 14;
 const LOOP_SEGMENTS = 24;
 const LOOP_VERTICES_PER_ITEM = (LOOP_SEGMENTS + 1) * 2 + 2;
 
@@ -304,22 +316,26 @@ describe('EdgeRect processEdge buffer encoding', () => {
     const prog = new TestEdgeRect(makeReglStub());
     prog.reallocate(1);
     const color: [number, number, number] = [0.4, 0.5, 0.6];
-    // ...lineWidth=4, dashCycle=0, opacity=0.8, srcRadius=6, tgtRadius=8, srcArrowPx=0, tgtArrowPx=12
-    prog.processEdge(0, 0, 0, 100, 0, color, 7, 4, 0, 0.8, 6, 8, 0, 12);
+    // ...lineWidth=4, hitAreaWidth=16, dashCycle=0, opacity=0.8,
+    // srcRadius=6, tgtRadius=8, srcArrowPx=0, tgtArrowPx=12
+    prog.processEdge(0, 0, 0, 100, 0, color, 7, 4, 16, 0, 0.8, 6, 8, 0, 12);
     const a = prog.peek();
 
-    // Tail attributes (offsets 15-18) written verbatim across all 6 vertices.
+    // Tail attributes (offsets 16-19) written verbatim across all 6 vertices.
     for (let v = 0; v < 6; v++) {
       const o = v * STRIDE_RECT;
-      expect(a[o + 15]).toBeCloseTo(6); // a_srcRadius (graph)
-      expect(a[o + 16]).toBeCloseTo(8); // a_tgtRadius
-      expect(a[o + 17]).toBeCloseTo(0); // a_srcArrowPx
-      expect(a[o + 18]).toBeCloseTo(12); // a_tgtArrowPx (fixed px)
+      expect(a[o + 16]).toBeCloseTo(6); // a_srcRadius (graph)
+      expect(a[o + 17]).toBeCloseTo(8); // a_tgtRadius
+      expect(a[o + 18]).toBeCloseTo(0); // a_srcArrowPx
+      expect(a[o + 19]).toBeCloseTo(12); // a_tgtArrowPx (fixed px)
     }
-    // Head offsets 0-14 still hold the pre-existing attributes.
+    // Head attributes carry both visual and picking widths.
     expect(a[6]).toBeCloseTo(4); // a_lineWidth
-    expect(a[7]).toBeCloseTo(0.4); // a_color
-    expect(a[14]).toBeCloseTo(0.8); // a_opacity
+    expect(a[7]).toBeCloseTo(16); // a_hitAreaWidth
+    expect(a[8]).toBeCloseTo(0.4); // a_color
+    expect(a[15]).toBeCloseTo(0.8); // a_opacity
+    expect(prog.getVertexShader()).toContain('max(a_lineWidth, a_hitAreaWidth * float(u_picking))');
+    expect(prog.getFragmentShader()).toContain('&& !u_picking) discard');
   });
 
   it('patchEdgeStyle updates every optional rect style attribute', () => {
@@ -330,6 +346,7 @@ describe('EdgeRect processEdge buffer encoding', () => {
     prog.patchEdgeStyle(0, {
       color: [0.7, 0.8, 0.9],
       lineWidth: 6,
+      hitAreaWidth: 18,
       dashCycle: 12,
       opacity: 0.4,
       srcRadius: 11,
@@ -342,15 +359,16 @@ describe('EdgeRect processEdge buffer encoding', () => {
     for (let vertex = 0; vertex < 6; vertex++) {
       const offset = vertex * STRIDE_RECT;
       expect(a[offset + 6]).toBeCloseTo(6);
-      expect(a[offset + 7]).toBeCloseTo(0.7);
-      expect(a[offset + 8]).toBeCloseTo(0.8);
-      expect(a[offset + 9]).toBeCloseTo(0.9);
-      expect(a[offset + 13]).toBeCloseTo(12);
-      expect(a[offset + 14]).toBeCloseTo(0.4);
-      expect(a[offset + 15]).toBeCloseTo(11);
-      expect(a[offset + 16]).toBeCloseTo(13);
-      expect(a[offset + 17]).toBeCloseTo(17);
-      expect(a[offset + 18]).toBeCloseTo(19);
+      expect(a[offset + 7]).toBeCloseTo(18);
+      expect(a[offset + 8]).toBeCloseTo(0.7);
+      expect(a[offset + 9]).toBeCloseTo(0.8);
+      expect(a[offset + 10]).toBeCloseTo(0.9);
+      expect(a[offset + 14]).toBeCloseTo(12);
+      expect(a[offset + 15]).toBeCloseTo(0.4);
+      expect(a[offset + 16]).toBeCloseTo(11);
+      expect(a[offset + 17]).toBeCloseTo(13);
+      expect(a[offset + 18]).toBeCloseTo(17);
+      expect(a[offset + 19]).toBeCloseTo(19);
     }
   });
 });
@@ -361,7 +379,7 @@ describe('EdgeArc processEdge buffer encoding', () => {
     prog.reallocate(1);
     const color: [number, number, number] = [0.2, 0.3, 0.4];
     const pickingIndex = 9;
-    prog.processEdge(0, 0, 0, 100, 0, color, pickingIndex, 0.3, 4, 12, 0.6);
+    prog.processEdge(0, 0, 0, 100, 0, color, pickingIndex, 0.3, 4, 16, 12, 0.6);
 
     const a = prog.peek();
 
@@ -381,6 +399,7 @@ describe('EdgeArc processEdge buffer encoding', () => {
     expect(a[10]).toBeCloseTo(color[1]);
     expect(a[11]).toBeCloseTo(color[2]);
     expect(a[12]).toBeCloseTo(pickingIndex);
+    expect(a[13]).toBeCloseTo(16);
     expect(Array.from(a.slice(0, STRIDE_ARC))).toEqual(
       Array.from(a.slice(STRIDE_ARC, STRIDE_ARC * 2)),
     );
@@ -394,12 +413,13 @@ describe('EdgeArc processEdge buffer encoding', () => {
 
     // Analytic normals are normalized, so lineWidth is measured in pixels.
     expect(Math.hypot(a[2], a[3])).toBeCloseTo(1);
+    expect(prog.getVertexShader()).toContain('max(a_style.x, a_hitAreaWidth * float(u_picking))');
   });
 
   it('accumulates a continuous path distance across segment boundaries', () => {
     const prog = new TestEdgeArc(makeReglStub());
     prog.reallocate(1);
-    prog.processEdge(0, 10, 20, 110, 220, [0.1, 0.2, 0.3], 42, 0.45, 3, 10, 0.8);
+    prog.processEdge(0, 10, 20, 110, 220, [0.1, 0.2, 0.3], 42, 0.45, 3, 14, 10, 0.8);
 
     const a = prog.peek();
     let previousDistance = 0;
@@ -433,7 +453,7 @@ describe('EdgeArc processEdge buffer encoding', () => {
   it('keeps long high-curvature arc chord error below the visual threshold', () => {
     const prog = new TestEdgeArc(makeReglStub());
     prog.reallocate(1);
-    prog.processEdge(0, 0, 0, 1000, 0, [0.1, 0.2, 0.3], 42, 0.4, 1, 0, 1);
+    prog.processEdge(0, 0, 0, 1000, 0, [0.1, 0.2, 0.3], 42, 0.4, 1, 1, 0, 1);
 
     const a = prog.peek();
     const cpx = 500;
@@ -462,7 +482,7 @@ describe('EdgeArc processEdge buffer encoding', () => {
   it('keeps degenerate arc vertices finite', () => {
     const prog = new TestEdgeArc(makeReglStub());
     prog.reallocate(1);
-    prog.processEdge(0, 5, 5, 5, 5, [1, 0, 0], 3, 0.5, 2, 0, 0);
+    prog.processEdge(0, 5, 5, 5, 5, [1, 0, 0], 3, 0.5, 2, 8, 0, 0);
 
     const usedLength = prog.getVerticesPerItem() * prog.getFloatsPerVertex();
     expect(Array.from(prog.peek().subarray(0, usedLength)).every(Number.isFinite)).toBe(true);
@@ -478,7 +498,7 @@ describe('EdgeLoop processLoop buffer encoding', () => {
     const pickingIndex = 17;
     const angle = -Math.PI / 2;
     const radius = 10;
-    prog.processLoop(0, 30, 40, radius, angle, 25, color, pickingIndex, 3, 10, 0.35);
+    prog.processLoop(0, 30, 40, radius, angle, 25, color, pickingIndex, 3, 16, 10, 0.35);
 
     expect(prog.getDrawMethod()).toBe('triangle strip');
     expect(prog.getVerticesPerItem()).toBe(LOOP_VERTICES_PER_ITEM);
@@ -489,6 +509,7 @@ describe('EdgeLoop processLoop buffer encoding', () => {
       { name: 'a_style', size: 4 },
       { name: 'a_color', size: 3 },
       { name: 'a_pickingIndex', size: 1 },
+      { name: 'a_hitAreaWidth', size: 1 },
     ]);
     expect(prog.getVertexShader()).toContain('attribute vec3 a_normalSide;');
 
@@ -506,6 +527,7 @@ describe('EdgeLoop processLoop buffer encoding', () => {
       expect(a[offset + 10]).toBeCloseTo(color[1]);
       expect(a[offset + 11]).toBeCloseTo(color[2]);
       expect(a[offset + 12]).toBe(pickingIndex);
+      expect(a[offset + 13]).toBeCloseTo(16);
     }
 
     const spread = 0.5;
@@ -525,10 +547,37 @@ describe('EdgeLoop processLoop buffer encoding', () => {
   it('keeps degenerate loop geometry finite', () => {
     const prog = new TestEdgeLoop(makeReglStub());
     prog.reallocate(1);
-    prog.processLoop(0, 5, 5, 0, 0, 0, [1, 0, 0], 3, 2, 0, 0);
+    prog.processLoop(0, 5, 5, 0, 0, 0, [1, 0, 0], 3, 2, 8, 0, 0);
 
     const usedLength = prog.getVerticesPerItem() * prog.getFloatsPerVertex();
     expect(Array.from(prog.peek().subarray(0, usedLength)).every(Number.isFinite)).toBe(true);
+  });
+});
+
+describe('EdgeCubic and EdgeArrow picking geometry', () => {
+  it('renders cubic edges as thick strips with independent picking width', () => {
+    const prog = new TestEdgeCubic(makeReglStub());
+    prog.reallocate(1);
+    prog.processEdge(0, 10, 20, 210, 120, [0.1, 0.2, 0.3], 7, 60, 'LR', 1.5, 16, 0, 0.8);
+
+    expect(prog.getDrawMethod()).toBe('triangle strip');
+    expect(prog.getFloatsPerVertex()).toBe(14);
+    expect(prog.peek()[5]).toBeCloseTo(1.5);
+    expect(prog.peek()[13]).toBeCloseTo(16);
+    expect(prog.getVertexShader()).toContain('a_hitAreaWidth');
+  });
+
+  it('keeps arrow visuals unchanged while widening only the picking pass', () => {
+    const prog = new TestEdgeArrow(makeReglStub());
+    prog.reallocate(1);
+    prog.processArrow(0, 0, 0, 100, 0, 10, 1.5, 20, 8, [0.2, 0.4, 0.6], 5, 0.7);
+
+    expect(prog.peek()[7]).toBeCloseTo(1.5);
+    expect(prog.peek()[8]).toBeCloseTo(20);
+    expect(prog.peek()[9]).toBeCloseTo(8);
+    expect(prog.getVertexShader()).toContain(
+      'max(a_lineWidth + 12.0, a_hitAreaWidth * float(u_picking))',
+    );
   });
 });
 

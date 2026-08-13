@@ -53,6 +53,7 @@ export interface ResolvedEdgeStyle {
   stroke: string;
   strokeRGB?: [number, number, number]; // Pre-parsed color (optional, for static optimization)
   lineWidth: number;
+  hitAreaWidth: number;
   curvature: number;
   curveOffset: number;
   endArrow: boolean;
@@ -116,6 +117,7 @@ function applyEdgeStateOverrides(
       style.strokeRGB = undefined;
     }
     if (override.lineWidth !== undefined) style.lineWidth = override.lineWidth;
+    if (override.hitAreaWidth !== undefined) style.hitAreaWidth = override.hitAreaWidth;
     if (override.opacity !== undefined) style.opacity = override.opacity;
     if (override.lineDash !== undefined) style.lineDash = override.lineDash;
   }
@@ -145,6 +147,7 @@ interface CachedEdgeStyle {
   stroke: string;
   strokeRGB: [number, number, number]; // Pre-parsed color for zero runtime cost
   lineWidth: number;
+  hitAreaWidth: number;
   curvature: number;
   curveOffset: number;
   endArrow: boolean;
@@ -259,6 +262,7 @@ export function analyzeEdgeConfig(config: EdgeConfig | undefined, theme: ThemeTo
     const isStatic =
       !isFunction(style.stroke) &&
       !isFunction(style.lineWidth) &&
+      !isFunction(style.hitAreaWidth) &&
       !isFunction(style.curvature) &&
       !isFunction(style.curveOffset) &&
       !isFunction(style.endArrow) &&
@@ -276,6 +280,8 @@ export function analyzeEdgeConfig(config: EdgeConfig | undefined, theme: ThemeTo
 
   // Static config: pre-compute and cache the base style (including pre-parsed colors)
   const lineWidth = (style?.lineWidth as number) ?? theme.edgeLineWidth ?? 1;
+  const normalizedLineWidth = typeof lineWidth === 'number' ? lineWidth : 1;
+  const hitAreaWidth = style?.hitAreaWidth as number | undefined;
   const strokeValue =
     (style?.stroke as string) ?? theme.edgeStroke ?? theme.edgeDefaultColor ?? '#e2e2e2';
   const userArrowSize = (style?.arrowSize as number) ?? 0;
@@ -283,7 +289,11 @@ export function analyzeEdgeConfig(config: EdgeConfig | undefined, theme: ThemeTo
     type: 'static',
     stroke: strokeValue,
     strokeRGB: parseColor(strokeValue), // Pre-parse color!
-    lineWidth: typeof lineWidth === 'number' ? lineWidth : 1,
+    lineWidth: normalizedLineWidth,
+    hitAreaWidth:
+      typeof hitAreaWidth === 'number' && Number.isFinite(hitAreaWidth)
+        ? Math.max(normalizedLineWidth, hitAreaWidth)
+        : normalizedLineWidth,
     curvature: (style?.curvature as number) ?? 0.3,
     curveOffset: (style?.curveOffset as number) ?? 60,
     endArrow: (style?.endArrow as boolean) ?? theme.edgeArrow ?? false,
@@ -433,6 +443,7 @@ export function resolveEdgeStyle(
       stroke: base.stroke,
       strokeRGB: base.strokeRGB,
       lineWidth: base.lineWidth,
+      hitAreaWidth: (config?.style as { hitAreaWidth?: number } | undefined)?.hitAreaWidth ?? NaN,
       curvature: base.curvature,
       curveOffset: base.curveOffset,
       endArrow: base.endArrow,
@@ -449,6 +460,7 @@ export function resolveEdgeStyle(
       undefined,
       theme.edgeStateStyles,
     );
+    resolved.hitAreaWidth = validHitAreaWidth(resolved.hitAreaWidth, resolved.lineWidth);
     if (base.arrowSize <= 0) resolved.arrowSize = getArrowSize(resolved.lineWidth);
     return resolved;
   }
@@ -482,6 +494,7 @@ function resolveEdgeStyleDynamic(
   };
   let stroke: string;
   let lineWidth: number;
+  let hitAreaWidth: number | undefined;
   let curvature: number;
   let curveOffset: number;
   let endArrow: boolean;
@@ -497,6 +510,7 @@ function resolveEdgeStyleDynamic(
     const styleObj = styleFn(edge);
     stroke = styleObj.stroke ?? theme.edgeStroke ?? theme.edgeDefaultColor ?? '#e2e2e2';
     lineWidth = styleObj.lineWidth ?? 1;
+    hitAreaWidth = styleObj.hitAreaWidth;
     curvature = styleObj.curvature ?? 0.3;
     curveOffset = styleObj.curveOffset ?? 60;
     endArrow = styleObj.endArrow ?? false;
@@ -520,6 +534,13 @@ function resolveEdgeStyleDynamic(
       target,
       edge,
       theme.edgeLineWidth ?? 1,
+    );
+    hitAreaWidth = resolveEdgeStyleValue(
+      config?.style?.hitAreaWidth ?? extensionStyle.hitAreaWidth,
+      source,
+      target,
+      edge,
+      undefined,
     );
     curvature = resolveEdgeStyleValue(
       config?.style?.curvature ?? extensionStyle.curvature,
@@ -585,6 +606,7 @@ function resolveEdgeStyleDynamic(
   const resolved: ResolvedEdgeStyle = {
     stroke,
     lineWidth,
+    hitAreaWidth: hitAreaWidth ?? NaN,
     curvature: typeof curvature === 'number' ? curvature : 0.3,
     curveOffset: typeof curveOffset === 'number' ? curveOffset : 60,
     endArrow: !!endArrow,
@@ -601,8 +623,13 @@ function resolveEdgeStyleDynamic(
     extension?.stateStyles,
     theme.edgeStateStyles,
   );
+  resolved.hitAreaWidth = validHitAreaWidth(resolved.hitAreaWidth, resolved.lineWidth);
   if (userArrowSize <= 0) resolved.arrowSize = getArrowSize(resolved.lineWidth);
   return resolved;
+}
+
+function validHitAreaWidth(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(fallback, value) : fallback;
 }
 
 function resolveStyleValue<T>(

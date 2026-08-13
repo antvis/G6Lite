@@ -19,3 +19,20 @@ edge: {
 ```
 
 Use line, arc, cubic, or polyline edges according to the topology. Enable `process-parallel-edges` when multiple edges share endpoints. See [parallel edges](/en/docs/guides/parallel-edges).
+
+## Thin-edge hit areas
+
+Use `hitAreaWidth` to make a thin edge easier to interact with without changing its visual width:
+
+```ts
+edge: {
+  style: {
+    lineWidth: 1.5,
+    hitAreaWidth: 16,
+  },
+}
+```
+
+`hitAreaWidth` is the total picking width, so `16` gives roughly `8` pixels on each side of the path. It applies consistently to lines, parallel or arc edges, polylines, cubic curves, self-loops, and arrowheads. Hover, click selection, tooltips, and edge dragging all use the shared picking result.
+
+When omitted, it inherits the final `lineWidth`. Values below the visual width, negative values, and non-finite values fall back to the visual width. It uses the same screen-rendering pixel semantics as `lineWidth`; do not multiply it by zoom, DPR, or the picking framebuffer scale. Dashed gaps remain interactive.

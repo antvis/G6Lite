@@ -5,6 +5,9 @@ export interface Point {
   y: number;
 }
 
+/** Shared curve tessellation density for GPU strips and CPU picking. */
+export const EDGE_CURVE_SEGMENTS = 24;
+
 export interface QuadraticEdgePath {
   type: 'quadratic';
   p0: Point;

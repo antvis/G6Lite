@@ -2,8 +2,8 @@
  * EdgeRect: renders thick edges as rectangles via 2 triangles (6 vertices).
  * Line width is computed in the vertex shader via normal offset in pixel space.
  * Supports dash pattern and opacity.
- * Stride: 19 floats per vertex (source.xy, target.xy, posCoef, normalCoef,
- * lineWidth, color.rgb, pickingColor.rgb, dashCycle, opacity, srcRadius,
+ * Stride: 20 floats per vertex (source.xy, target.xy, posCoef, normalCoef,
+ * lineWidth, hitAreaWidth, color.rgb, pickingColor.rgb, dashCycle, opacity, srcRadius,
  * tgtRadius, srcArrowPx, tgtArrowPx). Endpoint clamping is shader-side (uses
  * u_scale) so it stays correct on zoom.
  */
@@ -14,7 +14,7 @@ import { Program } from './program';
 import { fragmentShader } from './shaders/edgeRect.frag';
 import { vertexShader } from './shaders/edgeRect.vert';
 
-const FLOATS_PER_VERTEX = 19;
+const FLOATS_PER_VERTEX = 20;
 const VERTICES_PER_ITEM = 6;
 
 // 6 vertices: (posCoef, normalCoef)
@@ -52,6 +52,7 @@ export class EdgeRectProgram extends Program {
       { name: 'a_posCoef', size: 1 },
       { name: 'a_normalCoef', size: 1 },
       { name: 'a_lineWidth', size: 1 },
+      { name: 'a_hitAreaWidth', size: 1 },
       { name: 'a_color', size: 3 },
       { name: 'a_pickingColor', size: 3 },
       { name: 'a_dashCycle', size: 1 },
@@ -72,6 +73,7 @@ export class EdgeRectProgram extends Program {
     color: [number, number, number],
     pickingIndex: number,
     lineWidth: number,
+    hitAreaWidth: number = lineWidth,
     dashCycle: number = 0,
     opacity: number = 1,
     srcRadius: number = 0,
@@ -94,18 +96,19 @@ export class EdgeRectProgram extends Program {
     this.array[base + 4] = pc0;
     this.array[base + 5] = nc0;
     this.array[base + 6] = lineWidth;
-    this.array[base + 7] = color[0];
-    this.array[base + 8] = color[1];
-    this.array[base + 9] = color[2];
-    this.array[base + 10] = pR;
-    this.array[base + 11] = pG;
-    this.array[base + 12] = pB;
-    this.array[base + 13] = dashCycle;
-    this.array[base + 14] = opacity;
-    this.array[base + 15] = srcRadius;
-    this.array[base + 16] = tgtRadius;
-    this.array[base + 17] = srcArrowPx;
-    this.array[base + 18] = tgtArrowPx;
+    this.array[base + 7] = hitAreaWidth;
+    this.array[base + 8] = color[0];
+    this.array[base + 9] = color[1];
+    this.array[base + 10] = color[2];
+    this.array[base + 11] = pR;
+    this.array[base + 12] = pG;
+    this.array[base + 13] = pB;
+    this.array[base + 14] = dashCycle;
+    this.array[base + 15] = opacity;
+    this.array[base + 16] = srcRadius;
+    this.array[base + 17] = tgtRadius;
+    this.array[base + 18] = srcArrowPx;
+    this.array[base + 19] = tgtArrowPx;
 
     // Copy first vertex to remaining 5 vertices, then patch a_posCoef and a_normalCoef
     for (let v = 1; v < VERTICES_PER_ITEM; v++) {
@@ -135,6 +138,7 @@ export class EdgeRectProgram extends Program {
     patch: {
       color?: [number, number, number];
       lineWidth?: number;
+      hitAreaWidth?: number;
       dashCycle?: number;
       opacity?: number;
       srcRadius?: number;
@@ -145,6 +149,8 @@ export class EdgeRectProgram extends Program {
   ): void {
     if (patch.color) this.patchAttribute(index, 'a_color', patch.color);
     if (patch.lineWidth !== undefined) this.patchAttribute(index, 'a_lineWidth', [patch.lineWidth]);
+    if (patch.hitAreaWidth !== undefined)
+      this.patchAttribute(index, 'a_hitAreaWidth', [patch.hitAreaWidth]);
     if (patch.dashCycle !== undefined) this.patchAttribute(index, 'a_dashCycle', [patch.dashCycle]);
     if (patch.opacity !== undefined) this.patchAttribute(index, 'a_opacity', [patch.opacity]);
     if (patch.srcRadius !== undefined) this.patchAttribute(index, 'a_srcRadius', [patch.srcRadius]);

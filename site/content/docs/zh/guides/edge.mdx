@@ -32,7 +32,8 @@ edge: {
 | 字段                        | 说明                |
 | --------------------------- | ------------------- |
 | `stroke`                    | 线条颜色            |
-| `lineWidth`                 | 线宽                |
+| `lineWidth`                 | 视觉线宽            |
+| `hitAreaWidth`              | 总交互命中宽度      |
 | `opacity`                   | 不透明度            |
 | `lineDash`                  | 虚线                |
 | `startArrow` / `endArrow`   | 起点 / 终点箭头     |
@@ -53,12 +54,29 @@ edge: {
 }
 ```
 
+## 细边交互热区
+
+细线场景可以独立扩大边的交互热区，不需要加粗视觉线：
+
+```ts
+edge: {
+  style: {
+    lineWidth: 1.5,
+    hitAreaWidth: 16,
+  },
+}
+```
+
+`hitAreaWidth` 表示边的总命中宽度，因此 `16` 相当于中心线两侧各约 `8` 的热区。它适用于直线、平行边、弧线、折线、三次曲线、自环和箭头，也会被 hover、click-select、tooltip 与 drag-edge 等共享 Picking 交互使用。
+
+未配置时，命中宽度继承最终 `lineWidth`；配置值小于视觉线宽、为负数或不是有限数值时，也会回退到视觉线宽。该值使用与 `lineWidth` 相同的屏幕渲染像素语义，业务不需要乘 zoom、DPR 或 Picking framebuffer 比例。虚线间隙仍保持可命中。
+
 ## 状态样式
 
 ```ts
 edge: {
   stateStyles: {
-    selected: { stroke: '#1890ff', lineWidth: 3 },
+    selected: { stroke: '#1890ff', lineWidth: 3, hitAreaWidth: 18 },
     highlight: { stroke: '#faad14', lineWidth: 3 },
     inactive: { opacity: 0.15 },
   },

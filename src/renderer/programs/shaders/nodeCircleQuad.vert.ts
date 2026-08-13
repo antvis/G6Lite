@@ -22,9 +22,8 @@ varying float v_aa;
 void main() {
   float totalSize = a_size + a_haloWidth * 2.0;
   vec2 pos = a_center + a_corner * totalSize * 0.5;
-  vec2 p = (pos + u_translate) * u_scale;
-  vec2 ndc = vec2(p.x * 2.0 / u_resolution.x - 1.0, 1.0 - p.y * 2.0 / u_resolution.y);
-  gl_Position = vec4(ndc, 0.0, 1.0);
+  vec2 p = (pos + u_translate) * u_scale / u_resolution;
+  gl_Position = vec4(p * vec2(2.0, -2.0) + vec2(-1.0, 1.0), 0.0, 1.0);
 
   float renderedSize = totalSize * u_scale;
   v_circleCoord = a_corner * 0.5;

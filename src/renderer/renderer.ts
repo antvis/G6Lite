@@ -416,14 +416,18 @@ export class Renderer {
     if (baseType === 'cubic') return 'cubic' as EdgeProgramType;
     if (this.hasParallelEdges()) return 'arc';
     const lw = config?.style?.lineWidth;
+    const hitAreaWidth = config?.style?.hitAreaWidth;
     if (typeof lw === 'number' && lw > 1) return 'rect';
     if (typeof lw === 'undefined' && (this.theme.edgeLineWidth ?? 1) > 1) return 'rect';
     if (typeof lw === 'function') return 'rect';
+    if (typeof hitAreaWidth === 'number' && hitAreaWidth > 1) return 'rect';
+    if (typeof hitAreaWidth === 'function') return 'rect';
     const stateStyles = config?.stateStyles;
     if (stateStyles) {
       for (const style of Object.values(stateStyles)) {
         if (!style) continue;
         if ((style.lineWidth ?? 1) > 1) return 'rect';
+        if ((style.hitAreaWidth ?? 1) > 1) return 'rect';
         if (style.opacity !== undefined && style.opacity < 1) return 'rect';
         if (style.lineDash && style.lineDash.length > 0) return 'rect';
       }
@@ -934,6 +938,7 @@ export class Renderer {
         color,
         pickingIndex,
         style.lineWidth,
+        style.hitAreaWidth,
         dashCycle,
         opacity,
       );
@@ -949,6 +954,7 @@ export class Renderer {
           node.y + nodeRadius * Math.sin(endAngle),
           style.arrowSize,
           style.lineWidth,
+          style.hitAreaWidth,
           0,
           color,
           pickingIndex,
@@ -1070,6 +1076,7 @@ export class Renderer {
         endTipY,
         style.arrowSize,
         style.lineWidth,
+        style.hitAreaWidth,
         endTipAtCenter ? targetRadius : 0,
         color,
         pickingIndex,
@@ -1085,6 +1092,7 @@ export class Renderer {
         startTipY,
         style.arrowSize,
         style.lineWidth,
+        style.hitAreaWidth,
         startTipAtCenter ? sourceRadius : 0,
         color,
         pickingIndex,
@@ -1196,6 +1204,7 @@ export class Renderer {
               color,
               pickIdx,
               style.lineWidth,
+              style.hitAreaWidth,
               dashCycle,
               opacity,
               0,
@@ -1232,6 +1241,7 @@ export class Renderer {
             pickIdx,
             arcCurvature,
             style.lineWidth,
+            style.hitAreaWidth,
             dashCycle,
             opacity,
           );
@@ -1257,6 +1267,9 @@ export class Renderer {
             pickIdx,
             curveOffset,
             direction,
+            style.lineWidth,
+            style.hitAreaWidth,
+            dashCycle,
             opacity,
           );
         } else if (this.activeEdgeType === 'rect') {
@@ -1272,6 +1285,7 @@ export class Renderer {
             color,
             pickIdx,
             style.lineWidth,
+            style.hitAreaWidth,
             dashCycle,
             opacity,
             srcRadius,
@@ -1590,6 +1604,7 @@ export class Renderer {
             tgt.y,
             style.arrowSize,
             style.lineWidth,
+            style.hitAreaWidth,
             tgtRadius,
             color,
             pickIdx,
@@ -1605,6 +1620,7 @@ export class Renderer {
             src.y,
             style.arrowSize,
             style.lineWidth,
+            style.hitAreaWidth,
             srcRadius,
             color,
             pickIdx,
@@ -1768,6 +1784,12 @@ export class Renderer {
       const source = this.nodes[sourceIndex];
       const target = this.nodes[targetIndex];
       const style = resolveEdgeStyle(source, target, edge, this.edgeConfig, this.theme);
+      const expectedArrowCount = Number(style.endArrow) + Number(style.startArrow);
+      const mappedArrowCount = this.edgeArrowCount[index] ?? 0;
+      if (expectedArrowCount > 0 || mappedArrowCount > 0) {
+        this.needToProcess = true;
+        continue;
+      }
       const active = !hasHighlight || this.highlightEdgeIndices.has(index);
       const baseColor = style.strokeRGB ?? parseColor(style.stroke);
       const color: RGBColor = active
@@ -1784,6 +1806,7 @@ export class Renderer {
         (edgeProgram as EdgeRectProgram).patchEdgeStyle(drawStart, {
           color,
           lineWidth: style.lineWidth,
+          hitAreaWidth: style.hitAreaWidth,
           dashCycle,
           opacity,
         });
@@ -2275,19 +2298,81 @@ export class Renderer {
 
   /** @deprecated Use pickAt() for O(1) hit detection. */
   hitTestEdge(graphX: number, graphY: number): number {
-    const threshold = 8;
-    let found = -1;
-    for (let i = 0; i < this.edges.length; i++) {
-      const e = this.edges[i];
-      const sIdx = this.nodeIdToIndex.get(e.source);
-      const tIdx = this.nodeIdToIndex.get(e.target);
-      if (sIdx === undefined || tIdx === undefined) continue;
-      const s = this.nodes[sIdx];
-      const t = this.nodes[tIdx];
-      const d = pointToSegmentDist(graphX, graphY, s.x, s.y, t.x, t.y);
-      if (d <= threshold) found = i;
+    if (this.needToProcess) this.process();
+    const zoom = this.camera.zoom;
+    const arrowArray = this._programs.edgeArrow?.getArray();
+
+    for (let pass = 3; pass >= 0; pass--)
+      for (let i = this.edges.length - 1; i >= 0; i--) {
+        const selfLoop = this.edges[i].source === this.edges[i].target;
+        if (selfLoop !== !!(pass & 1)) continue;
+        if (pass < 2) {
+          if (this.isEdgePathHit(i, graphX, graphY, zoom, selfLoop)) return i;
+        } else if (arrowArray) {
+          const start = this.edgeArrowStart[i];
+          const count = this.edgeArrowCount[i];
+          for (let arrow = start; arrow >= 0 && arrow < start + count; arrow++) {
+            const o = arrow * 102;
+            const dx = arrowArray[o + 2] - arrowArray[o];
+            const dy = arrowArray[o + 3] - arrowArray[o + 1];
+            const length = Math.hypot(dx, dy);
+            if (length <= 1e-8) continue;
+            const x = graphX - arrowArray[o + 2];
+            const y = graphY - arrowArray[o + 3];
+            const along =
+              (-(x * dx + y * dy + arrowArray[o + 9] * length) * zoom) /
+              (length * arrowArray[o + 6]);
+            const across =
+              (Math.abs(y * dx - x * dy) * zoom * 2) /
+              (length * Math.max(arrowArray[o + 7] + 12, arrowArray[o + 8]));
+            if (
+              along >= 0 &&
+              along <= 1 &&
+              across <= along &&
+              (along <= 0.8 || across >= (along - 0.8) * 5)
+            )
+              return i;
+          }
+        }
+      }
+    return -1;
+  }
+
+  private isEdgePathHit(i: number, x: number, y: number, zoom: number, loop: boolean): boolean {
+    const start = loop ? this.edgeLoopSlot[i] : this.edgeDrawStart[i];
+    if (start < 0) return false;
+
+    const program = loop ? this._programs.edgeLoop! : this.activeEdgeProgram;
+    const array = program.getArray();
+    const curved = loop || this.activeEdgeType === 'arc' || this.activeEdgeType === 'cubic';
+    const floatsPerVertex = curved ? 14 : this.activeEdgeType === 'line' ? 16 : 20;
+    const verticesPerItem = curved ? 52 : this.activeEdgeType === 'line' ? 2 : 6;
+    const itemFloats = floatsPerVertex * verticesPerItem;
+
+    for (let item = start; item < start + (loop ? 1 : this.edgeDrawCount[i]); item++) {
+      const base = item * itemFloats;
+      const threshold = array[base + (verticesPerItem > 6 ? 13 : 7)] / zoom / 2;
+      const thresholdSquared = threshold * threshold;
+      let previousX = array[base];
+      let previousY = array[base + 1];
+      for (let vertex = 1; vertex < (verticesPerItem > 6 ? verticesPerItem : 2); vertex++) {
+        const offset = base + vertex * floatsPerVertex;
+        const vx = array[verticesPerItem > 6 ? offset : base + 2];
+        const vy = array[verticesPerItem > 6 ? offset + 1 : base + 3];
+        const dx = vx - previousX;
+        const dy = vy - previousY;
+        const t = Math.max(
+          0,
+          Math.min(1, ((x - previousX) * dx + (y - previousY) * dy) / (dx * dx + dy * dy || 1)),
+        );
+        const offsetX = x - previousX - t * dx;
+        const offsetY = y - previousY - t * dy;
+        if (offsetX * offsetX + offsetY * offsetY <= thresholdSquared) return true;
+        previousX = vx;
+        previousY = vy;
+      }
     }
-    return found;
+    return false;
   }
 
   /** Hide edges during camera movement, restore after delay. */
@@ -2383,21 +2468,4 @@ export class Renderer {
     this.prevHighlightNodeIds.clear();
     this.prevHighlightEdgeIndices.clear();
   }
-}
-
-function pointToSegmentDist(
-  px: number,
-  py: number,
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-): number {
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const len = Math.hypot(dx, dy) || 1e-6;
-  const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / (len * len)));
-  const projX = x1 + t * dx;
-  const projY = y1 + t * dy;
-  return Math.hypot(px - projX, py - projY);
 }

@@ -393,6 +393,21 @@ describe('Renderer — data pipeline', () => {
     expect(rendererInternals(renderer).resolveEdgeType(config)).toBe('rect');
   });
 
+  it('uses rect geometry only when a line needs an expanded picking width', () => {
+    expect(
+      rendererInternals(renderer).resolveEdgeType({
+        type: 'line',
+        style: { lineWidth: 1, hitAreaWidth: 16 },
+      }),
+    ).toBe('rect');
+    expect(
+      rendererInternals(renderer).resolveEdgeType({
+        type: 'line',
+        style: { lineWidth: 1 },
+      }),
+    ).toBe('line');
+  });
+
   it('replaces data fully on a second setData (no stale nodes)', () => {
     renderer.setData(
       rendererData(
@@ -821,10 +836,101 @@ describe('Renderer — CPU geometry picking (hitTest)', () => {
     expect(renderer.hitTestNode(1000, 1000)).toBeNull();
   });
 
-  it('hits the edge near its segment and misses far away', () => {
-    // Edge a→b runs along y=0 from x=0 to x=200; threshold is 8px.
-    expect(renderer.hitTestEdge(100, 2)).toBe(0);
-    expect(renderer.hitTestEdge(100, 50)).toBe(-1);
+  it('uses the configured total hit-area width in screen pixels', () => {
+    const edgeConfig: EdgeConfig = { style: { lineWidth: 1.5, hitAreaWidth: 16 } };
+    analyzeEdgeConfig(edgeConfig, theme);
+    renderer.setData({
+      nodes: [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 200, y: 0 },
+      ],
+      edges: [{ source: 'a', target: 'b' }],
+      theme,
+      edgeConfig,
+    });
+
+    expect(renderer.hitTestEdge(100, 7.9)).toBe(0);
+    expect(renderer.hitTestEdge(100, 8.1)).toBe(-1);
+
+    renderer.setCamera({ zoom: 2 });
+    expect(renderer.hitTestEdge(100, 3.9)).toBe(0);
+    expect(renderer.hitTestEdge(100, 4.1)).toBe(-1);
+  });
+
+  it('uses the true arc path and ignores hidden edges in CPU fallback', () => {
+    const edgeConfig: EdgeConfig = {
+      type: 'arc',
+      style: { lineWidth: 1, hitAreaWidth: 12, curvature: 0.5 },
+    };
+    analyzeEdgeConfig(edgeConfig, theme);
+    renderer.setData({
+      nodes: [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 200, y: 0 },
+      ],
+      edges: [
+        { source: 'a', target: 'b' },
+        { source: 'a', target: 'b', states: ['hidden'] },
+      ],
+      theme,
+      edgeConfig,
+    });
+
+    expect(renderer.hitTestEdge(100, 50)).toBe(0);
+    expect(renderer.hitTestEdge(100, 0)).toBe(-1);
+  });
+
+  it('uses the routed polyline and self-loop paths in CPU fallback', () => {
+    const polylineConfig: EdgeConfig = {
+      type: 'polyline',
+      style: { lineWidth: 1, hitAreaWidth: 12, router: 'orth' },
+    };
+    analyzeEdgeConfig(polylineConfig, theme);
+    renderer.setData({
+      nodes: [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 200, y: 100 },
+      ],
+      edges: [{ source: 'a', target: 'b' }],
+      theme,
+      edgeConfig: polylineConfig,
+      layoutDirection: 'TB',
+    });
+
+    expect(renderer.hitTestEdge(0, 50)).toBe(0);
+    expect(renderer.hitTestEdge(100, 50)).toBe(0);
+    expect(renderer.hitTestEdge(100, 25)).toBe(-1);
+
+    const loopConfig: EdgeConfig = { style: { lineWidth: 1, hitAreaWidth: 12 } };
+    analyzeEdgeConfig(loopConfig, theme);
+    renderer.setData({
+      nodes: [{ id: 'a', x: 100, y: 100 }],
+      edges: [{ source: 'a', target: 'a' }],
+      theme,
+      edgeConfig: loopConfig,
+    });
+    expect(renderer.hitTestEdge(100, 70)).toBe(0);
+    expect(renderer.hitTestEdge(100, 100)).toBe(-1);
+  });
+
+  it('uses the rendered arrow geometry in CPU fallback', () => {
+    const edgeConfig: EdgeConfig = {
+      style: { lineWidth: 1, hitAreaWidth: 16, endArrow: true, arrowSize: 10 },
+    };
+    analyzeEdgeConfig(edgeConfig, theme);
+    renderer.setData({
+      nodes: [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 200, y: 0 },
+      ],
+      edges: [{ source: 'a', target: 'b' }],
+      theme,
+      nodeConfig: { type: 'circle', style: { size: 20 } },
+      edgeConfig,
+    });
+
+    expect(renderer.hitTestEdge(186, 5)).toBe(0);
+    expect(renderer.hitTestEdge(186, 9)).toBe(-1);
   });
 });
 

@@ -3,7 +3,7 @@ import type { DecorationRenderer } from '@src/extensions/contracts.js';
 import { registerDecoration } from '@src/extensions/decoration.js';
 import { registerLabelRenderer } from '@src/extensions/label.js';
 import { registerNode } from '@src/extensions/node.js';
-import { createQuadraticPath } from '@src/renderer/edgePath.js';
+import { createCubicPath, createQuadraticPath } from '@src/renderer/edgePath.js';
 import {
   getBuiltInNodeBoundaryAnchor,
   getCustomNodeLabelAnchor,
@@ -362,6 +362,43 @@ describe('LabelLayerRenderer rendering policies', () => {
       { hideOnCollision: false },
     );
     expect(ctx.fillText).toHaveBeenCalledTimes(2);
+    layer.destroy();
+  });
+
+  it('draws separated self-loop labels that share a collision grid cell', () => {
+    const ctx = makeContext();
+    const layer = createLayer(ctx);
+    const nodes: LayoutNode[] = [{ id: 'node', x: 100, y: 100 }];
+    const edges: GraphEdge[] = Array.from({ length: 3 }, (_, index) => ({
+      id: `loop-${index}`,
+      source: 'node',
+      target: 'node',
+      data: { label: String(index + 1) },
+    }));
+    const edgeConfig: EdgeConfig = {
+      style: {
+        label: (_source, _target, edge) => String(edge.data?.label),
+        labelAutoRotate: false,
+      },
+    };
+    const edgePathCache = new Map(
+      edges.map((_, index) => {
+        const point = { x: 100, y: 50 + index * 16 };
+        return [index, createCubicPath(point, point, point, point)] as const;
+      }),
+    );
+
+    layer.draw(
+      nodes,
+      edges,
+      { x: 0, y: 0, zoom: 1 },
+      undefined,
+      edgeConfig,
+      new Map([['node', 0]]),
+      edgePathCache,
+    );
+
+    expect(vi.mocked(ctx.fillText).mock.calls.map(([text]) => text)).toEqual(['1', '2', '3']);
     layer.destroy();
   });
 });

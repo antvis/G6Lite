@@ -5,18 +5,15 @@
 
 export class LabelGrid {
   private cellSize: number;
-  private cols: number;
-  private occupied: Set<number>;
+  private cells: Map<string, LabelBounds[]>;
 
   constructor(cellSize = 150) {
     this.cellSize = cellSize;
-    this.cols = 0;
-    this.occupied = new Set();
+    this.cells = new Map();
   }
 
-  reset(viewportWidth: number, _viewportHeight: number): void {
-    this.cols = Math.ceil(viewportWidth / this.cellSize) || 1;
-    this.occupied.clear();
+  reset(_viewportWidth: number, _viewportHeight: number): void {
+    this.cells.clear();
   }
 
   hasOverlap(x: number, y: number, w: number, h: number): boolean {
@@ -27,13 +24,18 @@ export class LabelGrid {
     const r1 = Math.floor((y + h) / cs);
     for (let r = r0; r <= r1; r++) {
       for (let c = c0; c <= c1; c++) {
-        if (this.occupied.has(r * this.cols + c)) return true;
+        const bounds = this.cells.get(cellKey(r, c));
+        if (!bounds) continue;
+        for (const candidate of bounds) {
+          if (intersects(x, y, w, h, candidate)) return true;
+        }
       }
     }
     return false;
   }
 
   register(x: number, y: number, w: number, h: number): void {
+    const bounds = { x, y, width: w, height: h };
     const cs = this.cellSize;
     const c0 = Math.floor(x / cs);
     const c1 = Math.floor((x + w) / cs);
@@ -41,8 +43,37 @@ export class LabelGrid {
     const r1 = Math.floor((y + h) / cs);
     for (let r = r0; r <= r1; r++) {
       for (let c = c0; c <= c1; c++) {
-        this.occupied.add(r * this.cols + c);
+        const key = cellKey(r, c);
+        const cell = this.cells.get(key);
+        if (cell) cell.push(bounds);
+        else this.cells.set(key, [bounds]);
       }
     }
   }
+}
+
+interface LabelBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+function cellKey(row: number, column: number): string {
+  return `${row}:${column}`;
+}
+
+function intersects(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  bounds: LabelBounds,
+): boolean {
+  return (
+    x < bounds.x + bounds.width &&
+    x + width > bounds.x &&
+    y < bounds.y + bounds.height &&
+    y + height > bounds.y
+  );
 }

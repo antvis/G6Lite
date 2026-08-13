@@ -50,6 +50,8 @@ import { WebGLContextManager } from './webglContext';
 import type { WebGLContextInfo } from './webglContext';
 
 const HOVER_DIM_STRENGTH = 0.25;
+const SELF_LOOP_BASE_SIZE = 35;
+const SELF_LOOP_LEVEL_GAP = 24;
 
 export type { RendererData } from './renderData';
 
@@ -892,7 +894,7 @@ export class Renderer {
         halfWidths,
         heights,
       );
-      const loopSize = 35 + loopIndex * 15;
+      const loopSize = SELF_LOOP_BASE_SIZE + loopIndex * SELF_LOOP_LEVEL_GAP;
 
       if (edges.length <= this.maxPolylineRoutesCache) {
         const startAngle = angle - spread;

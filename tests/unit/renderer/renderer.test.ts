@@ -311,6 +311,34 @@ describe('Renderer — data pipeline', () => {
     expect(sampleEdgePath(path!, 0.5).point).not.toEqual({ x: 0, y: 0 });
   });
 
+  it('keeps nested self-loop label anchors at least 15px apart at neutral zoom', () => {
+    renderer.setData(
+      rendererData(
+        [{ id: 'a', x: 100, y: 100 }],
+        Array.from({ length: 5 }, (_, index) => ({
+          id: `loop-${index}`,
+          source: 'a',
+          target: 'a',
+        })),
+      ),
+    );
+    renderer.draw();
+
+    const anchors = Array.from({ length: 5 }, (_, index) => {
+      const path = renderer.getEdgePathCache().get(index);
+      expect(path?.type).toBe('cubic');
+      return sampleEdgePath(path!, 0.5).point;
+    });
+
+    for (let index = 1; index < anchors.length; index++) {
+      const distance = Math.hypot(
+        anchors[index].x - anchors[index - 1].x,
+        anchors[index].y - anchors[index - 1].y,
+      );
+      expect(distance).toBeGreaterThanOrEqual(15);
+    }
+  });
+
   it('keeps non-highlighted edges visible with the same dim strength as nodes', () => {
     renderer.setData(
       rendererData(

@@ -14,18 +14,18 @@ export async function run(container: string | HTMLElement) {
         { id: 'five', x: 720, y: 290, data: { label: '5 条自环' } },
       ],
       edges: [
-        { id: 's-1', source: 'single', target: 'single', data: { label: 'S1' } },
+        { id: 's-1', source: 'single', target: 'single', data: { label: '关联' } },
         ...Array.from({ length: 3 }, (_, index) => ({
           id: `t-${index}`,
           source: 'triple',
           target: 'triple',
-          data: { label: `T${index + 1}` },
+          data: { label: `关系 ${index + 1}` },
         })),
         ...Array.from({ length: 5 }, (_, index) => ({
           id: `f-${index}`,
           source: 'five',
           target: 'five',
-          data: { label: `F${index + 1}` },
+          data: { label: `关系 ${index + 1}` },
         })),
       ],
     },
@@ -54,12 +54,13 @@ export async function run(container: string | HTMLElement) {
   const ui = createDemoPanel(
     container,
     '自环边标签',
-    '标签应沿真实自环曲线定位，不能覆盖节点中心。拖动节点后仍应跟随。',
+    '默认碰撞开启时，多条自环标签应全部可见，并沿真实曲线定位。拖动节点后仍应跟随。',
     `${(['start', 'center', 'end'] as EdgeLabelPlacement[])
       .map((value) => `<button data-placement="${value}" style="${buttonStyle}">${value}</button>`)
       .join('')}`,
   );
-  const render = () => ui.setStatus(`labelPlacement: ${placement}\n标签位于自环曲线上且多环分离即 PASS`);
+  const render = () =>
+    ui.setStatus(`labelPlacement: ${placement}\n1 / 3 / 5 条自环标签全部可见且多环分离即 PASS`);
   ui.controls.querySelectorAll<HTMLElement>('[data-placement]').forEach((button) => {
     button.addEventListener('click', () => {
       placement = button.dataset.placement as EdgeLabelPlacement;

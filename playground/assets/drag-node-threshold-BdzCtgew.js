@@ -1,5 +1,0 @@
-import{createDemoPanel as g}from"./demo-panel-CCL1U5IY.js";import{G as l}from"./graph-BS6wuvhY.js";import"./preload-helper-lMf9uHy8.js";async function b(n){const d=new l({autoFitOnResize:!0,container:n,data:{nodes:[{id:"a",x:360,y:250,data:{label:"点击我"}},{id:"b",x:500,y:250,data:{label:"轻移我"}},{id:"c",x:640,y:250,data:{label:"拖动我"}}],edges:[]},node:{style:{size:36,fill:"#1677ff",label:a=>{var s;return String((s=a.data)==null?void 0:s.label)},labelPlacement:"bottom"}},behaviors:["zoom-canvas","drag-canvas","drag-node"]});await d.render();const o=g(n,"节点拖拽阈值","普通点击不应触发拖拽事件；移动超过 3px 后才进入拖拽。",""),r={dragstart:0,drag:0,dragend:0};let e="等待操作";const t=()=>o.setStatus(`dragstart: ${r.dragstart}
-drag: ${r.drag}
-dragend: ${r.dragend}
-最近事件: ${e}
-判定: 单击后 dragend 保持不变即 PASS`);return d.on("node:dragstart",({nodeId:a})=>{r.dragstart++,e=`${a}:dragstart`,t()}),d.on("node:drag",({nodeId:a})=>{r.drag++,e=`${a}:drag`,t()}),d.on("node:dragend",({nodeId:a})=>{r.dragend++,e=`${a}:dragend`,t()}),t(),{destroy:()=>{d.destroy(),o.panel.remove()}}}export{b as run};

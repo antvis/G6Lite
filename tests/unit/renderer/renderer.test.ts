@@ -912,6 +912,26 @@ describe('Renderer — CPU geometry picking (hitTest)', () => {
     expect(renderer.hitTestEdge(100, 70)).toBe(0);
     expect(renderer.hitTestEdge(100, 100)).toBe(-1);
   });
+
+  it('uses the rendered arrow geometry in CPU fallback', () => {
+    const edgeConfig: EdgeConfig = {
+      style: { lineWidth: 1, hitAreaWidth: 16, endArrow: true, arrowSize: 10 },
+    };
+    analyzeEdgeConfig(edgeConfig, theme);
+    renderer.setData({
+      nodes: [
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 200, y: 0 },
+      ],
+      edges: [{ source: 'a', target: 'b' }],
+      theme,
+      nodeConfig: { type: 'circle', style: { size: 20 } },
+      edgeConfig,
+    });
+
+    expect(renderer.hitTestEdge(186, 5)).toBe(0);
+    expect(renderer.hitTestEdge(186, 9)).toBe(-1);
+  });
 });
 
 describe('Renderer — GPU picking decode (pickAt)', () => {

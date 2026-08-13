@@ -30,13 +30,11 @@ void main() {
   srcPx += unitDir * (a_srcRadius * u_scale + a_srcArrowPx);
   tgtPx -= unitDir * (a_tgtRadius * u_scale + a_tgtArrowPx);
   vec2 basePx = mix(srcPx, tgtPx, a_posCoef);
-  vec2 clampedDir = tgtPx - srcPx;
-  float clampedLen = length(clampedDir);
+  float clampedLen = length(tgtPx - srcPx);
   vec2 normal = len > 0.001 ? vec2(-dir.y, dir.x) / len : vec2(0.0, 1.0);
-  float width = u_picking ? max(a_lineWidth, a_hitAreaWidth) : a_lineWidth;
+  float width = max(a_lineWidth, a_hitAreaWidth * float(u_picking));
   vec2 posPx = basePx + normal * width * 0.5 * a_normalCoef;
-  vec2 ndc = vec2(posPx.x * 2.0 / u_resolution.x - 1.0, 1.0 - posPx.y * 2.0 / u_resolution.y);
-  gl_Position = vec4(ndc, 0.0, 1.0);
+  gl_Position = vec4(posPx * vec2(2.0, -2.0) / u_resolution + vec2(-1.0, 1.0), 0.0, 1.0);
   v_color = u_picking ? a_pickingColor : a_color;
   v_edgePos = a_posCoef * clampedLen;
   v_dashCycle = a_dashCycle;

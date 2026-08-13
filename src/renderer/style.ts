@@ -102,12 +102,11 @@ function applyEdgeStateOverrides(
   configStyles: EdgeConfig['stateStyles'],
   extensionStyles: EdgeConfig['stateStyles'],
   themeStyles: ThemeTokens['edgeStateStyles'],
-): boolean {
-  let hitAreaWidthOverridden = false;
-  if (!hasAnyState(states)) return hitAreaWidthOverridden;
+): void {
+  if (!hasAnyState(states)) return;
   if (hasState(states, 'hidden')) {
     style.opacity = 0;
-    return hitAreaWidthOverridden;
+    return;
   }
   for (const state of states) {
     if (state === 'default') continue;
@@ -118,14 +117,10 @@ function applyEdgeStateOverrides(
       style.strokeRGB = undefined;
     }
     if (override.lineWidth !== undefined) style.lineWidth = override.lineWidth;
-    if (override.hitAreaWidth !== undefined) {
-      style.hitAreaWidth = override.hitAreaWidth;
-      hitAreaWidthOverridden = true;
-    }
+    if (override.hitAreaWidth !== undefined) style.hitAreaWidth = override.hitAreaWidth;
     if (override.opacity !== undefined) style.opacity = override.opacity;
     if (override.lineDash !== undefined) style.lineDash = override.lineDash;
   }
-  return hitAreaWidthOverridden;
 }
 
 /** Config analysis result type */
@@ -153,7 +148,6 @@ interface CachedEdgeStyle {
   strokeRGB: [number, number, number]; // Pre-parsed color for zero runtime cost
   lineWidth: number;
   hitAreaWidth: number;
-  configuredHitAreaWidth?: number;
   curvature: number;
   curveOffset: number;
   endArrow: boolean;
@@ -286,9 +280,8 @@ export function analyzeEdgeConfig(config: EdgeConfig | undefined, theme: ThemeTo
 
   // Static config: pre-compute and cache the base style (including pre-parsed colors)
   const lineWidth = (style?.lineWidth as number) ?? theme.edgeLineWidth ?? 1;
-  const hitAreaWidth = style?.hitAreaWidth as number | undefined;
   const normalizedLineWidth = typeof lineWidth === 'number' ? lineWidth : 1;
-  const normalizedHitAreaWidth = normalizeOptionalHitAreaWidth(hitAreaWidth);
+  const hitAreaWidth = style?.hitAreaWidth as number | undefined;
   const strokeValue =
     (style?.stroke as string) ?? theme.edgeStroke ?? theme.edgeDefaultColor ?? '#e2e2e2';
   const userArrowSize = (style?.arrowSize as number) ?? 0;
@@ -297,8 +290,10 @@ export function analyzeEdgeConfig(config: EdgeConfig | undefined, theme: ThemeTo
     stroke: strokeValue,
     strokeRGB: parseColor(strokeValue), // Pre-parse color!
     lineWidth: normalizedLineWidth,
-    hitAreaWidth: Math.max(normalizedLineWidth, normalizedHitAreaWidth ?? normalizedLineWidth),
-    configuredHitAreaWidth: normalizedHitAreaWidth,
+    hitAreaWidth:
+      typeof hitAreaWidth === 'number' && Number.isFinite(hitAreaWidth)
+        ? Math.max(normalizedLineWidth, hitAreaWidth)
+        : normalizedLineWidth,
     curvature: (style?.curvature as number) ?? 0.3,
     curveOffset: (style?.curveOffset as number) ?? 60,
     endArrow: (style?.endArrow as boolean) ?? theme.edgeArrow ?? false,
@@ -448,7 +443,7 @@ export function resolveEdgeStyle(
       stroke: base.stroke,
       strokeRGB: base.strokeRGB,
       lineWidth: base.lineWidth,
-      hitAreaWidth: base.hitAreaWidth,
+      hitAreaWidth: (config?.style as { hitAreaWidth?: number } | undefined)?.hitAreaWidth ?? NaN,
       curvature: base.curvature,
       curveOffset: base.curveOffset,
       endArrow: base.endArrow,
@@ -458,21 +453,14 @@ export function resolveEdgeStyle(
       opacity: base.opacity,
       radius: base.radius,
     };
-    const hitAreaWidthOverridden = applyEdgeStateOverrides(
+    applyEdgeStateOverrides(
       resolved,
       edge.states as StateLike,
       config?.stateStyles,
       undefined,
       theme.edgeStateStyles,
     );
-    const hitAreaWidth = hitAreaWidthOverridden
-      ? resolved.hitAreaWidth
-      : (base.configuredHitAreaWidth ?? resolved.lineWidth);
-    resolved.hitAreaWidth = resolveHitAreaWidth(
-      resolved.lineWidth,
-      hitAreaWidth,
-      base.configuredHitAreaWidth !== undefined || hitAreaWidthOverridden,
-    );
+    resolved.hitAreaWidth = validHitAreaWidth(resolved.hitAreaWidth, resolved.lineWidth);
     if (base.arrowSize <= 0) resolved.arrowSize = getArrowSize(resolved.lineWidth);
     return resolved;
   }
@@ -618,7 +606,7 @@ function resolveEdgeStyleDynamic(
   const resolved: ResolvedEdgeStyle = {
     stroke,
     lineWidth,
-    hitAreaWidth: normalizeOptionalHitAreaWidth(hitAreaWidth) ?? lineWidth,
+    hitAreaWidth: hitAreaWidth ?? NaN,
     curvature: typeof curvature === 'number' ? curvature : 0.3,
     curveOffset: typeof curveOffset === 'number' ? curveOffset : 60,
     endArrow: !!endArrow,
@@ -628,30 +616,20 @@ function resolveEdgeStyleDynamic(
     opacity,
     radius: typeof radius === 'number' ? radius : 0,
   };
-  const hitAreaWidthOverridden = applyEdgeStateOverrides(
+  applyEdgeStateOverrides(
     resolved,
     edge.states as StateLike,
     config?.stateStyles,
     extension?.stateStyles,
     theme.edgeStateStyles,
   );
-  resolved.hitAreaWidth = resolveHitAreaWidth(
-    resolved.lineWidth,
-    resolved.hitAreaWidth,
-    normalizeOptionalHitAreaWidth(hitAreaWidth) !== undefined || hitAreaWidthOverridden,
-  );
+  resolved.hitAreaWidth = validHitAreaWidth(resolved.hitAreaWidth, resolved.lineWidth);
   if (userArrowSize <= 0) resolved.arrowSize = getArrowSize(resolved.lineWidth);
   return resolved;
 }
 
-function normalizeOptionalHitAreaWidth(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : undefined;
-}
-
-function resolveHitAreaWidth(lineWidth: number, hitAreaWidth: number, explicit: boolean): number {
-  if (!explicit) return lineWidth;
-  const normalized = normalizeOptionalHitAreaWidth(hitAreaWidth);
-  return normalized === undefined ? lineWidth : Math.max(lineWidth, normalized);
+function validHitAreaWidth(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(fallback, value) : fallback;
 }
 
 function resolveStyleValue<T>(

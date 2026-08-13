@@ -334,8 +334,8 @@ describe('EdgeRect processEdge buffer encoding', () => {
     expect(a[7]).toBeCloseTo(16); // a_hitAreaWidth
     expect(a[8]).toBeCloseTo(0.4); // a_color
     expect(a[15]).toBeCloseTo(0.8); // a_opacity
-    expect(prog.getVertexShader()).toContain('u_picking ? max(a_lineWidth, a_hitAreaWidth)');
-    expect(prog.getFragmentShader()).toContain('!u_picking && v_dashCycle > 0.0');
+    expect(prog.getVertexShader()).toContain('max(a_lineWidth, a_hitAreaWidth * float(u_picking))');
+    expect(prog.getFragmentShader()).toContain('&& !u_picking) discard');
   });
 
   it('patchEdgeStyle updates every optional rect style attribute', () => {
@@ -413,7 +413,7 @@ describe('EdgeArc processEdge buffer encoding', () => {
 
     // Analytic normals are normalized, so lineWidth is measured in pixels.
     expect(Math.hypot(a[2], a[3])).toBeCloseTo(1);
-    expect(prog.getVertexShader()).toContain('u_picking ? max(a_style.x, a_hitAreaWidth)');
+    expect(prog.getVertexShader()).toContain('max(a_style.x, a_hitAreaWidth * float(u_picking))');
   });
 
   it('accumulates a continuous path distance across segment boundaries', () => {
@@ -575,7 +575,9 @@ describe('EdgeCubic and EdgeArrow picking geometry', () => {
     expect(prog.peek()[7]).toBeCloseTo(1.5);
     expect(prog.peek()[8]).toBeCloseTo(20);
     expect(prog.peek()[9]).toBeCloseTo(8);
-    expect(prog.getVertexShader()).toContain('u_picking ? max(visibleArrowWidth, a_hitAreaWidth)');
+    expect(prog.getVertexShader()).toContain(
+      'max(a_lineWidth + 12.0, a_hitAreaWidth * float(u_picking))',
+    );
   });
 });
 

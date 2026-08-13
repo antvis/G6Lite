@@ -19,9 +19,8 @@ varying float v_opacity;
 varying float v_haloRatio;
 varying float v_aa;
 void main() {
-  vec2 p = (a_position + u_translate) * u_scale;
-  vec2 ndc = vec2(p.x * 2.0 / u_resolution.x - 1.0, 1.0 - p.y * 2.0 / u_resolution.y);
-  gl_Position = vec4(ndc, 0.0, 1.0);
+  vec2 p = (a_position + u_translate) * u_scale / u_resolution;
+  gl_Position = vec4(p * vec2(2.0, -2.0) + vec2(-1.0, 1.0), 0.0, 1.0);
   float totalSize = a_size + a_haloWidth * 2.0;
   float pointSize = totalSize * u_scale;
   gl_PointSize = pointSize * u_pointScale;

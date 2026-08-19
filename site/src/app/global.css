@@ -203,14 +203,6 @@ html > body[data-scroll-locked] {
   text-transform: uppercase;
 }
 
-.landing-version {
-  display: inline-flex;
-  margin-left: 0.55rem;
-  color: var(--color-fd-muted-foreground);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-}
-
 .landing-actions {
   display: flex;
   flex-wrap: wrap;

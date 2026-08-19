@@ -113,6 +113,7 @@ const requiredSiteFiles = [
   'site/src/app/robots.ts',
   'site/src/app/manifest.ts',
   'site/src/app/icon.svg',
+  'site/src/app/(zh)/(home)/page.tsx',
   'site/src/app/en/(home)/page.tsx',
   'site/src/app/en/docs/[[...slug]]/page.tsx',
   'site/src/app/en/og/docs/[...slug]/route.tsx',
@@ -127,6 +128,23 @@ for (const file of requiredSiteFiles) {
 
 for (const removedFile of ['site/src/components/search.tsx', 'site/src/app/api/search/route.ts']) {
   if (existsSync(path.join(root, removedFile))) fail(`Search surface still exists: ${removedFile}`);
+}
+
+const homeRoutes = [
+  ['site/src/app/(zh)/(home)/page.tsx', '<HomePage locale="zh" />'],
+  ['site/src/app/en/(home)/page.tsx', '<HomePage locale="en" />'],
+];
+for (const [file, expectedUsage] of homeRoutes) {
+  const source = read(file);
+  if (!source.includes(expectedUsage)) fail(`Homepage route ${file} does not use ${expectedUsage}`);
+  if (/LegacyHomePage|legacy-home/.test(source)) fail(`Homepage route still uses legacy code: ${file}`);
+}
+
+const homepageSource = read('site/src/components/home-page.tsx');
+for (const staleMetric of ['~0ms', '0.1ms', '5k']) {
+  if (homepageSource.includes(staleMetric)) {
+    fail(`Homepage contains the unsupported historical metric ${staleMetric}`);
+  }
 }
 
 const sitePackage = JSON.parse(read('site/package.json'));

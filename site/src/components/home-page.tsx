@@ -2,7 +2,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { localizedPath, type Locale } from '@/lib/i18n';
-import { siteConfig } from '@/lib/site-config';
 import { withBasePath } from '@/lib/shared';
 import { CodeBlock } from './home-code-block';
 
@@ -36,7 +35,7 @@ const content = {
     values: [
       ['WebGL 批渲染', '节点与边通过 GPU 批量绘制，适合中大规模关系数据。'],
       ['增量交互', '状态、样式与坐标变化按影响范围刷新，避免无意义的全量重绘。'],
-      ['AntV 布局能力', '内置 15+ 布局，覆盖关系网络、层级图、脑图与鱼骨图。'],
+      ['AntV 布局能力', '内置 14 个布局，覆盖关系网络、层级图、脑图与鱼骨图。'],
       ['受控扩展', '通过 register() 与 extensionFactory() 扩展节点、边、行为、布局和插件。'],
     ],
     codeTitle: '一个入口完成数据、布局与交互',
@@ -49,7 +48,7 @@ const content = {
     metricsDescription:
       'Benchmark、包体积和兼容性均提供运行环境与复现命令；首页不展示无法跨机器比较的营销跑分。',
     metrics: [
-      ['15+', '内置布局'],
+      ['14', '内置布局'],
       ['WebGL 1.0', '渲染基线'],
       ['≤ 120 kB', 'Brotli 体积预算'],
       ['ESM + TS', '发布格式'],
@@ -80,7 +79,7 @@ const content = {
       ],
       [
         'AntV layouts',
-        '15+ built-in layouts cover networks, hierarchies, mind maps, and fishbone diagrams.',
+        '14 built-in layouts cover networks, hierarchies, mind maps, and fishbone diagrams.',
       ],
       [
         'Controlled extensions',
@@ -98,7 +97,7 @@ const content = {
     metricsDescription:
       'Benchmarks, bundle size, and compatibility include their environment and reproduction commands. The homepage avoids hardware-dependent marketing scores.',
     metrics: [
-      ['15+', 'built-in layouts'],
+      ['14', 'built-in layouts'],
       ['WebGL 1.0', 'rendering baseline'],
       ['≤ 120 kB', 'Brotli size budget'],
       ['ESM + TS', 'package format'],
@@ -145,7 +144,6 @@ export function HomePage({ locale }: { locale: Locale }) {
         <div className="landing-shell landing-hero-grid">
           <div className="landing-hero-copy">
             <div className="landing-eyebrow">{copy.eyebrow}</div>
-            <div className="landing-version">{siteConfig.version}</div>
             <h1>{copy.title}</h1>
             <p>{copy.description}</p>
             <div className="landing-actions">

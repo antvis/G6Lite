@@ -1,3 +1,158 @@
+# Build G6Lite graphs with AI (/en/docs/ai)
+
+
+
+
+
+<div className="ai-entry-hero not-prose">
+  <span>
+    AI for graph visualization
+  </span>
+
+  <h2>
+    Turn intent into a graph you can verify
+  </h2>
+
+  <div className="ai-entry-description">
+    The G6Lite Skill helps an AI agent identify data scale, layout, interaction, and browser
+    boundaries before it generates an implementation through the current package-root API.
+  </div>
+
+  <div className="ai-entry-actions">
+    <a href="https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph">
+      View the G6Lite Skill
+    </a>
+
+    <a className="is-secondary" href="https://sive.antv.antgroup.com/qa?message=Use%20G6Lite%20to%20create%20a%20relationship%20graph.%20First%20confirm%20the%20data%20scale%2C%20layout%2C%20interactions%2C%20and%20compatibility%20requirements%2C%20then%20provide%20a%20package-root%20API%20example.">
+      Start in Sive
+    </a>
+  </div>
+</div>
+
+## Two ways to use it [#two-ways-to-use-it]
+
+<Cards>
+  <Card title="Local agent + G6Lite Skill" href="https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph">
+    Keep implementation aligned with G6Lite's real API, capability boundary, and performance paths.
+  </Card>
+
+  <Card title="Ask Sive online" href="https://sive.antv.antgroup.com/qa?message=Use%20G6Lite%20to%20create%20a%20relationship%20graph.%20First%20confirm%20the%20data%20scale%2C%20layout%2C%20interactions%2C%20and%20compatibility%20requirements%2C%20then%20provide%20a%20package-root%20API%20example.">
+    Start an online question with G6Lite context. Answers depend on Sive's current knowledge state.
+  </Card>
+
+  <Card title="Understand the architecture" href="/en/docs/concepts/architecture">
+    See how data, layout, scheduling, WebGL rendering, Canvas information layers, and extensions
+    work together.
+  </Card>
+</Cards>
+
+## Use the Skill locally [#use-the-skill-locally]
+
+Provide the GitHub [`skills/antv-g6lite-graph`](https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph)
+directory as a Skill source to a compatible agent, then invoke it explicitly:
+
+```text
+Use $antv-g6lite-graph to build a force-directed dependency graph
+with hover highlighting and node dragging.
+```
+
+You can also ask an agent to install it directly from GitHub:
+
+```text
+Install the skill from
+https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph
+```
+
+The Skill keeps the agent focused on these constraints:
+
+* Import only from the `@antv/g6-lite` package root, never `src/` or `dist/` internals.
+* Use ESM and a real browser lifecycle with DOM, Canvas, and WebGL.
+* Generate only the node, edge, layout, Behavior, Combo, and extension capabilities G6Lite supports.
+* Distinguish G6Lite from G6 v5 instead of copying plugin, event, or element configuration.
+* For large graphs, examine layout, label density, incremental updates, DPR, GPU, and real devices.
+
+## Good agent tasks [#good-agent-tasks]
+
+| Task                        | Include in the prompt                                            |
+| --------------------------- | ---------------------------------------------------------------- |
+| Create a relationship graph | Data fields, node/edge count, layout, container size             |
+| Add interactions            | Selection, drag, tooltip, highlight, brush, or lasso             |
+| Migrate from G6 v5          | List capability differences and unsupported needs before editing |
+| Diagnose a blank canvas     | Container size, endpoints, WebGL, lifecycle, and version         |
+| Optimize a large graph      | First render, layout, labels, state patches, memory, and devices |
+| Create an extension         | Category, lifecycle, public ExtensionContext, and cleanup        |
+
+## Recommended workflow [#recommended-workflow]
+
+<div className="ai-workflow not-prose">
+  <ol>
+    <li>
+      <strong>
+        Clarify input
+      </strong>
+
+      <span>
+        Confirm data, scale, coordinates, layout, interactions, and runtime.
+      </span>
+    </li>
+
+    <li>
+      <strong>
+        Render the minimum
+      </strong>
+
+      <span>
+        Prove a visible, disposable graph through package-root APIs.
+      </span>
+    </li>
+
+    <li>
+      <strong>
+        Add layers
+      </strong>
+
+      <span>
+        Introduce styling, layout, behaviors, states, Combo, and extensions in sequence.
+      </span>
+    </li>
+
+    <li>
+      <strong>
+        Validate for real
+      </strong>
+
+      <span>
+        Check the target browser, DPR, GPU, and container dimensions.
+      </span>
+    </li>
+  </ol>
+</div>
+
+AI-generated code still needs type checking, browser validation, and product-data review. Do not treat agent output as a production result by itself.
+
+## The engine an agent should understand [#the-engine-an-agent-should-understand]
+
+<ArchitectureDiagram locale="en" />
+
+The diagram shows stable responsibilities only. See [Technical architecture](/en/docs/concepts/architecture) for data flow, update paths, and extension boundaries.
+
+## Continue learning [#continue-learning]
+
+<Cards>
+  <Card title="Install and render a graph" href="/en/docs/getting-started/quick-start" />
+
+  <Card title="Technical architecture" href="/en/docs/concepts/architecture" />
+
+  <Card title="Examples" href="/en/docs/examples" />
+
+  <Card title="API reference" href="/en/docs/api" />
+
+  <Card title="Performance tuning" href="/en/docs/metrics/performance-tuning" />
+
+  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
+</Cards>
+
+
 # Changelog (/en/docs/changelog)
 
 
@@ -53,6 +208,8 @@ G6Lite is a lightweight WebGL graph visualization engine for large relationship 
 <Cards>
   <Card title="Install and render your first graph" href="/en/docs/getting-started/quick-start" />
 
+  <Card title="Build G6Lite graphs with AI" href="/en/docs/ai" />
+
   <Card title="Use G6Lite with React" href="/en/docs/getting-started/react" />
 
   <Card title="Browse examples" href="/en/docs/examples" />
@@ -64,6 +221,8 @@ G6Lite is a lightweight WebGL graph visualization engine for large relationship 
 
 <Cards>
   <Card title="Core concepts" href="/en/docs/concepts/overview" />
+
+  <Card title="Technical architecture" href="/en/docs/concepts/architecture" />
 
   <Card title="Configuration" href="/en/docs/guides/data" />
 
@@ -102,6 +261,118 @@ import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-l
 Package-root types cover graph options and data, nodes, edges, combos, labels, states, themes, layouts, viewport operations, behaviors, transforms, plugins, and extension context.
 
 The Chinese API page is generated from `src/index.ts` by TypeDoc and contains complete signatures. Identifiers and signatures are language-neutral; use the source links on each generated item when you need implementation context. Public stability rules are documented in [API stability](/en/docs/compatibility/api-stability).
+
+
+# Technical architecture (/en/docs/concepts/architecture)
+
+
+
+
+
+G6Lite does not try to cover every shape and runtime. Its architecture combines a controlled public API, efficient graph-data paths, and specialized WebGL programs for large relationship graphs and frequent analytical interaction in modern browsers.
+
+<ArchitectureDiagram locale="en" />
+
+## Design boundary [#design-boundary]
+
+* `Graph` is the application entry point for data, layout, rendering, interaction, and lifecycle.
+* The package root exposes stable types and extension contracts; DataModel, Renderer, Picking, and GPU buffers remain internal.
+* Nodes and edges use batched WebGL drawing. Labels and icons use a Canvas 2D overlay, while Combo boundaries use a Canvas 2D underlay.
+* Layouts are lazy-loaded from `@antv/layout` and can run in a Worker when configured.
+* G6Lite keeps graph-specific programs, batches, picking, and incremental updates instead of adopting a complete scene-graph engine.
+
+## First-render data flow [#first-render-data-flow]
+
+After `await graph.render()`, the runtime works in this order:
+
+1. Create the current render generation, run registered transforms, and resolve the theme and container dimensions.
+2. Lazy-load the selected layout and optionally calculate node positions in a Worker.
+3. Create the DataModel and write nodes, edges, Combo, states, and positioned coordinates.
+4. Convert nodes and edges into the contiguous typed arrays and GPU buffers required by renderer programs.
+5. Mount InteractionDispatcher, Behaviors, LabelLayerRenderer, and ComboRenderer.
+6. Update the camera through `fitView()`, then draw the Canvas 2D Combo underlay.
+7. Draw nodes and edges in the WebGL normal pass, maintain the picking pass when needed, and draw the Canvas 2D label overlay.
+8. Emit `afterrender` after the first frame, then mount ResizeObserver and Plugins.
+
+After asynchronous layouts, extension initialization, or browser yields, Graph checks the active generation and destroyed state again so stale results cannot replace newer data.
+
+## Frequent-update paths [#frequent-update-paths]
+
+State, position, and data changes do not all rebuild the graph. RenderScheduler selects a path based on the change level:
+
+| Change                                | Main path                                                                  |
+| ------------------------------------- | -------------------------------------------------------------------------- |
+| selected / highlight / inactive       | Resolve state and patch the affected GPU ranges                            |
+| Batched node positions                | Update adjacency data, upload affected buffer ranges, redraw Canvas layers |
+| Label or Combo information            | Redraw the corresponding Canvas 2D information layer                       |
+| Camera pan and zoom                   | Update uniforms and draw without rebuilding graph-data buffers             |
+| Full replacement or structural change | Rebuild DataModel and the affected render batches                          |
+
+Frequent selection, highlighting, and drag interactions should use state, position, and batch APIs instead of repeatedly creating a new Graph.
+
+## Why WebGL and Canvas 2D coexist [#why-webgl-and-canvas-2d-coexist]
+
+WebGL is effective for batched homogeneous nodes and edges, GPU picking, and partial buffer updates. Text layout, icons, label collision, and Combo boundaries fit Canvas 2D better because measurements stay direct and the information layer does not need to move entirely into shaders.
+
+These layers share the camera, dimensions, DPR, and scheduling signals. The Combo underlay sits below the primary WebGL canvas, while the label and icon overlay sits above it. They are not separate Graph instances.
+
+## Layout and Worker boundary [#layout-and-worker-boundary]
+
+Layout is not a Renderer responsibility. Graph invokes the layout layer and passes positioned data to DataModel and Renderer:
+
+```text
+GraphData → Layout → positioned nodes → DataModel → Renderer
+```
+
+Official layouts are dynamically loaded by `layout.type`. `worker: true` can reduce main-thread blocking, but it does not remove algorithm cost; iteration limits, cancellation, and real data scale still need validation.
+
+When coordinates already exist, omit layout and provide node `x` / `y` values directly.
+
+## Interaction and picking [#interaction-and-picking]
+
+InteractionDispatcher centralizes pointer events and hit detection before it distributes normalized events to Behaviors:
+
+```text
+native event → GPU/CPU pick → graph event → Behavior → public state/data API
+```
+
+Nodes and edges prefer GPU Picking with a controlled CPU fallback. Combo is drawn in the Canvas 2D underlay and uses its own geometric hit path. A Behavior should not access framebuffers or reimplement picking.
+
+## Extension boundary [#extension-boundary]
+
+G6Lite supports eight extension categories: node, edge, label, decoration, layout, behavior, transform, and plugin. Prefer the factory pattern:
+
+```ts
+register(
+  'behavior',
+  name,
+  extensionFactory(() => ({
+    init(context, options) {},
+    getEvents() {
+      return {};
+    },
+    destroy() {},
+  })),
+);
+```
+
+Extensions work through controlled data, state, viewport, and `requestRender()` capabilities, reading snapshots and updating data through public methods. New extensions should not hold DataModel, Renderer, WebGL contexts, or GPU buffers directly.
+
+## Browser platform and fallback [#browser-platform-and-fallback]
+
+* Prefer a WebGL2 context and fall back to WebGL1 when required.
+* Fall back to CPU hit detection when the picking framebuffer is incomplete or unavailable.
+* Keep labels and Combo on Canvas 2D paths.
+* Handle WebGL context loss/restoration, ResizeObserver, Worker cancellation, and Graph destruction through explicit lifecycles.
+* The package is ESM-only and requires real DOM, Canvas, and WebGL; it does not support server-side graph rendering.
+
+See [Browsers and runtime](/en/docs/compatibility/browser) and [API stability](/en/docs/compatibility/api-stability) for the complete boundary.
+
+## Constraints for AI agents [#constraints-for-ai-agents]
+
+AI-generated G6Lite code should depend only on the public API layer at the top of the diagram. Internal layers explain performance and troubleshooting, but they are not business imports.
+
+Use [`$antv-g6lite-graph`](/en/docs/ai) to make an agent check package-root imports, runtime constraints, supported capabilities, and real validation before it generates code.
 
 
 # Data model (/en/docs/concepts/data-model)
@@ -196,6 +467,24 @@ G6Lite is a lightweight WebGL graph visualization engine. It keeps the familiar 
 * SVG/DOM-level customization or server-side image rendering.
 
 G6 v5 is the broader general-purpose framework. G6Lite is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
+
+## Core components [#core-components]
+
+* `Graph` coordinates the container, layout, rendering, interactions, and lifecycle.
+* `DataModel` owns nodes, edges, Combo, states, and incremental changes.
+* `Renderer` draws nodes, edges, and the picking buffer through WebGL.
+* `LabelLayerRenderer` and `ComboRenderer` draw the Canvas 2D label overlay and Combo underlay.
+* `RenderScheduler` selects complete redraws or smaller patches based on the change level.
+* `InteractionDispatcher` centralizes picking and element-event delivery.
+
+See [Technical architecture](/en/docs/concepts/architecture) for the complete layers, first-render flow, and frequent-update paths.
+
+## Next steps [#next-steps]
+
+* [Technical architecture](/en/docs/concepts/architecture)
+* [Graph lifecycle](/en/docs/concepts/graph-lifecycle)
+* [Data model](/en/docs/concepts/data-model)
+* [Install and render your first graph](/en/docs/getting-started/quick-start)
 
 
 # Minimal graph (/en/docs/examples/basic)

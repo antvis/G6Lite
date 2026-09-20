@@ -1,11 +1,13 @@
 # 文档
 
 - [概览](/docs): G6Lite — 基于 WebGL 的高性能图可视化与分析引擎
+- [用 AI 构建 G6Lite 图](/docs/ai): 使用 G6Lite Skill、本地 AI Agent 与 Sive 创建、排查和优化关系图
 - 快速开始
   - [安装与第一个图](/docs/getting-started/quick-start): 安装 G6Lite，准备容器，并渲染第一个可交互图
   - [在 React 中使用](/docs/getting-started/react): 用 useRef 和 useEffect 在 React 组件中挂载 G6Lite
 - 核心概念
   - [G6Lite 是什么](/docs/concepts/overview): G6Lite 的定位、适用场景和与 G6 v5 的关系
+  - [技术架构](/docs/concepts/architecture): G6Lite 的公开 API、数据运行时、布局、交互、WebGL 渲染与浏览器平台分层
   - [Graph 生命周期](/docs/concepts/graph-lifecycle): 从创建 Graph 到 render、更新、重新布局和销毁
   - [数据模型](/docs/concepts/data-model): GraphData、节点、边、Combo、业务字段和状态的组织方式
 - 配置指南
@@ -59,11 +61,13 @@
 # Documentation
 
 - [Overview](/en/docs): G6Lite documentation for getting started, configuration, API, examples, metrics, and compatibility
+- [Build G6Lite graphs with AI](/en/docs/ai): Use the G6Lite Skill, local AI agents, and Sive to create, troubleshoot, and optimize graph visualizations
 - Quick start
   - [Install and render your first graph](/en/docs/getting-started/quick-start): Install G6Lite, prepare a sized container, and render an interactive graph
   - [Use G6Lite with React](/en/docs/getting-started/react): Mount and clean up a Graph instance with useRef and useEffect
 - Core concepts
   - [What is G6Lite?](/en/docs/concepts/overview): Positioning, suitable workloads, and the relationship between G6Lite and G6 v5
+  - [Technical architecture](/en/docs/concepts/architecture): Layers for G6Lite public APIs, graph runtime, layouts, interactions, WebGL rendering, and the browser platform
   - [Graph lifecycle](/en/docs/concepts/graph-lifecycle): Create, render, update, relayout, and destroy a G6Lite Graph instance
   - [Data model](/en/docs/concepts/data-model): Organize nodes, edges, combos, business fields, coordinates, and runtime states
 - Configuration

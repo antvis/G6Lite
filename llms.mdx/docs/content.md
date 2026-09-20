@@ -9,6 +9,8 @@ G6Lite 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL �
 <Cards>
   <Card title="安装与第一个图" href="/docs/getting-started/quick-start" />
 
+  <Card title="用 AI 构建 G6Lite 图" href="/docs/ai" />
+
   <Card title="在 React 中使用" href="/docs/getting-started/react" />
 
   <Card title="示例总览" href="/docs/examples" />
@@ -20,6 +22,8 @@ G6Lite 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL �
 
 <Cards>
   <Card title="理解 G6Lite" href="/docs/concepts/overview" />
+
+  <Card title="技术架构" href="/docs/concepts/architecture" />
 
   <Card title="配置数据" href="/docs/guides/data" />
 

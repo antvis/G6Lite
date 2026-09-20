@@ -17,6 +17,30 @@
 <priority>0.9</priority>
 </url>
 <url>
+<loc>https://g6-gl.antv.vision/ai</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/ai" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/ai" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/ai" />
+<changefreq>weekly</changefreq>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/en/ai</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/ai" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/ai" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/ai" />
+<changefreq>weekly</changefreq>
+<priority>0.85</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/docs/ai</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/ai" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/ai" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/ai" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
 <loc>https://g6-gl.antv.vision/docs/changelog</loc>
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/changelog" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/changelog" />
@@ -45,6 +69,14 @@
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/api" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/api" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/api" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/docs/concepts/architecture</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/concepts/architecture" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/concepts/architecture" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/concepts/architecture" />
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
 </url>
@@ -401,6 +433,14 @@
 <priority>0.7</priority>
 </url>
 <url>
+<loc>https://g6-gl.antv.vision/en/docs/ai</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/ai" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/ai" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/ai" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
 <loc>https://g6-gl.antv.vision/en/docs/changelog</loc>
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/changelog" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/changelog" />
@@ -429,6 +469,14 @@
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/api" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/api" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/api" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6-gl.antv.vision/en/docs/concepts/architecture</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6-gl.antv.vision/docs/concepts/architecture" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6-gl.antv.vision/en/docs/concepts/architecture" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6-gl.antv.vision/docs/concepts/architecture" />
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
 </url>

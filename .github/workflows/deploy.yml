@@ -27,7 +27,7 @@ jobs:
         run: npm --prefix site install --no-package-lock --no-audit --no-fund
 
       - name: Build site
-        run: npm run site:build
+        run: npm run site
 
       - name: Create CNAME
         run: echo "g6-gl.antv.vision" > site/out/CNAME

@@ -1,0 +1,4 @@
+interface:
+  display_name: 'AntV G6Lite Graph'
+  short_description: 'Create and troubleshoot high-performance G6Lite graphs'
+  default_prompt: 'Use $antv-g6lite-graph to build a production-ready relationship graph with G6Lite.'

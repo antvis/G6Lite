@@ -248,9 +248,12 @@ for (const file of htmlFiles) {
   }
 
   const jsonLdTypes = getJsonLdTypes(html, relative);
-  const requiredTypes = route === '/' || route === '/en'
-    ? ['WebSite', 'SoftwareApplication']
-    : ['TechArticle', 'BreadcrumbList'];
+  const requiredTypes =
+    route === '/' || route === '/en'
+      ? ['WebSite', 'SoftwareApplication']
+      : route === '/ai' || route === '/en/ai'
+        ? ['WebApplication']
+        : ['TechArticle', 'BreadcrumbList'];
   for (const type of requiredTypes) {
     if (!jsonLdTypes.has(type)) fail(`${relative} JSON-LD is missing ${type}`);
   }

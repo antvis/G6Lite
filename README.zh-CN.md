@@ -96,7 +96,7 @@ npm install
 npm run dev
 ```
 
-使用 `npm run ci` 执行项目验证流水线，使用 `npm run site:build` 构建文档站点。
+使用 `npm run ci` 执行项目验证流水线，使用 `npm run site` 构建文档站点。
 
 ## 贡献
 

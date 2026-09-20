@@ -61,6 +61,7 @@ npm run ci   # lint + typecheck + test + library build + size limit
 | `npm run test` | Vitest; append `-- --watch` or `-- --coverage` as needed |
 | `npm run benchmark` | Performance suites under `tests/perf/` |
 | `npm run ci` | Run the core library checks used by CI |
+| `npm run site` | Generate API docs and build the documentation site |
 
 ## Workflow
 

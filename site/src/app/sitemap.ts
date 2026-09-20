@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-import { localizedDocsPath } from '@/lib/i18n';
+import { localizedDocsPath, localizedPath } from '@/lib/i18n';
 import { absoluteSiteUrl } from '@/lib/seo';
 import { source } from '@/lib/source';
 
@@ -11,6 +11,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'zh-CN': absoluteSiteUrl('/'),
     en: absoluteSiteUrl('/en'),
     'x-default': absoluteSiteUrl('/'),
+  };
+  const aiLanguages = {
+    'zh-CN': absoluteSiteUrl(localizedPath('/ai', 'zh')),
+    en: absoluteSiteUrl(localizedPath('/ai', 'en')),
+    'x-default': absoluteSiteUrl(localizedPath('/ai', 'zh')),
   };
   const pages = ['zh', 'en'].flatMap((locale) =>
     source.getPages(locale).map((page) => {
@@ -45,6 +50,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.9,
       alternates: { languages: homeLanguages },
+    },
+    {
+      url: absoluteSiteUrl('/ai'),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+      alternates: { languages: aiLanguages },
+    },
+    {
+      url: absoluteSiteUrl('/en/ai'),
+      changeFrequency: 'weekly',
+      priority: 0.85,
+      alternates: { languages: aiLanguages },
     },
     ...pages,
   ];

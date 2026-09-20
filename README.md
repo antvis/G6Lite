@@ -96,7 +96,7 @@ npm install
 npm run dev
 ```
 
-Run the project verification pipeline with `npm run ci`, and build the documentation site with `npm run site:build`.
+Run the project verification pipeline with `npm run ci`, and build the documentation site with `npm run site`.
 
 ## Contributing
 

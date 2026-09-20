@@ -1,4 +1,4 @@
 {
   "title": "核心概念",
-  "pages": ["overview", "graph-lifecycle", "data-model"]
+  "pages": ["overview", "architecture", "graph-lifecycle", "data-model"]
 }

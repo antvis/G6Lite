@@ -81,9 +81,9 @@ npm run typecheck
 npm test -- --coverage
 npm run build
 npm run size
-npm run examples:check -- --profile release
+node scripts/check-examples.mjs --profile release
 npm run benchmark -- --suite all --mode quick
-npm run site:build
+npm run site
 ```
 
 ## Contributing

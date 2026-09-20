@@ -35,8 +35,8 @@ http://localhost:5173/#fishbone
 4. 运行：
 
 ```bash
-npm run build:playground
-npm run examples:check -- --profile smoke
+npx vite build
+node scripts/check-examples.mjs --profile smoke
 ```
 
 Registry 使用 `import.meta.glob` 按需加载模块和 raw source，无需再增加手工 import。

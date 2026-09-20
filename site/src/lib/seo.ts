@@ -25,6 +25,12 @@ type DocsStructuredDataOptions = {
   image: string;
 };
 
+type AiWorkspaceStructuredDataOptions = {
+  locale: Locale;
+  path: string;
+  description: string;
+};
+
 const localeTags: Record<Locale, { html: string; openGraph: string }> = {
   zh: { html: 'zh-CN', openGraph: 'zh_CN' },
   en: { html: 'en', openGraph: 'en_US' },
@@ -119,6 +125,32 @@ export function createHomeStructuredData(locale: Locale): JsonLd {
         isPartOf: { '@id': websiteId },
       },
     ],
+  };
+}
+
+export function createAiWorkspaceStructuredData({
+  locale,
+  path,
+  description,
+}: AiWorkspaceStructuredDataOptions): JsonLd {
+  const url = absoluteSiteUrl(path);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: locale === 'zh' ? 'G6Lite AI 关系图工作台' : 'G6Lite AI graph workspace',
+    description,
+    url,
+    inLanguage: localeTags[locale].html,
+    applicationCategory: 'DeveloperApplication',
+    browserRequirements: 'Requires JavaScript',
+    operatingSystem: 'Any',
+    isAccessibleForFree: true,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
   };
 }
 

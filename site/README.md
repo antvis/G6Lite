@@ -18,7 +18,7 @@ From the repository root:
 ```bash
 npm install
 npm --prefix site install
-npm run site:dev
+npm --prefix site run dev
 ```
 
 Open `http://localhost:3000`.
@@ -27,11 +27,11 @@ Open `http://localhost:3000`.
 
 ```bash
 npm --prefix site run types:check
-npm run examples:check -- --profile release
-npm run site:build
+node scripts/check-examples.mjs --profile release
+npm run site
 ```
 
-`npm run site:build` regenerates TypeDoc, builds the Playground, statically exports the site to `site/out`, and copies the Playground to `site/out/playground`.
+`npm run site` regenerates TypeDoc from `site/typedoc.json`, builds the Playground, statically exports the site to `site/out`, and copies the Playground to `site/out/playground`.
 
 Use `NEXT_PUBLIC_SITE_URL` when validating a non-production canonical origin. Use `NEXT_PUBLIC_BASE_PATH` only for a deployment that actually serves the site under a subpath.
 

@@ -27,7 +27,7 @@ jobs:
         run: npm install --no-package-lock --no-audit --no-fund
 
       - name: Build playground
-        run: npm run build:playground
+        run: npx vite build
 
       - uses: afc163/surge-preview@v1
         with:

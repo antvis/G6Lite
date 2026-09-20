@@ -75,10 +75,10 @@ jobs:
         run: npm run size
 
       - name: Build playground
-        run: npm run build:playground
+        run: npx vite build
 
       - name: Check playground examples
-        run: npm run examples:check -- --profile smoke --screenshots-dir performance/examples-smoke
+        run: node scripts/check-examples.mjs --profile smoke --screenshots-dir performance/examples-smoke
 
       - name: Upload example screenshots
         if: always()
@@ -90,4 +90,4 @@ jobs:
           retention-days: 14
 
       - name: Build documentation site
-        run: npm run site:build
+        run: npm run site

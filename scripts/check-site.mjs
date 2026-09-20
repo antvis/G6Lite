@@ -114,7 +114,9 @@ const requiredSiteFiles = [
   'site/src/app/manifest.ts',
   'site/src/app/icon.svg',
   'site/src/app/(zh)/(home)/page.tsx',
+  'site/src/app/(zh)/(home)/ai/page.tsx',
   'site/src/app/en/(home)/page.tsx',
+  'site/src/app/en/(home)/ai/page.tsx',
   'site/src/app/en/docs/[[...slug]]/page.tsx',
   'site/src/app/en/og/docs/[...slug]/route.tsx',
   'site/src/app/en/llms.mdx/docs/[[...slug]]/route.ts',
@@ -137,7 +139,8 @@ const homeRoutes = [
 for (const [file, expectedUsage] of homeRoutes) {
   const source = read(file);
   if (!source.includes(expectedUsage)) fail(`Homepage route ${file} does not use ${expectedUsage}`);
-  if (/LegacyHomePage|legacy-home/.test(source)) fail(`Homepage route still uses legacy code: ${file}`);
+  if (/LegacyHomePage|legacy-home/.test(source))
+    fail(`Homepage route still uses legacy code: ${file}`);
 }
 
 const homepageSource = read('site/src/components/home-page.tsx');
@@ -156,9 +159,11 @@ for (const dependency of ['@orama/orama', 'flexsearch']) {
 const catalog = JSON.parse(read('playground/demos/catalog.json'));
 const exampleRuntimeSource = read('site/src/lib/example-runtime.ts');
 const runtimeLoaderById = new Map(
-  [...exampleRuntimeSource.matchAll(
-    /^\s*(?:'([^']+)'|([a-z0-9]+(?:-[a-z0-9]+)*)):\s*\(\)\s*=>\s*import\('([^']+)'\),?$/gm,
-  )].map((match) => [match[1] ?? match[2], match[3]]),
+  [
+    ...exampleRuntimeSource.matchAll(
+      /^\s*(?:'([^']+)'|([a-z0-9]+(?:-[a-z0-9]+)*)):\s*\(\)\s*=>\s*import\('([^']+)'\),?$/gm,
+    ),
+  ].map((match) => [match[1] ?? match[2], match[3]]),
 );
 const docsGroups = new Set([
   'getting-started',
@@ -222,6 +227,144 @@ const snippets = snippetFiles.map((file) => [file, extractMinimalExample(file)])
 const canonicalSnippet = snippets[0][1];
 for (const [file, snippet] of snippets.slice(1)) {
   if (snippet !== canonicalSnippet) fail(`Minimal Graph example differs in ${file}`);
+}
+
+const aiArchitectureFiles = [
+  'site/src/app/(zh)/(home)/ai/page.tsx',
+  'site/src/app/en/(home)/ai/page.tsx',
+  'site/src/components/ai-workspace.tsx',
+  'site/src/components/ai-native-graph.tsx',
+  'site/src/components/ai-workspace.module.css',
+  'site/src/lib/ai-workspace-mock.ts',
+  'site/content/docs/zh/ai.mdx',
+  'site/content/docs/en/ai.mdx',
+  'site/content/docs/zh/concepts/architecture.mdx',
+  'site/content/docs/en/concepts/architecture.mdx',
+  'site/src/components/architecture-diagram.tsx',
+  'skills/antv-g6lite-graph/SKILL.md',
+  'skills/antv-g6lite-graph/agents/openai.yaml',
+];
+for (const file of aiArchitectureFiles) {
+  if (!existsSync(path.join(root, file))) fail(`Missing AI or architecture artifact: ${file}`);
+}
+
+for (const locale of ['zh', 'en']) {
+  const rootMetaPath = `site/content/docs/${locale}/meta.json`;
+  const rootMeta = JSON.parse(read(rootMetaPath));
+  if (!rootMeta.pages?.includes('ai')) fail(`${rootMetaPath} does not expose the AI page`);
+
+  const conceptsMetaPath = `site/content/docs/${locale}/concepts/meta.json`;
+  const conceptsMeta = JSON.parse(read(conceptsMetaPath));
+  if (!conceptsMeta.pages?.includes('architecture')) {
+    fail(`${conceptsMetaPath} does not expose the architecture page`);
+  }
+
+  const routePrefix = locale === 'en' ? '/en' : '';
+  const indexPath = `site/content/docs/${locale}/index.mdx`;
+  const indexSource = read(indexPath);
+  for (const route of [`${routePrefix}/docs/ai`, `${routePrefix}/docs/concepts/architecture`]) {
+    if (!indexSource.includes(route)) fail(`${indexPath} does not link to ${route}`);
+  }
+
+  const aiPath = `site/content/docs/${locale}/ai.mdx`;
+  if (existsSync(path.join(root, aiPath))) {
+    const aiSource = read(aiPath);
+    for (const requiredReference of [
+      'https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph',
+      'https://sive.antv.antgroup.com/qa?message=',
+      '<ArchitectureDiagram',
+    ]) {
+      if (!aiSource.includes(requiredReference)) {
+        fail(`${aiPath} does not include ${requiredReference}`);
+      }
+    }
+  }
+
+  const architecturePath = `site/content/docs/${locale}/concepts/architecture.mdx`;
+  if (
+    existsSync(path.join(root, architecturePath)) &&
+    !read(architecturePath).includes(`<ArchitectureDiagram locale="${locale}" />`)
+  ) {
+    fail(`${architecturePath} does not render the shared ArchitectureDiagram`);
+  }
+}
+
+const layoutSource = read('site/src/lib/layout.shared.tsx');
+if (!layoutSource.includes("localizedPath('/ai', locale)")) {
+  fail('The shared top navigation does not include the localized AI route');
+}
+if (layoutSource.includes("{ text: text.ai, url: localizedPath('/docs/ai', locale) }")) {
+  fail('The shared top navigation still points AI to the documentation page');
+}
+
+const aiWorkspaceSource = read('site/src/components/ai-workspace.tsx');
+const aiMockSource = read('site/src/lib/ai-workspace-mock.ts');
+const aiNativeGraphSource = read('site/src/components/ai-native-graph.tsx');
+for (const requiredSignal of [
+  'In-site prototype · Mock',
+  'G6Lite 原生 AI 画布',
+  '<AiNativeGraph',
+  'needsMockPromptClarification',
+  'serializeMockGraph(result.graph)',
+  'buildMockCode(result.graph)',
+]) {
+  if (!aiWorkspaceSource.includes(requiredSignal)) {
+    fail(`The AI workspace does not include ${requiredSignal}`);
+  }
+}
+for (const requiredNativeSignal of [
+  "import('../../../src/index.ts')",
+  'new GraphConstructor',
+  'await instance.render()',
+  'await instance.setData',
+  'instance.fitView',
+  'instance?.destroy()',
+  "mount.dataset.graphEngine = 'g6lite'",
+]) {
+  if (!aiNativeGraphSource.includes(requiredNativeSignal)) {
+    fail(`The native AI graph does not include ${requiredNativeSignal}`);
+  }
+}
+if (existsSync(path.join(root, 'site/src/components/ai-graph-preview.tsx'))) {
+  fail('The legacy SVG AI graph preview still exists');
+}
+for (const forbiddenIntegration of [
+  'sive.antv.antgroup.com',
+  '/api/chat/',
+  'OPENROUTER_API_KEY',
+  '<iframe',
+]) {
+  if (
+    aiWorkspaceSource.includes(forbiddenIntegration) ||
+    aiMockSource.includes(forbiddenIntegration) ||
+    aiNativeGraphSource.includes(forbiddenIntegration)
+  ) {
+    fail(`The in-site AI prototype contains forbidden integration ${forbiddenIntegration}`);
+  }
+}
+
+const sitemapSource = read('site/src/app/sitemap.ts');
+for (const route of ["absoluteSiteUrl('/ai')", "absoluteSiteUrl('/en/ai')"]) {
+  if (!sitemapSource.includes(route)) fail(`The sitemap does not include ${route}`);
+}
+
+const skillPath = 'skills/antv-g6lite-graph/SKILL.md';
+if (existsSync(path.join(root, skillPath))) {
+  const skillSource = read(skillPath);
+  if (!/^name: antv-g6lite-graph$/m.test(skillSource)) {
+    fail(`${skillPath} has an unexpected Skill name`);
+  }
+  if (!skillSource.includes('@antv/g6-lite')) {
+    fail(`${skillPath} does not identify the @antv/g6-lite package`);
+  }
+  const deepImports = [
+    ...skillSource.matchAll(
+      /(?:from\s+|import\s*\(|require\s*\()(['"])(@antv\/g6-lite\/(?:src|dist)\/[^'"]+)\1/g,
+    ),
+  ];
+  if (deepImports.length > 0) {
+    fail(`${skillPath} contains a deep package import: ${deepImports[0][2]}`);
+  }
 }
 
 if (failures.length > 0) {

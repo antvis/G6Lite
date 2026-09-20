@@ -1,8 +1,8 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["src/index.ts"],
-  "tsconfig": "tsconfig.json",
-  "out": "site/content/docs/zh/api",
+  "entryPoints": ["../src/index.ts"],
+  "tsconfig": "../tsconfig.json",
+  "out": "content/docs/zh/api",
   "cleanOutputDir": false,
   "plugin": ["typedoc-plugin-markdown", "typedoc-plugin-frontmatter"],
   "readme": "none",

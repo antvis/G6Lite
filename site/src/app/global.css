@@ -2465,3 +2465,410 @@ body.example-preview-expanded {
     transform: none;
   }
 }
+
+.ai-entry-hero {
+  position: relative;
+  overflow: hidden;
+  margin-block: 2rem 2.5rem;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 8% 8%, var(--brand-accent-soft), transparent 22rem),
+    radial-gradient(circle at 92% 16%, rgba(103, 92, 245, 0.14), transparent 24rem),
+    var(--color-fd-card);
+  padding: clamp(1.5rem, 4vw, 3rem);
+  box-shadow: var(--landing-shadow);
+}
+
+.ai-entry-hero::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--color-fd-border) 55%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-fd-border) 55%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 42px 42px;
+  content: '';
+  mask-image: linear-gradient(120deg, rgba(0, 0, 0, 0.4), transparent 72%);
+  opacity: 0.35;
+}
+
+.ai-entry-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ai-entry-hero > span {
+  display: inline-flex;
+  border: 1px solid color-mix(in srgb, var(--brand-accent) 34%, var(--color-fd-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-accent) 8%, var(--color-fd-background));
+  padding: 0.4rem 0.68rem;
+  color: var(--brand-accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ai-entry-hero h2 {
+  max-width: 44rem;
+  margin-top: 1.1rem;
+  color: var(--color-fd-foreground);
+  font-size: clamp(2rem, 4.8vw, 3.6rem);
+  font-weight: 760;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.ai-entry-description {
+  max-width: 45rem;
+  margin-top: 1.2rem;
+  color: var(--color-fd-muted-foreground);
+  font-size: 1.02rem;
+  line-height: 1.8;
+}
+
+.ai-entry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.6rem;
+}
+
+.ai-entry-actions a {
+  display: inline-flex;
+  min-height: 2.7rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--brand-gradient);
+  padding-inline: 1rem;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 750;
+  text-decoration: none;
+  box-shadow: 0 14px 30px -20px rgba(103, 92, 245, 0.85);
+}
+
+.ai-entry-actions a:hover {
+  color: #ffffff;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.ai-entry-actions a.is-secondary {
+  border-color: var(--color-fd-border);
+  background: color-mix(in srgb, var(--color-fd-background) 82%, transparent);
+  color: var(--color-fd-foreground);
+  box-shadow: none;
+}
+
+.ai-entry-actions a.is-secondary:hover {
+  border-color: color-mix(in srgb, var(--brand-violet) 44%, var(--color-fd-border));
+  background: color-mix(in srgb, var(--brand-violet) 9%, var(--color-fd-background));
+  color: var(--color-fd-foreground);
+}
+
+.ai-workflow {
+  margin-block: 1.5rem 2rem;
+}
+
+.ai-workflow ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: ai-workflow;
+}
+
+.ai-workflow li {
+  min-width: 0;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.9rem;
+  background: var(--color-fd-card);
+  padding: 1rem;
+  counter-increment: ai-workflow;
+}
+
+.ai-workflow li::before {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  margin-bottom: 0.7rem;
+  border-radius: 999px;
+  background: var(--brand-gradient);
+  color: #ffffff;
+  content: counter(ai-workflow, decimal-leading-zero);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.ai-workflow strong,
+.ai-workflow span {
+  display: block;
+}
+
+.ai-workflow strong {
+  color: var(--color-fd-foreground);
+  font-size: 0.92rem;
+}
+
+.ai-workflow span {
+  margin-top: 0.35rem;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.architecture-diagram {
+  --architecture-blue: #1783ff;
+  position: relative;
+  overflow: hidden;
+  margin-block: 2rem;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 0% 0%, var(--brand-accent-soft), transparent 24rem),
+    radial-gradient(circle at 100% 0%, rgba(18, 169, 151, 0.12), transparent 24rem),
+    var(--color-fd-background);
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.architecture-diagram-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0.45rem;
+}
+
+.architecture-flow-entry {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.architecture-layer {
+  --architecture-layer-accent: var(--brand-accent);
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 21rem;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--architecture-layer-accent) 25%, var(--color-fd-border));
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--architecture-layer-accent) 5%, var(--color-fd-card));
+  padding: 1rem 0.8rem;
+}
+
+.architecture-layer::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--architecture-layer-accent);
+  content: '';
+}
+
+.architecture-layer-agent {
+  --architecture-layer-accent: var(--brand-accent);
+}
+
+.architecture-layer-api {
+  --architecture-layer-accent: var(--brand-violet);
+}
+
+.architecture-layer-runtime {
+  --architecture-layer-accent: var(--brand-cyan);
+}
+
+.architecture-layer-render {
+  --architecture-layer-accent: var(--architecture-blue);
+}
+
+.architecture-layer-platform {
+  --architecture-layer-accent: #64748b;
+}
+
+.architecture-layer-eyebrow {
+  color: var(--architecture-layer-accent);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.architecture-layer h3 {
+  margin-top: 0.55rem;
+  color: var(--color-fd-foreground);
+  font-size: 1rem;
+  font-weight: 760;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.architecture-layer p {
+  margin-top: 0.55rem;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.architecture-layer ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: auto 0 0;
+  padding: 1rem 0 0;
+  list-style: none;
+}
+
+.architecture-layer li {
+  overflow-wrap: anywhere;
+  border: 1px solid color-mix(in srgb, var(--architecture-layer-accent) 20%, var(--color-fd-border));
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--color-fd-background) 78%, transparent);
+  padding: 0.38rem 0.45rem;
+  color: var(--color-fd-foreground);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.62rem;
+  line-height: 1.35;
+}
+
+.architecture-flow-arrow {
+  width: 1.4rem;
+  flex: 0 0 1.4rem;
+  overflow: visible;
+  color: var(--color-fd-muted-foreground);
+}
+
+.architecture-flow-arrow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.architecture-data-paths {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.architecture-data-paths > div {
+  display: grid;
+  gap: 0.25rem;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-fd-secondary) 72%, transparent);
+  padding: 0.75rem 0.9rem;
+}
+
+.architecture-data-paths strong {
+  color: var(--brand-violet);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.architecture-data-paths span {
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.architecture-diagram figcaption {
+  margin-top: 0.85rem;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.architecture-diagram.is-compact .architecture-layer {
+  min-height: 16rem;
+}
+
+.architecture-diagram.is-compact .architecture-data-paths {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .architecture-diagram-flow {
+    flex-direction: column;
+  }
+
+  .architecture-flow-entry {
+    width: 100%;
+    flex: none;
+    flex-direction: column;
+  }
+
+  .architecture-layer,
+  .architecture-diagram.is-compact .architecture-layer {
+    width: 100%;
+    min-height: 0;
+  }
+
+  .architecture-layer ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 0;
+  }
+
+  .architecture-flow-arrow {
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 767px) {
+  .ai-entry-hero {
+    border-radius: 1rem;
+    padding: 1.35rem;
+  }
+
+  .ai-entry-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ai-entry-actions a {
+    width: 100%;
+  }
+
+  .ai-workflow ol,
+  .architecture-data-paths,
+  .architecture-layer ul {
+    grid-template-columns: 1fr;
+  }
+
+  .architecture-diagram {
+    border-radius: 1rem;
+    padding: 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-entry-actions a {
+    transition: none;
+  }
+
+  .ai-entry-actions a:hover {
+    transform: none;
+  }
+}

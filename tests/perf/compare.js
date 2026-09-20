@@ -16,7 +16,7 @@ function stableStringify(value) {
 }
 
 if (!currentPath || !baselinePath) {
-  console.error('Usage: npm run benchmark:compare -- <current.json> <baseline.json>');
+  console.error('Usage: node tests/perf/compare.js <current.json> <baseline.json>');
   process.exitCode = 1;
 } else {
   const [current, baseline] = await Promise.all([

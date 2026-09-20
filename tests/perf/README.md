@@ -11,7 +11,7 @@ The performance workspace separates two measurement layers:
 npm run benchmark
 npm run benchmark -- --suite node
 npm run benchmark -- --suite browser --mode full
-npm run benchmark:compare -- performance/current.json performance/baseline.json
+node tests/perf/compare.js performance/current.json performance/baseline.json
 ```
 
 `benchmark` builds the package and runs the quick Node and browser suites by

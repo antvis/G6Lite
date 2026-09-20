@@ -25,7 +25,7 @@ G6Lite 是一个基于 WebGL 的轻量图可视化与分析引擎，目标是让
 
 G6 v5 是功能完整的图可视化框架，插件、元素、动画、交互和生态能力更全面。G6Lite 更像是一个性能优先的轻量内核：
 
-| 维度     | G6Lite                    | G6 v5            |
+| 维度     | G6Lite                   | G6 v5            |
 | -------- | ------------------------ | ---------------- |
 | 渲染技术 | WebGL + Canvas 2D 标签层 | Canvas           |
 | 主要目标 | 大规模渲染和高频交互     | 完整图可视化能力 |
@@ -40,12 +40,15 @@ G6 v5 是功能完整的图可视化框架，插件、元素、动画、交互�
 - `Graph`：用户入口，负责容器、布局、渲染、交互和生命周期。
 - `DataModel`：维护节点、边、Combo、状态和增量变更。
 - `Renderer`：WebGL 绘制节点、边和拾取缓冲。
-- `LabelRenderer` / `ComboRenderer`：用 Canvas 2D 绘制标签、图标和 Combo 包围框。
+- `LabelLayerRenderer` / `ComboRenderer`：分别用 Canvas 2D overlay 和 underlay 绘制标签、图标与 Combo 包围框。
 - `RenderScheduler`：根据变更级别选择全量刷新或局部 patch。
 - `InteractionDispatcher`：统一处理拾取和元素事件分发。
 
+完整的分层、首次渲染和高频更新路径见[技术架构](/docs/concepts/architecture)。
+
 ## 下一步
 
+- [技术架构](/docs/concepts/architecture)
 - [Graph 生命周期](/docs/concepts/graph-lifecycle)
 - [数据模型](/docs/concepts/data-model)
 - [安装与第一个图](/docs/getting-started/quick-start)

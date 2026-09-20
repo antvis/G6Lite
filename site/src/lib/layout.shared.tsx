@@ -6,9 +6,17 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 export function baseOptions(locale: Locale): BaseLayoutProps {
   const text =
     locale === 'zh'
-      ? { docs: '文档', examples: '示例', api: 'API', metrics: '技术指标', compatibility: '兼容性' }
+      ? {
+          docs: '文档',
+          ai: 'AI',
+          examples: '示例',
+          api: 'API',
+          metrics: '技术指标',
+          compatibility: '兼容性',
+        }
       : {
           docs: 'Docs',
+          ai: 'AI',
           examples: 'Examples',
           api: 'API',
           metrics: 'Metrics',
@@ -28,6 +36,7 @@ export function baseOptions(locale: Locale): BaseLayoutProps {
     },
     links: [
       { text: text.docs, url: localizedPath('/docs', locale) },
+      { text: text.ai, url: localizedPath('/ai', locale) },
       { text: text.examples, url: localizedPath('/docs/examples', locale) },
       { text: text.api, url: localizedPath('/docs/api', locale) },
       { text: text.metrics, url: localizedPath('/docs/metrics/performance', locale) },

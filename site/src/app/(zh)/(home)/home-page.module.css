@@ -32,37 +32,6 @@
   margin-inline: auto;
 }
 
-.previewBar {
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  border-bottom: 1px solid var(--line);
-  background: #fafbfc;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.previewBar span {
-  border-radius: 999px;
-  background: var(--brand-gradient);
-  color: #fff;
-  padding: 4px 9px;
-  font-weight: 700;
-}
-
-.previewBar p {
-  margin: 0;
-}
-
-.previewBar a {
-  color: var(--ink);
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 .hero {
   padding: 84px 0 116px;
   background:
@@ -905,7 +874,6 @@
   --shadow: 0 24px 70px -44px rgba(0, 0, 0, 0.9);
 }
 
-:global(.dark) .previewBar,
 :global(.dark) .faqSection,
 :global(.dark) .finalCta {
   background: #10141b;

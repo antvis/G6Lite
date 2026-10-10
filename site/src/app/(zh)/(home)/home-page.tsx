@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 
 import { withBasePath } from '@/lib/shared';
 
-import styles from './tana-home.module.css';
+import styles from './home-page.module.css';
 
 const examples = [
   {
@@ -69,17 +69,9 @@ const codeExample = `const graph = new Graph({
 
 await graph.render();`;
 
-export function TanaHomePage({ preview = false }: { preview?: boolean }) {
+export function HomePage() {
   return (
     <main className={styles.root} lang="zh-CN">
-      {preview ? (
-        <div className={styles.previewBar}>
-          <span>独立视觉预览</span>
-          <p>当前官网首页已使用此方案</p>
-          <Link href="/">打开正式首页</Link>
-        </div>
-      ) : null}
-
       <section className={styles.hero}>
         <div className={styles.shell}>
           <div className={styles.heroGrid}>

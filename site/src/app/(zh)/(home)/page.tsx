@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 
-import { TanaHomePage } from '@/app/(zh)/(preview)/preview/tana-home/tana-home-page';
 import { StructuredData } from '@/components/structured-data';
 import { createHomeStructuredData, createPageSeo } from '@/lib/seo';
 import { siteConfig } from '@/lib/site-config';
+
+import { HomePage } from './home-page';
 
 export const metadata: Metadata = {
   title: siteConfig.description.zh,
@@ -23,7 +24,7 @@ export default function Page() {
   return (
     <>
       <StructuredData data={createHomeStructuredData('zh')} />
-      <TanaHomePage />
+      <HomePage />
     </>
   );
 }

@@ -128,12 +128,18 @@ for (const file of requiredSiteFiles) {
   if (!existsSync(path.join(root, file))) fail(`Missing required site artifact: ${file}`);
 }
 
-for (const removedFile of ['site/src/components/search.tsx', 'site/src/app/api/search/route.ts']) {
+for (const removedFile of [
+  'site/src/components/search.tsx',
+  'site/src/app/api/search/route.ts',
+  'site/src/app/(zh)/(home)/legacy-home-page.tsx',
+  'site/src/app/(zh)/(home)/legacy-home.css',
+  'site/src/app/(zh)/(home)/legacy-code-block.tsx',
+]) {
   if (existsSync(path.join(root, removedFile))) fail(`Search surface still exists: ${removedFile}`);
 }
 
 const homeRoutes = [
-  ['site/src/app/(zh)/(home)/page.tsx', '<TanaHomePage />'],
+  ['site/src/app/(zh)/(home)/page.tsx', '<HomePage />'],
   ['site/src/app/en/(home)/page.tsx', '<HomePage locale="en" />'],
 ];
 for (const [file, expectedUsage] of homeRoutes) {

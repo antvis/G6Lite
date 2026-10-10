@@ -33,30 +33,14 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  border-bottom: 1px solid var(--landing-border);
   background:
-    radial-gradient(circle at 14% 12%, var(--brand-accent-soft), transparent 27rem),
-    radial-gradient(circle at 88% 70%, rgba(18, 169, 151, 0.09), transparent 25rem),
+    radial-gradient(circle at 12% 8%, rgba(236, 61, 117, 0.065), transparent 25rem),
+    radial-gradient(circle at 88% 16%, rgba(103, 92, 245, 0.075), transparent 30rem),
     var(--color-fd-background);
 }
 
 .hero::after {
-  position: absolute;
-  z-index: -2;
-  inset: 0;
-  background:
-    linear-gradient(
-      color-mix(in srgb, var(--landing-border) 55%, transparent) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--landing-border) 55%, transparent) 1px,
-      transparent 1px
-    );
-  background-size: 52px 52px;
-  content: '';
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent 92%);
+  content: none;
 }
 
 .heroGlow {
@@ -68,25 +52,23 @@
   height: 30rem;
   border-radius: 999px;
   background: var(--brand-gradient);
-  filter: blur(120px);
-  opacity: 0.08;
+  filter: blur(130px);
+  opacity: 0.045;
 }
 
 .heroGrid,
-.casesSection,
-.learnSection,
 .workspaceShell {
-  width: min(100% - 2rem, 72rem);
+  width: min(100% - 3rem, 76rem);
   margin-inline: auto;
 }
 
 .heroGrid {
   display: grid;
-  min-height: min(48rem, calc(100vh - 4rem));
-  grid-template-columns: minmax(0, 0.92fr) minmax(28rem, 1.08fr);
+  min-height: calc(100vh - 4rem);
+  grid-template-columns: minmax(0, 0.9fr) minmax(30rem, 1.1fr);
   align-items: center;
-  gap: clamp(3rem, 7vw, 6rem);
-  padding-block: clamp(4rem, 8vw, 7rem);
+  gap: clamp(3rem, 6vw, 5.5rem);
+  padding-block: clamp(4.5rem, 7vw, 6.5rem);
 }
 
 .heroCopy {
@@ -103,23 +85,37 @@
 }
 
 .heroCopy h1 {
-  max-width: 39rem;
-  margin-top: 0.9rem;
-  font-size: clamp(3rem, 6vw, 5.15rem);
-  font-weight: 760;
-  letter-spacing: -0.06em;
-  line-height: 1.02;
+  max-width: 35rem;
+  margin-top: 1rem;
+  font-size: clamp(3rem, 4.7vw, 3.7rem);
+  font-weight: 680;
+  letter-spacing: -0.05em;
+  line-height: 1.12;
 }
 
 .heroCopy h1 span {
+  position: relative;
+  z-index: 0;
+  color: inherit;
+  white-space: nowrap;
+}
+
+.heroCopy h1 span::after {
+  position: absolute;
+  right: -0.03em;
+  bottom: 0.02em;
+  left: -0.03em;
+  z-index: -1;
+  height: 0.13em;
+  border-radius: 999px;
   background: var(--brand-gradient);
-  background-clip: text;
-  color: transparent;
+  content: '';
+  opacity: 0.62;
 }
 
 .heroDescription {
-  max-width: 36rem;
-  margin-top: 1.5rem;
+  max-width: 34rem;
+  margin-top: 1.35rem;
   color: var(--color-fd-muted-foreground);
   font-size: 1.02rem;
   line-height: 1.8;
@@ -129,17 +125,27 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
-  margin-top: 1.8rem;
+  margin-top: 1.55rem;
 }
 
 .heroFacts span {
-  border: 1px solid var(--landing-border);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-fd-card) 80%, transparent);
-  padding: 0.38rem 0.68rem;
+  position: relative;
+  padding-left: 0.8rem;
   color: var(--color-fd-muted-foreground);
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.68rem;
+}
+
+.heroFacts span::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--brand-violet);
+  content: '';
+  transform: translateY(-50%);
 }
 
 .composerColumn {
@@ -149,12 +155,12 @@
 .modeSwitch {
   display: inline-flex;
   gap: 0.3rem;
-  margin: 0 0 0.8rem 0.4rem;
-  border: 1px solid var(--landing-border);
+  margin: 0 0 0.75rem;
+  border: 0;
   border-radius: 999px;
   background: var(--color-fd-card);
   padding: 0.25rem;
-  box-shadow: 0 16px 36px -30px rgba(49, 46, 129, 0.7);
+  box-shadow: 0 14px 32px -26px rgba(49, 46, 129, 0.55);
 }
 
 .modeSwitch button {
@@ -176,20 +182,17 @@
 }
 
 .modeSwitch button.modeActive {
-  background: color-mix(in srgb, var(--brand-violet) 9%, var(--color-fd-background));
-  color: var(--brand-violet);
-  box-shadow: 0 8px 20px -15px rgba(49, 46, 129, 0.8);
+  background: var(--brand-gradient);
+  color: #ffffff;
+  box-shadow: 0 10px 24px -17px rgba(87, 72, 245, 0.8);
 }
 
 .promptCard {
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--brand-violet) 38%, var(--landing-border));
-  border-radius: 1.45rem;
-  background: color-mix(in srgb, var(--color-fd-card) 94%, transparent);
-  box-shadow:
-    0 34px 72px -48px rgba(74, 58, 190, 0.65),
-    inset 0 0 0 1px color-mix(in srgb, #ffffff 30%, transparent);
-  backdrop-filter: blur(20px);
+  border: 1px solid color-mix(in srgb, var(--brand-violet) 18%, var(--landing-border));
+  border-radius: 0.95rem;
+  background: var(--color-fd-card);
+  box-shadow: 0 28px 70px -44px rgba(52, 62, 92, 0.42);
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease;
@@ -198,8 +201,8 @@
 .promptCard:focus-within {
   border-color: var(--brand-violet);
   box-shadow:
-    0 38px 82px -46px rgba(74, 58, 190, 0.72),
-    0 0 0 3px color-mix(in srgb, var(--brand-violet) 12%, transparent);
+    0 30px 70px -44px rgba(74, 58, 190, 0.55),
+    0 0 0 3px color-mix(in srgb, var(--brand-violet) 10%, transparent);
 }
 
 .promptCard > label,
@@ -215,12 +218,12 @@
 .promptCard textarea {
   display: block;
   width: 100%;
-  min-height: 12rem;
+  min-height: 10.5rem;
   resize: none;
   border: 0;
   outline: 0;
   background: transparent;
-  padding: 1.45rem 1.5rem 0.75rem;
+  padding: 1.35rem 1.4rem 0.7rem;
   color: var(--color-fd-foreground);
   font: inherit;
   font-size: 1rem;
@@ -362,191 +365,68 @@
   text-align: left;
 }
 
-.casesSection {
-  padding-block: clamp(4rem, 7vw, 6rem);
-}
-
-.sectionHeading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
-.sectionHeading p,
-.learnSection > p {
-  color: var(--brand-accent);
-  font-size: 0.72rem;
-  font-weight: 850;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.sectionHeading h2 {
-  max-width: 42rem;
-  margin-top: 0.5rem;
-  color: var(--color-fd-foreground);
-  font-size: clamp(1.55rem, 3vw, 2.25rem);
-  font-weight: 720;
-  letter-spacing: -0.035em;
-  line-height: 1.25;
-}
-
-.sectionHeading > span {
-  color: color-mix(in srgb, var(--color-fd-muted-foreground) 38%, transparent);
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 2.8rem;
-  font-weight: 700;
-}
-
-.caseGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.caseCard {
-  position: relative;
-  display: flex;
-  min-height: 16rem;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--landing-border);
-  border-radius: 1.2rem;
-  background: var(--color-fd-card);
-  padding: 1.3rem;
-  color: inherit;
-  text-align: left;
-  box-shadow: 0 22px 50px -44px rgba(30, 41, 59, 0.75);
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease;
-}
-
-.caseCard::before {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: var(--brand-gradient);
-  content: '';
-  opacity: 0;
-  transition: opacity 180ms ease;
-}
-
-.caseCard:hover,
-.caseCard:focus-visible {
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--brand-accent) 36%, var(--landing-border));
-  box-shadow: 0 28px 60px -40px rgba(67, 56, 202, 0.38);
-  outline: none;
-}
-
-.caseCard:hover::before,
-.caseCard:focus-visible::before {
-  opacity: 1;
-}
-
-.caseCardTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.caseCardTop span {
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--brand-violet) 9%, var(--color-fd-secondary));
-  padding: 0.28rem 0.58rem;
-  color: var(--brand-violet);
-  font-size: 0.64rem;
-  font-weight: 800;
-}
-
-.caseCardTop strong {
-  color: color-mix(in srgb, var(--color-fd-muted-foreground) 38%, transparent);
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 1.4rem;
-}
-
-.caseCard h3 {
-  margin-top: 1.3rem;
-  font-size: 1.12rem;
-  font-weight: 760;
-  letter-spacing: -0.02em;
-}
-
-.caseCard > p {
-  max-width: 30rem;
-  margin-top: 0.55rem;
-  color: var(--color-fd-muted-foreground);
-  font-size: 0.82rem;
-  line-height: 1.65;
-}
-
-.caseDetails {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+.promptSuggestions {
   margin-top: 1.25rem;
 }
 
-.caseDetails span {
-  border: 1px solid var(--landing-border);
-  border-radius: 999px;
-  padding: 0.3rem 0.55rem;
+.promptSuggestions > span {
+  display: block;
+  margin-bottom: 0.55rem;
   color: var(--color-fd-muted-foreground);
-  font-size: 0.64rem;
+  font-size: 0.68rem;
+  font-weight: 720;
 }
 
-.caseAction {
-  margin-top: auto;
-  padding-top: 1.2rem;
+.promptSuggestions > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.promptSuggestions button {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--color-fd-secondary) 84%, transparent);
+  padding: 0.65rem 0.75rem;
+  color: var(--color-fd-foreground);
+  text-align: left;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.promptSuggestions button:hover {
+  background: color-mix(in srgb, var(--brand-violet) 8%, var(--color-fd-secondary));
+  transform: translateY(-1px);
+}
+
+.promptSuggestions button:focus-visible {
+  outline: 3px solid var(--brand-violet);
+  outline-offset: 2px;
+}
+
+.promptSuggestions button > span {
   color: var(--brand-accent);
-  font-size: 0.76rem;
+  font-size: 0.58rem;
   font-weight: 800;
 }
 
-.learnSection {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  border-top: 1px solid var(--landing-border);
-  padding-block: 2.4rem 3.4rem;
+.promptSuggestions button strong {
+  overflow: hidden;
+  font-size: 0.7rem;
+  font-weight: 680;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.learnSection > div {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.65rem;
-}
-
-.learnSection a {
-  display: inline-flex;
-  min-height: 2.4rem;
-  align-items: center;
-  gap: 0.45rem;
-  border: 1px solid var(--landing-border);
-  border-radius: 999px;
-  padding-inline: 0.85rem;
-  color: var(--color-fd-foreground);
-  font-size: 0.74rem;
-  font-weight: 730;
-  text-decoration: none;
-}
-
-.learnSection a:hover {
-  border-color: color-mix(in srgb, var(--brand-accent) 35%, var(--landing-border));
-  background: var(--brand-accent-soft);
-  color: var(--brand-accent);
-  text-decoration: none;
-}
-
-.learnSection a span {
-  color: var(--brand-accent);
+.promptSuggestions button i {
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.72rem;
+  font-style: normal;
 }
 
 .generationScreen {
@@ -554,43 +434,43 @@
   min-height: calc(100vh - 4rem);
   place-items: center;
   background:
-    radial-gradient(circle at 50% 35%, var(--brand-accent-soft), transparent 30rem),
+    radial-gradient(circle at 50% 34%, rgba(103, 92, 245, 0.08), transparent 28rem),
     var(--color-fd-background);
   padding: 2rem 1rem;
 }
 
 .generationCard {
   width: min(100%, 39rem);
-  border: 1px solid var(--landing-border);
-  border-radius: 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--brand-violet) 16%, var(--landing-border));
+  border-radius: 1rem;
   background: var(--color-fd-card);
   padding: clamp(1.5rem, 5vw, 2.5rem);
   text-align: center;
-  box-shadow: 0 36px 80px -52px rgba(67, 56, 202, 0.65);
+  box-shadow: 0 30px 72px -50px rgba(52, 62, 92, 0.48);
 }
 
 .generationOrb {
   display: grid;
-  width: 4.5rem;
-  height: 4.5rem;
+  width: 3.5rem;
+  height: 3.5rem;
   margin: 0 auto 1.25rem;
   place-items: center;
-  border-radius: 1.35rem;
+  border-radius: 1rem;
   background: var(--brand-gradient);
-  box-shadow: 0 20px 42px -20px rgba(87, 72, 245, 0.85);
+  box-shadow: 0 16px 34px -20px rgba(87, 72, 245, 0.72);
   animation: generationPulse 1.6s ease-in-out infinite;
 }
 
 .generationOrb svg {
-  width: 2rem;
-  height: 2rem;
+  width: 1.55rem;
+  height: 1.55rem;
   fill: #ffffff;
 }
 
 .generationCard h1 {
   margin-top: 1.15rem;
-  font-size: clamp(1.7rem, 5vw, 2.5rem);
-  font-weight: 760;
+  font-size: clamp(1.7rem, 5vw, 2.25rem);
+  font-weight: 680;
   letter-spacing: -0.04em;
 }
 
@@ -615,7 +495,8 @@
 
 .generationSteps {
   display: grid;
-  gap: 0.55rem;
+  position: relative;
+  gap: 0;
   margin-top: 1.35rem;
   padding: 0;
   list-style: none;
@@ -625,9 +506,10 @@
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  border: 1px solid var(--landing-border);
-  border-radius: 0.75rem;
-  padding: 0.68rem 0.78rem;
+  border: 0;
+  border-bottom: 1px solid var(--landing-border);
+  border-radius: 0;
+  padding: 0.75rem 0.2rem;
   color: var(--color-fd-muted-foreground);
   font-size: 0.78rem;
   font-weight: 700;
@@ -646,8 +528,6 @@
 }
 
 .generationSteps li.generationStepActive {
-  border-color: color-mix(in srgb, var(--brand-violet) 35%, var(--landing-border));
-  background: color-mix(in srgb, var(--brand-violet) 7%, transparent);
   color: var(--brand-violet);
 }
 
@@ -691,7 +571,7 @@
 
 .workspaceShell {
   width: min(100% - 2rem, 88rem);
-  padding-block: 1.6rem 2.4rem;
+  padding-block: 2rem 2.6rem;
 }
 
 .workspaceHeader {
@@ -742,7 +622,7 @@
   height: clamp(42rem, calc(100vh - 12rem), 56rem);
   overflow: hidden;
   border: 1px solid var(--landing-border);
-  border-radius: 1.5rem;
+  border-radius: 1rem;
   background:
     linear-gradient(var(--landing-border) 1px, transparent 1px),
     linear-gradient(90deg, var(--landing-border) 1px, transparent 1px),
@@ -753,7 +633,7 @@
     32px 32px,
     auto,
     auto;
-  box-shadow: 0 32px 70px -54px rgba(30, 41, 59, 0.9);
+  box-shadow: 0 28px 64px -54px rgba(30, 41, 59, 0.8);
 }
 
 .nativeGraph {
@@ -879,12 +759,12 @@
   left: 50%;
   width: min(46rem, calc(100% - 2rem));
   transform: translateX(-50%);
-  border: 1px solid color-mix(in srgb, var(--brand-violet) 30%, var(--landing-border));
-  border-radius: 1.15rem;
-  background: color-mix(in srgb, var(--color-fd-card) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-violet) 18%, var(--landing-border));
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--color-fd-card) 95%, transparent);
   padding: 0.55rem;
-  box-shadow: 0 24px 52px -30px rgba(30, 41, 59, 0.85);
-  backdrop-filter: blur(20px);
+  box-shadow: 0 22px 48px -32px rgba(30, 41, 59, 0.72);
+  backdrop-filter: blur(14px);
 }
 
 .quickAdjustments {
@@ -973,11 +853,11 @@
   width: min(25rem, 100%);
   flex-direction: column;
   border-left: 1px solid var(--landing-border);
-  background: color-mix(in srgb, var(--color-fd-card) 97%, transparent);
+  background: color-mix(in srgb, var(--color-fd-card) 98%, transparent);
   box-shadow: -30px 0 60px -42px rgba(15, 23, 42, 0.8);
   transform: translateX(102%);
   transition: transform 220ms ease;
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(14px);
 }
 
 .inspectorDrawerOpen {
@@ -1237,8 +1117,6 @@
 
 @media (max-width: 720px) {
   .heroGrid,
-  .casesSection,
-  .learnSection,
   .workspaceShell {
     width: min(100% - 1.25rem, 72rem);
   }
@@ -1248,7 +1126,7 @@
   }
 
   .heroCopy h1 {
-    font-size: clamp(2.7rem, 13vw, 4.2rem);
+    font-size: clamp(2.55rem, 11vw, 3.35rem);
   }
 
   .heroDescription {
@@ -1274,8 +1152,6 @@
 
   .promptFooter,
   .promptFooter > div,
-  .sectionHeading,
-  .learnSection,
   .workspaceHeader {
     align-items: stretch;
     flex-direction: column;
@@ -1291,18 +1167,6 @@
 
   .inputHint {
     white-space: normal;
-  }
-
-  .caseGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .sectionHeading > span {
-    display: none;
-  }
-
-  .learnSection > div {
-    justify-content: flex-start;
   }
 
   .workspaceHeader {
@@ -1378,14 +1242,14 @@
     font-size: 0.62rem;
   }
 
-  .caseCard {
-    min-height: 15rem;
+  .promptSuggestions > div {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .promptCard,
-  .caseCard,
+  .promptSuggestions button,
   .sendButton,
   .primaryToolbarButton,
   .commandInput > button,

@@ -133,7 +133,7 @@ for (const removedFile of ['site/src/components/search.tsx', 'site/src/app/api/s
 }
 
 const homeRoutes = [
-  ['site/src/app/(zh)/(home)/page.tsx', '<HomePage locale="zh" />'],
+  ['site/src/app/(zh)/(home)/page.tsx', '<TanaHomePage />'],
   ['site/src/app/en/(home)/page.tsx', '<HomePage locale="en" />'],
 ];
 for (const [file, expectedUsage] of homeRoutes) {

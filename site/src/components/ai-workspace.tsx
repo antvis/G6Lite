@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   useCallback,
   useEffect,
@@ -14,16 +13,14 @@ import {
 import {
   adjustMockGraph,
   buildMockCode,
-  createMockGraphFromTemplate,
   generateMockResult,
   getMockCases,
   needsMockPromptClarification,
   serializeMockGraph,
   type AiWorkspaceMode,
   type MockGenerationResult,
-  type MockGraphLayout,
 } from '@/lib/ai-workspace-mock';
-import { localizedPath, type Locale } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
 
 import {
   AiNativeGraph,
@@ -41,7 +38,7 @@ const content = {
     mock: '站内原型 · Mock',
     eyebrow: 'G6Lite 原生 AI 画布',
     titleLead: '描述关系，',
-    titleAccent: '立即生成可交互图',
+    titleAccent: '生成可交互图',
     description:
       '用自然语言描述实体与关系，在站内通过 G6Lite WebGL 画布查看布局、交互、图数据和可运行代码。',
     modes: {
@@ -61,9 +58,10 @@ const content = {
     clarificationDescription: '请至少告诉我两个实体，以及它们之间的动作或关系。',
     clarificationExample: '用户创建订单，订单包含商品',
     useClarificationExample: '使用这个示例',
-    casesTitle: '从一个具体场景开始',
-    casesDescription: '案例只提供结构化提示，真正的关系图由 G6Lite 在生成后运行。',
-    useCase: '填入这个场景',
+    casesTitle: '试试这些场景',
+    casesDescription: '选择一个场景，快速开始',
+    casesHint: '示例会自动填入输入框，你可以继续修改。',
+    useCase: '使用此案例',
     nodes: (count: number) => `${count} 个实体`,
     relations: (count: number) => `${count} 条关系`,
     layouts: { horizontal: '从左到右', vertical: '从上到下', radial: '环形网络' },
@@ -107,7 +105,7 @@ const content = {
     mock: 'In-site prototype · Mock',
     eyebrow: 'Native G6Lite AI canvas',
     titleLead: 'Describe relationships.',
-    titleAccent: 'Get an interactive graph.',
+    titleAccent: 'Build an interactive graph.',
     description:
       'Describe entities and relationships naturally, then inspect layouts, interactions, graph data, and runnable code on a native G6Lite WebGL canvas.',
     modes: {
@@ -129,10 +127,10 @@ const content = {
       'Name at least two entities and the action or relationship between them.',
     clarificationExample: 'Users create orders, and orders contain products',
     useClarificationExample: 'Use this example',
-    casesTitle: 'Start with a concrete scenario',
-    casesDescription:
-      'Prompts provide structure; G6Lite runs the actual relationship graph after generation.',
-    useCase: 'Use this scenario',
+    casesTitle: 'Try a starting point',
+    casesDescription: 'Choose a scenario and get started',
+    casesHint: 'The example fills the prompt automatically, and you can edit it.',
+    useCase: 'Use this example',
     nodes: (count: number) => `${count} entities`,
     relations: (count: number) => `${count} relationships`,
     layouts: { horizontal: 'Left to right', vertical: 'Top to bottom', radial: 'Radial network' },
@@ -218,13 +216,6 @@ function FitIcon() {
 export function AiWorkspace({ locale }: { locale: Locale }) {
   const copy = content[locale];
   const mockCases = useMemo(() => getMockCases(locale), [locale]);
-  const caseGraphs = useMemo(
-    () =>
-      new Map(
-        mockCases.map((item) => [item.id, createMockGraphFromTemplate(item.template, locale)]),
-      ),
-    [locale, mockCases],
-  );
   const [mode, setMode] = useState<AiWorkspaceMode>('create');
   const [prompt, setPrompt] = useState('');
   const [followUp, setFollowUp] = useState('');
@@ -720,57 +711,19 @@ export function AiWorkspace({ locale }: { locale: Locale }) {
             <p className={styles.privacy} id="ai-prompt-privacy">
               {copy.privacy}
             </p>
+            <div className={styles.promptSuggestions}>
+              <span>{copy.casesTitle}</span>
+              <div>
+                {mockCases.map((item) => (
+                  <button key={item.id} onClick={() => selectCase(item.id)} type="button">
+                    <span>{copy.modes[item.mode].short}</span>
+                    <strong>{item.title}</strong>
+                    <i aria-hidden="true">↗</i>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
-
-      <section className={styles.casesSection}>
-        <div className={styles.sectionHeading}>
-          <div>
-            <p>{copy.casesTitle}</p>
-            <h2>{copy.casesDescription}</h2>
-          </div>
-          <span>{mockCases.length.toString().padStart(2, '0')}</span>
-        </div>
-        <div className={styles.caseGrid}>
-          {mockCases.map((item, index) => {
-            const caseGraph = caseGraphs.get(item.id);
-            return (
-              <button
-                aria-label={`${copy.useCase}: ${item.title}`}
-                className={styles.caseCard}
-                key={item.id}
-                onClick={() => selectCase(item.id)}
-                type="button"
-              >
-                <div className={styles.caseCardTop}>
-                  <span>{copy.modes[item.mode].short}</span>
-                  <strong>{(index + 1).toString().padStart(2, '0')}</strong>
-                </div>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-                {caseGraph ? (
-                  <div className={styles.caseDetails}>
-                    <span>{copy.nodes(caseGraph.nodes.length)}</span>
-                    <span>{copy.relations(caseGraph.edges.length)}</span>
-                    <span>{copy.layouts[caseGraph.layout as MockGraphLayout]}</span>
-                  </div>
-                ) : null}
-                <span className={styles.caseAction}>{copy.useCase} →</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className={styles.learnSection}>
-        <p>{copy.learnTitle}</p>
-        <div>
-          {copy.learnLinks.map(([label, path]) => (
-            <Link href={localizedPath(path, locale)} key={path}>
-              {label} <span>↗</span>
-            </Link>
-          ))}
         </div>
       </section>
     </main>

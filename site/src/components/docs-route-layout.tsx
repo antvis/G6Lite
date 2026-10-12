@@ -27,7 +27,9 @@ export function DocsRouteLayout({
       searchToggle={{ enabled: false }}
       themeSwitch={{ enabled: false }}
       sidebar={{ enabled: !isExamplesRoute }}
-      containerProps={isExamplesRoute ? { className: 'examples-route-layout' } : undefined}
+      containerProps={{
+        className: isExamplesRoute ? 'examples-route-layout' : 'docs-brand-layout',
+      }}
     >
       {children}
     </DocsLayout>

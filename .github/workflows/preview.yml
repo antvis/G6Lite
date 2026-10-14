@@ -4,9 +4,14 @@ on:
   pull_request:
     paths:
       - 'playground/**'
+      - 'site/**'
       - 'src/**'
       - 'package.json'
       - 'vite.config.ts'
+
+concurrency:
+  group: surge-preview-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   checks: read
@@ -35,3 +40,28 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           dist: playground/dist
           build: echo "Already built"
+
+  site-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      - name: Install library dependencies
+        run: npm install --no-package-lock --no-audit --no-fund
+
+      - name: Install site dependencies
+        run: npm --prefix site install --no-package-lock --no-audit --no-fund
+
+      - name: Build site
+        run: npm run site
+
+      - uses: afc163/surge-preview@v1
+        with:
+          surge_token: ${{ secrets.SURGE_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dist: site/out
+          build: echo "Site already built"

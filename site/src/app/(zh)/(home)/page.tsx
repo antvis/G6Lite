@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     enPath: '/en',
     title: `${siteConfig.name} — ${siteConfig.description.zh}`,
     description: `${siteConfig.name} 是${siteConfig.description.zh}，提供数据、布局、交互、状态与扩展的一体化 API。`,
-    image: '/homepage/examples/network.png',
+    image: '/examples/relationship.png',
   }),
 };
 

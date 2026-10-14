@@ -1,4 +1,4 @@
-[简体中文](./README.zh-CN.md) | English
+English | [简体中文](./README.zh-CN.md)
 
 <h1 align="center">G6Lite</h1>
 

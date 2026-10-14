@@ -102,6 +102,6 @@ npm run dev
 
 提交 Pull Request 前请阅读[贡献指南](./CONTRIBUTING.md)。Bug、功能建议和使用问题请通过 [GitHub Issues](https://github.com/antvis/G6Lite/issues) 提交。
 
-## License
+## 许可证
 
 [MIT](./LICENSE) © AntV

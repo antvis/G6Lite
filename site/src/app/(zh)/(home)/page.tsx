@@ -4,7 +4,7 @@ import { StructuredData } from '@/components/structured-data';
 import { createHomeStructuredData, createPageSeo } from '@/lib/seo';
 import { siteConfig } from '@/lib/site-config';
 
-import { HomePage } from './home-page';
+import { Homepage } from '@/components/homepage/homepage';
 
 export const metadata: Metadata = {
   title: siteConfig.description.zh,
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     enPath: '/en',
     title: `${siteConfig.name} — ${siteConfig.description.zh}`,
     description: `${siteConfig.name} 是${siteConfig.description.zh}，提供数据、布局、交互、状态与扩展的一体化 API。`,
-    image: '/examples/real-dataset.png',
+    image: '/examples/relationship.png',
   }),
 };
 
@@ -24,7 +24,7 @@ export default function Page() {
   return (
     <>
       <StructuredData data={createHomeStructuredData('zh')} />
-      <HomePage />
+      <Homepage locale="zh" />
     </>
   );
 }

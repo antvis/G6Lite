@@ -1,0 +1,11 @@
+{
+  "version": "0.1.0-beta.27",
+  "measuredAt": "2026-10-13",
+  "sourceCommit": "74bb73dc",
+  "initialBytes": 83780,
+  "unitBytes": 1000,
+  "entry": "dist/index.js",
+  "compression": "minify + Brotli",
+  "scope": "初始入口，未加载布局",
+  "command": "npm run build && npm run size -- --json"
+}

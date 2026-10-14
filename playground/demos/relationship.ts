@@ -73,6 +73,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   await graph.render();
+  graph.fitView({ padding: 64, maxZoom: 1 });
 
   const g = graph as unknown as GraphInstanceWithTools;
   const cleanupNodeLabels = attachLabelsCanvas(wrapper, g, {
@@ -88,5 +89,8 @@ export async function run(container: string | HTMLElement) {
     showBg: false,
   });
 
-  return { destroy: () => { cleanupNodeLabels(); cleanupEdgeLabels(); graph.destroy(); } };
+  return {
+    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
+    destroy: () => { cleanupNodeLabels(); cleanupEdgeLabels(); graph.destroy(); },
+  };
 }

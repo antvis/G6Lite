@@ -66,16 +66,24 @@ export async function run(container: string | HTMLElement) {
   });
 
   await graph.render();
+  graph.fitView({ padding: 64, maxZoom: 1 });
 
   const g = graph as unknown as GraphInstanceWithTools;
-  attachLabelsCanvas(wrapper, g, {
-    nodeLabel: (n) => `${n.name}\n${(n.data as any)?.title ?? ''}`,
+  const cleanupLabels = attachLabelsCanvas(wrapper, g, {
+    nodeLabel: (n) => `${n.name}\n${n.data?.title ?? ''}`,
     position: 'inside',
-    nodeSize: () => ({ width: NODE_W, height: NODE_H }),
-    fontSize: 13,
+    nodeSize: () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      return { width: NODE_W / dpr, height: NODE_H / dpr };
+    },
+    // Camera zoom is measured in physical pixels; the overlay expects CSS pixels.
+    fontSize: () => 13 * graph.getCamera().zoom / Math.min(2, window.devicePixelRatio || 1),
     color: '#fff',
     secondaryColor: 'rgba(255,255,255,0.8)',
   });
 
-  return { destroy: () => graph.destroy() };
+  return {
+    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
+    destroy: () => { cleanupLabels(); graph.destroy(); },
+  };
 }

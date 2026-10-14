@@ -277,7 +277,8 @@
     "description": "使用力导布局展示人物和关系标签。",
     "category": "scenario",
     "kind": "scenario",
-    "audiences": ["playground"],
+    "audiences": ["playground", "site"],
+    "docsGroup": "scenario-and-dataset",
     "coverage": ["layout.d3-force", "label.node", "label.edge"],
     "releaseCheck": "smoke",
     "capture": { "mode": "artifact", "settleMs": 900, "deviceScaleFactor": 2 }
@@ -289,7 +290,8 @@
     "description": "使用层级布局展示组织关系。",
     "category": "scenario",
     "kind": "scenario",
-    "audiences": ["playground"],
+    "audiences": ["playground", "site"],
+    "docsGroup": "scenario-and-dataset",
     "coverage": ["layout.dagre", "node.rect", "label.node"],
     "releaseCheck": "smoke",
     "capture": { "mode": "artifact", "settleMs": 700, "deviceScaleFactor": 2 }
@@ -313,7 +315,8 @@
     "description": "使用思维导图布局展示层级主题。",
     "category": "layout",
     "kind": "scenario",
-    "audiences": ["playground"],
+    "audiences": ["playground", "site"],
+    "docsGroup": "layout",
     "coverage": ["layout.mindmap", "label.canvas"],
     "releaseCheck": "visual",
     "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
@@ -325,7 +328,8 @@
     "description": "使用鱼骨布局展示问题归因。",
     "category": "layout",
     "kind": "scenario",
-    "audiences": ["playground"],
+    "audiences": ["playground", "site"],
+    "docsGroup": "layout",
     "coverage": ["layout.fishbone", "edge.router", "label.canvas"],
     "releaseCheck": "visual",
     "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }

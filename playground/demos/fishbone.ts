@@ -120,20 +120,28 @@ export async function run(container: string | HTMLElement) {
   });
 
   await graph.render();
+  graph.fitView({ padding: 64, maxZoom: 1 });
 
   const g = graph as unknown as GraphInstanceWithTools;
   const cleanupLabels = attachLabelsCanvas(wrapper, g, {
     nodeLabel: (n) => n.name ?? n.id,
     position: (n) => (n.data?.level as string) === NODE_LEVELS.ITEM ? 'right-edge' : 'inside',
-    nodeSize: (n) => getNodeSize(n),
+    nodeSize: (n) => {
+      const size = getNodeSize(n);
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      return { width: size.width / dpr, height: size.height / dpr };
+    },
     fontSize: (n) => {
       const level = n.data?.level as string;
-      if (level === NODE_LEVELS.HEAD) return 16;
-      if (level === NODE_LEVELS.CATEGORY) return 14;
-      return 12;
+      const size = level === NODE_LEVELS.HEAD ? 16 : level === NODE_LEVELS.CATEGORY ? 14 : 12;
+      // Camera zoom is measured in physical pixels; the overlay expects CSS pixels.
+      return size * graph.getCamera().zoom / Math.min(2, window.devicePixelRatio || 1);
     },
     color: (n) => getNodeLabelColor(n),
   });
 
-  return { destroy: () => { cleanupLabels(); graph.destroy(); } };
+  return {
+    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
+    destroy: () => { cleanupLabels(); graph.destroy(); },
+  };
 }

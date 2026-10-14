@@ -17,10 +17,7 @@ for (const example of examples) {
   const sourcePath = path.join(repositoryRoot, 'playground/demos', example.file);
   const source = await readFile(sourcePath, 'utf8');
   const publicSource = source
-    .replace(
-      /from\s+(['"])\.\.\/\.\.\/src\/index\.ts\1/g,
-      "from '@antv/g6-lite'",
-    )
+    .replace(/from\s+(['"])\.\.\/\.\.\/src\/index\.ts\1/g, "from '@antv/g6-lite'")
     .replace(
       /from\s+(['"])\.\.\/\.\.\/src\/layout\/optional\/([a-z0-9-]+)\.ts\1/g,
       (_match, _quote, layout) => `from '@antv/g6-lite/layouts/${layout}'`,
@@ -30,7 +27,9 @@ for (const example of examples) {
 
   const helperNote = /from\s+['"]\.\//.test(publicSource)
     ? '// Local presentation helpers in this repository are used only for the example controls.\n'
-    : '';
+    : /from\s+['"]\.\.\//.test(publicSource)
+      ? '// Local presentation helpers in this repository provide example label overlays.\n'
+      : '';
   const generated = `${helperNote}${publicSource}\n`;
   const highlightedSource = generated.endsWith('\n') ? generated.slice(0, -1) : generated;
   const highlighted = await codeToHtml(highlightedSource, {

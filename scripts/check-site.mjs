@@ -139,17 +139,23 @@ for (const removedFile of [
 }
 
 const homeRoutes = [
-  ['site/src/app/(zh)/(home)/page.tsx', '<HomePage />'],
-  ['site/src/app/en/(home)/page.tsx', '<HomePage locale="en" />'],
+  ['site/src/app/(zh)/(home)/page.tsx', '<Homepage locale="zh" />'],
+  ['site/src/app/en/(home)/page.tsx', '<Homepage locale="en" />'],
 ];
 for (const [file, expectedUsage] of homeRoutes) {
   const source = read(file);
   if (!source.includes(expectedUsage)) fail(`Homepage route ${file} does not use ${expectedUsage}`);
+  if (!source.includes("from '@/components/homepage/homepage'"))
+    fail(`Homepage route ${file} must directly import the shared homepage component`);
+  if (/preview\//.test(source)) fail(`Homepage route ${file} must not depend on a preview route`);
   if (/LegacyHomePage|legacy-home/.test(source))
     fail(`Homepage route still uses legacy code: ${file}`);
 }
 
-const homepageSource = read('site/src/components/home-page.tsx');
+if (existsSync(path.join(root, 'site/src/app/(zh)/(preview)/preview/ava-home/page.tsx')))
+  fail('The temporary AVA homepage preview route must not remain');
+
+const homepageSource = read('site/src/components/homepage/homepage.tsx');
 for (const staleMetric of ['~0ms', '0.1ms', '5k']) {
   if (homepageSource.includes(staleMetric)) {
     fail(`Homepage contains the unsupported historical metric ${staleMetric}`);
@@ -227,7 +233,7 @@ function extractMinimalExample(relativePath) {
 const snippetFiles = [
   'site/content/docs/zh/getting-started/quick-start.mdx',
   'site/content/docs/en/getting-started/quick-start.mdx',
-  'site/src/components/home-page.tsx',
+  'site/src/components/homepage/homepage.tsx',
 ];
 const snippets = snippetFiles.map((file) => [file, extractMinimalExample(file)]);
 const canonicalSnippet = snippets[0][1];

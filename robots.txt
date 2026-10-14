@@ -1,5 +1,5 @@
 User-Agent: *
 Allow: /
 
-Host: https://g6-gl.antv.vision
-Sitemap: https://g6-gl.antv.vision/sitemap.xml
+Host: https://g6lite.antv.vision
+Sitemap: https://g6lite.antv.vision/sitemap.xml

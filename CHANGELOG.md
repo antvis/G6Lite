@@ -6,7 +6,7 @@
 
 - Restore the product brand to `G6Lite` and the published package coordinate to `@antv/g6-lite`.
 - Treat `G6-GL` and `@antv/g6-gl` as historical names only; current installation and import examples use `@antv/g6-lite`.
-- Keep the GitHub repository at `antvis/G6Lite`. Website domain naming and configuration are outside this rename and remain unchanged.
+- Keep the GitHub repository at `antvis/G6Lite`. The production website is hosted at `g6lite.antv.vision`.
 
 ### Beta API rebaseline
 

@@ -9,7 +9,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_SITE_URL: https://g6-gl.antv.vision
+      NEXT_PUBLIC_SITE_URL: https://g6lite.antv.vision
     permissions:
       contents: write
     steps:
@@ -30,7 +30,7 @@ jobs:
         run: npm run site
 
       - name: Create CNAME
-        run: echo "g6-gl.antv.vision" > site/out/CNAME
+        run: echo "g6lite.antv.vision" > site/out/CNAME
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4

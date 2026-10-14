@@ -1,5 +1,4 @@
 node_modules
-package-lock.json
 dist
 .DS_Store
 performance/
@@ -25,8 +24,11 @@ site/content/docs/zh/api/
 *.tgz
 
 # lock files
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+*.lock
+*.lockb
+*-lock
+*-lock.*
+npm-shrinkwrap.json
+.package-lock.json
 
 pnpm-workspace.yaml

@@ -57,14 +57,14 @@ Only package-root exports from `@antv/g6-lite` and `package.json#exports` are pu
 
 ## Continue reading
 
-- [Website](https://g6-gl.antv.vision/en)
-- [Quick start](https://g6-gl.antv.vision/en/docs/getting-started/quick-start)
-- [Core concepts](https://g6-gl.antv.vision/en/docs/concepts/overview)
-- [Configuration](https://g6-gl.antv.vision/en/docs/guides/data)
-- [API](https://g6-gl.antv.vision/en/docs/api)
-- [Examples](https://g6-gl.antv.vision/en/docs/examples)
-- [Technical metrics](https://g6-gl.antv.vision/en/docs/metrics/performance)
-- [Compatibility](https://g6-gl.antv.vision/en/docs/compatibility/browser)
+- [Website](https://g6lite.antv.vision/en)
+- [Quick start](https://g6lite.antv.vision/en/docs/getting-started/quick-start)
+- [Core concepts](https://g6lite.antv.vision/en/docs/concepts/overview)
+- [Configuration](https://g6lite.antv.vision/en/docs/guides/data)
+- [API](https://g6lite.antv.vision/en/docs/api)
+- [Examples](https://g6lite.antv.vision/en/docs/examples)
+- [Technical metrics](https://g6lite.antv.vision/en/docs/metrics/performance)
+- [Compatibility](https://g6lite.antv.vision/en/docs/compatibility/browser)
 
 ## Local development
 

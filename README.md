@@ -14,10 +14,10 @@
 </p>
 
 <p align="center">
-  <a href="https://g6-gl.antv.vision/en">Website</a> ·
-  <a href="https://g6-gl.antv.vision/en/docs/getting-started/quick-start">Quick Start</a> ·
-  <a href="https://g6-gl.antv.vision/en/docs/api">API</a> ·
-  <a href="https://g6-gl.antv.vision/en/docs/examples">Examples</a>
+  <a href="https://g6lite.antv.vision/en">Website</a> ·
+  <a href="https://g6lite.antv.vision/en/docs/getting-started/quick-start">Quick Start</a> ·
+  <a href="https://g6lite.antv.vision/en/docs/api">API</a> ·
+  <a href="https://g6lite.antv.vision/en/docs/examples">Examples</a>
 </p>
 
 ![G6Lite rendering a large relationship graph](./site/public/examples/large.png)
@@ -80,14 +80,14 @@ Only package-root exports from `@antv/g6-lite` and `package.json#exports` are pu
 
 ## Learn More
 
-- [Website](https://g6-gl.antv.vision/en)
-- [Quick Start](https://g6-gl.antv.vision/en/docs/getting-started/quick-start)
-- [Core Concepts](https://g6-gl.antv.vision/en/docs/concepts/overview)
-- [Data and Configuration](https://g6-gl.antv.vision/en/docs/guides/data)
-- [API Reference](https://g6-gl.antv.vision/en/docs/api)
-- [Examples](https://g6-gl.antv.vision/en/docs/examples)
-- [Performance Metrics](https://g6-gl.antv.vision/en/docs/metrics/performance)
-- [Browser Compatibility](https://g6-gl.antv.vision/en/docs/compatibility/browser)
+- [Website](https://g6lite.antv.vision/en)
+- [Quick Start](https://g6lite.antv.vision/en/docs/getting-started/quick-start)
+- [Core Concepts](https://g6lite.antv.vision/en/docs/concepts/overview)
+- [Data and Configuration](https://g6lite.antv.vision/en/docs/guides/data)
+- [API Reference](https://g6lite.antv.vision/en/docs/api)
+- [Examples](https://g6lite.antv.vision/en/docs/examples)
+- [Performance Metrics](https://g6lite.antv.vision/en/docs/metrics/performance)
+- [Browser Compatibility](https://g6lite.antv.vision/en/docs/compatibility/browser)
 
 ## Local Development
 

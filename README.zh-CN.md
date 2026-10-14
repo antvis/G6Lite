@@ -14,10 +14,10 @@
 </p>
 
 <p align="center">
-  <a href="https://g6-gl.antv.vision">官网</a> ·
-  <a href="https://g6-gl.antv.vision/docs/getting-started/quick-start">快速开始</a> ·
-  <a href="https://g6-gl.antv.vision/docs/api">API</a> ·
-  <a href="https://g6-gl.antv.vision/docs/examples">示例</a>
+  <a href="https://g6lite.antv.vision">官网</a> ·
+  <a href="https://g6lite.antv.vision/docs/getting-started/quick-start">快速开始</a> ·
+  <a href="https://g6lite.antv.vision/docs/api">API</a> ·
+  <a href="https://g6lite.antv.vision/docs/examples">示例</a>
 </p>
 
 ![G6Lite 大规模关系图渲染效果](./site/public/examples/large.png)
@@ -80,14 +80,14 @@ await graph.render();
 
 ## 继续阅读
 
-- [官网](https://g6-gl.antv.vision)
-- [快速开始](https://g6-gl.antv.vision/docs/getting-started/quick-start)
-- [核心概念](https://g6-gl.antv.vision/docs/concepts/overview)
-- [数据与配置](https://g6-gl.antv.vision/docs/guides/data)
-- [API 参考](https://g6-gl.antv.vision/docs/api)
-- [示例](https://g6-gl.antv.vision/docs/examples)
-- [性能指标](https://g6-gl.antv.vision/docs/metrics/performance)
-- [浏览器兼容性](https://g6-gl.antv.vision/docs/compatibility/browser)
+- [官网](https://g6lite.antv.vision)
+- [快速开始](https://g6lite.antv.vision/docs/getting-started/quick-start)
+- [核心概念](https://g6lite.antv.vision/docs/concepts/overview)
+- [数据与配置](https://g6lite.antv.vision/docs/guides/data)
+- [API 参考](https://g6lite.antv.vision/docs/api)
+- [示例](https://g6lite.antv.vision/docs/examples)
+- [性能指标](https://g6lite.antv.vision/docs/metrics/performance)
+- [浏览器兼容性](https://g6lite.antv.vision/docs/compatibility/browser)
 
 ## 本地开发
 

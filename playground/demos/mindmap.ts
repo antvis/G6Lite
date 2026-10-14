@@ -158,20 +158,28 @@ export async function run(container: string | HTMLElement) {
   });
 
   await graph.render();
+  graph.fitView({ padding: 64, maxZoom: 1 });
 
   const g = graph as unknown as GraphInstanceWithTools;
-  attachLabelsCanvas(wrapper, g, {
+  const cleanupLabels = attachLabelsCanvas(wrapper, g, {
     nodeLabel: (n) => n.name ?? n.id,
     position: 'inside',
-    nodeSize: (n) => getNodeSize(n),
+    nodeSize: (n) => {
+      const size = getNodeSize(n);
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      return { width: size.width / dpr, height: size.height / dpr };
+    },
     fontSize: (n) => {
       const level = n.data?.level as string;
-      if (level === NODE_LEVELS.ROOT) return 20;
-      if (level === NODE_LEVELS.LEVEL1) return 16;
-      return 14;
+      const size = level === NODE_LEVELS.ROOT ? 20 : level === NODE_LEVELS.LEVEL1 ? 16 : 14;
+      // Camera zoom is measured in physical pixels; the overlay expects CSS pixels.
+      return size * graph.getCamera().zoom / Math.min(2, window.devicePixelRatio || 1);
     },
     color: (n) => getNodeLabelColor(n),
   });
 
-  return { destroy: () => graph.destroy() };
+  return {
+    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
+    destroy: () => { cleanupLabels(); graph.destroy(); },
+  };
 }

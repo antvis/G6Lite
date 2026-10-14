@@ -149,7 +149,7 @@ for (const [file, expectedUsage] of homeRoutes) {
     fail(`Homepage route still uses legacy code: ${file}`);
 }
 
-const homepageSource = read('site/src/components/home-page.tsx');
+const homepageSource = read('site/src/components/homepage/homepage.tsx');
 for (const staleMetric of ['~0ms', '0.1ms', '5k']) {
   if (homepageSource.includes(staleMetric)) {
     fail(`Homepage contains the unsupported historical metric ${staleMetric}`);
@@ -227,7 +227,7 @@ function extractMinimalExample(relativePath) {
 const snippetFiles = [
   'site/content/docs/zh/getting-started/quick-start.mdx',
   'site/content/docs/en/getting-started/quick-start.mdx',
-  'site/src/components/home-page.tsx',
+  'site/src/components/homepage/homepage.tsx',
 ];
 const snippets = snippetFiles.map((file) => [file, extractMinimalExample(file)]);
 const canonicalSnippet = snippets[0][1];

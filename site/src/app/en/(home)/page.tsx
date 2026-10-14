@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     enPath: '/en',
     title: `${siteConfig.name} — High-performance WebGL graph visualization`,
     description,
-    image: '/examples/real-dataset.png',
+    image: '/homepage/examples/network.png',
   }),
 };
 

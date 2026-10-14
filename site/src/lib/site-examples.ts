@@ -178,7 +178,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       zh: '在一份小型业务关系数据上持续执行增量更新。',
       en: 'Apply incremental updates to a small business relationship dataset.',
     },
-    dataPreview: '{\n  "operations": [\n    "addNode",\n    "updateNode",\n    "removeNode",\n    "addEdge",\n    "updateEdge",\n    "removeEdge"\n  ]\n}',
+    dataPreview:
+      '{\n  "operations": [\n    "addNode",\n    "updateNode",\n    "removeNode",\n    "addEdge",\n    "updateEdge",\n    "removeEdge"\n  ]\n}',
     tags: ['addNode', 'updateNode', 'removeNode', 'data events'],
     metrics: [{ label: { zh: '操作类型', en: 'Operations' }, value: '6+' }],
   },
@@ -200,7 +201,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       zh: '使用带邻接关系的数据验证 Graph 查询模型。',
       en: 'Use connected graph data to validate the Graph query model.',
     },
-    dataPreview: '{\n  "capabilities": [\n    "element queries",\n    "neighbor queries",\n    "batch states",\n    "visibility"\n  ]\n}',
+    dataPreview:
+      '{\n  "capabilities": [\n    "element queries",\n    "neighbor queries",\n    "batch states",\n    "visibility"\n  ]\n}',
     tags: ['getNodeData', 'neighbors', 'batchSetState', 'visibility'],
     metrics: [{ label: { zh: '能力组', en: 'Capability groups' }, value: '4' }],
   },
@@ -319,7 +321,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       zh: '10 个节点和 11 条边组成的层级关系数据。',
       en: 'Hierarchical relationship data with 10 nodes and 11 edges.',
     },
-    dataPreview: '{\n  "nodes": 10,\n  "edges": 11,\n  "layouts": ["circular", "force", "grid", "dagre"]\n}',
+    dataPreview:
+      '{\n  "nodes": 10,\n  "edges": 11,\n  "layouts": ["circular", "force", "grid", "dagre"]\n}',
     tags: ['setLayout', 'circular', 'force', 'grid', 'dagre'],
     metrics: [{ label: { zh: '布局', en: 'Layouts' }, value: '4' }],
   },
@@ -341,9 +344,110 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       zh: '使用固定的小型网络横向比较 6 种布局。',
       en: 'Use a fixed small network to compare six layout algorithms.',
     },
-    dataPreview: '{\n  "layouts": ["radial", "concentric", "force-atlas2", "fruchterman", "mds", "random"]\n}',
+    dataPreview:
+      '{\n  "layouts": ["radial", "concentric", "force-atlas2", "fruchterman", "mds", "random"]\n}',
     tags: ['radial', 'concentric', 'force-atlas2', 'fruchterman', 'mds'],
     metrics: [{ label: { zh: '布局', en: 'Layouts' }, value: '6' }],
+  },
+  {
+    id: 'relationship',
+    file: 'relationship.ts',
+    category: 'scenarios-and-performance',
+    group: { zh: '关系网络', en: 'Relationship networks' },
+    title: { zh: '人物关系网络', en: 'Character relationship network' },
+    description: {
+      zh: '通过人物节点和关系标签，展示力导布局下的关联网络。',
+      en: 'Explore a force-directed network with character nodes and relationship labels.',
+    },
+    interaction: {
+      zh: '缩放或拖拽画布，悬停人物查看关联高亮；点击“适应画布”恢复全图。',
+      en: 'Zoom or pan the canvas, hover characters to highlight connections, and fit the full graph.',
+    },
+    dataDescription: {
+      zh: '哈利·波特角色关系示意：8 个人物节点与 10 条带标签的关系边。',
+      en: 'An illustrative Harry Potter character network with 8 nodes and 10 labeled edges.',
+    },
+    dataPreview: '{\n  "nodes": 8,\n  "edges": 10,\n  "layout": "d3-force"\n}',
+    tags: ['d3-force', 'label.node', 'label.edge', 'highlight-node'],
+    metrics: [
+      { label: { zh: '节点', en: 'Nodes' }, value: '8' },
+      { label: { zh: '边', en: 'Edges' }, value: '10' },
+    ],
+  },
+  {
+    id: 'org-chart',
+    file: 'org-chart.ts',
+    category: 'scenarios-and-performance',
+    group: { zh: '层级图', en: 'Hierarchical graphs' },
+    title: { zh: '组织架构图', en: 'Organization chart' },
+    description: {
+      zh: '使用层级布局、矩形节点和树形连线，展示组织与团队的上下级关系。',
+      en: 'Show reporting relationships with hierarchical layout, rectangle nodes, and tree edges.',
+    },
+    interaction: {
+      zh: '缩放或拖拽画布查看组织层级，使用“适应画布”还原完整结构。',
+      en: 'Zoom or pan to inspect reporting levels and fit the complete structure.',
+    },
+    dataDescription: {
+      zh: '虚构科技公司的组织示意：6 个岗位 / 团队节点与 5 条层级连线。',
+      en: 'An illustrative technology company with 6 role or team nodes and 5 reporting edges.',
+    },
+    dataPreview: '{\n  "nodes": 6,\n  "edges": 5,\n  "layout": "dagre",\n  "rankdir": "TB"\n}',
+    tags: ['dagre', 'node.rect', 'edge.polyline', 'label.node'],
+    metrics: [
+      { label: { zh: '节点', en: 'Nodes' }, value: '6' },
+      { label: { zh: '边', en: 'Edges' }, value: '5' },
+    ],
+  },
+  {
+    id: 'mindmap',
+    file: 'mindmap.ts',
+    category: 'layouts',
+    group: { zh: '思维导图', en: 'Mind maps' },
+    title: { zh: '思维导图', en: 'Mind map' },
+    description: {
+      zh: '围绕中心主题展开双向分支，用颜色和文字表达知识层级。',
+      en: 'Organize knowledge around a central topic with two-sided, labeled, colored branches.',
+    },
+    interaction: {
+      zh: '缩放或拖拽画布阅读各级主题；使用“适应画布”查看完整脑图。',
+      en: 'Zoom or pan to read topic branches and fit the complete mind map.',
+    },
+    dataDescription: {
+      zh: '台风形成因素示意：12 个主题节点与 11 条分支连线。',
+      en: 'Illustrative typhoon formation factors with 12 topic nodes and 11 branch edges.',
+    },
+    dataPreview: '{\n  "nodes": 12,\n  "edges": 11,\n  "layout": "mindmap",\n  "direction": "H"\n}',
+    tags: ['mindmap', 'node.rect', 'edge.cubic', 'label.canvas'],
+    metrics: [
+      { label: { zh: '节点', en: 'Nodes' }, value: '12' },
+      { label: { zh: '边', en: 'Edges' }, value: '11' },
+    ],
+  },
+  {
+    id: 'fishbone',
+    file: 'fishbone.ts',
+    category: 'layouts',
+    group: { zh: '问题归因', en: 'Cause analysis' },
+    title: { zh: '鱼骨图', en: 'Fishbone diagram' },
+    description: {
+      zh: '将问题、分类与原因组织成鱼骨结构，清晰呈现归因层级。',
+      en: 'Organize a problem, categories, and contributing causes into a fishbone structure.',
+    },
+    interaction: {
+      zh: '缩放或拖拽画布阅读各类原因；使用“适应画布”查看完整归因结构。',
+      en: 'Zoom or pan to read contributing causes and fit the complete diagram.',
+    },
+    dataDescription: {
+      zh: '盈利未达预期的归因示意：人员、设备、方法等 6 类原因，共 20 个节点与 19 条边。',
+      en: 'Illustrative profit shortfall analysis across 6 categories, with 20 nodes and 19 edges.',
+    },
+    dataPreview: '{\n  "nodes": 20,\n  "edges": 19,\n  "categories": 6,\n  "layout": "fishbone"\n}',
+    tags: ['fishbone', 'edge.router', 'node.rect', 'label.canvas'],
+    metrics: [
+      { label: { zh: '节点', en: 'Nodes' }, value: '20' },
+      { label: { zh: '分类', en: 'Categories' }, value: '6' },
+    ],
   },
   {
     id: 'tooltip',
@@ -407,7 +511,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       zh: '固定坐标节点用于验证视口和坐标 API。',
       en: 'Fixed-position nodes make viewport and coordinate APIs observable.',
     },
-    dataPreview: '{\n  "capabilities": ["fitView", "zoomTo", "focusElement", "resize", "screenToGraph"]\n}',
+    dataPreview:
+      '{\n  "capabilities": ["fitView", "zoomTo", "focusElement", "resize", "screenToGraph"]\n}',
     tags: ['fitView', 'zoomTo', 'focusElement', 'resize', 'coordinates'],
     metrics: [{ label: { zh: '视口能力', en: 'Viewport capabilities' }, value: '5+' }],
   },
@@ -429,7 +534,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       zh: '小型关系数据用于集中展示六类公开扩展点。',
       en: 'A small graph demonstrates six categories of public extension points.',
     },
-    dataPreview: '{\n  "extensions": ["decoration", "edge", "layout", "transform", "behavior", "plugin"]\n}',
+    dataPreview:
+      '{\n  "extensions": ["decoration", "edge", "layout", "transform", "behavior", "plugin"]\n}',
     tags: ['register', 'decoration', 'layout extension', 'behavior', 'plugin'],
     metrics: [{ label: { zh: '扩展类型', en: 'Extension types' }, value: '6' }],
   },
@@ -451,7 +557,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       zh: 'AI Papers 数据包含 8,798 个节点和 71,077 条边，复用预计算 ForceAtlas2 坐标。',
       en: 'The AI Papers dataset contains 8,798 nodes and 71,077 edges with precomputed ForceAtlas2 coordinates.',
     },
-    dataPreview: '{\n  "dataset": "AI Papers",\n  "nodes": 8798,\n  "edges": 71077,\n  "layout": "precomputed ForceAtlas2 positions"\n}',
+    dataPreview:
+      '{\n  "dataset": "AI Papers",\n  "nodes": 8798,\n  "edges": 71077,\n  "layout": "precomputed ForceAtlas2 positions"\n}',
     tags: ['real dataset', 'large graph', 'WebGL', 'highlight-node'],
     metrics: [
       { label: { zh: '节点', en: 'Nodes' }, value: '8,798' },

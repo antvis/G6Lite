@@ -1,0 +1,46 @@
+{
+  "network": {
+    "source": "/examples/relationship.png",
+    "crop": [
+      728,
+      438,
+      1249,
+      781
+    ],
+    "width": 521,
+    "height": 343
+  },
+  "hierarchy": {
+    "source": "/examples/org-chart.png",
+    "crop": [
+      552,
+      384,
+      1368,
+      816
+    ],
+    "width": 816,
+    "height": 432
+  },
+  "mindmap": {
+    "source": "/examples/mindmap.png",
+    "crop": [
+      394,
+      469,
+      1484,
+      731
+    ],
+    "width": 1090,
+    "height": 262
+  },
+  "fishbone": {
+    "source": "/examples/fishbone.png",
+    "crop": [
+      283,
+      350,
+      1707,
+      850
+    ],
+    "width": 1424,
+    "height": 500
+  }
+}

@@ -40,6 +40,10 @@
   - [Combo 分组容器](/docs/examples/combo): 展示嵌套分组、折叠展开、运行时归组和数据导出
   - [常用布局切换](/docs/examples/layouts): 在同一份数据上切换 circular、force、grid 和 dagre
   - [更多内置布局](/docs/examples/layout-gallery): 比较 radial、concentric、ForceAtlas2、fruchterman、MDS 和 random
+  - [人物关系网络](/docs/examples/relationship): 使用力导布局和关系标签展示人物关联
+  - [组织架构图](/docs/examples/org-chart): 使用层级布局展示组织与团队关系
+  - [思维导图](/docs/examples/mindmap): 围绕中心主题展开双向知识分支
+  - [鱼骨图](/docs/examples/fishbone): 将问题、分类与原因组织为鱼骨归因结构
   - [Tooltip 浮层](/docs/examples/tooltip): 悬停节点或边时展示自定义业务信息
   - [点选、框选与拉索选择](/docs/examples/selection-behaviors): 在同一示例中比较 click、brush 和 lasso 选择行为
   - [视口与坐标转换](/docs/examples/viewport-controls): 验证 camera、fit、zoom、focus、resize 和屏幕/图坐标互转
@@ -100,6 +104,10 @@
   - [Combo containers](/en/docs/examples/combo): Explore nested groups, collapse and expand, runtime regrouping, and data export
   - [Common layout switching](/en/docs/examples/layouts): Switch between circular, force, grid, and dagre with the same data
   - [More built-in layouts](/en/docs/examples/layout-gallery): Compare radial, concentric, ForceAtlas2, fruchterman, MDS, and random layouts
+  - [Character relationship network](/en/docs/examples/relationship): Explore character connections with force layout and relationship labels
+  - [Organization chart](/en/docs/examples/org-chart): Show organization and team reporting relationships with hierarchical layout
+  - [Mind map](/en/docs/examples/mindmap): Organize knowledge with two-sided branches around a central topic
+  - [Fishbone diagram](/en/docs/examples/fishbone): Organize a problem, categories, and causes into a fishbone structure
   - [Tooltip](/en/docs/examples/tooltip): Show custom business information while hovering nodes or edges
   - [Click, brush, and lasso selection](/en/docs/examples/selection-behaviors): Compare click, brush, and lasso selection behaviors in one example
   - [Viewport and coordinate conversion](/en/docs/examples/viewport-controls): Validate camera, fit, zoom, focus, resize, and screen/graph coordinate conversion

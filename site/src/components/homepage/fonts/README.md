@@ -13,10 +13,6 @@
 
 Update `characters.txt` when adding Chinese characters to h1 / h2 / h3 headings. Unknown characters otherwise fall back to the site's system font.
 
-To regenerate this checked-in asset, use an isolated Python environment with `fonttools[woff]==4.61.1` and run from this directory:
-
-```sh
-python subset-heading.py <path-to-upstream-medium.otf> characters.txt heading-medium.woff2
-```
+To regenerate this checked-in asset, subset the upstream Medium OTF to the characters in `characters.txt`, preserve its copyright and license metadata, rename the derivative family to **G6Lite Preview Headings**, and export WOFF2. The current asset was generated using `fonttools[woff]==4.61.1`; regeneration tools are maintained locally.
 
 The offline generation tool is not part of the website build and adds no website or npm runtime dependency. Verify rendered headings, font coverage and the upstream license when regenerating.

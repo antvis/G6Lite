@@ -10,6 +10,6 @@ No force layout runs in the browser.
 - Mobile: 250 nodes, at most 750 edges.
 - Sampling: breadth-first traversal from `data visualization`; spanning-tree edges are retained before adding induced edges, so each sample remains connected.
 - Fields: precomputed coordinates, label, cluster and display size only; article URLs and unused metadata are omitted.
-- Regenerate from the existing repository dataset: `node site/scripts/generate-hero-graph.mjs` from the repository root.
+- Regeneration follows the sampling and normalization rules above, using the existing repository dataset. The offline generation tool is maintained locally and is not part of the website build.
 
 These are presentation samples, not benchmark workloads or claims about engine limits.

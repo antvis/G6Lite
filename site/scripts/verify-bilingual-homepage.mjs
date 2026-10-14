@@ -234,7 +234,15 @@ try {
       await page.close();
     }
   }
-  for (const path of ['/preview/ava-home', '/preview/home-v2']) {
+  const removedPreview = await browser.newPage();
+  assert.equal(
+    (
+      await removedPreview.goto(origin + '/preview/ava-home', { waitUntil: 'networkidle' })
+    ).status(),
+    404,
+  );
+  await removedPreview.close();
+  for (const path of ['/preview/home-v2']) {
     const page = await browser.newPage();
     assert.equal((await page.goto(origin + path, { waitUntil: 'networkidle' })).status(), 200);
     assert.equal(await page.locator('main[lang="zh-CN"] #architecture').count(), 1);
@@ -295,7 +303,8 @@ try {
     JSON.stringify(
       {
         results,
-        previews: 'same shared component, noindex',
+        removedAvaPreview: true,
+        existingHomeV2Preview: 'shared component, noindex',
         englishErrorRetry: true,
         languageSwitch: true,
         navigationCleanup: true,

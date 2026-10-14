@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { HomePage } from '@/components/home-page';
+import { Homepage } from '@/components/homepage/homepage';
 import { StructuredData } from '@/components/structured-data';
 import { createHomeStructuredData, createPageSeo } from '@/lib/seo';
 import { siteConfig } from '@/lib/site-config';
@@ -25,7 +25,7 @@ export default function Page() {
   return (
     <>
       <StructuredData data={createHomeStructuredData('en')} />
-      <HomePage locale="en" />
+      <Homepage locale="en" />
     </>
   );
 }

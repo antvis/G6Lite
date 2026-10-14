@@ -115,7 +115,6 @@ const zh = {
     product: ['核心能力', '精选示例', 'AI 构建'],
     developer: ['文档', '快速开始', 'API'],
     community: ['GitHub', '问题反馈', '更新记录'],
-    tagline: 'G6Lite · WebGL 图可视化',
   },
   graph: {
     region: '可交互的 Wikipedia 数据可视化关系网络',
@@ -285,7 +284,6 @@ const en: typeof zh = {
     product: ['Core capabilities', 'Examples', 'Build with AI'],
     developer: ['Docs', 'Quick start', 'API'],
     community: ['GitHub', 'Report an issue', 'Changelog'],
-    tagline: 'G6Lite · WebGL graph visualization',
   },
   graph: {
     region: 'Interactive relationship network from the Wikipedia dataset',

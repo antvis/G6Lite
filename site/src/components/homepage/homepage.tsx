@@ -487,10 +487,6 @@ function HomepageFooter({ locale }: { locale: Locale }) {
             </div>
           ))}
         </div>
-        <div className={styles.footerBottom}>
-          <span>G6Lite · MIT licensed</span>
-          <span>{copy.tagline}</span>
-        </div>
       </div>
     </footer>
   );

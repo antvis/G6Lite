@@ -60,6 +60,12 @@ try {
       assert.equal(await main.locator('h1').count(), 1);
       assert.equal(await main.locator('[data-graph-status]').count(), 1);
       assert.equal(await main.locator('#opensource').count(), 0);
+      const footer = main.locator('footer');
+      assert.equal(await footer.locator('[class*="footerBottom"]').count(), 0);
+      assert(!/MIT licensed|G6Lite · WebGL/.test(await footer.textContent()));
+      assert.equal(await footer.locator('[class*="footerBrand"] p').count(), 1);
+      assert.equal(await footer.locator('h3').count(), 4);
+      assert.equal(await footer.locator('a').count(), 13);
       assert.equal(await main.locator('h2').last().textContent(), copy.cta);
       assert.equal(await main.locator('[data-g6lite-home-navigation]').count(), 1);
       const actions = main.locator('[class*="heroAside"] [class*="actions"] a');

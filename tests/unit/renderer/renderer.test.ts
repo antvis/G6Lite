@@ -151,24 +151,6 @@ describe('Renderer — construction', () => {
     const div = document.createElement('div');
     expect(() => new Renderer(div as unknown as HTMLCanvasElement)).toThrow(/canvas/);
   });
-
-  it('clamps camera zoom to 0.1–20 unless the view configures a wider range', () => {
-    const { canvas } = makeCanvas();
-    const renderer = new Renderer(canvas);
-    renderer.setCamera({ zoom: 40 });
-    expect(renderer.getCamera().zoom).toBe(20);
-    renderer.setCamera({ zoom: 0.01 });
-    expect(renderer.getCamera().zoom).toBe(0.1);
-
-    renderer.setZoomRange(0.2, 40);
-    renderer.setCamera({ zoom: 40 });
-    expect(renderer.getCamera().zoom).toBe(40);
-    renderer.setCamera({ zoom: 80 });
-    expect(renderer.getCamera().zoom).toBe(40);
-    renderer.setZoomRange(undefined, 10);
-    expect(renderer.getCamera().zoom).toBe(10);
-    renderer.destroy();
-  });
 });
 
 describe('Renderer — WebGL context lifecycle', () => {

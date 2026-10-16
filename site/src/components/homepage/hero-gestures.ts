@@ -3,8 +3,9 @@ import type { Camera, Graph } from '../../../../src/index.ts';
 type Point = { x: number; y: number };
 type Baseline = { anchor: Point; zoom: number; distance: number; count: number };
 
+/** Matches the renderer camera clamp and the default zoomTo / zoom-canvas ceiling. */
 export const HERO_MIN_ZOOM = 0.1;
-export const HERO_MAX_ZOOM = 40;
+export const HERO_MAX_ZOOM = 20;
 
 /** Touch/pinch adapter using only the public camera API; mouse behaviors stay in G6Lite. */
 export function bindHeroGestures(

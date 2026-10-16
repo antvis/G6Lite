@@ -32,3 +32,7 @@ const graph = new Graph({
 ```
 
 Node labels default to a minimum zoom of `0.3`; edge labels default to `0.5`. Setting `hideOnLowZoom` to `false` bypasses both thresholds. These options can be updated at runtime with `graph.updateOptions({ label: ... })` without rerunning layout.
+
+## Per-node label zoom
+
+`node.style.labelMinZoom` hides one node's label until the camera zoom reaches that value. It defaults to `0`, and it can be a number or a function of the node. A label below its threshold is not drawn and does not occupy collision space. The check is independent of `hideOnLowZoom` / `nodeMinZoom`, so a hub can stay visible while other labels wait for a closer zoom. `labelMaxWidth` still truncates long text to the measured width.

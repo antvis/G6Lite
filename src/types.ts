@@ -55,6 +55,17 @@ export interface ZoomOptions {
   maxZoom?: number;
 }
 
+/**
+ * Hard camera zoom limits. `setCamera` always clamps to this range.
+ * `zoomTo`, `fitView`, and `zoom-canvas` use it when a call does not pass its own bounds.
+ */
+export interface ZoomRangeOptions {
+  /** Lowest zoom `setCamera` will apply. Defaults to 0.1. */
+  min?: number;
+  /** Highest zoom `setCamera` will apply. Defaults to 20. */
+  max?: number;
+}
+
 export interface FitViewOptions {
   /** CSS-like padding in viewport pixels. */
   padding?: number | [number, number, number, number];
@@ -507,6 +518,11 @@ export interface NodeStyleConfig {
   opacity?: NodeStyleValue<number>;
   borderRadius?: NodeStyleValue<number>;
   label?: NodeStyleValue<string | false>;
+  /**
+   * Hide this node's label until the camera zoom reaches the value. Defaults to 0.
+   * Independent of the graph-level `nodeMinZoom` gate. A hidden label does not occupy collision space.
+   */
+  labelMinZoom?: NodeStyleValue<number>;
   labelFontSize?: NodeStyleValue<number>;
   labelFontFamily?: NodeStyleValue<string>;
   labelFontWeight?: NodeStyleValue<string>;
@@ -748,6 +764,12 @@ export interface GraphOptions {
   autoFitOnResize?: boolean | number | FitViewOptions;
   /** Engine-managed node and edge label rendering policies. */
   label?: LabelOptions;
+  /**
+   * Hard camera zoom limits. Defaults to 0.1–20.
+   * Read only when the graph is constructed. `updateOptions` does not change it.
+   * A per-call `maxZoom` can be tighter, but `setCamera` will not exceed this ceiling.
+   */
+  zoomRange?: ZoomRangeOptions;
   node?: NodeConfig;
   edge?: EdgeConfig;
   combo?: ComboConfig;

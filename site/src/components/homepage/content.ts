@@ -117,7 +117,7 @@ const zh = {
     community: ['GitHub', '问题反馈', '更新记录'],
   },
   graph: {
-    region: '可交互的 Wikipedia 数据可视化关系网络',
+    region: '可交互的 AI 论文引用网络',
     loading: '正在加载关系图',
     error: '关系图暂时无法加载',
     errorHint: '请检查网络或浏览器的 WebGL 支持',
@@ -286,7 +286,7 @@ const en: typeof zh = {
     community: ['GitHub', 'Report an issue', 'Changelog'],
   },
   graph: {
-    region: 'Interactive relationship network from the Wikipedia dataset',
+    region: 'Interactive AI paper citation network',
     loading: 'Loading graph',
     error: 'The graph could not be loaded',
     errorHint: 'Check your connection and make sure your browser supports WebGL.',

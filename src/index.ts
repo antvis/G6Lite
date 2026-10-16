@@ -119,6 +119,7 @@ export type {
   TransformOption,
   ViewportPoint,
   ZoomOptions,
+  ZoomRangeOptions,
 } from './types';
 
 // ──── Behavior config types ────

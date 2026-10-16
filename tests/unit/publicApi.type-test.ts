@@ -24,11 +24,14 @@ import type {
   Handler,
   LabelOptions,
   NodeModel,
+  NodeStyleConfig,
+  NodeStyleValue,
   NodeGraphEvent,
   NodeDecorationConfig,
   PluginExtension,
   TransformExtension,
   ZoomCanvasOptions,
+  ZoomRangeOptions,
 } from '@antv/g6-lite';
 
 type Equal<Left, Right> =
@@ -88,6 +91,10 @@ type AutoFitOnResizeOption = Assert<
   Equal<GraphOptions['autoFitOnResize'], boolean | number | FitViewOptions | undefined>
 >;
 type GraphLabelOption = Assert<Equal<GraphOptions['label'], LabelOptions | undefined>>;
+type ZoomRangeOption = Assert<Equal<GraphOptions['zoomRange'], ZoomRangeOptions | undefined>>;
+type NodeLabelMinZoom = Assert<
+  Equal<NodeStyleConfig['labelMinZoom'], NodeStyleValue<number> | undefined>
+>;
 type UpdateLabelOption = Assert<
   Equal<Parameters<Graph['updateOptions']>[0]['label'], LabelOptions | undefined>
 >;

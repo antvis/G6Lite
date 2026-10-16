@@ -1,4 +1,6 @@
+import { DevReloadGuard } from '@/components/dev-reload-guard';
 import { Provider } from '@/components/provider';
+import { headingFont } from '@/lib/site-font';
 import { siteConfig } from '@/lib/site-config';
 import type { Metadata } from 'next';
 
@@ -34,7 +36,10 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
+    <html lang="zh-CN" className={headingFont.variable} suppressHydrationWarning>
+      <head>
+        <DevReloadGuard />
+      </head>
       <body className="flex flex-col min-h-screen">
         <Provider>{children}</Provider>
       </body>

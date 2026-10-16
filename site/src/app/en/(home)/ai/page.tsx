@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
-import { AiWorkspace } from '@/components/ai-workspace';
+import { AiSkillPage } from '@/components/ai-skill/ai-skill-page';
 import { StructuredData } from '@/components/structured-data';
-import { createAiWorkspaceStructuredData, createPageSeo } from '@/lib/seo';
+import { createAiSkillStructuredData, createPageSeo } from '@/lib/seo';
 
-const title = 'G6Lite AI — Generate relationship graphs with natural language';
+const title = 'G6Lite Skill — Build graphs with AI';
 const description =
-  'Describe entities and relationships in the in-site G6Lite AI workspace, then explore a graph preview, natural-language refinements, structured data, and G6Lite code.';
+  'Give an agent the antv-g6lite-graph skill and invoke $antv-g6lite-graph to generate graphs through the G6Lite package-root API, capability boundary, and validation flow.';
 
 export const metadata: Metadata = {
   title,
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     enPath: '/en/ai',
     title,
     description,
-    image: '/examples/real-dataset.png',
+    image: '/examples/relationship.png',
   }),
 };
 
@@ -26,9 +26,9 @@ export default function Page() {
   return (
     <>
       <StructuredData
-        data={createAiWorkspaceStructuredData({ locale: 'en', path: '/en/ai', description })}
+        data={createAiSkillStructuredData({ locale: 'en', path: '/en/ai', description })}
       />
-      <AiWorkspace locale="en" />
+      <AiSkillPage locale="en" />
     </>
   );
 }

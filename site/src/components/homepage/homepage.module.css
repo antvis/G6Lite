@@ -1167,63 +1167,6 @@
   line-height: 1.8;
   margin: 0 0 28px;
 }
-.footer {
-  background: var(--soft);
-  padding: 48px 0 24px;
-}
-.footerGrid {
-  display: grid;
-  grid-template-columns: 1.7fr repeat(4, 1fr);
-  gap: 30px;
-}
-.footerBrand > span {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  font-weight: 650;
-}
-.footerBrand > span > i {
-  display: block;
-  width: 1px;
-  height: 14px;
-  background: var(--line);
-}
-.footerBrand p {
-  max-width: 210px;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.8;
-  margin: 20px 0;
-}
-.footerBrand > a {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 10px;
-  color: var(--cyan-dark);
-  text-decoration: none;
-}
-.footerBrand > a svg {
-  width: 12px;
-  height: 12px;
-}
-.footerGrid h3 {
-  font-size: 10px;
-  font-weight: 500;
-  margin: 0 0 19px;
-  letter-spacing: 0.05em;
-}
-.footerGrid > div:not(:first-child) a {
-  display: block;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 11px;
-  margin-bottom: 14px;
-}
-.footerGrid a:hover {
-  color: var(--cyan-dark);
-}
 .page a:focus-visible {
   outline: 3px solid var(--cyan-dark);
   outline-offset: 4px;
@@ -1308,12 +1251,6 @@
   }
   .developerBody {
     gap: 32px;
-  }
-  .footerGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .footerBrand {
-    grid-column: 1 / -1;
   }
 }
 
@@ -1500,10 +1437,6 @@
   }
   .finalCta > p {
     font-size: 13px;
-  }
-  .footerGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 26px;
   }
 }
 

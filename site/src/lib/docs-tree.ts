@@ -7,8 +7,7 @@ const labels = {
     gettingStarted: '快速开始',
     concepts: '核心概念',
     guides: '配置指南',
-    api: 'API',
-    examples: '示例',
+    api: 'API 参考',
     metrics: '技术指标',
     compatibility: '兼容性',
   },
@@ -16,8 +15,7 @@ const labels = {
     gettingStarted: 'Quick start',
     concepts: 'Core concepts',
     guides: 'Configuration',
-    api: 'API',
-    examples: 'Examples',
+    api: 'API reference',
     metrics: 'Technical metrics',
     compatibility: 'Compatibility',
   },
@@ -33,46 +31,21 @@ export function getDocsNavigationTree(tree: PageTree.Root, locale: Locale): Page
   const concepts = findFolderByPath(tree, 'concepts');
   const guides = findFolderByPath(tree, 'guides');
   const api = findFolderByPath(tree, 'api');
-  const examples = findFolderByPath(tree, 'examples');
   const metrics = findFolderByPath(tree, 'metrics');
   const compatibility = findFolderByPath(tree, 'compatibility');
 
   const children: PageTree.Node[] = [
-    createRootFolder(
+    createSection(
       'getting-started',
       text.gettingStarted,
-      compactNodes([docsOverview, gettingStarted ? cloneNode(gettingStarted) : undefined]),
+      sectionPages(gettingStarted, [docsOverview]),
     ),
-    createRootFolder(
-      'concepts',
-      text.concepts,
-      concepts ? concepts.children.map((node) => cloneNode(node)) : [],
-    ),
-    createRootFolder(
-      'guides',
-      text.guides,
-      guides ? guides.children.map((node) => cloneNode(node)) : [],
-    ),
-    createRootFolder('api', text.api, api ? api.children.map((node) => cloneNode(node)) : []),
-    createRootFolder(
-      'examples',
-      text.examples,
-      examples ? examples.children.map((node) => cloneNode(node)) : [],
-    ),
-    createRootFolder(
-      'metrics',
-      text.metrics,
-      metrics ? metrics.children.map((node) => cloneNode(node)) : [],
-    ),
-    createRootFolder(
-      'compatibility',
-      text.compatibility,
-      compactNodes([
-        ...(compatibility ? compatibility.children.map((node) => cloneNode(node)) : []),
-        faq,
-        changelog,
-      ]),
-    ),
+    createSection('concepts', text.concepts, sectionPages(concepts)),
+    createSection('guides', text.guides, sectionPages(guides)),
+    createSection('api', text.api, sectionPages(api)),
+    createSection('metrics', text.metrics, sectionPages(metrics)),
+    createSection('compatibility', text.compatibility, sectionPages(compatibility)),
+    ...compactNodes([faq, changelog]),
   ];
 
   return { ...tree, $id: `docs-navigation-root-${locale}`, children };
@@ -82,27 +55,28 @@ function compactNodes<T extends PageTree.Node>(nodes: Array<T | undefined>): T[]
   return nodes.filter((node): node is T => node !== undefined);
 }
 
-function createRootFolder(id: string, name: string, children: PageTree.Node[]): PageTree.Folder {
+function sectionPages(
+  folder: PageTree.Folder | undefined,
+  leading: Array<PageTree.Node | undefined> = [],
+): PageTree.Node[] {
+  const children = folder ? folder.children.map((node) => cloneNode(node)) : [];
+  const index = folder?.index;
+  const indexListed =
+    !index || children.some((node) => node.type === 'page' && node.url === index.url);
+  return compactNodes([...leading, index && !indexListed ? { ...index } : undefined, ...children]);
+}
+
+/** A visible section. `root` stays off so the sidebar never swaps to a single chapter. */
+function createSection(id: string, name: string, children: PageTree.Node[]): PageTree.Folder {
   return {
     type: 'folder',
     $id: `docs-navigation-${id}`,
     name,
-    root: true,
+    root: false,
     defaultOpen: true,
     collapsible: false,
     children,
-    index: findFirstPage(children),
   };
-}
-
-function findFirstPage(nodes: PageTree.Node[]): PageTree.Item | undefined {
-  for (const node of nodes) {
-    if (node.type === 'page') return node;
-    if (node.type === 'folder') {
-      const child = node.index ?? findFirstPage(node.children);
-      if (child) return child;
-    }
-  }
 }
 
 function cloneNode<T extends PageTree.Node>(node: T): T {

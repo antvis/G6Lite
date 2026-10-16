@@ -6,12 +6,12 @@
 - Input: `OTF/SimplifiedChinese/SourceHanSansSC-Medium.otf` on the `release` branch.
 - Input SHA-256: `1df61d31687d04fd2f928a3bb6ca6cd61f0e988cc267cf317f32406edbb49f70`.
 - Weight: 500 (Medium).
-- Scope: homepage Hero and all h2 / h3 headings; body, navigation and code retain their original fonts. Headings share the Hero's 500 weight and default title color while keeping their size hierarchy.
+- Scope: headings across the whole site, including the homepage, docs, examples, and AI pages. Body, navigation, and code keep the site text font (`--font-brand`: Inter, then PingFang SC / Microsoft YaHei). Headings use this Medium face at weight 500.
 - Copyright and license: `LICENSE.txt`, also embedded in the font's name metadata.
 
 ## Updating headings
 
-Update `characters.txt` when adding Chinese characters to h1 / h2 / h3 headings. Unknown characters otherwise fall back to the site's system font.
+`characters.txt` lists the characters currently used in site copy. Add new characters there and regenerate the font when headings introduce text outside this set. Unknown characters otherwise fall back to the site's text font.
 
 To regenerate this checked-in asset, subset the upstream Medium OTF to the characters in `characters.txt`, preserve its copyright and license metadata, rename the derivative family to **G6Lite Preview Headings**, and export WOFF2. The current asset was generated using `fonttools[woff]==4.61.1`; regeneration tools are maintained locally.
 

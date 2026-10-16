@@ -25,7 +25,8 @@
     "benchmark": "npm run build && node tests/perf/run.js",
     "size": "size-limit",
     "ci": "npm run lint && npm run typecheck && npm test -- --coverage && npm run build && npm run size",
-    "site": "typedoc --options site/typedoc.json && vite build && node scripts/check-site.mjs && npm --prefix site run build && node scripts/copy-playground-to-site.mjs && node scripts/check-site-output.mjs"
+    "api-reference": "node scripts/generate-api-reference.mjs",
+    "site": "npm run api-reference && typedoc --options site/typedoc.json && vite build && node scripts/check-site.mjs && npm --prefix site run build && node scripts/copy-playground-to-site.mjs && node scripts/check-site-output.mjs"
   },
   "keywords": [
     "graph",

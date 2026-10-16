@@ -8,19 +8,13 @@ export function baseOptions(locale: Locale): BaseLayoutProps {
     locale === 'zh'
       ? {
           docs: '文档',
-          ai: 'AI',
           examples: '示例',
-          api: 'API',
-          metrics: '技术指标',
-          compatibility: '兼容性',
+          ai: 'AI',
         }
       : {
           docs: 'Docs',
-          ai: 'AI',
           examples: 'Examples',
-          api: 'API',
-          metrics: 'Metrics',
-          compatibility: 'Compatibility',
+          ai: 'AI',
         };
 
   return {
@@ -36,11 +30,8 @@ export function baseOptions(locale: Locale): BaseLayoutProps {
     },
     links: [
       { text: text.docs, url: localizedPath('/docs', locale) },
-      { text: text.ai, url: localizedPath('/ai', locale) },
       { text: text.examples, url: localizedPath('/docs/examples', locale) },
-      { text: text.api, url: localizedPath('/docs/api', locale) },
-      { text: text.metrics, url: localizedPath('/docs/metrics/performance', locale) },
-      { text: text.compatibility, url: localizedPath('/docs/compatibility', locale) },
+      { text: text.ai, url: localizedPath('/ai', locale) },
     ],
     searchToggle: { enabled: false },
     i18n: true,

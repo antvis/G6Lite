@@ -25,7 +25,7 @@ type DocsStructuredDataOptions = {
   image: string;
 };
 
-type AiWorkspaceStructuredDataOptions = {
+type AiSkillStructuredDataOptions = {
   locale: Locale;
   path: string;
   description: string;
@@ -128,29 +128,46 @@ export function createHomeStructuredData(locale: Locale): JsonLd {
   };
 }
 
-export function createAiWorkspaceStructuredData({
+export function createAiSkillStructuredData({
   locale,
   path,
   description,
-}: AiWorkspaceStructuredDataOptions): JsonLd {
-  const url = absoluteSiteUrl(path);
+}: AiSkillStructuredDataOptions): JsonLd {
+  const steps =
+    locale === 'zh'
+      ? [
+          ['提供 Skill 源', '把 skills/antv-g6lite-graph 交给 Agent，或让它从 GitHub 安装。'],
+          ['在任务里点名调用', '用 $antv-g6lite-graph 写清数据、规模、布局、容器和交互。'],
+          ['按 Skill 的顺序验收', '从最小 Graph 开始，在有尺寸的浏览器里验证，并在卸载时销毁。'],
+        ]
+      : [
+          [
+            'Provide the Skill source',
+            'Point the agent at skills/antv-g6lite-graph, or ask it to install the Skill from GitHub.',
+          ],
+          [
+            'Invoke it in the task',
+            'Start with $antv-g6lite-graph and include data, scale, layout, container, and interactions.',
+          ],
+          [
+            'Accept the result in order',
+            'Start from a minimal Graph, validate it in a sized browser, and destroy it on unmount.',
+          ],
+        ];
 
   return {
     '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: locale === 'zh' ? 'G6Lite AI 关系图工作台' : 'G6Lite AI graph workspace',
+    '@type': 'HowTo',
+    name: locale === 'zh' ? '在 AI 中使用 G6Lite Skill' : 'Use the G6Lite Skill with an AI agent',
     description,
-    url,
+    url: absoluteSiteUrl(path),
     inLanguage: localeTags[locale].html,
-    applicationCategory: 'DeveloperApplication',
-    browserRequirements: 'Requires JavaScript',
-    operatingSystem: 'Any',
-    isAccessibleForFree: true,
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-    },
+    step: steps.map(([name, text], index) => ({
+      '@type': 'HowToStep',
+      position: index + 1,
+      name,
+      text,
+    })),
   };
 }
 

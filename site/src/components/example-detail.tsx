@@ -6,11 +6,13 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 
+import exampleCrops from '@/data/example-crops';
 import { runSiteExample, type SiteExampleHandle } from '@/lib/example-runtime';
 import { localizedPath, type Locale } from '@/lib/i18n';
 import {
@@ -25,11 +27,70 @@ import { withBasePath } from '@/lib/shared';
 type DetailTab = 'guide' | 'source' | 'data';
 type PreviewStatus = 'loading' | 'ready' | 'error';
 
-const DEFAULT_WORKSPACE_SPLIT = 68;
-const MIN_PREVIEW_WIDTH = 560;
-const MIN_CODE_WIDTH = 360;
+const DEFAULT_WORKSPACE_SPLIT = 54;
+const MIN_PREVIEW_WIDTH = 360;
+const MIN_CODE_WIDTH = 300;
+
+type ExampleCrop = {
+  width: number;
+  height: number;
+  left: number;
+  top: number;
+  cropWidth: number;
+  cropHeight: number;
+};
+
+const exampleCropRecords = exampleCrops as Record<string, ExampleCrop>;
 const WORKSPACE_RESIZER_WIDTH = 12;
 const WORKSPACE_SPLIT_STORAGE_KEY = 'g6lite-example-workspace-split';
+const DIRECTORY_OPEN_STORAGE_KEY = 'g6lite-example-directory-open';
+
+function readOpenCategories(): string[] {
+  try {
+    const raw = window.sessionStorage.getItem(DIRECTORY_OPEN_STORAGE_KEY);
+    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function storeOpenCategories(ids: readonly string[]) {
+  try {
+    window.sessionStorage.setItem(DIRECTORY_OPEN_STORAGE_KEY, JSON.stringify(ids));
+  } catch {
+    // Ignore private-mode storage failures and keep the in-memory list.
+  }
+}
+
+function DirectoryThumb({ id, eager }: { id: string; eager: boolean }) {
+  const crop = exampleCropRecords[id];
+  if (!crop) return null;
+
+  return (
+    <span
+      className="example-directory-thumb"
+      style={{ '--crop-ratio': crop.cropWidth / crop.cropHeight } as CSSProperties}
+    >
+      <span className="example-directory-thumb-crop">
+        <Image
+          src={withBasePath(`/examples/${id}.png`)}
+          alt=""
+          width={crop.width}
+          height={crop.height}
+          loading={eager ? 'eager' : 'lazy'}
+          unoptimized
+          style={{
+            width: `${(crop.width / crop.cropWidth) * 100}%`,
+            height: `${(crop.height / crop.cropHeight) * 100}%`,
+            left: `${(-crop.left / crop.cropWidth) * 100}%`,
+            top: `${(-crop.top / crop.cropHeight) * 100}%`,
+          }}
+        />
+      </span>
+    </span>
+  );
+}
 
 export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
   const example = getSiteExample(id);
@@ -53,6 +114,8 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
   const [wrapSource, setWrapSource] = useState(false);
   const [query, setQuery] = useState('');
+  const directoryNavRef = useRef<HTMLElement>(null);
+  const directorySyncingRef = useRef(false);
   const [directoryOpen, setDirectoryOpen] = useState(false);
   const [previewExpanded, setPreviewExpanded] = useState(false);
   const [splitRatio, setSplitRatio] = useState(DEFAULT_WORKSPACE_SPLIT);
@@ -120,6 +183,44 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
       container.replaceChildren();
     };
   }, [example, revision]);
+
+  // Runs after React hydrates. The inline script in the directory nav has
+  // already restored sessionStorage and opened the current category, so this
+  // effect repeats that state and then owns later `toggle` events. Both are
+  // required: the script avoids a collapsed flash, and this effect keeps the
+  // saved set in sync after React takes over.
+  useLayoutEffect(() => {
+    const nav = directoryNavRef.current;
+    if (!nav || !example) return;
+
+    const searching = query.trim().length > 0;
+    const openIds = new Set(searching ? [] : readOpenCategories());
+    if (!searching) openIds.add(example.category);
+
+    directorySyncingRef.current = true;
+    for (const details of nav.querySelectorAll<HTMLDetailsElement>('details')) {
+      const categoryId = details.dataset.exampleCategory;
+      if (!categoryId) continue;
+      const nextOpen = searching || openIds.has(categoryId);
+      if (details.open !== nextOpen) details.open = nextOpen;
+    }
+    directorySyncingRef.current = false;
+    if (!searching) storeOpenCategories([...openIds]);
+    nav.dataset.directoryReady = '';
+
+    const onToggle = (event: Event) => {
+      if (directorySyncingRef.current || searching) return;
+      const target = event.target;
+      if (!(target instanceof HTMLDetailsElement) || !nav.contains(target)) return;
+      const ids = [...nav.querySelectorAll<HTMLDetailsElement>('details')]
+        .filter((details) => details.open)
+        .map((details) => details.dataset.exampleCategory)
+        .filter((categoryId): categoryId is string => Boolean(categoryId));
+      storeOpenCategories(ids);
+    };
+    nav.addEventListener('toggle', onToggle, true);
+    return () => nav.removeEventListener('toggle', onToggle, true);
+  }, [example, query]);
 
   useEffect(() => {
     if (!example) return;
@@ -380,7 +481,6 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
   }
 
   const sourceLineCount = source ? source.replace(/\n$/, '').split('\n').length : 0;
-  const sourceFilename = example.file.split('/').at(-1) ?? example.file;
   const workspaceStyle = {
     '--example-preview-fr': `${splitRatio}fr`,
     '--example-code-fr': `${100 - splitRatio}fr`,
@@ -419,15 +519,26 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                 onChange={(event) => setQuery(event.target.value)}
               />
             </label>
-            <nav aria-label={copy.directory}>
+            <noscript>
+              <style>{'.example-directory nav { visibility: visible !important; }'}</style>
+            </noscript>
+            <nav aria-label={copy.directory} ref={directoryNavRef} suppressHydrationWarning>
               {siteExampleCategories.map((category) => {
                 const entries = filteredExamples.filter((item) => item.category === category.id);
                 if (entries.length === 0) return null;
-                const containsCurrent = entries.some((item) => item.id === example.id);
+                const searching = query.trim().length > 0;
 
                 return (
-                  <details key={category.id} open={containsCurrent || query.length > 0}>
-                    <summary>
+                  <details
+                    key={category.id}
+                    data-example-category={category.id}
+                    suppressHydrationWarning
+                  >
+                    <summary
+                      onClick={(event) => {
+                        if (searching) event.preventDefault();
+                      }}
+                    >
                       <span>{localizedText(category.title, locale)}</span>
                       <small>{entries.length}</small>
                     </summary>
@@ -438,13 +549,9 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                           href={withBasePath(localizedExamplePath(item.id, locale))}
                           key={item.id}
                         >
-                          <Image
-                            src={withBasePath(`/examples/${item.id}.png`)}
-                            alt=""
-                            width={96}
-                            height={60}
-                            loading={item.id === example.id ? 'eager' : 'lazy'}
-                            unoptimized
+                          <DirectoryThumb
+                            id={item.id}
+                            eager={item.id === example.id}
                           />
                           <span>
                             <strong>{localizedText(item.title, locale)}</strong>
@@ -456,6 +563,18 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                   </details>
                 );
               })}
+              {/*
+                Runs while the nav is parsed, before hydration. Restores the
+                categories stored in sessionStorage and opens the current
+                example category. `example.category` comes from static site
+                data and is inserted with JSON.stringify. The useLayoutEffect
+                above repeats this after React mounts. Do not delete either.
+              */}
+              <script
+                dangerouslySetInnerHTML={{
+                  __html: `(()=>{var nav=document.currentScript&&document.currentScript.parentElement;try{var key=${JSON.stringify(DIRECTORY_OPEN_STORAGE_KEY)};var parsed=JSON.parse(sessionStorage.getItem(key)||"[]");var ids=new Set(Array.isArray(parsed)?parsed.filter(function(item){return typeof item==="string";}):[]);ids.add(${JSON.stringify(example.category)});sessionStorage.setItem(key,JSON.stringify(Array.from(ids)));if(nav){nav.querySelectorAll("[data-example-category]").forEach(function(el){if(ids.has(el.getAttribute("data-example-category")))el.open=true;});}}catch(e){}if(nav)nav.setAttribute("data-directory-ready","");})();`,
+                }}
+              />
             </nav>
           </div>
         </div>
@@ -616,9 +735,6 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                     {copy.data}
                   </button>
                 </div>
-                {activeTab === 'source' ? (
-                  <span className="example-code-filename">{sourceFilename}</span>
-                ) : null}
               </div>
               {activeTab === 'source' ? (
                 <div className="example-code-actions">
@@ -693,26 +809,23 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                 </div>
               )}
             </div>
-            <footer className="example-code-footer">
-              {activeTab === 'guide' ? (
-                <>
-                  <span>{copy.guideTitle}</span>
-                  <span>{localizedText(example.group, locale)}</span>
-                </>
-              ) : activeTab === 'source' ? (
-                <>
-                  <span>
-                    TypeScript · ESM{sourceLineCount ? ` · ${sourceLineCount} ${copy.lines}` : ''}
-                  </span>
-                  <span>{example.file}</span>
-                </>
-              ) : (
-                <>
-                  <span>JSON</span>
-                  <span>{copy.dataTitle}</span>
-                </>
-              )}
-            </footer>
+            {activeTab === 'guide' ? null : (
+              <footer className="example-code-footer">
+                {activeTab === 'source' ? (
+                  <>
+                    <span>
+                      TypeScript · ESM{sourceLineCount ? ` · ${sourceLineCount} ${copy.lines}` : ''}
+                    </span>
+                    <span>{example.file}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>JSON</span>
+                    <span>{copy.dataTitle}</span>
+                  </>
+                )}
+              </footer>
+            )}
           </div>
         </section>
 

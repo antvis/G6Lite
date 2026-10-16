@@ -2,10 +2,12 @@
 
 The hero graph is the sigma.js v4 homepage dataset: highly cited AI papers.
 Coordinates are the upstream precomputed ForceAtlas2 layout, translated to the origin.
-The page does not run a force layout, and it does not download a separate JSON file.
-`site/src/components/homepage/hero-graph-data.mjs` is loaded with the graph renderer.
+The page does not run a force layout. Preset coordinates load with the renderer chunk, so the hero does not wait on a separate JSON request.
 
-- 8,798 nodes and 71,077 edges.
+Desktop loads the full network. A viewport at most 767px wide, or a device that reports 4 GB of memory or two CPU cores, loads a spatially sampled subset instead.
+
+- Desktop: 8,798 nodes and 71,077 edges.
+- Compact: 1,200 nodes and 6,433 edges.
 - Source: https://github.com/jacomyal/sigma.js/tree/v4/packages/website/public/data
 - Copyright (C) 2012-2026 Alexis Jacomy, Guillaume Plique, Benoît Simard. MIT License.
 

@@ -9,7 +9,7 @@ import type { Locale } from '@/lib/i18n';
 
 import styles from './homepage.module.css';
 import { homepageCopy } from './content';
-import { bindHeroGestures } from './hero-gestures';
+import { HERO_MAX_ZOOM, HERO_MIN_ZOOM, bindHeroGestures } from './hero-gestures';
 
 type Status = 'waiting' | 'loading' | 'ready' | 'error';
 type Metrics = { nodes: number; edges: number; loadMs: number; renderMs: number };
@@ -25,7 +25,8 @@ function visualOptions(dark: boolean): Pick<GraphOptions, 'theme' | 'node' | 'ed
     node: {
       type: 'circle',
       style: {
-        // Graph units. The scaled layout is about 1800 units tall, so this stays a small dot.
+        // Graph units, multiplied by camera zoom. Overview zoom is about 0.24, so this
+        // stays a ~2px dot. The hero ceiling is 40, so a hub can grow to about 360px.
         size: 9,
         fill: (node) => palette[(Number(node.data?.cluster) || 0) % palette.length],
         strokeWidth: 0,
@@ -38,7 +39,16 @@ function visualOptions(dark: boolean): Pick<GraphOptions, 'theme' | 'node' | 'ed
         labelColor: dark ? '#d7e0ff' : '#3c4e8c',
         labelPlacement: (node) => {
           const placement = node.data?.labelPlacement;
-          return placement === 'left' || placement === 'top' || placement === 'bottom' ? placement : 'right';
+          if (
+            placement === 'center' ||
+            placement === 'left' ||
+            placement === 'top' ||
+            placement === 'bottom' ||
+            placement === 'right'
+          ) {
+            return placement;
+          }
+          return 'right';
         },
         labelMaxWidth: 180,
         labelMinZoom: (node) => Number(node.data?.labelMinZoom) || 0,
@@ -49,6 +59,20 @@ function visualOptions(dark: boolean): Pick<GraphOptions, 'theme' | 'node' | 'ed
       style: { stroke: dark ? '#485674' : '#c8d2e7', lineWidth: 0.6, endArrow: false },
     },
   };
+}
+
+/**
+ * Narrow phones, and devices that report at most 4 GB or two CPU cores, use the
+ * sampled cloud. Four cores is a normal laptop, so core count alone does not
+ * replace the desktop citation network.
+ */
+function prefersCompactHeroGraph(): boolean {
+  const narrow = window.matchMedia('(max-width: 767px)').matches;
+  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+  const lowMemory = typeof memory === 'number' && memory > 0 && memory <= 4;
+  const cores = navigator.hardwareConcurrency;
+  const lowCpu = typeof cores === 'number' && cores > 0 && cores <= 2;
+  return narrow || lowMemory || lowCpu;
 }
 
 /** A single on-demand WebGL instance with a loading state and explicit retry. */
@@ -125,7 +149,9 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
       try {
         const [module, dataModule] = await Promise.all([
           import('../../../../src/index.ts'),
-          import('./hero-graph-data.mjs'),
+          prefersCompactHeroGraph()
+            ? import('./hero-graph-mobile.mjs')
+            : import('./hero-graph-data.mjs'),
         ]);
         if (disposed || failed) return;
         const data = dataModule.createHeroGraph();
@@ -136,6 +162,8 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
           container: mount,
           data,
           // Preset coordinates: never run a force layout on the homepage.
+          // zoomRange is the camera hard ceiling. The library default stays at 20.
+          zoomRange: { min: HERO_MIN_ZOOM, max: HERO_MAX_ZOOM },
           ...visualOptions(initialDark),
           // A few hub labels stay visible. Others use labelMinZoom and appear as the camera zooms in.
           label: { hideOnLowZoom: false, scaleWithZoom: false, hideOnCollision: true },
@@ -213,7 +241,12 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
     try {
       gestureRef.current?.reset();
       if (action === 'fit') graph.fitView({ padding: 24, minZoom: 0.01 });
-      else graph.zoomBy(action === 'in' ? 1.6 : 0.625, { minZoom: 0.1, maxZoom: 40 });
+      else {
+        graph.zoomBy(action === 'in' ? 1.6 : 0.625, {
+          minZoom: HERO_MIN_ZOOM,
+          maxZoom: HERO_MAX_ZOOM,
+        });
+      }
       setCamera(graph.getCamera());
     } catch {
       failRef.current?.();

@@ -3,8 +3,8 @@ import type { Camera, Graph } from '../../../../src/index.ts';
 type Point = { x: number; y: number };
 type Baseline = { anchor: Point; zoom: number; distance: number; count: number };
 
-const MIN_ZOOM = 0.1;
-const MAX_ZOOM = 40;
+export const HERO_MIN_ZOOM = 0.1;
+export const HERO_MAX_ZOOM = 40;
 
 /** Touch/pinch adapter using only the public camera API; mouse behaviors stay in G6Lite. */
 export function bindHeroGestures(
@@ -52,7 +52,7 @@ export function bindHeroGestures(
       if (baseline && current) {
         const ratio =
           baseline.count === 2 && baseline.distance >= 4 ? current.distance / baseline.distance : 1;
-        const zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, baseline.zoom * ratio));
+        const zoom = Math.max(HERO_MIN_ZOOM, Math.min(HERO_MAX_ZOOM, baseline.zoom * ratio));
         const rect = canvas.getBoundingClientRect();
         if (!rect.width || !rect.height) return;
         // Keep the initial graph-space anchor under the moving finger/midpoint.
@@ -68,8 +68,8 @@ export function bindHeroGestures(
       } else if (wheelDelta) {
         graph.zoomBy(Math.exp(-Math.max(-200, Math.min(200, wheelDelta)) * 0.006), {
           center: wheelCenter,
-          minZoom: MIN_ZOOM,
-          maxZoom: MAX_ZOOM,
+          minZoom: HERO_MIN_ZOOM,
+          maxZoom: HERO_MAX_ZOOM,
         });
       }
       wheelDelta = 0;

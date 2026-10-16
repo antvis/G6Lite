@@ -31,6 +31,9 @@ node: {
 | `labelBackground`               | 标签底色                                       |
 | `labelBackgroundPadding`        | 底色内边距                                     |
 | `labelMaxWidth`                 | 最大宽度，超出截断                             |
+| `labelMinZoom`                  | 该节点标签开始显示的 zoom，默认 `0`。低于阈值不绘制，也不占用碰撞空间 |
+
+`labelMinZoom` 按节点生效，可以是数值或函数。它和顶层 `label.nodeMinZoom` 相互独立：即使 `hideOnLowZoom: false`，低于 `labelMinZoom` 的标签仍然隐藏。长文本保留原文，由 `labelMaxWidth` 按测量宽度截断。
 
 ## 节点图标
 

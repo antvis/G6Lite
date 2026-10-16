@@ -63,6 +63,8 @@ behaviors: ['drag-canvas', { type: 'brush-select', key: 'shift' }];
 
 `zoom-canvas` 默认按归一化 wheel delta 的百分比连续缩放，对鼠标滚轮和触控板使用同一套规则。默认 `sensitivity` 为 `1`，同一动画帧内的同方向事件会合并，单帧缩放变化最多为 `15%`，默认范围为 `0.1` 到 `20`。
 
+`GraphOptions.zoomRange` 是 `setCamera` 的硬边界，默认同样是 `0.1` 到 `20`。`zoomTo`、`fitView`，以及没有单独设置 `minZoom` / `maxZoom` 的 `zoom-canvas`，都使用这个范围。单次调用或 behavior 可以把范围收得更紧，但不能超过 `zoomRange`。
+
 ```ts
 behaviors: [
   {

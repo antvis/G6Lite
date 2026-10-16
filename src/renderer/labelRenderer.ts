@@ -372,7 +372,8 @@ export class LabelLayerRenderer {
       // Draw label (skip at very low zoom when the optimization is enabled)
       if (style.label !== undefined && showNodeLabels) {
         const text = resolveNodeValue(style.label, node, false as string | false);
-        if (text && typeof text === 'string') {
+        const labelMinZoom = resolveNodeValue(style.labelMinZoom, node, 0);
+        if (text && typeof text === 'string' && zoom >= labelMinZoom) {
           const renderedByCustomRenderer =
             customRendererName &&
             customRenderer &&

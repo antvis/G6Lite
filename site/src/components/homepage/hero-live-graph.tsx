@@ -4,8 +4,7 @@ import { useTheme } from 'fumadocs-ui/provider/base';
 import { LoaderCircle, Minus, Plus, Scan } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import type { Camera, Graph, GraphData, GraphOptions } from '../../../../src/index.ts';
-import { withBasePath } from '@/lib/shared';
+import type { Camera, Graph, GraphOptions } from '../../../../src/index.ts';
 import type { Locale } from '@/lib/i18n';
 
 import styles from './homepage.module.css';
@@ -26,10 +25,23 @@ function visualOptions(dark: boolean): Pick<GraphOptions, 'theme' | 'node' | 'ed
     node: {
       type: 'circle',
       style: {
-        size: (node) => Number(node.data?.size) || 6,
+        // Graph units. The scaled layout is about 1800 units tall, so this stays a small dot.
+        size: 9,
         fill: (node) => palette[(Number(node.data?.cluster) || 0) % palette.length],
         strokeWidth: 0,
-        label: () => false,
+        label: (node) => {
+          const label = node.data?.label;
+          return typeof label === 'string' && label ? label : false;
+        },
+        labelFontSize: 12,
+        labelFontWeight: '600',
+        labelColor: dark ? '#d7e0ff' : '#3c4e8c',
+        labelPlacement: (node) => {
+          const placement = node.data?.labelPlacement;
+          return placement === 'left' || placement === 'top' || placement === 'bottom' ? placement : 'right';
+        },
+        labelMaxWidth: 180,
+        labelMinZoom: (node) => Number(node.data?.labelMinZoom) || 0,
       },
     },
     edge: {
@@ -37,28 +49,6 @@ function visualOptions(dark: boolean): Pick<GraphOptions, 'theme' | 'node' | 'ed
       style: { stroke: dark ? '#485674' : '#c8d2e7', lineWidth: 0.6, endArrow: false },
     },
   };
-}
-
-/** Validate the same-site static asset before passing it to the renderer. */
-function graphData(value: unknown): GraphData {
-  if (!value || typeof value !== 'object') throw new Error('Invalid graph data');
-  const data = value as GraphData;
-  if (!Array.isArray(data.nodes) || !Array.isArray(data.edges))
-    throw new Error('Missing graph data');
-  if (!data.nodes.length || data.nodes.length > 500 || data.edges.length > 1500) {
-    throw new Error('Graph exceeds the homepage display budget');
-  }
-  const ids = new Set<string>();
-  for (const node of data.nodes) {
-    if (!node || typeof node.id !== 'string' || ids.has(node.id)) throw new Error('Invalid node');
-    if (!Number.isFinite(node.x) || !Number.isFinite(node.y))
-      throw new Error('Missing coordinates');
-    ids.add(node.id);
-  }
-  for (const edge of data.edges) {
-    if (!edge || !ids.has(edge.source) || !ids.has(edge.target)) throw new Error('Invalid edge');
-  }
-  return data;
 }
 
 /** A single on-demand WebGL instance with a loading state and explicit retry. */
@@ -99,7 +89,6 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
     let timer: ReturnType<typeof setTimeout> | undefined;
     let timeout: ReturnType<typeof setTimeout> | undefined;
     let canvas: HTMLCanvasElement | null = null;
-    const controller = new AbortController();
 
     const clearPending = () => {
       if (idle !== undefined) window.cancelIdleCallback(idle);
@@ -120,7 +109,6 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
       if (disposed || failed) return;
       failed = true;
       clearPending();
-      controller.abort();
       destroyGraph();
       setStatus('error');
       setCamera(null);
@@ -135,16 +123,12 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
       timeout = setTimeout(fail, 12000);
       const started = performance.now();
       try {
-        const mobile = window.matchMedia('(max-width: 767px)').matches;
-        const [module, data] = await Promise.all([
+        const [module, dataModule] = await Promise.all([
           import('../../../../src/index.ts'),
-          fetch(withBasePath(`/homepage/graph-${mobile ? 'mobile' : 'desktop'}.json`), {
-            signal: controller.signal,
-          }).then(async (response) => {
-            if (!response.ok) throw new Error('Unable to load graph');
-            return graphData(await response.json());
-          }),
+          import('./hero-graph-data.mjs'),
         ]);
+        if (disposed || failed) return;
+        const data = dataModule.createHeroGraph();
         if (disposed || failed) return;
         const loaded = performance.now();
         const initialDark = darkRef.current;
@@ -153,6 +137,8 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
           data,
           // Preset coordinates: never run a force layout on the homepage.
           ...visualOptions(initialDark),
+          // A few hub labels stay visible. Others use labelMinZoom and appear as the camera zooms in.
+          label: { hideOnLowZoom: false, scaleWithZoom: false, hideOnCollision: true },
           autoFitOnResize: { padding: 24, minZoom: 0.01 },
           behaviors: ['drag-canvas', 'drag-node', 'highlight-node'],
         });
@@ -207,14 +193,15 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
               schedule();
             }
           });
-    if (observer) observer.observe(mount);
-    else schedule();
+    const rect = mount.getBoundingClientRect();
+    const visible = rect.bottom > 0 && rect.top < window.innerHeight && rect.width > 0;
+    if (visible || !observer) schedule();
+    else observer.observe(mount);
 
     return () => {
       disposed = true;
       observer?.disconnect();
       clearPending();
-      controller.abort();
       failRef.current = null;
       destroyGraph();
     };
@@ -226,7 +213,7 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
     try {
       gestureRef.current?.reset();
       if (action === 'fit') graph.fitView({ padding: 24, minZoom: 0.01 });
-      else graph.zoomBy(action === 'in' ? 1.25 : 0.8, { minZoom: 0.1, maxZoom: 6 });
+      else graph.zoomBy(action === 'in' ? 1.6 : 0.625, { minZoom: 0.1, maxZoom: 40 });
       setCamera(graph.getCamera());
     } catch {
       failRef.current?.();

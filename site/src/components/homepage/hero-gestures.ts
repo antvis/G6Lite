@@ -4,7 +4,7 @@ type Point = { x: number; y: number };
 type Baseline = { anchor: Point; zoom: number; distance: number; count: number };
 
 const MIN_ZOOM = 0.1;
-const MAX_ZOOM = 6;
+const MAX_ZOOM = 40;
 
 /** Touch/pinch adapter using only the public camera API; mouse behaviors stay in G6Lite. */
 export function bindHeroGestures(

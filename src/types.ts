@@ -507,6 +507,8 @@ export interface NodeStyleConfig {
   opacity?: NodeStyleValue<number>;
   borderRadius?: NodeStyleValue<number>;
   label?: NodeStyleValue<string | false>;
+  /** Hide this node's label until the camera zoom reaches the value. Defaults to 0. */
+  labelMinZoom?: NodeStyleValue<number>;
   labelFontSize?: NodeStyleValue<number>;
   labelFontFamily?: NodeStyleValue<string>;
   labelFontWeight?: NodeStyleValue<string>;

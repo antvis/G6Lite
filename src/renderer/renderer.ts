@@ -2192,7 +2192,7 @@ export class Renderer {
     if (cam.x !== undefined) this.camera.x = cam.x;
     if (cam.y !== undefined) this.camera.y = cam.y;
     if (cam.zoom !== undefined) {
-      this.camera.zoom = Math.max(0.1, Math.min(20, cam.zoom));
+      this.camera.zoom = Math.max(0.1, Math.min(40, cam.zoom));
       if (this.updateCircleRenderMode(this.maxCircleExtent, this.camera.zoom)) {
         this.needToProcess = true;
       }

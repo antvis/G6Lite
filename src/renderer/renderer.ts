@@ -2203,7 +2203,8 @@ export class Renderer {
     this.zoomMax = nextMax;
     const zoom = this.camera.zoom;
     if (zoom < this.zoomMin || zoom > this.zoomMax) {
-      this.camera.zoom = Math.max(this.zoomMin, Math.min(this.zoomMax, zoom));
+      // setCamera applies the new clamp and refreshes the circle program plus picking.
+      this.setCamera({ zoom });
     }
   }
 

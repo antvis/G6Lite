@@ -766,6 +766,7 @@ export interface GraphOptions {
   label?: LabelOptions;
   /**
    * Hard camera zoom limits. Defaults to 0.1–20.
+   * Read only when the graph is constructed. `updateOptions` does not change it.
    * A per-call `maxZoom` can be tighter, but `setCamera` will not exceed this ceiling.
    */
   zoomRange?: ZoomRangeOptions;

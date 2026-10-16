@@ -24,7 +24,7 @@ Each behavior can be a string or an object with options. Picking and element eve
 
 `zoom-canvas` treats normalized wheel delta as a percentage for both mouse wheels and trackpads. The default `sensitivity` is `1`. Same-direction events within one animation frame are combined, each frame is capped at a `15%` zoom change, and the default zoom range is `0.1` to `20`.
 
-`GraphOptions.zoomRange` is the hard limit applied by `setCamera`, and it defaults to `0.1`–`20` as well. `zoomTo`, `fitView`, and a `zoom-canvas` behavior that does not set its own `minZoom` / `maxZoom` use that range. A single call or behavior can tighten the range, but it cannot exceed `zoomRange`.
+`GraphOptions.zoomRange` is the hard limit applied by `setCamera`, and it defaults to `0.1`–`20` as well. It is read only when the graph is constructed. `updateOptions` does not change it. `zoomTo`, `fitView`, and a `zoom-canvas` behavior that does not set its own `minZoom` / `maxZoom` use that range. A single call or behavior can tighten the range, but it cannot exceed `zoomRange`.
 
 ```ts
 behaviors: [

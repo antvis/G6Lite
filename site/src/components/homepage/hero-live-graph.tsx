@@ -14,7 +14,10 @@ import { HERO_MAX_ZOOM, HERO_MIN_ZOOM, bindHeroGestures } from './hero-gestures'
 type Status = 'waiting' | 'loading' | 'ready' | 'error';
 type Metrics = { nodes: number; edges: number; loadMs: number; renderMs: number };
 
-function visualOptions(dark: boolean): Pick<GraphOptions, 'theme' | 'node' | 'edge'> {
+function visualOptions(
+  dark: boolean,
+  getZoom: () => number,
+): Pick<GraphOptions, 'theme' | 'node' | 'edge'> {
   const palette = dark
     ? ['#aabcf3', '#91bfe0', '#88c6b6', '#ccc1e8']
     : ['#7186c8', '#75a9cf', '#78b9a7', '#aaa0cb'];
@@ -26,13 +29,17 @@ function visualOptions(dark: boolean): Pick<GraphOptions, 'theme' | 'node' | 'ed
       type: 'circle',
       style: {
         // Graph units, multiplied by camera zoom. Overview zoom is about 0.24, so this
-        // stays a ~2px dot. The hero ceiling is 40, so a hub can grow to about 360px.
+        // stays a ~2px dot. The camera ceiling is 20, so a hub grows to about 180px.
         size: 9,
         fill: (node) => palette[(Number(node.data?.cluster) || 0) % palette.length],
         strokeWidth: 0,
+        // label() is re-read on each draw. Returning false hides the text and keeps it
+        // out of collision. data.labelMinZoom is hero data, not a node-style field.
         label: (node) => {
           const label = node.data?.label;
-          return typeof label === 'string' && label ? label : false;
+          if (typeof label !== 'string' || !label) return false;
+          const minZoom = Number(node.data?.labelMinZoom) || 0;
+          return getZoom() >= minZoom ? label : false;
         },
         labelFontSize: 12,
         labelFontWeight: '600',
@@ -51,7 +58,6 @@ function visualOptions(dark: boolean): Pick<GraphOptions, 'theme' | 'node' | 'ed
           return 'right';
         },
         labelMaxWidth: 180,
-        labelMinZoom: (node) => Number(node.data?.labelMinZoom) || 0,
       },
     },
     edge: {
@@ -97,7 +103,7 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
     const graph = graphRef.current;
     if (!graph || !readyRef.current) return;
     try {
-      graph.updateOptions(visualOptions(darkRef.current));
+      graph.updateOptions(visualOptions(darkRef.current, () => graph.getZoom()));
     } catch {
       failRef.current?.();
     }
@@ -162,10 +168,9 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
           container: mount,
           data,
           // Preset coordinates: never run a force layout on the homepage.
-          // zoomRange is the camera hard ceiling. The library default stays at 20.
-          zoomRange: { min: HERO_MIN_ZOOM, max: HERO_MAX_ZOOM },
-          ...visualOptions(initialDark),
-          // A few hub labels stay visible. Others use labelMinZoom and appear as the camera zooms in.
+          ...visualOptions(initialDark, () => graphRef.current?.getZoom() ?? 0),
+          // Overview zoom is below the default nodeMinZoom of 0.3, so the global gate
+          // stays off. The label callback reveals more hubs as the camera zooms in.
           label: { hideOnLowZoom: false, scaleWithZoom: false, hideOnCollision: true },
           autoFitOnResize: { padding: 24, minZoom: 0.01 },
           behaviors: ['drag-canvas', 'drag-node', 'highlight-node'],
@@ -177,7 +182,9 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
         if (disposed || failed) return;
         graph.fitView({ padding: 24, minZoom: 0.01 });
         // A theme switch during async loading must also update the new instance.
-        if (initialDark !== darkRef.current) graph.updateOptions(visualOptions(darkRef.current));
+        if (initialDark !== darkRef.current) {
+          graph.updateOptions(visualOptions(darkRef.current, () => graph.getZoom()));
+        }
         readyRef.current = true;
         if (!canvas) throw new Error('Missing graph canvas');
         gestureRef.current = bindHeroGestures(

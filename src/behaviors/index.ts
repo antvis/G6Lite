@@ -72,18 +72,8 @@ export type BuiltInBehaviorConfig = BuiltInBehaviorOptionsMap[keyof BuiltInBehav
 type BehaviorFactory = (renderer: Renderer, graph: Graph, config?: BehaviorConfig) => () => void;
 
 const BEHAVIORS: Record<string, BehaviorFactory> = {
-  'zoom-canvas': (r, _g, config) => {
-    const requested = resolveZoomCanvasConfig(config);
-    const range = r.getZoomRange();
-    return zoomCanvas(
-      r,
-      resolveZoomCanvasOptions({
-        sensitivity: requested?.sensitivity,
-        minZoom: requested?.minZoom ?? range.min,
-        maxZoom: requested?.maxZoom ?? range.max,
-      }),
-    );
-  },
+  'zoom-canvas': (r, _g, config) =>
+    zoomCanvas(r, resolveZoomCanvasOptions(resolveZoomCanvasConfig(config))),
   'drag-canvas': (r, g, config) =>
     dragCanvas(r, g, {
       ignoreModifierKeys:

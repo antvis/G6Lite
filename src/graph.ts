@@ -104,7 +104,6 @@ export class Graph {
     this.containerEl = resolveContainer(options.container);
     this.canvas = ensureCanvas(this.containerEl);
     this.renderer = new Renderer(this.canvas);
-    if (options.zoomRange) this.renderer.setZoomRange(options.zoomRange.min, options.zoomRange.max);
   }
 
   get destroyed(): boolean {
@@ -943,9 +942,8 @@ export class Graph {
 
   zoomTo(zoom: number, options: ZoomOptions = {}): void {
     if (this._destroyed) return;
-    const range = this.renderer.getZoomRange();
-    const minZoom = options.minZoom ?? range.min;
-    const maxZoom = options.maxZoom ?? range.max;
+    const minZoom = options.minZoom ?? 0.1;
+    const maxZoom = options.maxZoom ?? 20;
     const nextZoom = Math.max(minZoom, Math.min(maxZoom, zoom));
     const rect = this.canvas.getBoundingClientRect();
     const center = options.center ?? {
@@ -1001,9 +999,8 @@ export class Graph {
     const scaleX = availableW / graphW;
     const scaleY = availableH / graphH;
     const rawZoom = Math.min(scaleX, scaleY) * legacyScale;
-    const range = this.renderer.getZoomRange();
-    const minZoom = typeof options === 'number' ? range.min : (options.minZoom ?? range.min);
-    const maxZoom = typeof options === 'number' ? range.max : (options.maxZoom ?? range.max);
+    const minZoom = typeof options === 'number' ? 0.1 : (options.minZoom ?? 0.1);
+    const maxZoom = typeof options === 'number' ? 20 : (options.maxZoom ?? 20);
     const zoom = Math.max(minZoom, Math.min(maxZoom, rawZoom));
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;

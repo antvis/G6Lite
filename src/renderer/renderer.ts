@@ -169,10 +169,8 @@ export class Renderer {
   private indentTarget: 'left' | 'right' = 'left';
   private trunkGap: number = 0;
 
-  // Camera. The hard zoom clamp defaults to 0.1–20; GraphOptions.zoomRange can widen one view.
+  // Camera
   private camera: Camera = createCamera();
-  private zoomMin = 0.1;
-  private zoomMax = 20;
 
   // Suppress draw during batch operations (e.g. resize + fitView on first render)
   private suppressDraw = false;
@@ -2190,29 +2188,11 @@ export class Renderer {
     return this.camera;
   }
 
-  getZoomRange(): { min: number; max: number } {
-    return { min: this.zoomMin, max: this.zoomMax };
-  }
-
-  /** Replace the hard camera zoom clamp. Invalid or inverted bounds are ignored. */
-  setZoomRange(min?: number, max?: number): void {
-    const nextMin = typeof min === 'number' && Number.isFinite(min) && min > 0 ? min : this.zoomMin;
-    const nextMax = typeof max === 'number' && Number.isFinite(max) && max > 0 ? max : this.zoomMax;
-    if (nextMin > nextMax) return;
-    this.zoomMin = nextMin;
-    this.zoomMax = nextMax;
-    const zoom = this.camera.zoom;
-    if (zoom < this.zoomMin || zoom > this.zoomMax) {
-      // setCamera applies the new clamp and refreshes the circle program plus picking.
-      this.setCamera({ zoom });
-    }
-  }
-
   setCamera(cam: Partial<Camera>): void {
     if (cam.x !== undefined) this.camera.x = cam.x;
     if (cam.y !== undefined) this.camera.y = cam.y;
     if (cam.zoom !== undefined) {
-      this.camera.zoom = Math.max(this.zoomMin, Math.min(this.zoomMax, cam.zoom));
+      this.camera.zoom = Math.max(0.1, Math.min(20, cam.zoom));
       if (this.updateCircleRenderMode(this.maxCircleExtent, this.camera.zoom)) {
         this.needToProcess = true;
       }

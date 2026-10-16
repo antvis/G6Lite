@@ -227,47 +227,6 @@ describe('LabelLayerRenderer rendering policies', () => {
     layer.destroy();
   });
 
-  it('applies per-node labelMinZoom below, at, and above the threshold', () => {
-    const ctx = makeContext();
-    const layer = createLayer(ctx);
-    const nodes: LayoutNode[] = [
-      { id: 'early', x: 40, y: 40 },
-      { id: 'late', x: 280, y: 40 },
-    ];
-    const policy = { hideOnLowZoom: false, hideOnCollision: false };
-    const draw = (zoom: number, nodeConfig: NodeConfig, drawn: LayoutNode[]) => {
-      vi.mocked(ctx.fillText).mockClear();
-      layer.draw(
-        drawn,
-        [],
-        { x: 0, y: 0, zoom },
-        nodeConfig,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        policy,
-      );
-      return vi.mocked(ctx.fillText).mock.calls.map(([text]) => text);
-    };
-
-    const numeric: NodeConfig = { style: { label: 'hub', labelMinZoom: 0.5 } };
-    expect(draw(0.49, numeric, nodes.slice(0, 1))).toEqual([]);
-    expect(draw(0.5, numeric, nodes.slice(0, 1))).toEqual(['hub']);
-    expect(draw(0.8, numeric, nodes.slice(0, 1))).toEqual(['hub']);
-
-    const functional: NodeConfig = {
-      style: {
-        label: (node) => node.id,
-        labelMinZoom: (node) => (node.id === 'early' ? 0 : 1.2),
-      },
-    };
-    expect(draw(0.2, functional, nodes)).toEqual(['early']);
-    expect(draw(1.2, functional, nodes)).toEqual(['early', 'late']);
-    layer.destroy();
-  });
-
   it('keeps default node labels at a fixed screen font size when configured', () => {
     const ctx = makeContext();
     const layer = createLayer(ctx, 2);

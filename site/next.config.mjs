@@ -14,7 +14,16 @@ const config = {
   basePath,
   allowedDevOrigins: ['127.0.0.1'],
   images: { unoptimized: true },
-  turbopack: { root: repositoryRoot },
+  // workerLayout.ts points at ./layoutWorker.js so the tsc emit resolves.
+  // The source file is layoutWorker.ts; Turbopack does not apply the Vite alias.
+  // The target must stay relative to this config. An absolute path is treated
+  // as a server-relative import and fails the build.
+  turbopack: {
+    root: repositoryRoot,
+    resolveAlias: {
+      './layoutWorker.js': '../src/layout/layoutWorker.ts',
+    },
+  },
 };
 
 export default withMDX(config);

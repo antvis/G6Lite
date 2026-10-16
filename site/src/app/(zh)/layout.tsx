@@ -37,8 +37,10 @@ export const metadata: Metadata = {
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="zh-CN" className={headingFont.variable} suppressHydrationWarning>
-      <body className="flex flex-col min-h-screen">
+      <head>
         <DevReloadGuard />
+      </head>
+      <body className="flex flex-col min-h-screen">
         <Provider>{children}</Provider>
       </body>
     </html>

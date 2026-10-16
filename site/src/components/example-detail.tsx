@@ -12,7 +12,7 @@ import {
   useState,
 } from 'react';
 
-import exampleCrops from '@/data/example-crops.json';
+import exampleCrops from '@/data/example-crops';
 import { runSiteExample, type SiteExampleHandle } from '@/lib/example-runtime';
 import { localizedPath, type Locale } from '@/lib/i18n';
 import {
@@ -184,6 +184,11 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
     };
   }, [example, revision]);
 
+  // Runs after React hydrates. The inline script in the directory nav has
+  // already restored sessionStorage and opened the current category, so this
+  // effect repeats that state and then owns later `toggle` events. Both are
+  // required: the script avoids a collapsed flash, and this effect keeps the
+  // saved set in sync after React takes over.
   useLayoutEffect(() => {
     const nav = directoryNavRef.current;
     if (!nav || !example) return;
@@ -558,6 +563,13 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                   </details>
                 );
               })}
+              {/*
+                Runs while the nav is parsed, before hydration. Restores the
+                categories stored in sessionStorage and opens the current
+                example category. `example.category` comes from static site
+                data and is inserted with JSON.stringify. The useLayoutEffect
+                above repeats this after React mounts. Do not delete either.
+              */}
               <script
                 dangerouslySetInnerHTML={{
                   __html: `(()=>{var nav=document.currentScript&&document.currentScript.parentElement;try{var key=${JSON.stringify(DIRECTORY_OPEN_STORAGE_KEY)};var parsed=JSON.parse(sessionStorage.getItem(key)||"[]");var ids=new Set(Array.isArray(parsed)?parsed.filter(function(item){return typeof item==="string";}):[]);ids.add(${JSON.stringify(example.category)});sessionStorage.setItem(key,JSON.stringify(Array.from(ids)));if(nav){nav.querySelectorAll("[data-example-category]").forEach(function(el){if(ids.has(el.getAttribute("data-example-category")))el.open=true;});}}catch(e){}if(nav)nav.setAttribute("data-directory-ready","");})();`,

@@ -39,8 +39,10 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={headingFont.variable} suppressHydrationWarning>
-      <body className="flex flex-col min-h-screen">
+      <head>
         <DevReloadGuard />
+      </head>
+      <body className="flex flex-col min-h-screen">
         <Provider>{children}</Provider>
       </body>
     </html>

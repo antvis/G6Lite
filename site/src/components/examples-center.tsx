@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 import { useMemo, useState, type CSSProperties } from 'react';
 
-import exampleCrops from '@/data/example-crops.json';
+import exampleCrops from '@/data/example-crops';
 
 import { localizedPath, type Locale } from '@/lib/i18n';
 import {

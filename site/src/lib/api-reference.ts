@@ -2,6 +2,8 @@ import { statSync } from 'node:fs';
 import path from 'node:path';
 import Slugger from 'github-slugger';
 import { toHtml } from 'hast-util-to-html';
+import type { Element, Root as HastRoot } from 'hast';
+import type { Code, Heading, Html, Parent, Root } from 'mdast';
 import { toString } from 'mdast-util-to-string';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
@@ -16,38 +18,25 @@ export type ApiReferenceTocItem = {
   depth: number;
 };
 
-type MarkdownNode = {
-  type?: string;
-  depth?: number;
-  value?: string;
-  children?: MarkdownNode[];
-  data?: { hProperties?: Record<string, string> };
-};
-
 const referencePath = path.join(process.cwd(), 'src/data/api-reference.md');
 
 let highlighterPromise: Promise<Highlighter> | null = null;
 let rendered: { mtimeMs: number; html: string; toc: ApiReferenceTocItem[] } | null = null;
 
-type HastNode = {
-  type: string;
-  tagName?: string;
-  properties?: { className?: string[] };
-  children?: HastNode[];
-};
-
-function wrapTables(node: HastNode) {
-  if (!node.children) return;
-  node.children = node.children.map((child) => {
+function wrapTables(node: HastRoot | Element) {
+  for (let index = 0; index < node.children.length; index += 1) {
+    const child = node.children[index];
+    if (!child || child.type !== 'element') continue;
     wrapTables(child);
-    if (child.type !== 'element' || child.tagName !== 'table') return child;
-    return {
+    if (child.tagName !== 'table') continue;
+    const wrapper: Element = {
       type: 'element',
       tagName: 'div',
       properties: { className: ['api-table'] },
       children: [child],
     };
-  });
+    node.children[index] = wrapper;
+  }
 }
 
 function getHighlighter() {
@@ -71,55 +60,54 @@ export async function renderApiReference(): Promise<{ html: string; toc: ApiRefe
   if (rendered?.mtimeMs === mtimeMs) return rendered;
 
   const markdown = readApiReferenceMarkdown();
-  const tree = remark().use(remarkGfm).parse(markdown) as MarkdownNode;
+  const tree: Root = remark().use(remarkGfm).parse(markdown);
   const slugger = new Slugger();
   const toc: ApiReferenceTocItem[] = [];
-  const codeNodes: MarkdownNode[] = [];
+  const codeNodes: { node: Code; index: number; parent: Parent }[] = [];
 
-  visit(tree, (node: MarkdownNode) => {
-    if (node.type === 'heading') {
-      const title = toString(node);
-      const id = slugger.slug(title);
-      node.data ??= {};
-      node.data.hProperties ??= {};
-      node.data.hProperties.id = id;
-      const depth = node.depth ?? 1;
-      if (depth <= 3) {
-        toc.push({
-          title: title.replace(/([a-z0-9])([A-Z])/g, '$1\u200b$2'),
-          url: `#${id}`,
-          depth,
-        });
-      }
-      return;
+  visit(tree, 'heading', (node: Heading) => {
+    const title = toString(node);
+    const id = slugger.slug(title);
+    node.data ??= {};
+    node.data.hProperties = { ...node.data.hProperties, id };
+    if (node.depth <= 3) {
+      toc.push({
+        title: title.replace(/([a-z0-9])([A-Z])/g, '$1\u200b$2'),
+        url: `#${id}`,
+        depth: node.depth,
+      });
     }
-    if (node.type === 'code') codeNodes.push(node);
+  });
+  visit(tree, 'code', (node: Code, index, parent) => {
+    if (!parent || typeof index !== 'number') return;
+    codeNodes.push({ node, index, parent });
   });
 
   const highlighter = await getHighlighter();
   for (let index = 0; index < codeNodes.length; index += 40) {
     const slice = codeNodes.slice(index, index + 40);
     await Promise.all(
-      slice.map(async (node) => {
-        const code = node.value ?? '';
+      slice.map(async ({ node, index: childIndex, parent }) => {
+        const code = node.value;
+        let value: string;
         try {
           const highlighted = highlighter.codeToHtml(code, {
             lang: 'typescript',
             themes: { light: 'github-light', dark: 'github-dark' },
           });
-          node.type = 'html';
-          node.value = `<figure class="shiki not-prose api-code"><div class="api-code-viewport">${highlighted}</div></figure>`;
+          value = `<figure class="shiki not-prose api-code"><div class="api-code-viewport">${highlighted}</div></figure>`;
         } catch {
-          node.type = 'html';
-          node.value = `<figure class="shiki not-prose api-code"><div class="api-code-viewport"><pre><code>${escapeHtml(code)}</code></pre></div></figure>`;
+          value = `<figure class="shiki not-prose api-code"><div class="api-code-viewport"><pre><code>${escapeHtml(code)}</code></pre></div></figure>`;
         }
+        const replacement: Html = { type: 'html', value };
+        parent.children[childIndex] = replacement;
       }),
     );
   }
 
   const hast = (await remark()
     .use(remarkRehype, { allowDangerousHtml: true })
-    .run(tree)) as HastNode;
+    .run(tree)) as unknown as HastRoot;
   wrapTables(hast);
   const html = toHtml(hast, { allowDangerousHtml: true });
   rendered = { mtimeMs, html, toc };

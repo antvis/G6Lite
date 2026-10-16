@@ -9,6 +9,8 @@ const catalog = JSON.parse(
   readFileSync(resolve(repositoryRoot, 'playground/demos/catalog.json'), 'utf8'),
 );
 const OUT_DIR = resolve(__dirname, '../public/examples');
+// Crop windows live in site/src/data/example-crops.ts and are hand-tuned to
+// these screenshots. Recapturing does not update them.
 const BASE = process.env.CAPTURE_BASE ?? 'http://localhost:5179';
 
 const defaultIds = catalog

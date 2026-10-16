@@ -990,7 +990,7 @@ export class Graph {
       this.canvas.height || (this.containerEl.clientHeight || 600) * (window.devicePixelRatio ?? 1);
     const dpr = Math.min(2, window.devicePixelRatio ?? 1);
     const legacyScale = typeof options === 'number' ? options : 1;
-    const padding = typeof options === 'number' ? 64 : (options.padding ?? 0);
+    const padding = typeof options === 'number' ? 0 : (options.padding ?? 0);
     const [pt, pr, pb, pl] = Array.isArray(padding)
       ? padding
       : [padding, padding, padding, padding];

@@ -1,4 +1,13 @@
-{
+/**
+ * Hand-tuned crop windows for example thumbnails.
+ *
+ * `width` and `height` are the pixel size of the screenshot written by
+ * `npm run examples:capture` (`site/scripts/capture-demo-thumbnails.mjs`).
+ * `left`, `top`, `cropWidth`, and `cropHeight` select the visible region
+ * in that image. The capture script does not update these numbers. After a
+ * recapture, adjust any entry whose screenshot size or framing changed.
+ */
+const exampleCrops = {
   "basic": {
     "width": 1920,
     "height": 1200,
@@ -167,4 +176,6 @@
     "cropWidth": 1331,
     "cropHeight": 852
   }
-}
+} as const;
+
+export default exampleCrops;

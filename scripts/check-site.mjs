@@ -333,7 +333,6 @@ for (const requiredSignal of [
   'skills/antv-g6lite-graph',
   'https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph',
   'Install the skill from',
-  'https://sive.antv.antgroup.com/qa',
 ]) {
   if (!aiSkillSource.includes(requiredSignal)) {
     fail(`The AI Skill page does not include ${requiredSignal}`);

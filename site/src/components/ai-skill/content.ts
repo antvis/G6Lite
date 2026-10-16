@@ -5,9 +5,6 @@ export const skillRepoPath = 'skills/antv-g6lite-graph';
 export const skillSourceUrl =
   'https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph';
 
-/** Reserved Sive experience entry for the AI page. */
-export const siveExperienceUrl = 'https://sive.antv.antgroup.com/qa';
-
 export const installCommand = 'npx skills add antvis/G6Lite --skill antv-g6lite-graph';
 
 export const installPrompt = `Install the skill from\n${skillSourceUrl}`;
@@ -43,7 +40,6 @@ const zh = {
   cardTitle: '把 G6Lite Skill 交给 Agent',
   cardBody:
     '支持 Skill 的 Agent 会读取 $antv-g6lite-graph。它先确认数据规模、布局、交互和运行环境，再按当前 @antv/g6-lite 包根 API 写出可以继续验证的实现。',
-  trySive: '去 Sive 体验',
   readGuide: '阅读 Skill 说明',
   copy: '复制',
   copied: '已复制',
@@ -82,7 +78,6 @@ const en: typeof zh = {
   cardTitle: 'Give your agent the G6Lite Skill.',
   cardBody:
     'An agent that supports Skills reads $antv-g6lite-graph. It checks data scale, layout, interactions, and the runtime, then writes an implementation through the current @antv/g6-lite package-root API.',
-  trySive: 'Try it in Sive',
   readGuide: 'Read the Skill guide',
   copy: 'copy',
   copied: 'Copied',

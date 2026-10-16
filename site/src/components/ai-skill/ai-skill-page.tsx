@@ -6,7 +6,7 @@ import { headingFont } from '@/lib/site-font';
 import { localizedPath, type Locale } from '@/lib/i18n';
 
 import styles from './ai-skill-page.module.css';
-import { aiSkillCopy, siveExperienceUrl, terminalText, type TerminalLine } from './content';
+import { aiSkillCopy, terminalText, type TerminalLine } from './content';
 import { CopyPrompt } from './copy-prompt';
 
 function Terminal({ lines, label }: { lines: TerminalLine[]; label: string }) {
@@ -71,9 +71,6 @@ export function AiSkillPage({ locale }: { locale: Locale }) {
               <h2>{copy.cardTitle}</h2>
               <p>{copy.cardBody}</p>
               <div className={styles.cardLinks}>
-                <a href={siveExperienceUrl} target="_blank" rel="noreferrer">
-                  {copy.trySive} <ArrowUpRight aria-hidden="true" />
-                </a>
                 <Link href={localizedPath('/docs/ai', locale)}>
                   {copy.readGuide} <ArrowUpRight aria-hidden="true" />
                 </Link>

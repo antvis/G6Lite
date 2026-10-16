@@ -1,4 +1,6 @@
+import { DevReloadGuard } from '@/components/dev-reload-guard';
 import { Provider } from '@/components/provider';
+import { headingFont } from '@/lib/site-font';
 import { siteConfig } from '@/lib/site-config';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
@@ -36,8 +38,9 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={headingFont.variable} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
+        <DevReloadGuard />
         <Provider>{children}</Provider>
       </body>
     </html>

@@ -1,5 +1,6 @@
 import { docs } from 'collections/server';
 import { loader } from 'fumadocs-core/source';
+import { readApiReferenceMarkdown } from './api-reference-source';
 import { i18n, localizedDocsPath, type Locale } from './i18n';
 import { docsContentRoute, docsImageRoute, withBasePath } from './shared';
 
@@ -36,7 +37,10 @@ export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
 }
 
 export async function getLLMText(page: (typeof source)['$inferPage']) {
-  const processed = await page.data.getText('processed');
+  const processed =
+    page.slugs.length === 1 && page.slugs[0] === 'api'
+      ? readApiReferenceMarkdown()
+      : await page.data.getText('processed');
 
   return `# ${page.data.title} (${page.url})
 

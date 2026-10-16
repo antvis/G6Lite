@@ -2,6 +2,7 @@
  * Demo: 布局 — 同一数据切换 circular / force / grid / dagre
  */
 import { Graph } from '../../src/index.ts';
+import { mountChoiceSelect } from './demo-panel.ts';
 
 const data = {
   nodes: [
@@ -27,12 +28,13 @@ let currentGraph: Graph | null = null;
 
 export async function run(container: string | HTMLElement) {
   const wrapper = typeof container === 'string'
-    ? document.querySelector(container)!
+    ? document.querySelector<HTMLElement>(container)!
     : container;
+  wrapper.replaceChildren();
+  wrapper.style.cssText = 'position:relative;width:100%;height:100%;min-height:0;';
+
   const canvasParent = document.createElement('div');
-  canvasParent.id = 'layout-demo-canvas';
-  canvasParent.style.cssText = 'flex:1;min-height:0;';
-  wrapper.innerHTML = '';
+  canvasParent.style.cssText = 'position:absolute;inset:0;';
   wrapper.appendChild(canvasParent);
 
   async function renderLayout(index: number) {
@@ -51,24 +53,19 @@ export async function run(container: string | HTMLElement) {
     await currentGraph.render();
   }
 
-  const btnBar = document.createElement('div');
-  btnBar.style.cssText = 'padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap;background:#f0f0f0;';
-  ['Circular', 'Force', 'Grid', 'Dagre'].forEach((label, i) => {
-    const btn = document.createElement('button');
-    btn.textContent = label;
-    btn.style.cssText = 'padding:6px 12px;cursor:pointer;border-radius:4px;border:1px solid #ccc;background:#fff;color:#333;';
-    btn.onclick = () => renderLayout(i);
-    btnBar.appendChild(btn);
-  });
-  wrapper.insertBefore(btnBar, canvasParent);
-
   await renderLayout(0);
+
+  mountChoiceSelect(wrapper, '布局', ['Circular', 'Force', 'Grid', 'Dagre'], 'Circular', (value) => {
+    const index = ['Circular', 'Force', 'Grid', 'Dagre'].indexOf(value);
+    if (index >= 0) void renderLayout(index);
+  });
 
   return {
     fitView: () => currentGraph?.fitView({ padding: 64, maxZoom: 1.5 }),
     destroy: () => {
       currentGraph?.destroy();
       currentGraph = null;
+      wrapper.querySelector('[data-canvas-controls]')?.remove();
     },
   };
 }

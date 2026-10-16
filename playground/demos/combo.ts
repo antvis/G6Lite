@@ -5,6 +5,7 @@
  */
 
 import { Graph } from '../../src/index.ts';
+import { mountActionSelect } from './demo-panel.ts';
 
 const NODE_COLORS: Record<string, string> = {
   client: '#7D9FD3',
@@ -208,66 +209,8 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
   graph.fitView(0.82);
 
-  const toolbarStyle = document.createElement('style');
-  toolbarStyle.textContent = `
-    .combo-demo-toolbar {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      z-index: 10;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 6px;
-      width: fit-content;
-      max-width: calc(100% - 24px);
-      padding: 7px;
-      border: 1px solid rgba(148, 163, 184, 0.26);
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.94);
-      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-      color: #475569;
-      font: 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      backdrop-filter: blur(6px);
-    }
-    .combo-demo-toolbar button {
-      height: 26px;
-      padding: 0 9px;
-      border: 1px solid #dbe3ee;
-      border-radius: 6px;
-      background: #fff;
-      color: #475569;
-      font: inherit;
-      cursor: pointer;
-      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
-    }
-    .combo-demo-toolbar button:hover {
-      border-color: #8fb3e8;
-      background: #f4f8fd;
-      color: #315f9e;
-    }
-    .combo-demo-toolbar button:focus-visible {
-      outline: 2px solid rgba(59, 130, 246, 0.36);
-      outline-offset: 1px;
-    }
-    .combo-demo-toolbar button:disabled {
-      cursor: default;
-      opacity: 0.55;
-    }
-    .combo-demo-toolbar__status {
-      min-width: 72px;
-      color: #7c8798;
-      font-size: 11px;
-      white-space: nowrap;
-    }
-  `;
-  containerEl.appendChild(toolbarStyle);
-
   const toolbar = document.createElement('div');
-  toolbar.className = 'combo-demo-toolbar';
-  toolbar.setAttribute('data-capture-ignore', '');
-  toolbar.setAttribute('aria-label', 'Combo 示例工具条');
+  toolbar.hidden = true;
   toolbar.innerHTML = `
     <button type="button" data-action="collapse-all">全部折叠</button>
     <button type="button" data-action="expand-all">全部展开</button>
@@ -275,13 +218,15 @@ export async function run(container: string | HTMLElement) {
     <button type="button" data-action="move-console">控制台加入服务层</button>
     <button type="button" data-action="create-runtime">创建可观测分组</button>
     <button type="button" data-action="export">导出数据</button>
-    <output class="combo-demo-toolbar__status" aria-live="polite">固定坐标 · 可拖拽</output>
   `;
   containerEl.appendChild(toolbar);
+  mountActionSelect(containerEl, [...toolbar.querySelectorAll('button')]);
 
-  const status = toolbar.querySelector<HTMLOutputElement>(
-    '.combo-demo-toolbar__status',
-  )!;
+  const status = document.createElement('div');
+  status.style.cssText =
+    'position:absolute;left:12px;bottom:10px;z-index:20;color:#64748b;font:12px/1.4 system-ui,sans-serif;pointer-events:none;';
+  status.textContent = '固定坐标 · 可拖拽';
+  containerEl.appendChild(status);
   const consoleButton = toolbar.querySelector<HTMLButtonElement>(
     '[data-action="move-console"]',
   )!;
@@ -391,7 +336,8 @@ export async function run(container: string | HTMLElement) {
     destroy() {
       graph.destroy();
       toolbar.remove();
-      toolbarStyle.remove();
+      status.remove();
+      containerEl.querySelector('[data-canvas-controls]')?.remove();
     },
   };
 }

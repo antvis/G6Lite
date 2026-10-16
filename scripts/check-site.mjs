@@ -244,10 +244,10 @@ for (const [file, snippet] of snippets.slice(1)) {
 const aiArchitectureFiles = [
   'site/src/app/(zh)/(home)/ai/page.tsx',
   'site/src/app/en/(home)/ai/page.tsx',
-  'site/src/components/ai-workspace.tsx',
-  'site/src/components/ai-native-graph.tsx',
-  'site/src/components/ai-workspace.module.css',
-  'site/src/lib/ai-workspace-mock.ts',
+  'site/src/components/ai-skill/ai-skill-page.tsx',
+  'site/src/components/ai-skill/ai-skill-page.module.css',
+  'site/src/components/ai-skill/content.ts',
+  'site/src/components/ai-skill/copy-prompt.tsx',
   'site/content/docs/zh/ai.mdx',
   'site/content/docs/en/ai.mdx',
   'site/content/docs/zh/concepts/architecture.mdx',
@@ -309,49 +309,50 @@ if (layoutSource.includes("{ text: text.ai, url: localizedPath('/docs/ai', local
   fail('The shared top navigation still points AI to the documentation page');
 }
 
-const aiWorkspaceSource = read('site/src/components/ai-workspace.tsx');
-const aiMockSource = read('site/src/lib/ai-workspace-mock.ts');
-const aiNativeGraphSource = read('site/src/components/ai-native-graph.tsx');
+const aiPageSources = [
+  'site/src/app/(zh)/(home)/ai/page.tsx',
+  'site/src/app/en/(home)/ai/page.tsx',
+].map((file) => read(file));
+for (const source of aiPageSources) {
+  if (!source.includes('<AiSkillPage')) {
+    fail('The AI route does not render the G6Lite Skill page');
+  }
+  if (source.includes('AiWorkspace')) {
+    fail('The AI route still renders the in-site mock workspace');
+  }
+}
+const aiSkillSource = [
+  'site/src/components/ai-skill/ai-skill-page.tsx',
+  'site/src/components/ai-skill/content.ts',
+]
+  .map((file) => read(file))
+  .join('\n');
 for (const requiredSignal of [
-  'In-site prototype · Mock',
-  'G6Lite 原生 AI 画布',
-  '<AiNativeGraph',
-  'needsMockPromptClarification',
-  'serializeMockGraph(result.graph)',
-  'buildMockCode(result.graph)',
+  'antv-g6lite-graph',
+  '$antv-g6lite-graph',
+  'skills/antv-g6lite-graph',
+  'https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph',
+  'Install the skill from',
+  'https://sive.antv.antgroup.com/qa',
 ]) {
-  if (!aiWorkspaceSource.includes(requiredSignal)) {
-    fail(`The AI workspace does not include ${requiredSignal}`);
+  if (!aiSkillSource.includes(requiredSignal)) {
+    fail(`The AI Skill page does not include ${requiredSignal}`);
   }
 }
-for (const requiredNativeSignal of [
-  "import('../../../src/index.ts')",
-  'new GraphConstructor',
-  'await instance.render()',
-  'await instance.setData',
-  'instance.fitView',
-  'instance?.destroy()',
-  "mount.dataset.graphEngine = 'g6lite'",
+for (const legacyFile of [
+  'site/src/components/ai-workspace.tsx',
+  'site/src/components/ai-native-graph.tsx',
+  'site/src/components/ai-workspace.module.css',
+  'site/src/lib/ai-workspace-mock.ts',
+  'site/src/components/ai-graph-preview.tsx',
 ]) {
-  if (!aiNativeGraphSource.includes(requiredNativeSignal)) {
-    fail(`The native AI graph does not include ${requiredNativeSignal}`);
+  if (existsSync(path.join(root, legacyFile))) {
+    fail(`The legacy AI workspace artifact still exists: ${legacyFile}`);
   }
 }
-if (existsSync(path.join(root, 'site/src/components/ai-graph-preview.tsx'))) {
-  fail('The legacy SVG AI graph preview still exists');
-}
-for (const forbiddenIntegration of [
-  'sive.antv.antgroup.com',
-  '/api/chat/',
-  'OPENROUTER_API_KEY',
-  '<iframe',
-]) {
-  if (
-    aiWorkspaceSource.includes(forbiddenIntegration) ||
-    aiMockSource.includes(forbiddenIntegration) ||
-    aiNativeGraphSource.includes(forbiddenIntegration)
-  ) {
-    fail(`The in-site AI prototype contains forbidden integration ${forbiddenIntegration}`);
+for (const forbiddenIntegration of ['/api/chat/', 'OPENROUTER_API_KEY', '<iframe']) {
+  if (aiSkillSource.includes(forbiddenIntegration)) {
+    fail(`The AI Skill page contains forbidden integration ${forbiddenIntegration}`);
   }
 }
 

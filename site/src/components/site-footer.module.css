@@ -1,0 +1,120 @@
+.footer {
+  --cyan-dark: #5366ad;
+  --ink: #20242d;
+  --muted: #707c8d;
+  --line: rgba(35, 53, 75, 0.11);
+  --soft: #f8f9fd;
+  margin-top: auto;
+  background: var(--soft);
+  padding: 48px 0 24px;
+  color: var(--ink);
+  font-family: var(--font-brand), ui-sans-serif, sans-serif;
+}
+
+.shell {
+  width: min(100% - 64px, 1160px);
+  margin-inline: auto;
+}
+
+.footerGrid {
+  display: grid;
+  grid-template-columns: 1.7fr repeat(4, 1fr);
+  gap: 30px;
+}
+
+.footerBrand > span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.footerBrand > span > i {
+  display: block;
+  width: 1px;
+  height: 14px;
+  background: var(--line);
+}
+
+.footerBrand p {
+  max-width: 210px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 20px 0;
+}
+
+.footerBrand > a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--cyan-dark);
+  text-decoration: none;
+}
+
+.footerBrand > a svg {
+  width: 12px;
+  height: 12px;
+}
+
+.footerGrid h3 {
+  margin: 0 0 19px;
+  color: var(--ink);
+  font-family: var(--font-homepage-heading), var(--font-brand), ui-sans-serif, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.footerGrid > div:not(:first-child) a {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--cyan-dark);
+}
+
+.footer a:focus-visible {
+  outline: 3px solid var(--cyan-dark);
+  outline-offset: 4px;
+  border-radius: 5px;
+}
+
+:global(.dark) .footer {
+  --ink: #edf4fa;
+  --muted: #a1afbf;
+  --line: rgba(165, 193, 221, 0.16);
+  --soft: #171e28;
+  --cyan-dark: #c4d0fa;
+}
+
+@media (max-width: 1023px) {
+  .shell {
+    width: min(100% - 48px, 1160px);
+  }
+
+  .footerGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .footerBrand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .shell {
+    width: min(100% - 36px, 1160px);
+  }
+
+  .footerGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px;
+  }
+}

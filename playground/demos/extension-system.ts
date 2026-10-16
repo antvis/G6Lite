@@ -106,7 +106,7 @@ interface ExtensionHintPluginOptions extends PluginOptions<typeof EXTENSION_HINT
 
 function createExtensionHintPlugin(): PluginExtension<ExtensionHintPluginOptions> {
   let hint: HTMLElement | undefined;
-  let text = '点击节点切换 32px / 68px，悬停 ··· 展开';
+  let text = '点击节点切换 32px / 68px · 悬停 ··· 展开徽章';
 
   return {
     init(_context, options) {
@@ -120,12 +120,10 @@ function createExtensionHintPlugin(): PluginExtension<ExtensionHintPluginOptions
         position: 'absolute',
         left: '12px',
         top: '12px',
-        padding: '6px 10px',
-        border: '1px solid #d9d9d9',
-        borderRadius: '6px',
-        background: '#fff',
-        color: '#595959',
-        fontSize: '12px',
+        zIndex: '20',
+        maxWidth: 'calc(100% - 24px)',
+        color: '#64748b',
+        font: '12px/1.4 system-ui, sans-serif',
         pointerEvents: 'none',
       });
       container.appendChild(hint);
@@ -218,7 +216,7 @@ export async function run(container: string | HTMLElement) {
     plugins: [
       {
         type: EXTENSION_HINT_PLUGIN,
-        text: '点击节点切换 32px / 68px，悬停 ··· 展开',
+        text: '点击节点切换 32px / 68px · 悬停 ··· 展开徽章',
       } satisfies ExtensionHintPluginOptions,
     ],
     node: {

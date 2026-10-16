@@ -527,8 +527,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Combine decoration, edge, layout, transform, behavior, and plugin extensions.',
     },
     interaction: {
-      zh: '使用示例控制项触发扩展行为，观察注册能力的组合效果。',
-      en: 'Use the example controls to trigger and combine registered extensions.',
+      zh: '点击节点切换大小，悬停 ··· 展开被收起的徽章。',
+      en: 'Click a node to change its size, and hover ··· to expand hidden badges.',
     },
     dataDescription: {
       zh: '小型关系数据用于集中展示六类公开扩展点。',

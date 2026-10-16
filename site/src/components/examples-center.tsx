@@ -1,7 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
+import { ArrowUpRight } from 'lucide-react';
+import { useMemo, useState, type CSSProperties } from 'react';
+
+import exampleCrops from '@/data/example-crops.json';
 
 import { localizedPath, type Locale } from '@/lib/i18n';
 import {
@@ -12,6 +15,11 @@ import {
   siteExamples,
 } from '@/lib/site-examples';
 import { withBasePath } from '@/lib/shared';
+
+const crops = exampleCrops as Record<
+  string,
+  { width: number; height: number; left: number; top: number; cropWidth: number; cropHeight: number }
+>;
 
 export function ExamplesCenter({ locale }: { locale: Locale }) {
   const [query, setQuery] = useState('');
@@ -28,6 +36,7 @@ export function ExamplesCenter({ locale }: { locale: Locale }) {
           examples: '官网示例',
           categories: '能力分类',
           empty: '没有找到匹配的示例，请尝试其他关键词。',
+          open: '查看示例',
         }
       : {
           back: 'Back to docs',
@@ -40,6 +49,7 @@ export function ExamplesCenter({ locale }: { locale: Locale }) {
           examples: 'website examples',
           categories: 'capability groups',
           empty: 'No examples match this search. Try another keyword.',
+          open: 'View example',
         };
 
   const normalizedQuery = query.trim().toLocaleLowerCase();
@@ -130,38 +140,54 @@ export function ExamplesCenter({ locale }: { locale: Locale }) {
                   </header>
 
                   <div className="examples-card-grid">
-                    {examples.map((example) => (
+                    {examples.map((example) => {
+                      const crop = crops[example.id];
+                      return (
                       <a
                         className="examples-center-card"
                         href={withBasePath(localizedExamplePath(example.id, locale))}
                         key={example.id}
                       >
                         <span className="examples-center-card-image">
-                          <Image
-                            src={withBasePath(`/examples/${example.id}.png`)}
-                            alt={localizedText(example.title, locale)}
-                            width={960}
-                            height={600}
-                            loading={example.id === siteExamples[0]?.id ? 'eager' : 'lazy'}
-                            unoptimized
-                          />
-                          <span>{localizedText(example.group, locale)}</span>
+                          {crop ? (
+                            <span
+                              className="examples-center-card-crop"
+                              style={{ '--crop-ratio': crop.cropWidth / crop.cropHeight } as CSSProperties}
+                            >
+                              <Image
+                                src={withBasePath(`/examples/${example.id}.png`)}
+                                alt={localizedText(example.title, locale)}
+                                width={crop.width}
+                                height={crop.height}
+                                loading={example.id === siteExamples[0]?.id ? 'eager' : 'lazy'}
+                                unoptimized
+                                style={{
+                                  width: `${(crop.width / crop.cropWidth) * 100}%`,
+                                  height: `${(crop.height / crop.cropHeight) * 100}%`,
+                                  left: `${(-crop.left / crop.cropWidth) * 100}%`,
+                                  top: `${(-crop.top / crop.cropHeight) * 100}%`,
+                                }}
+                              />
+                            </span>
+                          ) : null}
                         </span>
                         <span className="examples-center-card-body">
-                          <span className="examples-center-card-title">
-                            {localizedText(example.title, locale)}
+                          <span className="examples-center-card-title-row">
+                            <span className="examples-center-card-title">
+                              {localizedText(example.title, locale)}
+                            </span>
+                            <span className="examples-center-card-action">
+                              <span>{copy.open}</span>
+                              <ArrowUpRight aria-hidden="true" />
+                            </span>
                           </span>
                           <span className="examples-center-card-description">
                             {localizedText(example.description, locale)}
                           </span>
-                          <span className="examples-center-card-tags">
-                            {example.tags.slice(0, 3).map((tag) => (
-                              <span key={tag}>{tag}</span>
-                            ))}
-                          </span>
                         </span>
                       </a>
-                    ))}
+                      );
+                    })}
                   </div>
                 </section>
               );

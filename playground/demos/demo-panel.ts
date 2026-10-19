@@ -117,12 +117,17 @@ function textWidth(text: string) {
   return Math.ceil(width);
 }
 
+export function mountCanvasControl(container: HTMLElement, control: HTMLElement) {
+  ensureCluster(container).append(control);
+}
+
 function ensureCluster(container: HTMLElement) {
   container.style.position = 'relative';
   let cluster = container.querySelector<HTMLElement>(':scope > [data-canvas-controls]');
   if (!cluster) {
     cluster = document.createElement('div');
     cluster.dataset.canvasControls = '';
+    cluster.dataset.captureIgnore = '';
     cluster.style.cssText = CLUSTER_STYLE;
     container.append(cluster);
   }
@@ -471,6 +476,7 @@ export function createDemoPanel(
 
   const status = document.createElement('div');
   status.dataset.role = 'status';
+  status.dataset.captureIgnore = '';
   status.style.cssText =
     'position:absolute;left:12px;bottom:10px;z-index:20;max-width:min(28rem,calc(100% - 24px));color:#64748b;font:12px/1.45 system-ui,sans-serif;pointer-events:none;white-space:pre-wrap;';
   status.textContent = _description;

@@ -1,0 +1,57 @@
+/**
+ * Demo: register a layout extension that places nodes in two rows.
+ */
+import { extensionFactory, Graph, register, type LayoutExtension } from '../../src/index.ts';
+
+const TWO_ROW_LAYOUT = 'two-row';
+
+const twoRowLayout: LayoutExtension = {
+  execute(data) {
+    const columns = Math.ceil(data.nodes.length / 2);
+    return {
+      nodes: data.nodes.map((node, index) => ({
+        ...node,
+        x: 120 + (index % columns) * 150,
+        y: 140 + Math.floor(index / columns) * 150,
+      })),
+    };
+  },
+};
+
+register('layout', TWO_ROW_LAYOUT, extensionFactory(() => ({ ...twoRowLayout })));
+
+export async function run(container: string | HTMLElement) {
+  const graph = new Graph({
+    autoFitOnResize: true,
+    container,
+    data: {
+      nodes: ['采集', '清洗', '特征', '训练', '评估', '发布'].map((label) => ({
+        id: label,
+        data: { label },
+      })),
+      edges: [
+        { source: '采集', target: '清洗' },
+        { source: '清洗', target: '特征' },
+        { source: '特征', target: '训练' },
+        { source: '训练', target: '评估' },
+        { source: '评估', target: '发布' },
+      ],
+    },
+    node: {
+      type: 'rect',
+      style: {
+        fill: '#5AD8A6',
+        width: 72,
+        height: 36,
+        borderRadius: 18,
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'center',
+      },
+    },
+    edge: { style: { endArrow: true, stroke: '#8C8C8C' } },
+    layout: { type: TWO_ROW_LAYOUT },
+    behaviors: ['zoom-canvas', 'drag-canvas'],
+  });
+  await graph.render();
+  return graph;
+}

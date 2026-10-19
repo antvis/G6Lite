@@ -97,6 +97,10 @@ export async function run(container: string | HTMLElement) {
   await graph2.render();
 
   return {
+    fitView() {
+      graph1.fitView();
+      graph2.fitView();
+    },
     destroy() {
       graph1.destroy();
       graph2.destroy();

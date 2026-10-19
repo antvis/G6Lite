@@ -47,5 +47,8 @@ export async function run(container: string | HTMLElement) {
   );
   ui.setStatus('拖拽 editable-edge 或 reference-edge 的端点');
 
-  return { destroy: () => { graph.destroy(); ui.panel.remove(); } };
+  return {
+    fitView: () => graph.fitView({ padding: 90, maxZoom: 1.4 }),
+    destroy: () => { graph.destroy(); ui.panel.remove(); },
+  };
 }

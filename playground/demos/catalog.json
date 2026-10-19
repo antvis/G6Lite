@@ -7,10 +7,21 @@
     "category": "getting-started",
     "docsGroup": "getting-started",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["graph.render", "layout.circular", "behavior.viewport"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "graph.render",
+      "layout.circular",
+      "behavior.viewport"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "default-theme",
@@ -20,10 +31,22 @@
     "category": "theme",
     "docsGroup": "getting-started",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["theme.light", "theme.dark", "theme.states", "behavior.zoom-canvas-options"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "theme.light",
+      "theme.dark",
+      "theme.states",
+      "behavior.zoom-canvas-options"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 500, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 500,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "node-style",
@@ -33,10 +56,21 @@
     "category": "node",
     "docsGroup": "node-edge-label-combo",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["node.style", "node.style-callback", "state.highlight"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "node.style",
+      "node.style-callback",
+      "state.highlight"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "layouts",
@@ -46,10 +80,22 @@
     "category": "layout",
     "docsGroup": "layout",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["layout.circular", "layout.force", "layout.grid", "layout.dagre"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "layout.circular",
+      "layout.force",
+      "layout.grid",
+      "layout.dagre"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "theme",
@@ -58,10 +104,20 @@
     "description": "验证 light、dark 与主题 token 覆盖。",
     "category": "theme",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["theme.light", "theme.dark", "theme.tokens"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "theme.light",
+      "theme.dark",
+      "theme.tokens"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "behaviors",
@@ -70,10 +126,21 @@
     "description": "验证缩放、拖拽、高亮与框选组合。",
     "category": "interaction",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["behavior.zoom-canvas", "behavior.drag-canvas", "behavior.highlight", "behavior.brush-select"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "behavior.zoom-canvas",
+      "behavior.drag-canvas",
+      "behavior.highlight",
+      "behavior.brush-select"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "hover",
@@ -82,10 +149,21 @@
     "description": "验证节点与关联边的悬停高亮。",
     "category": "interaction",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["behavior.hover-highlight", "event.pointer"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "behavior.hover-highlight",
+      "event.pointer"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "none" }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 500,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "interaction-state-viewport"
   },
   {
     "id": "tooltip",
@@ -95,10 +173,20 @@
     "category": "interaction",
     "docsGroup": "interaction-state-viewport",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["behavior.tooltip", "event.pointer"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "behavior.tooltip",
+      "event.pointer"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "shapes",
@@ -107,10 +195,22 @@
     "description": "展示圆形、矩形等节点图形组合。",
     "category": "node",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["node.circle", "node.rect", "edge.line"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "node.circle",
+      "node.rect",
+      "edge.line"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "node-edge-label-combo"
   },
   {
     "id": "large",
@@ -119,10 +219,21 @@
     "description": "快速验证较大规模图的基础渲染和交互。",
     "category": "performance",
     "kind": "performance",
-    "audiences": ["playground"],
-    "coverage": ["scale.synthetic-medium", "graph.render"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "scale.synthetic-medium",
+      "graph.render"
+    ],
     "releaseCheck": "full",
-    "capture": { "mode": "artifact", "settleMs": 900, "deviceScaleFactor": 1 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 900,
+      "deviceScaleFactor": 1
+    },
+    "docsGroup": "scenario-and-dataset"
   },
   {
     "id": "large-labeled",
@@ -131,10 +242,21 @@
     "description": "验证 5000 节点和 Canvas 标签的渲染性能。",
     "category": "performance",
     "kind": "performance",
-    "audiences": ["playground"],
-    "coverage": ["scale.synthetic-large", "label.canvas"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "scale.synthetic-large",
+      "label.canvas"
+    ],
     "releaseCheck": "full",
-    "capture": { "mode": "artifact", "settleMs": 1500, "deviceScaleFactor": 1 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 1500,
+      "deviceScaleFactor": 1
+    },
+    "docsGroup": "scenario-and-dataset"
   },
   {
     "id": "edge-states",
@@ -143,10 +265,21 @@
     "description": "展示边的状态样式和权重映射。",
     "category": "edge",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["edge.state", "edge.style-callback"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "edge.state",
+      "edge.style-callback"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "node-edge-label-combo"
   },
   {
     "id": "edge-types",
@@ -155,10 +288,23 @@
     "description": "展示直线、虚线、弧线和曲线边。",
     "category": "edge",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["edge.line", "edge.arc", "edge.cubic", "edge.dash"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "edge.line",
+      "edge.arc",
+      "edge.cubic",
+      "edge.dash"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "node-edge-label-combo"
   },
   {
     "id": "edge-colors",
@@ -167,10 +313,21 @@
     "description": "按业务分类映射边颜色。",
     "category": "edge",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["edge.color", "edge.style-callback"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "edge.color",
+      "edge.style-callback"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "node-edge-label-combo"
   },
   {
     "id": "edge-arrows",
@@ -180,22 +337,43 @@
     "category": "edge",
     "docsGroup": "node-edge-label-combo",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["edge.arrow", "edge.direction"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "edge.arrow",
+      "edge.direction"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "edge-loops",
     "file": "edge-loops.ts",
     "title": "自环边",
-    "description": "验证嵌套自环边的路径与箭头。",
+    "description": "展示单条和多层嵌套自环边。",
     "category": "edge",
     "kind": "regression",
-    "audiences": ["playground"],
-    "coverage": ["edge.loop", "edge.arrow"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "edge.loop",
+      "edge.arrow"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "node-edge-label-combo"
   },
   {
     "id": "edge-hit-area",
@@ -204,10 +382,23 @@
     "description": "保持细线视觉，同时扩大直线、曲线、折线、自环和箭头的拾取范围。",
     "category": "edge",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["edge.hit-area", "edge.picking", "edge.loop", "edge.arrow"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "edge.hit-area",
+      "edge.picking",
+      "edge.loop",
+      "edge.arrow"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "node-edge-label-combo"
   },
   {
     "id": "parallel-edges",
@@ -217,10 +408,21 @@
     "category": "edge",
     "docsGroup": "node-edge-label-combo",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["transform.parallel-edges", "edge.arc", "edge.loop"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "transform.parallel-edges",
+      "edge.arc",
+      "edge.loop"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "node-states",
@@ -229,10 +431,19 @@
     "description": "展示节点六种状态及其样式。",
     "category": "node",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["node.state", "state.styles"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "node.state",
+      "state.styles"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "breathing-node",
@@ -241,10 +452,22 @@
     "description": "验证自定义节点动画和状态切换。",
     "category": "extension",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["extension.node", "state.selected", "state.highlight"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "extension.node",
+      "state.selected",
+      "state.highlight"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "none" }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 500,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "extension"
   },
   {
     "id": "node-border",
@@ -253,10 +476,21 @@
     "description": "展示节点描边、线宽和圆角配置。",
     "category": "node",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["node.stroke", "node.border-radius"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "node.stroke",
+      "node.border-radius"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "node-edge-label-combo"
   },
   {
     "id": "flowchart",
@@ -265,10 +499,23 @@
     "description": "使用层级布局和折线边绘制决策流程。",
     "category": "scenario",
     "kind": "scenario",
-    "audiences": ["playground"],
-    "coverage": ["layout.dagre", "edge.polyline", "label.node", "label.edge"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "layout.dagre",
+      "edge.polyline",
+      "label.node",
+      "label.edge"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "layout"
   },
   {
     "id": "relationship",
@@ -277,11 +524,22 @@
     "description": "使用力导布局展示人物和关系标签。",
     "category": "scenario",
     "kind": "scenario",
-    "audiences": ["playground", "site"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
     "docsGroup": "scenario-and-dataset",
-    "coverage": ["layout.d3-force", "label.node", "label.edge"],
+    "coverage": [
+      "layout.d3-force",
+      "label.node",
+      "label.edge"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 900, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 900,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "org-chart",
@@ -290,11 +548,22 @@
     "description": "使用层级布局展示组织关系。",
     "category": "scenario",
     "kind": "scenario",
-    "audiences": ["playground", "site"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
     "docsGroup": "scenario-and-dataset",
-    "coverage": ["layout.dagre", "node.rect", "label.node"],
+    "coverage": [
+      "layout.dagre",
+      "node.rect",
+      "label.node"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "indented-tree",
@@ -303,10 +572,21 @@
     "description": "使用缩进布局绘制目录结构。",
     "category": "layout",
     "kind": "scenario",
-    "audiences": ["playground"],
-    "coverage": ["layout.indented", "label.canvas"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "layout.indented",
+      "label.canvas"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "layout"
   },
   {
     "id": "mindmap",
@@ -315,11 +595,21 @@
     "description": "使用思维导图布局展示层级主题。",
     "category": "layout",
     "kind": "scenario",
-    "audiences": ["playground", "site"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
     "docsGroup": "layout",
-    "coverage": ["layout.mindmap", "label.canvas"],
+    "coverage": [
+      "layout.mindmap",
+      "label.canvas"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "fishbone",
@@ -328,11 +618,22 @@
     "description": "使用鱼骨布局展示问题归因。",
     "category": "layout",
     "kind": "scenario",
-    "audiences": ["playground", "site"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
     "docsGroup": "layout",
-    "coverage": ["layout.fishbone", "edge.router", "label.canvas"],
+    "coverage": [
+      "layout.fishbone",
+      "edge.router",
+      "label.canvas"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "performance",
@@ -341,10 +642,16 @@
     "description": "运行合成数据和浏览器性能场景。",
     "category": "performance",
     "kind": "performance",
-    "audiences": ["playground"],
-    "coverage": ["performance.browser"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "performance.browser"
+    ],
     "releaseCheck": false,
-    "capture": { "mode": "none" }
+    "capture": {
+      "mode": "none"
+    }
   },
   {
     "id": "set-data",
@@ -353,10 +660,23 @@
     "description": "验证全量数据替换、布局切换、可见性和聚焦。",
     "category": "data",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["data.set", "layout.runtime", "state.visibility", "viewport.focus"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "data.set",
+      "layout.runtime",
+      "state.visibility",
+      "viewport.focus"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "data-and-lifecycle"
   },
   {
     "id": "incremental-nodes",
@@ -365,10 +685,17 @@
     "description": "验证 addNodes 后节点立即可见和可选择。",
     "category": "data",
     "kind": "regression",
-    "audiences": ["playground"],
-    "coverage": ["data.node-add", "state.selected"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "data.node-add",
+      "state.selected"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "none" }
+    "capture": {
+      "mode": "none"
+    }
   },
   {
     "id": "drag-node-threshold",
@@ -377,10 +704,17 @@
     "description": "验证单击不会误触拖拽，超过阈值才发出拖拽事件。",
     "category": "regression",
     "kind": "regression",
-    "audiences": ["playground"],
-    "coverage": ["behavior.drag-node", "event.drag"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "behavior.drag-node",
+      "event.drag"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "none" }
+    "capture": {
+      "mode": "none"
+    }
   },
   {
     "id": "brush-click-select",
@@ -389,10 +723,18 @@
     "description": "验证框选结果不会被同一手势的 click 清空。",
     "category": "regression",
     "kind": "regression",
-    "audiences": ["playground"],
-    "coverage": ["behavior.brush-select", "behavior.click-select", "event.selection"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "behavior.brush-select",
+      "behavior.click-select",
+      "event.selection"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "none" }
+    "capture": {
+      "mode": "none"
+    }
   },
   {
     "id": "fit-incremental-nodes",
@@ -401,10 +743,18 @@
     "description": "验证新增和删除远端节点后的 fitView。",
     "category": "regression",
     "kind": "regression",
-    "audiences": ["playground"],
-    "coverage": ["data.node-add", "data.node-remove", "viewport.fit"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "data.node-add",
+      "data.node-remove",
+      "viewport.fit"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "none" }
+    "capture": {
+      "mode": "none"
+    }
   },
   {
     "id": "batch-node-positions",
@@ -413,10 +763,17 @@
     "description": "验证批量更新坐标时节点和边同步移动。",
     "category": "data",
     "kind": "regression",
-    "audiences": ["playground"],
-    "coverage": ["data.node-position-batch", "query.node-position"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "data.node-position-batch",
+      "query.node-position"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "none" }
+    "capture": {
+      "mode": "none"
+    }
   },
   {
     "id": "set-data-fit-options",
@@ -425,10 +782,18 @@
     "description": "验证 fitView、maxZoom 和并发 setData 的视口行为。",
     "category": "regression",
     "kind": "regression",
-    "audiences": ["playground"],
-    "coverage": ["data.set", "viewport.fit-options", "layout.race"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "data.set",
+      "viewport.fit-options",
+      "layout.race"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "none" }
+    "capture": {
+      "mode": "none"
+    }
   },
   {
     "id": "self-loop-labels",
@@ -437,22 +802,44 @@
     "description": "验证自环标签沿真实曲线定位。",
     "category": "regression",
     "kind": "regression",
-    "audiences": ["playground"],
-    "coverage": ["edge.loop", "label.edge"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "edge.loop",
+      "label.edge"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "labels",
     "file": "labels.ts",
-    "title": "标签与图标",
+    "title": "标签位置与图标",
     "description": "展示节点标签、边标签、图标和运行时位置切换。",
     "category": "label",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["label.node", "label.edge", "label.icon", "options.update"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "label.node",
+      "label.edge",
+      "label.icon",
+      "options.update"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "node-edge-label-combo"
   },
   {
     "id": "label-rendering-options",
@@ -461,10 +848,24 @@
     "description": "对比固定字号、低 zoom 持续绘制和关闭碰撞隐藏后的标签效果。",
     "category": "label",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["label.options", "label.zoom-scaling", "label.low-zoom", "label.collision", "options.update"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "label.options",
+      "label.zoom-scaling",
+      "label.low-zoom",
+      "label.collision",
+      "options.update"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "node-edge-label-combo"
   },
   {
     "id": "custom-label-renderer",
@@ -473,10 +874,21 @@
     "description": "节点和边共用自定义标签 Renderer。",
     "category": "extension",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["extension.label", "label.custom"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "extension.label",
+      "label.custom"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "extension"
   },
   {
     "id": "combo",
@@ -486,10 +898,22 @@
     "category": "combo",
     "docsGroup": "node-edge-label-combo",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["combo.render", "combo.collapse", "combo.runtime", "combo.state"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "combo.render",
+      "combo.collapse",
+      "combo.runtime",
+      "combo.state"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "custom-node-extension",
@@ -498,11 +922,25 @@
     "description": "验证自定义节点、显式边 ID 和 Combo 状态。",
     "category": "extension",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["extension.node", "edge.explicit-id", "combo.state"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "extension.node",
+      "edge.explicit-id",
+      "combo.state"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 700, "deviceScaleFactor": 2 },
-    "aliases": ["g6-v5-compat"]
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    },
+    "aliases": [
+      "g6-v5-compat"
+    ],
+    "docsGroup": "extension"
   },
   {
     "id": "real-dataset",
@@ -512,10 +950,21 @@
     "category": "dataset",
     "docsGroup": "scenario-and-dataset",
     "kind": "dataset",
-    "audiences": ["playground", "site"],
-    "coverage": ["dataset.ai-papers", "scale.real-large", "interaction.large-graph"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "dataset.ai-papers",
+      "scale.real-large",
+      "interaction.large-graph"
+    ],
     "releaseCheck": "full",
-    "capture": { "mode": "artifact", "settleMs": 1200, "deviceScaleFactor": 1 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 1200,
+      "deviceScaleFactor": 1
+    }
   },
   {
     "id": "extension-system",
@@ -525,10 +974,24 @@
     "category": "extension",
     "docsGroup": "extension",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["extension.decoration", "extension.edge", "extension.layout", "extension.transform", "extension.behavior", "extension.plugin"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "extension.decoration",
+      "extension.edge",
+      "extension.layout",
+      "extension.transform",
+      "extension.behavior",
+      "extension.plugin"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "data-mutations",
@@ -538,10 +1001,25 @@
     "category": "data",
     "docsGroup": "data-and-lifecycle",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["data.node-add", "data.node-update", "data.node-remove", "data.edge-add", "data.edge-update", "data.edge-remove", "event.data-mutation"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "data.node-add",
+      "data.node-update",
+      "data.node-remove",
+      "data.edge-add",
+      "data.edge-update",
+      "data.edge-remove",
+      "event.data-mutation"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "queries-and-states",
@@ -551,10 +1029,25 @@
     "category": "data",
     "docsGroup": "data-and-lifecycle",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["query.element", "query.adjacency", "query.state", "state.batch", "state.clear", "state.visibility", "combo.query"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "query.element",
+      "query.adjacency",
+      "query.state",
+      "state.batch",
+      "state.clear",
+      "state.visibility",
+      "combo.query"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "viewport-controls",
@@ -564,10 +1057,24 @@
     "category": "interaction",
     "docsGroup": "interaction-state-viewport",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["viewport.camera", "viewport.fit", "viewport.zoom", "viewport.focus", "viewport.resize", "viewport.coordinates"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "viewport.camera",
+      "viewport.fit",
+      "viewport.zoom",
+      "viewport.focus",
+      "viewport.resize",
+      "viewport.coordinates"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "layout-gallery",
@@ -577,10 +1084,24 @@
     "category": "layout",
     "docsGroup": "layout",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["layout.radial", "layout.concentric", "layout.force-atlas2", "layout.fruchterman", "layout.mds", "layout.random"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "layout.radial",
+      "layout.concentric",
+      "layout.force-atlas2",
+      "layout.fruchterman",
+      "layout.mds",
+      "layout.random"
+    ],
     "releaseCheck": "visual",
-    "capture": { "mode": "visual", "settleMs": 700, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "visual",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "layout-worker-cancel",
@@ -589,10 +1110,18 @@
     "description": "验证 Worker 布局、取消和快速切换的竞态保护。",
     "category": "layout",
     "kind": "regression",
-    "audiences": ["playground"],
-    "coverage": ["layout.worker", "layout.cancel", "layout.race"],
+    "audiences": [
+      "playground"
+    ],
+    "coverage": [
+      "layout.worker",
+      "layout.cancel",
+      "layout.race"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "none" }
+    "capture": {
+      "mode": "none"
+    }
   },
   {
     "id": "selection-behaviors",
@@ -602,10 +1131,21 @@
     "category": "interaction",
     "docsGroup": "interaction-state-viewport",
     "kind": "functional",
-    "audiences": ["playground", "site"],
-    "coverage": ["behavior.click-select", "behavior.brush-select", "behavior.lasso-select"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "behavior.click-select",
+      "behavior.brush-select",
+      "behavior.lasso-select"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
   },
   {
     "id": "drag-edge",
@@ -614,9 +1154,321 @@
     "description": "验证 drag-edge 行为、事件和运行时重连。",
     "category": "interaction",
     "kind": "functional",
-    "audiences": ["playground"],
-    "coverage": ["behavior.drag-edge", "event.edge-drag", "data.edge-update"],
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "behavior.drag-edge",
+      "event.edge-drag",
+      "data.edge-update"
+    ],
     "releaseCheck": "smoke",
-    "capture": { "mode": "artifact", "settleMs": 450, "deviceScaleFactor": 2 }
+    "capture": {
+      "mode": "artifact",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    },
+    "docsGroup": "interaction-state-viewport"
+  },
+  {
+    "id": "search-focus",
+    "file": "search-focus.ts",
+    "title": "搜索并聚焦",
+    "description": "按名称搜索节点，高亮匹配结果并移动视口。",
+    "category": "data",
+    "docsGroup": "data-and-lifecycle",
+    "kind": "functional",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "query.node",
+      "state.highlight",
+      "viewport.focus"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 500,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "polyline-routing",
+    "file": "polyline-routing.ts",
+    "title": "折线与正交路由",
+    "description": "用圆角正交折线连接层级节点。",
+    "category": "edge",
+    "docsGroup": "node-edge-label-combo",
+    "kind": "functional",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "edge.polyline",
+      "edge.router"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 500,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "layout-worker",
+    "file": "layout-worker.ts",
+    "title": "Worker 布局",
+    "description": "在 Web Worker 中计算力导向布局。",
+    "category": "layout",
+    "docsGroup": "layout",
+    "kind": "functional",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "layout.worker",
+      "layout.force"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 1200,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "radial-tree",
+    "file": "radial-tree.ts",
+    "title": "辐射树",
+    "description": "用辐射布局展示一棵主题树。",
+    "category": "layout",
+    "docsGroup": "layout",
+    "kind": "scenario",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "layout.radial",
+      "label.node"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "dependency-graph",
+    "file": "dependency-graph.ts",
+    "title": "调用链",
+    "description": "用从左到右的层级布局展示服务调用关系。",
+    "category": "scenario",
+    "docsGroup": "layout",
+    "kind": "scenario",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "layout.dagre",
+      "label.node",
+      "edge.arrow"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 700,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "drag-node",
+    "file": "drag-node.ts",
+    "title": "拖拽节点与 Combo",
+    "description": "拖拽节点，或拖拽 Combo 背景带动子节点。",
+    "category": "interaction",
+    "docsGroup": "interaction-state-viewport",
+    "kind": "functional",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "behavior.drag-node",
+      "combo.drag"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "neighbor-highlight",
+    "file": "neighbor-highlight.ts",
+    "title": "一度邻居高亮",
+    "description": "悬停节点高亮邻居，悬停边高亮两端节点。",
+    "category": "interaction",
+    "docsGroup": "interaction-state-viewport",
+    "kind": "functional",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "behavior.highlight-node",
+      "behavior.highlight-edge"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "event-log",
+    "file": "event-log.ts",
+    "title": "事件面板",
+    "description": "监听点击、拖拽和选择事件。",
+    "category": "interaction",
+    "docsGroup": "interaction-state-viewport",
+    "kind": "functional",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "event.pointer",
+      "event.drag",
+      "event.selection"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "context-menu",
+    "file": "context-menu.ts",
+    "title": "右键菜单",
+    "description": "在节点上打开右键菜单并执行聚焦或高亮。",
+    "category": "interaction",
+    "docsGroup": "interaction-state-viewport",
+    "kind": "functional",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "event.contextmenu",
+      "viewport.focus",
+      "state.selected"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "zoom-options",
+    "file": "zoom-options.ts",
+    "title": "缩放范围与灵敏度",
+    "description": "限制滚轮缩放的灵敏度、最小和最大比例。",
+    "category": "interaction",
+    "docsGroup": "interaction-state-viewport",
+    "kind": "functional",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "behavior.zoom-canvas-options"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "custom-behavior",
+    "file": "custom-behavior.ts",
+    "title": "注册自定义 Behavior",
+    "description": "注册点击后选中节点的 Behavior。",
+    "category": "extension",
+    "docsGroup": "extension",
+    "kind": "functional",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "extension.behavior"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "custom-layout",
+    "file": "custom-layout.ts",
+    "title": "自定义布局",
+    "description": "注册把节点排成两行的布局扩展。",
+    "category": "extension",
+    "docsGroup": "extension",
+    "kind": "functional",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "extension.layout"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 450,
+      "deviceScaleFactor": 2
+    }
+  },
+  {
+    "id": "decoration-badges",
+    "file": "decoration-badges.ts",
+    "title": "节点徽章",
+    "description": "在节点边界堆叠内置 Badge。",
+    "category": "extension",
+    "docsGroup": "extension",
+    "kind": "functional",
+    "audiences": [
+      "playground",
+      "site"
+    ],
+    "coverage": [
+      "extension.decoration",
+      "decoration.badge"
+    ],
+    "releaseCheck": "smoke",
+    "capture": {
+      "mode": "visual",
+      "settleMs": 500,
+      "deviceScaleFactor": 2
+    }
   }
 ]

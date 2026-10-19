@@ -34,6 +34,8 @@ export function FeaturedExamples({ locale }: { locale: Locale }) {
       {examples.map((example, index) => {
         const crop = cropRecords[example.image];
         const [left, top] = crop.crop;
+        const imageWidth = crop.imageWidth ?? 1920;
+        const imageHeight = crop.imageHeight ?? 1200;
         return (
           <article key={example.id}>
             <Link
@@ -53,8 +55,8 @@ export function FeaturedExamples({ locale }: { locale: Locale }) {
                     width={1920}
                     height={1200}
                     style={{
-                      width: `${(1920 / crop.width) * 100}%`,
-                      height: `${(1200 / crop.height) * 100}%`,
+                      width: `${(imageWidth / crop.width) * 100}%`,
+                      height: `${(imageHeight / crop.height) * 100}%`,
                       left: `${(-left / crop.width) * 100}%`,
                       top: `${(-top / crop.height) * 100}%`,
                     }}

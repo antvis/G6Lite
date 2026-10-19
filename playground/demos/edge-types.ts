@@ -76,5 +76,8 @@ export async function run(container: string | HTMLElement) {
   await g2.render();
   graphs.push(g2);
 
-  return { destroy: () => graphs.forEach(g => g.destroy()) };
+  return {
+    fitView: () => graphs.forEach((graph) => graph.fitView()),
+    destroy: () => graphs.forEach((graph) => graph.destroy()),
+  };
 }

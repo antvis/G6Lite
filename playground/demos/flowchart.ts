@@ -104,5 +104,8 @@ export async function run(container: string | HTMLElement) {
     padding: 3,
   });
 
-  return { destroy: () => { cleanupNodeLabels(); cleanupEdgeLabels(); graph.destroy(); } };
+  return {
+    fitView: () => graph.fitView(),
+    destroy: () => { cleanupNodeLabels(); cleanupEdgeLabels(); graph.destroy(); },
+  };
 }

@@ -65,5 +65,8 @@ export async function run(container: string | HTMLElement) {
   });
 
   await graph.render();
-  return { destroy: () => graph.destroy() };
+  return {
+    fitView: () => graph.fitView(),
+    destroy: () => graph.destroy(),
+  };
 }

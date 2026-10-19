@@ -88,6 +88,7 @@ export async function run(container: string | HTMLElement) {
 
   ui.setStatus('move near a thin edge');
   return {
+    fitView: () => graphs.forEach((graph) => graph.fitView()),
     destroy: () => {
       graphs.forEach((graph) => graph.destroy());
       board.remove();

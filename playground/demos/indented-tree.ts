@@ -5,9 +5,10 @@
  * 1. 有背景节点 + 按深度着色（默认）
  * 2. 子节点无样式 — 只有根节点有背景，子节点文字直接显示在边上（设计稿风格）
  *
- * 通过顶部按钮切换两种模式。
+ * 通过右上角菜单切换两种模式。
  */
 import { Graph } from '../../src/index.ts';
+import { mountCanvasMenu } from './demo-panel.ts';
 import { attachLabelsCanvas, type GraphInstanceWithTools } from '../tooling.ts';
 
 const data = {
@@ -150,19 +151,6 @@ export async function run(container: string | HTMLElement) {
       : container;
   wrapper.style.position = 'relative';
 
-  // Mode toggle buttons
-  const toolbar = document.createElement('div');
-  toolbar.style.cssText = 'position:absolute;top:8px;right:8px;z-index:10;display:flex;gap:6px;';
-  const btnStyled = document.createElement('button');
-  btnStyled.textContent = '有背景';
-  btnStyled.style.cssText = 'padding:4px 12px;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:12px;background:#4A90D9;color:#fff;';
-  const btnMinimal = document.createElement('button');
-  btnMinimal.textContent = '无样式';
-  btnMinimal.style.cssText = 'padding:4px 12px;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:12px;background:#fff;color:#333;';
-  toolbar.appendChild(btnStyled);
-  toolbar.appendChild(btnMinimal);
-  wrapper.appendChild(toolbar);
-
   let currentGraph: any = null;
   let currentMode = 'styled';
 
@@ -174,10 +162,6 @@ export async function run(container: string | HTMLElement) {
       if (oldLabel) oldLabel.remove();
     }
     currentMode = mode;
-    btnStyled.style.background = mode === 'styled' ? '#4A90D9' : '#fff';
-    btnStyled.style.color = mode === 'styled' ? '#fff' : '#333';
-    btnMinimal.style.background = mode === 'minimal' ? '#4A90D9' : '#fff';
-    btnMinimal.style.color = mode === 'minimal' ? '#fff' : '#333';
 
     const cfg = mode === 'styled' ? configStyled() : configMinimal();
 
@@ -214,15 +198,25 @@ export async function run(container: string | HTMLElement) {
     currentGraph = graph;
   }
 
-  btnStyled.onclick = () => { if (currentMode !== 'styled') renderMode('styled'); };
-  btnMinimal.onclick = () => { if (currentMode !== 'minimal') renderMode('minimal'); };
+  mountCanvasMenu(wrapper, {
+    caption: '样式',
+    items: [
+      { value: 'styled', label: '有背景' },
+      { value: 'minimal', label: '无样式' },
+    ],
+    value: 'styled',
+    onSelect(value) {
+      if (value !== currentMode) void renderMode(value);
+    },
+  });
 
   await renderMode('styled');
 
   return {
+    fitView: () => currentGraph?.fitView(),
     destroy: () => {
       if (currentGraph) currentGraph.destroy();
-      toolbar.remove();
+      wrapper.querySelector(':scope > [data-canvas-controls]')?.remove();
     },
   };
 }

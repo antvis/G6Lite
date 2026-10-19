@@ -1,0 +1,112 @@
+const e=`/**
+ * Demo: 流程图 — 性能诊断决策树 (dagre TB + 矩形节点 + 边标签)
+ */
+import { Graph } from '../../src/index.ts';
+import { attachLabelsCanvas, attachEdgeLabelsCanvas, type GraphInstanceWithTools } from '../tooling.ts';
+
+const COLORS: Record<string, string> = {
+  start: '#5B8FF9',
+  check: '#F6BD16',
+  problem: '#E86452',
+  action: '#5AD8A6',
+};
+
+const data = {
+  nodes: [
+    { id: 'start', name: 'Check I/O wait (top)', data: { role: 'start' } },
+    { id: 'mem', name: 'Check swap/free -m', data: { role: 'check' } },
+    { id: 'cpu', name: 'Check %CPU (top)', data: { role: 'check' } },
+    { id: 'ram_prob', name: 'RAM PROBLEM', data: { role: 'problem' } },
+    { id: 'io', name: 'I/O', data: { role: 'problem' } },
+    { id: 'nw_prob', name: 'NW PROBLEM', data: { role: 'problem' } },
+    { id: 'cpu_prob', name: 'CPU PROBLEM', data: { role: 'problem' } },
+    { id: 'ram_hog', name: 'What\\'s hogging RAM? (top)', data: { role: 'check' } },
+    { id: 'io_hog', name: 'What\\'s hogging I/O? (iotop)', data: { role: 'check' } },
+    { id: 'ext_dep', name: 'Look for an external dependency', data: { role: 'check' } },
+    { id: 'cpu_confirm', name: 'Confirm by checking CPU %', data: { role: 'check' } },
+    { id: 'mem_anomaly', name: 'Check history - anomaly?', data: { role: 'check' } },
+    { id: 'cpu_procs', name: 'Check list of processes (top)', data: { role: 'check' } },
+    { id: 'kill_mem', name: 'Kill processes (memory)', data: { role: 'action' } },
+    { id: 'infra_ram', name: 'Infrastructure - add RAM', data: { role: 'action' } },
+    { id: 'cpu_anomaly', name: 'Check history - anomaly?', data: { role: 'check' } },
+    { id: 'kill_cpu', name: 'Kill processes (CPU)', data: { role: 'action' } },
+    { id: 'infra_cores', name: 'Infrastructure - add cores', data: { role: 'action' } },
+  ],
+  edges: [
+    { source: 'start', target: 'mem', data: { label: 'true' } },
+    { source: 'start', target: 'cpu', data: { label: 'false' } },
+    { source: 'mem', target: 'ram_prob', data: { label: 'true' } },
+    { source: 'mem', target: 'io', data: { label: 'false' } },
+    { source: 'cpu', target: 'nw_prob', data: { label: 'false' } },
+    { source: 'cpu', target: 'cpu_prob', data: { label: 'true' } },
+    { source: 'ram_prob', target: 'ram_hog' },
+    { source: 'io', target: 'io_hog' },
+    { source: 'nw_prob', target: 'ext_dep' },
+    { source: 'cpu_prob', target: 'cpu_confirm' },
+    { source: 'ram_hog', target: 'mem_anomaly' },
+    { source: 'cpu_confirm', target: 'cpu_procs' },
+    { source: 'mem_anomaly', target: 'kill_mem', data: { label: 'true' } },
+    { source: 'mem_anomaly', target: 'infra_ram', data: { label: 'false' } },
+    { source: 'cpu_procs', target: 'cpu_anomaly' },
+    { source: 'cpu_anomaly', target: 'kill_cpu', data: { label: 'true' } },
+    { source: 'cpu_anomaly', target: 'infra_cores', data: { label: 'false' } },
+  ],
+};
+
+export async function run(container: string | HTMLElement) {
+  const wrapper = typeof container === 'string' ? document.querySelector(container)! as HTMLElement : container;
+  wrapper.style.position = 'relative';
+
+  const graph = new Graph({
+    autoFitOnResize: true,
+    container: wrapper,
+    data,
+    node: {
+      type: 'rect',
+      style: {
+        fill: (n) => COLORS[n.data?.role as string] ?? '#5B8FF9',
+        width: 180,
+        height: 32,
+        borderRadius: 4,
+        stroke: '#fff',
+        strokeWidth: 1,
+      },
+    },
+    edge: {
+      type: 'polyline',
+      style: {
+        stroke: '#aaa',
+        lineWidth: 1.5,
+        endArrow: true,
+        radius: 16,
+      },
+    },
+    layout: { type: 'dagre', rankdir: 'TB', nodesep: 40, ranksep: 60, nodeSize: [180, 32] },
+    behaviors: ['zoom-canvas', 'drag-canvas'],
+    theme: 'light',
+  });
+
+  await graph.render();
+
+  const g = graph as unknown as GraphInstanceWithTools;
+  const cleanupNodeLabels = attachLabelsCanvas(wrapper, g, {
+    nodeLabel: (n) => n.name ?? n.id,
+    position: 'inside',
+    nodeSize: () => ({ width: 180, height: 32 }),
+    fontSize: 10,
+  });
+  const cleanupEdgeLabels = attachEdgeLabelsCanvas(wrapper, g, {
+    fontSize: 8,
+    color: '#555',
+    bgColor: 'rgba(255,255,255,0.95)',
+    borderRadius: 6,
+    borderColor: '#ddd',
+    padding: 3,
+  });
+
+  return {
+    fitView: () => graph.fitView(),
+    destroy: () => { cleanupNodeLabels(); cleanupEdgeLabels(); graph.destroy(); },
+  };
+}
+`;export{e as default};

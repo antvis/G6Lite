@@ -252,7 +252,7 @@ for (const file of htmlFiles) {
     route === '/' || route === '/en'
       ? ['WebSite', 'SoftwareApplication']
       : route === '/ai' || route === '/en/ai'
-        ? ['WebApplication']
+        ? ['HowTo']
         : ['TechArticle', 'BreadcrumbList'];
   for (const type of requiredTypes) {
     if (!jsonLdTypes.has(type)) fail(`${relative} JSON-LD is missing ${type}`);

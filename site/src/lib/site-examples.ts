@@ -478,7 +478,7 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     file: 'labels.ts',
     category: 'elements',
     group: { zh: '标签', en: 'Labels' },
-    title: { zh: '标签与图标', en: 'Labels and icons' },
+    title: { zh: '标签位置与图标', en: 'Label placement and icons' },
     description: {
       zh: '展示节点标签、边标签、图标，并在运行时切换位置。',
       en: 'Show node labels, edge labels, and icons, and change their placement at runtime.',
@@ -1138,7 +1138,7 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     file: 'custom-behavior.ts',
     category: 'extensions',
     group: { zh: '行为扩展', en: 'Behavior extensions' },
-    title: { zh: '自定义 Behavior', en: 'Custom behavior' },
+    title: { zh: '注册自定义 Behavior', en: 'Register a custom behavior' },
     description: {
       zh: '注册一个 Behavior：点击节点时选中它，点击画布时清除。',
       en: 'Register a behavior that selects a clicked node and clears selection on the canvas.',

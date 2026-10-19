@@ -44,7 +44,7 @@ describe('Playground resize fitting policy', () => {
       visit(sourceFile);
     }
 
-    expect(graphCount).toBe(58);
+    expect(graphCount).toBe(71);
     expect(missing).toEqual([]);
   });
 

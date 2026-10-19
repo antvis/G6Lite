@@ -25,7 +25,15 @@ export async function run(container: string | HTMLElement) {
         { source: 'c', target: 'c' },
       ],
     },
-    node: { type: 'circle', style: { fill: '#5B8FF9', size: 24 } },
+    node: {
+      type: 'circle',
+      style: {
+        fill: '#5B8FF9',
+        size: 36,
+        label: (node) => node.name ?? node.id,
+        labelPlacement: 'bottom',
+      },
+    },
     edge: {
       type: 'line',
       style: { stroke: '#99ADD1', lineWidth: 2 },
@@ -34,5 +42,8 @@ export async function run(container: string | HTMLElement) {
   });
 
   await graph.render();
-  return { destroy: () => graph.destroy() };
+  return {
+    fitView: () => graph.fitView(),
+    destroy: () => graph.destroy(),
+  };
 }

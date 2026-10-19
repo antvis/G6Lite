@@ -73,10 +73,17 @@ export async function run(container: string | HTMLElement) {
       },
     },
     layout: { type: 'force', maxIteration: 300 },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
+    behaviors: [
+      'zoom-canvas',
+      'drag-canvas',
+      { type: 'hover-highlight', inactiveState: 'inactive' },
+    ],
     theme: 'light',
   });
 
   await graph.render();
-  return { destroy: () => graph.destroy() };
+  return {
+    fitView: () => graph.fitView(),
+    destroy: () => graph.destroy(),
+  };
 }

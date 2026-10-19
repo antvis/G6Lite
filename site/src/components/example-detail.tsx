@@ -4,6 +4,7 @@ import Image from 'next/image';
 import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
   useEffect,
   useLayoutEffect,
@@ -55,6 +56,16 @@ function readOpenCategories(): string[] {
   }
 }
 
+function exampleIdFromPath(pathname: string): string | undefined {
+  const match = pathname.match(/\/docs\/examples\/([^/]+)\/?$/);
+  if (!match) return undefined;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return match[1];
+  }
+}
+
 function storeOpenCategories(ids: readonly string[]) {
   try {
     window.sessionStorage.setItem(DIRECTORY_OPEN_STORAGE_KEY, JSON.stringify(ids));
@@ -93,7 +104,8 @@ function DirectoryThumb({ id, eager }: { id: string; eager: boolean }) {
 }
 
 export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
-  const example = getSiteExample(id);
+  const [activeId, setActiveId] = useState(id);
+  const example = getSiteExample(activeId);
   const previewRef = useRef<HTMLDivElement>(null);
   const previewPanelRef = useRef<HTMLDivElement>(null);
   const workspaceRef = useRef<HTMLElement>(null);
@@ -121,9 +133,31 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
   const [splitRatio, setSplitRatio] = useState(DEFAULT_WORKSPACE_SPLIT);
   const [workspaceResizing, setWorkspaceResizing] = useState(false);
 
-  const currentIndex = siteExamples.findIndex((item) => item.id === id);
+  const currentIndex = siteExamples.findIndex((item) => item.id === activeId);
   const previous = currentIndex > 0 ? siteExamples[currentIndex - 1] : undefined;
   const next = currentIndex >= 0 ? siteExamples[currentIndex + 1] : undefined;
+
+  const selectExample = (nextId: string) => {
+    if (nextId === activeId || !getSiteExample(nextId)) return;
+    const href = withBasePath(localizedExamplePath(nextId, locale));
+    window.history.pushState({ exampleId: nextId }, '', href);
+    setActiveId(nextId);
+  };
+
+  const onExampleLinkClick = (event: ReactMouseEvent<HTMLAnchorElement>, nextId: string) => {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.defaultPrevented
+    ) {
+      return;
+    }
+    event.preventDefault();
+    selectExample(nextId);
+  };
 
   const filteredExamples = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase();
@@ -141,6 +175,28 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
       return haystack.includes(normalized);
     });
   }, [locale, query]);
+
+  useEffect(() => {
+    setActiveId(id);
+  }, [id]);
+
+  useEffect(() => {
+    if (!example) return;
+    document.title = `${localizedText(example.title, locale)} | G6Lite`;
+  }, [example, locale]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const nextId = exampleIdFromPath(window.location.pathname);
+      if (nextId && getSiteExample(nextId)) {
+        setActiveId(nextId);
+        return;
+      }
+      window.location.reload();
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   useEffect(() => {
     if (!example) return;
@@ -548,6 +604,7 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                           aria-current={item.id === example.id ? 'page' : undefined}
                           href={withBasePath(localizedExamplePath(item.id, locale))}
                           key={item.id}
+                          onClick={(event) => onExampleLinkClick(event, item.id)}
                         >
                           <DirectoryThumb
                             id={item.id}
@@ -831,7 +888,10 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
 
         <nav className="example-detail-pagination" aria-label={copy.directory}>
           {previous ? (
-            <a href={withBasePath(localizedExamplePath(previous.id, locale))}>
+            <a
+              href={withBasePath(localizedExamplePath(previous.id, locale))}
+              onClick={(event) => onExampleLinkClick(event, previous.id)}
+            >
               <small>{copy.previous}</small>
               <strong>{localizedText(previous.title, locale)}</strong>
             </a>
@@ -839,7 +899,10 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
             <span />
           )}
           {next ? (
-            <a href={withBasePath(localizedExamplePath(next.id, locale))}>
+            <a
+              href={withBasePath(localizedExamplePath(next.id, locale))}
+              onClick={(event) => onExampleLinkClick(event, next.id)}
+            >
               <small>{copy.next}</small>
               <strong>{localizedText(next.title, locale)}</strong>
             </a>

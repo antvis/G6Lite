@@ -1,0 +1,104 @@
+---
+title: 可用 API
+description: 业务代码可以从 @antv/g6-lite 直接使用的入口、调用顺序和类型
+---
+
+业务代码只从 `@antv/g6-lite` 包根导入。这一节列出应用可以直接调用的函数、类和类型。配置写法、交互示例和扩展教程分别在对应指南里。
+
+```ts
+import { Graph, register, extensionFactory, runLayout, resolveTheme } from '@antv/g6-lite';
+import type {
+  GraphData,
+  GraphOptions,
+  GraphEventMap,
+  NodeModel,
+  ElementState,
+} from '@antv/g6-lite';
+```
+
+包只提供 ESM。CommonJS 工程在客户端边界使用动态导入：
+
+```js
+const { Graph } = await import('@antv/g6-lite');
+```
+
+`Graph` 需要真实的 DOM、Canvas 和 WebGL，不能在没有画布的环境里创建实例。
+
+## 调用顺序
+
+```ts
+const graph = new Graph({
+  container: document.getElementById('container')!,
+  data: { nodes: [{ id: 'a' }, { id: 'b' }], edges: [{ source: 'a', target: 'b' }] },
+  layout: { type: 'force' },
+});
+
+graph.on('node:click', (event) => {
+  graph.setItemState(event.nodeId, 'selected', true);
+});
+
+await graph.render();
+
+graph.destroy();
+```
+
+`new Graph()` 只保存配置并准备画布。布局、绘制和后续数据修改都要等 `await graph.render()` 完成。在此之前调用 `setData()`、`addNode()`、`setItemState()`、`layout()` 会抛出 `Graph must be rendered before calling data operations`。
+
+查询方法在首次渲染前返回空结果：`getNodes()` 为 `[]`，`getNodeData()` 为 `undefined`。`graph.on()` 可以在 `render()` 之前注册。
+
+## 可以直接使用的入口
+
+| 入口 | 作用 | 说明 |
+| --- | --- | --- |
+| `Graph` | 创建图、读写数据、设置状态、控制视口、监听事件 | [Graph](/docs/api/graph) |
+| `GraphOptions` 及节点、边、布局、行为、主题类型 | 声明首屏配置 | [配置](/docs/api/options) |
+| `register()` | 注册自定义节点、边、标签、装饰、布局、行为、转换和插件 | [扩展](/docs/api/extensions) |
+| `extensionFactory()` | 让有状态扩展在每个 Graph 上得到独立实例 | [扩展](/docs/api/extensions) |
+| `runLayout()` | 不创建 Graph，单独计算节点坐标 | [扩展](/docs/api/extensions) |
+| `resolveTheme()` | 把 `'light'`、`'dark'` 或局部 token 解析成完整 `ThemeTokens` | [配置](/docs/api/options) |
+
+常用类型都可以从包根导入：`GraphData`、`GraphNode`、`GraphEdge`、`ComboData`、`NodeModel`、`EdgeModel`、`ComboModel`、`ElementState`、`GraphEventMap`、`FitViewOptions`、`ZoomOptions`、`SetDataOptions`、`LayoutConfig`、`LabelOptions`、`ThemeOption`、`BehaviorOption`。
+
+## 读取结果不能直接改
+
+`getNodeData()`、`getEdgeData()`、`getComboData()` 返回的是只读视图。位置、业务字段和状态要走对应的写入方法：
+
+```ts
+const node = graph.getNodeData('a');
+if (node) {
+  graph.updateNodeData(node.id, { ...node.data, highlighted: true });
+  graph.updateNodePosition(node.id, node.x + 20, node.y);
+  graph.setItemState(node.id, 'selected', true);
+}
+```
+
+直接给 `node.x` 赋值，或调用 `node.states.add()`，不会更新画面，类型检查也会拒绝。
+
+## 引擎内部方法
+
+下列成员出现在 `Graph` 类上，只供渲染和交互分发使用。业务代码使用表格右侧的公开入口。
+
+| 内部成员 | 业务侧入口 |
+| --- | --- |
+| `eventEmitter` | `graph.on()` / `graph.off()` / `graph.once()` |
+| `getCanvas()` | 不暴露画布 DOM |
+| `getLayoutNodes()` / `getNodeIndex()` | `getNodes()` / `getNodeData()` |
+| `pickAt()` / `pickComboAt()` | 元素事件里的 `nodeId`、`edgeId`、`comboId` |
+| `setHighlight()` / `clearHighlight()` | `setItemState()` 与 `highlight` 状态 |
+| `updateData()` / `scheduleRender()` | 数据方法和 `refresh()` |
+
+`EventEmitter` 和 `Handler` 也从包根导出，它们是事件传输类型。订阅图事件时使用 `graph.on()`。
+
+## 已有项目里的兼容入口
+
+新代码使用右侧入口。这些符号仍可导入，后续版本会按 [API 稳定性](/docs/compatibility/api-stability) 移除。
+
+| 兼容入口 | 当前入口 |
+| --- | --- |
+| `BaseNode`、`BreathingNode`、`registerNode()` | `register('node', name, extension)` |
+| `graph.isDestroyed()` | `graph.destroyed` |
+| `graph.toData()` | `graph.getData()` |
+| `graph.getNodePosition()` | `graph.getElementPosition()` |
+| `setComboState()` / `clearComboStates()` / `getComboStates()` | `setItemState()` / `clearItemStates()` / `getItemStates()` |
+| 事件字段 `event` | `nativeEvent` |
+| 扩展里的 `context.graph` 和平铺坐标方法 | `context.data`、`context.state`、`context.viewport` |

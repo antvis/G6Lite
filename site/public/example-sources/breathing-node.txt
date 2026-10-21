@@ -1,9 +1,11 @@
+// Local presentation helpers in this repository are used only for the example controls.
 /**
  * Breathing node demo.
  * Demonstrates the built-in breathing-node extension on selected/highlight states.
  */
 
 import { Graph } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -50,32 +52,25 @@ export async function run(container: string | HTMLElement) {
 
   const containerEl =
     typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
-  containerEl.style.position = 'relative';
 
-  const panel = document.createElement('div');
-  panel.style.cssText =
-    'position:absolute;top:10px;right:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);font-size:12px;z-index:10;';
-  panel.innerHTML = `
-    <div style="font-weight:600;margin-bottom:8px">Breathing Node</div>
-    <button id="toggle-selected">Toggle selected</button>
-    <button id="toggle-highlight" style="margin-left:4px">Toggle highlight</button>
-  `;
-  containerEl.appendChild(panel);
-
-  panel.querySelector('#toggle-selected')!.addEventListener('click', () => {
-    const selected = graph.getItemStates('selected').includes('selected');
-    graph.setItemState('selected', 'selected', !selected);
-  });
-  panel.querySelector('#toggle-highlight')!.addEventListener('click', () => {
-    const highlighted = graph.getItemStates('highlight').includes('highlight');
-    graph.setItemState('highlight', 'highlight', !highlighted);
+  const ui = createDemoPanel(
+    containerEl,
+    '呼吸节点',
+    '切换选中和高亮，观察节点呼吸动画。',
+    '<button data-action="selected">切换选中</button><button data-action="highlight">切换高亮</button>',
+  );
+  ui.controls.addEventListener('click', (event) => {
+    const action = (event.target as HTMLElement).dataset.action;
+    if (action !== 'selected' && action !== 'highlight') return;
+    const active = graph.getItemStates(action).includes(action);
+    graph.setItemState(action, action, !active);
   });
 
   return {
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();
-      panel.remove();
+      ui.panel.remove();
     },
   };
 }

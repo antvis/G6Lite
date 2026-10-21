@@ -151,8 +151,10 @@ register('behavior', BUSINESS_CLICK_BEHAVIOR, extensionFactory(createBusinessCli
 register('plugin', EXTENSION_HINT_PLUGIN, extensionFactory(createExtensionHintPlugin));
 
 export async function run(container: string | HTMLElement) {
+  // Padding keeps the boundary badges (star, count pill) off the canvas edge.
+  const viewPadding = 40;
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFitOnResize: { padding: viewPadding, maxZoom: 1.5 },
     container,
     data: {
       nodes: [
@@ -256,5 +258,10 @@ export async function run(container: string | HTMLElement) {
     edge: { type: 'business-relation' },
   });
   await graph.render();
+  // The business-click behavior toggles node sizes between 32 and 68; refit
+  // after each toggle so resized nodes and their badges stay inside the view.
+  graph.on('node:click', () => {
+    graph.fitView({ padding: viewPadding, maxZoom: 1.5 });
+  });
   return graph;
 }

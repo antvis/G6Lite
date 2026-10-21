@@ -1,0 +1,251 @@
+---
+title: 配置
+description: new Graph() 可传入的数据、节点、边、布局、交互、标签和主题
+---
+
+`new Graph(options)` 的参数类型是 `GraphOptions`。必填字段只有 `container` 和 `data`。节点外观、边外观、布局、交互和主题都有默认值，需要差异化时再覆盖。
+
+```ts
+const graph = new Graph({
+  container: 'container',
+  data: {
+    nodes: [{ id: 'a' }, { id: 'b' }],
+    edges: [{ id: 'a-b', source: 'a', target: 'b' }],
+  },
+  node: { style: { size: 28, fill: '#5366ad' } },
+  edge: { style: { endArrow: true } },
+  layout: { type: 'dagre', rankdir: 'TB' },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'click-select'],
+  theme: 'light',
+});
+```
+
+各主题的视觉效果和完整示例在配置指南里： [数据](/docs/guides/data)、[节点](/docs/guides/node)、[边](/docs/guides/edge)、[标签](/docs/guides/label)、[布局](/docs/guides/layout)、[交互](/docs/guides/interactions)、[主题](/docs/guides/theme)。
+
+## GraphOptions
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `container` | `string \| HTMLElement` | 画布容器。字符串按元素 id 查找 |
+| `data` | `GraphData` | 节点、边，以及可选的 Combo |
+| `node` | `NodeConfig` | 节点形状、样式和状态样式 |
+| `edge` | `EdgeConfig` | 边形状、样式、箭头和状态样式 |
+| `combo` | `ComboConfig` | Combo 外观。折叠和嵌套仍是实验能力 |
+| `label` | `LabelOptions` | 节点和边标签共用的缩放、碰撞策略 |
+| `layout` | `LayoutConfig` | 布局类型和算法参数 |
+| `behaviors` | `BehaviorOption[]` | 交互列表。省略时启用滚轮缩放和拖拽平移 |
+| `transforms` | `TransformOption[]` | 绘制前的数据转换，例如平行边 |
+| `plugins` | `PluginOption[]` | 已注册插件 |
+| `theme` | `ThemeOption` | `'light'`、`'dark'`，或在预设上覆盖 token |
+| `autoFitOnResize` | `boolean \| number \| FitViewOptions` | 容器尺寸变化后是否重新 `fitView()`。默认 `false`，保留当前相机 |
+
+运行中能热更新的是 `node`、`edge`、`label` 和 `theme`，通过 [`graph.updateOptions()`](/docs/api/graph#updateoptions)。
+
+## 图数据
+
+```ts
+const data: GraphData = {
+  nodes: [{ id: 'a', data: { cluster: 'svc' } }],
+  edges: [{ source: 'a', target: 'b', data: { weight: 1 } }],
+  combos: [{ id: 'group', collapsed: false }],
+};
+```
+
+### 节点 `GraphNode`
+
+| 字段 | 必填 | 说明 |
+| --- | --- | --- |
+| `id` | 是 | 图内唯一 |
+| `name` | 否 | 节点名称 |
+| `data` | 否 | 业务字段。样式函数和 Tooltip 从这里读取 |
+| `x` / `y` | 否 | 已有坐标。无布局或作为布局初始位置时使用 |
+| `fx` / `fy` | 否 | 布局时固定的坐标 |
+| `states` | 否 | 初始状态，如 `['selected']` |
+| `comboId` | 否 | 所属 Combo 的 id |
+
+### 边 `GraphEdge`
+
+| 字段 | 必填 | 说明 |
+| --- | --- | --- |
+| `source` | 是 | 起点节点 id |
+| `target` | 是 | 终点节点 id |
+| `id` | 否 | 省略时由引擎生成 |
+| `data` | 否 | 业务字段 |
+| `states` | 否 | 初始状态 |
+
+### Combo `ComboData`
+
+| 字段 | 说明 |
+| --- | --- |
+| `id` | 必填，唯一 |
+| `parentId` | 父 Combo，用于嵌套 |
+| `collapsed` | 初始是否折叠 |
+| `style` | 覆盖 `combo.style` 的局部样式 |
+| `data` | 业务字段 |
+| `states` | 初始状态 |
+
+## 节点
+
+```ts
+node?: {
+  type?: 'circle' | 'rect' | string;
+  labelRenderer?: string;
+  decorations?: NodeDecorationConfig[];
+  autoExternalLabelPlacement?: boolean;
+  style?: NodeStyleConfig | ((node: GraphNode) => Partial<NodeStyleConfig>);
+  stateStyles?: Partial<Record<ElementState, NodeStateStyleOverride>>;
+}
+```
+
+`type` 省略或为 `'circle'` 时画圆形，`'rect'` 画圆角矩形。其他字符串必须是已经 `register('node', ...)` 的类型名。
+
+`style` 的每个视觉字段都可以是固定值，或 `(node: GraphNode) => 值`。`label: false` 和 `icon: false` 表示不绘制该项。
+
+| 样式字段 | 说明 |
+| --- | --- |
+| `fill` / `stroke` / `strokeWidth` / `opacity` | 填充、描边和透明度 |
+| `size` | 圆形直径或未分别指定宽高时的尺寸 |
+| `width` / `height` / `borderRadius` | 矩形尺寸和圆角 |
+| `label` | 文本，或返回文本的函数。未配置时不绘制节点标签；`false` 表示明确不显示 |
+| `labelFontSize` / `labelFontFamily` / `labelFontWeight` / `labelColor` | 文本外观 |
+| `labelPlacement` | `'center' \| 'top' \| 'bottom' \| 'left' \| 'right'`，默认 `'bottom'` |
+| `labelOffsetX` / `labelOffsetY` | 相对放置点的偏移 |
+| `labelBackground` / `labelBackgroundPadding` / `labelMaxWidth` | 文本底色、内边距和最大宽度 |
+| `icon` / `iconType` | 图标内容。`iconType` 为 `'image'` 或 `'text'` |
+| `iconWidth` / `iconHeight` / `iconFontFamily` / `iconFontSize` / `iconColor` | 图标尺寸和文字图标样式 |
+| `iconOffsetX` / `iconOffsetY` | 图标偏移 |
+
+`stateStyles` 在元素进入对应状态时覆盖 `fill`、`stroke`、`strokeWidth`、`opacity`、`haloWidth`。状态怎么开关见 [Graph 状态方法](/docs/api/graph#状态显隐和定位)。
+
+`labelRenderer` 是已注册的自定义标签渲染器名称。`decorations` 用来挂 badge 等节点装饰，渲染器通过 `register('decoration', ...)` 注册。字段和碰撞规则见 [标签](/docs/guides/label) 与 [自定义节点](/docs/guides/custom-node)。
+
+## 边
+
+```ts
+edge?: {
+  type?: 'line' | 'arc' | 'polyline' | 'cubic' | string;
+  labelRenderer?: string;
+  parallelEdges?: boolean | ParallelEdgesConfig;
+  style?: { /* 见下表，值可以是函数 */ };
+  stateStyles?: Partial<Record<ElementState, EdgeStateStyleOverride>>;
+}
+```
+
+边的样式函数签名是 `(source, target, edge) => 值`。
+
+| 样式字段 | 说明 |
+| --- | --- |
+| `stroke` / `lineWidth` / `opacity` / `lineDash` | 颜色、宽度、透明度和虚线 |
+| `hitAreaWidth` | 可点中的屏幕像素宽度。省略时等于最终线宽 |
+| `curvature` / `curveOffset` | 弧线和曲线的弯曲 |
+| `endArrow` / `startArrow` / `arrowSize` | 终点箭头、起点箭头和尺寸 |
+| `radius` | 折线拐角半径 |
+| `router` | 折线路由：`'orth' \| 'tree' \| 'indented' \| 'fishbone'` |
+| `label` 及 `labelFontSize`、`labelFontFamily`、`labelColor` | 边标签内容。未配置 `label` 时不绘制；字号默认 `10` |
+| `labelPlacement` | `'start' \| 'center' \| 'end'` |
+| `labelBackground` / `labelBackgroundPadding` / `labelAutoRotate` | 底色、内边距，以及是否沿边旋转 |
+
+`stateStyles` 可覆盖 `stroke`、`lineWidth`、`hitAreaWidth`、`opacity`、`lineDash`。
+
+`parallelEdges: true` 使用默认间距拆开同端点的多条边。对象形式：
+
+| 字段 | 默认 | 说明 |
+| --- | --- | --- |
+| `enabled` | 开启 | 是否分离 |
+| `offset` | `20` | 相邻边的图坐标间距 |
+| `mergeBy` | 按 source/target | 当前只支持按两端分组 |
+| `includeReverse` | `true` | `A→B` 与 `B→A` 算同一组 |
+| `minOffset` | `0` | 非中心边的最小绝对偏移 |
+| `maxOffset` | `80` | 最大绝对偏移 |
+
+也可以把 `'process-parallel-edges'` 放进 `transforms`，两种写法的效果相同。详见 [平行边](/docs/guides/parallel-edges)。
+
+## 标签策略
+
+`label` 控制引擎如何显示已经算好的节点和边标签，不决定文本内容。
+
+| 字段 | 默认 | 说明 |
+| --- | --- | --- |
+| `scaleWithZoom` | `true` | 节点标签尺寸是否跟随相机缩放。边标签保持屏幕尺寸 |
+| `hideOnLowZoom` | `true` | 缩放低于阈值时隐藏标签 |
+| `hideOnCollision` | `true` | 与更早的标签重叠时隐藏 |
+| `nodeMinZoom` | `0.3` | 节点标签的最小缩放 |
+| `edgeMinZoom` | `0.5` | 边标签的最小缩放 |
+
+## 布局
+
+```ts
+layout?: {
+  type: string;
+  worker?: boolean;
+  width?: number;
+  height?: number;
+  center?: [number, number];
+  [algorithmOption: string]: unknown;
+}
+```
+
+`type` 使用内置名称或已注册的布局名，例如 `'force'`、`'dagre'`、`'mindmap'`。其余字段传给对应算法。`worker: true` 把支持的算法放到 Web Worker。`width`、`height`、`center` 省略时按画布尺寸计算。
+
+可选类型、参数和运行时重跑见 [布局配置](/docs/guides/layout)。
+
+## 交互
+
+`behaviors` 的每一项是行为名，或 `{ type, ...选项 }`。
+
+省略整个字段时等价于 `['zoom-canvas', 'drag-canvas']`。传入数组后，数组就是完整列表，`[]` 表示关闭默认的缩放和平移。
+
+| `type` | 作用 | 可写选项 |
+| --- | --- | --- |
+| `zoom-canvas` | 滚轮缩放 | `sensitivity` 默认 `1`，`minZoom` 默认 `0.1`，`maxZoom` 默认 `20` |
+| `drag-canvas` | 拖拽平移 | `ignoreModifierKeys` 默认 `true`，按住修饰键时不平移，留给框选 |
+| `drag-node` | 拖拽节点 | 无额外选项 |
+| `drag-edge` | 拖拽边的端点重新连线 | 无额外选项 |
+| `click-select` | 点击选中节点或边 | `multiple` 默认 `false`，`trigger` 默认 `'shift'`，还可为 `'ctrl'` 或 `'meta'` |
+| `hover-highlight` | 悬停高亮邻域 | `degree` 默认 `1`，`inactiveState` 可选 |
+| `highlight-node` | 悬停节点时高亮该节点、一度邻居和相连的边 | 无额外选项 |
+| `highlight-edge` | 悬停边时高亮边和两端节点 | 无额外选项 |
+| `brush-select` | 矩形框选 | `key` 为 `'shift'`、`'ctrl'` 或 `null`，`throttleMs` 默认 `100` |
+| `lasso-select` | 套索选择 | 与 `brush-select` 相同 |
+| `tooltip` | 浮层 | 见下表 |
+
+`tooltip` 选项：
+
+| 字段 | 默认 | 说明 |
+| --- | --- | --- |
+| `trigger` | `'hover'` | `'hover'` 或 `'click'` |
+| `getContent` | 节点 id 或边的两端 | 返回字符串或 `HTMLElement`。自定义字符串按 HTML 写入，不可信内容需要调用方转义 |
+| `enable` | 始终显示 | 返回 `false` 时不显示该元素 |
+| `offset` | `[10, 10]` | 相对指针的像素偏移 |
+| `delay` | `80` | 悬停出现前的等待毫秒 |
+| `className` | `'g6lite-tooltip'` | 浮层类名 |
+| `container` | `document.body` | 浮层挂载节点 |
+
+`getContent` 收到的 `TooltipContext` 包含 `itemType`、`nodeId` 或边的 `edgeId` / `source` / `target`、`data` 和原始 `event`。
+
+行为组合和事件见 [交互配置](/docs/guides/interactions)。自定义行为用 [`register('behavior', ...)`](/docs/api/extensions)。
+
+## 主题
+
+```ts
+theme?: 'light' | 'dark' | ({ type: 'light' | 'dark' } & Partial<ThemeTokens>)
+```
+
+对象形式先取 `type` 对应的预设，再用同层字段覆盖。可覆盖的 token 包括 `nodeFill`、`nodeSize`、`nodeStroke`、`nodeStrokeWidth`、`edgeStroke`、`edgeLineWidth`、`edgeArrow`、`canvasBackground`、`edgeDefaultColor`、`edgeCategoryPalette`、`nodeStateStyles`、`edgeStateStyles`。
+
+```ts
+import { resolveTheme } from '@antv/g6-lite';
+
+const tokens = resolveTheme({ type: 'light', nodeFill: '#1677ff' });
+```
+
+`resolveTheme()` 返回一份新的完整 `ThemeTokens`，不修改预设。
+
+## 插件与转换
+
+```ts
+plugins?: Array<{ type: string; [option: string]: unknown }>
+transforms?: Array<'process-parallel-edges' | string | { type: string; options?: object }>
+```
+
+`plugins` 和自定义 `transforms` 的 `type` 必须先用 `register()` 注册。内置转换名目前是 `'process-parallel-edges'`。

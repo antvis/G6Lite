@@ -9,6 +9,7 @@ export async function run(container: string | HTMLElement) {
 
   // Circle nodes with stroke
   const div1 = document.createElement('div');
+  div1.className = 'demo-canvas-card';
   div1.style.cssText = 'width:100%;height:45%;position:relative;';
   root.appendChild(div1);
 
@@ -40,6 +41,7 @@ export async function run(container: string | HTMLElement) {
 
   // Rect nodes with border radius
   const div2 = document.createElement('div');
+  div2.className = 'demo-canvas-card';
   div2.style.cssText = 'width:100%;height:45%;position:relative;margin-top:16px;';
   root.appendChild(div2);
 

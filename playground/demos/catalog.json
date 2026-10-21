@@ -1260,7 +1260,7 @@
     "releaseCheck": "smoke",
     "capture": {
       "mode": "visual",
-      "settleMs": 700,
+      "settleMs": 3000,
       "deviceScaleFactor": 2
     }
   },

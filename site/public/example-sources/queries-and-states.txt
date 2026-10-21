@@ -16,8 +16,8 @@ const DATA: GraphData = {
     { id: 'e-n2-n3', source: 'n2', target: 'n3' },
   ],
   combos: [
-    { id: 'left', data: { label: '入口' } },
-    { id: 'right', data: { label: '处理' } },
+    { id: 'left', data: { label: '查询起点' } },
+    { id: 'right', data: { label: '状态分组' } },
   ],
 };
 

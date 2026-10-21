@@ -556,6 +556,183 @@ describe('P1: public camera and coordinate boundary', () => {
     expect(camera.x * camera.zoom).toBeCloseTo(50);
     expect((1000 + camera.x) * camera.zoom).toBeCloseTo(750);
   });
+
+  it('fits the view around full node bodies so padding keeps them visible', () => {
+    const nodes = [
+      { id: 'n1', x: 120, y: 140 },
+      { id: 'n2', x: 270, y: 140 },
+      { id: 'n3', x: 420, y: 140 },
+      { id: 'n4', x: 120, y: 290 },
+      { id: 'n5', x: 270, y: 290 },
+      { id: 'n6', x: 420, y: 290 },
+    ];
+    const setCamera = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      options: {},
+      getCurrentLayoutNodes: () => nodes,
+      containerEl: { clientWidth: 590, clientHeight: 320 },
+      canvas: { width: 590, height: 320 },
+      renderer: {
+        ensureProcessed: () => undefined,
+        getNodeDimensions: () => ({ width: 72, height: 36 }),
+        getEdgeGeometryBounds: () => undefined,
+        setCamera,
+      },
+    });
+
+    graph.fitView(0.9);
+
+    const camera = setCamera.mock.calls[0][0] as { x: number; y: number; zoom: number };
+    // Bounds include node bodies (372x186), not just centers (300x150):
+    // scale = min(590 / 372, 320 / 186) * 0.9.
+    expect(camera.zoom).toBeCloseTo(0.9 * Math.min(590 / 372, 320 / 186));
+    // The fitted graph must stay inside the canvas on both axes.
+    expect(camera.zoom * 372).toBeLessThanOrEqual(590);
+    expect(camera.zoom * 186).toBeLessThanOrEqual(320);
+    // The camera centers the expanded bounds (center at 270, 215).
+    expect(camera.x).toBeCloseTo(295 / camera.zoom - 270);
+    expect(camera.y).toBeCloseTo(160 / camera.zoom - 215);
+  });
+
+  it('falls back to node centers when rendered dimensions are unavailable', () => {
+    const nodes = [
+      { id: 'n1', x: 120, y: 140 },
+      { id: 'n6', x: 420, y: 290 },
+    ];
+    const setCamera = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      options: {},
+      getCurrentLayoutNodes: () => nodes,
+      containerEl: { clientWidth: 590, clientHeight: 320 },
+      canvas: { width: 590, height: 320 },
+      renderer: {
+        ensureProcessed: () => undefined,
+        getNodeDimensions: () => undefined,
+        getEdgeGeometryBounds: () => undefined,
+        setCamera,
+      },
+    });
+
+    graph.fitView(0.9);
+
+    const camera = setCamera.mock.calls[0][0] as { x: number; y: number; zoom: number };
+    // Center-only bounds (300x150): scale = min(590 / 300, 320 / 150) * 0.9.
+    expect(camera.zoom).toBeCloseTo(0.9 * Math.min(590 / 300, 320 / 150));
+  });
+
+  it('falls back to static node style dimensions right after render', () => {
+    // Mirrors the render() path: fitView runs before the first draw(), so the
+    // renderer dimension buffers do not exist yet. The static node style on
+    // the graph options must still expand the bounds by node bodies.
+    const nodes = [
+      { id: 'n1', x: 120, y: 140 },
+      { id: 'n2', x: 270, y: 140 },
+      { id: 'n3', x: 420, y: 140 },
+      { id: 'n4', x: 120, y: 290 },
+      { id: 'n5', x: 270, y: 290 },
+      { id: 'n6', x: 420, y: 290 },
+    ];
+    const setCamera = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      options: { node: { style: { width: 72, height: 36 } } },
+      getCurrentLayoutNodes: () => nodes,
+      containerEl: { clientWidth: 590, clientHeight: 320 },
+      canvas: { width: 590, height: 320 },
+      renderer: {
+        ensureProcessed: () => undefined,
+        getNodeDimensions: () => undefined,
+        getEdgeGeometryBounds: () => undefined,
+        setCamera,
+      },
+    });
+
+    graph.fitView(0.9);
+
+    const camera = setCamera.mock.calls[0][0] as { x: number; y: number; zoom: number };
+    expect(camera.zoom).toBeCloseTo(0.9 * Math.min(590 / 372, 320 / 186));
+    expect(camera.zoom * 372).toBeLessThanOrEqual(590);
+    expect(camera.zoom * 186).toBeLessThanOrEqual(320);
+  });
+
+  it('expands the fitted bounds with curved edge geometry', () => {
+    // Parallel arcs between two nodes bow far above the node centers; without
+    // edge bounds the arc apex would be clipped at the canvas edge.
+    const nodes = [
+      { id: 'a', x: 200, y: 220 },
+      { id: 'b', x: 340, y: 220 },
+    ];
+    const setCamera = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      options: {},
+      getCurrentLayoutNodes: () => nodes,
+      containerEl: { clientWidth: 590, clientHeight: 320 },
+      canvas: { width: 590, height: 320 },
+      renderer: {
+        ensureProcessed: () => undefined,
+        getNodeDimensions: () => ({ width: 34, height: 34 }),
+        getEdgeGeometryBounds: () => ({ minX: 190, minY: 140, maxX: 350, maxY: 230 }),
+        setCamera,
+      },
+    });
+
+    graph.fitView(0.9);
+
+    const camera = setCamera.mock.calls[0][0] as { x: number; y: number; zoom: number };
+    // Merged bounds: node bodies (183..357 x, 203..237 y) ∪ edge arcs (y up to
+    // 140) => 174 x 97. Height becomes the constraint, so the zoom must be
+    // smaller than the node-only fit (bounded by width at 590 / 174).
+    expect(camera.zoom).toBeCloseTo(0.9 * Math.min(590 / 174, 320 / 97));
+    expect(camera.zoom).toBeLessThan(0.9 * (590 / 174));
+    expect(camera.zoom * 97).toBeLessThanOrEqual(320);
+  });
+
+  it('expands the fitted bounds with combo boxes', () => {
+    // Combo boxes wrap node bodies plus padding; without merging them the box
+    // bleeds past the fitted view edges.
+    const nodes = [
+      { id: 'a', x: 200, y: 220 },
+      { id: 'b', x: 340, y: 220 },
+    ];
+    const setCamera = vi.fn();
+    const updateComboBounds = vi.fn();
+    const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
+    Object.assign(graph, {
+      _destroyed: false,
+      options: {},
+      getCurrentLayoutNodes: () => nodes,
+      containerEl: { clientWidth: 590, clientHeight: 320 },
+      canvas: { width: 590, height: 320 },
+      renderer: {
+        ensureProcessed: () => undefined,
+        getNodeDimensions: () => ({ width: 34, height: 34 }),
+        getEdgeGeometryBounds: () => undefined,
+        setCamera,
+      },
+      dataModel: {
+        hasCombos: () => true,
+        updateComboBounds,
+        getCombos: () => [{ id: 'c1', x: 270, y: 220, width: 300, height: 200 }],
+      },
+    });
+
+    graph.fitView(0.9);
+
+    expect(updateComboBounds).toHaveBeenCalled();
+    const camera = setCamera.mock.calls[0][0] as { x: number; y: number; zoom: number };
+    // Merged bounds: nodes (183..357 x, 203..237 y) ∪ combo (120..420 x,
+    // 120..320 y) => 300 x 200; height constrains the zoom.
+    expect(camera.zoom).toBeCloseTo(0.9 * Math.min(590 / 300, 320 / 200));
+    expect(camera.zoom * 300).toBeLessThanOrEqual(590);
+    expect(camera.zoom * 200).toBeLessThanOrEqual(320);
+  });
 });
 
 describe('P1: viewport resize fitting policy', () => {

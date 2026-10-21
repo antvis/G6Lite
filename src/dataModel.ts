@@ -1115,8 +1115,15 @@ export class DataModel {
     return result;
   }
 
-  /** Recompute combo bounding boxes based on child node positions. */
-  updateComboBounds(padding: number | ((combo: InternalCombo) => number) = 20): void {
+  /**
+   * Recompute combo bounding boxes based on child node positions.
+   * Pass `getNodeDimensions` so bounds wrap full node bodies instead of just
+   * their centers; without it, bounds only cover center coordinates.
+   */
+  updateComboBounds(
+    padding: number | ((combo: InternalCombo) => number) = 20,
+    getNodeDimensions?: (nodeId: string) => { width: number; height: number } | undefined,
+  ): void {
     // Process from leaf combos up to root combos
     const processed = new Set<string>();
     const visiting = new Set<string>();
@@ -1142,10 +1149,13 @@ export class DataModel {
       for (const nodeId of combo.childNodeIds) {
         const node = this.getNode(nodeId);
         if (node) {
-          if (node.x < minX) minX = node.x;
-          if (node.x > maxX) maxX = node.x;
-          if (node.y < minY) minY = node.y;
-          if (node.y > maxY) maxY = node.y;
+          const dimensions = getNodeDimensions?.(nodeId);
+          const halfWidth = (dimensions?.width ?? 0) / 2;
+          const halfHeight = (dimensions?.height ?? 0) / 2;
+          if (node.x - halfWidth < minX) minX = node.x - halfWidth;
+          if (node.x + halfWidth > maxX) maxX = node.x + halfWidth;
+          if (node.y - halfHeight < minY) minY = node.y - halfHeight;
+          if (node.y + halfHeight > maxY) maxY = node.y + halfHeight;
         }
       }
 

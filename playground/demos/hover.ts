@@ -62,7 +62,6 @@ export async function run(container: string | HTMLElement) {
           if (idx <= 5) return '#5B8FF9';  // First ring: blue
           return '#5AD8A6';                 // Outer ring: green
         },
-        size: (d) => (d.id === '0' ? 14 : 10),
       },
     },
     edge: {

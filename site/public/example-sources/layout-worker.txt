@@ -1,7 +1,9 @@
+// Local presentation helpers in this repository are used only for the example controls.
 /**
  * Demo: run a force layout in a Web Worker.
  */
 import { Graph } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 function createNetwork(count: number) {
   const nodes = Array.from({ length: count }, (_, index) => ({
@@ -35,17 +37,14 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const note = document.createElement('div');
-  note.style.cssText =
-    'position:absolute;left:12px;bottom:12px;z-index:20;color:#64748b;font:12px/1.4 system-ui,sans-serif;pointer-events:none;';
-  note.textContent = `force · worker · ${Math.round(performance.now() - started)} ms`;
-  host.append(note);
+  const ui = createDemoPanel(host, 'Worker 布局', '', '');
+  ui.setStatus(`force · worker · ${Math.round(performance.now() - started)} ms`);
 
   return {
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();
-      note.remove();
+      ui.panel.remove();
     },
   };
 }

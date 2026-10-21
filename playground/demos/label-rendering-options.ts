@@ -21,12 +21,17 @@ const EDGES = NODES.slice(1).map((node, index) => ({
   data: { label: `route ${index + 1}` },
 }));
 
-const VIEW_PADDING: [number, number, number, number] = [90, 70, 70, 360];
-
 export async function run(container: string | HTMLElement) {
+  const root =
+    typeof container === 'string' ? (document.querySelector(container)! as HTMLElement) : container;
+  // Reserve left room for the bottom-left status block. Scale the reservation
+  // with the container so narrow hosts (e.g. the docs site preview) are not
+  // squeezed against the right edge while wide canvases keep the full gap.
+  const leftReserve = Math.round(Math.min(360, Math.max(160, root.clientWidth * 0.28)));
+  const viewPadding: [number, number, number, number] = [90, 70, 70, leftReserve];
   const graph = new Graph({
-    autoFitOnResize: { padding: VIEW_PADDING, maxZoom: 0.4 },
-    container,
+    autoFitOnResize: { padding: viewPadding, maxZoom: 0.4 },
+    container: root,
     data: { nodes: NODES, edges: EDGES },
     label: {
       scaleWithZoom: false,
@@ -63,7 +68,7 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
 
   const ui = createDemoPanel(
-    container,
+    root,
     '标签渲染策略开关',
     '对比字号随 zoom 缩放、低 zoom 隐藏和碰撞隐藏。初始为三项全部关闭。',
     [
@@ -88,7 +93,7 @@ export async function run(container: string | HTMLElement) {
 
   const setZoom = (nextZoom: number) => {
     zoom = nextZoom;
-    graph.fitView({ padding: VIEW_PADDING, minZoom: zoom, maxZoom: zoom });
+    graph.fitView({ padding: viewPadding, minZoom: zoom, maxZoom: zoom });
     updateStatus();
   };
 

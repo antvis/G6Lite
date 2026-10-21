@@ -580,6 +580,29 @@ describe('DataModel combo operations', () => {
     expect(combo.height).toBe(90); // 50 - 0 + 20 * 2
   });
 
+  it('should expand combo bounds by node dimensions when provided', () => {
+    const model = createModel();
+    model.addNodes([
+      { id: 'n1', x: 0, y: 0 },
+      { id: 'n2', x: 100, y: 50 },
+    ]);
+    model.initCombos(
+      [{ id: 'c1' }],
+      [
+        { id: 'n1', comboId: 'c1' },
+        { id: 'n2', comboId: 'c1' },
+      ],
+    );
+    model.updateComboBounds(20, () => ({ width: 20, height: 10 }));
+    const combo = model.getCombo('c1')!;
+    // Centers span (0,0)-(100,50); each node adds 10 half-width, 5 half-height:
+    // x: -10..110, y: -5..55, plus padding 20 per side.
+    expect(combo.x).toBe(50);
+    expect(combo.y).toBe(25);
+    expect(combo.width).toBe(160); // 120 + 20 * 2
+    expect(combo.height).toBe(100); // 60 + 20 * 2
+  });
+
   it('should give an empty combo zero bounds', () => {
     const model = createModel();
     model.addCombo({ id: 'c1' });

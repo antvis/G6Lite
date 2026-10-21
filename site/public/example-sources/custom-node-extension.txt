@@ -1,9 +1,11 @@
+// Local presentation helpers in this repository are used only for the example controls.
 /**
  * Custom node extension demo.
  * Demonstrates: function-style node registration, explicit edge IDs, and Combo state API.
  */
 
 import { Graph, register, type NodeExtension } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 const statusBadgeNode: NodeExtension = {
   base: 'rect',
@@ -88,7 +90,7 @@ export async function run(container: string | HTMLElement) {
         labelFontSize: 13,
       },
     },
-    layout: { type: 'dagre', rankdir: 'LR', nodesep: 45, ranksep: 90 },
+    layout: { type: 'dagre', rankdir: 'LR', nodesep: 45, ranksep: 90, nodeSize: [96, 34] },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select', 'hover-highlight'],
   });
 
@@ -97,51 +99,40 @@ export async function run(container: string | HTMLElement) {
 
   const containerEl =
     typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
-  containerEl.style.position = 'relative';
 
-  const panel = document.createElement('div');
-  panel.style.cssText =
-    'position:absolute;top:10px;right:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);font-size:12px;z-index:10;min-width:220px;';
-  panel.innerHTML = `
-    <div style="font-weight:600;margin-bottom:8px">Custom Node + Edge ID</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button id="combo-state">Toggle combo state</button>
-      <button id="edge-state">Select explicit edgeId</button>
-    </div>
-    <div id="compat-log" style="margin-top:8px;color:#666;font:11px ui-monospace,SFMono-Regular,Menlo,monospace">
-      demo-combo states: selected
-    </div>
-  `;
-  containerEl.appendChild(panel);
+  const ui = createDemoPanel(
+    containerEl,
+    '自定义节点',
+    'demo-combo states: selected',
+    '<button data-action="combo">切换 Combo 状态</button><button data-action="edge">选中显式边 ID</button>',
+  );
 
-  const log = panel.querySelector<HTMLElement>('#compat-log')!;
-  const setLog = (text: string) => {
-    log.textContent = text;
-  };
-
-  panel.querySelector('#combo-state')!.addEventListener('click', () => {
-    const selected = graph.getComboStates('demo-combo').includes('selected');
-    graph.setComboState('demo-combo', 'selected', !selected);
-    setLog(`demo-combo states: ${graph.getComboStates('demo-combo').join(', ') || '(none)'}`);
-  });
-
-  panel.querySelector('#edge-state')!.addEventListener('click', () => {
-    graph.setItemState('edge-worker-a-store', 'selected', true);
-    setLog('selected edgeId: edge-worker-a-store');
+  ui.controls.addEventListener('click', (event) => {
+    const action = (event.target as HTMLElement).dataset.action;
+    if (action === 'combo') {
+      const selected = graph.getComboStates('demo-combo').includes('selected');
+      graph.setComboState('demo-combo', 'selected', !selected);
+      ui.setStatus(`demo-combo states: ${graph.getComboStates('demo-combo').join(', ') || '(none)'}`);
+      return;
+    }
+    if (action === 'edge') {
+      graph.setItemState('edge-worker-a-store', 'selected', true);
+      ui.setStatus('selected edgeId: edge-worker-a-store');
+    }
   });
 
   graph.on('edge:click', (payload: { edgeId?: string }) => {
-    setLog(`edge:click edgeId=${payload.edgeId}`);
+    ui.setStatus(`edge:click edgeId=${payload.edgeId}`);
   });
   graph.on('combo:click', (payload: { comboId: string }) => {
-    setLog(`combo:click comboId=${payload.comboId}`);
+    ui.setStatus(`combo:click comboId=${payload.comboId}`);
   });
 
   return {
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();
-      panel.remove();
+      ui.panel.remove();
     },
   };
 }

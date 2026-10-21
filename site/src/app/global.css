@@ -1703,7 +1703,7 @@ body:has(#nd-docs-layout.examples-route-layout) {
   display: flex;
   height: auto;
   min-height: 0;
-  max-height: min(28rem, 100%);
+  max-height: min(34rem, 100%);
   flex-direction: column;
   align-self: start;
   background: #f7f8fc;
@@ -1901,7 +1901,8 @@ body.example-workspace-resizing {
 }
 
 .example-code-content > pre,
-.example-data-panel > pre {
+.example-data-panel > pre,
+.example-data-panel > .example-highlighted-code {
   margin: 0 !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -2034,7 +2035,8 @@ body.example-workspace-resizing {
   line-height: 1.7;
 }
 
-.example-data-panel > pre {
+.example-data-panel > pre,
+.example-data-panel > .example-highlighted-code {
   border: 0 !important;
   border-radius: 0.7rem !important;
   background: var(--example-code-surface) !important;
@@ -2147,9 +2149,9 @@ body.example-workspace-resizing {
 .example-preview-stage {
   position: relative;
   display: flex;
-  height: clamp(12rem, calc(100dvh - 36rem), 20rem);
+  height: clamp(12rem, calc(100dvh - 36rem), 28rem);
   min-height: 12rem;
-  max-height: 20rem;
+  max-height: 28rem;
   flex: none;
   align-items: center;
   justify-content: center;
@@ -2160,6 +2162,7 @@ body.example-workspace-resizing {
 
 .example-preview-canvas {
   display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -2173,6 +2176,30 @@ body.example-workspace-resizing {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+/* Uniform card look for multi-canvas demo sections, so each sub-canvas reads
+   as a contained surface inside the preview stage. */
+.example-preview-canvas .demo-canvas-card {
+  box-sizing: border-box;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* Tooltip overlay (the library ships an unstyled div; apps provide the look).
+   Mirrors the playground tooltip styling. */
+.g6lite-tooltip {
+  box-sizing: border-box;
+  padding: 6px 10px;
+  max-width: 240px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.78);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .example-preview-overlay {

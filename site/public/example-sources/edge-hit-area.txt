@@ -27,8 +27,8 @@ export async function run(container: string | HTMLElement) {
 
   for (const [index, item] of EDGE_TYPES.entries()) {
     const panel = document.createElement('div');
-    panel.style.cssText =
-      'position:relative;min-height:210px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff;';
+    panel.className = 'demo-canvas-card';
+    panel.style.cssText = 'position:relative;min-height:210px;';
     const title = document.createElement('div');
     title.textContent = item.title;
     title.style.cssText =

@@ -1,8 +1,10 @@
+// Local presentation helpers in this repository are used only for the example controls.
 /**
  * Demo: setData + layout() 端到端验证
  * 测试运行时整体数据替换和布局切换
  */
 import { Graph } from '@antv/g6-lite';
+import { mountCanvasMenu } from './demo-panel.ts';
 
 const DATA_A = {
   nodes: [
@@ -47,20 +49,7 @@ const DATA_B = {
 export async function run(container: string | HTMLElement) {
   const el = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
 
-  const toolbar = document.createElement('div');
-  toolbar.style.cssText = 'position:absolute;top:8px;left:8px;z-index:10;display:flex;gap:6px;';
-  toolbar.innerHTML = `
-    <button id="btn-set-data-a">setData(A) 5节点</button>
-    <button id="btn-set-data-b">setData(B) 8节点</button>
-    <button id="btn-layout-grid">layout: grid</button>
-    <button id="btn-layout-circular">layout: circular</button>
-    <button id="btn-layout-force">layout: force</button>
-    <button id="btn-hide">hideItem(b1)</button>
-    <button id="btn-show">showItem(b1)</button>
-    <button id="btn-focus">focusItem(b8)</button>
-  `;
   el.style.position = 'relative';
-  el.appendChild(toolbar);
 
   const graph = new Graph({
     autoFitOnResize: true,
@@ -86,67 +75,78 @@ export async function run(container: string | HTMLElement) {
   graph.on('layout:start', () => log('layout:start'));
   graph.on('layout:end', (e: any) => log(`layout:end: ${e.duration.toFixed(1)}ms`));
 
-  document.getElementById('btn-set-data-a')!.onclick = async () => {
-    log('setData → DATA_A');
-    await graph.setData(DATA_A);
-    graph.fitView();
-    log(`done. nodeCount=${graph.getNodeCount()}`);
-  };
+  mountCanvasMenu(el, {
+    caption: '数据',
+    items: [
+      { value: 'a', label: 'A · 5 节点' },
+      { value: 'b', label: 'B · 8 节点' },
+    ],
+    value: 'a',
+    onSelect(value) {
+      const next = value === 'b' ? DATA_B : DATA_A;
+      log(`setData → DATA_${value.toUpperCase()}`);
+      void graph.setData(next).then(() => {
+        graph.fitView();
+        log(`done. nodeCount=${graph.getNodeCount()}`);
+      });
+    },
+  });
 
-  document.getElementById('btn-set-data-b')!.onclick = async () => {
-    log('setData → DATA_B');
-    await graph.setData(DATA_B);
-    graph.fitView();
-    log(`done. nodeCount=${graph.getNodeCount()}`);
-  };
+  mountCanvasMenu(el, {
+    caption: '布局',
+    items: [
+      { value: 'circular', label: 'circular' },
+      { value: 'grid', label: 'grid' },
+      { value: 'force', label: 'force' },
+    ],
+    value: 'circular',
+    onSelect(value) {
+      const apply = async () => {
+        log(`setLayout(${value}) + layout()`);
+        if (value === 'grid') graph.setLayout({ type: 'grid' });
+        else if (value === 'force') graph.setLayout({ type: 'd3-force' });
+        else graph.setLayout({ type: 'circular', radius: 150 });
+        await graph.layout();
+        graph.fitView();
+        log(`${value} done`);
+      };
+      void apply();
+    },
+  });
 
-  document.getElementById('btn-layout-grid')!.onclick = async () => {
-    log('setLayout(grid) + layout()');
-    graph.setLayout({ type: 'grid' });
-    await graph.layout();
-    graph.fitView();
-    log('grid done');
-  };
+  mountCanvasMenu(el, {
+    caption: '操作',
+    action: true,
+    items: [
+      { value: 'hide', label: 'hideItem' },
+      { value: 'show', label: 'showItem' },
+      { value: 'focus', label: 'focusItem' },
+    ],
+    value: '',
+    onSelect(value) {
+      if (value === 'focus') {
+        const id = graph.hasNode('b8') ? 'b8' : 'a5';
+        log(`focusItem(${id})`);
+        graph.focusItem(id);
+        return;
+      }
+      const id = graph.hasNode('b1') ? 'b1' : 'a1';
+      if (value === 'hide') {
+        log(`hideItem(${id})`);
+        graph.hideItem(id);
+      } else {
+        log(`showItem(${id})`);
+        graph.showItem(id);
+      }
+      log(`states after ${value}: ${JSON.stringify(graph.getItemStates(id))}`);
+    },
+  });
 
-  document.getElementById('btn-layout-circular')!.onclick = async () => {
-    log('setLayout(circular) + layout()');
-    graph.setLayout({ type: 'circular', radius: 150 });
-    await graph.layout();
-    graph.fitView();
-    log('circular done');
+  return {
+    fitView: () => graph.fitView(),
+    destroy() {
+      graph.destroy();
+      el.querySelector(':scope > [data-canvas-controls]')?.remove();
+    },
   };
-
-  document.getElementById('btn-layout-force')!.onclick = async () => {
-    log('setLayout(force) + layout()');
-    graph.setLayout({ type: 'd3-force' });
-    await graph.layout();
-    graph.fitView();
-    log('force done');
-  };
-
-  document.getElementById('btn-hide')!.onclick = () => {
-    const id = graph.hasNode('b1') ? 'b1' : 'a1';
-    log(`hideItem(${id})`);
-    graph.hideItem(id);
-    log(`states after hide: ${JSON.stringify(graph.getItemStates(id))}`);
-    const nd = graph.getNodeData(id);
-    log(`dataModel states: ${nd ? JSON.stringify([...nd.states]) : 'not found'}`);
-  };
-
-  document.getElementById('btn-show')!.onclick = () => {
-    const id = graph.hasNode('b1') ? 'b1' : 'a1';
-    log(`showItem(${id})`);
-    graph.showItem(id);
-    log(`states after show: ${JSON.stringify(graph.getItemStates(id))}`);
-    const nd = graph.getNodeData(id);
-    log(`dataModel states: ${nd ? JSON.stringify([...nd.states]) : 'not found'}`);
-  };
-
-  document.getElementById('btn-focus')!.onclick = () => {
-    const id = graph.hasNode('b8') ? 'b8' : 'a5';
-    log(`focusItem(${id})`);
-    graph.focusItem(id);
-  };
-
-  return graph;
 }

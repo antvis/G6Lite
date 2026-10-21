@@ -9,6 +9,7 @@ export async function run(container: string | HTMLElement) {
 
   // Line edges: solid + dashed
   const lineDiv = document.createElement('div');
+  lineDiv.className = 'demo-canvas-card';
   lineDiv.style.cssText = 'width:100%;height:45%;position:relative;';
   root.appendChild(lineDiv);
 
@@ -44,6 +45,7 @@ export async function run(container: string | HTMLElement) {
 
   // Arc edges
   const arcDiv = document.createElement('div');
+  arcDiv.className = 'demo-canvas-card';
   arcDiv.style.cssText = 'width:100%;height:45%;position:relative;margin-top:16px;';
   root.appendChild(arcDiv);
 

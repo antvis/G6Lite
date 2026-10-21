@@ -89,7 +89,7 @@ export async function run(container: string | HTMLElement) {
         labelFontSize: 13,
       },
     },
-    layout: { type: 'dagre', rankdir: 'LR', nodesep: 45, ranksep: 90 },
+    layout: { type: 'dagre', rankdir: 'LR', nodesep: 45, ranksep: 90, nodeSize: [96, 34] },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select', 'hover-highlight'],
   });
 

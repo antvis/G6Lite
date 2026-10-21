@@ -142,7 +142,13 @@ export class Graph {
     });
     if (!this.isGenerationCurrent(generation)) return;
 
-    this.fitView();
+    // Run the geometry phase up front so fitView can include curved edge
+    // paths (parallel arcs, loops) in addition to node bounds.
+    this.renderer.ensureProcessed();
+    // Honor the same fit policy as resize-driven fits: an options object
+    // (e.g. padding for label breathing room) or a custom scale.
+    const autoFit = this.options.autoFitOnResize;
+    this.fitView(autoFit && autoFit !== true ? autoFit : 0.9);
     this.renderer.draw();
     if (!this.isGenerationCurrent(generation)) return;
 
@@ -969,6 +975,9 @@ export class Graph {
 
   fitView(options: number | FitViewOptions = 0.9): void {
     if (this._destroyed) return;
+    // Refresh geometry buffers first so programmatic fits after data/style
+    // updates read current node dimensions and edge paths, not stale caches.
+    this.renderer.ensureProcessed();
     const nodes = this.getCurrentLayoutNodes();
     if (!nodes.length) return;
     let minX = Infinity,
@@ -976,10 +985,41 @@ export class Graph {
       minY = Infinity,
       maxY = -Infinity;
     for (const n of nodes) {
-      if (n.x < minX) minX = n.x;
-      if (n.x > maxX) maxX = n.x;
-      if (n.y < minY) minY = n.y;
-      if (n.y > maxY) maxY = n.y;
+      // Expand the bounds by each node's rendered size so the fit scale (e.g.
+      // the default 0.9) leaves padding around full node bodies, not centers.
+      const dimensions = this.resolveNodeDimensions(n.id);
+      const halfWidth = (dimensions?.width ?? 0) / 2;
+      const halfHeight = (dimensions?.height ?? 0) / 2;
+      if (n.x - halfWidth < minX) minX = n.x - halfWidth;
+      if (n.x + halfWidth > maxX) maxX = n.x + halfWidth;
+      if (n.y - halfHeight < minY) minY = n.y - halfHeight;
+      if (n.y + halfHeight > maxY) maxY = n.y + halfHeight;
+    }
+    // Curved edges (parallel arcs, loops) and polyline routes can extend far
+    // beyond the node bounds; merge them so they are not clipped after fit.
+    const edgeBounds = this.renderer.getEdgeGeometryBounds();
+    if (edgeBounds) {
+      if (edgeBounds.minX < minX) minX = edgeBounds.minX;
+      if (edgeBounds.maxX > maxX) maxX = edgeBounds.maxX;
+      if (edgeBounds.minY < minY) minY = edgeBounds.minY;
+      if (edgeBounds.maxY > maxY) maxY = edgeBounds.maxY;
+    }
+    // Combo boxes wrap node bodies plus their padding; they are part of the
+    // visible content, so the fit must cover them or they bleed off-canvas.
+    if (this.dataModel?.hasCombos()) {
+      this.dataModel.updateComboBounds(
+        (combo) => this.getComboStylePadding(combo),
+        (id) => this.resolveNodeDimensions(id),
+      );
+      for (const combo of this.dataModel.getCombos()) {
+        if (combo.width === 0 && combo.height === 0) continue;
+        const halfWidth = combo.width / 2;
+        const halfHeight = combo.height / 2;
+        if (combo.x - halfWidth < minX) minX = combo.x - halfWidth;
+        if (combo.x + halfWidth > maxX) maxX = combo.x + halfWidth;
+        if (combo.y - halfHeight < minY) minY = combo.y - halfHeight;
+        if (combo.y + halfHeight > maxY) maxY = combo.y + halfHeight;
+      }
     }
     const graphW = maxX - minX || 1;
     const graphH = maxY - minY || 1;
@@ -1403,7 +1443,10 @@ export class Graph {
   private mountOverlayRuntime(dataModel: DataModel): void {
     if (dataModel.hasCombos()) {
       this.ensureComboRenderer();
-      dataModel.updateComboBounds((combo) => this.getComboStylePadding(combo));
+      dataModel.updateComboBounds(
+        (combo) => this.getComboStylePadding(combo),
+        (id) => this.resolveNodeDimensions(id),
+      );
     }
 
     this.labelRenderer = new LabelLayerRenderer(this.containerEl, this.canvas);
@@ -1463,7 +1506,10 @@ export class Graph {
     this.comboBeforeDrawRegistered = true;
     this.renderer.onBeforeDraw(() => {
       if (!this.comboRenderer || !this.dataModel) return;
-      this.dataModel.updateComboBounds((combo) => this.getComboStylePadding(combo));
+      this.dataModel.updateComboBounds(
+        (combo) => this.getComboStylePadding(combo),
+        (id) => this.resolveNodeDimensions(id),
+      );
       this.comboRenderer.draw(
         this.dataModel.getCombos(),
         this.renderer.getCamera(),
@@ -1490,6 +1536,23 @@ export class Graph {
     if (typeof p === 'number') return p;
     if (Array.isArray(p)) return Math.max(...p);
     return 20;
+  }
+
+  /**
+   * Node body dimensions for bounds computations (fitView, combo bounds).
+   * Renderer dimension buffers are filled inside renderer.draw(); before the
+   * first draw they may not exist yet, so fall back to the static node style
+   * dimensions configured on the graph.
+   */
+  private resolveNodeDimensions(id: string): { width: number; height: number } | undefined {
+    const rendered = this.renderer.getNodeDimensions(id);
+    if (rendered && rendered.width > 0 && rendered.height > 0) return rendered;
+    const nodeStyleOption = this.options.node?.style;
+    const nodeStyle = typeof nodeStyleOption === 'function' ? undefined : nodeStyleOption;
+    const staticSize = typeof nodeStyle?.size === 'number' ? nodeStyle.size : undefined;
+    const width = typeof nodeStyle?.width === 'number' ? nodeStyle.width : staticSize;
+    const height = typeof nodeStyle?.height === 'number' ? nodeStyle.height : staticSize;
+    return width !== undefined && height !== undefined ? { width, height } : undefined;
   }
 }
 

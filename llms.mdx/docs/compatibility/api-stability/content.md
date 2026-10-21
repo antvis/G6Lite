@@ -57,4 +57,4 @@ Combo 的折叠、嵌套和运行时归组仍为实验性能力。可以用于�
 * 稳定版后：遵循语义化版本；破坏性变更进入 major 版本。
 * 每次升级前：查看 [Changelog](/docs/changelog)，并执行类型检查、构建和关键案例回归。
 
-完整签名以 [API 参考](/docs/api) 为准。
+业务可调用的入口、方法和配置字段见 [可用 API](/docs/api)、[Graph](/docs/api/graph) 和 [配置](/docs/api/options)。

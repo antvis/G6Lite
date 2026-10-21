@@ -1228,6 +1228,397 @@ transforms?: Array<'process-parallel-edges' | string | { type: string; options?:
 `plugins` 和自定义 `transforms` 的 `type` 必须先用 `register()` 注册。内置转换名目前是 `'process-parallel-edges'`。
 
 
+# 技术架构 (/docs/concepts/architecture)
+
+
+
+
+
+G6Lite 的架构目标不是覆盖所有图形和运行环境，而是在现代浏览器中用受控的公开 API、高效的图数据路径和专用 WebGL Program 支撑大规模关系图与高频分析交互。
+
+<ArchitectureDiagram locale="zh" />
+
+## 设计边界 [#设计边界]
+
+* `Graph` 是面向使用方的主入口，组织数据、布局、渲染、交互和生命周期。
+* 包根只公开稳定类型和扩展契约；`DataModel`、Renderer、Picking 与 GPU Buffer 仍是内部实现。
+* 节点和边使用 WebGL 批量绘制，标签和图标使用 Canvas 2D overlay，Combo 包围框使用 Canvas 2D underlay。
+* 布局通过 `@antv/layout` 按算法懒加载，耗时布局可以在 Worker 中执行。
+* G6Lite 保留关系图专用的 Program、批次、Picking 和增量更新，不引入完整场景图引擎。
+
+## 首次渲染数据流 [#首次渲染数据流]
+
+调用 `await graph.render()` 后，运行时按以下顺序工作：
+
+1. 创建当前渲染代次，执行已注册的 Transform，并解析主题与容器尺寸。
+2. 根据 `layout.type` 懒加载布局算法；需要时在 Worker 中计算节点坐标。
+3. 创建 DataModel，写入节点、边、Combo、状态和布局坐标。
+4. Renderer 把节点和边转换为 Program 所需的连续 TypedArray 与 GPU Buffer。
+5. 挂载 InteractionDispatcher、Behaviors、LabelLayerRenderer 和 ComboRenderer。
+6. `fitView()` 更新相机后，ComboRenderer 先绘制 Canvas 2D underlay。
+7. WebGL normal pass 绘制节点和边；Picking pass 按需维护命中缓冲；LabelLayerRenderer 再绘制 Canvas 2D overlay。
+8. 首帧完成后触发 `afterrender`，随后挂载 ResizeObserver 和 Plugin。
+
+异步布局、扩展初始化或浏览器让帧完成后，Graph 会重新核对当前代次和销毁状态，避免旧结果覆盖新数据。
+
+## 高频更新路径 [#高频更新路径]
+
+状态、位置和数据变化不会都触发完整重建。RenderScheduler 根据变更级别选择不同路径：
+
+| 变化                              | 主要路径                              |
+| ------------------------------- | --------------------------------- |
+| selected / highlight / inactive | 状态解析与 GPU 局部 patch                |
+| 批量节点位置                          | 邻接数据更新、相关 Buffer 区间上传、Canvas 图层重绘 |
+| 标签或 Combo 信息                    | 对应 Canvas 2D 信息层重绘                |
+| 相机平移与缩放                         | 更新 uniform 后重新 draw，不重建图数据 Buffer |
+| 完整数据替换或结构变化                     | 重建 DataModel 与需要受影响的渲染批次          |
+
+因此频繁选择、高亮和拖拽应优先使用状态、位置和批量 API，而不是反复调用 `new Graph()`。
+
+## 为什么同时使用 WebGL 和 Canvas 2D [#为什么同时使用-webgl-和-canvas-2d]
+
+WebGL 适合大量同类节点和边的批量绘制、GPU Picking 与局部 Buffer 更新。文本排版、图标、标签碰撞和 Combo 包围框更适合 Canvas 2D：它能保持文字测量直接，也避免把复杂信息层全部编码进 shader。
+
+这些图层共享相机、尺寸、DPR 和调度信号。Combo underlay 位于 WebGL 主画布下方，标签与图标 overlay 位于其上方；它们不是独立的 Graph。
+
+## 布局与 Worker [#布局与-worker]
+
+布局不是 Renderer 的职责。Graph 根据配置调用布局层，得到坐标后再交给 DataModel 和 Renderer：
+
+```text
+GraphData → Layout → positioned nodes → DataModel → Renderer
+```
+
+官方布局按 `layout.type` 动态加载。`worker: true` 可以降低主线程阻塞，但不会消除算法成本；迭代次数、取消语义和真实数据规模仍需要验证。
+
+已有坐标时应省略布局并直接提供 `x` / `y`，避免重复计算。
+
+## 交互与 Picking [#交互与-picking]
+
+InteractionDispatcher 统一处理指针事件和命中检测，再把规范化事件分发给 Behavior：
+
+```text
+native event → GPU/CPU pick → graph event → Behavior → public state/data API
+```
+
+节点和边优先使用 GPU Picking；不可用时有受控 CPU fallback。Combo 位于 Canvas 2D underlay，使用自己的几何命中路径。Behavior 不应自行访问 framebuffer 或重复实现 Picking。
+
+## 扩展边界 [#扩展边界]
+
+G6Lite 支持 node、edge、label、decoration、layout、behavior、transform 和 plugin 八类扩展。推荐使用：
+
+```ts
+register(
+  'behavior',
+  name,
+  extensionFactory(() => ({
+    init(context, options) {},
+    getEvents() {
+      return {};
+    },
+    destroy() {},
+  })),
+);
+```
+
+扩展通过受控的 data、state、viewport 和 `requestRender()` 能力与 Graph 协作，读取只读快照并经公开方法更新数据。新扩展不应直接持有 DataModel、Renderer、WebGL context 或 GPU Buffer。
+
+## 浏览器与降级 [#浏览器与降级]
+
+* 优先创建 WebGL2 context，不可用时回退 WebGL1。
+* Picking framebuffer 不完整或不可用时回退 CPU 命中检测。
+* 标签和 Combo 保持 Canvas 2D 路径。
+* WebGL context lost/restored、ResizeObserver、Worker 取消和 Graph destroy 均有明确生命周期。
+* 当前包为 ESM-only，渲染需要真实 DOM、Canvas 和 WebGL，不支持服务端绘图。
+
+完整限制见[浏览器与运行环境](/docs/compatibility/browser)和 [API 稳定性](/docs/compatibility/api-stability)。
+
+## 对 AI Agent 的约束 [#对-ai-agent-的约束]
+
+AI 生成 G6Lite 代码时，应只依赖架构图最上层的公开 API。内部层帮助理解性能和问题定位，但不是可直接导入的业务契约。
+
+使用 [`$antv-g6lite-graph`](/docs/ai) 可以让 Agent 在生成代码前检查包根导入、运行环境、能力边界和真实验证要求。
+
+
+# 数据模型 (/docs/concepts/data-model)
+
+
+
+G6Lite 的数据通过 `GraphData` 传入，核心字段是 `nodes`、`edges` 和可选的 `combos`。
+
+```ts
+const data = {
+  nodes: [
+    { id: 'service-a', data: { name: '入口服务', type: 'gateway' } },
+    { id: 'service-b', data: { name: '订单服务', type: 'service' } },
+  ],
+  edges: [{ source: 'service-a', target: 'service-b', data: { qps: 1200 } }],
+  combos: [{ id: 'domain-order', data: { name: '订单域' } }],
+};
+```
+
+## 节点 [#节点]
+
+节点必须有稳定的 `id`。
+
+| 字段        | 说明                    |
+| --------- | --------------------- |
+| `id`      | 节点唯一标识                |
+| `name`    | 可选名称                  |
+| `x` / `y` | 可选坐标；不传布局时会使用         |
+| `data`    | 业务扩展字段，样式函数和业务逻辑可读取   |
+| `states`  | 初始状态，如 `['selected']` |
+| `comboId` | 所属 Combo id           |
+
+业务字段建议放在 `data` 中，避免和 G6Lite 的保留字段冲突。
+
+## 边 [#边]
+
+边必须声明 `source` 和 `target`。
+
+| 字段       | 说明             |
+| -------- | -------------- |
+| `id`     | 可选边 id；不传时内部生成 |
+| `source` | 起点节点 id        |
+| `target` | 终点节点 id        |
+| `data`   | 业务扩展字段         |
+| `states` | 初始状态           |
+
+## Combo [#combo]
+
+Combo 用于节点分组：
+
+```ts
+const data = {
+  nodes: [
+    { id: 'n1', comboId: 'frontend' },
+    { id: 'n2', comboId: 'frontend' },
+  ],
+  edges: [],
+  combos: [{ id: 'frontend', data: { name: 'Frontend' } }],
+};
+```
+
+更完整的配置见 [Combo](/docs/guides/combo)。
+
+## 状态 [#状态]
+
+元素状态用于表达选中、高亮、置灰、隐藏等运行时语义：
+
+```ts
+graph.setItemState('n1', 'selected', true);
+graph.setItemState('n2', 'inactive', true);
+graph.hideItem('n3');
+graph.showItem('n3');
+```
+
+样式层可通过 `stateStyles` 定义状态覆盖：
+
+```ts
+node: {
+  stateStyles: {
+    selected: { stroke: '#1890ff', strokeWidth: 3 },
+    inactive: { opacity: 0.25 },
+  },
+}
+```
+
+状态变更会触发增量刷新，适合高频交互。
+
+## 查询视图 [#查询视图]
+
+`getNodeData()`、`getEdgeData()`、`getComboData()` 以及 `getNodes()` / `getEdges()` 返回归一化后的只读 Model 视图：
+
+* `NodeModel` 包含必选坐标和当前状态集合。
+* `EdgeModel` 包含确定的 edge id、端点和当前状态集合。
+* `ComboModel` 额外包含计算后的边界和子元素关系。
+
+这些 Model 由 Graph 持有，不是不可变快照。请通过 `updateNodeData()`、`updateEdgeData()`、位置和状态 API 修改数据，不要直接改写查询结果。
+
+## 大图数据建议 [#大图数据建议]
+
+* 保持 `id` 稳定，避免频繁删除再新增同一元素。
+* 大规模场景尽量使用静态样式，必要时再使用函数式样式。
+* 首屏如果已有后端布局坐标，可以直接传 `x` / `y` 并省略 `layout`。
+* 标签数量多时按需显示，避免全量文本绘制成为瓶颈。
+
+
+# Graph 生命周期 (/docs/concepts/graph-lifecycle)
+
+
+
+`Graph` 是 G6Lite 的主入口。理解它的生命周期，有助于正确组织初始化、数据更新和组件卸载。
+
+## 创建实例 [#创建实例]
+
+```ts
+const graph = new Graph({
+  container: 'container',
+  data,
+  layout: { type: 'force' },
+});
+```
+
+构造阶段会解析容器并准备 canvas，但不会执行布局，也不会绘制图形。
+
+## 首次渲染 [#首次渲染]
+
+```ts
+await graph.render();
+```
+
+`render()` 会按顺序完成：
+
+1. 根据容器尺寸设置 canvas。
+2. 解析主题，并先绘制背景。
+3. 执行布局；大图的 force 系布局会自动启用 worker。
+4. 初始化 `DataModel`，写入节点、边和 Combo。
+5. 应用平行边等 transform。
+6. 初始化 WebGL renderer、调度器、交互分发层和 behaviors。
+7. 初始化 Combo 与标签绘制层。
+8. `fitView()` 后绘制首帧。
+9. 触发 `afterrender` 事件。
+
+## 更新数据 [#更新数据]
+
+替换整份数据：
+
+```ts
+await graph.setData(nextData);
+```
+
+增量更新：
+
+```ts
+graph.addNode({ id: 'n3', x: 120, y: 80 });
+graph.addEdge({ source: 'n1', target: 'n3' });
+graph.updateNodeData('n3', { label: '新节点' });
+graph.removeNode('n2');
+```
+
+状态更新：
+
+```ts
+graph.setItemState('n1', 'selected', true);
+graph.batchSetState([
+  { id: 'n1', state: 'highlight', value: true },
+  { id: 'n2', state: 'inactive', value: true },
+]);
+```
+
+高频交互优先使用状态 API，它会走更轻的刷新路径。
+
+## 重新布局 [#重新布局]
+
+```ts
+graph.setLayout({ type: 'dagre', rankdir: 'LR' });
+await graph.layout();
+```
+
+`setLayout()` 只更新布局配置，`layout()` 才会重新计算坐标并刷新画布。
+
+## 视口与坐标 [#视口与坐标]
+
+常用视口 API：
+
+```ts
+graph.fitView();
+graph.focusItem('n1', 40);
+graph.setCamera({ zoom: 1.5 });
+graph.resetCamera();
+```
+
+坐标转换：
+
+```ts
+const graphPoint = graph.screenToGraph(clientX, clientY);
+const screenPoint = graph.graphToScreen(x, y);
+```
+
+### 容器尺寸变化 [#容器尺寸变化]
+
+G6Lite 会通过 `ResizeObserver` 自动同步容器与 canvas 尺寸，调用 `setSize(width, height)` 时也会走相同的视口更新流程。默认情况下，这两种变化都会保留当前 camera，避免覆盖用户手动缩放和平移。
+
+可变分栏、侧栏展开收起等场景可以在创建 Graph 时开启自动适应：
+
+```ts
+const graph = new Graph({
+  container: 'container',
+  data,
+  autoFitOnResize: {
+    padding: 24,
+    minZoom: 0.2,
+    maxZoom: 1.5,
+  },
+});
+```
+
+`autoFitOnResize: true` 等价于尺寸变化后调用 `fitView(0.9)`，也可以直接传数值缩放系数或 `FitViewOptions`。自动适应完成后才会触发 `resize` 事件，因此监听器读取到的是最终 camera。大图或需要保留用户视口的场景建议保持默认关闭。
+
+## 销毁 [#销毁]
+
+```ts
+graph.destroy();
+```
+
+销毁会释放 behavior、交互分发、ResizeObserver、scheduler、标签层、Combo 层和 WebGL renderer，并触发 `destroy` 事件。React、Vue 等框架中应在组件卸载时调用。
+
+
+# G6Lite 是什么 (/docs/concepts/overview)
+
+
+
+G6Lite 是一个基于 WebGL 的轻量图可视化与分析引擎，目标是让大规模图数据在浏览器中保持稳定渲染和低成本交互。
+
+它保留 G6 用户熟悉的图配置心智：数据、节点、边、布局、交互和主题，但实现重点放在 WebGL 渲染、增量刷新和高频交互上。
+
+## 适合的场景 [#适合的场景]
+
+* 万级节点的关系探索、资产拓扑、知识图谱、依赖分析。
+* 频繁高亮、选中、邻居聚焦、状态切换的分析型交互。
+* 需要轻量包体，同时希望接入 AntV 布局能力的项目。
+* 对首屏可接受布局耗时，但要求渲染后交互开销稳定的场景。
+
+## 需要评估的场景 [#需要评估的场景]
+
+* 10 万级以上超大图且首屏速度是唯一核心指标。
+* 强依赖完整插件生态、动画系统、图论分析算法的场景。
+* 需要 SVG / Canvas 细粒度 DOM 级定制的场景。
+* 服务端渲染输出图片或 SVG 的场景。
+
+## 与 G6 v5 的关系 [#与-g6-v5-的关系]
+
+G6 v5 是功能完整的图可视化框架，插件、元素、动画、交互和生态能力更全面。G6Lite 更像是一个性能优先的轻量内核：
+
+| 维度   | G6Lite                | G6 v5    |
+| ---- | --------------------- | -------- |
+| 渲染技术 | WebGL + Canvas 2D 标签层 | Canvas   |
+| 主要目标 | 大规模渲染和高频交互            | 完整图可视化能力 |
+| 包体   | 更轻                    | 更完整      |
+| 扩展生态 | 有限，聚焦核心能力             | 更丰富      |
+| 适用重点 | 分析型大图                 | 通用图可视化   |
+
+如果你的应用需要完整插件生态，优先评估 G6 v5。如果你的核心瓶颈是大图渲染、高亮和状态切换，优先评估 G6Lite。
+
+## 核心组成 [#核心组成]
+
+* `Graph`：用户入口，负责容器、布局、渲染、交互和生命周期。
+* `DataModel`：维护节点、边、Combo、状态和增量变更。
+* `Renderer`：WebGL 绘制节点、边和拾取缓冲。
+* `LabelLayerRenderer` / `ComboRenderer`：分别用 Canvas 2D overlay 和 underlay 绘制标签、图标与 Combo 包围框。
+* `RenderScheduler`：根据变更级别选择全量刷新或局部 patch。
+* `InteractionDispatcher`：统一处理拾取和元素事件分发。
+
+完整的分层、首次渲染和高频更新路径见[技术架构](/docs/concepts/architecture)。
+
+## 下一步 [#下一步]
+
+* [技术架构](/docs/concepts/architecture)
+* [Graph 生命周期](/docs/concepts/graph-lifecycle)
+* [数据模型](/docs/concepts/data-model)
+* [安装与第一个图](/docs/getting-started/quick-start)
+
+
 # API 稳定性与发布边界 (/docs/compatibility/api-stability)
 
 
@@ -1761,395 +2152,183 @@ G6Lite 的测量入口见[性能指标](/docs/metrics/performance)和[性能调�
 * [Cytoscape.js README](https://github.com/cytoscape/cytoscape.js#readme) 与 [Cytoscape.js 文档](https://js.cytoscape.org/)
 
 
-# 技术架构 (/docs/concepts/architecture)
+# 安装与第一个图 (/docs/getting-started/quick-start)
 
 
 
+G6Lite 的最小使用链路是：安装依赖、准备一个有宽高的容器、创建 `Graph`、传入数据与配置、调用 `render()`。
 
+画布默认支持平滑滚轮缩放和拖拽平移；只有节点拖拽、选择、高亮等元素级交互需要显式配置。缩放灵敏度和范围可通过 [`zoom-canvas`](/docs/guides/interactions#缩放手感与范围) 调整。
 
-G6Lite 的架构目标不是覆盖所有图形和运行环境，而是在现代浏览器中用受控的公开 API、高效的图数据路径和专用 WebGL Program 支撑大规模关系图与高频分析交互。
+## 安装 [#安装]
 
-<ArchitectureDiagram locale="zh" />
-
-## 设计边界 [#设计边界]
-
-* `Graph` 是面向使用方的主入口，组织数据、布局、渲染、交互和生命周期。
-* 包根只公开稳定类型和扩展契约；`DataModel`、Renderer、Picking 与 GPU Buffer 仍是内部实现。
-* 节点和边使用 WebGL 批量绘制，标签和图标使用 Canvas 2D overlay，Combo 包围框使用 Canvas 2D underlay。
-* 布局通过 `@antv/layout` 按算法懒加载，耗时布局可以在 Worker 中执行。
-* G6Lite 保留关系图专用的 Program、批次、Picking 和增量更新，不引入完整场景图引擎。
-
-## 首次渲染数据流 [#首次渲染数据流]
-
-调用 `await graph.render()` 后，运行时按以下顺序工作：
-
-1. 创建当前渲染代次，执行已注册的 Transform，并解析主题与容器尺寸。
-2. 根据 `layout.type` 懒加载布局算法；需要时在 Worker 中计算节点坐标。
-3. 创建 DataModel，写入节点、边、Combo、状态和布局坐标。
-4. Renderer 把节点和边转换为 Program 所需的连续 TypedArray 与 GPU Buffer。
-5. 挂载 InteractionDispatcher、Behaviors、LabelLayerRenderer 和 ComboRenderer。
-6. `fitView()` 更新相机后，ComboRenderer 先绘制 Canvas 2D underlay。
-7. WebGL normal pass 绘制节点和边；Picking pass 按需维护命中缓冲；LabelLayerRenderer 再绘制 Canvas 2D overlay。
-8. 首帧完成后触发 `afterrender`，随后挂载 ResizeObserver 和 Plugin。
-
-异步布局、扩展初始化或浏览器让帧完成后，Graph 会重新核对当前代次和销毁状态，避免旧结果覆盖新数据。
-
-## 高频更新路径 [#高频更新路径]
-
-状态、位置和数据变化不会都触发完整重建。RenderScheduler 根据变更级别选择不同路径：
-
-| 变化                              | 主要路径                              |
-| ------------------------------- | --------------------------------- |
-| selected / highlight / inactive | 状态解析与 GPU 局部 patch                |
-| 批量节点位置                          | 邻接数据更新、相关 Buffer 区间上传、Canvas 图层重绘 |
-| 标签或 Combo 信息                    | 对应 Canvas 2D 信息层重绘                |
-| 相机平移与缩放                         | 更新 uniform 后重新 draw，不重建图数据 Buffer |
-| 完整数据替换或结构变化                     | 重建 DataModel 与需要受影响的渲染批次          |
-
-因此频繁选择、高亮和拖拽应优先使用状态、位置和批量 API，而不是反复调用 `new Graph()`。
-
-## 为什么同时使用 WebGL 和 Canvas 2D [#为什么同时使用-webgl-和-canvas-2d]
-
-WebGL 适合大量同类节点和边的批量绘制、GPU Picking 与局部 Buffer 更新。文本排版、图标、标签碰撞和 Combo 包围框更适合 Canvas 2D：它能保持文字测量直接，也避免把复杂信息层全部编码进 shader。
-
-这些图层共享相机、尺寸、DPR 和调度信号。Combo underlay 位于 WebGL 主画布下方，标签与图标 overlay 位于其上方；它们不是独立的 Graph。
-
-## 布局与 Worker [#布局与-worker]
-
-布局不是 Renderer 的职责。Graph 根据配置调用布局层，得到坐标后再交给 DataModel 和 Renderer：
-
-```text
-GraphData → Layout → positioned nodes → DataModel → Renderer
+```bash
+npm install @antv/g6-lite
 ```
 
-官方布局按 `layout.type` 动态加载。`worker: true` 可以降低主线程阻塞，但不会消除算法成本；迭代次数、取消语义和真实数据规模仍需要验证。
+## 准备容器 [#准备容器]
 
-已有坐标时应省略布局并直接提供 `x` / `y`，避免重复计算。
+`container` 可以是 DOM id、选择器或 HTMLElement。容器必须有明确宽高，否则画布会退回默认尺寸。
 
-## 交互与 Picking [#交互与-picking]
-
-InteractionDispatcher 统一处理指针事件和命中检测，再把规范化事件分发给 Behavior：
-
-```text
-native event → GPU/CPU pick → graph event → Behavior → public state/data API
+```html
+<div id="graph" style="width: 800px; height: 500px"></div>
 ```
 
-节点和边优先使用 GPU Picking；不可用时有受控 CPU fallback。Combo 位于 Canvas 2D underlay，使用自己的几何命中路径。Behavior 不应自行访问 framebuffer 或重复实现 Picking。
+在实际业务中，通常让容器跟随父级布局：
 
-## 扩展边界 [#扩展边界]
-
-G6Lite 支持 node、edge、label、decoration、layout、behavior、transform 和 plugin 八类扩展。推荐使用：
-
-```ts
-register(
-  'behavior',
-  name,
-  extensionFactory(() => ({
-    init(context, options) {},
-    getEvents() {
-      return {};
-    },
-    destroy() {},
-  })),
-);
-```
-
-扩展通过受控的 data、state、viewport 和 `requestRender()` 能力与 Graph 协作，读取只读快照并经公开方法更新数据。新扩展不应直接持有 DataModel、Renderer、WebGL context 或 GPU Buffer。
-
-## 浏览器与降级 [#浏览器与降级]
-
-* 优先创建 WebGL2 context，不可用时回退 WebGL1。
-* Picking framebuffer 不完整或不可用时回退 CPU 命中检测。
-* 标签和 Combo 保持 Canvas 2D 路径。
-* WebGL context lost/restored、ResizeObserver、Worker 取消和 Graph destroy 均有明确生命周期。
-* 当前包为 ESM-only，渲染需要真实 DOM、Canvas 和 WebGL，不支持服务端绘图。
-
-完整限制见[浏览器与运行环境](/docs/compatibility/browser)和 [API 稳定性](/docs/compatibility/api-stability)。
-
-## 对 AI Agent 的约束 [#对-ai-agent-的约束]
-
-AI 生成 G6Lite 代码时，应只依赖架构图最上层的公开 API。内部层帮助理解性能和问题定位，但不是可直接导入的业务契约。
-
-使用 [`$antv-g6lite-graph`](/docs/ai) 可以让 Agent 在生成代码前检查包根导入、运行环境、能力边界和真实验证要求。
-
-
-# 数据模型 (/docs/concepts/data-model)
-
-
-
-G6Lite 的数据通过 `GraphData` 传入，核心字段是 `nodes`、`edges` 和可选的 `combos`。
-
-```ts
-const data = {
-  nodes: [
-    { id: 'service-a', data: { name: '入口服务', type: 'gateway' } },
-    { id: 'service-b', data: { name: '订单服务', type: 'service' } },
-  ],
-  edges: [{ source: 'service-a', target: 'service-b', data: { qps: 1200 } }],
-  combos: [{ id: 'domain-order', data: { name: '订单域' } }],
-};
-```
-
-## 节点 [#节点]
-
-节点必须有稳定的 `id`。
-
-| 字段        | 说明                    |
-| --------- | --------------------- |
-| `id`      | 节点唯一标识                |
-| `name`    | 可选名称                  |
-| `x` / `y` | 可选坐标；不传布局时会使用         |
-| `data`    | 业务扩展字段，样式函数和业务逻辑可读取   |
-| `states`  | 初始状态，如 `['selected']` |
-| `comboId` | 所属 Combo id           |
-
-业务字段建议放在 `data` 中，避免和 G6Lite 的保留字段冲突。
-
-## 边 [#边]
-
-边必须声明 `source` 和 `target`。
-
-| 字段       | 说明             |
-| -------- | -------------- |
-| `id`     | 可选边 id；不传时内部生成 |
-| `source` | 起点节点 id        |
-| `target` | 终点节点 id        |
-| `data`   | 业务扩展字段         |
-| `states` | 初始状态           |
-
-## Combo [#combo]
-
-Combo 用于节点分组：
-
-```ts
-const data = {
-  nodes: [
-    { id: 'n1', comboId: 'frontend' },
-    { id: 'n2', comboId: 'frontend' },
-  ],
-  edges: [],
-  combos: [{ id: 'frontend', data: { name: 'Frontend' } }],
-};
-```
-
-更完整的配置见 [Combo](/docs/guides/combo)。
-
-## 状态 [#状态]
-
-元素状态用于表达选中、高亮、置灰、隐藏等运行时语义：
-
-```ts
-graph.setItemState('n1', 'selected', true);
-graph.setItemState('n2', 'inactive', true);
-graph.hideItem('n3');
-graph.showItem('n3');
-```
-
-样式层可通过 `stateStyles` 定义状态覆盖：
-
-```ts
-node: {
-  stateStyles: {
-    selected: { stroke: '#1890ff', strokeWidth: 3 },
-    inactive: { opacity: 0.25 },
-  },
+```css
+#graph {
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
 }
 ```
 
-状态变更会触发增量刷新，适合高频交互。
-
-## 查询视图 [#查询视图]
-
-`getNodeData()`、`getEdgeData()`、`getComboData()` 以及 `getNodes()` / `getEdges()` 返回归一化后的只读 Model 视图：
-
-* `NodeModel` 包含必选坐标和当前状态集合。
-* `EdgeModel` 包含确定的 edge id、端点和当前状态集合。
-* `ComboModel` 额外包含计算后的边界和子元素关系。
-
-这些 Model 由 Graph 持有，不是不可变快照。请通过 `updateNodeData()`、`updateEdgeData()`、位置和状态 API 修改数据，不要直接改写查询结果。
-
-## 大图数据建议 [#大图数据建议]
-
-* 保持 `id` 稳定，避免频繁删除再新增同一元素。
-* 大规模场景尽量使用静态样式，必要时再使用函数式样式。
-* 首屏如果已有后端布局坐标，可以直接传 `x` / `y` 并省略 `layout`。
-* 标签数量多时按需显示，避免全量文本绘制成为瓶颈。
-
-
-# Graph 生命周期 (/docs/concepts/graph-lifecycle)
-
-
-
-`Graph` 是 G6Lite 的主入口。理解它的生命周期，有助于正确组织初始化、数据更新和组件卸载。
-
-## 创建实例 [#创建实例]
+## 渲染基础图 [#渲染基础图]
 
 ```ts
+import { Graph } from '@antv/g6-lite';
+
 const graph = new Graph({
-  container: 'container',
-  data,
-  layout: { type: 'force' },
+  container: 'graph',
+  data: {
+    nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+    edges: [
+      { source: 'a', target: 'b' },
+      { source: 'a', target: 'c' },
+    ],
+  },
+  layout: { type: 'circular', radius: 140 },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
-```
 
-构造阶段会解析容器并准备 canvas，但不会执行布局，也不会绘制图形。
-
-## 首次渲染 [#首次渲染]
-
-```ts
 await graph.render();
 ```
 
-`render()` 会按顺序完成：
+## 代码做了什么 [#代码做了什么]
 
-1. 根据容器尺寸设置 canvas。
-2. 解析主题，并先绘制背景。
-3. 执行布局；大图的 force 系布局会自动启用 worker。
-4. 初始化 `DataModel`，写入节点、边和 Combo。
-5. 应用平行边等 transform。
-6. 初始化 WebGL renderer、调度器、交互分发层和 behaviors。
-7. 初始化 Combo 与标签绘制层。
-8. `fitView()` 后绘制首帧。
-9. 触发 `afterrender` 事件。
+1. `data.nodes` 定义节点，`id` 是唯一标识，业务字段放在 `data` 中。
+2. `data.edges` 定义边，`source` 和 `target` 指向节点 id。
+3. `layout` 决定节点坐标；不传布局时会使用节点上的 `x` / `y`。
+4. `behaviors` 启用画布缩放、画布拖拽、节点拖拽和悬停高亮。
+5. `await graph.render()` 执行布局、初始化渲染管线并绘制首帧。
+
+## 常用配置 [#常用配置]
+
+| 选项          | 说明                                 | 继续阅读                            |
+| ----------- | ---------------------------------- | ------------------------------- |
+| `container` | 挂载画布的 DOM 容器                       | 本页                              |
+| `data`      | 图数据，包含 `nodes`、`edges`、可选 `combos` | [数据](/docs/guides/data)         |
+| `node`      | 节点类型、样式、状态样式、标签                    | [节点](/docs/guides/node)         |
+| `edge`      | 边类型、样式、箭头、标签                       | [边](/docs/guides/edge)          |
+| `combo`     | 节点分组容器样式                           | [Combo](/docs/guides/combo)     |
+| `layout`    | 布局算法与参数                            | [布局](/docs/guides/layout)       |
+| `behaviors` | 交互行为列表                             | [交互](/docs/guides/interactions) |
+| `theme`     | `light`、`dark` 或 token 覆盖          | [主题](/docs/guides/theme)        |
 
 ## 更新数据 [#更新数据]
 
-替换整份数据：
+首次渲染后，可以用 `setData()` 替换整份数据：
 
 ```ts
-await graph.setData(nextData);
-```
-
-增量更新：
-
-```ts
-graph.addNode({ id: 'n3', x: 120, y: 80 });
-graph.addEdge({ source: 'n1', target: 'n3' });
-graph.updateNodeData('n3', { label: '新节点' });
-graph.removeNode('n2');
-```
-
-状态更新：
-
-```ts
-graph.setItemState('n1', 'selected', true);
-graph.batchSetState([
-  { id: 'n1', state: 'highlight', value: true },
-  { id: 'n2', state: 'inactive', value: true },
-]);
-```
-
-高频交互优先使用状态 API，它会走更轻的刷新路径。
-
-## 重新布局 [#重新布局]
-
-```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR' });
-await graph.layout();
-```
-
-`setLayout()` 只更新布局配置，`layout()` 才会重新计算坐标并刷新画布。
-
-## 视口与坐标 [#视口与坐标]
-
-常用视口 API：
-
-```ts
-graph.fitView();
-graph.focusItem('n1', 40);
-graph.setCamera({ zoom: 1.5 });
-graph.resetCamera();
-```
-
-坐标转换：
-
-```ts
-const graphPoint = graph.screenToGraph(clientX, clientY);
-const screenPoint = graph.graphToScreen(x, y);
-```
-
-### 容器尺寸变化 [#容器尺寸变化]
-
-G6Lite 会通过 `ResizeObserver` 自动同步容器与 canvas 尺寸，调用 `setSize(width, height)` 时也会走相同的视口更新流程。默认情况下，这两种变化都会保留当前 camera，避免覆盖用户手动缩放和平移。
-
-可变分栏、侧栏展开收起等场景可以在创建 Graph 时开启自动适应：
-
-```ts
-const graph = new Graph({
-  container: 'container',
-  data,
-  autoFitOnResize: {
-    padding: 24,
-    minZoom: 0.2,
-    maxZoom: 1.5,
-  },
+await graph.setData({
+  nodes: [{ id: 'next-a' }, { id: 'next-b' }],
+  edges: [{ source: 'next-a', target: 'next-b' }],
 });
 ```
 
-`autoFitOnResize: true` 等价于尺寸变化后调用 `fitView(0.9)`，也可以直接传数值缩放系数或 `FitViewOptions`。自动适应完成后才会触发 `resize` 事件，因此监听器读取到的是最终 camera。大图或需要保留用户视口的场景建议保持默认关闭。
+也可以做增量更新：
 
-## 销毁 [#销毁]
+```ts
+graph.addNode({ id: 'd', x: 120, y: 80, data: { label: '支付服务' } });
+graph.addEdge({ source: 'b', target: 'd', data: { label: '支付' } });
+graph.setItemState('d', 'selected', true);
+```
+
+## 销毁实例 [#销毁实例]
+
+页面卸载或容器被移除时，调用 `destroy()` 释放渲染器、调度器、事件和观察器。
 
 ```ts
 graph.destroy();
 ```
 
-销毁会释放 behavior、交互分发、ResizeObserver、scheduler、标签层、Combo 层和 WebGL renderer，并触发 `destroy` 事件。React、Vue 等框架中应在组件卸载时调用。
-
-
-# G6Lite 是什么 (/docs/concepts/overview)
-
-
-
-G6Lite 是一个基于 WebGL 的轻量图可视化与分析引擎，目标是让大规模图数据在浏览器中保持稳定渲染和低成本交互。
-
-它保留 G6 用户熟悉的图配置心智：数据、节点、边、布局、交互和主题，但实现重点放在 WebGL 渲染、增量刷新和高频交互上。
-
-## 适合的场景 [#适合的场景]
-
-* 万级节点的关系探索、资产拓扑、知识图谱、依赖分析。
-* 频繁高亮、选中、邻居聚焦、状态切换的分析型交互。
-* 需要轻量包体，同时希望接入 AntV 布局能力的项目。
-* 对首屏可接受布局耗时，但要求渲染后交互开销稳定的场景。
-
-## 需要评估的场景 [#需要评估的场景]
-
-* 10 万级以上超大图且首屏速度是唯一核心指标。
-* 强依赖完整插件生态、动画系统、图论分析算法的场景。
-* 需要 SVG / Canvas 细粒度 DOM 级定制的场景。
-* 服务端渲染输出图片或 SVG 的场景。
-
-## 与 G6 v5 的关系 [#与-g6-v5-的关系]
-
-G6 v5 是功能完整的图可视化框架，插件、元素、动画、交互和生态能力更全面。G6Lite 更像是一个性能优先的轻量内核：
-
-| 维度   | G6Lite                | G6 v5    |
-| ---- | --------------------- | -------- |
-| 渲染技术 | WebGL + Canvas 2D 标签层 | Canvas   |
-| 主要目标 | 大规模渲染和高频交互            | 完整图可视化能力 |
-| 包体   | 更轻                    | 更完整      |
-| 扩展生态 | 有限，聚焦核心能力             | 更丰富      |
-| 适用重点 | 分析型大图                 | 通用图可视化   |
-
-如果你的应用需要完整插件生态，优先评估 G6 v5。如果你的核心瓶颈是大图渲染、高亮和状态切换，优先评估 G6Lite。
-
-## 核心组成 [#核心组成]
-
-* `Graph`：用户入口，负责容器、布局、渲染、交互和生命周期。
-* `DataModel`：维护节点、边、Combo、状态和增量变更。
-* `Renderer`：WebGL 绘制节点、边和拾取缓冲。
-* `LabelLayerRenderer` / `ComboRenderer`：分别用 Canvas 2D overlay 和 underlay 绘制标签、图标与 Combo 包围框。
-* `RenderScheduler`：根据变更级别选择全量刷新或局部 patch。
-* `InteractionDispatcher`：统一处理拾取和元素事件分发。
-
-完整的分层、首次渲染和高频更新路径见[技术架构](/docs/concepts/architecture)。
-
 ## 下一步 [#下一步]
 
-* [技术架构](/docs/concepts/architecture)
-* [Graph 生命周期](/docs/concepts/graph-lifecycle)
-* [数据模型](/docs/concepts/data-model)
-* [安装与第一个图](/docs/getting-started/quick-start)
+* [在 React 中使用](/docs/getting-started/react)
+* [理解 Graph 生命周期](/docs/concepts/graph-lifecycle)
+* [选择布局](/docs/guides/layout)
+* [添加交互](/docs/guides/interactions)
+* [查看示例](/docs/examples)
+
+
+# 在 React 中使用 (/docs/getting-started/react)
+
+
+
+React 中推荐在 `useEffect` 内创建 `Graph`，通过 `ref` 传入真实 DOM，并在 cleanup 中销毁实例。
+
+```tsx
+import { useEffect, useRef } from 'react';
+import { Graph } from '@antv/g6-lite';
+
+export function GraphView() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: {
+        nodes: [
+          { id: 'a', data: { label: 'A' } },
+          { id: 'b', data: { label: 'B' } },
+        ],
+        edges: [{ source: 'a', target: 'b' }],
+      },
+      node: {
+        style: {
+          size: 18,
+          label: (node) => (node.data?.label as string) ?? node.id,
+          labelPlacement: 'bottom',
+        },
+      },
+      edge: { style: { endArrow: true } },
+      layout: { type: 'circular', radius: 120 },
+      autoFitOnResize: { padding: 24, maxZoom: 1.5 },
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+    });
+
+    graph.render();
+
+    return () => {
+      graph.destroy();
+    };
+  }, []);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 480 }} />;
+}
+```
+
+## 注意事项 [#注意事项]
+
+* 容器需要有明确高度，只有 `width: 100%` 不够。
+* React Strict Mode 在开发环境可能会重复执行 effect，cleanup 中调用 `graph.destroy()` 可以避免残留 canvas 和事件监听。
+* 如果数据来自请求，建议在拿到数据后创建实例；或先创建空图，再调用 `await graph.setData(data)`。
+* 如果父容器尺寸会变化，G6Lite 会通过 ResizeObserver 同步 canvas 尺寸。默认会保留用户当前的缩放和平移；希望分栏拖拽或侧栏展开后让关系图重新完整可见时，配置 `autoFitOnResize: true`，或传入 `FitViewOptions` 控制 padding 和缩放边界。
+
+## 数据变化 [#数据变化]
+
+若数据会随 props 更新，保留 `graph` 引用并在 effect 中调用 `setData()`：
+
+```tsx
+useEffect(() => {
+  graphRef.current?.setData(data);
+}, [data]);
+```
+
+如果只是高亮、选中、隐藏元素，优先使用 `setItemState()`、`hideItem()`、`showItem()` 等增量 API，避免频繁替换整份数据。
 
 
 # 最简关系图 (/docs/examples/basic)
@@ -2618,185 +2797,6 @@ G6 v5 是功能完整的图可视化框架，插件、元素、动画、交互�
 
 
 <ExampleDetail id="zoom-options" locale="zh" />
-
-
-# 安装与第一个图 (/docs/getting-started/quick-start)
-
-
-
-G6Lite 的最小使用链路是：安装依赖、准备一个有宽高的容器、创建 `Graph`、传入数据与配置、调用 `render()`。
-
-画布默认支持平滑滚轮缩放和拖拽平移；只有节点拖拽、选择、高亮等元素级交互需要显式配置。缩放灵敏度和范围可通过 [`zoom-canvas`](/docs/guides/interactions#缩放手感与范围) 调整。
-
-## 安装 [#安装]
-
-```bash
-npm install @antv/g6-lite
-```
-
-## 准备容器 [#准备容器]
-
-`container` 可以是 DOM id、选择器或 HTMLElement。容器必须有明确宽高，否则画布会退回默认尺寸。
-
-```html
-<div id="graph" style="width: 800px; height: 500px"></div>
-```
-
-在实际业务中，通常让容器跟随父级布局：
-
-```css
-#graph {
-  width: 100%;
-  height: 100%;
-  min-height: 480px;
-}
-```
-
-## 渲染基础图 [#渲染基础图]
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const graph = new Graph({
-  container: 'graph',
-  data: {
-    nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
-    edges: [
-      { source: 'a', target: 'b' },
-      { source: 'a', target: 'c' },
-    ],
-  },
-  layout: { type: 'circular', radius: 140 },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-});
-
-await graph.render();
-```
-
-## 代码做了什么 [#代码做了什么]
-
-1. `data.nodes` 定义节点，`id` 是唯一标识，业务字段放在 `data` 中。
-2. `data.edges` 定义边，`source` 和 `target` 指向节点 id。
-3. `layout` 决定节点坐标；不传布局时会使用节点上的 `x` / `y`。
-4. `behaviors` 启用画布缩放、画布拖拽、节点拖拽和悬停高亮。
-5. `await graph.render()` 执行布局、初始化渲染管线并绘制首帧。
-
-## 常用配置 [#常用配置]
-
-| 选项          | 说明                                 | 继续阅读                            |
-| ----------- | ---------------------------------- | ------------------------------- |
-| `container` | 挂载画布的 DOM 容器                       | 本页                              |
-| `data`      | 图数据，包含 `nodes`、`edges`、可选 `combos` | [数据](/docs/guides/data)         |
-| `node`      | 节点类型、样式、状态样式、标签                    | [节点](/docs/guides/node)         |
-| `edge`      | 边类型、样式、箭头、标签                       | [边](/docs/guides/edge)          |
-| `combo`     | 节点分组容器样式                           | [Combo](/docs/guides/combo)     |
-| `layout`    | 布局算法与参数                            | [布局](/docs/guides/layout)       |
-| `behaviors` | 交互行为列表                             | [交互](/docs/guides/interactions) |
-| `theme`     | `light`、`dark` 或 token 覆盖          | [主题](/docs/guides/theme)        |
-
-## 更新数据 [#更新数据]
-
-首次渲染后，可以用 `setData()` 替换整份数据：
-
-```ts
-await graph.setData({
-  nodes: [{ id: 'next-a' }, { id: 'next-b' }],
-  edges: [{ source: 'next-a', target: 'next-b' }],
-});
-```
-
-也可以做增量更新：
-
-```ts
-graph.addNode({ id: 'd', x: 120, y: 80, data: { label: '支付服务' } });
-graph.addEdge({ source: 'b', target: 'd', data: { label: '支付' } });
-graph.setItemState('d', 'selected', true);
-```
-
-## 销毁实例 [#销毁实例]
-
-页面卸载或容器被移除时，调用 `destroy()` 释放渲染器、调度器、事件和观察器。
-
-```ts
-graph.destroy();
-```
-
-## 下一步 [#下一步]
-
-* [在 React 中使用](/docs/getting-started/react)
-* [理解 Graph 生命周期](/docs/concepts/graph-lifecycle)
-* [选择布局](/docs/guides/layout)
-* [添加交互](/docs/guides/interactions)
-* [查看示例](/docs/examples)
-
-
-# 在 React 中使用 (/docs/getting-started/react)
-
-
-
-React 中推荐在 `useEffect` 内创建 `Graph`，通过 `ref` 传入真实 DOM，并在 cleanup 中销毁实例。
-
-```tsx
-import { useEffect, useRef } from 'react';
-import { Graph } from '@antv/g6-lite';
-
-export function GraphView() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const graph = new Graph({
-      container: containerRef.current,
-      data: {
-        nodes: [
-          { id: 'a', data: { label: 'A' } },
-          { id: 'b', data: { label: 'B' } },
-        ],
-        edges: [{ source: 'a', target: 'b' }],
-      },
-      node: {
-        style: {
-          size: 18,
-          label: (node) => (node.data?.label as string) ?? node.id,
-          labelPlacement: 'bottom',
-        },
-      },
-      edge: { style: { endArrow: true } },
-      layout: { type: 'circular', radius: 120 },
-      autoFitOnResize: { padding: 24, maxZoom: 1.5 },
-      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
-    });
-
-    graph.render();
-
-    return () => {
-      graph.destroy();
-    };
-  }, []);
-
-  return <div ref={containerRef} style={{ width: '100%', height: 480 }} />;
-}
-```
-
-## 注意事项 [#注意事项]
-
-* 容器需要有明确高度，只有 `width: 100%` 不够。
-* React Strict Mode 在开发环境可能会重复执行 effect，cleanup 中调用 `graph.destroy()` 可以避免残留 canvas 和事件监听。
-* 如果数据来自请求，建议在拿到数据后创建实例；或先创建空图，再调用 `await graph.setData(data)`。
-* 如果父容器尺寸会变化，G6Lite 会通过 ResizeObserver 同步 canvas 尺寸。默认会保留用户当前的缩放和平移；希望分栏拖拽或侧栏展开后让关系图重新完整可见时，配置 `autoFitOnResize: true`，或传入 `FitViewOptions` 控制 padding 和缩放边界。
-
-## 数据变化 [#数据变化]
-
-若数据会随 props 更新，保留 `graph` 引用并在 effect 中调用 `setData()`：
-
-```tsx
-useEffect(() => {
-  graphRef.current?.setData(data);
-}, [data]);
-```
-
-如果只是高亮、选中、隐藏元素，优先使用 `setItemState()`、`hideItem()`、`showItem()` 等增量 API，避免频繁替换整份数据。
 
 
 # Combo (/docs/guides/combo)

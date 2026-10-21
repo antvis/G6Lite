@@ -23,9 +23,11 @@ import {
   createCubicPath,
   createLinePath,
   createQuadraticPath,
+  EDGE_CURVE_SEGMENTS,
   findPathBoundarySample,
   getParallelEdgeCurvature,
   getRectBoundaryDistance,
+  sampleEdgePath,
   type EdgePath,
   type NodeBoundary,
 } from './edgePath';
@@ -370,6 +372,11 @@ export class Renderer {
     // Resolve active program types
     this.activeNodeType = getNodeBaseType(renderData.nodeConfig);
     this.activeEdgeType = this.resolveEdgeType(renderData.edgeConfig);
+
+    // Geometry caches describe the previous dataset; drop them so consumers
+    // (labels, fit bounds) never read stale paths before the next process().
+    this.edgePathCache.clear();
+    this.polylineRoutes.clear();
 
     this.needToProcess = true;
     this.needPickingRender = true;
@@ -2427,6 +2434,46 @@ export class Renderer {
   /** Get cached regular edge paths for label positioning. */
   getEdgePathCache(): Map<number, EdgePath> {
     return this.edgePathCache;
+  }
+
+  /**
+   * Run the geometry phase immediately when a full process is pending, so
+   * consumers can read edge paths/bounds before the next draw().
+   */
+  ensureProcessed(): void {
+    if (this.needToProcess) this.process();
+  }
+
+  /**
+   * Bounds of cached edge geometries in graph coordinates: curved edge paths
+   * (arc/parallel curves and self-loops) sampled along the curve, plus
+   * polyline route waypoints. Straight-line edges are skipped because their
+   * endpoints are node centers, already covered by the node bounds.
+   */
+  getEdgeGeometryBounds(): { minX: number; minY: number; maxX: number; maxY: number } | undefined {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    const expand = (x: number, y: number) => {
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    };
+
+    for (const path of this.edgePathCache.values()) {
+      if (path.type === 'line') continue;
+      for (let i = 0; i <= EDGE_CURVE_SEGMENTS; i++) {
+        const { point } = sampleEdgePath(path, i / EDGE_CURVE_SEGMENTS);
+        expand(point.x, point.y);
+      }
+    }
+    for (const route of this.polylineRoutes.values()) {
+      for (const waypoint of route) expand(waypoint.x, waypoint.y);
+    }
+
+    return Number.isFinite(minX) ? { minX, minY, maxX, maxY } : undefined;
   }
 
   destroy(): void {

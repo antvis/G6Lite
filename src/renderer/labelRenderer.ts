@@ -362,9 +362,9 @@ export class LabelLayerRenderer {
         if (iconValue && typeof iconValue === 'string') {
           const iconType = resolveNodeValue(style.iconType, node, 'image' as 'image' | 'text');
           if (iconType === 'text') {
-            this.drawTextIcon(iconValue, px, py, node, style, dpr, zoom);
+            this.drawTextIcon(iconValue, px, py, node, style, zoom);
           } else {
-            this.drawIcon(iconValue, px, py, node, style, dpr, zoom);
+            this.drawIcon(iconValue, px, py, node, style, zoom);
           }
         }
       }
@@ -996,7 +996,6 @@ export class LabelLayerRenderer {
     py: number,
     node: GraphNode,
     style: NodeStyleConfig,
-    dpr: number,
     zoom: number,
   ): void {
     const img = this.loadImage(url);
@@ -1006,8 +1005,10 @@ export class LabelLayerRenderer {
     const defaultIconSize = nodeSize * 0.6;
     const iconW = resolveNodeValue(style.iconWidth, node, defaultIconSize) * zoom;
     const iconH = resolveNodeValue(style.iconHeight, node, defaultIconSize) * zoom;
-    const offsetX = resolveNodeValue(style.iconOffsetX, node, 0) * dpr;
-    const offsetY = resolveNodeValue(style.iconOffsetY, node, 0) * dpr;
+    // Offsets are in graph units and must scale with zoom (like the icon
+    // size), otherwise the icon drifts toward the node center when zooming in.
+    const offsetX = resolveNodeValue(style.iconOffsetX, node, 0) * zoom;
+    const offsetY = resolveNodeValue(style.iconOffsetY, node, 0) * zoom;
 
     this.ctx.drawImage(img, px - iconW / 2 + offsetX, py - iconH / 2 + offsetY, iconW, iconH);
   }
@@ -1018,7 +1019,6 @@ export class LabelLayerRenderer {
     py: number,
     node: GraphNode,
     style: NodeStyleConfig,
-    dpr: number,
     zoom: number,
   ): void {
     const nodeSize = resolveNodeValue(style.size, node, 8);
@@ -1027,8 +1027,10 @@ export class LabelLayerRenderer {
     if (fontSize < 4) return;
     const fontFamily = resolveNodeValue(style.iconFontFamily, node, DEFAULT_FONT_FAMILY);
     const color = resolveNodeValue(style.iconColor, node, '#fff');
-    const offsetX = resolveNodeValue(style.iconOffsetX, node, 0) * dpr;
-    const offsetY = resolveNodeValue(style.iconOffsetY, node, 0) * dpr;
+    // Offsets are in graph units and must scale with zoom (like the font
+    // size), otherwise the icon drifts toward the node center when zooming in.
+    const offsetX = resolveNodeValue(style.iconOffsetX, node, 0) * zoom;
+    const offsetY = resolveNodeValue(style.iconOffsetY, node, 0) * zoom;
 
     const ctx = this.ctx;
     ctx.save();

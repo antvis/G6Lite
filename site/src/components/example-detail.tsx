@@ -25,12 +25,13 @@ import {
 } from '@/lib/site-examples';
 import { withBasePath } from '@/lib/shared';
 
-type DetailTab = 'guide' | 'source' | 'data';
+type DetailTab = 'source' | 'data' | 'guide';
 type PreviewStatus = 'loading' | 'ready' | 'error';
 
 const DEFAULT_WORKSPACE_SPLIT = 54;
 const MIN_PREVIEW_WIDTH = 360;
 const MIN_CODE_WIDTH = 300;
+const MAX_DATA_PREVIEW_LENGTH = 100_000;
 
 type ExampleCrop = {
   width: number;
@@ -116,7 +117,7 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
   const [status, setStatus] = useState<PreviewStatus>('loading');
   const [error, setError] = useState('');
   const [renderDuration, setRenderDuration] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<DetailTab>('guide');
+  const [activeTab, setActiveTab] = useState<DetailTab>('source');
   const [sourceResult, setSourceResult] = useState({
     id: '',
     source: '',
@@ -124,6 +125,8 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
     error: '',
   });
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
+  const [liveData, setLiveData] = useState({ display: '', full: '' });
+  const [highlightedData, setHighlightedData] = useState({ source: '', html: '' });
   const [wrapSource, setWrapSource] = useState(false);
   const [query, setQuery] = useState('');
   const directoryNavRef = useRef<HTMLElement>(null);
@@ -312,6 +315,61 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
     };
   }, [example]);
 
+  // Serializes the live graph data from the running example whenever the data
+  // tab is opened, so the panel always shows the real dataset in the preview.
+  useEffect(() => {
+    if (activeTab !== 'data' || status !== 'ready') return;
+
+    const data = activeHandleRef.current?.getData?.();
+    if (!data || typeof data !== 'object') {
+      setLiveData({ display: '', full: '' });
+      return;
+    }
+
+    const json = JSON.stringify(data, null, 2);
+    if (json.length <= MAX_DATA_PREVIEW_LENGTH) {
+      setLiveData({ display: json, full: json });
+      return;
+    }
+
+    const { nodes, edges } = data as { nodes?: unknown[]; edges?: unknown[] };
+    const nodeCount = Array.isArray(nodes) ? nodes.length : 0;
+    const edgeCount = Array.isArray(edges) ? edges.length : 0;
+    const note =
+      locale === 'zh'
+        ? `… 数据过大已截断，完整数据共 ${nodeCount} 个节点、${edgeCount} 条边`
+        : `… truncated; the full dataset has ${nodeCount} nodes and ${edgeCount} edges`;
+    setLiveData({ display: `${json.slice(0, MAX_DATA_PREVIEW_LENGTH)}\n${note}`, full: json });
+  }, [activeTab, status, revision, locale]);
+
+  // Highlights the live JSON on demand with the same shiki themes as the
+  // build-time source highlighting, keeping both tabs visually consistent.
+  // The result is tagged with its input so stale markup never renders.
+  useEffect(() => {
+    const json = liveData.display;
+    if (!json) return;
+
+    let cancelled = false;
+    void import('shiki')
+      .then(({ codeToHtml }) =>
+        codeToHtml(json, {
+          lang: 'json',
+          themes: { light: 'github-light', dark: 'github-dark' },
+          defaultColor: false,
+        }),
+      )
+      .then((html) => {
+        if (!cancelled) setHighlightedData({ source: json, html });
+      })
+      .catch(() => {
+        // The plain <pre> fallback renders while highlighting is unavailable.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [liveData.display]);
+
   useEffect(() => {
     if (!previewExpanded) return;
 
@@ -356,6 +414,8 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
   const source = sourceResult.id === example?.id ? sourceResult.source : '';
   const highlightedSource = sourceResult.id === example?.id ? sourceResult.highlighted : '';
   const sourceError = sourceResult.id === example?.id ? sourceResult.error : '';
+  const highlightedJson =
+    highlightedData.source === liveData.display ? highlightedData.html : '';
 
   if (!example) {
     return (
@@ -382,6 +442,7 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
           dataContext: '数据背景',
           capabilities: '关键能力',
           copy: '复制源码',
+          copyData: '复制数据',
           copied: '已复制',
           wrap: '自动换行',
           unwrap: '取消换行',
@@ -417,6 +478,7 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
           dataContext: 'Data context',
           capabilities: 'Key capabilities',
           copy: 'Copy source',
+          copyData: 'Copy data',
           copied: 'Copied',
           wrap: 'Wrap lines',
           unwrap: 'No wrap',
@@ -444,6 +506,14 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
   async function copySource() {
     if (!source) return;
     await navigator.clipboard.writeText(source);
+    setCopyState('copied');
+    window.setTimeout(() => setCopyState('idle'), 1600);
+  }
+
+  // Copies the complete dataset, even when the panel shows a truncated preview.
+  async function copyData() {
+    if (!liveData.full) return;
+    await navigator.clipboard.writeText(liveData.full);
     setCopyState('copied');
     window.setTimeout(() => setCopyState('idle'), 1600);
   }
@@ -765,15 +835,6 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
               <div className="example-code-toolbar-main">
                 <div className="example-tabs" role="tablist">
                   <button
-                    aria-selected={activeTab === 'guide'}
-                    className={activeTab === 'guide' ? 'is-active' : undefined}
-                    onClick={() => setActiveTab('guide')}
-                    role="tab"
-                    type="button"
-                  >
-                    {copy.guide}
-                  </button>
-                  <button
                     aria-selected={activeTab === 'source'}
                     className={activeTab === 'source' ? 'is-active' : undefined}
                     onClick={() => setActiveTab('source')}
@@ -791,6 +852,15 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                   >
                     {copy.data}
                   </button>
+                  <button
+                    aria-selected={activeTab === 'guide'}
+                    className={activeTab === 'guide' ? 'is-active' : undefined}
+                    onClick={() => setActiveTab('guide')}
+                    role="tab"
+                    type="button"
+                  >
+                    {copy.guide}
+                  </button>
                 </div>
               </div>
               {activeTab === 'source' ? (
@@ -807,6 +877,18 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                   <button className="example-utility-button" onClick={copySource} type="button">
                     <span aria-hidden="true">⧉</span>
                     {copyState === 'copied' ? copy.copied : copy.copy}
+                  </button>
+                </div>
+              ) : activeTab === 'data' ? (
+                <div className="example-code-actions">
+                  <button
+                    className="example-utility-button"
+                    disabled={!liveData.full}
+                    onClick={copyData}
+                    type="button"
+                  >
+                    <span aria-hidden="true">⧉</span>
+                    {copyState === 'copied' ? copy.copied : copy.copyData}
                   </button>
                 </div>
               ) : null}
@@ -860,9 +942,17 @@ export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
                     <h2>{copy.dataTitle}</h2>
                     <p>{localizedText(example.dataDescription, locale)}</p>
                   </div>
-                  <pre>
-                    <code>{example.dataPreview}</code>
-                  </pre>
+                  {highlightedJson ? (
+                    <div
+                      className="example-highlighted-code shiki-host"
+                      dangerouslySetInnerHTML={{ __html: highlightedJson }}
+                      tabIndex={0}
+                    />
+                  ) : (
+                    <pre>
+                      <code>{liveData.display || copy.loading}</code>
+                    </pre>
+                  )}
                 </div>
               )}
             </div>

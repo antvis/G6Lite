@@ -8,7 +8,7 @@ The product website and API documentation live in this directory. It uses Next.j
 - Chinese documentation lives in `content/docs/zh`, and English documentation lives in `content/docs/en`.
 - English routes use `/en`; Fumadocs maps the language directories with its `dir` locale parser.
 - Documentation is organized into quick start, core concepts, configuration, API, examples, technical metrics, and compatibility.
-- Generated API content comes from the package-root exports through TypeDoc.
+- The API section documents the package-root calls application code can use: `Graph`, configuration types, and `register` / `runLayout`.
 - Website examples consume `playground/demos/catalog.json`; the deployed Playground is copied into the static site after the Next.js build.
 
 ## Development
@@ -31,7 +31,7 @@ node scripts/check-examples.mjs --profile release
 npm run site
 ```
 
-`npm run site` regenerates TypeDoc from `site/typedoc.json`, builds the Playground, statically exports the site to `site/out`, and copies the Playground to `site/out/playground`.
+`npm run site` builds the Playground, statically exports the site to `site/out`, and copies the Playground to `site/out/playground`.
 
 Use `NEXT_PUBLIC_SITE_URL` when validating a non-production canonical origin. Use `NEXT_PUBLIC_BASE_PATH` only for a deployment that actually serves the site under a subpath.
 

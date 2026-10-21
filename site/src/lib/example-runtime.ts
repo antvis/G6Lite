@@ -3,6 +3,7 @@
 export interface SiteExampleHandle {
   destroy(): void;
   fitView(): void | Promise<void>;
+  getData?(): unknown;
   ready?: Promise<void>;
 }
 

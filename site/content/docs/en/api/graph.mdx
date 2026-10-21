@@ -1,0 +1,400 @@
+---
+title: Graph
+description: Create a graph and call its data, state, viewport, layout, and event methods
+---
+
+`Graph` is the instance application code uses to operate one graph. Import it from the package root, pass [options](/en/docs/api/options), then `await graph.render()`.
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({ container, data });
+await graph.render();
+```
+
+Data writes, state changes, and `layout()` run after the first successful `render()`. After `destroy()`, those methods return immediately.
+
+## Lifecycle
+
+### `new Graph(options)`
+
+```ts
+const graph = new Graph({
+  container: document.getElementById('container')!,
+  data: { nodes: [{ id: 'a' }, { id: 'b' }], edges: [{ source: 'a', target: 'b' }] },
+});
+```
+
+Stores `container`, `data`, and the rest of the configuration, then creates a canvas inside the container. There is no layout result yet, and element queries are empty.
+
+`container` accepts an element id or an `HTMLElement`. The element must already be in the document.
+
+### `render()`
+
+```ts
+await graph.render();
+```
+
+Runs the configured transforms and layout, builds renderer data, mounts interactions, labels, and plugins, then calls `fitView()` once and draws. `destroyed` stays `false`, and the data methods can be called.
+
+Calling it again on the same instance cancels an in-flight layout and redraws from the latest data and options.
+
+The render emits `beforerender` and `afterrender`.
+
+### `destroy()`
+
+```ts
+graph.destroy();
+```
+
+Aborts an in-flight layout, emits `destroy`, tears down interactions, plugins, and the renderer, and removes the canvas. A second call has no further effect. `destroyed` is then `true`.
+
+### `destroyed`
+
+```ts
+if (graph.destroyed) return;
+```
+
+Whether the instance has been destroyed.
+
+### `refresh()`
+
+```ts
+graph.refresh();
+```
+
+Forces one full style pass and draw. Data, state, and viewport changes already schedule their own frame. Call this only when an input changed outside the methods the engine observes.
+
+## Reading data
+
+Queries return the current read-only view. Use the write methods below to change what is drawn.
+
+```ts
+const snapshot = graph.getData();
+const nodes = graph.getNodes();
+const node = graph.getNodeData('n1');
+const neighbors = graph.getNeighborNodes('n1');
+const edges = graph.getAdjacentEdges('n1');
+
+if (graph.hasNode('n1') && node) {
+  node.x;
+  node.y;
+  node.data;
+  neighbors.length;
+  edges[0]?.source;
+  snapshot.nodes.length;
+}
+```
+
+| Method | Returns | Description |
+| --- | --- | --- |
+| `getData()` | `GraphData` | Snapshot of the current nodes, edges, and combos |
+| `getNodes()` | `readonly NodeModel[]` | Every node |
+| `getNodeData(id)` | `NodeModel \| undefined` | Node by id |
+| `getEdges()` | `readonly EdgeModel[]` | Every edge |
+| `getEdgeData(id)` | `EdgeModel \| undefined` | Edge by id |
+| `getComboData(id)` | `ComboModel \| undefined` | Combo by id |
+| `getElementData(id)` | `ElementModel \| undefined` | Node, edge, or combo by id |
+| `getNodeCount()` | `number` | Node count |
+| `getEdgeCount()` | `number` | Edge count |
+| `hasNode(id)` | `boolean` | Whether the node exists |
+| `hasEdge(id)` | `boolean` | Whether the edge exists |
+| `hasElement(id)` | `boolean` | Whether that node, edge, or combo exists |
+| `getElementPosition(id)` | `{ x, y } \| null` | Graph position of a node or combo. An edge has no single position |
+| `getNeighborNodes(nodeId)` | `string[]` | Ids of neighboring nodes |
+| `getAdjacentEdges(nodeId)` | `{ id, source, target }[]` | Edges connected to the node |
+
+`NodeModel` has `id`, `name`, `x`, `y`, `data`, and `states`. `EdgeModel` has `id`, `source`, `target`, `data`, and `states`. `states` is a read-only set.
+
+Before the first `render()`, `getData()` returns a copy of the data passed to the constructor. The other queries behave as an empty graph.
+
+## Replacing data and styles
+
+### `setData()`
+
+```ts
+await graph.setData(
+  {
+    nodes: [{ id: 'a' }, { id: 'b' }],
+    edges: [{ id: 'a-b', source: 'a', target: 'b' }],
+  },
+  { fitView: false },
+);
+```
+
+Replaces the whole graph with a new set of nodes, edges, and combos. A configured `layout` runs again, the graph redraws, and `datachange` is emitted.
+
+`options.fitView` controls the viewport after replacement:
+
+- Omitted or `true`: calls `fitView()` with `0.9`.
+- `false`: keeps the current camera.
+- A number or `FitViewOptions`: forwards that value to `fitView()`.
+
+Use the incremental methods below for local additions and edits so the whole graph is not laid out again.
+
+### `updateOptions()`
+
+```ts
+graph.updateOptions({
+  node: { style: { fill: '#5366ad', size: 32 } },
+  theme: { type: 'light' },
+});
+```
+
+Merges node, edge, label, and theme options, then recomputes styles. Object `style` values merge with the previous style. A function style replaces the previous style entirely.
+
+Layout, behaviors, and plugins are outside this argument. Change layout with `setLayout()` followed by `layout()`.
+
+## Changing nodes and edges
+
+These methods require a completed first `render()`. Batch methods draw once.
+
+### Nodes
+
+```ts
+graph.addNode({ id: 'n4', x: 240, y: 80, data: { label: 'N4' } });
+graph.updateNodeData('n4', { label: 'Updated' });
+graph.updateNodePosition('n4', 260, 100);
+graph.updateNodePositions([
+  { id: 'n1', x: 40, y: 40 },
+  { id: 'n4', x: 280, y: 120 },
+]);
+graph.removeNode('n4');
+```
+
+`addNode()` requires a unique `id` and graph coordinates. It does not run layout again.
+
+`updateNodeData()` merges the business payload. Style functions that read those fields are recomputed on the next frame.
+
+`removeNode()` also removes edges connected to that node.
+
+A successful change emits `afteradditem`, `afterupdateitem`, or `afterremoveitem`.
+
+### Edges
+
+```ts
+const edgeId = graph.addEdge({ source: 'n1', target: 'n4', data: { weight: 1 } });
+graph.updateEdgeData(edgeId, { weight: 2 });
+graph.updateEdgeData([{ id: edgeId, source: 'n2', target: 'n4' }]);
+graph.removeEdge(edgeId);
+```
+
+`source` and `target` must already exist. When `id` is omitted the engine generates one, and the return value is that id. Later queries and removal use it.
+
+The batch form of `updateEdgeData()` can also change an edge's endpoints.
+
+## State, visibility, and focus
+
+Built-in state names are `default`, `active`, `selected`, `disabled`, `highlight`, `inactive`, and `hidden`. Application-defined names are accepted and can be styled with `node.stateStyles` or `edge.stateStyles`.
+
+### `setItemState()`
+
+```ts
+graph.setItemState('n1', 'selected', true);
+graph.setItemState('n1', 'selected', false);
+```
+
+Turns one state on or off for a node, edge, or combo. `value: false` removes only that state.
+
+### `setElementStates()`
+
+```ts
+graph.setElementStates('n1', ['selected', 'highlight']);
+graph.setElementStates({
+  n1: ['selected'],
+  'a-b': ['active'],
+});
+```
+
+Replaces the complete state list of an element. The object form updates many elements and draws once.
+
+### `batchSetState()`
+
+```ts
+graph.batchSetState([
+  { id: 'n1', state: 'highlight', value: true },
+  { id: 'n2', state: 'inactive', value: true },
+]);
+```
+
+Turns individual states on or off in one batch. Use it when one interaction, such as hover highlight, touches many elements.
+
+### Query and clear
+
+```ts
+const states = graph.getItemStates('n1');
+const selected = graph.findNodesByState('selected');
+graph.clearItemStates('n1');
+```
+
+`clearItemStates()` removes every state on that element. The `find*ByState()` methods return ids that currently have the state.
+
+### `hideItem()` and `showItem()`
+
+```ts
+graph.hideItem('n2');
+graph.showItem('n2');
+```
+
+Hide or show a node, edge, or combo through the `hidden` state. `showItem()` clears only `hidden` and leaves other states in place.
+
+### `focusItem()`
+
+```ts
+graph.focusItem('n1');
+graph.focusItem(['n1', 'n2'], 24);
+```
+
+Centers the viewport on one or more nodes. The current zoom is kept when the targets fit. Otherwise the view zooms out just enough to leave `padding` screen pixels. The default `padding` is `20`. Nothing happens when none of the ids resolve to a node.
+
+## Viewport
+
+The camera is the current view: graph-space translation `x` and `y`, plus `zoom`.
+
+```ts
+const camera = graph.getCamera();
+graph.setCamera({ x: camera.x, y: camera.y, zoom: 1 });
+graph.zoomBy(1.2);
+graph.fitCenter();
+graph.resetCamera();
+```
+
+| Method | Description |
+| --- | --- |
+| `getCamera()` | Returns a `{ x, y, zoom }` snapshot |
+| `setCamera(partial)` | Merges the provided camera fields |
+| `resetCamera()` | Returns to the camera captured at the end of the first render. Earlier calls do nothing |
+| `getZoom()` | Current zoom |
+| `setSize(width, height)` | Sets the canvas size in CSS pixels |
+| `fitCenter()` | Keeps zoom and moves the graph content to the viewport center |
+
+### `zoomTo()` and `zoomBy()`
+
+```ts
+graph.zoomTo(1.5, { center: { x: 320, y: 180 } });
+graph.zoomBy(2, { minZoom: 0.2, maxZoom: 8 });
+```
+
+`zoomTo()` sets an absolute zoom. `zoomBy(2)` multiplies the current zoom by 2.
+
+`ZoomOptions`:
+
+| Field | Default | Description |
+| --- | --- | --- |
+| `center` | Client coordinate of the canvas center | Screen point that stays fixed while zooming |
+| `minZoom` | `0.1` | Lower zoom bound |
+| `maxZoom` | `20` | Upper zoom bound |
+
+### `fitView()`
+
+```ts
+graph.fitView();
+graph.fitView(0.8);
+graph.fitView({ padding: [24, 16, 24, 16], minZoom: 0.2, maxZoom: 2 });
+```
+
+Fits the camera to the bounding box of every node.
+
+- A number is a scale applied to that fit. The default is `0.9`, which is also what `render()` uses when it finishes.
+- An object uses `padding`, `minZoom`, and `maxZoom`. `padding` is one CSS pixel value or `[top, right, bottom, left]`. The scale is `1`, `minZoom` defaults to `0.1`, and `maxZoom` defaults to `20`.
+
+### Coordinate conversion
+
+```ts
+graph.on('canvas:click', (event) => {
+  const point = graph.screenToGraph(event.nativeEvent.clientX, event.nativeEvent.clientY);
+  const screen = graph.graphToScreen(point.x, point.y);
+  screen.x;
+});
+```
+
+Arguments and return values are client coordinates, the same space as `MouseEvent.clientX` and `clientY`. Element events already split `client`, `canvas`, and `graph`, so most click handlers can read those fields directly.
+
+## Layout
+
+```ts
+graph.setLayout({ type: 'dagre', rankdir: 'LR' });
+await graph.layout();
+graph.cancelLayout();
+```
+
+`setLayout()` replaces the layout used by the next run. `layout()` executes it on the current graph data and writes the resulting coordinates back to the nodes. It returns immediately when no layout is configured or the graph has no nodes.
+
+`cancelLayout()` abandons an in-flight layout. An older run that finishes later does not overwrite a newer result.
+
+Layout names and parameters are in [Layout](/en/docs/guides/layout). To compute positions without a Graph, use [`runLayout()`](/en/docs/api/extensions#runlayout).
+
+## Combo
+
+Combo collapse, nesting, and runtime regrouping are experimental. Their configuration may change within `0.1.x`. Visual options are in [Combo](/en/docs/guides/combo). Call these methods after the first `render()`. A call before that returns immediately and does not create or change a combo.
+
+```ts
+graph.createCombo({ id: 'group', data: { label: 'Group' } }, ['n1', 'n2']);
+graph.addToCombo('n3', 'group');
+const children = graph.getComboChildren('group');
+graph.collapseCombo('group');
+graph.expandCombo('group');
+graph.removeFromCombo('n3');
+graph.removeCombo('group');
+children.nodes;
+```
+
+The second argument of `createCombo()` places existing nodes into the new combo. `collapseCombo()` hides the nodes under it and emits `combo:collapse`. `expandCombo()` restores them and emits `combo:expand`. Collapsing or expanding a combo that is already in the target state does not emit again.
+
+Select and hide combos with `setItemState()` and `hideItem()`. The older `setComboState()` remains only for existing code.
+
+## Events
+
+```ts
+graph.once('afterrender', () => {
+  graph.fitView(0.9);
+});
+```
+
+Names in `GraphEventMap` infer the handler argument. Custom event names can be subscribed too; the handler declares that payload.
+
+```ts
+graph.on('node:click', (event) => {
+  event.nodeId;
+  event.nativeEvent.clientX;
+});
+
+const onRender = (payload: { nodeCount: number; edgeCount: number }) => {
+  console.log(payload.nodeCount);
+};
+graph.on('afterrender', onRender);
+graph.off('afterrender', onRender);
+```
+
+`off()` needs the same function that was passed to `on()`. `once()` removes the listener after the first emit. `destroy` has no arguments.
+
+Element click, hover, and wheel events are emitted by the engine and do not require an extra behavior. Selection, drag, brush, and lasso events appear only when that behavior is enabled. Field notes are in [Events](/en/docs/guides/events).
+
+| Event | Main fields |
+| --- | --- |
+| `node:*` | `nodeId`, `nativeEvent`, `data`, `graph` |
+| `edge:*` | `edgeId`, `edgeIndex`, `source`, `target`, `nativeEvent` |
+| `combo:pointerdown` / `click` / `dblclick` / `contextmenu` | `comboId`, `nativeEvent` |
+| `canvas:*` | `nativeEvent`, and no target element id |
+| `node:selectchange` | `nodeId`, `selected`, `event` |
+| `edge:selectchange` | `edgeId`, `edgeIndex`, `source`, `target`, `selected` |
+| `selection:clear` | `ids` |
+| `node:dragstart` / `node:drag` / `node:dragend` | `nodeId`, `nodeIds`; drag also has `dx`, `dy` |
+| `combo:dragstart` / `combo:drag` / `combo:dragend` | `comboId`; drag also has `dx`, `dy` |
+| `edge:dragstart` / `edge:drag` / `edge:dragend` | `source`, `target`, `dragEnd`; end also has `reconnected` |
+| `brush:select` / `brush:end` | `nodeIds` |
+| `lasso:select` / `lasso:end` | `nodeIds` |
+| `beforelayout` / `layout:start` | `nodeCount` |
+| `layout:end` / `afterlayout` | `duration`, `nodeCount` |
+| `beforerender` / `afterrender` | `nodeCount`, `edgeCount` |
+| `resize` | `width`, `height` |
+| `datachange` | `nodeCount`, `edgeCount` |
+| `afteradditem` | `type`, `id`; edges also include `source`, `target` |
+| `afterremoveitem` | `type`, `id` |
+| `afterupdateitem` | `type`, `id`, `action` |
+| `combo:collapse` / `combo:expand` | `comboId` |
+| `destroy` | No arguments |
+
+`node:*` and `edge:*` each include `pointerover`, `pointerenter`, `pointermove`, `pointerleave`, `pointerdown`, `click`, `dblclick`, `contextmenu`, and `wheel`. `canvas:*` includes `pointermove`, `pointerdown`, `pointerup`, `click`, `dblclick`, `contextmenu`, and `wheel`.
+
+The native input is `nativeEvent`. The older `event` field remains for existing listeners.

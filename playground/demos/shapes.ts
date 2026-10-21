@@ -6,6 +6,7 @@ import { Graph } from '../../src/index.ts';
 export async function run(container: string | HTMLElement) {
   // --- Rect nodes with arc edges ---
   const rectContainer = document.createElement('div');
+  rectContainer.className = 'demo-canvas-card';
   rectContainer.style.cssText = 'width:100%;height:45%;position:relative;';
   const arcLabel = document.createElement('div');
   arcLabel.textContent = 'Rect nodes + Arc edges';
@@ -57,6 +58,7 @@ export async function run(container: string | HTMLElement) {
 
   // --- Circle nodes with thick edges ---
   const thickContainer = document.createElement('div');
+  thickContainer.className = 'demo-canvas-card';
   thickContainer.style.cssText = 'width:100%;height:45%;position:relative;margin-top:10px;';
   const thickLabel = document.createElement('div');
   thickLabel.textContent = 'Circle nodes + Thick edges (lineWidth: 3)';

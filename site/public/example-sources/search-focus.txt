@@ -1,7 +1,9 @@
+// Local presentation helpers in this repository are used only for the example controls.
 /**
  * Demo: search nodes by name, highlight matches, and focus the viewport.
  */
 import { Graph } from '@antv/g6-lite';
+import { mountCanvasControl } from './demo-panel.ts';
 
 const PEOPLE = [
   'Alice',
@@ -50,17 +52,16 @@ export async function run(container: string | HTMLElement) {
 
   const box = document.createElement('label');
   box.style.cssText =
-    'position:absolute;top:12px;left:12px;z-index:20;display:flex;gap:8px;align-items:center;color:#334155;font:12px/1 system-ui,sans-serif;';
+    'display:inline-flex;gap:8px;align-items:center;color:#64748b;font:500 12px/1 system-ui,sans-serif;';
   const input = document.createElement('input');
   input.type = 'search';
   input.placeholder = '搜索节点，例如 al';
   input.setAttribute('aria-label', '搜索节点');
   input.style.cssText =
-    'width:180px;height:28px;padding:0 8px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;';
+    'width:180px;height:28px;padding:0 10px;border:0;border-radius:8px;background:rgba(255,255,255,.96);color:#334155;box-shadow:0 1px 2px rgba(15,23,42,.08);';
   const status = document.createElement('span');
-  status.style.color = '#64748b';
   box.append(input, status);
-  host.append(box);
+  mountCanvasControl(host, box);
 
   let highlighted: string[] = [];
   const search = () => {
@@ -83,7 +84,7 @@ export async function run(container: string | HTMLElement) {
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();
-      box.remove();
+      host.querySelector(':scope > [data-canvas-controls]')?.remove();
     },
   };
 }

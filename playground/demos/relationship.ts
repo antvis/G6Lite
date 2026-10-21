@@ -48,7 +48,6 @@ export async function run(container: string | HTMLElement) {
       type: 'circle',
       style: {
         fill: (n) => COLORS[n.data?.house as string] ?? '#5B8FF9',
-        size: 20,
         stroke: '#fff',
         strokeWidth: 2,
       },

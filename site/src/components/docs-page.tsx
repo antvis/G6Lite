@@ -1,6 +1,5 @@
 import { getMDXComponents } from '@/components/mdx';
 import { StructuredData } from '@/components/structured-data';
-import { renderApiReference } from '@/lib/api-reference';
 import type { Locale } from '@/lib/i18n';
 import { localizedDocsPath } from '@/lib/i18n';
 import { createDocsStructuredData, createPageSeo } from '@/lib/seo';
@@ -23,8 +22,6 @@ export async function DocsPageContent({ slug, locale }: { slug?: string[]; local
 
   const MDX = page.data.body;
   const pagePath = localizedDocsPath(page.slugs, locale);
-  const apiReference =
-    page.slugs.length === 1 && page.slugs[0] === 'api' ? await renderApiReference() : null;
   const image = getPageImage(page).url;
   const description = page.data.description ?? page.data.title;
   const markdownUrl = getPageMarkdownUrl(page).url;
@@ -67,7 +64,7 @@ export async function DocsPageContent({ slug, locale }: { slug?: string[]; local
         })}
       />
       <DocsPage
-        toc={apiReference?.toc ?? page.data.toc}
+        toc={page.data.toc}
         full={page.data.full}
         tableOfContent={{ single: true }}
       >
@@ -80,11 +77,7 @@ export async function DocsPageContent({ slug, locale }: { slug?: string[]; local
           </a>
         </div>
         <DocsBody>
-          {apiReference ? (
-            <div className="api-reference" dangerouslySetInnerHTML={{ __html: apiReference.html }} />
-          ) : (
-            <MDX components={getMDXComponents({ a: createRelativeLink(source, page) })} />
-          )}
+          <MDX components={getMDXComponents({ a: createRelativeLink(source, page) })} />
         </DocsBody>
       </DocsPage>
     </>

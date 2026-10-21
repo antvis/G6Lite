@@ -5,7 +5,8 @@ import { Graph, type TooltipContext } from '../../src/index.ts';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFitOnResize: true,
+    // Padding keeps arc-apex edge labels and bottom node labels inside view.
+    autoFitOnResize: { padding: 56, maxZoom: 1.5 },
     container,
     data: {
       nodes: [

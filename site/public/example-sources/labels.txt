@@ -1,7 +1,9 @@
+// Local presentation helpers in this repository are used only for the example controls.
 /**
  * Demo: 节点标签 / 边标签 / 节点图标
  */
-import { Graph, type GraphEdge, type GraphNode } from '@antv/g6-lite';
+import { Graph, type GraphEdge, type GraphNode, type LabelPlacement } from '@antv/g6-lite';
+import { mountCanvasMenu } from './demo-panel.ts';
 
 const DATA = {
   nodes: [
@@ -30,19 +32,7 @@ const DATA = {
 export async function run(container: string | HTMLElement) {
   const el = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
 
-  const toolbar = document.createElement('div');
-  toolbar.style.cssText = 'position:absolute;top:8px;left:8px;z-index:10;display:flex;gap:6px;flex-wrap:wrap;';
-  toolbar.innerHTML = `
-    <button id="btn-label-bottom">标签: bottom</button>
-    <button id="btn-label-center">标签: center</button>
-    <button id="btn-label-top">标签: top</button>
-    <button id="btn-label-right">标签: right</button>
-    <button id="btn-toggle-edge-labels">切换边标签</button>
-    <button id="btn-layout-circular">circular</button>
-    <button id="btn-layout-force">force</button>
-  `;
   el.style.position = 'relative';
-  el.appendChild(toolbar);
 
   const graph = new Graph({
     autoFitOnResize: true,
@@ -72,46 +62,56 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  // Toolbar handlers
-  document.getElementById('btn-label-bottom')!.onclick = () => {
-    graph.updateOptions({ node: { style: { labelPlacement: 'bottom' } } });
-  };
-  document.getElementById('btn-label-center')!.onclick = () => {
-    graph.updateOptions({ node: { style: { labelPlacement: 'center' } } });
-  };
-  document.getElementById('btn-label-top')!.onclick = () => {
-    graph.updateOptions({ node: { style: { labelPlacement: 'top' } } });
-  };
-  document.getElementById('btn-label-right')!.onclick = () => {
-    graph.updateOptions({ node: { style: { labelPlacement: 'right' } } });
-  };
+  const placements: LabelPlacement[] = ['bottom', 'center', 'top', 'right'];
+  mountCanvasMenu(el, {
+    caption: '标签',
+    items: placements.map((placement) => ({ value: placement, label: placement })),
+    value: 'bottom',
+    onSelect(value) {
+      graph.updateOptions({ node: { style: { labelPlacement: value as LabelPlacement } } });
+    },
+  });
 
   let edgeLabelsVisible = true;
-  document.getElementById('btn-toggle-edge-labels')!.onclick = () => {
-    edgeLabelsVisible = !edgeLabelsVisible;
-    graph.updateOptions({
-      edge: {
-        style: {
-          label: edgeLabelsVisible
-            ? ((_source: GraphNode, _target: GraphNode, edge: GraphEdge) =>
-                (edge.data?.label as string | undefined) ?? '')
-            : false,
-        },
-      },
-    });
-  };
+  mountCanvasMenu(el, {
+    caption: '操作',
+    action: true,
+    items: [
+      { value: 'edge-labels', label: '切换边标签' },
+      { value: 'circular', label: 'circular' },
+      { value: 'force', label: 'force' },
+    ],
+    value: '',
+    onSelect(value) {
+      if (value === 'edge-labels') {
+        edgeLabelsVisible = !edgeLabelsVisible;
+        graph.updateOptions({
+          edge: {
+            style: {
+              label: edgeLabelsVisible
+                ? ((_source: GraphNode, _target: GraphNode, edge: GraphEdge) =>
+                    (edge.data?.label as string | undefined) ?? '')
+                : false,
+            },
+          },
+        });
+        return;
+      }
+      const applyLayout = async () => {
+        if (value === 'circular') graph.setLayout({ type: 'circular', radius: 180 });
+        else graph.setLayout({ type: 'd3-force' });
+        await graph.layout();
+        graph.fitView();
+      };
+      void applyLayout();
+    },
+  });
 
-  document.getElementById('btn-layout-circular')!.onclick = async () => {
-    graph.setLayout({ type: 'circular', radius: 180 });
-    await graph.layout();
-    graph.fitView();
+  return {
+    fitView: () => graph.fitView(),
+    destroy() {
+      graph.destroy();
+      el.querySelector(':scope > [data-canvas-controls]')?.remove();
+    },
   };
-
-  document.getElementById('btn-layout-force')!.onclick = async () => {
-    graph.setLayout({ type: 'd3-force' });
-    await graph.layout();
-    graph.fitView();
-  };
-
-  return graph;
 }

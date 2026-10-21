@@ -33,8 +33,12 @@ export async function run(container: string | HTMLElement) {
     '',
   );
 
+  // Keep the modifier keys visible at all times; the event line updates as
+  // the user interacts, the hint line stays.
+  const HINT = 'Shift+点击多选 · Shift+拖拽框选 · Ctrl/⌘+拖拽拉索';
   const render = (eventName: string) => {
-    ui.setStatus(`${eventName}\nselected=${graph.findNodesByState('selected').join(', ') || '-'}`);
+    const selected = graph.findNodesByState('selected').join(', ') || '-';
+    ui.setStatus(`${HINT}\n${eventName}\nselected=${selected}`);
   };
   graph.on('node:selectchange', () => render('node:selectchange'));
   graph.on('brush:end', () => render('brush:end'));

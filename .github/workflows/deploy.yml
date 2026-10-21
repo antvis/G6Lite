@@ -34,8 +34,11 @@ jobs:
       - name: Build site
         run: npm run site
 
-      - name: Create CNAME
-        run: echo "g6lite.antv.vision" > site/out/CNAME
+      - name: Prepare GitHub Pages files
+        run: |
+          echo "g6lite.antv.vision" > site/out/CNAME
+          # Skip Jekyll so Next.js _next assets are published unchanged.
+          touch site/out/.nojekyll
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4

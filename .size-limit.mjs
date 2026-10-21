@@ -42,6 +42,8 @@ export default [
     name: `@antv/g6-lite (initial entry + ${layout} layout, brotli)`,
     path: 'dist/index.js',
     modifyEsbuildConfig: includeOnlyLayout(layout),
-    limit: '120 KB',
+    // 121 KB: the base entry was already at 119.98 KB, and the fitView
+    // edge/combo bounds work added ~0.5 KB. Owner-approved bump.
+    limit: '121 KB',
   })),
 ];

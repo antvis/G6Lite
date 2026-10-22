@@ -1813,90 +1813,6 @@ See [Technical architecture](/en/docs/concepts/architecture) for the complete la
 * [Install and render your first graph](/en/docs/getting-started/quick-start)
 
 
-# Install and render your first graph (/en/docs/getting-started/quick-start)
-
-
-
-Install the package:
-
-```bash
-npm install @antv/g6-lite
-```
-
-The canvas enables smooth wheel zoom and canvas dragging when `behaviors` is omitted. Node dragging, selection, and highlighting remain explicit. See [zoom feel and bounds](/en/docs/guides/interactions#zoom-feel-and-bounds) for sensitivity configuration.
-
-The container must have an explicit size:
-
-```html
-<div id="graph" style="width: 800px; height: 500px"></div>
-```
-
-Create and render the graph using package-root APIs:
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const graph = new Graph({
-  container: 'graph',
-  data: {
-    nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
-    edges: [
-      { source: 'a', target: 'b' },
-      { source: 'a', target: 'c' },
-    ],
-  },
-  layout: { type: 'circular', radius: 140 },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-});
-
-await graph.render();
-```
-
-Use `setData()` for a complete replacement and the add/update/remove/state APIs for incremental changes. Call `graph.destroy()` when the page or component unmounts.
-
-Next: [React integration](/en/docs/getting-started/react), [data configuration](/en/docs/guides/data), and [examples](/en/docs/examples).
-
-
-# Use G6Lite with React (/en/docs/getting-started/react)
-
-
-
-Create the graph after the DOM container mounts and destroy it in the effect cleanup:
-
-```tsx
-import { Graph } from '@antv/g6-lite';
-import { useEffect, useRef } from 'react';
-
-export function GraphView() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const graph = new Graph({
-      container: containerRef.current,
-      data: {
-        nodes: [{ id: 'a' }, { id: 'b' }],
-        edges: [{ source: 'a', target: 'b' }],
-      },
-      layout: { type: 'circular', radius: 120 },
-      autoFitOnResize: { padding: 24, maxZoom: 1.5 },
-      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
-    });
-
-    graph.render();
-    return () => graph.destroy();
-  }, []);
-
-  return <div ref={containerRef} style={{ width: '100%', height: 480 }} />;
-}
-```
-
-Give the container a real height. Cleanup is especially important because React Strict Mode can run effects twice during development. Keep the graph in a ref when props change, then call `setData()` or an incremental update API from a separate effect.
-
-G6Lite observes container size changes and keeps the canvas dimensions in sync. The current camera is preserved by default. Set `autoFitOnResize: true` when a resizable panel should keep the whole graph visible, or pass `FitViewOptions` to control padding and zoom limits.
-
-
 # Minimal graph (/en/docs/examples/basic)
 
 
@@ -2365,77 +2281,88 @@ G6Lite observes container size changes and keeps the canvas dimensions in sync. 
 <ExampleDetail id="zoom-options" locale="en" />
 
 
-# Bundle size (/en/docs/metrics/bundle-size)
+# Install and render your first graph (/en/docs/getting-started/quick-start)
 
 
 
-G6Lite measures the initial `dist/index.js` payload and each real layout usage path with size-limit. The initial entry has a **90 kB minified and brotli-compressed budget**; the initial entry plus any one official layout keeps the existing **120 kB budget**.
-
-```bash
-npm run build
-npm run size
-```
-
-The 2026-07-30 workspace result is **83.17 kB / 90 kB** before a layout is loaded. The official layout paths range from **86.70 kB to 119.48 kB / 120 kB**, with Dagre currently the largest. Layout algorithms are selected through internal dynamic imports; users do not need separate registration calls. Run the command on the current checkout for the latest result.
-
-Import from the package root, use a tree-shaking bundler, enable production compression, and inspect the final application bundle. Do not compare libraries unless feature scope and dependency boundaries are equivalent.
-
-
-# Performance tuning (/en/docs/metrics/performance-tuning)
-
-
-
-* Reuse backend coordinates when available and omit layout.
-* Control iterations for force layouts and consider `worker: true`.
-* Prefer deterministic layouts for large overview screens.
-* Use state and batch update APIs for high-frequency interaction.
-* Keep functional style callbacks inexpensive and precompute complex mappings.
-* Limit initial labels; reveal more by zoom, focus, or selection.
+Install the package:
 
 ```bash
-npm run benchmark -- --suite all --mode quick
-npm run benchmark -- --suite browser --mode full
+npm install @antv/g6-lite
 ```
 
-Compare only equivalent environments and configurations. Desktop Headless Chrome cannot replace real mobile or low-end device testing.
+The canvas enables smooth wheel zoom and canvas dragging when `behaviors` is omitted. Node dragging, selection, and highlighting remain explicit. See [zoom feel and bounds](/en/docs/guides/interactions#zoom-feel-and-bounds) for sensitivity configuration.
 
+The container must have an explicit size:
 
-# Performance metrics (/en/docs/metrics/performance)
-
-
-
-G6Lite uses one repository runner for Node microbenchmarks and browser scenarios. Results are comparable only when version, commit, hardware, runtime, data, configuration, and sampling mode match.
-
-This page documents measurement and selection boundaries. It does not claim that G6Lite is faster for every graph, layout, and device. Layout, rendering without layout, and post-render interaction updates must be evaluated separately.
-
-```bash
-npm run benchmark -- --suite all --mode quick
+```html
+<div id="graph" style="width: 800px; height: 500px"></div>
 ```
 
-* `--suite node` covers DataModel and layout microbenchmarks.
-* `--suite browser` covers public Graph API updates, first render, viewport interaction, picking, and memory trends.
-* `--mode quick` validates the runner and release path.
-* `--mode full` expands workloads and samples for reviewed baselines.
+Create and render the graph using package-root APIs:
 
-Reports are written to `performance/` as JSON and Markdown. Raw local reports are not committed by default. Public comparisons must record the G6Lite version and Git state, Node and Chromium versions, operating system, CPU, user agent, viewport, DPR, data scale, layout configuration, sample count, RME, and warnings.
+```ts
+import { Graph } from '@antv/g6-lite';
 
-Quick results are smoke evidence, not marketing baselines. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
+const graph = new Graph({
+  container: 'graph',
+  data: {
+    nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+    edges: [
+      { source: 'a', target: 'b' },
+      { source: 'a', target: 'c' },
+    ],
+  },
+  layout: { type: 'circular', radius: 140 },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+});
 
-## Selecting a graph library [#selecting-a-graph-library]
+await graph.render();
+```
 
-In short, G6Lite focuses on a compact WebGL runtime and post-render incremental interaction; G6 v5 provides a broader element, animation, plugin, and multi-environment surface; sigma.js focuses on WebGL network rendering over Graphology; and Cytoscape.js combines a graph-theory model, algorithms, and interactive visualization.
+Use `setData()` for a complete replacement and the add/update/remove/state APIs for incremental changes. Call `graph.destroy()` when the page or component unmounts.
 
-The detailed rendering, layout, element, combo, interaction, extension, animation, algorithm, SSR, and TypeScript matrix now lives in [graph library comparison](/en/docs/compatibility/library-comparison). This page keeps measurement guidance only, avoiding two capability matrices that drift across releases.
+Next: [React integration](/en/docs/getting-started/react), [data configuration](/en/docs/guides/data), and [examples](/en/docs/examples).
 
-For example, a first-render comparison is invalid when sigma.js reuses existing coordinates while G6Lite recomputes a force layout. Record layout time and rendering without layout independently.
 
-## Rules for numerical comparisons [#rules-for-numerical-comparisons]
+# Use G6Lite with React (/en/docs/getting-started/react)
 
-* Keep data, coordinates, styles, label policy, viewport, DPR, browser, and hardware fixed.
-* Report preset-coordinate and relayout scenarios separately.
-* Record median, P95, samples, and error instead of drawing conclusions from one run.
-* Measure drag, zoom, picking, highlighting, batch updates, and post-destroy memory trends in addition to first render.
-* Archive candidate versions, adapters, full configuration, and reports together.
+
+
+Create the graph after the DOM container mounts and destroy it in the effect cleanup:
+
+```tsx
+import { Graph } from '@antv/g6-lite';
+import { useEffect, useRef } from 'react';
+
+export function GraphView() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: {
+        nodes: [{ id: 'a' }, { id: 'b' }],
+        edges: [{ source: 'a', target: 'b' }],
+      },
+      layout: { type: 'circular', radius: 120 },
+      autoFitOnResize: { padding: 24, maxZoom: 1.5 },
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+    });
+
+    graph.render();
+    return () => graph.destroy();
+  }, []);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 480 }} />;
+}
+```
+
+Give the container a real height. Cleanup is especially important because React Strict Mode can run effects twice during development. Keep the graph in a ref when props change, then call `setData()` or an incremental update API from a separate effect.
+
+G6Lite observes container size changes and keeps the canvas dimensions in sync. The current camera is preserved by default. Set `autoFitOnResize: true` when a resizable panel should keep the whole graph visible, or pass `FitViewOptions` to control padding and zoom limits.
 
 
 # Combos (/en/docs/guides/combo)
@@ -3165,3 +3092,76 @@ behaviors: [
 ```
 
 Use application-safe rendering when content contains user input. Tooltip positioning follows the shared pointer and picking pipeline. Style the generated surface through the documented tooltip class names or your own controlled content.
+
+
+# Bundle size (/en/docs/metrics/bundle-size)
+
+
+
+G6Lite measures the initial `dist/index.js` payload and each real layout usage path with size-limit. The initial entry has a **90 kB minified and brotli-compressed budget**; the initial entry plus any one official layout keeps the existing **120 kB budget**.
+
+```bash
+npm run build
+npm run size
+```
+
+The 2026-07-30 workspace result is **83.17 kB / 90 kB** before a layout is loaded. The official layout paths range from **86.70 kB to 119.48 kB / 120 kB**, with Dagre currently the largest. Layout algorithms are selected through internal dynamic imports; users do not need separate registration calls. Run the command on the current checkout for the latest result.
+
+Import from the package root, use a tree-shaking bundler, enable production compression, and inspect the final application bundle. Do not compare libraries unless feature scope and dependency boundaries are equivalent.
+
+
+# Performance tuning (/en/docs/metrics/performance-tuning)
+
+
+
+* Reuse backend coordinates when available and omit layout.
+* Control iterations for force layouts and consider `worker: true`.
+* Prefer deterministic layouts for large overview screens.
+* Use state and batch update APIs for high-frequency interaction.
+* Keep functional style callbacks inexpensive and precompute complex mappings.
+* Limit initial labels; reveal more by zoom, focus, or selection.
+
+```bash
+npm run benchmark -- --suite all --mode quick
+npm run benchmark -- --suite browser --mode full
+```
+
+Compare only equivalent environments and configurations. Desktop Headless Chrome cannot replace real mobile or low-end device testing.
+
+
+# Performance metrics (/en/docs/metrics/performance)
+
+
+
+G6Lite uses one repository runner for Node microbenchmarks and browser scenarios. Results are comparable only when version, commit, hardware, runtime, data, configuration, and sampling mode match.
+
+This page documents measurement and selection boundaries. It does not claim that G6Lite is faster for every graph, layout, and device. Layout, rendering without layout, and post-render interaction updates must be evaluated separately.
+
+```bash
+npm run benchmark -- --suite all --mode quick
+```
+
+* `--suite node` covers DataModel and layout microbenchmarks.
+* `--suite browser` covers public Graph API updates, first render, viewport interaction, picking, and memory trends.
+* `--mode quick` validates the runner and release path.
+* `--mode full` expands workloads and samples for reviewed baselines.
+
+Reports are written to `performance/` as JSON and Markdown. Raw local reports are not committed by default. Public comparisons must record the G6Lite version and Git state, Node and Chromium versions, operating system, CPU, user agent, viewport, DPR, data scale, layout configuration, sample count, RME, and warnings.
+
+Quick results are smoke evidence, not marketing baselines. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
+
+## Selecting a graph library [#selecting-a-graph-library]
+
+In short, G6Lite focuses on a compact WebGL runtime and post-render incremental interaction; G6 v5 provides a broader element, animation, plugin, and multi-environment surface; sigma.js focuses on WebGL network rendering over Graphology; and Cytoscape.js combines a graph-theory model, algorithms, and interactive visualization.
+
+The detailed rendering, layout, element, combo, interaction, extension, animation, algorithm, SSR, and TypeScript matrix now lives in [graph library comparison](/en/docs/compatibility/library-comparison). This page keeps measurement guidance only, avoiding two capability matrices that drift across releases.
+
+For example, a first-render comparison is invalid when sigma.js reuses existing coordinates while G6Lite recomputes a force layout. Record layout time and rendering without layout independently.
+
+## Rules for numerical comparisons [#rules-for-numerical-comparisons]
+
+* Keep data, coordinates, styles, label policy, viewport, DPR, browser, and hardware fixed.
+* Report preset-coordinate and relayout scenarios separately.
+* Record median, P95, samples, and error instead of drawing conclusions from one run.
+* Measure drag, zoom, picking, highlighting, batch updates, and post-destroy memory trends in addition to first render.
+* Archive candidate versions, adapters, full configuration, and reports together.

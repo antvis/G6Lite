@@ -55,14 +55,14 @@ sigma.js v3 的官方 README 将产品描述为基于 WebGL、面向数千节点
 | `OES_standard_derivatives` | 可选          | 缺失时渲染仍可进行，部分边缘抗锯齿效果略有差异                |
 | 硬件加速                       | 推荐          | 软件渲染（如禁用 GPU）下大规模图性能会明显下降              |
 
-## 已知问题与注意事项 [#已知问题与注意事项]
-
-* **CSP**：底层 `regl` 会通过动态函数编译 WebGL command。启用 Content Security Policy 时，`script-src` 需要允许 `'unsafe-eval'`；只允许 `'wasm-unsafe-eval'` 不足以运行当前版本。不允许该策略的宿主暂不在支持范围内。
-* **WebGL 不可用时**：当浏览器禁用硬件加速、显卡进黑名单、或在无 GPU 的环境（部分远程桌面 / 虚拟机）中，WebGL2 和 WebGL1 context 都创建失败时，G6Lite 会抛出初始化错误。建议在初始化处 `try/catch` 并向用户提示。
-* **Safari 颜色管理**：Safari 对 WebGL 画布存在色彩管理（color profile）差异，同一颜色在 Safari 与 Chrome 间可能有肉眼可辨的细微偏差，属浏览器行为，非 G6Lite bug。
-* **移动端显存**：iOS / 低端 Android 设备显存与纹理尺寸上限较低，超大规模图（数十万节点）可能触发上下文丢失（context lost）。G6Lite 会监听 context lost/restored 并恢复 GPU 资源，但业务侧仍应控制单屏渲染规模。
-* **高 DPR 屏幕**：在 Retina 等高 devicePixelRatio 屏幕上，画布像素数成倍增长，需权衡清晰度与性能。
-* **多实例 WebGL 上下文**：浏览器对单页面活动 WebGL 上下文数量有限制（通常 8–16 个）。同一页面创建过多 Graph 实例可能导致最早的上下文被回收。
+<Callout type="warn" title="已知问题与注意事项">
+  * **CSP**：底层 `regl` 会通过动态函数编译 WebGL command。启用 Content Security Policy 时，`script-src` 需要允许 `'unsafe-eval'`；只允许 `'wasm-unsafe-eval'` 不足以运行当前版本。不允许该策略的宿主暂不在支持范围内。
+  * **WebGL 不可用时**：当浏览器禁用硬件加速、显卡进黑名单、或在无 GPU 的环境（部分远程桌面 / 虚拟机）中，WebGL2 和 WebGL1 context 都创建失败时，G6Lite 会抛出初始化错误。建议在初始化处 `try/catch` 并向用户提示。
+  * **Safari 颜色管理**：Safari 对 WebGL 画布存在色彩管理（color profile）差异，同一颜色在 Safari 与 Chrome 间可能有肉眼可辨的细微偏差，属浏览器行为，非 G6Lite bug。
+  * **移动端显存**：iOS / 低端 Android 设备显存与纹理尺寸上限较低，超大规模图（数十万节点）可能触发上下文丢失（context lost）。G6Lite 会监听 context lost/restored 并恢复 GPU 资源，但业务侧仍应控制单屏渲染规模。
+  * **高 DPR 屏幕**：在 Retina 等高 devicePixelRatio 屏幕上，画布像素数成倍增长，需权衡清晰度与性能。
+  * **多实例 WebGL 上下文**：浏览器对单页面活动 WebGL 上下文数量有限制（通常 8–16 个）。同一页面创建过多 Graph 实例可能导致最早的上下文被回收。
+</Callout>
 
 ## 测试范围说明 [#测试范围说明]
 

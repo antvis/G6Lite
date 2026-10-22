@@ -41,11 +41,11 @@ const graph = new Graph({
 * `src/extensions/node.ts`
 * `playground/demos/breathing-node.ts`
 
-## 注意事项 [#注意事项]
-
-* 自定义节点应避免破坏 WebGL 批量渲染优势。
-* 大图中不要给所有节点叠加昂贵的自定义绘制。
-* 如果只是颜色、尺寸、描边、标签变化，优先使用 `node.style` 和 `stateStyles`。
-* `BaseNode` 与 `registerNode` 仅用于 beta 兼容，新增扩展应使用 `register('node', ...)`。
+<Callout type="warn" title="注意事项">
+  - 自定义节点应避免破坏 WebGL 批量渲染优势。
+  - 大图中不要给所有节点叠加昂贵的自定义绘制。
+  - 如果只是颜色、尺寸、描边、标签变化，优先使用 `node.style` 和 `stateStyles`。
+  - `BaseNode` 与 `registerNode` 仅用于 beta 兼容，新增扩展应使用 `register('node', ...)`。
+</Callout>
 
 更多类型见 [API 总览](/docs/api)。

@@ -48,12 +48,14 @@ export function GraphView() {
 }
 ```
 
-## 注意事项
+<Callout type="warn" title="注意事项">
 
 - 容器需要有明确高度，只有 `width: 100%` 不够。
 - React Strict Mode 在开发环境可能会重复执行 effect，cleanup 中调用 `graph.destroy()` 可以避免残留 canvas 和事件监听。
 - 如果数据来自请求，建议在拿到数据后创建实例；或先创建空图，再调用 `await graph.setData(data)`。
 - 如果父容器尺寸会变化，G6Lite 会通过 ResizeObserver 同步 canvas 尺寸。默认会保留用户当前的缩放和平移；希望分栏拖拽或侧栏展开后让关系图重新完整可见时，配置 `autoFitOnResize: true`，或传入 `FitViewOptions` 控制 padding 和缩放边界。
+
+</Callout>
 
 ## 数据变化
 

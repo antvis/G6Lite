@@ -3364,33 +3364,46 @@ html.dark .examples-center-card-crop {
 }
 
 .docs-brand-layout #nd-page figure.shiki > div.absolute button {
+  position: relative;
   width: 1.75rem;
   height: 1.75rem;
   padding: 0;
   color: var(--editor-icon);
 }
 
-.docs-brand-layout #nd-page figure.shiki > div.absolute button svg {
-  display: none;
-}
-
-.docs-brand-layout #nd-page figure.shiki > div.absolute button::before {
-  content: '';
-  width: 0.95rem;
-  height: 0.95rem;
-  background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2' ry='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2' ry='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-
-.docs-brand-layout #nd-page figure.shiki > div.absolute button[data-checked]::before {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
-}
-
 .docs-brand-layout #nd-page figure.shiki > div.absolute button:hover {
   background: color-mix(in srgb, var(--editor-icon) 12%, transparent);
   color: var(--editor-ink);
+}
+
+/* 复制按钮 hover 提示：文案直接取组件 aria-label（复制代码 / Copy code），点击后自动变为"已复制"反馈 */
+.docs-brand-layout #nd-page figure.shiki > div.absolute button::after {
+  content: attr(aria-label);
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 1;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--editor-ink) 92%, transparent);
+  box-shadow: 0 4px 12px rgba(15, 20, 30, 0.18);
+  color: var(--editor-canvas);
+  padding: 0.3rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
+.docs-brand-layout #nd-page figure.shiki > div.absolute button:hover::after,
+.docs-brand-layout #nd-page figure.shiki > div.absolute button:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .docs-brand-layout #nd-page figure.shiki > [role='region'] {
@@ -3412,6 +3425,8 @@ html.dark .examples-center-card-crop {
 .docs-brand-layout #nd-page figure.shiki .line {
   position: relative;
   display: block;
+  min-width: 100%;
+  width: max-content;
   min-height: 1.65em;
   padding-inline-start: 3.7rem;
   line-height: 1.65;
@@ -3420,16 +3435,36 @@ html.dark .examples-center-card-crop {
 .docs-brand-layout #nd-page figure.shiki .line::before {
   content: counter(editor-line);
   counter-increment: editor-line;
-  position: absolute;
-  top: 0;
-  left: 0.55rem;
-  display: block;
+  position: sticky;
+  left: 0;
+  display: inline-block;
+  box-sizing: content-box;
   width: 1.85rem;
+  margin-left: -3.7rem;
+  padding-left: 0.55rem;
+  padding-right: 0.75rem;
+  background: var(--editor-gutter);
   color: var(--editor-muted);
   font-variant-numeric: tabular-nums;
   text-align: right;
   user-select: none;
   pointer-events: none;
+}
+
+/* Callout 警示强化：tinted 背景 + 彩色边框 + 标题着色，去掉组件自带的内嵌竖条，
+   避免竖条、边框、图标三种同色元素挤在左侧的堆叠感 */
+.docs-brand-layout #nd-page [style*='--callout-color'] {
+  border-color: color-mix(in srgb, var(--callout-color) 35%, transparent);
+  background-color: color-mix(in srgb, var(--callout-color) 9%, var(--color-fd-card));
+}
+
+.docs-brand-layout #nd-page [style*='--callout-color'] > div:first-child {
+  display: none;
+}
+
+.docs-brand-layout #nd-page [style*='--callout-color'] > div:last-child > p:first-child {
+  color: var(--callout-color);
+  font-weight: 600;
 }
 
 .docs-brand-layout #nd-page .prose > div:has(> table):not(.api-reference) {

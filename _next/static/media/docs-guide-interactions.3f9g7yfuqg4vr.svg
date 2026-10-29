@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="224" viewBox="0 0 560 224" fill="none">
+  <title>拖拽节点、单击选择和矩形框选的交互结果示意</title>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#94a3b8"/></marker></defs>
+  <rect width="560" height="224" fill="#fff"/>
+  <g font-family="system-ui, sans-serif" font-size="14" fill="#263445">
+    <text x="24" y="28" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">drag-node</text>
+    <text x="212" y="28" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">click-select</text>
+    <text x="398" y="28" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">brush-select</text>
+    <path d="M186 16L186 208" stroke="#edf0f4" stroke-width="2" />
+    <path d="M374 16L374 208" stroke="#edf0f4" stroke-width="2" />
+    <path d="M54 94L148 152" stroke="#b8c9e5" stroke-width="1" stroke-dasharray="3 3"/>
+    <path d="M126 118L148 152" stroke="#99add1" stroke-width="2"/>
+    <circle cx="148" cy="152" r="8" fill="#1783ff"/>
+    <circle cx="54" cy="94" r="12" fill="#fff" stroke="#b8c9e5" stroke-dasharray="3 3"/>
+    <path d="M60 100L114 100" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+    <circle cx="126" cy="118" r="12" fill="#1783ff" />
+    <path d="M133 122l0 20 5-5 5 9 4-2-5-9 8-1Z" fill="#334155" stroke="#fff" stroke-width="1.5"/>
+    <text x="24" y="195" font-size="12" fill="#718096">拖动后更新节点位置</text>
+    <path d="M232 138L310 94" stroke="#99add1" stroke-width="2" />
+    <circle cx="232" cy="138" r="11" fill="#1783ff" />
+    <circle cx="310" cy="94" r="26" fill="#1783ff" opacity="0.12"/>
+    <circle cx="310" cy="94" r="12" fill="#1783ff" stroke="#163b65" stroke-width="2"/>
+    <path d="M318 100l0 20 5-5 5 9 4-2-5-9 8-1Z" fill="#334155" stroke="#fff" stroke-width="1.5"/>
+    <text x="212" y="195" font-size="12" fill="#718096">选中后突出节点状态</text>
+    <rect x="397" y="65" width="120" height="98" rx="0" fill="#fff" stroke="#1783ff" stroke-dasharray="4 4"/>
+    <circle cx="426" cy="96" r="18" fill="#1783ff" opacity="0.1"/>
+    <circle cx="490" cy="130" r="18" fill="#1783ff" opacity="0.1"/>
+    <circle cx="426" cy="96" r="10" fill="#1783ff" stroke="#163b65"/>
+    <circle cx="490" cy="130" r="10" fill="#1783ff" stroke="#163b65"/>
+    <path d="M514 159l0 20 5-5 5 9 4-2-5-9 8-1Z" fill="#334155" stroke="#fff" stroke-width="1.5"/>
+    <text x="398" y="195" font-size="12" fill="#718096">框内节点一起选中</text>
+  </g>
+</svg>

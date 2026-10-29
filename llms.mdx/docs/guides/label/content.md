@@ -2,7 +2,15 @@
 
 
 
+
+
 G6Lite 用 Canvas 2D 在 WebGL 画布上方绘制文本标签与图标。GPU 负责海量节点和边，Canvas 2D 负责文本排版。
+
+节点下方标签、节点内图标和边标签的配置效果示意：
+
+<img alt="节点标签、节点图标与边标签的位置示意" src="__img0" title="标签与图标" />
+
+可运行示例：[标签与图标](/docs/examples/labels)、[标签显示策略](/docs/examples/label-rendering-options)。
 
 ## 节点标签 [#节点标签]
 

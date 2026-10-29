@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="234" viewBox="0 0 560 234" fill="none">
+  <title>组合自定义节点、边、标签和徽章后得到的业务图效果示意</title>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#94a3b8"/></marker></defs>
+  <rect width="560" height="234" fill="#fff"/>
+  <g font-family="system-ui, sans-serif" font-size="14" fill="#263445">
+    <text x="24" y="28" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">配置 + register()</text>
+    <path d="M106 118Q280 30 454 118" fill="none" stroke="#91caff" stroke-width="2"/>
+    <rect x="46" y="98" width="120" height="40" rx="8" fill="#e6f4ff" stroke="#1677ff" />
+    <rect x="220" y="98" width="120" height="40" rx="8" fill="#e6f4ff" stroke="#1677ff" />
+    <rect x="394" y="98" width="120" height="40" rx="8" fill="#e6f4ff" stroke="#1677ff" />
+    <path d="M166 118L220 118" stroke="#99add1" stroke-width="2" />
+    <path d="M340 118L394 118" stroke="#99add1" stroke-width="2" />
+    <text x="106" y="123" text-anchor="middle">服务 A</text>
+    <text x="280" y="123" text-anchor="middle">API 网关</text>
+    <text x="454" y="123" text-anchor="middle">数据服务</text>
+    <rect x="260" y="58" width="40" height="22" rx="2" fill="#fff" stroke="#fff" />
+    <text x="280" y="74" text-anchor="middle" font-size="12">调用</text>
+    <circle cx="163" cy="99" r="13" fill="#f4664a" />
+    <text x="163" y="103" text-anchor="middle" fill="#fff" font-size="11">86</text>
+    <text x="56" y="166" font-size="12" fill="#718096">Node + Decoration</text>
+    <text x="230" y="166" font-size="12" fill="#718096">自定义 Label</text>
+    <text x="398" y="166" font-size="12" fill="#718096">自定义 Edge</text>
+    <text x="24" y="209" font-size="12" fill="#718096">不同扩展组合出业务效果；交互、布局和数据处理按需接入。</text>
+  </g>
+</svg>

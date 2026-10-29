@@ -2,6 +2,8 @@
 
 
 
+
+
 `Graph` is the main public entry point.
 
 ```ts
@@ -9,7 +11,11 @@ const graph = new Graph({ container: 'graph', data, layout: { type: 'force' } })
 await graph.render();
 ```
 
-Construction resolves the container and prepares the rendering surface. `render()` sizes the canvases, resolves the theme, runs layout, initializes data and transforms, starts WebGL and interaction layers, fits the viewport, and emits `afterrender`.
+Construction resolves the container and prepares the rendering surface. It does not run layout or draw the graph. The first render follows this flow:
+
+<FirstRenderFlow locale="en" />
+
+Wait for the first `await graph.render()` to complete successfully before data or state mutations and relayout. See [First-render data flow](/en/docs/concepts/architecture#first-render-data-flow) for the detailed processing steps.
 
 Use `setData()` for complete replacement. Use `addNode`, `addEdge`, update, remove, and state APIs for incremental changes. To run another layout:
 

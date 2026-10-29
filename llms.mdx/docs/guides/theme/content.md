@@ -2,7 +2,15 @@
 
 
 
+
+
 `theme` 可以传字符串，也可以传覆盖 token 的对象。
+
+相同结构的配色示意：light 使用白色画布，dark 使用深色画布，右侧演示覆盖 `nodeFill`。仅 dark 预览保留深色底，以便对比主题效果。
+
+<img alt="light、dark 和自定义节点填充色的主题对比示意" src="__img0" title="主题配色对比" />
+
+可运行示例：[默认主题与交互状态](/docs/examples/default-theme)。
 
 ## 使用预设 [#使用预设]
 

@@ -2,7 +2,15 @@
 
 
 
+
+
 Behavior 用于消费 Graph 公开事件，并通过 `ExtensionContext` 更新数据或状态。它适合点击选择、业务高亮和事件联动等图内交互。需要独立 DOM、键盘监听、Observer 或外围控制器时使用 Plugin；只做渲染前数据处理时使用 Transform。
+
+下方示意对应本页的业务选择逻辑：点击节点后添加 `active` 状态，点击画布空白处后清空节点状态。
+
+<img alt="初始节点、点击后添加 active 状态、点击空白画布后清空状态的过程示意" src="__img0" title="自定义选择行为" />
+
+可运行示例：[自定义选择 Behavior](/docs/examples/custom-behavior)、[扩展组合](/docs/examples/extension-system)。
 
 ## 公共类型范式 [#公共类型范式]
 

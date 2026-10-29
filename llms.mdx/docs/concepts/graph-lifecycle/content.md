@@ -2,6 +2,8 @@
 
 
 
+
+
 `Graph` 是 G6Lite 的主入口。理解它的生命周期，有助于正确组织初始化、数据更新和组件卸载。
 
 ## 创建实例 [#创建实例]
@@ -22,17 +24,11 @@ const graph = new Graph({
 await graph.render();
 ```
 
-`render()` 会按顺序完成：
+首次渲染的主要流程如下：
 
-1. 根据容器尺寸设置 canvas。
-2. 解析主题，并先绘制背景。
-3. 执行布局；大图的 force 系布局会自动启用 worker。
-4. 初始化 `DataModel`，写入节点、边和 Combo。
-5. 应用平行边等 transform。
-6. 初始化 WebGL renderer、调度器、交互分发层和 behaviors。
-7. 初始化 Combo 与标签绘制层。
-8. `fitView()` 后绘制首帧。
-9. 触发 `afterrender` 事件。
+<FirstRenderFlow locale="zh" />
+
+数据、状态写入和重新布局需等待首次 `await graph.render()` 成功完成。更详细的处理步骤见[首次渲染数据流](/docs/concepts/architecture#首次渲染数据流)。
 
 ## 更新数据 [#更新数据]
 

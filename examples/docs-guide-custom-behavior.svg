@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="202" viewBox="0 0 560 202" fill="none">
+  <title>自定义 Behavior 从节点点击、设置 active 到画布点击清空状态的效果示意</title>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#94a3b8"/></marker></defs>
+  <rect width="560" height="202" fill="#fff"/>
+  <g font-family="system-ui, sans-serif" font-size="14" fill="#263445">
+    <text x="24" y="28" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">初始状态</text>
+    <text x="211" y="28" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">node:click</text>
+    <text x="397" y="28" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">canvas:click</text>
+    <path d="M50 104L125 104" stroke="#99add1" stroke-width="2" />
+    <circle cx="50" cy="104" r="12" fill="#1783ff" />
+    <circle cx="125" cy="104" r="12" fill="#1783ff" />
+    <path d="M155 104L185 104" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M237 104L312 104" stroke="#99add1" stroke-width="2" />
+    <circle cx="237" cy="104" r="24" fill="#1783ff" opacity="0.12"/>
+    <circle cx="237" cy="104" r="12" fill="#1783ff" />
+    <circle cx="312" cy="104" r="12" fill="#1783ff" />
+    <path d="M246 108l0 20 5-5 5 9 4-2-5-9 8-1Z" fill="#334155" stroke="#fff" stroke-width="1.5"/>
+    <path d="M341 104L371 104" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M423 104L498 104" stroke="#99add1" stroke-width="2" />
+    <circle cx="423" cy="104" r="12" fill="#1783ff" />
+    <circle cx="498" cy="104" r="12" fill="#1783ff" />
+    <path d="M522 140l0 20 5-5 5 9 4-2-5-9 8-1Z" fill="#334155" stroke="#fff" stroke-width="1.5"/>
+    <text x="24" y="174" font-size="12" fill="#718096">节点尚无交互状态</text>
+    <text x="211" y="174" font-size="12" fill="#718096">state.set(id, ['active'])</text>
+    <text x="397" y="174" font-size="12" fill="#718096">清空节点状态</text>
+  </g>
+</svg>

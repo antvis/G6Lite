@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="300" viewBox="0 0 560 300" fill="none">
+  <title>边样式对比：颜色、线宽、虚线、透明度与单向、双向箭头</title>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0 0L9 4L0 8L2.5 4Z" fill="#99add1"/>
+    </marker>
+  </defs>
+  <rect width="560" height="300" fill="#fff"/>
+  <path d="M280 16V284M16 100H544M16 200H544" stroke="#edf0f4"/>
+  <g fill="#263445" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="13">
+    <text x="24" y="28">stroke: '#ff4d4f'</text>
+    <text x="304" y="28">lineWidth: 6</text>
+    <text x="24" y="128">lineDash: [6, 4]</text>
+    <text x="304" y="128">opacity: 0.25</text>
+    <text x="24" y="228">endArrow: true</text>
+    <text x="304" y="228">startArrow / endArrow</text>
+  </g>
+  <g stroke="#99add1" stroke-width="2">
+    <path d="M40 64H240" stroke="#ff4d4f"/>
+    <path d="M320 64H520" stroke-width="6"/>
+    <path d="M40 164H240" stroke-dasharray="6 4"/>
+    <path d="M320 164H520" opacity="0.25"/>
+    <path d="M40 264H230" marker-end="url(#arrow)"/>
+    <path d="M330 264H510" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  </g>
+  <g fill="#5b8ff9" stroke="#fff" stroke-width="2">
+    <circle cx="40" cy="64" r="7"/><circle cx="240" cy="64" r="7"/>
+    <circle cx="320" cy="64" r="7"/><circle cx="520" cy="64" r="7"/>
+    <circle cx="40" cy="164" r="7"/><circle cx="240" cy="164" r="7"/>
+    <circle cx="320" cy="164" r="7"/><circle cx="520" cy="164" r="7"/>
+    <circle cx="40" cy="264" r="7"/><circle cx="240" cy="264" r="7"/>
+    <circle cx="320" cy="264" r="7"/><circle cx="520" cy="264" r="7"/>
+  </g>
+  <g fill="#718096" font-family="system-ui, sans-serif" font-size="12">
+    <text x="24" y="289">终点箭头</text>
+    <text x="304" y="289">两个字段均设为 true</text>
+  </g>
+</svg>

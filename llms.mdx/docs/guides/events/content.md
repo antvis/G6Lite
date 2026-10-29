@@ -2,6 +2,8 @@
 
 
 
+
+
 通过 `graph.on()`、`graph.off()`、`graph.once()` 监听事件。已知事件由公开 `GraphEventMap` 自动推导 payload：
 
 ```ts
@@ -19,6 +21,12 @@ graph.once('destroy', () => {
 ```
 
 元素事件中的 `nativeEvent` 是原始 `MouseEvent` 或 `WheelEvent`。兼容字段 `event` 仍然存在，但已弃用，新代码应使用 `nativeEvent`。
+
+点击节点后的监听效果示意：处理函数收到节点标识、数据和原始鼠标事件；监听本身不会自动改变节点样式。
+
+<img alt="点击 n1 后 node:click 监听器收到 nodeId、data 和 nativeEvent 的示意" src="__img0" title="节点点击事件" />
+
+在 [事件日志示例](/docs/examples/event-log) 中可操作图元素并查看事件参数。
 
 ## 元素事件 [#元素事件]
 

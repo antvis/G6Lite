@@ -2,11 +2,19 @@
 
 
 
+
+
 启用 `tooltip` behavior 后，G6Lite 会在命中节点或边时显示浮层。
 
 ```ts
 behaviors: ['tooltip'];
 ```
+
+自定义浮层效果示意：悬停节点后展示业务信息。图中的内容和深色卡片均由业务配置，库不预设这些视觉样式。
+
+<img alt="悬停服务节点时展示名称、运行状态和请求量的自定义 Tooltip 示意" src="__img0" title="自定义 Tooltip" />
+
+可运行示例：[Tooltip](/docs/examples/tooltip)。
 
 ## 自定义内容 [#自定义内容]
 

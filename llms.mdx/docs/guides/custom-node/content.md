@@ -2,6 +2,8 @@
 
 
 
+
+
 G6Lite 推荐通过统一的 `register()` 注册函数式节点扩展，不要求继承引擎内部基类。
 
 ```ts
@@ -19,6 +21,12 @@ const statusNode: NodeExtension = {
 
 register('node', 'status-node', statusNode);
 ```
+
+上方 `status-node` 的配色效果示意：同一个节点扩展根据 `data.status` 返回不同填充与描边；图中文字用于标注状态。
+
+<img alt="status-node 对普通状态使用蓝色，对 error 状态使用红色的对比示意" src="__img0" title="业务节点状态" />
+
+可运行示例：[自定义节点与显式边 ID](/docs/examples/custom-node-extension)、[呼吸节点](/docs/examples/breathing-node)。
 
 ## 适用场景 [#适用场景]
 

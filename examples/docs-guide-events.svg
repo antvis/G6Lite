@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="206" viewBox="0 0 560 206" fill="none">
+  <title>点击节点 n1 后，Graph 事件监听器收到 node:click 参数的示意</title>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#94a3b8"/></marker></defs>
+  <rect width="560" height="206" fill="#fff"/>
+  <g font-family="system-ui, sans-serif" font-size="14" fill="#263445">
+    <path d="M62 120L154 72" stroke="#99add1" stroke-width="2" />
+    <path d="M62 120L164 160" stroke="#99add1" stroke-width="2" />
+    <circle cx="62" cy="120" r="12" fill="#1783ff" />
+    <circle cx="154" cy="72" r="12" fill="#1783ff" />
+    <circle cx="164" cy="160" r="12" fill="#1783ff" />
+    <text x="48" y="150" font-size="12" fill="#718096">n1</text>
+    <path d="M67 124l0 20 5-5 5 9 4-2-5-9 8-1Z" fill="#334155" stroke="#fff" stroke-width="1.5"/>
+    <path d="M204 112L244 112" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="276" y="36" width="260" height="136" rx="8" fill="#fff" stroke="#e2e8f0" />
+    <text x="294" y="62" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">graph.on('node:click', …)</text>
+    <path d="M288 76L524 76" stroke="#edf0f4" stroke-width="2" />
+    <text x="294" y="100" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">nodeId: &quot;n1&quot;</text>
+    <text x="294" y="126" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">data: { … }</text>
+    <text x="294" y="152" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">nativeEvent: MouseEvent</text>
+    <text x="24" y="192" font-size="12" fill="#718096">点击图中节点</text>
+    <text x="276" y="192" font-size="12" fill="#718096">监听器收到该节点的事件参数</text>
+  </g>
+</svg>

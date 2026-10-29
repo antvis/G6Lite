@@ -2,9 +2,17 @@
 
 
 
+
+
 未配置 `behaviors` 时，画布默认启用滚轮缩放和拖拽平移，等价于 `['zoom-canvas', 'drag-canvas']`。每个 behavior 可以写成字符串，也可以写成配置对象。
 
 显式传入数组时，该数组就是完整行为列表；使用 `behaviors: []` 可关闭默认画布导航。
+
+常用交互的效果示意：虚线节点表示拖拽前的位置，强调描边表示选中状态，矩形虚线表示框选范围。
+
+<img alt="拖拽节点、单击选中节点和矩形框选的效果示意" src="__img0" title="拖拽与选择" />
+
+可运行示例：[拖拽节点](/docs/examples/drag-node)、[选择行为](/docs/examples/selection-behaviors)。
 
 ```ts
 behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'];

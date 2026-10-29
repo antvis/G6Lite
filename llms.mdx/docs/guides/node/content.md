@@ -2,6 +2,12 @@
 
 
 
+
+
+
+
+
+
 节点通过 `node` 配置类型与样式。`circle` 与 `rect` 都由 WebGL program 绘制，适合大规模渲染。
 
 ## 基础配置 [#基础配置]
@@ -22,6 +28,14 @@ node: {
 | -------- | --------- | ------------------ |
 | `circle` | 圆形节点，默认类型 | `size`             |
 | `rect`   | 矩形节点      | `width` / `height` |
+
+两种类型的实际渲染对比（[查看完整示例](/docs/examples/shapes)）：
+
+<div className="docs-example-gallery">
+    <img alt="矩形节点搭配弧线边的渲染效果。" src="__img0" title="rect · 矩形节点" />
+
+    <img alt="圆形节点搭配较粗直线边和箭头的渲染效果。" src="__img1" title="circle · 圆形节点" />
+</div>
 
 ## 样式字段 [#样式字段]
 
@@ -47,6 +61,10 @@ node: {
 }
 ```
 
+函数式样式的实际效果——节点颜色和尺寸都来自数据字段（[查看完整示例](/docs/examples/node-style)）：
+
+<img alt="节点颜色与尺寸由数据字段映射，同一组关系中可使用不同的节点样式。" src="__img2" title="函数式节点样式" />
+
 ## 状态样式 [#状态样式]
 
 ```ts
@@ -66,6 +84,8 @@ node: {
 graph.setItemState('node-a', 'selected', true);
 graph.setItemState('node-b', 'inactive', true);
 ```
+
+六种内置状态在节点和边上的实际表现见 [默认主题与交互状态](/docs/examples/default-theme) 示例。
 
 ## 性能建议 [#性能建议]
 

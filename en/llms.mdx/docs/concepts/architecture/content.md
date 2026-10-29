@@ -6,6 +6,8 @@
 
 G6Lite does not try to cover every shape and runtime. Its architecture combines a controlled public API, efficient graph-data paths, and specialized WebGL programs for large relationship graphs and frequent analytical interaction in modern browsers.
 
+The diagram shows the public entry points, core responsibilities, coordinated rendering, and browser platform. Dashed lines connect extensions to their integration points. The first-render, update, and interaction sequences are explained below.
+
 <ArchitectureDiagram locale="en" />
 
 ## Design boundary [#design-boundary]
@@ -20,13 +22,15 @@ G6Lite does not try to cover every shape and runtime. Its architecture combines 
 
 After `await graph.render()`, the runtime works in this order:
 
+<FirstRenderFlow locale="en" />
+
 1. Create the current render generation, run registered transforms, and resolve the theme and container dimensions.
-2. Lazy-load the selected layout and optionally calculate node positions in a Worker.
+2. When layout is configured and data is nonempty, select the algorithm and calculate positions, optionally in a Worker. Otherwise, use existing node coordinates.
 3. Create the DataModel and write nodes, edges, Combo, states, and positioned coordinates.
-4. Convert nodes and edges into the contiguous typed arrays and GPU buffers required by renderer programs.
-5. Mount InteractionDispatcher, Behaviors, LabelLayerRenderer, and ComboRenderer.
-6. Update the camera through `fitView()`, then draw the Canvas 2D Combo underlay.
-7. Draw nodes and edges in the WebGL normal pass, maintain the picking pass when needed, and draw the Canvas 2D label overlay.
+4. Submit render data to Renderer, create RenderScheduler, and mount InteractionDispatcher, Behaviors, LabelLayerRenderer, and ComboRenderer.
+5. Emit `beforerender`, then process geometry and prepare the contiguous typed arrays and GPU buffers required by renderer programs.
+6. Call `fitView()` to update the camera using the processed geometry bounds.
+7. Draw the Canvas 2D Combo underlay, then nodes and edges in the WebGL normal pass, followed by the Canvas 2D label overlay. Maintain picking buffers on demand; the picking pass is not required for the first frame.
 8. Emit `afterrender` after the first frame, then mount ResizeObserver and Plugins.
 
 After asynchronous layouts, extension initialization, or browser yields, Graph checks the active generation and destroyed state again so stale results cannot replace newer data.
@@ -35,13 +39,14 @@ After asynchronous layouts, extension initialization, or browser yields, Graph c
 
 State, position, and data changes do not all rebuild the graph. RenderScheduler selects a path based on the change level:
 
-| Change                                | Main path                                                                  |
-| ------------------------------------- | -------------------------------------------------------------------------- |
-| selected / highlight / inactive       | Resolve state and patch the affected GPU ranges                            |
-| Batched node positions                | Update adjacency data, upload affected buffer ranges, redraw Canvas layers |
-| Label or Combo information            | Redraw the corresponding Canvas 2D information layer                       |
-| Camera pan and zoom                   | Update uniforms and draw without rebuilding graph-data buffers             |
-| Full replacement or structural change | Rebuild DataModel and the affected render batches                          |
+| Change                                | Main path                                                                    |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| Node selected / highlight / inactive  | Resolve state and patch GPU styles, reprocessing when required               |
+| Edge business fields or states        | Fully process data to keep edge types, visibility, and arrow batches aligned |
+| Batched node positions                | Update adjacency data, upload affected buffer ranges, redraw Canvas layers   |
+| Label or Combo information            | Redraw the corresponding Canvas 2D information layer                         |
+| Camera pan and zoom                   | Update uniforms and draw without rebuilding graph-data buffers               |
+| Full replacement or structural change | Update DataModel and fully or partially process render data and buffers      |
 
 Frequent selection, highlighting, and drag interactions should use state, position, and batch APIs instead of repeatedly creating a new Graph.
 

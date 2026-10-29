@@ -1,0 +1,11 @@
+---
+description: Never commit or push directly to master; use a feature branch
+alwaysApply: true
+---
+
+# Git 分支流程
+
+- 不要在 `master` 或 `main` 上直接 commit、push。
+- 需要提交远端时：先 `git fetch origin master`，再从最新主分支创建 `feature/<name>`（或用户指定的分支名），在该分支上改代码、commit、`git push -u origin HEAD`。
+- 用 PR 合入主分支，不要把功能分支快进/强推到 `master`。
+- 发现当前已在 `master` 且有未提交改动时，先切到新分支再提交，不要继续在主分支上做。

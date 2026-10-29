@@ -4,8 +4,11 @@ description: G6Lite 的公开 API、数据运行时、布局、交互、WebGL �
 ---
 
 import { ArchitectureDiagram } from '@/components/architecture-diagram';
+import { FirstRenderFlow } from '@/components/first-render-flow';
 
 G6Lite 的架构目标不是覆盖所有图形和运行环境，而是在现代浏览器中用受控的公开 API、高效的图数据路径和专用 WebGL Program 支撑大规模关系图与高频分析交互。
+
+下图展示公开入口、内核职责、协同绘制与浏览器平台之间的关系。右侧扩展通过虚线连接到对应模块，首次渲染、更新和交互的具体过程在下文展开。
 
 <ArchitectureDiagram locale="zh" />
 
@@ -21,13 +24,15 @@ G6Lite 的架构目标不是覆盖所有图形和运行环境，而是在现代�
 
 调用 `await graph.render()` 后，运行时按以下顺序工作：
 
+<FirstRenderFlow locale="zh" />
+
 1. 创建当前渲染代次，执行已注册的 Transform，并解析主题与容器尺寸。
-2. 根据 `layout.type` 懒加载布局算法；需要时在 Worker 中计算节点坐标。
+2. 配置了布局且数据非空时，根据 `layout.type` 选择算法并计算坐标，需要时在 Worker 中执行；否则使用节点已有坐标。
 3. 创建 DataModel，写入节点、边、Combo、状态和布局坐标。
-4. Renderer 把节点和边转换为 Program 所需的连续 TypedArray 与 GPU Buffer。
-5. 挂载 InteractionDispatcher、Behaviors、LabelLayerRenderer 和 ComboRenderer。
-6. `fitView()` 更新相机后，ComboRenderer 先绘制 Canvas 2D underlay。
-7. WebGL normal pass 绘制节点和边；Picking pass 按需维护命中缓冲；LabelLayerRenderer 再绘制 Canvas 2D overlay。
+4. 向 Renderer 提交渲染数据，建立 RenderScheduler，挂载 InteractionDispatcher、Behaviors、LabelLayerRenderer 和 ComboRenderer。
+5. 触发 `beforerender`，Renderer 处理几何数据，准备 Program 所需的连续 TypedArray 与 GPU Buffer。
+6. 调用 `fitView()`，按处理后的几何范围更新相机。
+7. ComboRenderer 先绘制 Canvas 2D underlay，WebGL normal pass 绘制节点和边，LabelLayerRenderer 再绘制 Canvas 2D overlay；Picking pass 按需维护命中缓冲，不是首帧必经步骤。
 8. 首帧完成后触发 `afterrender`，随后挂载 ResizeObserver 和 Plugin。
 
 异步布局、扩展初始化或浏览器让帧完成后，Graph 会重新核对当前代次和销毁状态，避免旧结果覆盖新数据。
@@ -36,13 +41,14 @@ G6Lite 的架构目标不是覆盖所有图形和运行环境，而是在现代�
 
 状态、位置和数据变化不会都触发完整重建。RenderScheduler 根据变更级别选择不同路径：
 
-| 变化                            | 主要路径                                            |
-| ------------------------------- | --------------------------------------------------- |
-| selected / highlight / inactive | 状态解析与 GPU 局部 patch                           |
-| 批量节点位置                    | 邻接数据更新、相关 Buffer 区间上传、Canvas 图层重绘 |
-| 标签或 Combo 信息               | 对应 Canvas 2D 信息层重绘                           |
-| 相机平移与缩放                  | 更新 uniform 后重新 draw，不重建图数据 Buffer       |
-| 完整数据替换或结构变化          | 重建 DataModel 与需要受影响的渲染批次               |
+| 变化                                 | 主要路径                                            |
+| ------------------------------------ | --------------------------------------------------- |
+| 节点 selected / highlight / inactive | 状态解析与 GPU 样式 patch，必要时重新处理           |
+| 边业务字段或状态                     | 完整处理，保持边类型、可见性与箭头批次一致          |
+| 批量节点位置                         | 邻接数据更新、相关 Buffer 区间上传、Canvas 图层重绘 |
+| 标签或 Combo 信息                    | 对应 Canvas 2D 信息层重绘                           |
+| 相机平移与缩放                       | 更新 uniform 后重新 draw，不重建图数据 Buffer       |
+| 完整数据替换或结构变化               | 更新 DataModel，完整或部分处理渲染数据与 Buffer     |
 
 因此频繁选择、高亮和拖拽应优先使用状态、位置和批量 API，而不是反复调用 `new Graph()`。
 

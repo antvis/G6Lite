@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="212" viewBox="0 0 560 212" fill="none">
+  <title>平行边处理前重叠、处理后错开以及多个自环的对比示意</title>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#94a3b8"/></marker></defs>
+  <rect width="560" height="212" fill="#fff"/>
+  <g font-family="system-ui, sans-serif" font-size="14" fill="#263445">
+    <text x="24" y="28" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">处理前</text>
+    <text x="212" y="28" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">处理后</text>
+    <text x="400" y="28" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">自环</text>
+    <path d="M186 16L186 196" stroke="#edf0f4" stroke-width="2" />
+    <path d="M374 16L374 196" stroke="#edf0f4" stroke-width="2" />
+    <path d="M46 112L142 112" stroke="#99add1" stroke-width="2" />
+    <circle cx="46" cy="112" r="12" fill="#1783ff" />
+    <circle cx="142" cy="112" r="12" fill="#1783ff" />
+    <text x="24" y="185" font-size="12" fill="#718096">3 条边重叠在一起</text>
+    <path d="M234 112Q282 44 330 112M234 112H330M234 112Q282 180 330 112" fill="none" stroke="#99add1" stroke-width="2"/>
+    <circle cx="234" cy="112" r="12" fill="#1783ff" />
+    <circle cx="330" cy="112" r="12" fill="#1783ff" />
+    <text x="212" y="185" font-size="12" fill="#718096">平行边自动错开</text>
+    <path d="M458 116C412 116 412 42 458 42C504 42 504 116 458 116M458 116C426 116 426 60 458 60C490 60 490 116 458 116M458 116C440 116 440 78 458 78C476 78 476 116 458 116" fill="none" stroke="#99add1" stroke-width="2"/>
+    <circle cx="458" cy="116" r="12" fill="#1783ff" />
+    <text x="400" y="185" font-size="12" fill="#718096">同一节点的多条自环</text>
+  </g>
+</svg>

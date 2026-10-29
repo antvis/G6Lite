@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="218" viewBox="0 0 560 218" fill="none">
+  <title>Frontend 中的 n1、n2 与 Backend 中的 n3 分组及跨组连线示意</title>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L8 4L0 8Z" fill="#94a3b8"/></marker></defs>
+  <rect width="560" height="218" fill="#fff"/>
+  <g font-family="system-ui, sans-serif" font-size="14" fill="#263445">
+    <rect x="32" y="32" width="228" height="150" rx="12" fill="#fff" stroke="#b5cdf4" />
+    <rect x="316" y="32" width="212" height="150" rx="12" fill="#fff" stroke="#aad9c7" />
+    <text x="48" y="58" >Frontend</text>
+    <text x="332" y="58" >Backend</text>
+    <path d="M96 106L422 106" stroke="#99add1" stroke-width="2" />
+    <circle cx="96" cy="106" r="12" fill="#1783ff" />
+    <circle cx="198" cy="144" r="12" fill="#1783ff" />
+    <circle cx="422" cy="106" r="12" fill="#61ddaa" />
+    <text x="80" y="136" font-size="12" fill="#718096">n1</text>
+    <text x="181" y="169" font-size="12" fill="#718096">n2</text>
+    <text x="412" y="136" font-size="12" fill="#718096">n3</text>
+    <text x="70" y="206" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">comboId: 'frontend'</text>
+    <text x="340" y="206" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#475569">comboId: 'backend'</text>
+  </g>
+</svg>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="256" viewBox="0 0 560 256" fill="none">
+  <title>四种边类型：直线、弧线、三次曲线和圆角折线</title>
+  <rect width="560" height="256" fill="#fff"/>
+  <path d="M280 16V240M16 128H544" stroke="#edf0f4"/>
+  <g fill="#263445" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="14">
+    <text x="24" y="28">line</text>
+    <text x="304" y="28">arc</text>
+    <text x="24" y="156">cubic</text>
+    <text x="304" y="156">polyline</text>
+  </g>
+  <g fill="#718096" font-family="system-ui, sans-serif" font-size="12">
+    <text x="24" y="48">直线</text>
+    <text x="304" y="48">弧线 · curvature</text>
+    <text x="24" y="176">三次贝塞尔曲线 · curveOffset</text>
+    <text x="304" y="176">正交折线 · router / radius</text>
+  </g>
+  <g stroke="#99add1" stroke-width="2.5">
+    <path d="M40 88H240"/>
+    <path d="M320 78Q420 140 520 78"/>
+    <path d="M40 202C140 202 140 234 240 234"/>
+    <path d="M320 202H412Q420 202 420 210V226Q420 234 428 234H520"/>
+  </g>
+  <g fill="#5b8ff9" stroke="#fff" stroke-width="2">
+    <circle cx="40" cy="88" r="7"/><circle cx="240" cy="88" r="7"/>
+    <circle cx="320" cy="78" r="7"/><circle cx="520" cy="78" r="7"/>
+    <circle cx="40" cy="202" r="7"/><circle cx="240" cy="234" r="7"/>
+    <circle cx="320" cy="202" r="7"/><circle cx="520" cy="234" r="7"/>
+  </g>
+</svg>

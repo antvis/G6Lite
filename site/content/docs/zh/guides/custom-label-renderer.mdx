@@ -5,6 +5,12 @@ description: 自定义节点和边的 Label 内容，并复用定位、旋转、
 
 G6Lite 支持注册自定义 Label Renderer。业务只负责内容的测量和绘制，节点与边遍历、函数式样式解析、定位、路径采样、自动旋转、DPR/zoom 换算、碰撞检测和刷新调度仍由 G6Lite 负责。
 
+多行标签的绘制效果示意：节点名称与城市分行显示，边标签也可以同时包含协议与请求类型。
+
+![节点下方双行名称与城市标签，以及边上 HTTPS 和 request 双行标签的示意](/examples/docs-guide-custom-label-renderer.svg '多行标签')
+
+可运行示例：[自定义 Label Renderer](/docs/examples/custom-label-renderer)。
+
 ## 注册与使用
 
 ```ts

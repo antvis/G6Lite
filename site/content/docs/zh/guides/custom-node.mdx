@@ -21,6 +21,12 @@ const statusNode: NodeExtension = {
 register('node', 'status-node', statusNode);
 ```
 
+上方 `status-node` 的配色效果示意：同一个节点扩展根据 `data.status` 返回不同填充与描边；图中文字用于标注状态。
+
+![status-node 对普通状态使用蓝色，对 error 状态使用红色的对比示意](/examples/docs-guide-custom-node.svg '业务节点状态')
+
+可运行示例：[自定义节点与显式边 ID](/docs/examples/custom-node-extension)、[呼吸节点](/docs/examples/breathing-node)。
+
 ## 适用场景
 
 - 需要复用一类业务节点视觉。

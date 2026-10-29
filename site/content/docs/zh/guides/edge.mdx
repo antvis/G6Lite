@@ -27,6 +27,12 @@ edge: {
 | `cubic`    | 三次贝塞尔曲线           |
 | `polyline` | 折线，支持正交和树图路由 |
 
+四种类型的路径示意，其中折线使用正交路由与圆角：
+
+![直线、弧线、三次贝塞尔曲线和圆角正交折线的对比](/examples/docs-edge-types.svg '边类型对比')
+
+交互体验见 [边类型](/docs/examples/edge-types) 和 [折线路由](/docs/examples/polyline-routing)。
+
 ## 样式字段
 
 | 字段                        | 说明                |
@@ -42,6 +48,12 @@ edge: {
 | `radius`                    | 折线拐角圆角        |
 | `router`                    | 折线路由，如 `orth` |
 | `label*`                    | 边标签字段          |
+
+常用样式对比，除标注字段外，其余边样式保持一致：
+
+![边的颜色、线宽、虚线、透明度、单向箭头和双向箭头对比](/examples/docs-edge-styles.svg '线条与箭头样式')
+
+可运行示例：[边颜色](/docs/examples/edge-colors)、[箭头方向](/docs/examples/edge-arrows)。
 
 函数式样式签名为 `(source, target, edge) => value`：
 
@@ -68,6 +80,10 @@ edge: {
 ```
 
 `hitAreaWidth` 表示边的总命中宽度，因此 `16` 相当于中心线两侧各约 `8` 的热区。它适用于直线、平行边、弧线、折线、三次曲线、自环和箭头，也会被 hover、click-select、tooltip 与 drag-edge 等共享 Picking 交互使用。
+
+![细线仍以 1.5 像素绘制，交互热区扩展到总宽度 16 像素；浅蓝区域仅作示意](/examples/docs-edge-hit-area.svg '浅蓝色表示交互范围，实际画布中不可见。')
+
+在 [边交互热区示例](/docs/examples/edge-hit-area) 中，可将鼠标移到细线附近，体验悬停和点击效果。
 
 未配置时，命中宽度继承最终 `lineWidth`；配置值小于视觉线宽、为负数或不是有限数值时，也会回退到视觉线宽。该值使用与 `lineWidth` 相同的屏幕渲染像素语义，业务不需要乘 zoom、DPR 或 Picking framebuffer 比例。虚线间隙仍保持可命中。
 

@@ -1,0 +1,189 @@
+.figure {
+  --flow-ink: #252c3b;
+  --flow-muted: #64748b;
+  --flow-border: #dce3ed;
+  --flow-accent: #5864bb;
+  --flow-line: #9aa6bd;
+  --flow-decision-ink: #367c83;
+  container-type: inline-size;
+  margin: 1.5rem 0;
+  color: var(--flow-ink);
+  font-family: inherit;
+  font-size: 0.82em;
+  line-height: 1.6;
+}
+
+:global(.dark) .figure {
+  --flow-ink: #e7ebf4;
+  --flow-muted: #a5b0c5;
+  --flow-border: #43506a;
+  --flow-accent: #b0b9ff;
+  --flow-line: #8390aa;
+  --flow-decision-ink: #85c9cd;
+}
+
+.diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: center;
+  width: min(100%, 28rem);
+  min-width: 0;
+  padding: 0.75em 1em;
+  border: 1px solid var(--flow-border);
+  border-radius: 8px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.step[data-terminal='true'] {
+  width: fit-content;
+  max-width: 100%;
+  padding-inline: 2em;
+  border-color: var(--flow-accent);
+  border-radius: 999px;
+}
+
+.title {
+  font-size: 1em;
+  font-weight: 500;
+}
+
+.step[data-terminal='true'] .title {
+  color: var(--flow-accent);
+}
+
+.detail {
+  margin-top: 0.2em;
+  color: var(--flow-muted);
+  font-size: 0.95em;
+}
+
+.arrow,
+.branchStem {
+  position: relative;
+  height: 1.75rem;
+  border-left: 1px solid var(--flow-line);
+}
+
+.arrow::after,
+.branch::after {
+  position: absolute;
+  bottom: 1px;
+  left: -3px;
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid var(--flow-line);
+  border-bottom: 1px solid var(--flow-line);
+  content: '';
+  transform: rotate(45deg);
+}
+
+.decision {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 15rem);
+  height: 4rem;
+  color: var(--flow-decision-ink);
+}
+
+.decision svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--flow-decision-ink);
+  stroke-width: 1;
+}
+
+.decision span {
+  position: relative;
+}
+
+.branchStem {
+  height: 1rem;
+}
+
+.branches {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+}
+
+.branches::before {
+  position: absolute;
+  top: 0;
+  right: 25%;
+  left: 25%;
+  border-top: 1px solid var(--flow-line);
+  content: '';
+}
+
+.branch {
+  position: relative;
+  display: flex;
+  padding: 2rem 0.75rem 0;
+}
+
+.branch::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 2rem;
+  border-left: 1px solid var(--flow-line);
+  content: '';
+}
+
+.branch::after {
+  top: calc(2rem - 6px);
+  bottom: auto;
+  left: calc(50% - 2px);
+}
+
+.branch .step {
+  width: 100%;
+}
+
+.branchLabel {
+  position: absolute;
+  top: 0.25rem;
+  left: calc(50% + 0.65rem);
+  color: var(--flow-muted);
+  font-size: 0.95em;
+}
+
+.merge {
+  box-sizing: border-box;
+  width: 50%;
+  height: 1.25rem;
+  border: solid var(--flow-line);
+  border-width: 0 1px 1px;
+}
+
+.figure figcaption {
+  margin-top: 1.25rem;
+  color: var(--flow-muted);
+  font-size: 0.95em;
+  line-height: inherit;
+}
+
+@container (max-width: 36rem) {
+  .branch {
+    padding-inline: 0.4rem;
+  }
+
+  .branch .step {
+    padding-inline: 0.5em;
+  }
+}

@@ -42,11 +42,23 @@ layout: { type: 'force', linkDistance: 100 }
 
 ## 效果预览
 
-|               force               |                circular                 |                radial                 |
-| :-------------------------------: | :-------------------------------------: | :-----------------------------------: |
-| ![force 布局](/layouts/force.png) | ![circular 布局](/layouts/circular.png) |  ![radial 布局](/layouts/radial.png)  |
-|               dagre               |                  grid                   |                mindmap                |
-| ![dagre 布局](/layouts/dagre.png) |     ![grid 布局](/layouts/grid.png)     | ![mindmap 布局](/layouts/mindmap.png) |
+以下为不同布局的渲染预览。可在 [布局总览](/docs/examples/layout-gallery) 中切换算法并查看实际效果。
+
+<div className="docs-example-gallery" data-columns="3">
+
+![通过节点间的作用力组织网络关系。](/layouts/force.png 'force · 力导向')
+
+![将节点沿圆周排列。](/layouts/circular.png 'circular · 环形')
+
+![围绕中心按层次向外排列节点。](/layouts/radial.png 'radial · 辐射')
+
+![按有向关系排列层级，适合流程与依赖图。](/layouts/dagre.png 'dagre · 层级')
+
+![以规则行列排列节点。](/layouts/grid.png 'grid · 网格')
+
+![以树形分支呈现中心主题及其子主题。](/layouts/mindmap.png 'mindmap · 脑图')
+
+</div>
 
 ## 示例
 

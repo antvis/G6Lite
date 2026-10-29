@@ -1,0 +1,206 @@
+.figure {
+  --architecture-ink: #252c3b;
+  --architecture-muted: #748199;
+  --architecture-surface: #fff;
+  --architecture-background: #f7f8fd;
+  --architecture-api: #e8ecff;
+  --architecture-accent: #5864bb;
+  --architecture-line: #9aa6bd;
+  --architecture-border: #dce2ee;
+  --architecture-extension: #367c83;
+  --architecture-extension-tint: #edf5f5;
+  margin: 1.75rem 0;
+  border-radius: 14px;
+  background: var(--architecture-background);
+  padding: 16px;
+  color: var(--architecture-ink);
+}
+
+:global(.dark) .figure {
+  --architecture-ink: #e7ebf4;
+  --architecture-muted: #a5b0c5;
+  --architecture-surface: #1b2332;
+  --architecture-background: #141b28;
+  --architecture-api: #2b3455;
+  --architecture-accent: #b0b9ff;
+  --architecture-line: #8390aa;
+  --architecture-border: #3e4960;
+  --architecture-extension: #85c9cd;
+  --architecture-extension-tint: #1c343d;
+}
+
+.diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: inherit;
+}
+
+.diagram text {
+  fill: var(--architecture-ink);
+}
+
+.coreBoundary,
+.extensionBoundary {
+  fill: none;
+  stroke: var(--architecture-border);
+  stroke-width: 1;
+}
+
+.extensionBoundary {
+  stroke: var(--architecture-extension);
+  stroke-dasharray: 4 5;
+  stroke-opacity: 0.4;
+}
+
+.diagram .boundaryLabel,
+.diagram .extensionLabel {
+  fill: var(--architecture-muted);
+  font-size: 12px;
+}
+
+.diagram .extensionLabel {
+  fill: var(--architecture-extension);
+}
+
+.card > rect,
+.renderer > rect {
+  fill: var(--architecture-surface);
+}
+
+.card[data-tone='api'] > rect {
+  fill: var(--architecture-api);
+}
+
+.card[data-tone='extension'] > rect {
+  fill: var(--architecture-extension-tint);
+}
+
+.diagram .cardTitle {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.card[data-tone='api'] .cardTitle {
+  fill: var(--architecture-accent);
+}
+
+.card[data-tone='extension'] .cardTitle {
+  fill: var(--architecture-extension);
+  font-size: 14px;
+}
+
+.diagram .cardDetail {
+  fill: var(--architecture-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+}
+
+.card[data-tone='extension'] .cardDetail {
+  font-size: 12px;
+}
+
+.connections,
+.extensionConnections {
+  stroke: var(--architecture-line);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.extensionConnections {
+  stroke: var(--architecture-extension);
+  stroke-dasharray: 4 4;
+}
+
+.arrowhead,
+.extensionArrowhead {
+  fill: none;
+  stroke: var(--architecture-line);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.extensionArrowhead {
+  stroke: var(--architecture-extension);
+}
+
+.diagram .edgeLabel {
+  fill: var(--architecture-muted);
+  font-size: 11px;
+}
+
+.renderLayer {
+  fill: var(--architecture-background);
+}
+
+.renderer [data-main='true'] .renderLayer {
+  fill: var(--architecture-api);
+}
+
+.diagram .layerTech,
+.diagram .layerDetail {
+  fill: var(--architecture-muted);
+  font-size: 12px;
+}
+
+.layerTech {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.renderer [data-main='true'] text {
+  fill: var(--architecture-accent);
+}
+
+.platform rect {
+  fill: var(--architecture-surface);
+}
+
+.diagram .platformDetail {
+  fill: var(--architecture-muted);
+  font-size: 12px;
+}
+
+.caption {
+  margin-top: 12px;
+  color: var(--architecture-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 22px;
+}
+
+.legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend i {
+  display: block;
+  width: 22px;
+  border-top: 1px solid var(--architecture-line);
+}
+
+.legend .dashed {
+  border-color: var(--architecture-extension);
+  border-top-style: dashed;
+}
+
+.caption p {
+  margin: 6px 0 0;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .figure {
+    padding: 10px;
+  }
+}

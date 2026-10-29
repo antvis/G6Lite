@@ -7,6 +7,12 @@ Combo 是节点的分组容器，用于把一组节点圈在一个可视包围�
 
 Combo 包围框由 Canvas 2D 在 WebGL 画布下方叠加绘制，不影响节点和边的 GPU 渲染路径。
 
+下面的分组示意对应声明中的归属关系：`n1`、`n2` 属于 Frontend，`n3` 属于 Backend；边可以跨组连接。
+
+![Frontend 包含 n1 和 n2，Backend 包含 n3，n1 与 n3 跨组连接](/examples/docs-guide-combo.svg '节点分组与跨组连接')
+
+在 [Combo 示例](/docs/examples/combo) 中可体验嵌套、折叠展开和整体拖拽。
+
 ## 声明 Combo
 
 ```ts

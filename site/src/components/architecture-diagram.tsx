@@ -1,5 +1,7 @@
 import type { Locale } from '@/lib/i18n';
 
+import { DocsArchitectureDiagram } from './docs-architecture-diagram';
+
 interface ArchitectureDiagramProps {
   locale: Locale;
   compact?: boolean;
@@ -147,6 +149,8 @@ function FlowArrow() {
 }
 
 export function ArchitectureDiagram({ locale, compact = false }: ArchitectureDiagramProps) {
+  if (!compact) return <DocsArchitectureDiagram locale={locale} />;
+
   const copy = COPY[locale];
 
   return (

@@ -517,6 +517,9 @@
   border-radius: 0;
   background: var(--soft);
 }
+.performanceBand .sectionHeading h2 {
+  text-wrap: balance;
+}
 .advantagesGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

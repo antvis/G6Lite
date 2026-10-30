@@ -113,7 +113,7 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
             </article>
             <article className={styles.advantageCard}>
               <h3>
-                <MousePointer2 aria-hidden="true" /> {copy.performance.interactionTitle}
+                <Cpu aria-hidden="true" /> {copy.performance.interactionTitle}
               </h3>
               <p>{copy.performance.interactionDescription}</p>
               <div className={`${styles.advantageVisual} ${styles.interactionVisual}`}>
@@ -128,7 +128,7 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
               </div>
               <Link
                 className={styles.advantageLink}
-                href={localizedPath('/docs/metrics/performance-tuning', locale)}
+                href={localizedPath('/docs/metrics/performance', locale)}
               >
                 {copy.performance.tuning} <ArrowRight aria-hidden="true" />
               </Link>

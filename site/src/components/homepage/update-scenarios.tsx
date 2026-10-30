@@ -8,22 +8,36 @@ import { homepageCopy } from './content';
 
 type Scenario = 'highlight' | 'position' | 'viewport';
 const scenarioIds: Scenario[] = ['highlight', 'position', 'viewport'];
-const nodes = [
-  { x: 48, y: 44 },
-  { x: 140, y: 88 },
-  { x: 99, y: 145 },
-  { x: 246, y: 39 },
-  { x: 257, y: 140 },
-  { x: 48, y: 158 },
+const centers = [
+  { x: 85, y: 55 },
+  { x: 222, y: 58 },
+  { x: 103, y: 134 },
+  { x: 224, y: 132 },
 ];
-const edges = [
-  [0, 1],
-  [1, 2],
-  [1, 3],
-  [1, 4],
-  [2, 5],
-  [3, 4],
-];
+const clusterSize = 16;
+const nodes = centers.flatMap((center, cluster) => [
+  center,
+  ...Array.from({ length: clusterSize - 1 }, (_, index) => {
+    const angle = (index / (clusterSize - 1)) * Math.PI * 2 + cluster * 0.6;
+    const radius = 21 + (index % 3) * 10;
+    return {
+      x: center.x + Math.cos(angle) * radius,
+      y: center.y + Math.sin(angle) * radius * 0.8,
+    };
+  }),
+]);
+const edges = centers.flatMap((_, cluster) => {
+  const hub = cluster * clusterSize;
+  return Array.from({ length: clusterSize - 1 }, (_, index) => {
+    const node = hub + index + 1;
+    const next = hub + ((index + 1) % (clusterSize - 1)) + 1;
+    return [[hub, node], [node, next]];
+  }).flat();
+});
+edges.push([0, 16], [0, 32], [16, 48], [32, 48], [0, 48], [16, 32]);
+const neighbors = new Set(
+  edges.flatMap(([from, to]) => (from === 0 ? [to] : to === 0 ? [from] : [])),
+);
 
 /** Mechanism illustration only: no second WebGL graph and no invented timing. */
 export function UpdateScenarios({ locale }: { locale: Locale }) {
@@ -31,7 +45,7 @@ export function UpdateScenarios({ locale }: { locale: Locale }) {
   const scenarios = copy.scenarios.map((item, index) => ({ ...item, id: scenarioIds[index] }));
   const [scenario, setScenario] = useState<Scenario>('highlight');
   const points = nodes.map((node, index) =>
-    scenario === 'position' && index === 1 ? { x: 166, y: 62 } : node,
+    scenario === 'position' && index === 0 ? { x: node.x + 22, y: node.y - 12 } : node,
   );
   const current = scenarios.find((item) => item.id === scenario) ?? scenarios[0];
 
@@ -63,7 +77,7 @@ export function UpdateScenarios({ locale }: { locale: Locale }) {
           }
         >
           {scenario === 'position' && (
-            <circle cx={140} cy={88} r={11} className={styles.previousPosition} />
+            <circle cx={nodes[0].x} cy={nodes[0].y} r={8} className={styles.previousPosition} />
           )}
           {edges.map(([from, to]) => (
             <line
@@ -73,7 +87,7 @@ export function UpdateScenarios({ locale }: { locale: Locale }) {
               x2={points[to].x}
               y2={points[to].y}
               className={
-                (from === 1 || to === 1) && scenario !== 'viewport'
+                (from === 0 || to === 0) && scenario !== 'viewport'
                   ? styles.updatedEdge
                   : styles.illustrationEdge
               }
@@ -84,18 +98,18 @@ export function UpdateScenarios({ locale }: { locale: Locale }) {
               key={index}
               cx={point.x}
               cy={point.y}
-              r={index === 1 ? 10 : 6}
+              r={index === 0 ? 6 : index % clusterSize === 0 ? 4.5 : 2.6}
               className={
-                index === 1 && scenario !== 'viewport'
+                index === 0 && scenario !== 'viewport'
                   ? styles.updatedNode
-                  : scenario === 'highlight' && index !== 5
+                  : scenario === 'highlight' && neighbors.has(index)
                     ? styles.neighborNode
                     : styles.illustrationNode
               }
             />
           ))}
           {scenario === 'highlight' && (
-            <circle cx={points[1].x} cy={points[1].y} r={18} className={styles.highlightHalo} />
+            <circle cx={points[0].x} cy={points[0].y} r={12} className={styles.highlightHalo} />
           )}
         </g>
       </svg>

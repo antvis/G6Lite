@@ -5,7 +5,7 @@ import { buttonStyle, createDemoPanel } from './demo-panel.ts';
 export async function run(container: string | HTMLElement) {
   let placement: EdgeLabelPlacement = 'center';
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container,
     data: {
       nodes: [

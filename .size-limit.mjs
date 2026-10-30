@@ -23,7 +23,8 @@ function includeOnlyLayout(selectedLayout) {
         setup(build) {
           build.onResolve(
             { filter: /^@antv\/layout\/lib\/algorithm\/[^/]+\/index\.js$/ },
-            (args) => (args.path === selectedImport ? undefined : { external: true, path: args.path }),
+            (args) =>
+              args.path === selectedImport ? undefined : { external: true, path: args.path },
           );
         },
       },
@@ -32,6 +33,13 @@ function includeOnlyLayout(selectedLayout) {
 }
 
 export default [
+  {
+    name: '@antv/g6-lite (complete UMD with inline layout Worker, gzip)',
+    path: 'dist/g6-lite.umd.min.js',
+    disablePlugins: ['@size-limit/esbuild'],
+    gzip: true,
+    limit: '350 KB',
+  },
   {
     name: '@antv/g6-lite (initial entry before layout, brotli)',
     path: 'dist/index.js',

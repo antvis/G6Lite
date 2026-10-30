@@ -1,82 +1,23 @@
-import { ArrowUpRight } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import type { CSSProperties } from 'react';
+import { codeToHtml } from 'shiki';
 
-import { withBasePath } from '@/lib/shared';
-import { localizedPath, type Locale } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
+import { ExampleShowcase } from './example-showcase';
+import { showcaseIds, showcaseSource } from './showcase-examples';
 
-import styles from './homepage.module.css';
-import { homepageCopy } from './content';
-import cropRecords from '../../../public/homepage/examples/crop-records.json';
-
-const examples = [
-  {
-    id: 'relationship',
-    image: 'network',
-  },
-  {
-    id: 'org-chart',
-    image: 'hierarchy',
-  },
-  { id: 'mindmap', image: 'mindmap' },
-  {
-    id: 'fishbone',
-    image: 'fishbone',
-  },
-] as const;
-
-/** Homepage thumbnails link directly to the matching runnable example details. */
-export function FeaturedExamples({ locale }: { locale: Locale }) {
-  const copy = homepageCopy[locale].examples;
-  return (
-    <div className={styles.featuredGrid}>
-      {examples.map((example, index) => {
-        const crop = cropRecords[example.image];
-        const [left, top] = crop.crop;
-        const imageWidth = crop.imageWidth ?? 1920;
-        const imageHeight = crop.imageHeight ?? 1200;
-        return (
-          <article key={example.id}>
-            <Link
-              className={styles.featuredCard}
-              href={localizedPath(`/docs/examples/${example.id}`, locale)}
-              aria-label={`${copy.open}${copy.items[index].title}${copy.openSuffix}`}
-              prefetch={false}
-            >
-              <div className={styles.featuredImage}>
-                <div
-                  className={styles.featuredCrop}
-                  style={{ '--crop-ratio': crop.width / crop.height } as CSSProperties}
-                >
-                  <Image
-                    src={withBasePath(`/examples/${example.id}.png`)}
-                    alt={`${copy.items[index].title} ${copy.screenshot}`}
-                    width={1920}
-                    height={1200}
-                    style={{
-                      width: `${(imageWidth / crop.width) * 100}%`,
-                      height: `${(imageHeight / crop.height) * 100}%`,
-                      left: `${(-left / crop.width) * 100}%`,
-                      top: `${(-top / crop.height) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
-              <div className={styles.featuredContent}>
-                <div className={styles.featuredTitleRow}>
-                  <h3>{copy.items[index].title}</h3>
-                  <span className={styles.featuredAction} aria-hidden="true">
-                    <span className={styles.featuredActionLabel}>{copy.entry}</span>
-                    <ArrowUpRight />
-                  </span>
-                </div>
-                <p>{copy.items[index].description}</p>
-              </div>
-            </Link>
-          </article>
-        );
-      })}
-    </div>
+/** Highlight the same options used by each live example, for both themes. */
+export async function FeaturedExamples({ locale }: { locale: Locale }) {
+  const examples = await Promise.all(
+    showcaseIds.map(async (id) => {
+      const light = showcaseSource(id, locale);
+      const dark = showcaseSource(id, locale, true);
+      return {
+        id,
+        light,
+        dark,
+        lightHtml: await codeToHtml(light, { lang: 'ts', theme: 'github-dark' }),
+        darkHtml: await codeToHtml(dark, { lang: 'ts', theme: 'github-dark' }),
+      };
+    }),
   );
+  return <ExampleShowcase locale={locale} examples={examples} />;
 }

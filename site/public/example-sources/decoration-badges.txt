@@ -6,7 +6,7 @@ import { Graph, type NodeBadgeItem } from '@antv/g6-lite';
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
     // Padding covers the boundary badges extending past the rightmost node.
-    autoFitOnResize: { padding: 56, maxZoom: 1.5 },
+    autoFit: { padding: 56, maxZoom: 1.5 },
     container,
     data: {
       nodes: [

@@ -9,7 +9,7 @@ const MAX_ZOOM = 2;
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container,
     data: {
       nodes: [

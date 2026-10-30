@@ -14,7 +14,7 @@ export async function run(container: string | HTMLElement) {
   root.appendChild(lineDiv);
 
   const g1 = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container: lineDiv,
     data: {
       nodes: [
@@ -50,7 +50,7 @@ export async function run(container: string | HTMLElement) {
   root.appendChild(arcDiv);
 
   const g2 = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container: arcDiv,
     data: {
       nodes: [

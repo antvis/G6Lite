@@ -9,7 +9,7 @@ export async function run(container: string | HTMLElement) {
     data: { label: String(index + 1) },
   }));
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container,
     data: { nodes, edges: [] },
     node: {

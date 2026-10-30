@@ -1,6 +1,8 @@
 import { access, readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { clearTimeout, setTimeout } from 'node:timers';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url));
@@ -84,6 +86,11 @@ if (JSON.stringify(publishedDirectories) !== JSON.stringify(['dist', 'src'])) {
   throw new Error('Package files must publish both dist and src');
 }
 
+const umdPath = 'dist/g6-lite.umd.min.js';
+if (packageJson.unpkg !== umdPath || packageJson.jsdelivr !== umdPath) {
+  throw new Error('CDN entry points must reference the UMD build');
+}
+
 await assertModuleSpecifierStyle(
   resolve(packageRoot, 'src'),
   (filePath) => filePath.endsWith('.ts'),
@@ -121,5 +128,30 @@ if (JSON.stringify(actualRuntimeExports) !== JSON.stringify(expectedRuntimeExpor
   );
 }
 
+const umdSource = await readFile(resolve(packageRoot, umdPath), 'utf8');
+for (const format of ['global', 'commonjs', 'amd']) {
+  const context = { clearTimeout, setTimeout };
+  let umdApi;
+  if (format === 'commonjs') {
+    context.exports = {};
+    context.module = { exports: context.exports };
+  } else if (format === 'amd') {
+    context.define = (dependencies, factory) => {
+      if (JSON.stringify(dependencies) !== JSON.stringify(['exports'])) {
+        throw new Error('UMD build must bundle all runtime dependencies');
+      }
+      umdApi = {};
+      factory(umdApi);
+    };
+    context.define.amd = true;
+  }
+  runInNewContext(umdSource, context, { filename: umdPath, timeout: 10000 });
+  umdApi ??= format === 'global' ? context.G6Lite : context.module.exports;
+  if (JSON.stringify(Object.keys(umdApi).sort()) !== JSON.stringify(expectedRuntimeExports)) {
+    throw new Error(`UMD ${format} exports must match the package root`);
+  }
+}
+
 await access(new URL('../dist/layout/layoutWorker.js', import.meta.url));
+await access(resolve(packageRoot, `${umdPath}.map`));
 await access(new URL('../src/index.ts', import.meta.url));

@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import ts from 'typescript';
 
 const root = path.resolve('.');
 const docsRoot = path.join(root, 'site/content/docs');
@@ -156,6 +157,36 @@ if (existsSync(path.join(root, 'site/src/app/(zh)/(preview)/preview/ava-home/pag
   fail('The temporary AVA homepage preview route must not remain');
 
 const homepageSource = read('site/src/components/homepage/homepage.tsx');
+const productModule = ts.transpileModule(read('site/src/lib/product-copy.ts'), {
+  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
+}).outputText;
+const { productCopy } = await import(
+  `data:text/javascript;base64,${Buffer.from(productModule).toString('base64')}`
+);
+for (const locale of ['zh', 'en']) {
+  const copy = productCopy[locale];
+  const { before, prefix, highlight, after } = copy.hero;
+  if (`${before}${locale === 'en' ? ' ' : ''}${prefix}${highlight}${after}` !== copy.title) {
+    fail(`Product title and Hero heading differ for ${locale}`);
+  }
+  const readme = locale === 'zh' ? 'README.zh-CN.md' : 'README.md';
+  const documents = [
+    `site/content/docs/${locale}/index.mdx`,
+    `site/content/docs/${locale}/concepts/overview.mdx`,
+    ...(locale === 'en' ? ['CONTRIBUTING.md'] : []),
+  ];
+  for (const file of [readme, ...documents]) {
+    const source = read(file).replace(/\s+/g, ' ');
+    if (!source.includes(file === readme ? copy.tagline : copy.title)) {
+      fail(`Product positioning differs in ${file}`);
+    }
+    if (!source.includes(copy.hero.description)) fail(`Product description differs in ${file}`);
+  }
+}
+if (JSON.parse(read('package.json')).description !== productCopy.en.tagline) {
+  fail('Package description must match the English product positioning');
+}
+
 for (const staleMetric of ['~0ms', '0.1ms', '5k']) {
   if (homepageSource.includes(staleMetric)) {
     fail(`Homepage contains the unsupported historical metric ${staleMetric}`);
@@ -233,12 +264,81 @@ function extractMinimalExample(relativePath) {
 const snippetFiles = [
   'site/content/docs/zh/getting-started/quick-start.mdx',
   'site/content/docs/en/getting-started/quick-start.mdx',
-  'site/src/components/homepage/homepage.tsx',
 ];
 const snippets = snippetFiles.map((file) => [file, extractMinimalExample(file)]);
 const canonicalSnippet = snippets[0][1];
 for (const [file, snippet] of snippets.slice(1)) {
   if (snippet !== canonicalSnippet) fail(`Minimal Graph example differs in ${file}`);
+}
+
+// The homepage now shows runnable examples instead of duplicating the minimal
+// documentation snippet. Verify every displayed source against its live options.
+const showcaseModule = ts.transpileModule(
+  read('site/src/components/homepage/showcase-examples.ts'),
+  { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 } },
+).outputText;
+const { showcaseIds, showcaseOptions, showcaseSource } = await import(
+  `data:text/javascript;base64,${Buffer.from(showcaseModule).toString('base64')}`
+);
+const normalizeOptions = (options) =>
+  JSON.stringify(options, (_key, value) => (typeof value === 'function' ? '__function__' : value));
+for (const locale of ['zh', 'en']) {
+  for (const id of showcaseIds) {
+    for (const dark of [false, true]) {
+      try {
+        let captured;
+        class Graph {
+          constructor(options) {
+            captured = options;
+          }
+          async render() {}
+        }
+        const source = showcaseSource(id, locale, dark);
+        const entry = "import { Graph } from '@antv/g6-lite';";
+        if (!source.startsWith(entry)) throw new Error('Missing public package-root import');
+        const executable = ts.transpileModule(source.slice(entry.length), {
+          compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
+        }).outputText;
+        await new Function('Graph', `return (async () => {\n${executable}\n})();`)(Graph);
+        const { container, ...options } = captured;
+        if (container !== '#container') throw new Error('Example container must match the HTML');
+        if (normalizeOptions(options) !== normalizeOptions(showcaseOptions(id, locale, dark))) {
+          throw new Error('Displayed code does not match the live graph options');
+        }
+        if (options.node.style.label({ id: 'sample' }) !== 'sample') {
+          throw new Error('Node label mapping must preserve the node ID');
+        }
+        if (new Set(options.data.nodes.map((node) => node.data.fill)).size < 4) {
+          throw new Error('Example must distinguish its center and branch colors');
+        }
+        for (const node of options.data.nodes) {
+          for (const property of ['fill', 'stroke', 'labelColor']) {
+            if (options.node.style[property](node) !== node.data[property]) {
+              throw new Error(`Copied ${property} mapping does not match node colors`);
+            }
+          }
+        }
+        for (const edge of options.data.edges) {
+          const source = options.data.nodes.find((node) => node.id === edge.source);
+          const target = options.data.nodes.find((node) => node.id === edge.target);
+          const expected = options.node.type === 'circle' ? target.data.fill : target.data.stroke;
+          if (options.edge.style.stroke(source, target, edge) !== expected) {
+            throw new Error('Copied edge color must match its branch');
+          }
+        }
+        if (id === 'mindmap') {
+          if (options.layout.direction !== 'H') throw new Error('Mind map must use both sides');
+          for (const side of ['left', 'right']) {
+            if (options.layout.getSide({ id: 'sample', data: { side } }) !== side) {
+              throw new Error('Copied mind map must preserve branch directions');
+            }
+          }
+        }
+      } catch (error) {
+        fail(`Homepage example ${locale}/${id}/${dark ? 'dark' : 'light'}: ${error.message}`);
+      }
+    }
+  }
 }
 
 const aiArchitectureFiles = [

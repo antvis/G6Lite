@@ -1,11 +1,13 @@
 {
   "name": "@antv/g6-lite",
   "version": "0.1.0-beta.27",
-  "description": "A lightweight, high-performance WebGL graph visualization engine.",
+  "description": "Lightweight graph visualization, built for large-scale relationship data",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "unpkg": "dist/g6-lite.umd.min.js",
+  "jsdelivr": "dist/g6-lite.umd.min.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -18,9 +20,11 @@
   ],
   "scripts": {
     "dev": "vite playground",
-    "build": "rm -rf dist && tsc && node scripts/add-js-extensions.mjs && tsc -p tsconfig.dist-declarations.json && tsc -p tsconfig.package-nodenext.json && tsc -p tsconfig.package-bundler.json && node scripts/check-package.mjs",
+    "build": "rm -rf dist && tsc && node scripts/add-js-extensions.mjs && tsc -p tsconfig.dist-declarations.json && tsc -p tsconfig.package-nodenext.json && tsc -p tsconfig.package-bundler.json && npm run build:umd && node scripts/check-package.mjs",
+    "build:umd": "vite build --config vite.umd.config.ts",
+    "check:umd": "node scripts/check-umd.mjs",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.public-api.json && tsc -p tsconfig.perf.json && tsc -p tsconfig.playground.json",
-    "lint": "eslint src tests vite.config.ts vitest.config.ts",
+    "lint": "eslint src tests vite.config.ts vite.umd.config.ts vitest.config.ts",
     "test": "vitest run",
     "benchmark": "npm run build && node tests/perf/run.js",
     "size": "size-limit",

@@ -5,18 +5,16 @@ import { StructuredData } from '@/components/structured-data';
 import { createHomeStructuredData, createPageSeo } from '@/lib/seo';
 import { siteConfig } from '@/lib/site-config';
 
-const description = `${siteConfig.name} is ${siteConfig.description.en.toLowerCase()}, with one API for data, layouts, interactions, states, and extensions.`;
-
 export const metadata: Metadata = {
-  title: 'High-performance WebGL graph visualization',
-  description,
+  title: { absolute: siteConfig.title.en },
+  description: siteConfig.description.en,
   ...createPageSeo({
     locale: 'en',
     path: '/en',
     zhPath: '/',
     enPath: '/en',
-    title: `${siteConfig.name} — High-performance WebGL graph visualization`,
-    description,
+    title: siteConfig.title.en,
+    description: siteConfig.description.en,
     image: '/examples/relationship.png',
   }),
 };

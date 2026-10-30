@@ -166,7 +166,7 @@ export async function run(container: string | HTMLElement) {
     const cfg = mode === 'styled' ? configStyled() : configMinimal();
 
     const graph = new Graph({
-      autoFitOnResize: true,
+      autoFit: true,
       container: wrapper,
       data: JSON.parse(JSON.stringify(data)),
       node: cfg.node as any,

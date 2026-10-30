@@ -3,6 +3,8 @@
 @import 'fumadocs-ui/css/preset.css';
 
 :root {
+  --site-content-max-width: 100%;
+  --site-sidebar-width: 260px;
   --color-fd-primary: #ec3d75;
   --brand-accent: #ec3d75;
   --brand-accent-soft: rgba(236, 61, 117, 0.1);
@@ -67,21 +69,29 @@ html > body[data-scroll-locked] {
   --removed-body-scroll-bar-size: 0px !important;
 }
 
+body:has([data-g6lite-homepage]) {
+  --site-content-max-width: 1280px;
+}
+
 #nd-home-layout {
-  --fd-layout-width: 80rem;
+  --fd-layout-width: 100%;
 }
 
 #nd-docs-layout:not(.examples-route-layout) {
-  width: var(--site-frame, min(calc(100% - 48px), 1160px));
+  width: 100%;
   margin-inline: auto;
-  --fd-layout-width: 1160px;
-  --fd-sidebar-width: 220px;
+  --fd-layout-width: 100%;
+  --fd-sidebar-width: var(--site-sidebar-width);
   --fd-toc-width: 0px;
+}
+
+#nd-docs-layout:not(.examples-route-layout) #nd-page {
+  max-width: none;
 }
 
 #nd-nav nav {
   width: 100%;
-  max-width: 76rem;
+  max-width: none;
   margin-inline: auto;
   padding-inline: 1.5rem;
 }
@@ -101,16 +111,83 @@ html.dark #nd-nav {
 }
 
 #nd-nav nav > ul > li > a {
-  border-radius: 999px;
+  border-radius: 0.6rem;
   padding-inline: 0.85rem;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 400;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
 }
 
 #nd-nav nav > ul > li > a:hover,
 #nd-nav nav > ul > li > a[data-active='true'] {
   background: var(--nav-accent-soft);
   color: var(--nav-accent);
+}
+
+#nd-nav a:focus-visible,
+#nd-nav button:focus-visible {
+  outline: 2px solid var(--nav-accent);
+  outline-offset: 3px;
+}
+
+#nd-nav nav > a:first-child {
+  border-radius: 0.4rem;
+  transition: opacity 160ms ease;
+}
+
+#nd-nav nav > a:first-child:hover {
+  opacity: 0.8;
+}
+
+/* Group the primary menu with the utility controls on the right. */
+@media (min-width: 1024px) {
+  #nd-nav nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  #nd-nav nav > ul {
+    justify-self: end;
+    padding-inline: 24px;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  #nd-nav nav > div:last-child {
+    margin-inline-start: 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  #nd-nav nav > div:last-child button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  #nd-nav > div > div:last-child a {
+    min-height: 44px;
+    align-items: center;
+    border-radius: 8px;
+    padding-inline: 12px;
+    font-weight: 400;
+  }
+
+  #nd-nav > div > div:last-child a:hover,
+  #nd-nav > div > div:last-child a[data-active='true'] {
+    background: var(--nav-accent-soft);
+    color: var(--nav-accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #nd-nav a,
+  #nd-nav button,
+  #nd-nav nav > ul > li > a,
+  #nd-nav nav > a:first-child {
+    transition: none;
+  }
 }
 
 /* Language menu is portaled to body, so it misses the nav palette and falls back to the pink brand accent. */
@@ -189,7 +266,7 @@ html.dark body:has(#nd-docs-layout) {
 }
 
 body:has(#nd-docs-layout) {
-  --site-frame: min(calc(100% - 48px), 1160px);
+  --site-frame: calc(100% - 48px);
 }
 
 body:has(#nd-docs-layout) #nd-nav nav {
@@ -201,6 +278,12 @@ body:has(#nd-docs-layout) #nd-nav nav {
 
 body:has(#nd-docs-layout.examples-route-layout) {
   --examples-frame: var(--site-frame);
+}
+
+@media (min-width: 901px) {
+  body:has(#nd-docs-layout.examples-route-layout) {
+    --examples-frame: 100%;
+  }
 }
 
 @media (min-width: 1280px) {
@@ -945,7 +1028,7 @@ body:has(#nd-docs-layout.examples-route-layout) {
   display: grid;
   width: var(--examples-frame);
   min-height: calc(100vh - 3.5rem);
-  grid-template-columns: 15rem minmax(0, 1fr);
+  grid-template-columns: var(--site-sidebar-width) minmax(0, 1fr);
   margin-inline: auto;
 }
 
@@ -1337,7 +1420,7 @@ body:has(#nd-docs-layout.examples-route-layout) {
   display: grid;
   width: var(--examples-frame);
   height: calc(100dvh - 3.5rem);
-  grid-template-columns: 15rem minmax(0, 1fr);
+  grid-template-columns: var(--site-sidebar-width) minmax(0, 1fr);
   min-height: 0;
   margin-inline: auto;
   overflow: hidden;
@@ -1668,13 +1751,13 @@ body:has(#nd-docs-layout.examples-route-layout) {
 
 .example-workspace {
   display: grid;
-  height: auto;
+  height: 0;
   min-width: 0;
   min-height: 0;
   flex: 1 1 auto;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, max-content) minmax(0, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: minmax(0, var(--example-preview-fr)) 12px minmax(0, var(--example-code-fr));
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
   overflow: hidden;
   padding: 1rem;
 }
@@ -1701,17 +1784,22 @@ body:has(#nd-docs-layout.examples-route-layout) {
 
 .example-preview-panel {
   display: flex;
-  height: auto;
+  height: 100%;
   min-height: 0;
-  max-height: min(34rem, 100%);
+  max-height: none;
   flex-direction: column;
-  align-self: start;
+  align-self: stretch;
   background: #f7f8fc;
   color: #202632;
 }
 
 .example-workspace-resizer {
-  display: none;
+  display: flex;
+  width: 12px;
+  align-items: center;
+  justify-content: center;
+  cursor: col-resize;
+  touch-action: none;
 }
 
 .example-workspace-resizer > span {
@@ -2149,10 +2237,10 @@ body.example-workspace-resizing {
 .example-preview-stage {
   position: relative;
   display: flex;
-  height: clamp(12rem, calc(100dvh - 36rem), 28rem);
-  min-height: 12rem;
-  max-height: 28rem;
-  flex: none;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  flex: 1;
   align-items: center;
   justify-content: center;
   background-color: #f7f8fc;
@@ -2476,6 +2564,7 @@ html.dark .examples-center-card-crop {
     height: clamp(16rem, 40vh, 20rem);
     min-height: 16rem;
     max-height: 20rem;
+    flex: none;
   }
 
   .example-code-panel {
@@ -3173,7 +3262,7 @@ html.dark .examples-center-card-crop {
 }
 
 .docs-brand-layout [data-sidebar-placeholder] {
-  border-inline-end: 1px solid color-mix(in srgb, var(--color-fd-border) 72%, transparent);
+  border-inline-end: 1px solid color-mix(in srgb, var(--landing-border) 80%, transparent);
   background: var(--color-fd-background);
 }
 
@@ -3189,6 +3278,7 @@ html.dark .examples-center-card-crop {
   translate: none !important;
   transform: none !important;
   inset-block: 0 !important;
+  border-inline-end: 0;
   border-radius: 0 !important;
 }
 

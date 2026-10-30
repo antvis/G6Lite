@@ -736,7 +736,7 @@ describe('P1: public camera and coordinate boundary', () => {
 });
 
 describe('P1: viewport resize fitting policy', () => {
-  function createResizeGraph(autoFitOnResize?: boolean | number | object) {
+  function createResizeGraph(autoFit?: boolean | number | object) {
     const graph = Object.create(Graph.prototype) as Graph & Record<string, unknown>;
     const rendererResize = vi.fn();
     const fitView = vi.fn();
@@ -745,7 +745,7 @@ describe('P1: viewport resize fitting policy', () => {
       _destroyed: false,
       options: {
         data: { nodes: [], edges: [] },
-        autoFitOnResize,
+        autoFit,
       },
       renderer: { resize: rendererResize },
       eventEmitter,
@@ -754,8 +754,8 @@ describe('P1: viewport resize fitting policy', () => {
     return { eventEmitter, fitView, graph, rendererResize };
   }
 
-  it.each([undefined, false])('preserves the camera by default (%s)', (autoFitOnResize) => {
-    const { eventEmitter, fitView, graph, rendererResize } = createResizeGraph(autoFitOnResize);
+  it.each([undefined, false])('preserves the camera by default (%s)', (autoFit) => {
+    const { eventEmitter, fitView, graph, rendererResize } = createResizeGraph(autoFit);
     const onResize = vi.fn();
     eventEmitter.on('resize', onResize);
 

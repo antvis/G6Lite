@@ -37,7 +37,9 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 | `transforms` | `TransformOption[]` | Data transforms before drawing, such as parallel edges |
 | `plugins` | `PluginOption[]` | Registered plugins |
 | `theme` | `ThemeOption` | `'light'`, `'dark'`, or a preset plus token overrides |
-| `autoFitOnResize` | `boolean \| number \| FitViewOptions` | Whether a container resize calls `fitView()` again. Default `false`, which keeps the current camera |
+| `autoFit` | `boolean \| number \| FitViewOptions` | Whether a container resize calls `fitView()` again. Default `false`, which keeps the current camera |
+
+Setting `autoFit` to `false` or omitting it disables fitting after a size change; the initial `render()` still calls `fitView()`. An options object also configures the initial fit.
 
 At runtime, `node`, `edge`, `label`, and `theme` can be updated with [`graph.updateOptions()`](/en/docs/api/graph#updateoptions).
 

@@ -7,14 +7,13 @@ import {
   MousePointer2,
   Network,
   Package,
-  Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { codeToHtml } from 'shiki';
 
 import { SiteFooter } from '@/components/site-footer';
-import { siteConfig } from '@/lib/site-config';
+import { CopyPrompt } from '@/components/ai-skill/copy-prompt';
+import { skillName } from '@/components/ai-skill/content';
 import { localizedPath, type Locale } from '@/lib/i18n';
 import { headingFont } from '@/lib/site-font';
 
@@ -27,39 +26,15 @@ import { FeaturedExamples } from './featured-examples';
 import { HeroLiveGraph } from './hero-live-graph';
 import { UpdateScenarios } from './update-scenarios';
 
-function Github() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-      <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.86c-2.78.6-3.37-1.18-3.37-1.18-.45-1.15-1.11-1.45-1.11-1.45-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.82.09-.65.35-1.08.64-1.33-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.26-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02A9.58 9.58 0 0 1 12 6.83c.85 0 1.71.12 2.51.35 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.39.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.58 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" />
-    </svg>
-  );
-}
-
-const quickStartCode = `import { Graph } from '@antv/g6-lite';
-
-const graph = new Graph({
-  container: 'graph',
-  data: {
-    nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
-    edges: [
-      { source: 'a', target: 'b' },
-      { source: 'a', target: 'c' },
-    ],
-  },
-  layout: { type: 'circular', radius: 140 },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-});
-
-await graph.render();`;
-
 const stageIcons = [Database, Network, Cpu, MousePointer2];
 
 export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
   const copy = homepageCopy[locale];
-  const code = await codeToHtml(quickStartCode, { lang: 'ts', theme: 'github-dark' });
+  const aiPrompt = `${locale === 'zh' ? '使用' : 'Use'} $${skillName}\n${copy.performance.aiRequest}`;
 
   return (
     <main
+      data-g6lite-homepage
       className={`${styles.page} ${headingFont.variable}`}
       lang={locale === 'zh' ? 'zh-CN' : 'en'}
     >
@@ -70,7 +45,6 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
         <div className={styles.shell}>
           <SectionHeading
             title={copy.workflow.title}
-            align="left"
             descriptionClassName={styles.workflowDescription}
           >
             {copy.workflow.description}{' '}
@@ -102,7 +76,7 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
 
       <section className={`${styles.section} ${styles.performanceBand}`} id="performance">
         <div className={styles.shell}>
-          <SectionHeading title={copy.performance.title} align="left">
+          <SectionHeading title={copy.performance.title}>
             {copy.performance.description}
           </SectionHeading>
           <div className={styles.advantagesGrid}>
@@ -139,51 +113,17 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
             </article>
             <article className={styles.advantageCard}>
               <h3>
-                <Cpu aria-hidden="true" /> {copy.performance.batchTitle}
+                <MousePointer2 aria-hidden="true" /> {copy.performance.interactionTitle}
               </h3>
-              <p>{copy.performance.batchDescription}</p>
-              <div className={`${styles.advantageVisual} ${styles.batchVisual}`}>
-                <div className={styles.batchFlow}>
-                  <div className={styles.batchSources}>
-                    <div>
-                      <span>{copy.performance.nodes}</span>
-                      <div className={styles.batchDots} aria-hidden="true">
-                        {Array.from({ length: 8 }, (_, index) => (
-                          <i key={index} />
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <span>{copy.performance.edges}</span>
-                      <div className={styles.batchLines} aria-hidden="true">
-                        {Array.from({ length: 4 }, (_, index) => (
-                          <i key={index} />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <ArrowRight aria-hidden="true" />
-                  <div className={styles.batchTarget}>
+              <p>{copy.performance.interactionDescription}</p>
+              <div className={`${styles.advantageVisual} ${styles.interactionVisual}`}>
+                <div className={styles.renderingMechanisms}>
+                  <span>
                     <Cpu aria-hidden="true" />
-                    <strong>WebGL</strong>
-                    <span>{copy.performance.batches}</span>
-                  </div>
+                    {copy.performance.batchRendering}
+                  </span>
+                  <span>{copy.performance.incrementalUpdates}</span>
                 </div>
-                <span className={styles.visualCaption}>{copy.performance.batchCaption}</span>
-              </div>
-              <Link
-                className={styles.advantageLink}
-                href={localizedPath('/docs/concepts/architecture', locale)}
-              >
-                {copy.performance.architectureLink} <ArrowRight aria-hidden="true" />
-              </Link>
-            </article>
-            <article className={styles.advantageCard}>
-              <h3>
-                <Zap aria-hidden="true" /> {copy.performance.updateTitle}
-              </h3>
-              <p>{copy.performance.updateDescription}</p>
-              <div className={styles.advantageVisual}>
                 <UpdateScenarios locale={locale} />
               </div>
               <Link
@@ -191,6 +131,40 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
                 href={localizedPath('/docs/metrics/performance-tuning', locale)}
               >
                 {copy.performance.tuning} <ArrowRight aria-hidden="true" />
+              </Link>
+            </article>
+            <article className={styles.advantageCard}>
+              <h3>
+                <Bot aria-hidden="true" /> {copy.performance.aiTitle}
+              </h3>
+              <p>{copy.performance.aiDescription}</p>
+              <div className={`${styles.advantageVisual} ${styles.skillVisual}`}>
+                <div className={styles.skillBar}>
+                  <span>Agent Skill</span>
+                  <CopyPrompt
+                    text={aiPrompt}
+                    label={copy.performance.copyPrompt}
+                    copiedLabel={copy.performance.copiedPrompt}
+                    failedLabel={copy.performance.copyFailed}
+                    className={styles.skillCopy}
+                  />
+                </div>
+                <div className={styles.skillRequest}>
+                  <code>${skillName}</code>
+                  <p>{copy.performance.aiRequest}</p>
+                </div>
+                <ArrowRight className={styles.skillFlowArrow} aria-hidden="true" />
+                <div className={styles.skillResult}>
+                  <Network aria-hidden="true" />
+                  <div>
+                    <strong>{copy.performance.aiResult}</strong>
+                    <span>{copy.performance.aiResultDetail}</span>
+                  </div>
+                </div>
+                <span className={styles.visualCaption}>{copy.performance.aiCaption}</span>
+              </div>
+              <Link className={styles.advantageLink} href={localizedPath('/ai', locale)}>
+                {copy.performance.aiLink} <ArrowRight aria-hidden="true" />
               </Link>
             </article>
           </div>
@@ -203,46 +177,12 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
         </div>
       </section>
 
-      <section className={styles.section} id="scenarios">
+      <section className={`${styles.section} ${styles.showcaseBand}`} id="scenarios">
         <div className={styles.shell}>
-          <SectionHeading title={copy.examples.title} align="left">
+          <SectionHeading title={copy.examples.title} eyebrow={copy.examples.eyebrow}>
             {copy.examples.description}
           </SectionHeading>
           <FeaturedExamples locale={locale} />
-        </div>
-      </section>
-
-      <section className={`${styles.section} ${styles.developerBand}`} id="developers">
-        <div className={styles.shell}>
-          <div className={styles.developerBody}>
-            <div className={styles.developerCopy}>
-              <span className={styles.eyebrow}>{copy.developer.label}</span>
-              <h2 className={styles.developerTitle}>
-                {copy.developer.first}
-                {locale === 'en' && ' '}
-                <br />
-                {copy.developer.second}
-              </h2>
-              <p>{copy.developer.description}</p>
-              <Link
-                className={styles.textLink}
-                href={localizedPath('/docs/getting-started/quick-start', locale)}
-              >
-                {copy.actions.readStart} <ArrowRight aria-hidden="true" />
-              </Link>
-            </div>
-            <figure className={styles.codePanel} aria-label={copy.developer.codeLabel}>
-              <figcaption className={styles.codeWindowMarks}>
-                <span aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                <small>graph.ts</small>
-              </figcaption>
-              <div className={styles.highlightedCode} dangerouslySetInnerHTML={{ __html: code }} />
-            </figure>
-          </div>
         </div>
       </section>
 
@@ -269,20 +209,30 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
       <section className={styles.finalCta}>
         <h2>{copy.cta.title}</h2>
         <p>{copy.cta.description}</p>
-        <div className={styles.actions}>
-          <Link
-            className={styles.primaryButton}
-            href={localizedPath('/docs/getting-started/quick-start', locale)}
-          >
-            {copy.actions.start} <ArrowRight />
-          </Link>
-          <Link className={styles.secondaryButton} href={siteConfig.repository}>
-            <Github /> {copy.actions.github}
-          </Link>
-        </div>
+        <HomepageActions locale={locale} />
       </section>
       <SiteFooter locale={locale} />
     </main>
+  );
+}
+
+function HomepageActions({ locale }: { locale: Locale }) {
+  const copy = homepageCopy[locale];
+  return (
+    <div className={styles.actions}>
+      <Link
+        className={styles.secondaryButton}
+        href={localizedPath('/docs/getting-started/quick-start', locale)}
+      >
+        {copy.actions.start} <ArrowRight />
+      </Link>
+      <Link className={styles.primaryButton} href={localizedPath('/ai', locale)}>
+        <Bot aria-hidden="true" /> {copy.actions.ai} <ArrowRight aria-hidden="true" />
+      </Link>
+      <Link className={styles.heroExampleLink} href={localizedPath('/docs/examples', locale)}>
+        {copy.actions.examples} <ArrowUpRight aria-hidden="true" />
+      </Link>
+    </div>
   );
 }
 
@@ -291,16 +241,14 @@ function SectionHeading({
   title,
   children,
   descriptionClassName,
-  align = 'center',
 }: {
   eyebrow?: string;
   title: string;
   children: ReactNode;
   descriptionClassName?: string;
-  align?: 'center' | 'left';
 }) {
   return (
-    <header className={`${styles.sectionHeading} ${align === 'left' ? styles.alignLeft : ''}`}>
+    <header className={styles.sectionHeading}>
       {eyebrow && <span>{eyebrow}</span>}
       <h2>{title}</h2>
       <p className={descriptionClassName}>{children}</p>
@@ -310,40 +258,25 @@ function SectionHeading({
 
 function HeroStage({ locale }: { locale: Locale }) {
   const copy = homepageCopy[locale];
+  const [, statement] = copy.hero.before.split(' · ');
   return (
     <section className={styles.hero}>
       <div className={styles.heroIntro}>
         <div className={styles.heroLead}>
-          <p className={styles.eyebrow}>
-            <span aria-hidden="true">●</span> G6Lite · WebGL Graph Engine
-          </p>
           <h1>
-            {copy.hero.before}
-            {locale === 'en' && ' '}
-            <br />
-            {copy.hero.prefix}
-            <span>{copy.hero.highlight}</span>
-            {copy.hero.after}
+            <span className={styles.heroTagline}>
+              <span className={styles.heroClaim}>{statement}</span>
+              {locale === 'en' && ' '}
+              <span className={styles.heroClaim}>
+                {copy.hero.prefix}
+                <span className={styles.heroHighlight}>{copy.hero.highlight}</span>
+                {copy.hero.after}
+              </span>
+            </span>
           </h1>
           <div className={styles.heroAside}>
             <p className={styles.heroDescription}>{copy.hero.description}</p>
-            <div className={styles.actions}>
-              <Link
-                className={styles.secondaryButton}
-                href={localizedPath('/docs/getting-started/quick-start', locale)}
-              >
-                {copy.actions.start} <ArrowRight />
-              </Link>
-              <Link className={styles.primaryButton} href={localizedPath('/ai', locale)}>
-                <Bot aria-hidden="true" /> {copy.actions.ai} <ArrowRight aria-hidden="true" />
-              </Link>
-              <Link
-                className={styles.heroExampleLink}
-                href={localizedPath('/docs/examples', locale)}
-              >
-                {copy.actions.examples} <ArrowUpRight aria-hidden="true" />
-              </Link>
-            </div>
+            <HomepageActions locale={locale} />
           </div>
         </div>
         <div className={styles.productWindow}>
@@ -417,4 +350,3 @@ function WorkflowVisual({ stage, locale }: { stage: number; locale: Locale }) {
     </svg>
   );
 }
-

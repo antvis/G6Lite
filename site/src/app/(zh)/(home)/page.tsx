@@ -7,15 +7,15 @@ import { siteConfig } from '@/lib/site-config';
 import { Homepage } from '@/components/homepage/homepage';
 
 export const metadata: Metadata = {
-  title: siteConfig.description.zh,
-  description: `${siteConfig.name} 是${siteConfig.description.zh}，提供数据、布局、交互、状态与扩展的一体化 API。`,
+  title: { absolute: siteConfig.title.zh },
+  description: siteConfig.description.zh,
   ...createPageSeo({
     locale: 'zh',
     path: '/',
     zhPath: '/',
     enPath: '/en',
-    title: `${siteConfig.name} — ${siteConfig.description.zh}`,
-    description: `${siteConfig.name} 是${siteConfig.description.zh}，提供数据、布局、交互、状态与扩展的一体化 API。`,
+    title: siteConfig.title.zh,
+    description: siteConfig.description.zh,
     image: '/examples/relationship.png',
   }),
 };

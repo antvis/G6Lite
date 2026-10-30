@@ -55,6 +55,9 @@ jobs:
       - name: Run CI checks
         run: npm run ci
 
+      - name: Check UMD browser build
+        run: npm run check:umd
+
       - name: Build playground
         run: npx vite build
 

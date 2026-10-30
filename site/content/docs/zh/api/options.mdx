@@ -37,7 +37,9 @@ const graph = new Graph({
 | `transforms` | `TransformOption[]` | 绘制前的数据转换，例如平行边 |
 | `plugins` | `PluginOption[]` | 已注册插件 |
 | `theme` | `ThemeOption` | `'light'`、`'dark'`，或在预设上覆盖 token |
-| `autoFitOnResize` | `boolean \| number \| FitViewOptions` | 容器尺寸变化后是否重新 `fitView()`。默认 `false`，保留当前相机 |
+| `autoFit` | `boolean \| number \| FitViewOptions` | 容器尺寸变化后是否重新 `fitView()`。默认 `false`，保留当前相机 |
+
+`autoFit` 为 `false` 或未配置时，仅关闭尺寸变化后的自动适配；首次 `render()` 仍会执行 `fitView()`。对象配置也会用于首次适配。
 
 运行中能热更新的是 `node`、`edge`、`label` 和 `theme`，通过 [`graph.updateOptions()`](/docs/api/graph#updateoptions)。
 

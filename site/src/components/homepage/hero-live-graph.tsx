@@ -161,6 +161,10 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
         ]);
         if (disposed || failed) return;
         const data = dataModule.createHeroGraph();
+        // Keep the original layout with twice the horizontal span on desktop.
+        if (!window.matchMedia('(max-width: 767px)').matches) {
+          for (const node of data.nodes) node.x *= 2;
+        }
         if (disposed || failed) return;
         const loaded = performance.now();
         const initialDark = darkRef.current;
@@ -172,7 +176,7 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
           // Overview zoom is below the default nodeMinZoom of 0.3, so the global gate
           // stays off. The label callback reveals more hubs as the camera zooms in.
           label: { hideOnLowZoom: false, scaleWithZoom: false, hideOnCollision: true },
-          autoFitOnResize: { padding: 24, minZoom: 0.01 },
+          autoFit: { padding: 24, minZoom: 0.01 },
           behaviors: ['drag-canvas', 'drag-node', 'highlight-node'],
         });
         graphRef.current = graph;

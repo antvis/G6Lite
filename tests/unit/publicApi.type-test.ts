@@ -84,8 +84,8 @@ type PluginHasNoUpdate = Assert<
 type TransformHasUpdate = Assert<
   Equal<'update' extends keyof TransformExtension ? true : false, true>
 >;
-type AutoFitOnResizeOption = Assert<
-  Equal<GraphOptions['autoFitOnResize'], boolean | number | FitViewOptions | undefined>
+type AutoFitOption = Assert<
+  Equal<GraphOptions['autoFit'], boolean | number | FitViewOptions | undefined>
 >;
 type GraphLabelOption = Assert<Equal<GraphOptions['label'], LabelOptions | undefined>>;
 type UpdateLabelOption = Assert<
@@ -212,7 +212,7 @@ export type PublicApiTypeAssertions =
   | BehaviorHasNoUpdate
   | PluginHasNoUpdate
   | TransformHasUpdate
-  | AutoFitOnResizeOption
+  | AutoFitOption
   | GraphLabelOption
   | UpdateLabelOption
   | NodeLabelMinimumZoom

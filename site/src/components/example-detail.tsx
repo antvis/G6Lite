@@ -28,7 +28,7 @@ import { withBasePath } from '@/lib/shared';
 type DetailTab = 'source' | 'data' | 'guide';
 type PreviewStatus = 'loading' | 'ready' | 'error';
 
-const DEFAULT_WORKSPACE_SPLIT = 54;
+const DEFAULT_WORKSPACE_SPLIT = 50;
 const MIN_PREVIEW_WIDTH = 360;
 const MIN_CODE_WIDTH = 300;
 const MAX_DATA_PREVIEW_LENGTH = 100_000;
@@ -44,7 +44,8 @@ type ExampleCrop = {
 
 const exampleCropRecords = exampleCrops as Record<string, ExampleCrop>;
 const WORKSPACE_RESIZER_WIDTH = 12;
-const WORKSPACE_SPLIT_STORAGE_KEY = 'g6lite-example-workspace-split';
+// Start with equal panes instead of restoring ratios saved for the previous layout.
+const WORKSPACE_SPLIT_STORAGE_KEY = 'g6lite-example-workspace-split-v2';
 const DIRECTORY_OPEN_STORAGE_KEY = 'g6lite-example-directory-open';
 
 function readOpenCategories(): string[] {

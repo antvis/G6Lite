@@ -8,7 +8,7 @@ import { FirstRenderFlow } from '@/components/first-render-flow';
 `Graph` is the main public entry point.
 
 ```ts
-const graph = new Graph({ container: 'graph', data, layout: { type: 'force' } });
+const graph = new Graph({ container: 'container', data, layout: { type: 'force' } });
 await graph.render();
 ```
 
@@ -35,9 +35,9 @@ Enable automatic fitting for resizable panels or expanding sidebars:
 
 ```ts
 const graph = new Graph({
-  container: 'graph',
+  container: 'container',
   data,
-  autoFitOnResize: {
+  autoFit: {
     padding: 24,
     minZoom: 0.2,
     maxZoom: 1.5,
@@ -45,4 +45,6 @@ const graph = new Graph({
 });
 ```
 
-`autoFitOnResize: true` is equivalent to calling `fitView(0.9)` after a size change. A numeric scale or `FitViewOptions` can also be passed directly. The `resize` event is emitted after the optional fit finishes, so listeners observe the final camera. Leave the option disabled for large graphs or flows that must preserve the user's viewport.
+`autoFit: true` is equivalent to calling `fitView(0.9)` after a size change. A numeric scale or `FitViewOptions` can also be passed directly. The `resize` event is emitted after the optional fit finishes, so listeners observe the final camera. Leave the option disabled for large graphs or flows that must preserve the user's viewport.
+
+Disabling `autoFit` does not disable fitting during the initial `render()`. The `padding`, `minZoom`, and `maxZoom` fields of an options object also apply to the initial fit.

@@ -34,7 +34,7 @@ export async function run(container: string | HTMLElement) {
   el.style.position = 'relative';
 
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container: el,
     data: DATA,
     layout: { type: 'circular', radius: 180 },

@@ -47,7 +47,7 @@ export async function run(container: string | HTMLElement) {
   const graph = new Graph({
     // Labels are two lines and hang below nodes (labelPlacement: 'bottom');
     // the bottom padding reserves their height so they stay inside the view.
-    autoFitOnResize: { padding: [24, 48, 64, 48] },
+    autoFit: { padding: [24, 48, 64, 48] },
     container,
     data: {
       nodes: [

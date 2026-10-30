@@ -18,7 +18,7 @@ const TREE: Array<[string, string, string?]> = [
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFitOnResize: false,
+    autoFit: false,
     container,
     data: {
       nodes: TREE.map(([id, label]) => ({ id, data: { label, root: id === 'root' } })),

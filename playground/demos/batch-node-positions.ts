@@ -15,7 +15,7 @@ const SERVER: NodePositionUpdate[] = [
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container,
     data: {
       nodes: ORIGINAL.map((node) => ({ ...node, data: { label: node.id.toUpperCase(), stable: true } })),

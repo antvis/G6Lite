@@ -30,7 +30,7 @@ export async function run(container: string | HTMLElement) {
         ? { type: 'light' as const, edgeLineWidth: 3, canvasBackground: '#f0f4ff' }
         : theme;
     currentGraph = new Graph({
-      autoFitOnResize: true,
+      autoFit: true,
       container: host,
       data,
       node: { type: 'circle', style: { size: 14 } },

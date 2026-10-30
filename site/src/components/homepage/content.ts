@@ -1,14 +1,8 @@
 import type { Locale } from '@/lib/i18n';
+import { productCopy } from '@/lib/product-copy';
 
 const zh = {
-  hero: {
-    before: '轻量图可视化，',
-    prefix: '为',
-    highlight: '大规模关系数据',
-    after: '而生',
-    description:
-      '丰富的布局与交互能力，配合轻量、高效的 WebGL 渲染，帮助你更轻松地呈现和探索复杂关系。',
-  },
+  hero: productCopy.zh.hero,
   actions: {
     start: '快速开始',
     ai: '用 AI 构建',
@@ -29,8 +23,8 @@ const zh = {
     layers: ['Canvas · 标签信息', 'WebGL · 节点与边', 'Canvas · Combo 分组'],
   },
   performance: {
-    title: '轻量加载，流畅交互',
-    description: '按需加载降低初始开销，WebGL 批量绘制支撑复杂关系渲染，按变化类型处理交互更新。',
+    title: '轻量、高效，支持 AI 协作',
+    description: '按需加载降低开销，WebGL 与增量更新支撑流畅交互，Agent Skill 辅助关系图开发。',
     loadTitle: '轻量加载',
     loadDescription: '核心入口与布局算法分离，按需加载所选布局，降低初始化阶段的加载开销。',
     measured: '初始入口实测',
@@ -38,18 +32,22 @@ const zh = {
     core: '核心入口',
     lazyLayouts: '布局按需加载',
     sizeLink: '查看体积测量口径',
-    batchTitle: '批量渲染',
-    batchDescription:
-      '同类节点与边进入 WebGL 绘制批次，利用 GPU 处理图形数据，支撑复杂关系网络的可视化。',
-    nodes: '节点数据',
-    edges: '边数据',
-    batches: '绘制批次',
-    batchCaption: '渲染机制示意 · 同类图形归入对应批次',
-    architectureLink: '了解图渲染架构',
-    updateTitle: '按需更新',
-    updateDescription:
-      '交互时复用已有布局，分别处理视口、节点位置与状态变化，减少不必要的重复计算。',
+    interactionTitle: '流畅交互',
+    interactionDescription:
+      'WebGL 批量绘制节点与边，交互时按状态、位置和视口变化更新，减少重复计算。',
+    batchRendering: 'WebGL 批量绘制',
+    incrementalUpdates: '增量更新',
     tuning: '查看交互性能调优',
+    aiTitle: 'AI 协作',
+    aiDescription: '把 G6Lite Skill 交给 Agent，从项目数据创建关系图，继续调整布局、样式与交互。',
+    aiRequest: '读取当前项目的节点和边，创建力导向图，加入节点拖拽和悬停高亮。',
+    aiResult: '关系图实现',
+    aiResultDetail: '数据接入 · 布局 · 交互',
+    aiCaption: '协作流程示意 · 在已安装 Skill 的 Agent 中使用',
+    aiLink: '了解 AI 协作',
+    copyPrompt: '复制指令',
+    copiedPrompt: '已复制',
+    copyFailed: '复制失败，请手动选择文本',
     footnote: '实际加载体积与交互表现取决于构建方式、数据和设备。',
     method: '查看性能验证方法',
   },
@@ -64,26 +62,33 @@ const zh = {
     ],
   },
   examples: {
-    title: '精选示例',
-    description: '通过关系网络、层级图、脑图与鱼骨图，查看不同类型的图可视化效果。',
-    entry: '查看示例',
+    eyebrow: '交互示例',
+    title: '从示例开始，把关系图接入应用',
+    description: '切换图类型，直接体验交互，在右侧查看并复制对应代码。',
+    entry: '完整示例',
+    tabs: '选择图类型',
+    live: '实时预览',
+    reset: '重置示例',
+    fit: '适配画布',
+    zoomIn: '放大示例',
+    zoomOut: '缩小示例',
+    graphLabel: '可拖拽和高亮的真实关系图',
+    hint: '拖拽节点 · 悬停高亮',
+    loading: '正在准备关系图',
+    retry: '加载失败，点击重试',
+    copy: '复制代码',
+    copied: '已复制',
+    copyFailed: '复制失败，请手动选择代码',
+    codeLabel: '当前示例完整接入代码，可滚动查看',
     screenshot: '实时示例截图',
     open: '查看',
     openSuffix: '示例',
     items: [
-      { title: '关系网络', description: '用人物与关系标签，呈现实体关联。' },
+      { title: '关系网络', description: '以 G6Lite 为中心，探索关联技术与图可视化能力。' },
       { title: '层级图', description: '展示组织与团队的上下级关系。' },
-      { title: '脑图', description: '围绕中心主题，展开知识分支。' },
+      { title: '脑图', description: '以项目规划为中心，向左右两侧展开目标、设计、开发与交付。' },
       { title: '鱼骨图', description: '按类别梳理原因，呈现归因结构。' },
     ],
-  },
-  developer: {
-    label: '开发接入',
-    first: '快速接入，',
-    second: '灵活定制',
-    description:
-      '将关系图集成到现有 Web 应用，根据业务需求配置布局、交互与样式，并通过数据更新接口保持图与业务数据同步。',
-    codeLabel: 'TypeScript 快速接入示例',
   },
   architecture: {
     title: '分层架构，协同渲染',
@@ -106,10 +111,10 @@ const zh = {
   },
   cta: {
     title: '开始使用 G6Lite',
-    description: '阅读接入指南，构建可交互的关系图；查看源码，了解实现细节与扩展方式。',
+    description: productCopy.zh.hero.description,
   },
   footer: {
-    description: '轻量、高性能的 WebGL 图可视化引擎。',
+    description: productCopy.zh.hero.description,
     home: '返回首页',
     groups: ['产品', '开发者', '开源社区', 'AntV 生态'],
     product: ['核心能力', '精选示例', 'AI 构建'],
@@ -136,14 +141,7 @@ const zh = {
 };
 
 const en: typeof zh = {
-  hero: {
-    before: 'A lightweight engine',
-    prefix: 'for ',
-    highlight: 'large-scale graphs',
-    after: '',
-    description:
-      'Visualize complex relationships with flexible layouts, responsive interactions, and efficient WebGL rendering.',
-  },
+  hero: productCopy.en.hero,
   actions: {
     start: 'Quick start',
     ai: 'Build with AI',
@@ -177,9 +175,9 @@ const en: typeof zh = {
     layers: ['Canvas · Labels', 'WebGL · Nodes and edges', 'Canvas · Combo groups'],
   },
   performance: {
-    title: 'A small core, responsive interactions',
+    title: 'Lightweight, responsive, ready for AI',
     description:
-      'Load layouts only when needed, render elements in batches, and handle changes without unnecessary recomputation.',
+      'Load layouts on demand, keep interactions responsive with WebGL and incremental updates, and build graphs with an Agent Skill.',
     loadTitle: 'Lightweight loading',
     loadDescription: 'Layout algorithms load on demand, keeping the initial core bundle small.',
     measured: 'Measured entry size',
@@ -187,18 +185,24 @@ const en: typeof zh = {
     core: 'Core entry',
     lazyLayouts: 'On-demand layouts',
     sizeLink: 'How we measure bundle size',
-    batchTitle: 'Batch rendering',
-    batchDescription:
-      'The engine groups similar nodes and edges into WebGL draw batches for efficient rendering.',
-    nodes: 'Node data',
-    edges: 'Edge data',
-    batches: 'Draw batches',
-    batchCaption: 'Illustration · Similar elements share draw batches',
-    architectureLink: 'Explore the rendering architecture',
-    updateTitle: 'Targeted updates',
-    updateDescription:
-      'Respond to state, position, and viewport changes without recalculating the layout unnecessarily.',
+    interactionTitle: 'Responsive interactions',
+    interactionDescription:
+      'Batch nodes and edges with WebGL, then update state, positions, and the viewport without unnecessary recomputation.',
+    batchRendering: 'WebGL batches',
+    incrementalUpdates: 'Incremental updates',
     tuning: 'Tune interaction performance',
+    aiTitle: 'AI collaboration',
+    aiDescription:
+      'Give your agent the G6Lite Skill to build graphs from project data and refine layouts, styles, and interactions.',
+    aiRequest:
+      'Read nodes and edges from this project. Build a force-directed graph with node dragging and hover highlighting.',
+    aiResult: 'Graph implementation',
+    aiResultDetail: 'Data · Layout · Interaction',
+    aiCaption: 'Workflow illustration · Use in an agent with the Skill installed',
+    aiLink: 'Explore AI collaboration',
+    copyPrompt: 'Copy prompt',
+    copiedPrompt: 'Copied',
+    copyFailed: 'Copy failed. Select the text manually.',
     footnote:
       'Actual bundle size and interaction performance vary with your build, data, and device.',
     method: 'Explore performance testing',
@@ -217,36 +221,44 @@ const en: typeof zh = {
     ],
   },
   examples: {
-    title: 'Examples',
+    eyebrow: 'DEVELOPER EXPERIENCE',
+    title: 'Explore a graph. Start with its code.',
     description:
-      'Explore networks, hierarchies, mind maps, and fishbone diagrams, each with a live demo and source code.',
-    entry: 'View example',
+      'Switch graph types, try the interactions, and copy the matching implementation on the right.',
+    entry: 'Full example',
+    tabs: 'Choose a graph type',
+    live: 'Live preview',
+    reset: 'Reset example',
+    fit: 'Fit to view',
+    zoomIn: 'Zoom in example',
+    zoomOut: 'Zoom out example',
+    graphLabel: 'Live graph with dragging and hover highlighting',
+    hint: 'Drag nodes · Hover to highlight',
+    loading: 'Preparing the graph',
+    retry: 'Unable to load. Click to retry.',
+    copy: 'Copy code',
+    copied: 'Copied',
+    copyFailed: 'Copy failed. Select the code manually.',
+    codeLabel: 'Complete source for the selected example. Scroll to explore.',
     screenshot: 'live example screenshot',
     open: 'View ',
     openSuffix: ' example',
     items: [
       {
         title: 'Network',
-        description: 'Show how people and entities connect.',
+        description: 'Explore G6Lite, related technologies, and graph visualization capabilities.',
       },
       { title: 'Hierarchy', description: 'Make reporting relationships easy to follow.' },
       {
         title: 'Mind map',
-        description: 'Build out ideas around a central topic.',
+        description:
+          'Explore goals, design, development, and delivery on both sides of a central topic.',
       },
       {
         title: 'Fishbone',
         description: 'Organize the causes behind a problem.',
       },
     ],
-  },
-  developer: {
-    label: 'Developer integration',
-    first: 'Fits your app,',
-    second: 'adapts to your needs',
-    description:
-      'Add G6Lite to your web app, then tailor layouts, interactions, and styles to your use case. Update the graph as your data changes.',
-    codeLabel: 'TypeScript quick-start example',
   },
   architecture: {
     title: 'Layers that work as one',
@@ -274,11 +286,10 @@ const en: typeof zh = {
   },
   cta: {
     title: 'Get started with G6Lite',
-    description:
-      'Get your first graph on screen with the quick-start guide, or explore the source on GitHub.',
+    description: productCopy.en.hero.description,
   },
   footer: {
-    description: 'A lightweight WebGL engine for interactive graphs',
+    description: productCopy.en.hero.description,
     home: 'Back to home',
     groups: ['Product', 'Developers', 'Community', 'AntV ecosystem'],
     product: ['Core capabilities', 'Examples', 'Build with AI'],

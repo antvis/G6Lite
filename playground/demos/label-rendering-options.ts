@@ -30,7 +30,7 @@ export async function run(container: string | HTMLElement) {
   const leftReserve = Math.round(Math.min(360, Math.max(160, root.clientWidth * 0.28)));
   const viewPadding: [number, number, number, number] = [90, 70, 70, leftReserve];
   const graph = new Graph({
-    autoFitOnResize: { padding: viewPadding, maxZoom: 0.4 },
+    autoFit: { padding: viewPadding, maxZoom: 0.4 },
     container: root,
     data: { nodes: NODES, edges: EDGES },
     label: {

@@ -137,7 +137,7 @@ const typedOptions: GraphOptions = {
     style: { lineWidth: 1.5, hitAreaWidth: 16 },
     stateStyles: { selected: { hitAreaWidth: 20 } },
   } satisfies EdgeConfig,
-  autoFitOnResize: { padding: 24, minZoom: 0.2, maxZoom: 1.5 },
+  autoFit: { padding: 24, minZoom: 0.2, maxZoom: 1.5 },
   behaviors: [
     {
       type: 'zoom-canvas',

@@ -41,7 +41,7 @@ export async function run(container: string | HTMLElement) {
     const sourceId = `source-${index}`;
     const targetId = `target-${index}`;
     const graph = new Graph({
-      autoFitOnResize: true,
+      autoFit: true,
       container: canvasHost,
       data: {
         nodes: [

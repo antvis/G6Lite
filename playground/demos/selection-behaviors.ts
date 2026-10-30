@@ -8,7 +8,7 @@ export async function run(container: string | HTMLElement) {
     y: 100 + Math.floor(index / 4) * 110,
   }));
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container,
     data: { nodes, edges: [] },
     node: {

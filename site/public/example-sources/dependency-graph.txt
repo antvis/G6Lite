@@ -22,7 +22,7 @@ export async function run(container: string | HTMLElement) {
   nodes.set('ledger', '账本');
 
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container,
     data: {
       nodes: [...nodes].map(([id, label]) => ({ id, data: { label } })),

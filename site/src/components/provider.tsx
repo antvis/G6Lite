@@ -42,6 +42,7 @@ export function Provider({ children }: { children: ReactNode }) {
                 chooseTheme: '选择主题',
                 editOnGithub: '在 GitHub 编辑',
                 themeToggle: '切换主题',
+                menuToggle: '切换菜单',
                 codeBlockCopy: '复制代码',
                 codeBlockCopied: '已复制',
                 pageActionsCopyMarkdown: '复制 Markdown',

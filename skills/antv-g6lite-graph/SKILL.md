@@ -23,7 +23,7 @@ Build and review G6Lite visualizations using the package-root contract. Keep gen
 import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
-  container: 'graph',
+  container: 'container',
   data: {
     nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
     edges: [

@@ -4,7 +4,7 @@
 
 ```ts
 const graph = new Graph({
-  container: 'graph',
+  container: 'container',
   data,
   edge: { type: 'line', style: { endArrow: true } },
   transforms: [{ type: 'process-parallel-edges', distance: 20 }],

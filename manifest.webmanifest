@@ -1,1 +1,1 @@
-{"name":"G6Lite","short_name":"G6Lite","description":"基于 WebGL 的高性能轻量图可视化引擎","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#ec3d75","icons":[{"src":"/icon.svg?v=antv-20260724","sizes":"any","type":"image/svg+xml"}]}
+{"name":"G6Lite","short_name":"G6Lite","description":"丰富的布局与交互，配合轻量高效的 WebGL 渲染，让大规模关系清晰呈现，让数据探索流畅自如。","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#ec3d75","icons":[{"src":"/icon.svg?v=antv-20260724","sizes":"any","type":"image/svg+xml"}]}

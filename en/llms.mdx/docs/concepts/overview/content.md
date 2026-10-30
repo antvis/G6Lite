@@ -2,7 +2,11 @@
 
 
 
-G6Lite is a lightweight WebGL graph visualization engine. It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
+**G6Lite · Lightweight graph visualization, built for large-scale relationship data**
+
+Flexible layouts and interactions, paired with lightweight, efficient WebGL rendering, bring large-scale relationships into focus and make data exploration feel fluid.
+
+It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
 
 ## Good fits [#good-fits]
 

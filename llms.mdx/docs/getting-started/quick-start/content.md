@@ -17,13 +17,13 @@ npm install @antv/g6-lite
 `container` 可以是 DOM id、选择器或 HTMLElement。容器必须有明确宽高，否则画布会退回默认尺寸。
 
 ```html
-<div id="graph" style="width: 800px; height: 500px"></div>
+<div id="container" style="width: 800px; height: 500px"></div>
 ```
 
 在实际业务中，通常让容器跟随父级布局：
 
 ```css
-#graph {
+#container {
   width: 100%;
   height: 100%;
   min-height: 480px;
@@ -36,7 +36,7 @@ npm install @antv/g6-lite
 import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
-  container: 'graph',
+  container: 'container',
   data: {
     nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
     edges: [
@@ -101,7 +101,7 @@ graph.destroy();
 
 ## 下一步 [#下一步]
 
-* [在 React 中使用](/docs/getting-started/react)
+* [在框架中使用](/docs/getting-started/react)
 * [理解 Graph 生命周期](/docs/concepts/graph-lifecycle)
 * [选择布局](/docs/guides/layout)
 * [添加交互](/docs/guides/interactions)

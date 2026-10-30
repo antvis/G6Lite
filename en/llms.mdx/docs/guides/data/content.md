@@ -6,7 +6,7 @@
 
 ```ts
 const graph = new Graph({
-  container: 'graph',
+  container: 'container',
   data: {
     nodes: [{ id: 'a', data: { type: 'service' } }, { id: 'b' }],
     edges: [{ source: 'a', target: 'b', data: { relation: 'calls' } }],

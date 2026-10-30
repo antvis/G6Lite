@@ -23,20 +23,22 @@ const graph = new Graph({
 
 ## GraphOptions [#graphoptions]
 
-| 字段                | 类型                                    | 说明                                        |
-| ----------------- | ------------------------------------- | ----------------------------------------- |
-| `container`       | `string \| HTMLElement`               | 画布容器。字符串按元素 id 查找                         |
-| `data`            | `GraphData`                           | 节点、边，以及可选的 Combo                          |
-| `node`            | `NodeConfig`                          | 节点形状、样式和状态样式                              |
-| `edge`            | `EdgeConfig`                          | 边形状、样式、箭头和状态样式                            |
-| `combo`           | `ComboConfig`                         | Combo 外观。折叠和嵌套仍是实验能力                      |
-| `label`           | `LabelOptions`                        | 节点和边标签共用的缩放、碰撞策略                          |
-| `layout`          | `LayoutConfig`                        | 布局类型和算法参数                                 |
-| `behaviors`       | `BehaviorOption[]`                    | 交互列表。省略时启用滚轮缩放和拖拽平移                       |
-| `transforms`      | `TransformOption[]`                   | 绘制前的数据转换，例如平行边                            |
-| `plugins`         | `PluginOption[]`                      | 已注册插件                                     |
-| `theme`           | `ThemeOption`                         | `'light'`、`'dark'`，或在预设上覆盖 token          |
-| `autoFitOnResize` | `boolean \| number \| FitViewOptions` | 容器尺寸变化后是否重新 `fitView()`。默认 `false`，保留当前相机 |
+| 字段           | 类型                                    | 说明                                        |
+| ------------ | ------------------------------------- | ----------------------------------------- |
+| `container`  | `string \| HTMLElement`               | 画布容器。字符串按元素 id 查找                         |
+| `data`       | `GraphData`                           | 节点、边，以及可选的 Combo                          |
+| `node`       | `NodeConfig`                          | 节点形状、样式和状态样式                              |
+| `edge`       | `EdgeConfig`                          | 边形状、样式、箭头和状态样式                            |
+| `combo`      | `ComboConfig`                         | Combo 外观。折叠和嵌套仍是实验能力                      |
+| `label`      | `LabelOptions`                        | 节点和边标签共用的缩放、碰撞策略                          |
+| `layout`     | `LayoutConfig`                        | 布局类型和算法参数                                 |
+| `behaviors`  | `BehaviorOption[]`                    | 交互列表。省略时启用滚轮缩放和拖拽平移                       |
+| `transforms` | `TransformOption[]`                   | 绘制前的数据转换，例如平行边                            |
+| `plugins`    | `PluginOption[]`                      | 已注册插件                                     |
+| `theme`      | `ThemeOption`                         | `'light'`、`'dark'`，或在预设上覆盖 token          |
+| `autoFit`    | `boolean \| number \| FitViewOptions` | 容器尺寸变化后是否重新 `fitView()`。默认 `false`，保留当前相机 |
+
+`autoFit` 为 `false` 或未配置时，仅关闭尺寸变化后的自动适配；首次 `render()` 仍会执行 `fitView()`。对象配置也会用于首次适配。
 
 运行中能热更新的是 `node`、`edge`、`label` 和 `theme`，通过 [`graph.updateOptions()`](/docs/api/graph#updateoptions)。
 

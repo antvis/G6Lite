@@ -96,7 +96,7 @@ G6Lite 会通过 `ResizeObserver` 自动同步容器与 canvas 尺寸，调用 `
 const graph = new Graph({
   container: 'container',
   data,
-  autoFitOnResize: {
+  autoFit: {
     padding: 24,
     minZoom: 0.2,
     maxZoom: 1.5,
@@ -104,7 +104,9 @@ const graph = new Graph({
 });
 ```
 
-`autoFitOnResize: true` 等价于尺寸变化后调用 `fitView(0.9)`，也可以直接传数值缩放系数或 `FitViewOptions`。自动适应完成后才会触发 `resize` 事件，因此监听器读取到的是最终 camera。大图或需要保留用户视口的场景建议保持默认关闭。
+`autoFit: true` 等价于尺寸变化后调用 `fitView(0.9)`，也可以直接传数值缩放系数或 `FitViewOptions`。自动适应完成后才会触发 `resize` 事件，因此监听器读取到的是最终 camera。大图或需要保留用户视口的场景建议保持默认关闭。
+
+关闭 `autoFit` 不影响首次 `render()` 的适配；对象配置中的 `padding`、`minZoom`、`maxZoom` 也会用于首次适配。
 
 ## 销毁 [#销毁]
 

@@ -169,22 +169,6 @@
 <priority>0.7</priority>
 </url>
 <url>
-<loc>https://g6lite.antv.vision/docs/getting-started/quick-start</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/getting-started/quick-start" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/getting-started/quick-start" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/getting-started/quick-start" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6lite.antv.vision/docs/getting-started/react</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/getting-started/react" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/getting-started/react" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/getting-started/react" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
 <loc>https://g6lite.antv.vision/docs/examples/basic</loc>
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/examples/basic" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/examples/basic" />
@@ -601,6 +585,22 @@
 <priority>0.7</priority>
 </url>
 <url>
+<loc>https://g6lite.antv.vision/docs/getting-started/quick-start</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/getting-started/quick-start" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/getting-started/quick-start" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/getting-started/quick-start" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6lite.antv.vision/docs/getting-started/react</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/getting-started/react" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/getting-started/react" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/getting-started/react" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
 <loc>https://g6lite.antv.vision/docs/guides/combo</loc>
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/guides/combo" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/guides/combo" />
@@ -877,22 +877,6 @@
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/overview" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/overview" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/overview" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6lite.antv.vision/en/docs/getting-started/quick-start</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/getting-started/quick-start" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/getting-started/quick-start" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/getting-started/quick-start" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6lite.antv.vision/en/docs/getting-started/react</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/getting-started/react" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/getting-started/react" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/getting-started/react" />
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
 </url>
@@ -1309,6 +1293,22 @@
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/examples/zoom-options" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/examples/zoom-options" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/examples/zoom-options" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6lite.antv.vision/en/docs/getting-started/quick-start</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/getting-started/quick-start" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/getting-started/quick-start" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/getting-started/quick-start" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6lite.antv.vision/en/docs/getting-started/react</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/getting-started/react" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/getting-started/react" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/getting-started/react" />
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
 </url>

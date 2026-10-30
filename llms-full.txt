@@ -287,7 +287,11 @@ Combo 已支持分组容器、嵌套、折叠和运行时归组，但这些能�
 
 
 
-G6Lite 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL 引擎。文档按任务组织：先完成第一个图，再深入数据、样式、布局、交互、性能和 API。
+**G6Lite · 轻量图可视化，为大规模关系数据而生**
+
+丰富的布局与交互，配合轻量高效的 WebGL 渲染，让大规模关系清晰呈现，让数据探索流畅自如。
+
+文档按任务组织：先完成第一个图，再深入数据、样式、布局、交互、性能和 API。
 
 ## 先从这里开始 [#先从这里开始]
 
@@ -296,7 +300,7 @@ G6Lite 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL �
 
   <Card title="用 AI 构建 G6Lite 图" href="/docs/ai" />
 
-  <Card title="在 React 中使用" href="/docs/getting-started/react" />
+  <Card title="在框架中使用" href="/docs/getting-started/react" />
 
   <Card title="示例总览" href="/docs/examples" />
 
@@ -327,11 +331,10 @@ G6Lite 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL �
 
 ## 核心能力 [#核心能力]
 
-* **WebGL 高性能渲染**：节点和边通过 GPU 批量绘制，适合大规模图数据。
-* **增量更新**：高亮、选中、隐藏等状态变化走分级刷新和局部 patch。
-* **布局能力**：提供 force、circular、grid、dagre、radial、mds、mindmap、fishbone 等布局，并按类型自动加载对应算法。
-* **交互行为**：缩放、拖拽、选择、高亮、框选、套索、Tooltip 开箱可用。
-* **轻量扩展**：支持主题覆盖、Combo、标签、图标和节点扩展。
+* **面向图数据的 GPU 渲染** — 节点与边共享 WebGL 批量渲染管线，为流畅探索关系数据而设计。
+* **按变化分级刷新** — 状态、位置和业务数据变更按刷新级别调度，支持局部更新；边状态变更等情况会触发全量重建。
+* **内置布局与交互** — 通过 `layout` 选择 `@antv/layout` 等布局，通过 `behaviors` 配置缩放、平移、拖拽、选择和高亮交互；未配置 `behaviors` 时仅默认启用缩放和平移。
+* **清晰的扩展边界** — 从包根导入公开 API，通过函数映射数据与样式，并使用统一的 `register()` API 扩展能力。
 
 ## 选型提示 [#选型提示]
 
@@ -1001,20 +1004,22 @@ const graph = new Graph({
 
 ## GraphOptions [#graphoptions]
 
-| 字段                | 类型                                    | 说明                                        |
-| ----------------- | ------------------------------------- | ----------------------------------------- |
-| `container`       | `string \| HTMLElement`               | 画布容器。字符串按元素 id 查找                         |
-| `data`            | `GraphData`                           | 节点、边，以及可选的 Combo                          |
-| `node`            | `NodeConfig`                          | 节点形状、样式和状态样式                              |
-| `edge`            | `EdgeConfig`                          | 边形状、样式、箭头和状态样式                            |
-| `combo`           | `ComboConfig`                         | Combo 外观。折叠和嵌套仍是实验能力                      |
-| `label`           | `LabelOptions`                        | 节点和边标签共用的缩放、碰撞策略                          |
-| `layout`          | `LayoutConfig`                        | 布局类型和算法参数                                 |
-| `behaviors`       | `BehaviorOption[]`                    | 交互列表。省略时启用滚轮缩放和拖拽平移                       |
-| `transforms`      | `TransformOption[]`                   | 绘制前的数据转换，例如平行边                            |
-| `plugins`         | `PluginOption[]`                      | 已注册插件                                     |
-| `theme`           | `ThemeOption`                         | `'light'`、`'dark'`，或在预设上覆盖 token          |
-| `autoFitOnResize` | `boolean \| number \| FitViewOptions` | 容器尺寸变化后是否重新 `fitView()`。默认 `false`，保留当前相机 |
+| 字段           | 类型                                    | 说明                                        |
+| ------------ | ------------------------------------- | ----------------------------------------- |
+| `container`  | `string \| HTMLElement`               | 画布容器。字符串按元素 id 查找                         |
+| `data`       | `GraphData`                           | 节点、边，以及可选的 Combo                          |
+| `node`       | `NodeConfig`                          | 节点形状、样式和状态样式                              |
+| `edge`       | `EdgeConfig`                          | 边形状、样式、箭头和状态样式                            |
+| `combo`      | `ComboConfig`                         | Combo 外观。折叠和嵌套仍是实验能力                      |
+| `label`      | `LabelOptions`                        | 节点和边标签共用的缩放、碰撞策略                          |
+| `layout`     | `LayoutConfig`                        | 布局类型和算法参数                                 |
+| `behaviors`  | `BehaviorOption[]`                    | 交互列表。省略时启用滚轮缩放和拖拽平移                       |
+| `transforms` | `TransformOption[]`                   | 绘制前的数据转换，例如平行边                            |
+| `plugins`    | `PluginOption[]`                      | 已注册插件                                     |
+| `theme`      | `ThemeOption`                         | `'light'`、`'dark'`，或在预设上覆盖 token          |
+| `autoFit`    | `boolean \| number \| FitViewOptions` | 容器尺寸变化后是否重新 `fitView()`。默认 `false`，保留当前相机 |
+
+`autoFit` 为 `false` 或未配置时，仅关闭尺寸变化后的自动适配；首次 `render()` 仍会执行 `fitView()`。对象配置也会用于首次适配。
 
 运行中能热更新的是 `node`、`edge`、`label` 和 `theme`，通过 [`graph.updateOptions()`](/docs/api/graph#updateoptions)。
 
@@ -2079,7 +2084,7 @@ G6Lite 会通过 `ResizeObserver` 自动同步容器与 canvas 尺寸，调用 `
 const graph = new Graph({
   container: 'container',
   data,
-  autoFitOnResize: {
+  autoFit: {
     padding: 24,
     minZoom: 0.2,
     maxZoom: 1.5,
@@ -2087,7 +2092,9 @@ const graph = new Graph({
 });
 ```
 
-`autoFitOnResize: true` 等价于尺寸变化后调用 `fitView(0.9)`，也可以直接传数值缩放系数或 `FitViewOptions`。自动适应完成后才会触发 `resize` 事件，因此监听器读取到的是最终 camera。大图或需要保留用户视口的场景建议保持默认关闭。
+`autoFit: true` 等价于尺寸变化后调用 `fitView(0.9)`，也可以直接传数值缩放系数或 `FitViewOptions`。自动适应完成后才会触发 `resize` 事件，因此监听器读取到的是最终 camera。大图或需要保留用户视口的场景建议保持默认关闭。
+
+关闭 `autoFit` 不影响首次 `render()` 的适配；对象配置中的 `padding`、`minZoom`、`maxZoom` 也会用于首次适配。
 
 ## 销毁 [#销毁]
 
@@ -2102,7 +2109,9 @@ graph.destroy();
 
 
 
-G6Lite 是一个基于 WebGL 的轻量图可视化与分析引擎，目标是让大规模图数据在浏览器中保持稳定渲染和低成本交互。
+**G6Lite · 轻量图可视化，为大规模关系数据而生**
+
+丰富的布局与交互，配合轻量高效的 WebGL 渲染，让大规模关系清晰呈现，让数据探索流畅自如。
 
 它保留 G6 用户熟悉的图配置心智：数据、节点、边、布局、交互和主题，但实现重点放在 WebGL 渲染、增量刷新和高频交互上。
 
@@ -2151,185 +2160,6 @@ G6 v5 是功能完整的图可视化框架，插件、元素、动画、交互�
 * [Graph 生命周期](/docs/concepts/graph-lifecycle)
 * [数据模型](/docs/concepts/data-model)
 * [安装与第一个图](/docs/getting-started/quick-start)
-
-
-# 安装与第一个图 (/docs/getting-started/quick-start)
-
-
-
-G6Lite 的最小使用链路是：安装依赖、准备一个有宽高的容器、创建 `Graph`、传入数据与配置、调用 `render()`。
-
-画布默认支持平滑滚轮缩放和拖拽平移；只有节点拖拽、选择、高亮等元素级交互需要显式配置。缩放灵敏度和范围可通过 [`zoom-canvas`](/docs/guides/interactions#缩放手感与范围) 调整。
-
-## 安装 [#安装]
-
-```bash
-npm install @antv/g6-lite
-```
-
-## 准备容器 [#准备容器]
-
-`container` 可以是 DOM id、选择器或 HTMLElement。容器必须有明确宽高，否则画布会退回默认尺寸。
-
-```html
-<div id="graph" style="width: 800px; height: 500px"></div>
-```
-
-在实际业务中，通常让容器跟随父级布局：
-
-```css
-#graph {
-  width: 100%;
-  height: 100%;
-  min-height: 480px;
-}
-```
-
-## 渲染基础图 [#渲染基础图]
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const graph = new Graph({
-  container: 'graph',
-  data: {
-    nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
-    edges: [
-      { source: 'a', target: 'b' },
-      { source: 'a', target: 'c' },
-    ],
-  },
-  layout: { type: 'circular', radius: 140 },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-});
-
-await graph.render();
-```
-
-## 代码做了什么 [#代码做了什么]
-
-1. `data.nodes` 定义节点，`id` 是唯一标识，业务字段放在 `data` 中。
-2. `data.edges` 定义边，`source` 和 `target` 指向节点 id。
-3. `layout` 决定节点坐标；不传布局时会使用节点上的 `x` / `y`。
-4. `behaviors` 启用画布缩放、画布拖拽、节点拖拽和悬停高亮。
-5. `await graph.render()` 执行布局、初始化渲染管线并绘制首帧。
-
-## 常用配置 [#常用配置]
-
-| 选项          | 说明                                 | 继续阅读                            |
-| ----------- | ---------------------------------- | ------------------------------- |
-| `container` | 挂载画布的 DOM 容器                       | 本页                              |
-| `data`      | 图数据，包含 `nodes`、`edges`、可选 `combos` | [数据](/docs/guides/data)         |
-| `node`      | 节点类型、样式、状态样式、标签                    | [节点](/docs/guides/node)         |
-| `edge`      | 边类型、样式、箭头、标签                       | [边](/docs/guides/edge)          |
-| `combo`     | 节点分组容器样式                           | [Combo](/docs/guides/combo)     |
-| `layout`    | 布局算法与参数                            | [布局](/docs/guides/layout)       |
-| `behaviors` | 交互行为列表                             | [交互](/docs/guides/interactions) |
-| `theme`     | `light`、`dark` 或 token 覆盖          | [主题](/docs/guides/theme)        |
-
-## 更新数据 [#更新数据]
-
-首次渲染后，可以用 `setData()` 替换整份数据：
-
-```ts
-await graph.setData({
-  nodes: [{ id: 'next-a' }, { id: 'next-b' }],
-  edges: [{ source: 'next-a', target: 'next-b' }],
-});
-```
-
-也可以做增量更新：
-
-```ts
-graph.addNode({ id: 'd', x: 120, y: 80, data: { label: '支付服务' } });
-graph.addEdge({ source: 'b', target: 'd', data: { label: '支付' } });
-graph.setItemState('d', 'selected', true);
-```
-
-## 销毁实例 [#销毁实例]
-
-页面卸载或容器被移除时，调用 `destroy()` 释放渲染器、调度器、事件和观察器。
-
-```ts
-graph.destroy();
-```
-
-## 下一步 [#下一步]
-
-* [在 React 中使用](/docs/getting-started/react)
-* [理解 Graph 生命周期](/docs/concepts/graph-lifecycle)
-* [选择布局](/docs/guides/layout)
-* [添加交互](/docs/guides/interactions)
-* [查看示例](/docs/examples)
-
-
-# 在 React 中使用 (/docs/getting-started/react)
-
-
-
-React 中推荐在 `useEffect` 内创建 `Graph`，通过 `ref` 传入真实 DOM，并在 cleanup 中销毁实例。
-
-```tsx
-import { useEffect, useRef } from 'react';
-import { Graph } from '@antv/g6-lite';
-
-export function GraphView() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const graph = new Graph({
-      container: containerRef.current,
-      data: {
-        nodes: [
-          { id: 'a', data: { label: 'A' } },
-          { id: 'b', data: { label: 'B' } },
-        ],
-        edges: [{ source: 'a', target: 'b' }],
-      },
-      node: {
-        style: {
-          size: 18,
-          label: (node) => (node.data?.label as string) ?? node.id,
-          labelPlacement: 'bottom',
-        },
-      },
-      edge: { style: { endArrow: true } },
-      layout: { type: 'circular', radius: 120 },
-      autoFitOnResize: { padding: 24, maxZoom: 1.5 },
-      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
-    });
-
-    graph.render();
-
-    return () => {
-      graph.destroy();
-    };
-  }, []);
-
-  return <div ref={containerRef} style={{ width: '100%', height: 480 }} />;
-}
-```
-
-<Callout type="warn" title="注意事项">
-  * 容器需要有明确高度，只有 `width: 100%` 不够。
-  * React Strict Mode 在开发环境可能会重复执行 effect，cleanup 中调用 `graph.destroy()` 可以避免残留 canvas 和事件监听。
-  * 如果数据来自请求，建议在拿到数据后创建实例；或先创建空图，再调用 `await graph.setData(data)`。
-  * 如果父容器尺寸会变化，G6Lite 会通过 ResizeObserver 同步 canvas 尺寸。默认会保留用户当前的缩放和平移；希望分栏拖拽或侧栏展开后让关系图重新完整可见时，配置 `autoFitOnResize: true`，或传入 `FitViewOptions` 控制 padding 和缩放边界。
-</Callout>
-
-## 数据变化 [#数据变化]
-
-若数据会随 props 更新，保留 `graph` 引用并在 effect 中调用 `setData()`：
-
-```tsx
-useEffect(() => {
-  graphRef.current?.setData(data);
-}, [data]);
-```
-
-如果只是高亮、选中、隐藏元素，优先使用 `setItemState()`、`hideItem()`、`showItem()` 等增量 API，避免频繁替换整份数据。
 
 
 # 最简关系图 (/docs/examples/basic)
@@ -2798,6 +2628,341 @@ useEffect(() => {
 
 
 <ExampleDetail id="zoom-options" locale="zh" />
+
+
+# 安装与第一个图 (/docs/getting-started/quick-start)
+
+
+
+G6Lite 的最小使用链路是：安装依赖、准备一个有宽高的容器、创建 `Graph`、传入数据与配置、调用 `render()`。
+
+画布默认支持平滑滚轮缩放和拖拽平移；只有节点拖拽、选择、高亮等元素级交互需要显式配置。缩放灵敏度和范围可通过 [`zoom-canvas`](/docs/guides/interactions#缩放手感与范围) 调整。
+
+## 安装 [#安装]
+
+```bash
+npm install @antv/g6-lite
+```
+
+## 准备容器 [#准备容器]
+
+`container` 可以是 DOM id、选择器或 HTMLElement。容器必须有明确宽高，否则画布会退回默认尺寸。
+
+```html
+<div id="container" style="width: 800px; height: 500px"></div>
+```
+
+在实际业务中，通常让容器跟随父级布局：
+
+```css
+#container {
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+}
+```
+
+## 渲染基础图 [#渲染基础图]
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: 'container',
+  data: {
+    nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+    edges: [
+      { source: 'a', target: 'b' },
+      { source: 'a', target: 'c' },
+    ],
+  },
+  layout: { type: 'circular', radius: 140 },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+});
+
+await graph.render();
+```
+
+## 代码做了什么 [#代码做了什么]
+
+1. `data.nodes` 定义节点，`id` 是唯一标识，业务字段放在 `data` 中。
+2. `data.edges` 定义边，`source` 和 `target` 指向节点 id。
+3. `layout` 决定节点坐标；不传布局时会使用节点上的 `x` / `y`。
+4. `behaviors` 启用画布缩放、画布拖拽、节点拖拽和悬停高亮。
+5. `await graph.render()` 执行布局、初始化渲染管线并绘制首帧。
+
+## 常用配置 [#常用配置]
+
+| 选项          | 说明                                 | 继续阅读                            |
+| ----------- | ---------------------------------- | ------------------------------- |
+| `container` | 挂载画布的 DOM 容器                       | 本页                              |
+| `data`      | 图数据，包含 `nodes`、`edges`、可选 `combos` | [数据](/docs/guides/data)         |
+| `node`      | 节点类型、样式、状态样式、标签                    | [节点](/docs/guides/node)         |
+| `edge`      | 边类型、样式、箭头、标签                       | [边](/docs/guides/edge)          |
+| `combo`     | 节点分组容器样式                           | [Combo](/docs/guides/combo)     |
+| `layout`    | 布局算法与参数                            | [布局](/docs/guides/layout)       |
+| `behaviors` | 交互行为列表                             | [交互](/docs/guides/interactions) |
+| `theme`     | `light`、`dark` 或 token 覆盖          | [主题](/docs/guides/theme)        |
+
+## 更新数据 [#更新数据]
+
+首次渲染后，可以用 `setData()` 替换整份数据：
+
+```ts
+await graph.setData({
+  nodes: [{ id: 'next-a' }, { id: 'next-b' }],
+  edges: [{ source: 'next-a', target: 'next-b' }],
+});
+```
+
+也可以做增量更新：
+
+```ts
+graph.addNode({ id: 'd', x: 120, y: 80, data: { label: '支付服务' } });
+graph.addEdge({ source: 'b', target: 'd', data: { label: '支付' } });
+graph.setItemState('d', 'selected', true);
+```
+
+## 销毁实例 [#销毁实例]
+
+页面卸载或容器被移除时，调用 `destroy()` 释放渲染器、调度器、事件和观察器。
+
+```ts
+graph.destroy();
+```
+
+## 下一步 [#下一步]
+
+* [在框架中使用](/docs/getting-started/react)
+* [理解 Graph 生命周期](/docs/concepts/graph-lifecycle)
+* [选择布局](/docs/guides/layout)
+* [添加交互](/docs/guides/interactions)
+* [查看示例](/docs/examples)
+
+
+# 在框架中使用 (/docs/getting-started/react)
+
+
+
+G6Lite 可以直接集成到 React 和 Vue 3 中。通过框架的 ref 传入真实 DOM，在挂载后创建图实例，并在卸载时销毁。下面分别介绍两个框架的组件写法和数据更新方式。
+
+## 安装依赖 [#安装依赖]
+
+在已有 React 或 Vue 3 项目中安装 G6Lite：
+
+```bash
+npm install @antv/g6-lite
+```
+
+## 在 React 中使用 [#在-react-中使用]
+
+在 `useEffect` 中创建实例，通过 `useRef` 保存 DOM、图实例和首次渲染的 Promise。
+
+### 挂载图实例 [#挂载图实例]
+
+下面的组件可保存为 `GraphView.tsx`。用 `useRef` 保存实例和首次渲染的 Promise，后续更新时可以复用同一个图。
+
+```tsx
+import { useEffect, useRef } from 'react';
+import { Graph } from '@antv/g6-lite';
+
+export function GraphView() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const graphRef = useRef<Graph | null>(null);
+  const renderRef = useRef<Promise<void> | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: {
+        nodes: [
+          { id: 'a', data: { label: 'A' } },
+          { id: 'b', data: { label: 'B' } },
+        ],
+        edges: [{ source: 'a', target: 'b' }],
+      },
+      node: {
+        style: {
+          size: 18,
+          label: (node) => (node.data?.label as string) ?? node.id,
+          labelPlacement: 'bottom',
+        },
+      },
+      edge: { style: { endArrow: true } },
+      layout: { type: 'circular', radius: 120 },
+      autoFit: { padding: 24, maxZoom: 1.5 },
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+    });
+
+    graphRef.current = graph;
+    const rendered = graph.render();
+    renderRef.current = rendered;
+    void rendered.catch(console.error);
+
+    return () => {
+      graph.destroy();
+      graphRef.current = null;
+      renderRef.current = null;
+    };
+  }, []);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 480 }} />;
+}
+```
+
+### 更新图数据 [#更新图数据]
+
+若数据来自 props，为上面的组件增加 `data: GraphData` 参数，从包根导入 `GraphData` 类型，并在挂载 effect 之后添加以下 effect。先等待首次 `render()` 完成，再调用 `setData()`：
+
+```tsx
+// import type { GraphData } from '@antv/g6-lite';
+// export function GraphView({ data }: { data: GraphData }) { ... }
+useEffect(() => {
+  const graph = graphRef.current;
+  const rendered = renderRef.current;
+  if (!graph || !rendered) return;
+  let cancelled = false;
+
+  const update = async () => {
+    await rendered;
+    if (cancelled || graph.destroyed) return;
+    await graph.setData(data);
+  };
+  void update().catch(console.error);
+
+  return () => {
+    cancelled = true;
+  };
+}, [data]);
+```
+
+用新的数据对象触发更新，避免在原对象上修改后继续传入同一个引用。数据来自请求时，可以先传入 `{ nodes: [], edges: [] }`，待请求完成后更新 props。不要把 `data` 加入创建实例的 effect 依赖，否则每次数据变化都会销毁并重建图。
+
+如果只是高亮、选中或隐藏元素，优先使用 `setItemState()`、`hideItem()`、`showItem()` 等增量 API。更多方式见[数据配置](/docs/guides/data)。
+
+## 在 Vue 中使用 [#在-vue-中使用]
+
+在 Vue 3 中，通过模板 ref 获取真实 DOM，在 `onMounted` 中创建 `Graph`，并在 `onBeforeUnmount` 中销毁实例。以下示例使用 Composition API 和 `<script setup lang="ts">`。
+
+### 挂载图实例 [#挂载图实例-1]
+
+将下面的单文件组件保存为 `GraphView.vue`，在父组件中导入并使用 `<GraphView />`：
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Graph } from '@antv/g6-lite';
+
+const containerRef = ref<HTMLDivElement | null>(null);
+let graph: Graph | undefined;
+let rendered: Promise<void> | undefined;
+
+onMounted(() => {
+  if (!containerRef.value) return;
+
+  graph = new Graph({
+    container: containerRef.value,
+    data: {
+      nodes: [
+        { id: 'a', data: { label: 'A' } },
+        { id: 'b', data: { label: 'B' } },
+      ],
+      edges: [{ source: 'a', target: 'b' }],
+    },
+    node: {
+      style: {
+        size: 18,
+        label: (node) => (node.data?.label as string) ?? node.id,
+        labelPlacement: 'bottom',
+      },
+    },
+    edge: { style: { endArrow: true } },
+    layout: { type: 'circular', radius: 120 },
+    autoFit: { padding: 24, maxZoom: 1.5 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+  });
+
+  rendered = graph.render();
+  void rendered.catch(console.error);
+});
+
+onBeforeUnmount(() => {
+  graph?.destroy();
+  graph = undefined;
+  rendered = undefined;
+});
+</script>
+
+<template>
+  <div ref="containerRef" style="width: 100%; height: 480px" />
+</template>
+```
+
+模板 ref 在挂载后才可用。`Graph` 实例保存在普通变量中，避免被 Vue 深度响应式代理；如需响应式保存实例，可以使用 `shallowRef`。参见 [Vue 模板 ref](https://vuejs.org/guide/essentials/template-refs) 和[浅层响应式 API](https://vuejs.org/api/reactivity-advanced.html#shallowref)。
+
+### 更新图数据 [#更新图数据-1]
+
+若数据来自 props，在上面的 `<script setup>` 中增加以下导入和声明，再添加 `watch`。首次挂载的数据改为 `data: props.data`，后续替换 props 时复用图实例：
+
+```ts
+import { watch } from 'vue';
+import type { GraphData } from '@antv/g6-lite';
+
+const props = defineProps<{ data: GraphData }>();
+
+watch(
+  () => props.data,
+  async (data, _previous, onCleanup) => {
+    const current = graph;
+    const ready = rendered;
+    if (!current || !ready) return;
+    let cancelled = false;
+    onCleanup(() => {
+      cancelled = true;
+    });
+
+    try {
+      await ready;
+      if (cancelled || current.destroyed) return;
+      await current.setData(data);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);
+```
+
+这个 watcher 监听数据对象的替换。父组件应传入新的对象；如果直接修改原对象的节点或边，优先调用增量 API，或生成新对象后再传入。通常不必对大规模图数据使用深度监听。
+
+先等待首次 `render()` 完成，避免初始化期间的更新被忽略。数据来自请求时，可以先传入 `{ nodes: [], edges: [] }`，再更新 props。更多方式见[数据配置](/docs/guides/data)。
+
+## 适配容器尺寸 [#适配容器尺寸]
+
+容器必须有明确宽高，只有 `width: 100%` 不够。上面的示例使用固定高度 `480`；在弹性布局中，也可以用 CSS 设置高度或 `min-height`。
+
+G6Lite 通过 `ResizeObserver` 同步 canvas 尺寸，默认保留用户当前的缩放和平移。示例中的 `autoFit` 会在尺寸变化时重新适配图，并限制 padding 和最大缩放。配置详情见[Graph 生命周期](/docs/concepts/graph-lifecycle#容器尺寸变化)。
+
+Vue 示例使用内联样式设置 `480px` 高度。使用百分比高度时，父容器也需要确定的高度。图组件放在隐藏页签或弹窗中时，建议在容器显示且尺寸确定后再创建实例。
+
+## 卸载与清理 [#卸载与清理]
+
+### React [#react]
+
+在 effect 的 cleanup 中调用 `graph.destroy()`，释放 canvas、事件监听、观察器和布局任务，同时清空保存的引用。
+
+React Strict Mode 在开发环境会额外执行一次 effect 的创建与清理。保留 cleanup，让每次创建都对应一次销毁，避免残留画布或事件监听。参见 [React 的 effect 清理说明](https://react.dev/reference/react/useEffect#my-effect-runs-twice-when-the-component-mounts)。
+
+### Vue [#vue]
+
+在 `onBeforeUnmount` 中调用 `graph.destroy()`，释放 canvas、事件监听、观察器和布局任务，并清空实例引用。Vue 会在组件卸载时停止同步创建的 watcher；示例中的清理回调也会阻止尚未开始的数据更新。参见 [Vue 生命周期钩子](https://vuejs.org/api/composition-api-lifecycle#onbeforeunmount)。
+
+## 下一步 [#下一步]
+
+* [理解 Graph 生命周期](/docs/concepts/graph-lifecycle)
+* [配置交互行为](/docs/guides/interactions)
+* [查看完整示例](/docs/examples)
 
 
 # Combo (/docs/guides/combo)

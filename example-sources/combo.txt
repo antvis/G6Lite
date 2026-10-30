@@ -23,7 +23,7 @@ export async function run(container: string | HTMLElement) {
   containerEl.style.position = 'relative';
 
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container: containerEl,
     data: {
       nodes: [

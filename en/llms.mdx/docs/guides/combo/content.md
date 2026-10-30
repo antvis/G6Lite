@@ -6,7 +6,7 @@ Combo capabilities are experimental during `0.1.x`.
 
 ```ts
 const graph = new Graph({
-  container: 'graph',
+  container: 'container',
   data: {
     nodes: [
       { id: 'n1', comboId: 'frontend' },

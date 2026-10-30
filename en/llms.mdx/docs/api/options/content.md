@@ -23,20 +23,22 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 
 ## GraphOptions [#graphoptions]
 
-| Field             | Type                                  | Description                                                                                         |
-| ----------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `container`       | `string \| HTMLElement`               | Canvas container. A string is looked up as an element id                                            |
-| `data`            | `GraphData`                           | Nodes, edges, and optional combos                                                                   |
-| `node`            | `NodeConfig`                          | Node shape, style, and state styles                                                                 |
-| `edge`            | `EdgeConfig`                          | Edge shape, style, arrows, and state styles                                                         |
-| `combo`           | `ComboConfig`                         | Combo appearance. Collapse and nesting are still experimental                                       |
-| `label`           | `LabelOptions`                        | Zoom and collision policy shared by node and edge labels                                            |
-| `layout`          | `LayoutConfig`                        | Layout type and algorithm parameters                                                                |
-| `behaviors`       | `BehaviorOption[]`                    | Interaction list. Omitted means wheel zoom and drag pan                                             |
-| `transforms`      | `TransformOption[]`                   | Data transforms before drawing, such as parallel edges                                              |
-| `plugins`         | `PluginOption[]`                      | Registered plugins                                                                                  |
-| `theme`           | `ThemeOption`                         | `'light'`, `'dark'`, or a preset plus token overrides                                               |
-| `autoFitOnResize` | `boolean \| number \| FitViewOptions` | Whether a container resize calls `fitView()` again. Default `false`, which keeps the current camera |
+| Field        | Type                                  | Description                                                                                         |
+| ------------ | ------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `container`  | `string \| HTMLElement`               | Canvas container. A string is looked up as an element id                                            |
+| `data`       | `GraphData`                           | Nodes, edges, and optional combos                                                                   |
+| `node`       | `NodeConfig`                          | Node shape, style, and state styles                                                                 |
+| `edge`       | `EdgeConfig`                          | Edge shape, style, arrows, and state styles                                                         |
+| `combo`      | `ComboConfig`                         | Combo appearance. Collapse and nesting are still experimental                                       |
+| `label`      | `LabelOptions`                        | Zoom and collision policy shared by node and edge labels                                            |
+| `layout`     | `LayoutConfig`                        | Layout type and algorithm parameters                                                                |
+| `behaviors`  | `BehaviorOption[]`                    | Interaction list. Omitted means wheel zoom and drag pan                                             |
+| `transforms` | `TransformOption[]`                   | Data transforms before drawing, such as parallel edges                                              |
+| `plugins`    | `PluginOption[]`                      | Registered plugins                                                                                  |
+| `theme`      | `ThemeOption`                         | `'light'`, `'dark'`, or a preset plus token overrides                                               |
+| `autoFit`    | `boolean \| number \| FitViewOptions` | Whether a container resize calls `fitView()` again. Default `false`, which keeps the current camera |
+
+Setting `autoFit` to `false` or omitting it disables fitting after a size change; the initial `render()` still calls `fitView()`. An options object also configures the initial fit.
 
 At runtime, `node`, `edge`, `label`, and `theme` can be updated with [`graph.updateOptions()`](/en/docs/api/graph#updateoptions).
 

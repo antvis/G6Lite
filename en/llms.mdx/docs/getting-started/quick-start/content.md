@@ -13,7 +13,7 @@ The canvas enables smooth wheel zoom and canvas dragging when `behaviors` is omi
 The container must have an explicit size:
 
 ```html
-<div id="graph" style="width: 800px; height: 500px"></div>
+<div id="container" style="width: 800px; height: 500px"></div>
 ```
 
 Create and render the graph using package-root APIs:
@@ -22,7 +22,7 @@ Create and render the graph using package-root APIs:
 import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
-  container: 'graph',
+  container: 'container',
   data: {
     nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
     edges: [
@@ -39,4 +39,4 @@ await graph.render();
 
 Use `setData()` for a complete replacement and the add/update/remove/state APIs for incremental changes. Call `graph.destroy()` when the page or component unmounts.
 
-Next: [React integration](/en/docs/getting-started/react), [data configuration](/en/docs/guides/data), and [examples](/en/docs/examples).
+Next: [Use with React and Vue](/en/docs/getting-started/react), [data configuration](/en/docs/guides/data), and [examples](/en/docs/examples).

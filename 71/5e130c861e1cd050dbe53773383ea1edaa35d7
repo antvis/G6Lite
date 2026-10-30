@@ -1,0 +1,589 @@
+site/src/components/site-footer.module.css
+  s_b8892a7b0fc6e6::t_1f6e7d2c2aa6a0 15,99,113
+scripts/check-package.mjs
+  s_b8892a7b0fc6e6::t_9db189dd9c9b61 3,133
+  s_b8892a7b0fc6e6::t_d5b28128313356 5,89-93,131-132,134-154,156
+site/content/docs/en/getting-started/react.mdx
+  s_012f96d409d953::t_4729b3e77d9607 2-3,6,10,16,18-21,63,92-130,132-153,155-188,195-196,198-199,204-207,211
+  s_012f96d409d953::t_135d4700333989 8-9,11-15,17,22,30-31,47-56,64-91,154,189-192,194,197,200-203,209,212-213
+  s_1052240f0c6fe1::t_8ce29b77d3beed 43,131,193
+  s_012f96d409d953::t_9f181fc3f35bc2 7
+  s_012f96d409d953::t_a660c31f1fd8d6 208
+site/src/app/(zh)/layout.tsx
+  s_b8892a7b0fc6e6::t_0ab505eaba8555 12,15,22,31
+playground/demos/polyline-routing.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 8
+playground/demos/brush-click-select.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 12
+site/src/components/homepage/content.ts
+  s_b8892a7b0fc6e6::t_3c4a12b693e049 27
+  s_b8892a7b0fc6e6::t_0ab505eaba8555 2,5,114,117,144,289,292
+  s_b8892a7b0fc6e6::t_8ecc22afdace29 26,35-39,41,43-50,178,180,188-192,194-205
+  s_b8892a7b0fc6e6::t_2579ecf91d9c8b 73-74,233-234
+  s_b8892a7b0fc6e6::t_6195b0064edfc9 87,249
+  s_b8892a7b0fc6e6::t_5401ed39611bc6 65,76,224,236
+  s_b8892a7b0fc6e6::t_6b9d6ea9144ac9 66-72,75,77-82,225,227-232,235,237-242
+  s_b8892a7b0fc6e6::t_6952f49d1342e9 42
+  s_b8892a7b0fc6e6::t_118544af0ba1ca 254-255
+  s_b8892a7b0fc6e6::t_5a269758be241a 89
+playground/demos/large.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 26
+playground/demos/data-mutations.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 21
+playground/demos/mindmap.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 124
+site/src/components/example-detail.tsx
+  s_b8892a7b0fc6e6::t_55bda877de8fb9 31,47
+  s_b8892a7b0fc6e6::t_c198bd29f99817 48
+playground/demos/custom-behavior.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 49
+playground/demos/extension-system.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 157
+playground/demos/edge-features.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 32,71,101,121,165,185
+playground/demos/edge-loops.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 8
+playground/demos/theme.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 33
+site/src/lib/site-config.ts
+  s_b8892a7b0fc6e6::t_0ab505eaba8555 2,8,10-11
+site/src/components/homepage/homepage.tsx
+  s_b8892a7b0fc6e6::t_5401ed39611bc6 180,182
+  s_b8892a7b0fc6e6::t_c9b83edc32a95f 212,219-221,279
+  s_b8892a7b0fc6e6::t_8ecc22afdace29 15-16,33,116,118-120,125,127,131,133,138,140-164,167
+  s_b8892a7b0fc6e6::t_93e198297256ba 79,251
+  s_b8892a7b0fc6e6::t_6952f49d1342e9 121,123-124,166
+  s_b8892a7b0fc6e6::t_abd345ec9c66e3 261
+  s_b8892a7b0fc6e6::t_b5530473e140fb 222-235
+  s_b8892a7b0fc6e6::t_93fcb4dd86a970 267-275
+  s_b8892a7b0fc6e6::t_1f6e7d2c2aa6a0 37
+  s_b8892a7b0fc6e6::t_d6c697a30908ea 236-238
+site/content/docs/en/guides/parallel-edges.mdx
+  s_012f96d409d953::t_d6ec66b919b4e8 8
+src/graph.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 150,1484
+README.md
+  s_b8892a7b0fc6e6::t_00ef2e0499cd88 6-10
+  s_b8892a7b0fc6e6::t_d5b28128313356 17,86-90,92-94,96-114,135
+  s_1052240f0c6fe1::t_2b2cf4d2748b02 33-34
+  s_012f96d409d953::t_d6ec66b919b4e8 48,57,91,95
+  s_b8892a7b0fc6e6::t_7a15b949d3a663 136
+.github/workflows/release.yml
+  s_b8892a7b0fc6e6::t_9db189dd9c9b61 58-60
+playground/demos/viewport-controls.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 9
+site/content/docs/en/concepts/graph-lifecycle.mdx
+  s_1052240f0c6fe1::t_8ce29b77d3beed 40,48
+  s_1052240f0c6fe1::t_7ee0eb054c42ec 49-50
+  s_012f96d409d953::t_d6ec66b919b4e8 11,38
+playground/demos/org-chart.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 39
+playground/demos/edge-states.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 43
+playground/demos/batch-node-positions.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 18
+site/src/app/(zh)/(home)/page.tsx
+  s_b8892a7b0fc6e6::t_0ab505eaba8555 10-11,17-18
+playground/demos/large-labeled.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 35
+site/public/homepage/README.md
+  s_b8892a7b0fc6e6::t_404a9a79d39db7 5
+site/src/app/en/(home)/page.tsx
+  s_b8892a7b0fc6e6::t_0ab505eaba8555 9-10,16-17
+scripts/check-site.mjs
+  s_b8892a7b0fc6e6::t_ce430e91242290 299-301
+  s_b8892a7b0fc6e6::t_5a269758be241a 310,329-335
+  s_b8892a7b0fc6e6::t_5bd3e81909e40e 160-189,342
+  s_012f96d409d953::t_d6ec66b919b4e8 304
+  s_b8892a7b0fc6e6::t_4b2cc02c767bf2 302
+  s_b8892a7b0fc6e6::t_291e1df90a80c8 311-320
+  s_b8892a7b0fc6e6::t_db0cfc38db58ca 321-328
+  s_b8892a7b0fc6e6::t_a421f71fb0dba3 3,274-298,303,305-309,336-341
+  s_b8892a7b0fc6e6::t_e08680809a6f9a 343
+playground/demos/layout-gallery.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 18
+playground/demos/layouts.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 44
+playground/demos/fishbone.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 112
+package.json
+  s_b8892a7b0fc6e6::t_00ef2e0499cd88 4
+  s_b8892a7b0fc6e6::t_66a749745cecfc 9-10,23-24,27
+  s_b8892a7b0fc6e6::t_9db189dd9c9b61 25
+playground/demos/decoration-badges.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 9
+skills/antv-g6lite-graph/SKILL.md
+  s_012f96d409d953::t_d6ec66b919b4e8 26
+site/content/docs/zh/getting-started/react.mdx
+  s_012f96d409d953::t_135d4700333989 8-9,11-15,17,22,30-31,58-61,65-66,76,79-80,82-96,100-102,165,200-203,205,208,211-214,219-220,223-224
+  s_1052240f0c6fe1::t_8ce29b77d3beed 54,142,204
+  s_012f96d409d953::t_4729b3e77d9607 2-3,6,10,16,18-21,74,103-141,143-164,166-199,206-207,209-210,215-218,222
+  s_012f96d409d953::t_51368ec25ca351 7
+  s_012f96d409d953::t_6cae27b8d943b3 221
+site/src/components/homepage/example-showcase.tsx
+  s_b8892a7b0fc6e6::t_95aa3ebf3f5d65 77-105,107-113,130-131,196,206-210
+  s_b8892a7b0fc6e6::t_022fc5916a4700 51-58,115-125,157-158,160,162-163,182-195,197-199,205,211-212,214,216-220
+  s_b8892a7b0fc6e6::t_cf7ca42c4f74b3 4,76,106,126-129,132-155,159
+  s_b8892a7b0fc6e6::t_73f59df1ad65e0 1-3,5-50,59-74,114,156,161,200-204,213,221-225
+  s_b8892a7b0fc6e6::t_5b84bd65f48694 164-181
+  s_b8892a7b0fc6e6::t_2579ecf91d9c8b 215
+  s_b8892a7b0fc6e6::t_da628ee4ff840f 75
+site/src/components/provider.tsx
+  s_1052240f0c6fe1::t_ec33b322264f5a 45
+src/types.ts
+  s_1052240f0c6fe1::t_7ee0eb054c42ec 747
+  s_1052240f0c6fe1::t_8ce29b77d3beed 749
+playground/demos/custom-label-renderer.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 50
+site/content/docs/zh/concepts/overview.mdx
+  s_b8892a7b0fc6e6::t_00ef2e0499cd88 6-8
+README.zh-CN.md
+  s_012f96d409d953::t_d6ec66b919b4e8 48,57,91,95
+  s_1052240f0c6fe1::t_2b2cf4d2748b02 33-34
+  s_b8892a7b0fc6e6::t_d5b28128313356 17,86-90,92-94,96-114,135
+  s_b8892a7b0fc6e6::t_00ef2e0499cd88 6-10
+  s_b8892a7b0fc6e6::t_f1162fca6c450b 136
+playground/demos/hover.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 13
+site/src/components/homepage/featured-examples.tsx
+  s_b8892a7b0fc6e6::t_022fc5916a4700 9-20
+  s_b8892a7b0fc6e6::t_47eb638222fc4b 1,3-5,7-8,22
+site/content/docs/zh/getting-started/quick-start.mdx
+  s_012f96d409d953::t_4729b3e77d9607 105
+  s_012f96d409d953::t_d6ec66b919b4e8 21,27,40
+playground/demos/drag-node.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 8
+site/content/docs/zh/concepts/graph-lifecycle.mdx
+  s_1052240f0c6fe1::t_7ee0eb054c42ec 110
+  s_1052240f0c6fe1::t_8ce29b77d3beed 100,108
+  s_1052240f0c6fe1::t_cc7388e264df7f 109
+playground/demos/node-border.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 17,49
+site/src/components/homepage/showcase-examples.ts
+  s_b8892a7b0fc6e6::t_73f59df1ad65e0 1-7,62-66,70-72,76,79,82-84,94-99,110,116,130,136-142,158-159,193-196,231-235,249-252,276-279,281-290,292-299
+  s_b8892a7b0fc6e6::t_5a269758be241a 160,176-180,182-186,188,236-241,253-254,258-259,270-271,274
+  s_b8892a7b0fc6e6::t_118544af0ba1ca 161-171,187
+  s_b8892a7b0fc6e6::t_95aa3ebf3f5d65 69
+  s_b8892a7b0fc6e6::t_2579ecf91d9c8b 67
+  s_b8892a7b0fc6e6::t_022fc5916a4700 73-75,77-78,80-81,85-93,100-109,111-115,117-129,131-134,143-157,172-175,181,189-192,197-230,255-256,272-273,275
+  s_012f96d409d953::t_d6ec66b919b4e8 280,291
+  s_1052240f0c6fe1::t_8ce29b77d3beed 68
+  s_b8892a7b0fc6e6::t_291e1df90a80c8 8-25,38-53,57-61,135,248
+  s_b8892a7b0fc6e6::t_db0cfc38db58ca 26-37,54-56,242-247
+  s_b8892a7b0fc6e6::t_ce430e91242290 257,260-269
+playground/demos/incremental-nodes.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 6
+playground/demos/set-data-fit-options.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 21
+playground/demos/drag-node-threshold.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 6
+playground/demos/event-log.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 9
+site/content/docs/en/guides/data.mdx
+  s_012f96d409d953::t_d6ec66b919b4e8 10
+site/src/components/homepage/hero-live-graph.tsx
+  s_b8892a7b0fc6e6::t_404a9a79d39db7 164,166
+  s_b8892a7b0fc6e6::t_f318fe6c24f2a4 165,167
+  s_1052240f0c6fe1::t_8ce29b77d3beed 179
+scripts/check-umd.mjs
+  s_b8892a7b0fc6e6::t_9db189dd9c9b61 1-50,52-85,94-133,137-139,143-145
+  s_b8892a7b0fc6e6::t_6b59a97d5cb214 86-93
+  s_b8892a7b0fc6e6::t_816aca1e551423 51,134-136,140-142
+  s_b8892a7b0fc6e6::t_ad3c34a1fb7d29 146
+tests/unit/playgroundAutoFit.test.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 9,13,18,36
+playground/demos/radial-tree.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 21
+site/content/docs/en/guides/combo.mdx
+  s_012f96d409d953::t_d6ec66b919b4e8 10
+playground/demos/set-data.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 54
+playground/demos/layout-worker-cancel.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 19
+playground/demos/fit-incremental-nodes.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 14
+site/content/docs/zh/api/options.mdx
+  s_1052240f0c6fe1::t_8ce29b77d3beed 40
+  s_1052240f0c6fe1::t_7ee0eb054c42ec 42
+  s_1052240f0c6fe1::t_437d6734e2342d 41
+playground/demos/basic.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 8
+playground/demos/indented-tree.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 169
+site/src/components/homepage/scroll-navigation.tsx
+  s_1052240f0c6fe1::t_32bb866ab0b9bc 7
+  s_1052240f0c6fe1::t_ec33b322264f5a 22,25
+playground/demos/combo.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 25
+playground/demos/drag-edge.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 6
+playground/demos/labels.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 37
+site/src/app/global.css
+  s_b8892a7b0fc6e6::t_1f6e7d2c2aa6a0 6,72-75,81,83,88-89,269
+  s_1052240f0c6fe1::t_428a034ec6ebb0 117,144,148,152,157-162,174
+  s_1052240f0c6fe1::t_ec33b322264f5a 114,118-120,129-143,184-185,189-190
+  s_b8892a7b0fc6e6::t_dae20730d7dac9 77,94
+  s_b8892a7b0fc6e6::t_e170e240c452bd 84,90,191,283-288,1031,1423
+  s_b8892a7b0fc6e6::t_589b052a98d4ff 1754,1759-1760,1787,1789,1791,1797-1802,2240-2243,2567
+  s_1052240f0c6fe1::t_3b8142d5b5bb2d 186-188
+  s_1052240f0c6fe1::t_04c14af6c2a052 3265
+  s_b8892a7b0fc6e6::t_86a0ae141e5117 1758
+  s_1052240f0c6fe1::t_4aef4d4424003f 3281
+  s_b8892a7b0fc6e6::t_fe80c973e628c3 7
+  s_1052240f0c6fe1::t_ade5630e4c5486 145-147,149-151,153-156,163-173,175-183
+  s_b8892a7b0fc6e6::t_76e90ce9b0a62d 91
+  s_b8892a7b0fc6e6::t_879acde47f100e 192
+site/tsconfig.json
+  s_012f96d409d953::t_4729b3e77d9607 44-45
+playground/demos/edge-types.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 17,53
+playground/demos/node-states.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 19
+playground/demos/real-dataset.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 26
+site/content/docs/en/api/options.mdx
+  s_1052240f0c6fe1::t_8ce29b77d3beed 40
+  s_1052240f0c6fe1::t_7ee0eb054c42ec 42
+  s_1052240f0c6fe1::t_d9a443b97d33a3 41
+playground/demos/breathing-node.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 11
+playground/demos/self-loop-labels.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 8
+playground/demos/label-rendering-options.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 33
+site/src/components/ai-skill/ai-skill-page.module.css
+  s_b8892a7b0fc6e6::t_1f6e7d2c2aa6a0 70,249,326
+  s_b8892a7b0fc6e6::t_b0b3fcfb19682f 2,71,250
+site/src/components/homepage/scroll-navigation.css
+  s_1052240f0c6fe1::t_ec33b322264f5a 1,3,27-29,39-41,44-45,51,53,56-58
+site/content/docs/en/index.mdx
+  s_b8892a7b0fc6e6::t_00ef2e0499cd88 6-10
+  s_012f96d409d953::t_4729b3e77d9607 17
+  s_1052240f0c6fe1::t_2b2cf4d2748b02 34-43
+playground/demos/layout-worker.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 24
+playground/demos/search-focus.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 27
+CONTRIBUTING.md
+  s_b8892a7b0fc6e6::t_00ef2e0499cd88 5-9
+tests/unit/graph.test.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 739,748,757-758
+playground/demos/shapes.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 18,70
+playground/demos/queries-and-states.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 28
+playground/demos/node-style.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 8
+site/src/components/docs-route-layout.tsx
+  s_1052240f0c6fe1::t_32bb866ab0b9bc 24-35
+playground/demos/edge-hit-area.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 43
+playground/demos/selection-behaviors.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 11
+tests/unit/packageConsumer.type-test.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 140
+site/src/components/homepage/homepage.module.css
+  s_b8892a7b0fc6e6::t_1f6e7d2c2aa6a0 42,150,1392,1432
+  s_b8892a7b0fc6e6::t_abd345ec9c66e3 176,1446
+  s_b8892a7b0fc6e6::t_7dada7ae37961a 53,1443
+  s_b8892a7b0fc6e6::t_9ba8a0fffa57b6 641,870-871,887-889,897,903-905,908,919-920,922,926-929,988,991,993-994,996-998,1002,1007-1008,1011,1013-1015,1019-1020,1022-1023,1030,1033-1034,1036-1041,1045,1048-1049,1054-1058,1062-1064,1066-1088,1093-1094,1096-1098,1105-1106,1108,1115,1125,1132,1134-1135,1137-1142,1144,1147-1151
+  s_b8892a7b0fc6e6::t_6952f49d1342e9 642-646,683-687
+  s_b8892a7b0fc6e6::t_a273f9025ff555 177,181,1447
+  s_b8892a7b0fc6e6::t_da628ee4ff840f 872,986,995,999
+  s_b8892a7b0fc6e6::t_2c24825c8724c8 1089-1090,1110-1114,1126-1131,1152-1153,1155-1156,1158-1159,1161-1177
+  s_b8892a7b0fc6e6::t_0c18d92a9076a9 1403,1515,1519
+  s_b8892a7b0fc6e6::t_1b7b31ac25c9e3 37-38
+  s_b8892a7b0fc6e6::t_39091a6732032b 139,147-149,152,155,157-158,161-162,166,169,187,191-192,216,1398,1439,1467,1470
+  s_b8892a7b0fc6e6::t_93fcb4dd86a970 172-175,178-180,183,1444-1445
+  s_b8892a7b0fc6e6::t_e43ea19df7a070 854-855,857-858,860-864,866-868,873-877,879-886,890-895,899-902,906-907,910,912-917,921,923-925,930-964,966-967,969,973,975,977-978,980-981,983-984,990,1000-1001,1003-1006,1009-1010,1012,1016-1018,1021,1024-1026,1028,1031-1032,1042-1044,1046-1047,1050-1053,1059-1061,1065,1095,1099-1104,1107,1109,1116-1124,1133,1136,1143,1145-1146
+  s_b8892a7b0fc6e6::t_95aa3ebf3f5d65 1154,1157,1160
+  s_b8892a7b0fc6e6::t_b579db95945aeb 557,608-609,611,613,615,617,619-625,627-629,631-637,640,648-651,653-661,663-668,670-682,688-703,706-714,718-721,723-724,727-729
+  s_b8892a7b0fc6e6::t_93e198297256ba 76
+.github/workflows/build.yml
+  s_b8892a7b0fc6e6::t_9db189dd9c9b61 79-81
+playground/demos/edge-arrows.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 8
+site/content/docs/en/concepts/overview.mdx
+  s_b8892a7b0fc6e6::t_00ef2e0499cd88 6-10
+playground/demos/context-menu.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 11
+playground/demos/custom-layout.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 25
+playground/demos/edge-colors.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 20
+playground/demos/flowchart.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 61
+playground/demos/zoom-options.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 12
+playground/demos/behaviors.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 10
+site/content/docs/zh/index.mdx
+  s_b8892a7b0fc6e6::t_00ef2e0499cd88 3,6-10
+  s_012f96d409d953::t_4729b3e77d9607 17
+  s_1052240f0c6fe1::t_2b2cf4d2748b02 38-41
+playground/demos/parallel-edges.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 9
+playground/demos/g6-v5-compat.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 41
+playground/demos/relationship.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 44
+playground/demos/tooltip.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 12
+tests/unit/publicApi.type-test.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 87-88,215
+playground/demos/dependency-graph.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 25
+site/content/docs/en/getting-started/quick-start.mdx
+  s_012f96d409d953::t_4729b3e77d9607 43
+  s_012f96d409d953::t_d6ec66b919b4e8 17,26
+vite.umd.config.ts
+  s_b8892a7b0fc6e6::t_ab56dd86936709 2,4-6
+  s_b8892a7b0fc6e6::t_66a749745cecfc 1,3,7-47
+playground/demos/default-theme.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 103
+playground/demos/neighbor-highlight.ts
+  s_1052240f0c6fe1::t_8ce29b77d3beed 8
+site/src/app/en/layout.tsx
+  s_b8892a7b0fc6e6::t_0ab505eaba8555 13,16,23,33
+site/src/lib/product-copy.ts
+  s_b8892a7b0fc6e6::t_0ab505eaba8555 1-27
+.size-limit.mjs
+  s_b8892a7b0fc6e6::t_b115cfdd5f4844 26-27,36-42
+site/public/example-sources/basic.highlighted.txt
+  s_1052240f0c6fe1::t_7f524f4adf12ca 8
+site/public/example-sources/basic.txt
+  s_1052240f0c6fe1::t_60b18e08fb1b9a 8
+site/public/example-sources/breathing-node.highlighted.txt
+  s_1052240f0c6fe1::t_fad08e1d0299c6 12
+site/public/example-sources/breathing-node.txt
+  s_1052240f0c6fe1::t_00b2558ee307e5 12
+site/public/example-sources/combo.highlighted.txt
+  s_1052240f0c6fe1::t_6340b51b95647b 26
+site/public/example-sources/combo.txt
+  s_1052240f0c6fe1::t_5248d121343124 26
+site/public/example-sources/context-menu.highlighted.txt
+  s_1052240f0c6fe1::t_04b240e56316ab 11
+site/public/example-sources/context-menu.txt
+  s_1052240f0c6fe1::t_9dd6558ba2dc7a 11
+site/public/example-sources/custom-behavior.highlighted.txt
+  s_1052240f0c6fe1::t_bdd28f24c48a74 49
+site/public/example-sources/custom-behavior.txt
+  s_1052240f0c6fe1::t_0a0e1e2b35ee9a 49
+site/public/example-sources/custom-label-renderer.highlighted.txt
+  s_1052240f0c6fe1::t_9e9f09e1dc4717 50
+site/public/example-sources/custom-label-renderer.txt
+  s_1052240f0c6fe1::t_8f3f1b8ba5f2fa 50
+site/public/example-sources/custom-layout.highlighted.txt
+  s_1052240f0c6fe1::t_1da11e820260b7 25
+site/public/example-sources/custom-layout.txt
+  s_1052240f0c6fe1::t_2bb78ee4d363e2 25
+site/public/example-sources/custom-node-extension.highlighted.txt
+  s_1052240f0c6fe1::t_2e571d40235ccc 42
+site/public/example-sources/custom-node-extension.txt
+  s_1052240f0c6fe1::t_1b10207b28a27c 42
+site/public/example-sources/data-mutations.highlighted.txt
+  s_1052240f0c6fe1::t_6ed7f8d50ea5e9 22
+site/public/example-sources/data-mutations.txt
+  s_1052240f0c6fe1::t_5f9374f1b18690 22
+site/public/example-sources/decoration-badges.highlighted.txt
+  s_1052240f0c6fe1::t_47a4bd4f0abd25 9
+site/public/example-sources/decoration-badges.txt
+  s_1052240f0c6fe1::t_b119c663011f04 9
+site/public/example-sources/default-theme.highlighted.txt
+  s_1052240f0c6fe1::t_c69ab83eccb595 104
+site/public/example-sources/default-theme.txt
+  s_1052240f0c6fe1::t_1c42d57bf9c381 104
+site/public/example-sources/dependency-graph.highlighted.txt
+  s_1052240f0c6fe1::t_db9782541983e0 25
+site/public/example-sources/dependency-graph.txt
+  s_1052240f0c6fe1::t_ec53a710f5a798 25
+site/public/example-sources/drag-edge.highlighted.txt
+  s_1052240f0c6fe1::t_139e10ae26f03c 7
+site/public/example-sources/drag-edge.txt
+  s_1052240f0c6fe1::t_9bdb682af9a0dd 7
+site/public/example-sources/drag-node.highlighted.txt
+  s_1052240f0c6fe1::t_c17025135fa3a2 8
+site/public/example-sources/drag-node.txt
+  s_1052240f0c6fe1::t_aaeefaee3d8bc9 8
+site/public/example-sources/edge-arrows.highlighted.txt
+  s_1052240f0c6fe1::t_0fc785814e15ed 8
+site/public/example-sources/edge-arrows.txt
+  s_1052240f0c6fe1::t_a6fb63c51be3f5 8
+site/public/example-sources/edge-colors.highlighted.txt
+  s_1052240f0c6fe1::t_3b477fcd749932 20
+site/public/example-sources/edge-colors.txt
+  s_1052240f0c6fe1::t_9c384d34b85faa 20
+site/public/example-sources/edge-hit-area.highlighted.txt
+  s_1052240f0c6fe1::t_6c943dc5b645c5 44
+site/public/example-sources/edge-hit-area.txt
+  s_1052240f0c6fe1::t_5c8db7241ec440 44
+site/public/example-sources/edge-loops.highlighted.txt
+  s_1052240f0c6fe1::t_f95edd694ded41 8
+site/public/example-sources/edge-loops.txt
+  s_1052240f0c6fe1::t_3a93b9a748653b 8
+site/public/example-sources/edge-states.highlighted.txt
+  s_1052240f0c6fe1::t_9a0045e4f7d2bd 43
+site/public/example-sources/edge-states.txt
+  s_1052240f0c6fe1::t_f92efcca30e94f 43
+site/public/example-sources/edge-types.highlighted.txt
+  s_1052240f0c6fe1::t_de0e63405d3320 17,53
+site/public/example-sources/edge-types.txt
+  s_1052240f0c6fe1::t_9f96787d6bf94c 17,53
+site/public/example-sources/event-log.highlighted.txt
+  s_1052240f0c6fe1::t_d135c883908c25 10
+site/public/example-sources/event-log.txt
+  s_1052240f0c6fe1::t_f46d6e208f9e04 10
+site/public/example-sources/extension-system.highlighted.txt
+  s_1052240f0c6fe1::t_7a95dc8a395034 157
+site/public/example-sources/extension-system.txt
+  s_1052240f0c6fe1::t_ce2876291d5f02 157
+site/public/example-sources/fishbone.highlighted.txt
+  s_1052240f0c6fe1::t_c27330b8922246 113
+site/public/example-sources/fishbone.txt
+  s_1052240f0c6fe1::t_d75df0d0531a75 113
+site/public/example-sources/flowchart.highlighted.txt
+  s_1052240f0c6fe1::t_909aea0110f340 62
+site/public/example-sources/flowchart.txt
+  s_1052240f0c6fe1::t_54e0a6c006ca19 62
+site/public/example-sources/hover.highlighted.txt
+  s_1052240f0c6fe1::t_36cf20c7f6b872 13
+site/public/example-sources/hover.txt
+  s_1052240f0c6fe1::t_0b680f1979064b 13
+site/public/example-sources/indented-tree.highlighted.txt
+  s_1052240f0c6fe1::t_1850524fc56a69 170
+site/public/example-sources/indented-tree.txt
+  s_1052240f0c6fe1::t_083db8f07d90ef 170
+site/public/example-sources/label-rendering-options.highlighted.txt
+  s_1052240f0c6fe1::t_e9463862b1331b 34
+site/public/example-sources/label-rendering-options.txt
+  s_1052240f0c6fe1::t_0cd1e50e381066 34
+site/public/example-sources/labels.highlighted.txt
+  s_1052240f0c6fe1::t_72cef761e1d39d 38
+site/public/example-sources/labels.txt
+  s_1052240f0c6fe1::t_37732ae2018bef 38
+site/public/example-sources/large-labeled.highlighted.txt
+  s_1052240f0c6fe1::t_3a195c80a23a0f 36
+site/public/example-sources/large-labeled.txt
+  s_1052240f0c6fe1::t_1179145f42e303 36
+site/public/example-sources/large.highlighted.txt
+  s_1052240f0c6fe1::t_3e0ddcfc40ac57 26
+site/public/example-sources/large.txt
+  s_1052240f0c6fe1::t_80ada2659bf3be 26
+site/public/example-sources/layout-gallery.highlighted.txt
+  s_1052240f0c6fe1::t_c1df47dec74056 19
+site/public/example-sources/layout-gallery.txt
+  s_1052240f0c6fe1::t_e9210ecd109614 19
+site/public/example-sources/layout-worker.highlighted.txt
+  s_1052240f0c6fe1::t_d4736b8acd0e77 25
+site/public/example-sources/layout-worker.txt
+  s_1052240f0c6fe1::t_3065540331ac1b 25
+site/public/example-sources/layouts.highlighted.txt
+  s_1052240f0c6fe1::t_8c8d7420d5ff20 45
+site/public/example-sources/layouts.txt
+  s_1052240f0c6fe1::t_75219db7f656ce 45
+site/public/example-sources/mindmap.highlighted.txt
+  s_1052240f0c6fe1::t_30d09e6a5a8aca 125
+site/public/example-sources/mindmap.txt
+  s_1052240f0c6fe1::t_8bac244868941e 125
+site/public/example-sources/neighbor-highlight.highlighted.txt
+  s_1052240f0c6fe1::t_4cd2fb8a33492e 8
+site/public/example-sources/neighbor-highlight.txt
+  s_1052240f0c6fe1::t_ccec20afed25f5 8
+site/public/example-sources/node-border.highlighted.txt
+  s_1052240f0c6fe1::t_b0578ee794a69f 17,49
+site/public/example-sources/node-border.txt
+  s_1052240f0c6fe1::t_e5839b4cf5ae30 17,49
+site/public/example-sources/node-style.highlighted.txt
+  s_1052240f0c6fe1::t_2135d62c91e8bd 8
+site/public/example-sources/node-style.txt
+  s_1052240f0c6fe1::t_ac3705d0ec342b 8
+site/public/example-sources/org-chart.highlighted.txt
+  s_1052240f0c6fe1::t_0662f2d4b68e79 40
+site/public/example-sources/org-chart.txt
+  s_1052240f0c6fe1::t_230cd033e4ff60 40
+site/public/example-sources/parallel-edges.highlighted.txt
+  s_1052240f0c6fe1::t_a008ed300c4bed 9
+site/public/example-sources/parallel-edges.txt
+  s_1052240f0c6fe1::t_31cb795cdcb64f 9
+site/public/example-sources/polyline-routing.highlighted.txt
+  s_1052240f0c6fe1::t_b44e449ad2e12a 8
+site/public/example-sources/polyline-routing.txt
+  s_1052240f0c6fe1::t_5b111590ab134f 8
+site/public/example-sources/queries-and-states.highlighted.txt
+  s_1052240f0c6fe1::t_edddd0919b0ac3 29
+site/public/example-sources/queries-and-states.txt
+  s_1052240f0c6fe1::t_b3f8460952ebcd 29
+site/public/example-sources/radial-tree.highlighted.txt
+  s_1052240f0c6fe1::t_8c9c479d66b062 21
+site/public/example-sources/radial-tree.txt
+  s_1052240f0c6fe1::t_ba68ad28336ea4 21
+site/public/example-sources/real-dataset.highlighted.txt
+  s_1052240f0c6fe1::t_a3fa8cf8a5368c 26
+site/public/example-sources/real-dataset.txt
+  s_1052240f0c6fe1::t_bbd4f4f2625958 26
+site/public/example-sources/relationship.highlighted.txt
+  s_1052240f0c6fe1::t_a8e0b3e18dbb00 45
+site/public/example-sources/relationship.txt
+  s_1052240f0c6fe1::t_23f120e757a5a5 45
+site/public/example-sources/search-focus.highlighted.txt
+  s_1052240f0c6fe1::t_1f64dc3a0b4013 28
+site/public/example-sources/search-focus.txt
+  s_1052240f0c6fe1::t_e82246e0a6de5f 28
+site/public/example-sources/selection-behaviors.highlighted.txt
+  s_1052240f0c6fe1::t_d47c30873905f2 12
+site/public/example-sources/selection-behaviors.txt
+  s_1052240f0c6fe1::t_f51aa3005b2d70 12
+site/public/example-sources/set-data.highlighted.txt
+  s_1052240f0c6fe1::t_c841e7db257400 55
+site/public/example-sources/set-data.txt
+  s_1052240f0c6fe1::t_df0df27451842e 55
+site/public/example-sources/shapes.highlighted.txt
+  s_1052240f0c6fe1::t_786d10c277cd2e 18,70
+site/public/example-sources/shapes.txt
+  s_1052240f0c6fe1::t_8697eb9031bbe7 18,70
+site/public/example-sources/tooltip.highlighted.txt
+  s_1052240f0c6fe1::t_9dfa49ecd7e035 12
+site/public/example-sources/tooltip.txt
+  s_1052240f0c6fe1::t_8c75d910493259 12
+site/public/example-sources/viewport-controls.highlighted.txt
+  s_1052240f0c6fe1::t_1e8987bee0ce9b 10
+site/public/example-sources/viewport-controls.txt
+  s_1052240f0c6fe1::t_a9dffe68b46a44 10
+site/public/example-sources/zoom-options.highlighted.txt
+  s_1052240f0c6fe1::t_697341611d232e 13
+site/public/example-sources/zoom-options.txt
+  s_1052240f0c6fe1::t_b7a3c363cdccc2 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "715e130c861e1cd050dbe53773383ea1edaa35d7",
+  "prompts": {},
+  "sessions": {
+    "s_012f96d409d953": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18b44-336b-7cf0-8020-fb64a641ef6c",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    },
+    "s_1052240f0c6fe1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18af2-3af0-7bb0-aa6d-fb353c3dfe5f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    },
+    "s_b8892a7b0fc6e6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18702-2f49-7ae2-83ec-5e00f25068d2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

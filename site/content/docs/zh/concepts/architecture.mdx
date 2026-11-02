@@ -1,117 +1,82 @@
 ---
 title: 技术架构
-description: G6Lite 的公开 API、数据运行时、布局、交互、WebGL 渲染与浏览器平台分层
+description: 图运行时、绘制图层、渲染调度与布局交互如何协作
 ---
 
 import { ArchitectureDiagram } from '@/components/architecture-diagram';
 import { FirstRenderFlow } from '@/components/first-render-flow';
 
-G6Lite 的架构目标不是覆盖所有图形和运行环境，而是在现代浏览器中用受控的公开 API、高效的图数据路径和专用 WebGL Program 支撑大规模关系图与高频分析交互。
+本页解释 G6Lite 各模块的职责及协作方式，适合需要理解渲染原理、性能路径和扩展边界的读者。初始化与卸载的调用顺序见 [Graph 生命周期](/docs/concepts/graph-lifecycle)。
 
-下图展示公开入口、内核职责、协同绘制与浏览器平台之间的关系。右侧扩展通过虚线连接到对应模块，首次渲染、更新和交互的具体过程在下文展开。
+## 架构分层
 
 <ArchitectureDiagram locale="zh" />
 
-## 设计边界
+业务通过包根的 `Graph` 和扩展契约使用 G6Lite。Graph 编排数据转换、布局和运行时；DataModel 管理图数据与状态；RenderScheduler 根据变化范围协调绘制。Renderer、Picking 和 GPU Buffer 属于内部实现。
 
-- `Graph` 是面向使用方的主入口，组织数据、布局、渲染、交互和生命周期。
-- 包根只公开稳定类型和扩展契约；`DataModel`、Renderer、Picking 与 GPU Buffer 仍是内部实现。
-- 节点和边使用 WebGL 批量绘制，标签和图标使用 Canvas 2D overlay，Combo 包围框使用 Canvas 2D underlay。
-- 布局通过 `@antv/layout` 按算法懒加载，耗时布局可以在 Worker 中执行。
-- G6Lite 保留关系图专用的 Program、批次、Picking 和增量更新，不引入完整场景图引擎。
+各层围绕同一份图运行时协作：布局提供坐标，交互产生数据或状态变更，调度器将变更交给对应图层。职责分离使布局算法、信息层和交互能力可以独立扩展。
 
-## 首次渲染数据流
+## 绘制图层
 
-调用 `await graph.render()` 后，运行时按以下顺序工作：
+G6Lite 使用 WebGL 批量绘制节点和边，并用 Canvas 2D 处理文本测量、标签碰撞与分组包围框：
+
+| 图层（从下到上） | 绘制内容 | 选择原因 |
+| --- | --- | --- |
+| Canvas 2D underlay | Combo 包围框 | 适合分组边界及背景信息 |
+| WebGL 主画布 | 节点、边和箭头 | 适合大量同类图元批量绘制与 Buffer 更新 |
+| Canvas 2D overlay | 标签、图标与装饰 | 便于文字测量、排版和碰撞处理 |
+
+这些图层共享相机、尺寸、DPR 和调度信号，属于同一个 Graph。WebGL 优先使用 WebGL2，不可用时回退 WebGL1；运行环境限制见[浏览器与运行环境](/docs/compatibility/browser)。
+
+## 渲染与更新路径
+
+### 首次渲染数据流
+
+调用 `render()` 后，Graph 根据配置准备输入、建立运行时并完成首帧：
 
 <FirstRenderFlow locale="zh" />
 
-1. 创建当前渲染代次，执行已注册的 Transform，并解析主题与容器尺寸。
-2. 配置了布局且数据非空时，根据 `layout.type` 选择算法并计算坐标，需要时在 Worker 中执行；否则使用节点已有坐标。
-3. 创建 DataModel，写入节点、边、Combo、状态和布局坐标。
-4. 向 Renderer 提交渲染数据，建立 RenderScheduler，挂载 InteractionDispatcher、Behaviors、LabelLayerRenderer 和 ComboRenderer。
-5. 触发 `beforerender`，Renderer 处理几何数据，准备 Program 所需的连续 TypedArray 与 GPU Buffer。
-6. 调用 `fitView()`，按处理后的几何范围更新相机。
-7. ComboRenderer 先绘制 Canvas 2D underlay，WebGL normal pass 绘制节点和边，LabelLayerRenderer 再绘制 Canvas 2D overlay；Picking pass 按需维护命中缓冲，不是首帧必经步骤。
-8. 首帧完成后触发 `afterrender`，随后挂载 ResizeObserver 和 Plugin。
+异步布局或扩展初始化返回时，Graph 会检查当前渲染代次和销毁状态，避免旧结果覆盖新数据。渲染代次是内部取消与结果提交机制，业务通过公开生命周期方法管理实例即可。
 
-异步布局、扩展初始化或浏览器让帧完成后，Graph 会重新核对当前代次和销毁状态，避免旧结果覆盖新数据。
+### 高频更新路径
 
-## 高频更新路径
+RenderScheduler 根据变更级别选择处理路径：
 
-状态、位置和数据变化不会都触发完整重建。RenderScheduler 根据变更级别选择不同路径：
+| 变化 | 主要路径 |
+| --- | --- |
+| 节点 selected / highlight / inactive | 状态解析与 GPU 样式 patch，必要时重新处理 |
+| 边业务字段或状态 | 完整处理，保持边类型、可见性与箭头批次一致 |
+| 批量节点位置 | 邻接数据更新、相关 Buffer 区间上传、Canvas 图层重绘 |
+| 标签或 Combo 信息 | 对应 Canvas 2D 信息层重绘 |
+| 相机平移与缩放 | 更新 uniform 后重新 draw，不重建图数据 Buffer |
+| 完整数据替换或结构变化 | 更新 DataModel，完整或部分处理渲染数据与 Buffer |
 
-| 变化                                 | 主要路径                                            |
-| ------------------------------------ | --------------------------------------------------- |
-| 节点 selected / highlight / inactive | 状态解析与 GPU 样式 patch，必要时重新处理           |
-| 边业务字段或状态                     | 完整处理，保持边类型、可见性与箭头批次一致          |
-| 批量节点位置                         | 邻接数据更新、相关 Buffer 区间上传、Canvas 图层重绘 |
-| 标签或 Combo 信息                    | 对应 Canvas 2D 信息层重绘                           |
-| 相机平移与缩放                       | 更新 uniform 后重新 draw，不重建图数据 Buffer       |
-| 完整数据替换或结构变化               | 更新 DataModel，完整或部分处理渲染数据与 Buffer     |
+因此选择、高亮和拖拽应通过状态、位置和批量 API 更新现有实例。业务侧如何选择更新方法见[数据指南](/docs/guides/data)，性能实践见[性能调优](/docs/metrics/performance-tuning)。
 
-因此频繁选择、高亮和拖拽应优先使用状态、位置和批量 API，而不是反复调用 `new Graph()`。
+## 布局与交互协作
 
-## 为什么同时使用 WebGL 和 Canvas 2D
+### 布局与 Worker
 
-WebGL 适合大量同类节点和边的批量绘制、GPU Picking 与局部 Buffer 更新。文本排版、图标、标签碰撞和 Combo 包围框更适合 Canvas 2D：它能保持文字测量直接，也避免把复杂信息层全部编码进 shader。
+布局层根据图数据和配置计算坐标，Graph 将结果写入 DataModel，再交给 Renderer。官方算法按 `layout.type` 懒加载；支持的耗时布局可通过 Worker 减少主线程阻塞。
 
-这些图层共享相机、尺寸、DPR 和调度信号。Combo underlay 位于 WebGL 主画布下方，标签与图标 overlay 位于其上方；它们不是独立的 Graph。
+布局取消后，旧计算结果不会写回当前渲染代次。Worker 不会消除算法本身的成本，已有坐标的数据可以省略布局。算法选择、参数和 Worker 限制见[布局配置](/docs/guides/layout)。
 
-## 布局与 Worker
+### 交互与 Picking
 
-布局不是 Renderer 的职责。Graph 根据配置调用布局层，得到坐标后再交给 DataModel 和 Renderer：
+InteractionDispatcher 统一处理指针事件与命中检测，将规范化事件分发给 Behavior：
 
 ```text
-GraphData → Layout → positioned nodes → DataModel → Renderer
+原生事件 → 命中检测 → 图事件 → Behavior → 公开的数据或状态 API
 ```
 
-官方布局按 `layout.type` 动态加载。`worker: true` 可以降低主线程阻塞，但不会消除算法成本；迭代次数、取消语义和真实数据规模仍需要验证。
+节点和边优先使用 GPU Picking；命中缓冲不可用时回退 CPU 检测。Combo 使用自身的几何命中路径。Picking 缓冲按需维护，无需每次绘制都执行拾取。
 
-已有坐标时应省略布局并直接提供 `x` / `y`，避免重复计算。
-
-## 交互与 Picking
-
-InteractionDispatcher 统一处理指针事件和命中检测，再把规范化事件分发给 Behavior：
-
-```text
-native event → GPU/CPU pick → graph event → Behavior → public state/data API
-```
-
-节点和边优先使用 GPU Picking；不可用时有受控 CPU fallback。Combo 位于 Canvas 2D underlay，使用自己的几何命中路径。Behavior 不应自行访问 framebuffer 或重复实现 Picking。
+交互产生的变更重新进入更新调度路径，Behavior 无需直接操作 framebuffer。使用方式见[交互配置](/docs/guides/interactions)和[事件](/docs/guides/events)。
 
 ## 扩展边界
 
-G6Lite 支持 node、edge、label、decoration、layout、behavior、transform 和 plugin 八类扩展。推荐使用：
+G6Lite 支持 node、edge、label、decoration、layout、behavior、transform 和 plugin 八类扩展。它们分别参与图形描述、信息层绘制、坐标计算、事件响应或运行时编排。
 
-```ts
-register(
-  'behavior',
-  name,
-  extensionFactory(() => ({
-    init(context, options) {},
-    getEvents() {
-      return {};
-    },
-    destroy() {},
-  })),
-);
-```
+有状态扩展通过 `ExtensionContext` 的 data、state、viewport 和 `requestRender()` 能力协作，不应持有内部 DataModel、Renderer、WebGL context 或 GPU Buffer。
 
-扩展通过受控的 data、state、viewport 和 `requestRender()` 能力与 Graph 协作，读取只读快照并经公开方法更新数据。新扩展不应直接持有 DataModel、Renderer、WebGL context 或 GPU Buffer。
-
-## 浏览器与降级
-
-- 优先创建 WebGL2 context，不可用时回退 WebGL1。
-- Picking framebuffer 不完整或不可用时回退 CPU 命中检测。
-- 标签和 Combo 保持 Canvas 2D 路径。
-- WebGL context lost/restored、ResizeObserver、Worker 取消和 Graph destroy 均有明确生命周期。
-- 当前包为 ESM-only，渲染需要真实 DOM、Canvas 和 WebGL，不支持服务端绘图。
-
-完整限制见[浏览器与运行环境](/docs/compatibility/browser)和 [API 稳定性](/docs/compatibility/api-stability)。
-
-## 对 AI Agent 的约束
-
-AI 生成 G6Lite 代码时，应只依赖架构图最上层的公开 API。内部层帮助理解性能和问题定位，但不是可直接导入的业务契约。
-
-使用 [`$antv-g6lite-graph`](/docs/ai) 可以让 Agent 在生成代码前检查包根导入、运行环境、能力边界和真实验证要求。
+注册方式、实例作用域与清理规则见[扩展体系](/docs/guides/extensions)；公开契约的稳定性见 [API 稳定性](/docs/compatibility/api-stability)。

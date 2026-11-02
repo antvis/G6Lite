@@ -3514,6 +3514,33 @@ html.dark .examples-center-card-crop {
   );
 }
 
+/* Installation commands use compact blocks without editor chrome or line numbers. */
+.docs-brand-layout #nd-page .quick-start-install figure.shiki {
+  margin: 0.65rem 0;
+  border: 0;
+  border-radius: 0.4rem;
+  background: var(--editor-header);
+}
+
+.docs-brand-layout #nd-page .quick-start-install figure.shiki::before,
+.docs-brand-layout #nd-page .quick-start-install figure.shiki::after,
+.docs-brand-layout #nd-page .quick-start-install figure.shiki .line::before {
+  display: none;
+}
+
+.docs-brand-layout #nd-page .quick-start-install figure.shiki > [role='region'] {
+  padding: 0.8rem 3rem 0.8rem 1rem;
+  background: transparent;
+}
+
+.docs-brand-layout #nd-page .quick-start-install figure.shiki > div.absolute {
+  top: 0.55rem;
+}
+
+.docs-brand-layout #nd-page .quick-start-install figure.shiki .line {
+  padding-inline-start: 0;
+}
+
 .docs-brand-layout #nd-page figure.shiki pre,
 .docs-brand-layout #nd-page figure.shiki code {
   margin: 0;

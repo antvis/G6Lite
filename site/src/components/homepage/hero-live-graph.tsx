@@ -10,6 +10,7 @@ import type { Locale } from '@/lib/i18n';
 import styles from './homepage.module.css';
 import { homepageCopy } from './content';
 import { HERO_MAX_ZOOM, HERO_MIN_ZOOM, bindHeroGestures } from './hero-gestures';
+import { bindHeroHighlight } from './hero-highlight';
 
 type Status = 'waiting' | 'loading' | 'ready' | 'error';
 type Metrics = { nodes: number; edges: number; loadMs: number; renderMs: number };
@@ -17,7 +18,9 @@ type Metrics = { nodes: number; edges: number; loadMs: number; renderMs: number 
 function visualOptions(
   dark: boolean,
   getZoom: () => number,
+  isHighlighted: (id: string) => boolean,
 ): Pick<GraphOptions, 'theme' | 'node' | 'edge'> {
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
   const palette = dark
     ? ['#aabcf3', '#91bfe0', '#88c6b6', '#ccc1e8']
     : ['#7186c8', '#75a9cf', '#78b9a7', '#aaa0cb'];
@@ -28,10 +31,10 @@ function visualOptions(
     node: {
       type: 'circle',
       style: {
-        // Graph units, multiplied by camera zoom. Overview zoom is about 0.24, so this
-        // stays a ~2px dot. The camera ceiling is 20, so a hub grows to about 180px.
-        size: 9,
+        // Enlarge the focused neighborhood without changing the rest of the cloud.
+        size: (node) => (isHighlighted(node.id) ? 20 : 10),
         fill: (node) => palette[(Number(node.data?.cluster) || 0) % palette.length],
+        opacity: 0.5,
         strokeWidth: 0,
         // label() is re-read on each draw. Returning false hides the text and keeps it
         // out of collision. data.labelMinZoom is hero data, not a node-style field.
@@ -59,10 +62,27 @@ function visualOptions(
         },
         labelMaxWidth: 180,
       },
+      stateStyles: {
+        highlight: {
+          fill: dark ? '#d4e3ff' : '#3459c4',
+          strokeWidth: 0,
+          haloWidth: 0,
+          opacity: 1,
+        },
+      },
     },
     edge: {
       type: 'line',
-      style: { stroke: dark ? '#485674' : '#c8d2e7', lineWidth: 0.6, endArrow: false },
+      style: {
+        stroke: dark ? '#485674' : '#c8d2e7',
+        lineWidth: 0.6,
+        opacity: 0.28,
+        endArrow: false,
+      },
+      stateStyles: {
+        // Edge widths use backing pixels; keep a crisp 2 CSS px on Retina too.
+        highlight: { stroke: dark ? '#c4dcff' : '#3159c9', lineWidth: 2 * dpr, opacity: 1 },
+      },
     },
   };
 }
@@ -103,7 +123,13 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
     const graph = graphRef.current;
     if (!graph || !readyRef.current) return;
     try {
-      graph.updateOptions(visualOptions(darkRef.current, () => graph.getZoom()));
+      graph.updateOptions(
+        visualOptions(
+          darkRef.current,
+          () => graph.getZoom(),
+          (id) => graph.getNodeData(id)?.states.has('highlight') ?? false,
+        ),
+      );
     } catch {
       failRef.current?.();
     }
@@ -119,6 +145,7 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
     let timer: ReturnType<typeof setTimeout> | undefined;
     let timeout: ReturnType<typeof setTimeout> | undefined;
     let canvas: HTMLCanvasElement | null = null;
+    let clearHighlight: (() => void) | undefined;
 
     const clearPending = () => {
       if (idle !== undefined) window.cancelIdleCallback(idle);
@@ -127,6 +154,8 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
     };
     const destroyGraph = () => {
       readyRef.current = false;
+      clearHighlight?.();
+      clearHighlight = undefined;
       gestureRef.current?.destroy();
       gestureRef.current = null;
       canvas?.removeEventListener('webglcontextlost', onContextLost);
@@ -172,22 +201,34 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
           container: mount,
           data,
           // Preset coordinates: never run a force layout on the homepage.
-          ...visualOptions(initialDark, () => graphRef.current?.getZoom() ?? 0),
+          ...visualOptions(
+            initialDark,
+            () => graphRef.current?.getZoom() ?? 0,
+            (id) => graphRef.current?.getNodeData(id)?.states.has('highlight') ?? false,
+          ),
           // Overview zoom is below the default nodeMinZoom of 0.3, so the global gate
           // stays off. The label callback reveals more hubs as the camera zooms in.
           label: { hideOnLowZoom: false, scaleWithZoom: false, hideOnCollision: true },
           autoFit: { padding: 24, minZoom: 0.01 },
-          behaviors: ['drag-canvas', 'drag-node', 'highlight-node'],
+          behaviors: ['drag-canvas', 'drag-node'],
         });
         graphRef.current = graph;
         canvas = mount.querySelector('canvas');
         canvas?.addEventListener('webglcontextlost', onContextLost);
         await graph.render();
         if (disposed || failed) return;
+        if (!canvas) throw new Error('Missing graph canvas');
+        clearHighlight = bindHeroHighlight(graph, canvas);
         graph.fitView({ padding: 24, minZoom: 0.01 });
         // A theme switch during async loading must also update the new instance.
         if (initialDark !== darkRef.current) {
-          graph.updateOptions(visualOptions(darkRef.current, () => graph.getZoom()));
+          graph.updateOptions(
+            visualOptions(
+              darkRef.current,
+              () => graph.getZoom(),
+              (id) => graph.getNodeData(id)?.states.has('highlight') ?? false,
+            ),
+          );
         }
         readyRef.current = true;
         if (!canvas) throw new Error('Missing graph canvas');

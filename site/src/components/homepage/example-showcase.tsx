@@ -10,7 +10,7 @@ import { CopyPrompt } from '@/components/ai-skill/copy-prompt';
 import { localizedPath, type Locale } from '@/lib/i18n';
 import { homepageCopy } from './content';
 import styles from './homepage.module.css';
-import { showcaseOptions, type ShowcaseId } from './showcase-examples';
+import { bindHomepageHighlight, showcaseOptions, type ShowcaseId } from './showcase-examples';
 
 type Example = { id: ShowcaseId; light: string; dark: string; lightHtml: string; darkHtml: string };
 
@@ -31,6 +31,7 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
     if (!mount) return;
     let disposed = false;
     let graph: Graph | undefined;
+    let clearHighlight: (() => void) | undefined;
     const start = async () => {
       setStatus('loading');
       try {
@@ -40,9 +41,11 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
         graphRef.current = graph;
         await graph.render();
         if (disposed) return;
+        if (active === 'relationship') clearHighlight = bindHomepageHighlight(graph);
         setStatus('ready');
       } catch {
         if (disposed) return;
+        clearHighlight?.();
         graph?.destroy();
         graphRef.current = null;
         setStatus('error');
@@ -60,6 +63,7 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
     return () => {
       disposed = true;
       observer.disconnect();
+      clearHighlight?.();
       graph?.destroy();
       if (graphRef.current === graph) graphRef.current = null;
     };

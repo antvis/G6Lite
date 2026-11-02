@@ -286,8 +286,8 @@
   z-index: 1;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, rgba(114, 134, 177, 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(114, 134, 177, 0.06) 1px, transparent 1px);
+    linear-gradient(to right, rgba(114, 134, 177, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(114, 134, 177, 0.025) 1px, transparent 1px);
   background-size: 12px 12px;
   mask-image:
     linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent),
@@ -1383,8 +1383,8 @@
 }
 :global(.dark) .graphGrid {
   background-image:
-    linear-gradient(to right, rgba(158, 180, 225, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(158, 180, 225, 0.08) 1px, transparent 1px);
+    linear-gradient(to right, rgba(158, 180, 225, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(158, 180, 225, 0.035) 1px, transparent 1px);
 }
 :global(.dark) .liveGraphMount canvas {
   mix-blend-mode: screen;

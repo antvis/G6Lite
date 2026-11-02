@@ -1,9 +1,38 @@
-import type { GraphNode, GraphOptions } from '../../../../src/index.ts';
+import type { Graph, GraphNode, GraphOptions } from '../../../../src/index.ts';
 import type { Locale } from '@/lib/i18n';
 
 export const showcaseIds = ['relationship', 'org-chart', 'mindmap', 'fishbone'] as const;
 export type ShowcaseId = (typeof showcaseIds)[number];
 type Options = Omit<GraphOptions, 'container'>;
+
+/** Add visible edge states to the node-only hover behavior. */
+export function bindHomepageHighlight(graph: Graph): () => void {
+  const edgesByNode = new Map<string, string[]>();
+  for (const edge of graph.getEdges()) {
+    for (const id of new Set([edge.source, edge.target])) {
+      const edges = edgesByNode.get(id) ?? [];
+      edges.push(edge.id);
+      edgesByNode.set(id, edges);
+    }
+  }
+  let highlighted: string[] = [];
+  const clear = () => {
+    graph.batchSetState(highlighted.map((id) => ({ id, state: 'highlight', value: false })));
+    highlighted = [];
+  };
+  const onOver = ({ nodeId }: { nodeId: string }) => {
+    clear();
+    highlighted = edgesByNode.get(nodeId) ?? [];
+    graph.batchSetState(highlighted.map((id) => ({ id, state: 'highlight', value: true })));
+  };
+  graph.on('node:pointerover', onOver);
+  graph.on('node:pointerleave', clear);
+  return () => {
+    graph.off('node:pointerover', onOver);
+    graph.off('node:pointerleave', clear);
+    clear();
+  };
+}
 
 /** Shared branch colors keep related nodes and their incoming edges together. */
 function colorizeExample(options: Options, groups: number[], dark: boolean): Options {
@@ -94,6 +123,7 @@ export function showcaseOptions(id: ShowcaseId, locale: Locale, dark = false): O
     behaviors: ['drag-canvas', 'drag-node', 'hover-highlight'],
   };
   if (id === 'relationship') {
+    options.behaviors = ['drag-canvas', 'drag-node', 'highlight-node'];
     const labels = zh
       ? ['G6Lite', 'React', 'Vue', 'TypeScript', 'WebGL', '布局', '数据', '交互']
       : ['G6Lite', 'React', 'Vue', 'TypeScript', 'WebGL', 'Layouts', 'Data', 'Interaction'];
@@ -131,6 +161,9 @@ export function showcaseOptions(id: ShowcaseId, locale: Locale, dark = false): O
     options.edge = {
       type: 'line',
       style: { stroke: dark ? '#52658c' : '#b9c6e4', lineWidth: 1.5 },
+      stateStyles: {
+        highlight: { stroke: dark ? '#a9c4ff' : '#4568c4', lineWidth: 3, opacity: 1 },
+      },
     };
     return colorizeExample(options, [0, 0, 1, 0, 2, 3, 1, 3], dark);
   }
@@ -294,6 +327,25 @@ ${config}
 });
 
 await graph.render();
+${
+  id === 'relationship'
+    ? `
+let highlightedEdges: string[] = [];
+const clearHighlight = () => {
+  graph.batchSetState(highlightedEdges.map((id) => ({ id, state: 'highlight', value: false })));
+  highlightedEdges = [];
+};
+graph.on('node:pointerover', ({ nodeId }) => {
+  clearHighlight();
+  highlightedEdges = graph.getEdges()
+    .filter((edge) => edge.source === nodeId || edge.target === nodeId)
+    .map((edge) => edge.id);
+  graph.batchSetState(highlightedEdges.map((id) => ({ id, state: 'highlight', value: true })));
+});
+graph.on('node:pointerleave', clearHighlight);
+`
+    : ''
+}
 
 // ${locale === 'zh' ? '组件卸载时调用 graph.destroy()。' : 'Call graph.destroy() when the component unmounts.'}`;
 }

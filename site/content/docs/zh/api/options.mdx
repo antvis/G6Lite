@@ -7,7 +7,7 @@ description: new Graph() 可传入的数据、节点、边、布局、交互、�
 
 ```ts
 const graph = new Graph({
-  container: 'container',
+  container: '#container',
   data: {
     nodes: [{ id: 'a' }, { id: 'b' }],
     edges: [{ id: 'a-b', source: 'a', target: 'b' }],
@@ -26,7 +26,7 @@ const graph = new Graph({
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `container` | `string \| HTMLElement` | 画布容器。字符串按元素 id 查找 |
+| `container` | `string \| HTMLElement` | 画布容器。字符串是 CSS 选择器，例如 `#container` |
 | `data` | `GraphData` | 节点、边，以及可选的 Combo |
 | `node` | `NodeConfig` | 节点形状、样式和状态样式 |
 | `edge` | `EdgeConfig` | 边形状、样式、箭头和状态样式 |
@@ -39,15 +39,41 @@ const graph = new Graph({
 | `theme` | `ThemeOption` | `'light'`、`'dark'`，或在预设上覆盖 token |
 | `autoFit` | `boolean \| number \| FitViewOptions` | 容器尺寸变化后是否重新 `fitView()`。默认 `false`，保留当前相机 |
 
-`autoFit` 为 `false` 或未配置时，仅关闭尺寸变化后的自动适配；首次 `render()` 仍会执行 `fitView()`。对象配置也会用于首次适配。
+首次适配与尺寸变化后的适配规则见下方 [`autoFit`](#autofit)。
 
 运行中能热更新的是 `node`、`edge`、`label` 和 `theme`，通过 [`graph.updateOptions()`](/docs/api/graph#updateoptions)。
+
+### `autoFit`
+
+控制首次渲染的适配参数，以及容器尺寸变化后是否重新适配：
+
+| 配置 | 首次 `render()` | 尺寸变化后 |
+| --- | --- | --- |
+| 未配置或 `false`（默认） | `fitView(0.9)` | 保留当前相机 |
+| `true` | `fitView(0.9)` | `fitView(0.9)` |
+| `FitViewOptions` 对象 | 按对象参数适配 | 按同一对象参数重新适配 |
+
+也可以传入正数，作为 `fitView()` 的相对缩放系数，用于首次渲染和尺寸变化后的适配。
+
+可变分栏、侧栏展开收起等场景可以使用对象配置：
+
+```ts
+const graph = new Graph({
+  container: '#container',
+  data,
+  autoFit: { padding: 24, minZoom: 0.2, maxZoom: 1.5 },
+});
+```
+
+`padding`、`minZoom`、`maxZoom` 的含义见 [`fitView()`](/docs/api/graph#fitview)。需要保留用户手动缩放和平移时，保持默认关闭；关闭仅影响尺寸变化后的自动适配，不影响首次渲染。
+
+尺寸监听与事件顺序见[容器尺寸变化](/docs/api/graph#容器尺寸变化)。
 
 ## 图数据
 
 ```ts
 const data: GraphData = {
-  nodes: [{ id: 'a', data: { cluster: 'svc' } }],
+  nodes: [{ id: 'a', data: { cluster: 'svc' } }, { id: 'b' }],
   edges: [{ source: 'a', target: 'b', data: { weight: 1 } }],
   combos: [{ id: 'group', collapsed: false }],
 };

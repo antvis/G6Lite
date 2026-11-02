@@ -33,10 +33,11 @@ Follow the documentation from the first graph to concepts, configuration, exampl
 
 ## Core capabilities
 
-- **GPU-first graph rendering** — Nodes and edges share a batched WebGL pipeline designed for responsive relationship exploration.
-- **Refresh by change level** — State, position, and data changes are scheduled by refresh level, with support for partial updates; edge state changes and other cases trigger full rebuilds.
-- **Built-in layouts and interactions** — Select layouts from `@antv/layout` and other built-in algorithms through `layout`, and configure zoom, pan, drag, select, and highlight through `behaviors`; omitting `behaviors` enables only zoom and pan by default.
-- **An explicit extension surface** — Import from the package root, map data to styles with functions, and add capabilities through the unified `register()` API.
+- **Lightweight loading** — Keep the core separate from layouts and load algorithms on demand to reduce initial loading overhead.
+- **Efficient rendering** — Combine batched WebGL rendering with incremental updates to display and explore large-scale relationship graphs.
+- **Flexible layouts and interactions** — Choose from multiple graph layouts and add zoom, pan, drag, selection, and highlighting.
+- **Customization and extensions** — Map business data to visual styles and extend graph elements, layouts, and interactions as needed.
+- **AI-assisted development** — Use the G6Lite Skill to help an agent create graphs, refine styles, and configure interactions.
 
 ## Choosing G6Lite
 

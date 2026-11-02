@@ -1,0 +1,27 @@
+tests/unit/renderer/renderer.test.ts
+  s_d4bb42b712817c::t_ad9cf6440e16b9 372-377,383-398,405-411,416-434,440-453
+  s_d4bb42b712817c::t_0a469c5fe7eaf1 378-382,399-404,412-415,435-439
+  s_d4bb42b712817c::t_1c6a3bcd847bea 10,33-34
+src/renderer/renderer.ts
+  s_d4bb42b712817c::t_0a469c5fe7eaf1 671,676
+  s_d4bb42b712817c::t_1c6a3bcd847bea 2545
+  s_d4bb42b712817c::t_57ec2f480a3766 184,1779-1780,2110,2122-2134,2137,2139,2142-2143
+  s_d4bb42b712817c::t_7ccbfdf56cdb38 2135-2136,2138,2140-2141
+  s_d4bb42b712817c::t_9c4ce3c3a9d91d 2144-2145
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "bae5874edc2b0dbdc9b2bb00d70abeac213be6f2",
+  "prompts": {},
+  "sessions": {
+    "s_d4bb42b712817c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a19b4d-96a3-7511-8900-5f765db9d9d8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

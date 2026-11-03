@@ -1,0 +1,38 @@
+site/src/lib/layout.shared.tsx
+  s_df4bfd395e427f::t_fd1eb84c125906 27-29
+site/src/app/global.css
+  s_df4bfd395e427f::t_b4368cbed6089b 355,359-368
+  s_df4bfd395e427f::t_e0d4889b415a79 369-370
+README.md
+  s_8c9479ad73a7e1::t_93ce91d5664b5c 134
+README.zh-CN.md
+  s_8c9479ad73a7e1::t_b8b6da66eaa327 134
+CONTRIBUTING.md
+  s_8c9479ad73a7e1::t_4318bb2d59a0b2 73
+  s_8c9479ad73a7e1::t_1ffd3011149946 128
+  s_8c9479ad73a7e1::t_9b7c84af0459be 63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d3b2b3f5bd28ff5b4aef1634ab888cfbd320360d",
+  "prompts": {},
+  "sessions": {
+    "s_8c9479ad73a7e1": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "2c10c3b9-546e-410b-abb7-d44a50242360",
+        "model": "codefuse_official_channel/Kimi-K3:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    },
+    "s_df4bfd395e427f": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "89714e03-7045-40ba-bb22-713d015d5bf5",
+        "model": "codefuse_official_channel/Kimi-K3:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

@@ -9,7 +9,8 @@
   --architecture-border: #dce2ee;
   --architecture-extension: #367c83;
   --architecture-extension-tint: #edf5f5;
-  margin: 1.75rem 0;
+  margin: 1.75rem auto;
+  max-width: 760px;
   border-radius: 14px;
   background: var(--architecture-background);
   padding: 16px;

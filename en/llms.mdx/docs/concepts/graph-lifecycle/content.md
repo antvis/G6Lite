@@ -4,46 +4,65 @@
 
 
 
-`Graph` is the main public entry point.
+Usually, create one instance, reuse it for data and interaction after its first render, and destroy it when leaving the page. This page covers that sequence. See [Graph API](/en/docs/api/graph) for method parameters and [Technical architecture](/en/docs/concepts/architecture) for internal processing.
+
+## Lifecycle overview [#lifecycle-overview]
+
+<GraphLifecycleFlow locale="en" />
+
+## Creation and first render [#creation-and-first-render]
+
+`new Graph(options)` requires a mounted container with explicit dimensions. Construction creates the canvas and renderer; layout and drawing start when `render()` is called.
+
+Use successful completion of `await graph.render()` as the initialization boundary. Wait until then before data writes, state changes, or relayout. For framework mounting and cleanup, see [Use with React and Vue](/en/docs/getting-started/react).
+
+## Updates during use [#updates-during-use]
+
+After the first render, choose an operation based on the scope of the change:
+
+| Change                               | Operation                                               | Details                                                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Replace all data                     | `await graph.setData(nextData)`                         | [Data updates](/en/docs/guides/data#replace-all-data)                                                                                    |
+| Change individual elements or states | Element mutation and state APIs                         | [Change nodes and edges](/en/docs/api/graph#changing-nodes-and-edges), [State operations](/en/docs/api/graph#state-visibility-and-focus) |
+| Recalculate positions                | `graph.setLayout(options)`, then `await graph.layout()` | [Runtime relayout](/en/docs/guides/layout)                                                                                               |
+
+`setLayout()` stores the configuration; `layout()` executes it. Regular updates arrange rendering, so reuse the current instance.
+
+Zoom, pan, and container resizing are [viewport operations](/en/docs/api/graph#viewport) and do not require a new Graph.
+
+## Destruction and asynchronous cleanup [#destruction-and-asynchronous-cleanup]
+
+Call `graph.destroy()` when leaving the page or unmounting a component to release the canvas, listeners, layout work, and other instance resources. Repeated destruction has no additional effect. A destroyed instance cannot be reused.
+
+Unmounting can happen before rendering or an application request finishes. Destroy the instance promptly and check `graph.destroyed` before applying asynchronous results. Application-owned requests, timers, and listeners still need application cleanup.
+
+## Complete example [#complete-example]
+
+This example connects creation, first render, a state update, and destruction. Pass the returned cleanup function to your page or framework's unmount logic.
 
 ```ts
-const graph = new Graph({ container: 'container', data, layout: { type: 'force' } });
-await graph.render();
+import { Graph } from '@antv/g6-lite';
+
+export function mountGraph(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [{ id: 'alice' }, { id: 'bob' }],
+      edges: [{ source: 'alice', target: 'bob' }],
+    },
+    layout: { type: 'circular', radius: 100 },
+  });
+
+  async function initialize() {
+    await graph.render();
+    // Unmount can happen before asynchronous rendering finishes.
+    if (graph.destroyed) return;
+    graph.setItemState('alice', 'selected', true);
+  }
+
+  void initialize().catch(console.error);
+
+  // Call the returned function during page or component cleanup.
+  return () => graph.destroy();
+}
 ```
-
-Construction resolves the container and prepares the rendering surface. It does not run layout or draw the graph. The first render follows this flow:
-
-<FirstRenderFlow locale="en" />
-
-Wait for the first `await graph.render()` to complete successfully before data or state mutations and relayout. See [First-render data flow](/en/docs/concepts/architecture#first-render-data-flow) for the detailed processing steps.
-
-Use `setData()` for complete replacement. Use `addNode`, `addEdge`, update, remove, and state APIs for incremental changes. To run another layout:
-
-```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR' });
-await graph.layout();
-```
-
-Viewport APIs include `fitView()`, `focusItem()`, `setCamera()`, `screenToGraph()`, and `graphToScreen()`. Always call `graph.destroy()` during page or component cleanup.
-
-## Container resize [#container-resize]
-
-G6Lite uses `ResizeObserver` to keep the canvas dimensions synchronized with its container. Calling `setSize(width, height)` uses the same viewport update path. Both preserve the current camera by default so a user's zoom and pan are not overwritten.
-
-Enable automatic fitting for resizable panels or expanding sidebars:
-
-```ts
-const graph = new Graph({
-  container: 'container',
-  data,
-  autoFit: {
-    padding: 24,
-    minZoom: 0.2,
-    maxZoom: 1.5,
-  },
-});
-```
-
-`autoFit: true` is equivalent to calling `fitView(0.9)` after a size change. A numeric scale or `FitViewOptions` can also be passed directly. The `resize` event is emitted after the optional fit finishes, so listeners observe the final camera. Leave the option disabled for large graphs or flows that must preserve the user's viewport.
-
-Disabling `autoFit` does not disable fitting during the initial `render()`. The `padding`, `minZoom`, and `maxZoom` fields of an options object also apply to the initial fit.

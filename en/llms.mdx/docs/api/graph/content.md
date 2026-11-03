@@ -26,7 +26,7 @@ const graph = new Graph({
 
 Stores `container`, `data`, and the rest of the configuration, then creates a canvas inside the container. There is no layout result yet, and element queries are empty.
 
-`container` accepts an element id or an `HTMLElement`. The element must already be in the document.
+`container` accepts a CSS selector (such as `#container`) or an `HTMLElement`. The element must already be in the document.
 
 ### `render()` [#render]
 
@@ -34,7 +34,7 @@ Stores `container`, `data`, and the rest of the configuration, then creates a ca
 await graph.render();
 ```
 
-Runs the configured transforms and layout, builds renderer data, mounts interactions, labels, and plugins, then calls `fitView()` once and draws. `destroyed` stays `false`, and the data methods can be called.
+Runs the configured transforms and layout, initializes the runtime, and draws the first frame. Wait for the first render before calling data and state methods. See [Graph lifecycle](/en/docs/concepts/graph-lifecycle) for initialization and asynchronous cleanup.
 
 Calling it again on the same instance cancels an in-flight layout and redraws from the latest data and options.
 
@@ -267,6 +267,14 @@ graph.resetCamera();
 | `setSize(width, height)` | Sets the canvas size in CSS pixels                                                      |
 | `fitCenter()`            | Keeps zoom and moves the graph content to the viewport center                           |
 
+### Container resize [#container-resize]
+
+Graph uses `ResizeObserver` to synchronize the canvas with its container. `setSize(width, height)` updates canvas dimensions in CSS pixels through the same viewport update path.
+
+By default, resizing preserves the current camera so the user's zoom and pan remain intact. Enabling [`autoFit`](/en/docs/api/options#autofit) fits the content again according to that configuration.
+
+The `resize` event fires after optional fitting, so listeners observe the final camera. A size change does not require a new instance or another `render()`.
+
 ### `zoomTo()` and `zoomBy()` [#zoomto-and-zoomby]
 
 ```ts
@@ -294,7 +302,7 @@ graph.fitView({ padding: [24, 16, 24, 16], minZoom: 0.2, maxZoom: 2 });
 
 Fits the camera to the bounding box of every node.
 
-* A number is a scale applied to that fit. The default is `0.9`, which is also what `render()` uses when it finishes.
+* A number is a scale applied to that fit. The default is `0.9`. The first `render()` uses it unless [`autoFit`](/en/docs/api/options#autofit) supplies another policy.
 * An object uses `padding`, `minZoom`, and `maxZoom`. `padding` is one CSS pixel value or `[top, right, bottom, left]`. The scale is `1`, `minZoom` defaults to `0.1`, and `maxZoom` defaults to `20`.
 
 ### Coordinate conversion [#coordinate-conversion]

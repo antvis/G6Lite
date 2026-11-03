@@ -22,20 +22,15 @@ It keeps the familiar data, node, edge, layout, behavior, and theme configuratio
 
 G6 v5 is the broader general-purpose framework. G6Lite is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
 
-## Core components [#core-components]
+## Usage model [#usage-model]
 
-* `Graph` coordinates the container, layout, rendering, interactions, and lifecycle.
-* `DataModel` owns nodes, edges, Combo, states, and incremental changes.
-* `Renderer` draws nodes, edges, and the picking buffer through WebGL.
-* `LabelLayerRenderer` and `ComboRenderer` draw the Canvas 2D label overlay and Combo underlay.
-* `RenderScheduler` selects complete redraws or smaller patches based on the change level.
-* `InteractionDispatcher` centralizes picking and element-event delivery.
+A `Graph` instance manages one graph. `data` describes relationships, `node` and `edge` define appearance, `layout` computes positions, `behaviors` adds interactions, and `theme` controls the visual style.
 
-See [Technical architecture](/en/docs/concepts/architecture) for the complete layers, first-render flow, and frequent-update paths.
+Start with the [Data model](/en/docs/concepts/data-model), then use [Graph lifecycle](/en/docs/concepts/graph-lifecycle) to organize creation, updates, and cleanup. See [Technical architecture](/en/docs/concepts/architecture) for drawing layers, scheduling, and extension internals.
 
 ## Next steps [#next-steps]
 
-* [Technical architecture](/en/docs/concepts/architecture)
-* [Graph lifecycle](/en/docs/concepts/graph-lifecycle)
 * [Data model](/en/docs/concepts/data-model)
+* [Graph lifecycle](/en/docs/concepts/graph-lifecycle)
+* [Technical architecture](/en/docs/concepts/architecture)
 * [Install and render your first graph](/en/docs/getting-started/quick-start)

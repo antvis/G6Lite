@@ -1,101 +1,35 @@
-# 数据模型 (/docs/concepts/data-model)
+# 图数据模型 (/docs/concepts/data-model)
 
 
 
-G6Lite 的数据通过 `GraphData` 传入，核心字段是 `nodes`、`edges` 和可选的 `combos`。
 
-```ts
-const data = {
-  nodes: [
-    { id: 'service-a', data: { name: '入口服务', type: 'gateway' } },
-    { id: 'service-b', data: { name: '订单服务', type: 'service' } },
-  ],
-  edges: [{ source: 'service-a', target: 'service-b', data: { qps: 1200 } }],
-  combos: [{ id: 'domain-order', data: { name: '订单域' } }],
-};
-```
 
-## 节点 [#节点]
+一张图由节点和连接节点的边组成，也可以使用 Combo 对节点分组。G6Lite 通过 `GraphData` 接收这些数据，节点代表什么、连线表示什么，由使用场景决定。
 
-节点必须有稳定的 `id`。
+## 节点、边与分组 [#节点边与分组]
 
-| 字段        | 说明                    |
-| --------- | --------------------- |
-| `id`      | 节点唯一标识                |
-| `name`    | 可选名称                  |
-| `x` / `y` | 可选坐标；不传布局时会使用         |
-| `data`    | 业务扩展字段，样式函数和业务逻辑可读取   |
-| `states`  | 初始状态，如 `['selected']` |
-| `comboId` | 所属 Combo id           |
+下面是一张包含 6 个节点、8 条边的图，其中 A、B、C 属于同一个分组：
 
-业务字段建议放在 `data` 中，避免和 G6Lite 的保留字段冲突。
+<GraphDataModelDiagram locale="zh" />
 
-## 边 [#边]
+* **节点 `nodes`**：图中的点，通过 `id` 区分。
+* **边 `edges`**：连接两个节点，通过 `source` 和 `target` 指定两端节点的 `id`。
+* **Combo `combos`**：可选的节点分组，节点通过 `comboId` 加入。分组本身不会自动产生连线。
 
-边必须声明 `source` 和 `target`。
+## 数据与样式 [#数据与样式]
 
-| 字段       | 说明             |
-| -------- | -------------- |
-| `id`     | 可选边 id；不传时内部生成 |
-| `source` | 起点节点 id        |
-| `target` | 终点节点 id        |
-| `data`   | 业务扩展字段         |
-| `states` | 初始状态           |
+节点和边可以附带自定义的 `data` 字段。它们用于保存需要随图携带的信息，具体含义由使用方定义。
 
-## Combo [#combo]
+颜色、尺寸和标签由 `node`、`edge` 等外观配置决定，也可以从 `data` 中读取值进行映射。改变图形外观，不会改变节点之间的连接关系。配置方式见[节点](/docs/guides/node)和[边](/docs/guides/edge)。
 
-Combo 用于节点分组：
+## 位置与状态 [#位置与状态]
 
-```ts
-const data = {
-  nodes: [
-    { id: 'n1', comboId: 'frontend' },
-    { id: 'n2', comboId: 'frontend' },
-  ],
-  edges: [],
-  combos: [{ id: 'frontend', data: { name: 'Frontend' } }],
-};
-```
+**位置**决定节点画在哪里，用 `x` / `y` 表示，可以由布局计算，也可以直接提供。移动节点不会改变它连接了哪些节点。
 
-更完整的配置见 [Combo](/docs/guides/combo)。
+**状态**用于表达选中、高亮等当前交互情况。同一个节点可以同时具有多个状态，对应的视觉效果通过 `stateStyles` 配置。
 
-## 状态 [#状态]
+## 继续阅读 [#继续阅读]
 
-元素状态用于表达选中、高亮、置灰、隐藏等运行时语义：
-
-```ts
-graph.setItemState('n1', 'selected', true);
-graph.setItemState('n2', 'inactive', true);
-graph.hideItem('n3');
-graph.showItem('n3');
-```
-
-样式层可通过 `stateStyles` 定义状态覆盖：
-
-```ts
-node: {
-  stateStyles: {
-    selected: { stroke: '#1890ff', strokeWidth: 3 },
-    inactive: { opacity: 0.25 },
-  },
-}
-```
-
-状态变更会触发增量刷新，适合高频交互。
-
-## 查询视图 [#查询视图]
-
-`getNodeData()`、`getEdgeData()`、`getComboData()` 以及 `getNodes()` / `getEdges()` 返回归一化后的只读 Model 视图：
-
-* `NodeModel` 包含必选坐标和当前状态集合。
-* `EdgeModel` 包含确定的 edge id、端点和当前状态集合。
-* `ComboModel` 额外包含计算后的边界和子元素关系。
-
-这些 Model 由 Graph 持有，不是不可变快照。请通过 `updateNodeData()`、`updateEdgeData()`、位置和状态 API 修改数据，不要直接改写查询结果。
-
-## 大图数据建议 [#大图数据建议]
-
-* 保持 `id` 稳定，避免频繁删除再新增同一元素。
-* 大规模场景尽量使用静态样式，必要时再使用函数式样式。
-* 首屏如果已有后端布局坐标，可以直接传 `x` / `y` 并省略 `layout`。
-* 标签数量多时按需显示，避免全量文本绘制成为瓶颈。
+* [数据接入与更新](/docs/guides/data)：准备数据，选择整份替换或增量更新。
+* [图数据字段参考](/docs/api/options#图数据)：字段类型、必填项与约束。
+* [Combo 配置](/docs/guides/combo)：分组的外观和使用方式。

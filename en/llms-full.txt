@@ -241,10 +241,11 @@ Follow the documentation from the first graph to concepts, configuration, exampl
 
 ## Core capabilities [#core-capabilities]
 
-* **GPU-first graph rendering** — Nodes and edges share a batched WebGL pipeline designed for responsive relationship exploration.
-* **Refresh by change level** — State, position, and data changes are scheduled by refresh level, with support for partial updates; edge state changes and other cases trigger full rebuilds.
-* **Built-in layouts and interactions** — Select layouts from `@antv/layout` and other built-in algorithms through `layout`, and configure zoom, pan, drag, select, and highlight through `behaviors`; omitting `behaviors` enables only zoom and pan by default.
-* **An explicit extension surface** — Import from the package root, map data to styles with functions, and add capabilities through the unified `register()` API.
+* **Lightweight loading** — Keep the core separate from layouts and load algorithms on demand to reduce initial loading overhead.
+* **Efficient rendering** — Combine batched WebGL rendering with incremental updates to display and explore large-scale relationship graphs.
+* **Flexible layouts and interactions** — Choose from multiple graph layouts and add zoom, pan, drag, selection, and highlighting.
+* **Customization and extensions** — Map business data to visual styles and extend graph elements, layouts, and interactions as needed.
+* **AI-assisted development** — Use the G6Lite Skill to help an agent create graphs, refine styles, and configure interactions.
 
 ## Choosing G6Lite [#choosing-g6lite]
 
@@ -401,7 +402,7 @@ const graph = new Graph({
 
 Stores `container`, `data`, and the rest of the configuration, then creates a canvas inside the container. There is no layout result yet, and element queries are empty.
 
-`container` accepts an element id or an `HTMLElement`. The element must already be in the document.
+`container` accepts a CSS selector (such as `#container`) or an `HTMLElement`. The element must already be in the document.
 
 ### `render()` [#render]
 
@@ -409,7 +410,7 @@ Stores `container`, `data`, and the rest of the configuration, then creates a ca
 await graph.render();
 ```
 
-Runs the configured transforms and layout, builds renderer data, mounts interactions, labels, and plugins, then calls `fitView()` once and draws. `destroyed` stays `false`, and the data methods can be called.
+Runs the configured transforms and layout, initializes the runtime, and draws the first frame. Wait for the first render before calling data and state methods. See [Graph lifecycle](/en/docs/concepts/graph-lifecycle) for initialization and asynchronous cleanup.
 
 Calling it again on the same instance cancels an in-flight layout and redraws from the latest data and options.
 
@@ -642,6 +643,14 @@ graph.resetCamera();
 | `setSize(width, height)` | Sets the canvas size in CSS pixels                                                      |
 | `fitCenter()`            | Keeps zoom and moves the graph content to the viewport center                           |
 
+### Container resize [#container-resize]
+
+Graph uses `ResizeObserver` to synchronize the canvas with its container. `setSize(width, height)` updates canvas dimensions in CSS pixels through the same viewport update path.
+
+By default, resizing preserves the current camera so the user's zoom and pan remain intact. Enabling [`autoFit`](/en/docs/api/options#autofit) fits the content again according to that configuration.
+
+The `resize` event fires after optional fitting, so listeners observe the final camera. A size change does not require a new instance or another `render()`.
+
 ### `zoomTo()` and `zoomBy()` [#zoomto-and-zoomby]
 
 ```ts
@@ -669,7 +678,7 @@ graph.fitView({ padding: [24, 16, 24, 16], minZoom: 0.2, maxZoom: 2 });
 
 Fits the camera to the bounding box of every node.
 
-* A number is a scale applied to that fit. The default is `0.9`, which is also what `render()` uses when it finishes.
+* A number is a scale applied to that fit. The default is `0.9`. The first `render()` uses it unless [`autoFit`](/en/docs/api/options#autofit) supplies another policy.
 * An object uses `padding`, `minZoom`, and `maxZoom`. `padding` is one CSS pixel value or `[top, right, bottom, left]`. The scale is `1`, `minZoom` defaults to `0.1`, and `maxZoom` defaults to `20`.
 
 ### Coordinate conversion [#coordinate-conversion]
@@ -887,7 +896,7 @@ The argument of `new Graph(options)` is `GraphOptions`. Only `container` and `da
 
 ```ts
 const graph = new Graph({
-  container: 'container',
+  container: '#container',
   data: {
     nodes: [{ id: 'a' }, { id: 'b' }],
     edges: [{ id: 'a-b', source: 'a', target: 'b' }],
@@ -906,7 +915,7 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 
 | Field        | Type                                  | Description                                                                                         |
 | ------------ | ------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `container`  | `string \| HTMLElement`               | Canvas container. A string is looked up as an element id                                            |
+| `container`  | `string \| HTMLElement`               | Canvas container. A string is a CSS selector, such as `#container`                                  |
 | `data`       | `GraphData`                           | Nodes, edges, and optional combos                                                                   |
 | `node`       | `NodeConfig`                          | Node shape, style, and state styles                                                                 |
 | `edge`       | `EdgeConfig`                          | Edge shape, style, arrows, and state styles                                                         |
@@ -919,15 +928,41 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 | `theme`      | `ThemeOption`                         | `'light'`, `'dark'`, or a preset plus token overrides                                               |
 | `autoFit`    | `boolean \| number \| FitViewOptions` | Whether a container resize calls `fitView()` again. Default `false`, which keeps the current camera |
 
-Setting `autoFit` to `false` or omitting it disables fitting after a size change; the initial `render()` still calls `fitView()`. An options object also configures the initial fit.
+See [`autoFit`](#autofit) below for initial fitting and resize fitting.
 
 At runtime, `node`, `edge`, `label`, and `theme` can be updated with [`graph.updateOptions()`](/en/docs/api/graph#updateoptions).
+
+### `autoFit` [#autofit]
+
+Controls initial fitting and whether a container resize fits the graph again:
+
+| Value                        | First `render()`       | After resize                    |
+| ---------------------------- | ---------------------- | ------------------------------- |
+| Omitted or `false` (default) | `fitView(0.9)`         | Preserve the current camera     |
+| `true`                       | `fitView(0.9)`         | `fitView(0.9)`                  |
+| `FitViewOptions` object      | Fit with those options | Fit again with the same options |
+
+A positive number supplies the relative scale for `fitView()`, both during the initial render and after resizing.
+
+For resizable panels or expanding sidebars, an options object can control the fit:
+
+```ts
+const graph = new Graph({
+  container: '#container',
+  data,
+  autoFit: { padding: 24, minZoom: 0.2, maxZoom: 1.5 },
+});
+```
+
+See [`fitView()`](/en/docs/api/graph#fitview) for `padding`, `minZoom`, and `maxZoom`. Leave automatic fitting disabled to preserve the user's zoom and pan. Disabling it affects only resize fitting; the initial render still fits the graph.
+
+See [Container resize](/en/docs/api/graph#container-resize) for observation and event ordering.
 
 ## Graph data [#graph-data]
 
 ```ts
 const data: GraphData = {
-  nodes: [{ id: 'a', data: { cluster: 'svc' } }],
+  nodes: [{ id: 'a', data: { cluster: 'svc' } }, { id: 'b' }],
   edges: [{ source: 'a', target: 'b', data: { weight: 1 } }],
   combos: [{ id: 'group', collapsed: false }],
 };
@@ -1610,40 +1645,41 @@ See [performance metrics](/en/docs/metrics/performance) and [performance tuning]
 
 
 
-G6Lite does not try to cover every shape and runtime. Its architecture combines a controlled public API, efficient graph-data paths, and specialized WebGL programs for large relationship graphs and frequent analytical interaction in modern browsers.
+This page explains module responsibilities and collaboration for readers exploring rendering, performance paths, or extension boundaries. See [Graph lifecycle](/en/docs/concepts/graph-lifecycle) for the application calling sequence.
 
-The diagram shows the public entry points, core responsibilities, coordinated rendering, and browser platform. Dashed lines connect extensions to their integration points. The first-render, update, and interaction sequences are explained below.
+## Architecture layers [#architecture-layers]
 
 <ArchitectureDiagram locale="en" />
 
-## Design boundary [#design-boundary]
+Applications use `Graph` and extension contracts from the package root. Graph orchestrates transforms, layouts, and the runtime; DataModel owns graph data and states; RenderScheduler coordinates drawing based on the scope of each change. Renderer, Picking, and GPU buffers are internal implementation details.
 
-* `Graph` is the application entry point for data, layout, rendering, interaction, and lifecycle.
-* The package root exposes stable types and extension contracts; DataModel, Renderer, Picking, and GPU buffers remain internal.
-* Nodes and edges use batched WebGL drawing. Labels and icons use a Canvas 2D overlay, while Combo boundaries use a Canvas 2D underlay.
-* Layouts are lazy-loaded from `@antv/layout` and can run in a Worker when configured.
-* G6Lite keeps graph-specific programs, batches, picking, and incremental updates instead of adopting a complete scene-graph engine.
+These layers share one graph runtime. Layouts provide positions, interactions produce data or state changes, and the scheduler sends changes to the appropriate drawing layers. This division lets layouts, information layers, and interactions be extended independently.
 
-## First-render data flow [#first-render-data-flow]
+## Drawing layers [#drawing-layers]
 
-After `await graph.render()`, the runtime works in this order:
+G6Lite batches nodes and edges through WebGL and uses Canvas 2D for text measurement, label collision, and grouping bounds:
+
+| Layer, bottom to top | Content                        | Reason                                                    |
+| -------------------- | ------------------------------ | --------------------------------------------------------- |
+| Canvas 2D underlay   | Combo boundaries               | Fits group bounds and background information              |
+| Main WebGL canvas    | Nodes, edges, and arrows       | Supports batched geometry and buffer updates              |
+| Canvas 2D overlay    | Labels, icons, and decorations | Supports text measurement, layout, and collision handling |
+
+The layers share the camera, dimensions, DPR, and scheduling signals within one Graph. WebGL prefers WebGL2 and falls back to WebGL1. See [Browsers and runtime](/en/docs/compatibility/browser) for environment requirements.
+
+## Rendering and update paths [#rendering-and-update-paths]
+
+### First-render data flow [#first-render-data-flow]
+
+Calling `render()` prepares input, builds the runtime, and draws the first frame:
 
 <FirstRenderFlow locale="en" />
 
-1. Create the current render generation, run registered transforms, and resolve the theme and container dimensions.
-2. When layout is configured and data is nonempty, select the algorithm and calculate positions, optionally in a Worker. Otherwise, use existing node coordinates.
-3. Create the DataModel and write nodes, edges, Combo, states, and positioned coordinates.
-4. Submit render data to Renderer, create RenderScheduler, and mount InteractionDispatcher, Behaviors, LabelLayerRenderer, and ComboRenderer.
-5. Emit `beforerender`, then process geometry and prepare the contiguous typed arrays and GPU buffers required by renderer programs.
-6. Call `fitView()` to update the camera using the processed geometry bounds.
-7. Draw the Canvas 2D Combo underlay, then nodes and edges in the WebGL normal pass, followed by the Canvas 2D label overlay. Maintain picking buffers on demand; the picking pass is not required for the first frame.
-8. Emit `afterrender` after the first frame, then mount ResizeObserver and Plugins.
+When asynchronous layout or extension initialization returns, Graph checks the active render generation and destroyed state so stale results cannot replace newer data. Generations are an internal cancellation and result-commit mechanism; applications manage instances through public lifecycle methods.
 
-After asynchronous layouts, extension initialization, or browser yields, Graph checks the active generation and destroyed state again so stale results cannot replace newer data.
+### Frequent-update paths [#frequent-update-paths]
 
-## Frequent-update paths [#frequent-update-paths]
-
-State, position, and data changes do not all rebuild the graph. RenderScheduler selects a path based on the change level:
+RenderScheduler selects processing based on the change level:
 
 | Change                                | Main path                                                                    |
 | ------------------------------------- | ---------------------------------------------------------------------------- |
@@ -1654,101 +1690,72 @@ State, position, and data changes do not all rebuild the graph. RenderScheduler 
 | Camera pan and zoom                   | Update uniforms and draw without rebuilding graph-data buffers               |
 | Full replacement or structural change | Update DataModel and fully or partially process render data and buffers      |
 
-Frequent selection, highlighting, and drag interactions should use state, position, and batch APIs instead of repeatedly creating a new Graph.
+Selection, highlighting, and dragging should update the existing instance through state, position, and batch APIs. See [Data](/en/docs/guides/data) for choosing update methods and [Performance tuning](/en/docs/metrics/performance-tuning) for practical guidance.
 
-## Why WebGL and Canvas 2D coexist [#why-webgl-and-canvas-2d-coexist]
+## Layout and interaction collaboration [#layout-and-interaction-collaboration]
 
-WebGL is effective for batched homogeneous nodes and edges, GPU picking, and partial buffer updates. Text layout, icons, label collision, and Combo boundaries fit Canvas 2D better because measurements stay direct and the information layer does not need to move entirely into shaders.
+### Layout and Worker [#layout-and-worker]
 
-These layers share the camera, dimensions, DPR, and scheduling signals. The Combo underlay sits below the primary WebGL canvas, while the label and icon overlay sits above it. They are not separate Graph instances.
+The layout layer computes positions from graph data and configuration. Graph commits the result to DataModel and passes it to Renderer. Official algorithms are lazy-loaded by `layout.type`; supported expensive layouts can run in a Worker to reduce main-thread blocking.
 
-## Layout and Worker boundary [#layout-and-worker-boundary]
+Cancelled layout results are not committed to the active render generation. A Worker does not remove algorithm cost, and data with existing coordinates can omit layout. See [Layout configuration](/en/docs/guides/layout) for algorithms, options, and Worker limits.
 
-Layout is not a Renderer responsibility. Graph invokes the layout layer and passes positioned data to DataModel and Renderer:
+### Interaction and picking [#interaction-and-picking]
 
-```text
-GraphData → Layout → positioned nodes → DataModel → Renderer
-```
-
-Official layouts are dynamically loaded by `layout.type`. `worker: true` can reduce main-thread blocking, but it does not remove algorithm cost; iteration limits, cancellation, and real data scale still need validation.
-
-When coordinates already exist, omit layout and provide node `x` / `y` values directly.
-
-## Interaction and picking [#interaction-and-picking]
-
-InteractionDispatcher centralizes pointer events and hit detection before it distributes normalized events to Behaviors:
+InteractionDispatcher centralizes pointer events and hit detection, then delivers normalized events to Behaviors:
 
 ```text
-native event → GPU/CPU pick → graph event → Behavior → public state/data API
+Native event → Hit detection → Graph event → Behavior → Public data or state API
 ```
 
-Nodes and edges prefer GPU Picking with a controlled CPU fallback. Combo is drawn in the Canvas 2D underlay and uses its own geometric hit path. A Behavior should not access framebuffers or reimplement picking.
+Nodes and edges prefer GPU Picking and fall back to CPU detection when the picking buffer is unavailable. Combo uses its own geometric hit path. Picking buffers are maintained on demand; drawing does not always require a picking pass.
+
+Interaction changes return through the update scheduler, so Behaviors do not need to manipulate framebuffers. See [Interactions](/en/docs/guides/interactions) and [Events](/en/docs/guides/events) for application usage.
 
 ## Extension boundary [#extension-boundary]
 
-G6Lite supports eight extension categories: node, edge, label, decoration, layout, behavior, transform, and plugin. Prefer the factory pattern:
+G6Lite supports node, edge, label, decoration, layout, behavior, transform, and plugin extensions. These contribute shape descriptions, information layers, positions, event responses, or runtime orchestration.
 
-```ts
-register(
-  'behavior',
-  name,
-  extensionFactory(() => ({
-    init(context, options) {},
-    getEvents() {
-      return {};
-    },
-    destroy() {},
-  })),
-);
-```
+Stateful extensions collaborate through the data, state, viewport, and `requestRender()` capabilities of `ExtensionContext`. They should not hold internal DataModel, Renderer, WebGL contexts, or GPU buffers.
 
-Extensions work through controlled data, state, viewport, and `requestRender()` capabilities, reading snapshots and updating data through public methods. New extensions should not hold DataModel, Renderer, WebGL contexts, or GPU buffers directly.
-
-## Browser platform and fallback [#browser-platform-and-fallback]
-
-* Prefer a WebGL2 context and fall back to WebGL1 when required.
-* Fall back to CPU hit detection when the picking framebuffer is incomplete or unavailable.
-* Keep labels and Combo on Canvas 2D paths.
-* Handle WebGL context loss/restoration, ResizeObserver, Worker cancellation, and Graph destruction through explicit lifecycles.
-* The package is ESM-only and requires real DOM, Canvas, and WebGL; it does not support server-side graph rendering.
-
-See [Browsers and runtime](/en/docs/compatibility/browser) and [API stability](/en/docs/compatibility/api-stability) for the complete boundary.
-
-## Constraints for AI agents [#constraints-for-ai-agents]
-
-AI-generated G6Lite code should depend only on the public API layer at the top of the diagram. Internal layers explain performance and troubleshooting, but they are not business imports.
-
-Use [`$antv-g6lite-graph`](/en/docs/ai) to make an agent check package-root imports, runtime constraints, supported capabilities, and real validation before it generates code.
+See [Extensions](/en/docs/guides/extensions) for registration, instance scope, and cleanup, and [API stability](/en/docs/compatibility/api-stability) for public contract stability.
 
 
-# Data model (/en/docs/concepts/data-model)
+# Graph data model (/en/docs/concepts/data-model)
 
 
 
-`GraphData` contains `nodes`, `edges`, and optional `combos`:
 
-```ts
-const data = {
-  nodes: [
-    { id: 'gateway', data: { label: 'Gateway' } },
-    { id: 'orders', data: { label: 'Orders' } },
-  ],
-  edges: [{ source: 'gateway', target: 'orders', data: { qps: 1200 } }],
-};
-```
 
-Node IDs must be stable. Put business fields under `data`; use `x` and `y` when coordinates are already available. Edges declare `source` and `target` and may provide a stable `id`. Combos group nodes through `comboId` and remain experimental during the `0.1.x` beta.
+A graph consists of nodes and edges connecting them, with optional Combo groups. G6Lite receives these through `GraphData`. Your use case determines what the nodes and connections mean.
 
-Use states for selection, highlighting, and dimming:
+## Nodes, edges, and groups [#nodes-edges-and-groups]
 
-```ts
-graph.batchSetState([
-  { id: 'gateway', state: 'selected', value: true },
-  { id: 'orders', state: 'inactive', value: true },
-]);
-```
+This graph has 6 nodes and 8 edges. A, B, and C belong to the same group:
 
-Query APIs return normalized read-only model views. Modify graph-owned data through update, position, and state APIs instead of mutating query results.
+<GraphDataModelDiagram locale="en" />
+
+* **Nodes, `nodes`**: points in the graph, distinguished by `id`.
+* **Edges, `edges`**: connections between two nodes. Their `source` and `target` specify the endpoint node ids.
+* **Combos, `combos`**: optional node groups. Nodes join through `comboId`; a group does not automatically create connections.
+
+## Data and appearance [#data-and-appearance]
+
+Nodes and edges can carry custom `data` fields. These hold information you want to attach to the graph, with meanings defined by your application.
+
+Appearance options such as `node` and `edge` control colors, sizes, and labels. They can also map values from `data`. Changing appearance does not change the connections between nodes. See [Nodes](/en/docs/guides/node) and [Edges](/en/docs/guides/edge) for configuration.
+
+## Positions and states [#positions-and-states]
+
+**Positions** determine where nodes are drawn. Their `x` / `y` values can come from a layout or be supplied directly. Moving a node does not change which nodes it connects to.
+
+**States** express current interactions such as selection or highlighting. A node can have several states at once, with visual effects configured through `stateStyles`.
+
+## Read next [#read-next]
+
+* [Data ingestion and updates](/en/docs/guides/data): prepare data and choose full replacement or incremental updates.
+* [Graph data fields](/en/docs/api/options#graph-data): field types, required values, and constraints.
+* [Combo configuration](/en/docs/guides/combo): group appearance and usage.
 
 
 # Graph lifecycle (/en/docs/concepts/graph-lifecycle)
@@ -1757,49 +1764,68 @@ Query APIs return normalized read-only model views. Modify graph-owned data thro
 
 
 
-`Graph` is the main public entry point.
+Usually, create one instance, reuse it for data and interaction after its first render, and destroy it when leaving the page. This page covers that sequence. See [Graph API](/en/docs/api/graph) for method parameters and [Technical architecture](/en/docs/concepts/architecture) for internal processing.
+
+## Lifecycle overview [#lifecycle-overview]
+
+<GraphLifecycleFlow locale="en" />
+
+## Creation and first render [#creation-and-first-render]
+
+`new Graph(options)` requires a mounted container with explicit dimensions. Construction creates the canvas and renderer; layout and drawing start when `render()` is called.
+
+Use successful completion of `await graph.render()` as the initialization boundary. Wait until then before data writes, state changes, or relayout. For framework mounting and cleanup, see [Use with React and Vue](/en/docs/getting-started/react).
+
+## Updates during use [#updates-during-use]
+
+After the first render, choose an operation based on the scope of the change:
+
+| Change                               | Operation                                               | Details                                                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Replace all data                     | `await graph.setData(nextData)`                         | [Data updates](/en/docs/guides/data#replace-all-data)                                                                                    |
+| Change individual elements or states | Element mutation and state APIs                         | [Change nodes and edges](/en/docs/api/graph#changing-nodes-and-edges), [State operations](/en/docs/api/graph#state-visibility-and-focus) |
+| Recalculate positions                | `graph.setLayout(options)`, then `await graph.layout()` | [Runtime relayout](/en/docs/guides/layout)                                                                                               |
+
+`setLayout()` stores the configuration; `layout()` executes it. Regular updates arrange rendering, so reuse the current instance.
+
+Zoom, pan, and container resizing are [viewport operations](/en/docs/api/graph#viewport) and do not require a new Graph.
+
+## Destruction and asynchronous cleanup [#destruction-and-asynchronous-cleanup]
+
+Call `graph.destroy()` when leaving the page or unmounting a component to release the canvas, listeners, layout work, and other instance resources. Repeated destruction has no additional effect. A destroyed instance cannot be reused.
+
+Unmounting can happen before rendering or an application request finishes. Destroy the instance promptly and check `graph.destroyed` before applying asynchronous results. Application-owned requests, timers, and listeners still need application cleanup.
+
+## Complete example [#complete-example]
+
+This example connects creation, first render, a state update, and destruction. Pass the returned cleanup function to your page or framework's unmount logic.
 
 ```ts
-const graph = new Graph({ container: 'container', data, layout: { type: 'force' } });
-await graph.render();
+import { Graph } from '@antv/g6-lite';
+
+export function mountGraph(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [{ id: 'alice' }, { id: 'bob' }],
+      edges: [{ source: 'alice', target: 'bob' }],
+    },
+    layout: { type: 'circular', radius: 100 },
+  });
+
+  async function initialize() {
+    await graph.render();
+    // Unmount can happen before asynchronous rendering finishes.
+    if (graph.destroyed) return;
+    graph.setItemState('alice', 'selected', true);
+  }
+
+  void initialize().catch(console.error);
+
+  // Call the returned function during page or component cleanup.
+  return () => graph.destroy();
+}
 ```
-
-Construction resolves the container and prepares the rendering surface. It does not run layout or draw the graph. The first render follows this flow:
-
-<FirstRenderFlow locale="en" />
-
-Wait for the first `await graph.render()` to complete successfully before data or state mutations and relayout. See [First-render data flow](/en/docs/concepts/architecture#first-render-data-flow) for the detailed processing steps.
-
-Use `setData()` for complete replacement. Use `addNode`, `addEdge`, update, remove, and state APIs for incremental changes. To run another layout:
-
-```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR' });
-await graph.layout();
-```
-
-Viewport APIs include `fitView()`, `focusItem()`, `setCamera()`, `screenToGraph()`, and `graphToScreen()`. Always call `graph.destroy()` during page or component cleanup.
-
-## Container resize [#container-resize]
-
-G6Lite uses `ResizeObserver` to keep the canvas dimensions synchronized with its container. Calling `setSize(width, height)` uses the same viewport update path. Both preserve the current camera by default so a user's zoom and pan are not overwritten.
-
-Enable automatic fitting for resizable panels or expanding sidebars:
-
-```ts
-const graph = new Graph({
-  container: 'container',
-  data,
-  autoFit: {
-    padding: 24,
-    minZoom: 0.2,
-    maxZoom: 1.5,
-  },
-});
-```
-
-`autoFit: true` is equivalent to calling `fitView(0.9)` after a size change. A numeric scale or `FitViewOptions` can also be passed directly. The `resize` event is emitted after the optional fit finishes, so listeners observe the final camera. Leave the option disabled for large graphs or flows that must preserve the user's viewport.
-
-Disabling `autoFit` does not disable fitting during the initial `render()`. The `padding`, `minZoom`, and `maxZoom` fields of an options object also apply to the initial fit.
 
 
 # What is G6Lite? (/en/docs/concepts/overview)
@@ -1826,23 +1852,311 @@ It keeps the familiar data, node, edge, layout, behavior, and theme configuratio
 
 G6 v5 is the broader general-purpose framework. G6Lite is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
 
-## Core components [#core-components]
+## Usage model [#usage-model]
 
-* `Graph` coordinates the container, layout, rendering, interactions, and lifecycle.
-* `DataModel` owns nodes, edges, Combo, states, and incremental changes.
-* `Renderer` draws nodes, edges, and the picking buffer through WebGL.
-* `LabelLayerRenderer` and `ComboRenderer` draw the Canvas 2D label overlay and Combo underlay.
-* `RenderScheduler` selects complete redraws or smaller patches based on the change level.
-* `InteractionDispatcher` centralizes picking and element-event delivery.
+A `Graph` instance manages one graph. `data` describes relationships, `node` and `edge` define appearance, `layout` computes positions, `behaviors` adds interactions, and `theme` controls the visual style.
 
-See [Technical architecture](/en/docs/concepts/architecture) for the complete layers, first-render flow, and frequent-update paths.
+Start with the [Data model](/en/docs/concepts/data-model), then use [Graph lifecycle](/en/docs/concepts/graph-lifecycle) to organize creation, updates, and cleanup. See [Technical architecture](/en/docs/concepts/architecture) for drawing layers, scheduling, and extension internals.
 
 ## Next steps [#next-steps]
 
-* [Technical architecture](/en/docs/concepts/architecture)
-* [Graph lifecycle](/en/docs/concepts/graph-lifecycle)
 * [Data model](/en/docs/concepts/data-model)
+* [Graph lifecycle](/en/docs/concepts/graph-lifecycle)
+* [Technical architecture](/en/docs/concepts/architecture)
 * [Install and render your first graph](/en/docs/getting-started/quick-start)
+
+
+# Quick start (/en/docs/getting-started/quick-start)
+
+
+
+
+
+This small collaboration network has 6 nodes, with colors and sizes distinguishing the members. Drag nodes or hover to highlight their connections.
+
+<QuickStartExample locale="en" variant="network" />
+
+There are two ways to run this example:
+
+* [Package manager](#package-manager)
+* [CDN](#cdn)
+
+## Package manager [#package-manager]
+
+For projects using a bundler such as Vite or Webpack, install G6Lite with one of the following package managers:
+
+<div className="quick-start-install">
+  ```bash
+  # npm
+  npm install @antv/g6-lite
+  ```
+
+  ```bash
+  # pnpm
+  pnpm add @antv/g6-lite
+  ```
+
+  ```bash
+  # Yarn
+  yarn add @antv/g6-lite
+  ```
+</div>
+
+After installation, add a container with an explicit size:
+
+```html
+<div id="container" style="height: 360px"></div>
+```
+
+Then create a graph in your JavaScript or TypeScript entry after the container has mounted. Use `await` in an ES module or an `async` function.
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const data = {
+  nodes: [
+    { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
+    { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
+    { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
+    { id: 'David', data: { color: '#61DDAA', size: 40 } },
+    { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
+    { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
+  ],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+    { source: 'David', target: 'Eva' },
+    { source: 'David', target: 'Frank' },
+    { source: 'Alice', target: 'David' },
+    { source: 'Bob', target: 'Eva' },
+    { source: 'Carol', target: 'Frank' },
+  ],
+};
+
+const graph = new Graph({
+  container: '#container',
+  data,
+  node: {
+    style: {
+      size: (node) => Number(node.data?.size ?? 26),
+      fill: (node) => String(node.data?.color ?? '#5B8FF9'),
+      stroke: '#fff',
+      strokeWidth: 2,
+      label: (node) => node.id,
+      labelPlacement: 'bottom',
+      labelColor: '#334155',
+    },
+  },
+  edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
+  layout: {
+    type: 'd3-force',
+    linkDistance: 100,
+    nodeStrength: -400,
+    collideRadius: 32,
+  },
+  autoFit: { padding: 48, maxZoom: 1.2 },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+});
+
+await graph.render();
+```
+
+The force-directed layout positions the nodes automatically. Node data controls their colors and sizes, and `behaviors` enables zoom, pan, node dragging, and hover highlighting. TypeScript declarations are included in the package.
+
+## CDN [#cdn]
+
+The UMD build exposes the public API through `window.G6Lite`, allowing `new G6Lite.Graph()` in a plain HTML page.
+
+This complete HTML example needs no additional dependency scripts: the UMD file includes the runtime dependencies and layout algorithms.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>G6Lite team collaboration network</title>
+  </head>
+  <body>
+    <div id="container" style="height: 360px"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js"></script>
+    <script>
+      const data = {
+        nodes: [
+          { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
+          { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
+          { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
+          { id: 'David', data: { color: '#61DDAA', size: 40 } },
+          { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
+          { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
+        ],
+        edges: [
+          { source: 'Alice', target: 'Bob' },
+          { source: 'Alice', target: 'Carol' },
+          { source: 'David', target: 'Eva' },
+          { source: 'David', target: 'Frank' },
+          { source: 'Alice', target: 'David' },
+          { source: 'Bob', target: 'Eva' },
+          { source: 'Carol', target: 'Frank' },
+        ],
+      };
+
+      const graph = new G6Lite.Graph({
+        container: '#container',
+        data,
+        node: {
+          style: {
+            size: (node) => Number(node.data?.size ?? 26),
+            fill: (node) => String(node.data?.color ?? '#5B8FF9'),
+            stroke: '#fff',
+            strokeWidth: 2,
+            label: (node) => node.id,
+            labelPlacement: 'bottom',
+            labelColor: '#334155',
+          },
+        },
+        edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
+        layout: {
+          type: 'd3-force',
+          linkDistance: 100,
+          nodeStrength: -400,
+          collideRadius: 32,
+        },
+        autoFit: { padding: 48, maxZoom: 1.2 },
+        behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+      });
+
+      graph.render().catch(console.error);
+    </script>
+  </body>
+</html>
+```
+
+For production CDN use, pin an exact published version containing the UMD file. The ESM entry loads layouts on demand, while UMD bundles them, so their download sizes differ. See [bundle size](/en/docs/metrics/bundle-size).
+
+## Use in frontend frameworks [#use-in-frontend-frameworks]
+
+In React and Vue, obtain the DOM element through a ref, create the graph after client-side mount, and call `graph.destroy()` on unmount.
+
+<Cards>
+  <Card title="Use with React" href="/en/docs/getting-started/react#use-with-react">
+    Mount a graph in an effect, update its data, and clean up on unmount.
+  </Card>
+
+  <Card title="Use with Vue" href="/en/docs/getting-started/react#use-with-vue">
+    Manage a graph with template refs and lifecycle hooks.
+  </Card>
+</Cards>
+
+In frameworks such as Next.js and Nuxt, create `Graph` only on the client, after the DOM is available.
+
+
+# Use with React and Vue (/en/docs/getting-started/react)
+
+
+
+
+
+The React and Vue 3 examples below create the same graph. Zoom the canvas, drag nodes, and hover to highlight connections.
+
+<QuickStartExample locale="en" />
+
+Run `npm install @antv/g6-lite` in your existing framework project, then use the matching component below.
+
+## Use with React [#use-with-react]
+
+Save this as `GraphView.tsx` and use `<GraphView />` in your page. The component creates the graph after mounting and destroys it on unmount.
+
+```tsx
+import { useEffect, useRef } from 'react';
+import { Graph } from '@antv/g6-lite';
+
+export function GraphView() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: {
+        nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+        edges: [
+          { source: 'Alice', target: 'Bob' },
+          { source: 'Alice', target: 'Carol' },
+        ],
+      },
+      node: {
+        style: {
+          size: 24,
+          label: (node) => node.id,
+          labelPlacement: 'bottom',
+        },
+      },
+      edge: { style: { endArrow: true } },
+      layout: { type: 'circular', radius: 120 },
+      autoFit: { padding: 32, maxZoom: 1 },
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+    });
+
+    void graph.render().catch(console.error);
+
+    return () => graph.destroy();
+  }, []);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
+}
+```
+
+## Use with Vue [#use-with-vue]
+
+Save this as `GraphView.vue`, then import and use `<GraphView />` in your page. A template ref provides the container, and lifecycle hooks create and destroy the graph.
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Graph } from '@antv/g6-lite';
+
+const containerRef = ref<HTMLDivElement | null>(null);
+let graph: Graph | undefined;
+
+onMounted(() => {
+  if (!containerRef.value) return;
+
+  graph = new Graph({
+    container: containerRef.value,
+    data: {
+      nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+      edges: [
+        { source: 'Alice', target: 'Bob' },
+        { source: 'Alice', target: 'Carol' },
+      ],
+    },
+    node: {
+      style: {
+        size: 24,
+        label: (node) => node.id,
+        labelPlacement: 'bottom',
+      },
+    },
+    edge: { style: { endArrow: true } },
+    layout: { type: 'circular', radius: 120 },
+    autoFit: { padding: 32, maxZoom: 1 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+
+  void graph.render().catch(console.error);
+});
+
+onBeforeUnmount(() => {
+  graph?.destroy();
+});
+</script>
+
+<template>
+  <div ref="containerRef" style="width: 100%; height: 360px" />
+</template>
+```
 
 
 # Minimal graph (/en/docs/examples/basic)
@@ -2313,264 +2627,6 @@ See [Technical architecture](/en/docs/concepts/architecture) for the complete la
 <ExampleDetail id="zoom-options" locale="en" />
 
 
-# Install and render your first graph (/en/docs/getting-started/quick-start)
-
-
-
-Install the package:
-
-```bash
-npm install @antv/g6-lite
-```
-
-The canvas enables smooth wheel zoom and canvas dragging when `behaviors` is omitted. Node dragging, selection, and highlighting remain explicit. See [zoom feel and bounds](/en/docs/guides/interactions#zoom-feel-and-bounds) for sensitivity configuration.
-
-The container must have an explicit size:
-
-```html
-<div id="container" style="width: 800px; height: 500px"></div>
-```
-
-Create and render the graph using package-root APIs:
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const graph = new Graph({
-  container: 'container',
-  data: {
-    nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
-    edges: [
-      { source: 'a', target: 'b' },
-      { source: 'a', target: 'c' },
-    ],
-  },
-  layout: { type: 'circular', radius: 140 },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-});
-
-await graph.render();
-```
-
-Use `setData()` for a complete replacement and the add/update/remove/state APIs for incremental changes. Call `graph.destroy()` when the page or component unmounts.
-
-Next: [Use with React and Vue](/en/docs/getting-started/react), [data configuration](/en/docs/guides/data), and [examples](/en/docs/examples).
-
-
-# Use with React and Vue (/en/docs/getting-started/react)
-
-
-
-Integrate G6Lite with React or Vue 3 by passing a real DOM element through a ref, creating the graph after mounting, and destroying it on unmount. The sections below cover components and data updates for each framework.
-
-## Install dependencies [#install-dependencies]
-
-Install G6Lite in an existing React or Vue 3 project:
-
-```bash
-npm install @antv/g6-lite
-```
-
-## Use with React [#use-with-react]
-
-Create the instance in an effect and keep refs to the DOM element, graph instance, and first render Promise.
-
-### Mount the graph [#mount-the-graph]
-
-Save this component as `GraphView.tsx`. Refs keep the instance and its first render Promise available for later updates.
-
-```tsx
-import { Graph } from '@antv/g6-lite';
-import { useEffect, useRef } from 'react';
-
-export function GraphView() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const graphRef = useRef<Graph | null>(null);
-  const renderRef = useRef<Promise<void> | null>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const graph = new Graph({
-      container: containerRef.current,
-      data: {
-        nodes: [{ id: 'a' }, { id: 'b' }],
-        edges: [{ source: 'a', target: 'b' }],
-      },
-      layout: { type: 'circular', radius: 120 },
-      autoFit: { padding: 24, maxZoom: 1.5 },
-      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
-    });
-
-    graphRef.current = graph;
-    const rendered = graph.render();
-    renderRef.current = rendered;
-    void rendered.catch(console.error);
-
-    return () => {
-      graph.destroy();
-      graphRef.current = null;
-      renderRef.current = null;
-    };
-  }, []);
-
-  return <div ref={containerRef} style={{ width: '100%', height: 480 }} />;
-}
-```
-
-### Update graph data [#update-graph-data]
-
-To accept data through props, add a `data: GraphData` parameter to the component above, import the `GraphData` type from the package root, and add this effect after the mounting effect. Wait for the first `render()` to complete before calling `setData()`:
-
-```tsx
-// import type { GraphData } from '@antv/g6-lite';
-// export function GraphView({ data }: { data: GraphData }) { ... }
-useEffect(() => {
-  const graph = graphRef.current;
-  const rendered = renderRef.current;
-  if (!graph || !rendered) return;
-  let cancelled = false;
-
-  const update = async () => {
-    await rendered;
-    if (cancelled || graph.destroyed) return;
-    await graph.setData(data);
-  };
-  void update().catch(console.error);
-
-  return () => {
-    cancelled = true;
-  };
-}, [data]);
-```
-
-Pass a new data object to trigger updates. For fetched data, start with `{ nodes: [], edges: [] }` and update props when the request completes. Keep `data` out of the effect that creates the instance so data changes reuse the graph.
-
-Use incremental APIs such as `setItemState()`, `hideItem()`, and `showItem()` for highlighting, selection, or visibility changes. See [data configuration](/en/docs/guides/data).
-
-## Use with Vue [#use-with-vue]
-
-In Vue 3, use a template ref to access the DOM container, create `Graph` in `onMounted`, and destroy it in `onBeforeUnmount`. This guide uses the Composition API and `<script setup lang="ts">`.
-
-### Mount the graph [#mount-the-graph-1]
-
-Save this single-file component as `GraphView.vue`, then import and use `<GraphView />` in a parent component:
-
-```vue
-<script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { Graph } from '@antv/g6-lite';
-
-const containerRef = ref<HTMLDivElement | null>(null);
-let graph: Graph | undefined;
-let rendered: Promise<void> | undefined;
-
-onMounted(() => {
-  if (!containerRef.value) return;
-
-  graph = new Graph({
-    container: containerRef.value,
-    data: {
-      nodes: [
-        { id: 'a', data: { label: 'A' } },
-        { id: 'b', data: { label: 'B' } },
-      ],
-      edges: [{ source: 'a', target: 'b' }],
-    },
-    node: {
-      style: {
-        size: 18,
-        label: (node) => (node.data?.label as string) ?? node.id,
-        labelPlacement: 'bottom',
-      },
-    },
-    edge: { style: { endArrow: true } },
-    layout: { type: 'circular', radius: 120 },
-    autoFit: { padding: 24, maxZoom: 1.5 },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
-  });
-
-  rendered = graph.render();
-  void rendered.catch(console.error);
-});
-
-onBeforeUnmount(() => {
-  graph?.destroy();
-  graph = undefined;
-  rendered = undefined;
-});
-</script>
-
-<template>
-  <div ref="containerRef" style="width: 100%; height: 480px" />
-</template>
-```
-
-Template refs become available after mounting. Store the `Graph` instance in a plain variable to avoid deep reactive proxies. Use `shallowRef` if the instance itself must be reactive. See [Vue template refs](https://vuejs.org/guide/essentials/template-refs) and [shallow reactivity](https://vuejs.org/api/reactivity-advanced.html#shallowref).
-
-### Update graph data [#update-graph-data-1]
-
-For data supplied through props, add these imports, declarations, and watcher inside `<script setup>`. Replace the initial data configuration with `data: props.data`, then reuse the instance as props change:
-
-```ts
-import { watch } from 'vue';
-import type { GraphData } from '@antv/g6-lite';
-
-const props = defineProps<{ data: GraphData }>();
-
-watch(
-  () => props.data,
-  async (data, _previous, onCleanup) => {
-    const current = graph;
-    const ready = rendered;
-    if (!current || !ready) return;
-    let cancelled = false;
-    onCleanup(() => {
-      cancelled = true;
-    });
-
-    try {
-      await ready;
-      if (cancelled || current.destroyed) return;
-      await current.setData(data);
-    } catch (error) {
-      console.error(error);
-    }
-  },
-);
-```
-
-This watcher observes replacement of the data object. Pass a new object from the parent. For changes to nodes or edges within the same object, use incremental graph APIs or create a new object. Large graph datasets usually do not need a deep watcher.
-
-Wait for the first `render()` to complete so updates during initialization are applied. For fetched data, start with `{ nodes: [], edges: [] }` and update props when the request completes. See [data configuration](/en/docs/guides/data).
-
-## Handle container resizing [#handle-container-resizing]
-
-Give the container explicit dimensions. Setting only `width: 100%` is insufficient. The example uses a height of `480`; flexible layouts can set a height or `min-height` through CSS.
-
-G6Lite uses `ResizeObserver` to synchronize canvas dimensions and preserves the current camera by default. The example's `autoFit` option fits the graph after a resize while controlling padding and maximum zoom. See [Graph lifecycle](/en/docs/concepts/graph-lifecycle#container-resize).
-
-The Vue example uses an inline height of `480px`. Percentage heights require a parent with a defined height. For hidden tabs or dialogs, create the instance once the container is visible and has a real size.
-
-## Clean up on unmount [#clean-up-on-unmount]
-
-### React [#react]
-
-Call `graph.destroy()` in the effect cleanup to release the canvas, event listeners, observers, and layout tasks, then clear the stored refs.
-
-React Strict Mode runs an extra effect setup and cleanup cycle during development. Pair each creation with cleanup to avoid leftover canvases and listeners. See [React's effect cleanup guidance](https://react.dev/reference/react/useEffect#my-effect-runs-twice-when-the-component-mounts).
-
-### Vue [#vue]
-
-Call `graph.destroy()` in `onBeforeUnmount` to release the canvas, event listeners, observers, and layout tasks, then clear the instance reference. Vue stops watchers created synchronously during setup when the component unmounts; the cleanup callback also prevents pending updates from starting. See [Vue lifecycle hooks](https://vuejs.org/api/composition-api-lifecycle#onbeforeunmount).
-
-## Next steps [#next-steps]
-
-* [Understand the Graph lifecycle](/en/docs/concepts/graph-lifecycle)
-* [Configure interactions](/en/docs/guides/interactions)
-* [Browse complete examples](/en/docs/examples)
-
-
 # Combos (/en/docs/guides/combo)
 
 
@@ -2824,30 +2880,81 @@ register('node', 'status-node', {
 Prefer `node.style` and `stateStyles` when only color, size, stroke, label, or state appearance changes. `BaseNode` and `registerNode()` remain beta compatibility APIs; new extensions should use `register('node', ...)`.
 
 
-# Data and Graph options (/en/docs/guides/data)
+# Data (/en/docs/guides/data)
 
 
 
-`GraphData` contains nodes, edges, and optional combos. IDs must be stable; put application fields under `data`.
+This page covers data ingestion and runtime updates. See [Data model](/en/docs/concepts/data-model) for node, edge, and Combo relationships, and [Options](/en/docs/api/options#graph-data) for complete fields.
+
+## Map application data [#map-application-data]
+
+Map entities to nodes and relationships to edges. Put application fields in `data` so style callbacks, tooltips, and application logic can read them:
 
 ```ts
-const graph = new Graph({
-  container: 'container',
-  data: {
-    nodes: [{ id: 'a', data: { type: 'service' } }, { id: 'b' }],
-    edges: [{ source: 'a', target: 'b', data: { relation: 'calls' } }],
-  },
-  node: { type: 'circle' },
-  edge: { type: 'line' },
-  layout: { type: 'circular' },
-  behaviors: ['zoom-canvas', 'drag-canvas'],
-  theme: 'light',
-});
+import type { GraphData } from '@antv/g6-lite';
 
-await graph.render();
+const users = [
+  { id: 'alice', name: 'Alice', team: 'design' },
+  { id: 'bob', name: 'Bob', team: 'engineering' },
+];
+
+const data: GraphData = {
+  nodes: users.map((user) => ({
+    id: user.id,
+    data: { name: user.name, team: user.team },
+  })),
+  edges: [{ source: 'alice', target: 'bob' }],
+};
 ```
 
-Use `transforms` for reusable data processing such as parallel-edge separation and `plugins` for managed capabilities. Destroy the graph when its container is removed.
+Pass the result as the `data` option in `new Graph({ container, data })`. See [Quick start](/en/docs/getting-started/quick-start) for a complete creation and rendering example.
+
+## Validate data [#validate-data]
+
+* Node `id` values must be unique within the graph and remain stable across updates.
+* Edge `source` and `target` must refer to existing nodes.
+* When using Combo, a node's `comboId` should refer to a declared group.
+* Without a configured layout, provide node `x` / `y` positions so nodes do not share the default coordinates.
+* Update graph data through public methods instead of directly modifying returned Models.
+
+## Replace all data [#replace-all-data]
+
+Run the following operations after the first `await graph.render()` completes.
+
+Use `setData()` when filters change, datasets switch, or a request returns a complete result:
+
+```ts
+await graph.setData(nextData);
+```
+
+A configured layout runs again, and the viewport fits the data by default. To preserve the user's current zoom and pan:
+
+```ts
+await graph.setData(nextData, { fitView: false });
+```
+
+This `fitView` option controls fitting after this data replacement. Container resize fitting is controlled separately by [`autoFit`](/en/docs/api/options#autofit).
+
+## Incremental updates [#incremental-updates]
+
+For a small number of element changes, use add, update, and remove methods:
+
+```ts
+graph.addNode({ id: 'carol', x: 120, y: 80, data: { name: 'Carol' } });
+graph.addEdge({ source: 'alice', target: 'carol' });
+graph.updateNodeData('carol', { name: 'Carol Chen' });
+graph.removeNode('bob');
+```
+
+New nodes require positions; incremental methods do not automatically rerun layout. To rearrange the graph, call `layout()` as described in [Runtime relayout](/en/docs/guides/layout). Batch methods reduce repeated refreshes when updating multiple elements.
+
+Use [State and visibility APIs](/en/docs/api/graph#state-visibility-and-focus) for selection, highlighting, or hiding instead of replacing all data.
+
+## Related references [#related-references]
+
+* [Graph lifecycle](/en/docs/concepts/graph-lifecycle): update after initialization and destroy on unmount.
+* [Graph data API](/en/docs/api/graph#changing-nodes-and-edges): element mutations, batch operations, and parameters.
+* [Node configuration](/en/docs/guides/node): map application fields to colors, sizes, and labels.
 
 
 # Edges (/en/docs/guides/edge)

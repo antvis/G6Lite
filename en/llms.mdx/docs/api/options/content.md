@@ -6,7 +6,7 @@ The argument of `new Graph(options)` is `GraphOptions`. Only `container` and `da
 
 ```ts
 const graph = new Graph({
-  container: 'container',
+  container: '#container',
   data: {
     nodes: [{ id: 'a' }, { id: 'b' }],
     edges: [{ id: 'a-b', source: 'a', target: 'b' }],
@@ -25,7 +25,7 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 
 | Field        | Type                                  | Description                                                                                         |
 | ------------ | ------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `container`  | `string \| HTMLElement`               | Canvas container. A string is looked up as an element id                                            |
+| `container`  | `string \| HTMLElement`               | Canvas container. A string is a CSS selector, such as `#container`                                  |
 | `data`       | `GraphData`                           | Nodes, edges, and optional combos                                                                   |
 | `node`       | `NodeConfig`                          | Node shape, style, and state styles                                                                 |
 | `edge`       | `EdgeConfig`                          | Edge shape, style, arrows, and state styles                                                         |
@@ -38,15 +38,41 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 | `theme`      | `ThemeOption`                         | `'light'`, `'dark'`, or a preset plus token overrides                                               |
 | `autoFit`    | `boolean \| number \| FitViewOptions` | Whether a container resize calls `fitView()` again. Default `false`, which keeps the current camera |
 
-Setting `autoFit` to `false` or omitting it disables fitting after a size change; the initial `render()` still calls `fitView()`. An options object also configures the initial fit.
+See [`autoFit`](#autofit) below for initial fitting and resize fitting.
 
 At runtime, `node`, `edge`, `label`, and `theme` can be updated with [`graph.updateOptions()`](/en/docs/api/graph#updateoptions).
+
+### `autoFit` [#autofit]
+
+Controls initial fitting and whether a container resize fits the graph again:
+
+| Value                        | First `render()`       | After resize                    |
+| ---------------------------- | ---------------------- | ------------------------------- |
+| Omitted or `false` (default) | `fitView(0.9)`         | Preserve the current camera     |
+| `true`                       | `fitView(0.9)`         | `fitView(0.9)`                  |
+| `FitViewOptions` object      | Fit with those options | Fit again with the same options |
+
+A positive number supplies the relative scale for `fitView()`, both during the initial render and after resizing.
+
+For resizable panels or expanding sidebars, an options object can control the fit:
+
+```ts
+const graph = new Graph({
+  container: '#container',
+  data,
+  autoFit: { padding: 24, minZoom: 0.2, maxZoom: 1.5 },
+});
+```
+
+See [`fitView()`](/en/docs/api/graph#fitview) for `padding`, `minZoom`, and `maxZoom`. Leave automatic fitting disabled to preserve the user's zoom and pan. Disabling it affects only resize fitting; the initial render still fits the graph.
+
+See [Container resize](/en/docs/api/graph#container-resize) for observation and event ordering.
 
 ## Graph data [#graph-data]
 
 ```ts
 const data: GraphData = {
-  nodes: [{ id: 'a', data: { cluster: 'svc' } }],
+  nodes: [{ id: 'a', data: { cluster: 'svc' } }, { id: 'b' }],
   edges: [{ source: 'a', target: 'b', data: { weight: 1 } }],
   combos: [{ id: 'group', collapsed: false }],
 };

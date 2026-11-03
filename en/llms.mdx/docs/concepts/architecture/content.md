@@ -4,40 +4,41 @@
 
 
 
-G6Lite does not try to cover every shape and runtime. Its architecture combines a controlled public API, efficient graph-data paths, and specialized WebGL programs for large relationship graphs and frequent analytical interaction in modern browsers.
+This page explains module responsibilities and collaboration for readers exploring rendering, performance paths, or extension boundaries. See [Graph lifecycle](/en/docs/concepts/graph-lifecycle) for the application calling sequence.
 
-The diagram shows the public entry points, core responsibilities, coordinated rendering, and browser platform. Dashed lines connect extensions to their integration points. The first-render, update, and interaction sequences are explained below.
+## Architecture layers [#architecture-layers]
 
 <ArchitectureDiagram locale="en" />
 
-## Design boundary [#design-boundary]
+Applications use `Graph` and extension contracts from the package root. Graph orchestrates transforms, layouts, and the runtime; DataModel owns graph data and states; RenderScheduler coordinates drawing based on the scope of each change. Renderer, Picking, and GPU buffers are internal implementation details.
 
-* `Graph` is the application entry point for data, layout, rendering, interaction, and lifecycle.
-* The package root exposes stable types and extension contracts; DataModel, Renderer, Picking, and GPU buffers remain internal.
-* Nodes and edges use batched WebGL drawing. Labels and icons use a Canvas 2D overlay, while Combo boundaries use a Canvas 2D underlay.
-* Layouts are lazy-loaded from `@antv/layout` and can run in a Worker when configured.
-* G6Lite keeps graph-specific programs, batches, picking, and incremental updates instead of adopting a complete scene-graph engine.
+These layers share one graph runtime. Layouts provide positions, interactions produce data or state changes, and the scheduler sends changes to the appropriate drawing layers. This division lets layouts, information layers, and interactions be extended independently.
 
-## First-render data flow [#first-render-data-flow]
+## Drawing layers [#drawing-layers]
 
-After `await graph.render()`, the runtime works in this order:
+G6Lite batches nodes and edges through WebGL and uses Canvas 2D for text measurement, label collision, and grouping bounds:
+
+| Layer, bottom to top | Content                        | Reason                                                    |
+| -------------------- | ------------------------------ | --------------------------------------------------------- |
+| Canvas 2D underlay   | Combo boundaries               | Fits group bounds and background information              |
+| Main WebGL canvas    | Nodes, edges, and arrows       | Supports batched geometry and buffer updates              |
+| Canvas 2D overlay    | Labels, icons, and decorations | Supports text measurement, layout, and collision handling |
+
+The layers share the camera, dimensions, DPR, and scheduling signals within one Graph. WebGL prefers WebGL2 and falls back to WebGL1. See [Browsers and runtime](/en/docs/compatibility/browser) for environment requirements.
+
+## Rendering and update paths [#rendering-and-update-paths]
+
+### First-render data flow [#first-render-data-flow]
+
+Calling `render()` prepares input, builds the runtime, and draws the first frame:
 
 <FirstRenderFlow locale="en" />
 
-1. Create the current render generation, run registered transforms, and resolve the theme and container dimensions.
-2. When layout is configured and data is nonempty, select the algorithm and calculate positions, optionally in a Worker. Otherwise, use existing node coordinates.
-3. Create the DataModel and write nodes, edges, Combo, states, and positioned coordinates.
-4. Submit render data to Renderer, create RenderScheduler, and mount InteractionDispatcher, Behaviors, LabelLayerRenderer, and ComboRenderer.
-5. Emit `beforerender`, then process geometry and prepare the contiguous typed arrays and GPU buffers required by renderer programs.
-6. Call `fitView()` to update the camera using the processed geometry bounds.
-7. Draw the Canvas 2D Combo underlay, then nodes and edges in the WebGL normal pass, followed by the Canvas 2D label overlay. Maintain picking buffers on demand; the picking pass is not required for the first frame.
-8. Emit `afterrender` after the first frame, then mount ResizeObserver and Plugins.
+When asynchronous layout or extension initialization returns, Graph checks the active render generation and destroyed state so stale results cannot replace newer data. Generations are an internal cancellation and result-commit mechanism; applications manage instances through public lifecycle methods.
 
-After asynchronous layouts, extension initialization, or browser yields, Graph checks the active generation and destroyed state again so stale results cannot replace newer data.
+### Frequent-update paths [#frequent-update-paths]
 
-## Frequent-update paths [#frequent-update-paths]
-
-State, position, and data changes do not all rebuild the graph. RenderScheduler selects a path based on the change level:
+RenderScheduler selects processing based on the change level:
 
 | Change                                | Main path                                                                    |
 | ------------------------------------- | ---------------------------------------------------------------------------- |
@@ -48,68 +49,32 @@ State, position, and data changes do not all rebuild the graph. RenderScheduler 
 | Camera pan and zoom                   | Update uniforms and draw without rebuilding graph-data buffers               |
 | Full replacement or structural change | Update DataModel and fully or partially process render data and buffers      |
 
-Frequent selection, highlighting, and drag interactions should use state, position, and batch APIs instead of repeatedly creating a new Graph.
+Selection, highlighting, and dragging should update the existing instance through state, position, and batch APIs. See [Data](/en/docs/guides/data) for choosing update methods and [Performance tuning](/en/docs/metrics/performance-tuning) for practical guidance.
 
-## Why WebGL and Canvas 2D coexist [#why-webgl-and-canvas-2d-coexist]
+## Layout and interaction collaboration [#layout-and-interaction-collaboration]
 
-WebGL is effective for batched homogeneous nodes and edges, GPU picking, and partial buffer updates. Text layout, icons, label collision, and Combo boundaries fit Canvas 2D better because measurements stay direct and the information layer does not need to move entirely into shaders.
+### Layout and Worker [#layout-and-worker]
 
-These layers share the camera, dimensions, DPR, and scheduling signals. The Combo underlay sits below the primary WebGL canvas, while the label and icon overlay sits above it. They are not separate Graph instances.
+The layout layer computes positions from graph data and configuration. Graph commits the result to DataModel and passes it to Renderer. Official algorithms are lazy-loaded by `layout.type`; supported expensive layouts can run in a Worker to reduce main-thread blocking.
 
-## Layout and Worker boundary [#layout-and-worker-boundary]
+Cancelled layout results are not committed to the active render generation. A Worker does not remove algorithm cost, and data with existing coordinates can omit layout. See [Layout configuration](/en/docs/guides/layout) for algorithms, options, and Worker limits.
 
-Layout is not a Renderer responsibility. Graph invokes the layout layer and passes positioned data to DataModel and Renderer:
+### Interaction and picking [#interaction-and-picking]
 
-```text
-GraphData → Layout → positioned nodes → DataModel → Renderer
-```
-
-Official layouts are dynamically loaded by `layout.type`. `worker: true` can reduce main-thread blocking, but it does not remove algorithm cost; iteration limits, cancellation, and real data scale still need validation.
-
-When coordinates already exist, omit layout and provide node `x` / `y` values directly.
-
-## Interaction and picking [#interaction-and-picking]
-
-InteractionDispatcher centralizes pointer events and hit detection before it distributes normalized events to Behaviors:
+InteractionDispatcher centralizes pointer events and hit detection, then delivers normalized events to Behaviors:
 
 ```text
-native event → GPU/CPU pick → graph event → Behavior → public state/data API
+Native event → Hit detection → Graph event → Behavior → Public data or state API
 ```
 
-Nodes and edges prefer GPU Picking with a controlled CPU fallback. Combo is drawn in the Canvas 2D underlay and uses its own geometric hit path. A Behavior should not access framebuffers or reimplement picking.
+Nodes and edges prefer GPU Picking and fall back to CPU detection when the picking buffer is unavailable. Combo uses its own geometric hit path. Picking buffers are maintained on demand; drawing does not always require a picking pass.
+
+Interaction changes return through the update scheduler, so Behaviors do not need to manipulate framebuffers. See [Interactions](/en/docs/guides/interactions) and [Events](/en/docs/guides/events) for application usage.
 
 ## Extension boundary [#extension-boundary]
 
-G6Lite supports eight extension categories: node, edge, label, decoration, layout, behavior, transform, and plugin. Prefer the factory pattern:
+G6Lite supports node, edge, label, decoration, layout, behavior, transform, and plugin extensions. These contribute shape descriptions, information layers, positions, event responses, or runtime orchestration.
 
-```ts
-register(
-  'behavior',
-  name,
-  extensionFactory(() => ({
-    init(context, options) {},
-    getEvents() {
-      return {};
-    },
-    destroy() {},
-  })),
-);
-```
+Stateful extensions collaborate through the data, state, viewport, and `requestRender()` capabilities of `ExtensionContext`. They should not hold internal DataModel, Renderer, WebGL contexts, or GPU buffers.
 
-Extensions work through controlled data, state, viewport, and `requestRender()` capabilities, reading snapshots and updating data through public methods. New extensions should not hold DataModel, Renderer, WebGL contexts, or GPU buffers directly.
-
-## Browser platform and fallback [#browser-platform-and-fallback]
-
-* Prefer a WebGL2 context and fall back to WebGL1 when required.
-* Fall back to CPU hit detection when the picking framebuffer is incomplete or unavailable.
-* Keep labels and Combo on Canvas 2D paths.
-* Handle WebGL context loss/restoration, ResizeObserver, Worker cancellation, and Graph destruction through explicit lifecycles.
-* The package is ESM-only and requires real DOM, Canvas, and WebGL; it does not support server-side graph rendering.
-
-See [Browsers and runtime](/en/docs/compatibility/browser) and [API stability](/en/docs/compatibility/api-stability) for the complete boundary.
-
-## Constraints for AI agents [#constraints-for-ai-agents]
-
-AI-generated G6Lite code should depend only on the public API layer at the top of the diagram. Internal layers explain performance and troubleshooting, but they are not business imports.
-
-Use [`$antv-g6lite-graph`](/en/docs/ai) to make an agent check package-root imports, runtime constraints, supported capabilities, and real validation before it generates code.
+See [Extensions](/en/docs/guides/extensions) for registration, instance scope, and cleanup, and [API stability](/en/docs/compatibility/api-stability) for public contract stability.

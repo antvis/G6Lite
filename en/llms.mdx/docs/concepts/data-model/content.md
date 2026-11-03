@@ -1,28 +1,35 @@
-# Data model (/en/docs/concepts/data-model)
+# Graph data model (/en/docs/concepts/data-model)
 
 
 
-`GraphData` contains `nodes`, `edges`, and optional `combos`:
 
-```ts
-const data = {
-  nodes: [
-    { id: 'gateway', data: { label: 'Gateway' } },
-    { id: 'orders', data: { label: 'Orders' } },
-  ],
-  edges: [{ source: 'gateway', target: 'orders', data: { qps: 1200 } }],
-};
-```
 
-Node IDs must be stable. Put business fields under `data`; use `x` and `y` when coordinates are already available. Edges declare `source` and `target` and may provide a stable `id`. Combos group nodes through `comboId` and remain experimental during the `0.1.x` beta.
+A graph consists of nodes and edges connecting them, with optional Combo groups. G6Lite receives these through `GraphData`. Your use case determines what the nodes and connections mean.
 
-Use states for selection, highlighting, and dimming:
+## Nodes, edges, and groups [#nodes-edges-and-groups]
 
-```ts
-graph.batchSetState([
-  { id: 'gateway', state: 'selected', value: true },
-  { id: 'orders', state: 'inactive', value: true },
-]);
-```
+This graph has 6 nodes and 8 edges. A, B, and C belong to the same group:
 
-Query APIs return normalized read-only model views. Modify graph-owned data through update, position, and state APIs instead of mutating query results.
+<GraphDataModelDiagram locale="en" />
+
+* **Nodes, `nodes`**: points in the graph, distinguished by `id`.
+* **Edges, `edges`**: connections between two nodes. Their `source` and `target` specify the endpoint node ids.
+* **Combos, `combos`**: optional node groups. Nodes join through `comboId`; a group does not automatically create connections.
+
+## Data and appearance [#data-and-appearance]
+
+Nodes and edges can carry custom `data` fields. These hold information you want to attach to the graph, with meanings defined by your application.
+
+Appearance options such as `node` and `edge` control colors, sizes, and labels. They can also map values from `data`. Changing appearance does not change the connections between nodes. See [Nodes](/en/docs/guides/node) and [Edges](/en/docs/guides/edge) for configuration.
+
+## Positions and states [#positions-and-states]
+
+**Positions** determine where nodes are drawn. Their `x` / `y` values can come from a layout or be supplied directly. Moving a node does not change which nodes it connects to.
+
+**States** express current interactions such as selection or highlighting. A node can have several states at once, with visual effects configured through `stateStyles`.
+
+## Read next [#read-next]
+
+* [Data ingestion and updates](/en/docs/guides/data): prepare data and choose full replacement or incremental updates.
+* [Graph data fields](/en/docs/api/options#graph-data): field types, required values, and constraints.
+* [Combo configuration](/en/docs/guides/combo): group appearance and usage.

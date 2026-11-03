@@ -1994,6 +1994,11 @@ body.example-workspace-resizing {
   color: var(--example-code-text);
 }
 
+.example-code-panel .example-utility-button.is-dirty {
+  border-color: color-mix(in srgb, var(--example-code-active) 42%, var(--example-code-border));
+  color: var(--example-code-text);
+}
+
 .example-code-content {
   min-height: 0;
   flex: 1;
@@ -2032,6 +2037,27 @@ body.example-workspace-resizing {
   color: inherit !important;
   padding: 0 !important;
   text-decoration: none !important;
+}
+
+/* CodeMirror fills the source tab and inherits the panel typography. */
+.example-code-content > .cm-theme-light,
+.example-code-content > .cm-theme-dark {
+  height: 100%;
+}
+
+.example-code-content .cm-editor {
+  height: 100%;
+  background: transparent;
+  font-size: var(--example-code-font);
+}
+
+.example-code-content .cm-editor.cm-focused {
+  outline: none;
+}
+
+.example-code-content .cm-scroller {
+  font-family: var(--font-mono);
+  line-height: 1.615;
 }
 
 .example-panel-message {

@@ -32,7 +32,7 @@ const zh = {
     core: '核心入口',
     lazyLayouts: '布局按需加载',
     sizeLink: '查看体积测量口径',
-    vsG6: '较 {name} 小 {percent}%',
+    vsG6: '较 {name} ↓ {percent}%',
     interactionTitle: '高性能渲染',
     interactionDescription:
       'WebGL 批量绘制节点与边，结合增量更新，降低大规模关系图的绘制与交互开销。',
@@ -186,7 +186,7 @@ const en: typeof zh = {
     core: 'Core entry',
     lazyLayouts: 'On-demand layouts',
     sizeLink: 'How we measure bundle size',
-    vsG6: '{percent}% smaller than {name}',
+    vsG6: '{percent}% ↓ {name}',
     interactionTitle: 'High-performance rendering',
     interactionDescription:
       'Batch nodes and edges with WebGL and use incremental updates to reduce rendering and interaction overhead for large graphs.',

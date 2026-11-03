@@ -1,10 +1,11 @@
+/* global console, document, window */
+
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
 
-const repositoryRoot = path.resolve('.');
 const catalogPath = path.resolve('playground/demos/catalog.json');
 const catalog = JSON.parse(readFileSync(catalogPath, 'utf8'));
 
@@ -62,7 +63,9 @@ function validateCatalog() {
 
 function selectDemos() {
   if (profile === 'smoke') {
-    return catalog.filter((demo) => demo.releaseCheck === 'smoke' || demo.releaseCheck === 'visual');
+    return catalog.filter(
+      (demo) => demo.releaseCheck === 'smoke' || demo.releaseCheck === 'visual',
+    );
   }
   if (profile === 'release') return catalog.filter((demo) => demo.releaseCheck !== false);
   return catalog;
@@ -99,7 +102,10 @@ async function checkDemo(browser, baseUrl, demo) {
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.stack ?? error.message));
 
-  const timeout = demo.releaseCheck === 'full' ? 120_000 : Math.max(18_000, (demo.capture.settleMs ?? 450) + 15_000);
+  const timeout =
+    demo.releaseCheck === 'full'
+      ? 120_000
+      : Math.max(18_000, (demo.capture.settleMs ?? 450) + 15_000);
   await page.goto(`${baseUrl}capture-demo.html#${demo.id}`, { waitUntil: 'load', timeout });
   await page.waitForFunction(
     () => window.__ready === true || Boolean(window.__captureError),
@@ -124,8 +130,9 @@ async function checkDemo(browser, baseUrl, demo) {
   }
   if (pageErrors.length > 0) throw new Error(`${demo.id}: ${pageErrors.join('\n')}`);
   const hasVisibleCanvas = state.canvases.some(
-      (canvas) => canvas.width > 0 && canvas.height > 0 && canvas.cssWidth > 0 && canvas.cssHeight > 0,
-    );
+    (canvas) =>
+      canvas.width > 0 && canvas.height > 0 && canvas.cssWidth > 0 && canvas.cssHeight > 0,
+  );
   if (!hasVisibleCanvas) {
     throw new Error(`${demo.id}: no visible render surface`);
   }

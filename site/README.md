@@ -27,7 +27,7 @@ Open `http://localhost:3000`.
 
 ```bash
 npm --prefix site run types:check
-node scripts/check-examples.mjs --profile release
+npm run test:examples -- --profile release
 npm run site
 ```
 

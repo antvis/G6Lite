@@ -25,7 +25,7 @@ http://localhost:5173/#fishbone
 - `performance`：合成数据与浏览器性能入口。
 - `dataset`：真实数据集验证。
 
-官网 Examples 只消费 catalog 中 `audiences` 包含 `site` 的案例。性能入口复用 `tests/perf/browser`，不在 Playground 维护第二套测量逻辑。
+官网 Examples 只消费 catalog 中 `audiences` 包含 `site` 的案例。
 
 ## 新增案例
 

@@ -20,10 +20,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'playground/index.html'),
-        performance: resolve(__dirname, 'playground/performance.html'),
-      },
+      input: resolve(__dirname, 'playground/index.html'),
     },
   },
 });

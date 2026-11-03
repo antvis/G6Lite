@@ -19,20 +19,6 @@ export default tseslint.config(
     },
   },
   {
-    files: ['tests/perf/**/*.{js,mjs}'],
-    languageOptions: {
-      globals: {
-        console: 'readonly',
-        document: 'readonly',
-        Event: 'readonly',
-        fetch: 'readonly',
-        process: 'readonly',
-        URL: 'readonly',
-        window: 'readonly',
-      },
-    },
-  },
-  {
     ignores: ['dist/', 'node_modules/', 'playground/', '*.js'],
   },
 );

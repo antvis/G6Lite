@@ -16,7 +16,7 @@ export type DemoCategory =
   | 'performance'
   | 'regression';
 
-export type DemoKind = 'functional' | 'regression' | 'scenario' | 'performance' | 'dataset';
+export type DemoKind = 'functional' | 'regression' | 'scenario' | 'dataset';
 export type DemoAudience = 'playground' | 'site';
 export type DemoDocsGroup =
   | 'getting-started'

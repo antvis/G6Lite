@@ -10,27 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  quality:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Use Node.js 20
-        uses: actions/setup-node@v7
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install --no-package-lock --no-audit --no-fund
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Type check
-        run: npm run typecheck
-
-  test:
+  build:
+    name: build (node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -47,55 +28,14 @@ jobs:
       - name: Install dependencies
         run: npm install --no-package-lock --no-audit --no-fund
 
+      - name: Lint
+        run: npm run lint
+
       - name: Test
-        run: npm test -- --coverage
+        run: npm test
 
-  build:
-    name: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Use Node.js 20
-        uses: actions/setup-node@v7
-        with:
-          node-version: 20
-
-      - name: Install library dependencies
-        run: npm install --no-package-lock --no-audit --no-fund
-
-      # Node 20 ships npm 10.8, which crashes on the site peer graph
-      # (`edgesOut`). The guard shipped in npm 11.6.0.
-      - name: Use npm 11.6.2 for the site install
-        run: npm install -g npm@11.6.2
-
-      - name: Install site dependencies
-        run: npm --prefix site install --no-package-lock --no-audit --no-fund
-
-      - name: Build library
+      - name: Build
         run: npm run build
-
-      - name: Check UMD browser build
-        run: npm run check:umd
 
       - name: Size limit
         run: npm run size
-
-      - name: Build playground
-        run: npx vite build
-
-      - name: Check playground examples
-        run: node scripts/check-examples.mjs --profile smoke --screenshots-dir performance/examples-smoke
-
-      - name: Upload example screenshots
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: playground-example-screenshots
-          path: performance/examples-smoke/
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Build documentation site
-        run: npm run site

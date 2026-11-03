@@ -39,16 +39,8 @@ graph.batchSetState([
 - 标签由 Canvas 2D 绘制；大规模图只展示关键标签，并随缩放级别或选中状态逐步展开。
 - 控制阴影、复杂描边、超长文本和全量边标签，避免把 CPU 绘制成本放在每次视口更新上。
 
-## 使用统一 Benchmark
+## 对比口径
 
-```bash
-# 快速确认 Node 与浏览器链路
-npm run benchmark -- --suite all --mode quick
-
-# 使用真实基线前扩大工作负载与采样量
-npm run benchmark -- --suite browser --mode full
-```
-
-对比前确保版本、commit、CPU、浏览器、视口、DPR、数据规模和布局配置一致。完整口径见 [Benchmark 与性能指标](/docs/metrics/performance)。
+对比前确保版本、commit、CPU、浏览器、视口、DPR、数据规模和布局配置一致。完整口径见 [性能指标](/docs/metrics/performance)。
 
 如果目标是极大规模或低端移动设备，请在真实设备上使用真实拓扑测试；桌面 Headless Chrome 的结果不能替代终端验收。

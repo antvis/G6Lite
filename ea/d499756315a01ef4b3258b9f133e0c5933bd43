@@ -1,0 +1,26 @@
+tests/browser/examples.mjs
+  s_4498b88cd7e5fd::t_d303d1e07d0971 1-2,105-108,135
+  s_4498b88cd7e5fd::t_a6df574f00d174 66-68,133-134
+playground/demos/README.md
+  s_4498b88cd7e5fd::t_d303d1e07d0971 39
+package.json
+  s_4498b88cd7e5fd::t_d303d1e07d0971 27,30
+site/README.md
+  s_4498b88cd7e5fd::t_d303d1e07d0971 30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ead499756315a01ef4b3258b9f133e0c5933bd43",
+  "prompts": {},
+  "sessions": {
+    "s_4498b88cd7e5fd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a19f85-a533-7041-bf0b-93c29d1b93c4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -116,14 +116,6 @@ async function checkDemo(browser, baseUrl, demo) {
       cssWidth: canvas.getBoundingClientRect().width,
       cssHeight: canvas.getBoundingClientRect().height,
     })),
-    frames: Array.from(document.querySelectorAll('iframe')).map((frame) => ({
-      cssWidth: frame.getBoundingClientRect().width,
-      cssHeight: frame.getBoundingClientRect().height,
-      benchmarkReady: Boolean(
-        frame.contentDocument?.getElementById('btn-start') &&
-          frame.contentDocument?.getElementById('graph-container'),
-      ),
-    })),
   }));
 
   if (state.error) throw new Error(`${demo.id}: ${state.error}`);
@@ -134,12 +126,7 @@ async function checkDemo(browser, baseUrl, demo) {
   const hasVisibleCanvas = state.canvases.some(
       (canvas) => canvas.width > 0 && canvas.height > 0 && canvas.cssWidth > 0 && canvas.cssHeight > 0,
     );
-  const hasPerformanceSurface =
-    demo.kind === 'performance' &&
-    state.frames.some(
-      (frame) => frame.cssWidth > 0 && frame.cssHeight > 0 && frame.benchmarkReady,
-    );
-  if (!hasVisibleCanvas && !hasPerformanceSurface) {
+  if (!hasVisibleCanvas) {
     throw new Error(`${demo.id}: no visible render surface`);
   }
 

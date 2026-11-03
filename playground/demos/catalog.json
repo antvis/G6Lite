@@ -218,7 +218,7 @@
     "title": "较大规模（200 节点）",
     "description": "快速验证较大规模图的基础渲染和交互。",
     "category": "performance",
-    "kind": "performance",
+    "kind": "scenario",
     "audiences": [
       "playground",
       "site"
@@ -241,7 +241,7 @@
     "title": "5000 节点与标签",
     "description": "验证 5000 节点和 Canvas 标签的渲染性能。",
     "category": "performance",
-    "kind": "performance",
+    "kind": "scenario",
     "audiences": [
       "playground",
       "site"
@@ -633,24 +633,6 @@
       "mode": "visual",
       "settleMs": 700,
       "deviceScaleFactor": 2
-    }
-  },
-  {
-    "id": "performance",
-    "file": "performance-test.ts",
-    "title": "性能测试",
-    "description": "运行合成数据和浏览器性能场景。",
-    "category": "performance",
-    "kind": "performance",
-    "audiences": [
-      "playground"
-    ],
-    "coverage": [
-      "performance.browser"
-    ],
-    "releaseCheck": false,
-    "capture": {
-      "mode": "none"
     }
   },
   {

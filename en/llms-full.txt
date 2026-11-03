@@ -182,7 +182,7 @@ Choose G6Lite when WebGL rendering, frequent state updates, and a smaller contro
 
 ## Why is first render slow with a force layout? [#why-is-first-render-slow-with-a-force-layout]
 
-Layout computation often dominates first render. Reuse existing coordinates, control iterations, use a worker, or choose a deterministic layout. Measure with the repository Benchmark runner.
+Layout computation often dominates first render. Reuse existing coordinates, control iterations, use a worker, or choose a deterministic layout. Measure layout time and rendering without layout separately.
 
 ## Can G6Lite run during SSR? [#can-g6lite-run-during-ssr]
 
@@ -1168,6 +1168,233 @@ transforms?: Array<'process-parallel-edges' | string | { type: string; options?:
 A custom `plugins` or `transforms` `type` must be registered with `register()` first. The built-in transform name is `'process-parallel-edges'`.
 
 
+# Technical architecture (/en/docs/concepts/architecture)
+
+
+
+
+
+This page explains module responsibilities and collaboration for readers exploring rendering, performance paths, or extension boundaries. See [Graph lifecycle](/en/docs/concepts/graph-lifecycle) for the application calling sequence.
+
+## Architecture layers [#architecture-layers]
+
+<ArchitectureDiagram locale="en" />
+
+Applications use `Graph` and extension contracts from the package root. Graph orchestrates transforms, layouts, and the runtime; DataModel owns graph data and states; RenderScheduler coordinates drawing based on the scope of each change. Renderer, Picking, and GPU buffers are internal implementation details.
+
+These layers share one graph runtime. Layouts provide positions, interactions produce data or state changes, and the scheduler sends changes to the appropriate drawing layers. This division lets layouts, information layers, and interactions be extended independently.
+
+## Drawing layers [#drawing-layers]
+
+G6Lite batches nodes and edges through WebGL and uses Canvas 2D for text measurement, label collision, and grouping bounds:
+
+| Layer, bottom to top | Content                        | Reason                                                    |
+| -------------------- | ------------------------------ | --------------------------------------------------------- |
+| Canvas 2D underlay   | Combo boundaries               | Fits group bounds and background information              |
+| Main WebGL canvas    | Nodes, edges, and arrows       | Supports batched geometry and buffer updates              |
+| Canvas 2D overlay    | Labels, icons, and decorations | Supports text measurement, layout, and collision handling |
+
+The layers share the camera, dimensions, DPR, and scheduling signals within one Graph. WebGL prefers WebGL2 and falls back to WebGL1. See [Browsers and runtime](/en/docs/compatibility/browser) for environment requirements.
+
+## Rendering and update paths [#rendering-and-update-paths]
+
+### First-render data flow [#first-render-data-flow]
+
+Calling `render()` prepares input, builds the runtime, and draws the first frame:
+
+<FirstRenderFlow locale="en" />
+
+When asynchronous layout or extension initialization returns, Graph checks the active render generation and destroyed state so stale results cannot replace newer data. Generations are an internal cancellation and result-commit mechanism; applications manage instances through public lifecycle methods.
+
+### Frequent-update paths [#frequent-update-paths]
+
+RenderScheduler selects processing based on the change level:
+
+| Change                                | Main path                                                                    |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| Node selected / highlight / inactive  | Resolve state and patch GPU styles, reprocessing when required               |
+| Edge business fields or states        | Fully process data to keep edge types, visibility, and arrow batches aligned |
+| Batched node positions                | Update adjacency data, upload affected buffer ranges, redraw Canvas layers   |
+| Label or Combo information            | Redraw the corresponding Canvas 2D information layer                         |
+| Camera pan and zoom                   | Update uniforms and draw without rebuilding graph-data buffers               |
+| Full replacement or structural change | Update DataModel and fully or partially process render data and buffers      |
+
+Selection, highlighting, and dragging should update the existing instance through state, position, and batch APIs. See [Data](/en/docs/guides/data) for choosing update methods and [Performance tuning](/en/docs/metrics/performance-tuning) for practical guidance.
+
+## Layout and interaction collaboration [#layout-and-interaction-collaboration]
+
+### Layout and Worker [#layout-and-worker]
+
+The layout layer computes positions from graph data and configuration. Graph commits the result to DataModel and passes it to Renderer. Official algorithms are lazy-loaded by `layout.type`; supported expensive layouts can run in a Worker to reduce main-thread blocking.
+
+Cancelled layout results are not committed to the active render generation. A Worker does not remove algorithm cost, and data with existing coordinates can omit layout. See [Layout configuration](/en/docs/guides/layout) for algorithms, options, and Worker limits.
+
+### Interaction and picking [#interaction-and-picking]
+
+InteractionDispatcher centralizes pointer events and hit detection, then delivers normalized events to Behaviors:
+
+```text
+Native event → Hit detection → Graph event → Behavior → Public data or state API
+```
+
+Nodes and edges prefer GPU Picking and fall back to CPU detection when the picking buffer is unavailable. Combo uses its own geometric hit path. Picking buffers are maintained on demand; drawing does not always require a picking pass.
+
+Interaction changes return through the update scheduler, so Behaviors do not need to manipulate framebuffers. See [Interactions](/en/docs/guides/interactions) and [Events](/en/docs/guides/events) for application usage.
+
+## Extension boundary [#extension-boundary]
+
+G6Lite supports node, edge, label, decoration, layout, behavior, transform, and plugin extensions. These contribute shape descriptions, information layers, positions, event responses, or runtime orchestration.
+
+Stateful extensions collaborate through the data, state, viewport, and `requestRender()` capabilities of `ExtensionContext`. They should not hold internal DataModel, Renderer, WebGL contexts, or GPU buffers.
+
+See [Extensions](/en/docs/guides/extensions) for registration, instance scope, and cleanup, and [API stability](/en/docs/compatibility/api-stability) for public contract stability.
+
+
+# Graph data model (/en/docs/concepts/data-model)
+
+
+
+
+
+A graph consists of nodes and edges connecting them, with optional Combo groups. G6Lite receives these through `GraphData`. Your use case determines what the nodes and connections mean.
+
+## Nodes, edges, and groups [#nodes-edges-and-groups]
+
+This graph has 6 nodes and 8 edges. A, B, and C belong to the same group:
+
+<GraphDataModelDiagram locale="en" />
+
+* **Nodes, `nodes`**: points in the graph, distinguished by `id`.
+* **Edges, `edges`**: connections between two nodes. Their `source` and `target` specify the endpoint node ids.
+* **Combos, `combos`**: optional node groups. Nodes join through `comboId`; a group does not automatically create connections.
+
+## Data and appearance [#data-and-appearance]
+
+Nodes and edges can carry custom `data` fields. These hold information you want to attach to the graph, with meanings defined by your application.
+
+Appearance options such as `node` and `edge` control colors, sizes, and labels. They can also map values from `data`. Changing appearance does not change the connections between nodes. See [Nodes](/en/docs/guides/node) and [Edges](/en/docs/guides/edge) for configuration.
+
+## Positions and states [#positions-and-states]
+
+**Positions** determine where nodes are drawn. Their `x` / `y` values can come from a layout or be supplied directly. Moving a node does not change which nodes it connects to.
+
+**States** express current interactions such as selection or highlighting. A node can have several states at once, with visual effects configured through `stateStyles`.
+
+## Read next [#read-next]
+
+* [Data ingestion and updates](/en/docs/guides/data): prepare data and choose full replacement or incremental updates.
+* [Graph data fields](/en/docs/api/options#graph-data): field types, required values, and constraints.
+* [Combo configuration](/en/docs/guides/combo): group appearance and usage.
+
+
+# Graph lifecycle (/en/docs/concepts/graph-lifecycle)
+
+
+
+
+
+Usually, create one instance, reuse it for data and interaction after its first render, and destroy it when leaving the page. This page covers that sequence. See [Graph API](/en/docs/api/graph) for method parameters and [Technical architecture](/en/docs/concepts/architecture) for internal processing.
+
+## Lifecycle overview [#lifecycle-overview]
+
+<GraphLifecycleFlow locale="en" />
+
+## Creation and first render [#creation-and-first-render]
+
+`new Graph(options)` requires a mounted container with explicit dimensions. Construction creates the canvas and renderer; layout and drawing start when `render()` is called.
+
+Use successful completion of `await graph.render()` as the initialization boundary. Wait until then before data writes, state changes, or relayout. For framework mounting and cleanup, see [Use with React and Vue](/en/docs/getting-started/react).
+
+## Updates during use [#updates-during-use]
+
+After the first render, choose an operation based on the scope of the change:
+
+| Change                               | Operation                                               | Details                                                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Replace all data                     | `await graph.setData(nextData)`                         | [Data updates](/en/docs/guides/data#replace-all-data)                                                                                    |
+| Change individual elements or states | Element mutation and state APIs                         | [Change nodes and edges](/en/docs/api/graph#changing-nodes-and-edges), [State operations](/en/docs/api/graph#state-visibility-and-focus) |
+| Recalculate positions                | `graph.setLayout(options)`, then `await graph.layout()` | [Runtime relayout](/en/docs/guides/layout)                                                                                               |
+
+`setLayout()` stores the configuration; `layout()` executes it. Regular updates arrange rendering, so reuse the current instance.
+
+Zoom, pan, and container resizing are [viewport operations](/en/docs/api/graph#viewport) and do not require a new Graph.
+
+## Destruction and asynchronous cleanup [#destruction-and-asynchronous-cleanup]
+
+Call `graph.destroy()` when leaving the page or unmounting a component to release the canvas, listeners, layout work, and other instance resources. Repeated destruction has no additional effect. A destroyed instance cannot be reused.
+
+Unmounting can happen before rendering or an application request finishes. Destroy the instance promptly and check `graph.destroyed` before applying asynchronous results. Application-owned requests, timers, and listeners still need application cleanup.
+
+## Complete example [#complete-example]
+
+This example connects creation, first render, a state update, and destruction. Pass the returned cleanup function to your page or framework's unmount logic.
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+export function mountGraph(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [{ id: 'alice' }, { id: 'bob' }],
+      edges: [{ source: 'alice', target: 'bob' }],
+    },
+    layout: { type: 'circular', radius: 100 },
+  });
+
+  async function initialize() {
+    await graph.render();
+    // Unmount can happen before asynchronous rendering finishes.
+    if (graph.destroyed) return;
+    graph.setItemState('alice', 'selected', true);
+  }
+
+  void initialize().catch(console.error);
+
+  // Call the returned function during page or component cleanup.
+  return () => graph.destroy();
+}
+```
+
+
+# What is G6Lite? (/en/docs/concepts/overview)
+
+
+
+**G6Lite · Lightweight graph visualization, built for large-scale relationship data**
+
+Flexible layouts and interactions, paired with lightweight, efficient WebGL rendering, bring large-scale relationships into focus and make data exploration feel fluid.
+
+It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
+
+## Good fits [#good-fits]
+
+* Relationship exploration, topology, knowledge graphs, and dependency analysis.
+* Frequent highlighting, selection, neighbor focus, and state switching.
+* Products that need AntV layouts with a controlled package and extension boundary.
+
+## Evaluate carefully [#evaluate-carefully]
+
+* Extremely large graphs where first-paint speed is the only requirement.
+* Products that need the full G6 plugin, animation, and element ecosystem.
+* SVG/DOM-level customization or server-side image rendering.
+
+G6 v5 is the broader general-purpose framework. G6Lite is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
+
+## Usage model [#usage-model]
+
+A `Graph` instance manages one graph. `data` describes relationships, `node` and `edge` define appearance, `layout` computes positions, `behaviors` adds interactions, and `theme` controls the visual style.
+
+Start with the [Data model](/en/docs/concepts/data-model), then use [Graph lifecycle](/en/docs/concepts/graph-lifecycle) to organize creation, updates, and cleanup. See [Technical architecture](/en/docs/concepts/architecture) for drawing layers, scheduling, and extension internals.
+
+## Next steps [#next-steps]
+
+* [Data model](/en/docs/concepts/data-model)
+* [Graph lifecycle](/en/docs/concepts/graph-lifecycle)
+* [Technical architecture](/en/docs/concepts/architecture)
+* [Install and render your first graph](/en/docs/getting-started/quick-start)
+
+
 # API stability and release boundary (/en/docs/compatibility/api-stability)
 
 
@@ -1639,233 +1866,6 @@ See [performance metrics](/en/docs/metrics/performance) and [performance tuning]
 * [Cytoscape.js README](https://github.com/cytoscape/cytoscape.js#readme) and [Cytoscape.js documentation](https://js.cytoscape.org/)
 
 
-# Technical architecture (/en/docs/concepts/architecture)
-
-
-
-
-
-This page explains module responsibilities and collaboration for readers exploring rendering, performance paths, or extension boundaries. See [Graph lifecycle](/en/docs/concepts/graph-lifecycle) for the application calling sequence.
-
-## Architecture layers [#architecture-layers]
-
-<ArchitectureDiagram locale="en" />
-
-Applications use `Graph` and extension contracts from the package root. Graph orchestrates transforms, layouts, and the runtime; DataModel owns graph data and states; RenderScheduler coordinates drawing based on the scope of each change. Renderer, Picking, and GPU buffers are internal implementation details.
-
-These layers share one graph runtime. Layouts provide positions, interactions produce data or state changes, and the scheduler sends changes to the appropriate drawing layers. This division lets layouts, information layers, and interactions be extended independently.
-
-## Drawing layers [#drawing-layers]
-
-G6Lite batches nodes and edges through WebGL and uses Canvas 2D for text measurement, label collision, and grouping bounds:
-
-| Layer, bottom to top | Content                        | Reason                                                    |
-| -------------------- | ------------------------------ | --------------------------------------------------------- |
-| Canvas 2D underlay   | Combo boundaries               | Fits group bounds and background information              |
-| Main WebGL canvas    | Nodes, edges, and arrows       | Supports batched geometry and buffer updates              |
-| Canvas 2D overlay    | Labels, icons, and decorations | Supports text measurement, layout, and collision handling |
-
-The layers share the camera, dimensions, DPR, and scheduling signals within one Graph. WebGL prefers WebGL2 and falls back to WebGL1. See [Browsers and runtime](/en/docs/compatibility/browser) for environment requirements.
-
-## Rendering and update paths [#rendering-and-update-paths]
-
-### First-render data flow [#first-render-data-flow]
-
-Calling `render()` prepares input, builds the runtime, and draws the first frame:
-
-<FirstRenderFlow locale="en" />
-
-When asynchronous layout or extension initialization returns, Graph checks the active render generation and destroyed state so stale results cannot replace newer data. Generations are an internal cancellation and result-commit mechanism; applications manage instances through public lifecycle methods.
-
-### Frequent-update paths [#frequent-update-paths]
-
-RenderScheduler selects processing based on the change level:
-
-| Change                                | Main path                                                                    |
-| ------------------------------------- | ---------------------------------------------------------------------------- |
-| Node selected / highlight / inactive  | Resolve state and patch GPU styles, reprocessing when required               |
-| Edge business fields or states        | Fully process data to keep edge types, visibility, and arrow batches aligned |
-| Batched node positions                | Update adjacency data, upload affected buffer ranges, redraw Canvas layers   |
-| Label or Combo information            | Redraw the corresponding Canvas 2D information layer                         |
-| Camera pan and zoom                   | Update uniforms and draw without rebuilding graph-data buffers               |
-| Full replacement or structural change | Update DataModel and fully or partially process render data and buffers      |
-
-Selection, highlighting, and dragging should update the existing instance through state, position, and batch APIs. See [Data](/en/docs/guides/data) for choosing update methods and [Performance tuning](/en/docs/metrics/performance-tuning) for practical guidance.
-
-## Layout and interaction collaboration [#layout-and-interaction-collaboration]
-
-### Layout and Worker [#layout-and-worker]
-
-The layout layer computes positions from graph data and configuration. Graph commits the result to DataModel and passes it to Renderer. Official algorithms are lazy-loaded by `layout.type`; supported expensive layouts can run in a Worker to reduce main-thread blocking.
-
-Cancelled layout results are not committed to the active render generation. A Worker does not remove algorithm cost, and data with existing coordinates can omit layout. See [Layout configuration](/en/docs/guides/layout) for algorithms, options, and Worker limits.
-
-### Interaction and picking [#interaction-and-picking]
-
-InteractionDispatcher centralizes pointer events and hit detection, then delivers normalized events to Behaviors:
-
-```text
-Native event → Hit detection → Graph event → Behavior → Public data or state API
-```
-
-Nodes and edges prefer GPU Picking and fall back to CPU detection when the picking buffer is unavailable. Combo uses its own geometric hit path. Picking buffers are maintained on demand; drawing does not always require a picking pass.
-
-Interaction changes return through the update scheduler, so Behaviors do not need to manipulate framebuffers. See [Interactions](/en/docs/guides/interactions) and [Events](/en/docs/guides/events) for application usage.
-
-## Extension boundary [#extension-boundary]
-
-G6Lite supports node, edge, label, decoration, layout, behavior, transform, and plugin extensions. These contribute shape descriptions, information layers, positions, event responses, or runtime orchestration.
-
-Stateful extensions collaborate through the data, state, viewport, and `requestRender()` capabilities of `ExtensionContext`. They should not hold internal DataModel, Renderer, WebGL contexts, or GPU buffers.
-
-See [Extensions](/en/docs/guides/extensions) for registration, instance scope, and cleanup, and [API stability](/en/docs/compatibility/api-stability) for public contract stability.
-
-
-# Graph data model (/en/docs/concepts/data-model)
-
-
-
-
-
-A graph consists of nodes and edges connecting them, with optional Combo groups. G6Lite receives these through `GraphData`. Your use case determines what the nodes and connections mean.
-
-## Nodes, edges, and groups [#nodes-edges-and-groups]
-
-This graph has 6 nodes and 8 edges. A, B, and C belong to the same group:
-
-<GraphDataModelDiagram locale="en" />
-
-* **Nodes, `nodes`**: points in the graph, distinguished by `id`.
-* **Edges, `edges`**: connections between two nodes. Their `source` and `target` specify the endpoint node ids.
-* **Combos, `combos`**: optional node groups. Nodes join through `comboId`; a group does not automatically create connections.
-
-## Data and appearance [#data-and-appearance]
-
-Nodes and edges can carry custom `data` fields. These hold information you want to attach to the graph, with meanings defined by your application.
-
-Appearance options such as `node` and `edge` control colors, sizes, and labels. They can also map values from `data`. Changing appearance does not change the connections between nodes. See [Nodes](/en/docs/guides/node) and [Edges](/en/docs/guides/edge) for configuration.
-
-## Positions and states [#positions-and-states]
-
-**Positions** determine where nodes are drawn. Their `x` / `y` values can come from a layout or be supplied directly. Moving a node does not change which nodes it connects to.
-
-**States** express current interactions such as selection or highlighting. A node can have several states at once, with visual effects configured through `stateStyles`.
-
-## Read next [#read-next]
-
-* [Data ingestion and updates](/en/docs/guides/data): prepare data and choose full replacement or incremental updates.
-* [Graph data fields](/en/docs/api/options#graph-data): field types, required values, and constraints.
-* [Combo configuration](/en/docs/guides/combo): group appearance and usage.
-
-
-# Graph lifecycle (/en/docs/concepts/graph-lifecycle)
-
-
-
-
-
-Usually, create one instance, reuse it for data and interaction after its first render, and destroy it when leaving the page. This page covers that sequence. See [Graph API](/en/docs/api/graph) for method parameters and [Technical architecture](/en/docs/concepts/architecture) for internal processing.
-
-## Lifecycle overview [#lifecycle-overview]
-
-<GraphLifecycleFlow locale="en" />
-
-## Creation and first render [#creation-and-first-render]
-
-`new Graph(options)` requires a mounted container with explicit dimensions. Construction creates the canvas and renderer; layout and drawing start when `render()` is called.
-
-Use successful completion of `await graph.render()` as the initialization boundary. Wait until then before data writes, state changes, or relayout. For framework mounting and cleanup, see [Use with React and Vue](/en/docs/getting-started/react).
-
-## Updates during use [#updates-during-use]
-
-After the first render, choose an operation based on the scope of the change:
-
-| Change                               | Operation                                               | Details                                                                                                                                  |
-| ------------------------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Replace all data                     | `await graph.setData(nextData)`                         | [Data updates](/en/docs/guides/data#replace-all-data)                                                                                    |
-| Change individual elements or states | Element mutation and state APIs                         | [Change nodes and edges](/en/docs/api/graph#changing-nodes-and-edges), [State operations](/en/docs/api/graph#state-visibility-and-focus) |
-| Recalculate positions                | `graph.setLayout(options)`, then `await graph.layout()` | [Runtime relayout](/en/docs/guides/layout)                                                                                               |
-
-`setLayout()` stores the configuration; `layout()` executes it. Regular updates arrange rendering, so reuse the current instance.
-
-Zoom, pan, and container resizing are [viewport operations](/en/docs/api/graph#viewport) and do not require a new Graph.
-
-## Destruction and asynchronous cleanup [#destruction-and-asynchronous-cleanup]
-
-Call `graph.destroy()` when leaving the page or unmounting a component to release the canvas, listeners, layout work, and other instance resources. Repeated destruction has no additional effect. A destroyed instance cannot be reused.
-
-Unmounting can happen before rendering or an application request finishes. Destroy the instance promptly and check `graph.destroyed` before applying asynchronous results. Application-owned requests, timers, and listeners still need application cleanup.
-
-## Complete example [#complete-example]
-
-This example connects creation, first render, a state update, and destruction. Pass the returned cleanup function to your page or framework's unmount logic.
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-export function mountGraph(container: HTMLElement) {
-  const graph = new Graph({
-    container,
-    data: {
-      nodes: [{ id: 'alice' }, { id: 'bob' }],
-      edges: [{ source: 'alice', target: 'bob' }],
-    },
-    layout: { type: 'circular', radius: 100 },
-  });
-
-  async function initialize() {
-    await graph.render();
-    // Unmount can happen before asynchronous rendering finishes.
-    if (graph.destroyed) return;
-    graph.setItemState('alice', 'selected', true);
-  }
-
-  void initialize().catch(console.error);
-
-  // Call the returned function during page or component cleanup.
-  return () => graph.destroy();
-}
-```
-
-
-# What is G6Lite? (/en/docs/concepts/overview)
-
-
-
-**G6Lite · Lightweight graph visualization, built for large-scale relationship data**
-
-Flexible layouts and interactions, paired with lightweight, efficient WebGL rendering, bring large-scale relationships into focus and make data exploration feel fluid.
-
-It keeps the familiar data, node, edge, layout, behavior, and theme configuration model while focusing on GPU rendering, incremental refresh, and frequent analytical interactions.
-
-## Good fits [#good-fits]
-
-* Relationship exploration, topology, knowledge graphs, and dependency analysis.
-* Frequent highlighting, selection, neighbor focus, and state switching.
-* Products that need AntV layouts with a controlled package and extension boundary.
-
-## Evaluate carefully [#evaluate-carefully]
-
-* Extremely large graphs where first-paint speed is the only requirement.
-* Products that need the full G6 plugin, animation, and element ecosystem.
-* SVG/DOM-level customization or server-side image rendering.
-
-G6 v5 is the broader general-purpose framework. G6Lite is the smaller performance-oriented engine. Validate your real data and required capabilities before migrating.
-
-## Usage model [#usage-model]
-
-A `Graph` instance manages one graph. `data` describes relationships, `node` and `edge` define appearance, `layout` computes positions, `behaviors` adds interactions, and `theme` controls the visual style.
-
-Start with the [Data model](/en/docs/concepts/data-model), then use [Graph lifecycle](/en/docs/concepts/graph-lifecycle) to organize creation, updates, and cleanup. See [Technical architecture](/en/docs/concepts/architecture) for drawing layers, scheduling, and extension internals.
-
-## Next steps [#next-steps]
-
-* [Data model](/en/docs/concepts/data-model)
-* [Graph lifecycle](/en/docs/concepts/graph-lifecycle)
-* [Technical architecture](/en/docs/concepts/architecture)
-* [Install and render your first graph](/en/docs/getting-started/quick-start)
-
-
 # Quick start (/en/docs/getting-started/quick-start)
 
 
@@ -1979,7 +1979,7 @@ This complete HTML example needs no additional dependency scripts: the UMD file 
   </head>
   <body>
     <div id="container" style="height: 360px"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"></script>
     <script>
       const data = {
         nodes: [
@@ -3411,14 +3411,20 @@ Use application-safe rendering when content contains user input. Tooltip positio
 
 
 
-G6Lite measures the initial `dist/index.js` payload and each real layout usage path with size-limit. The initial entry has a **90 kB minified and brotli-compressed budget**; the initial entry plus any one official layout keeps the existing **120 kB budget**.
+G6Lite gates the built artifacts with [limit-size](https://github.com/yutingzhao1991/limit-size); budgets live in the root `package.json#limit-size` field. The ESM entry `dist/index.js` has a **100 KB gzip budget**; the browser-facing UMD bundle `dist/g6-lite.min.js` has a **200 KB gzip budget**.
+
+## Measurement scope [#measurement-scope]
+
+* Entry: `dist/index.js`, corresponding to `import { Graph } from '@antv/g6-lite'`.
+* Scope: core engine and runtime dependencies; layout algorithms are not inlined and load lazily through internal dynamic imports — users do not need registration calls.
+* Method: `npm run size` gzip-compresses the built files and compares them against the budgets.
 
 ```bash
 npm run build
 npm run size
 ```
 
-The 2026-07-30 workspace result is **83.17 kB / 90 kB** before a layout is loaded. The official layout paths range from **86.70 kB to 119.48 kB / 120 kB**, with Dagre currently the largest. Layout algorithms are selected through internal dynamic imports; users do not need separate registration calls. Run the command on the current checkout for the latest result.
+The 2026-11-03 workspace result is **93.5 KB / 100 KB** for `dist/index.js` and **166.8 KB / 200 KB** for `dist/g6-lite.min.js`. Run the command on the current checkout for the latest result.
 
 Import from the package root, use a tree-shaking bundler, enable production compression, and inspect the final application bundle. Do not compare libraries unless feature scope and dependency boundaries are equivalent.
 
@@ -3434,11 +3440,6 @@ Import from the package root, use a tree-shaking bundler, enable production comp
 * Keep functional style callbacks inexpensive and precompute complex mappings.
 * Limit initial labels; reveal more by zoom, focus, or selection.
 
-```bash
-npm run benchmark -- --suite all --mode quick
-npm run benchmark -- --suite browser --mode full
-```
-
 Compare only equivalent environments and configurations. Desktop Headless Chrome cannot replace real mobile or low-end device testing.
 
 
@@ -3446,22 +3447,11 @@ Compare only equivalent environments and configurations. Desktop Headless Chrome
 
 
 
-G6Lite uses one repository runner for Node microbenchmarks and browser scenarios. Results are comparable only when version, commit, hardware, runtime, data, configuration, and sampling mode match.
+Results are comparable only when version, commit, hardware, runtime, data, and configuration match.
 
 This page documents measurement and selection boundaries. It does not claim that G6Lite is faster for every graph, layout, and device. Layout, rendering without layout, and post-render interaction updates must be evaluated separately.
 
-```bash
-npm run benchmark -- --suite all --mode quick
-```
-
-* `--suite node` covers DataModel and layout microbenchmarks.
-* `--suite browser` covers public Graph API updates, first render, viewport interaction, picking, and memory trends.
-* `--mode quick` validates the runner and release path.
-* `--mode full` expands workloads and samples for reviewed baselines.
-
-Reports are written to `performance/` as JSON and Markdown. Raw local reports are not committed by default. Public comparisons must record the G6Lite version and Git state, Node and Chromium versions, operating system, CPU, user agent, viewport, DPR, data scale, layout configuration, sample count, RME, and warnings.
-
-Quick results are smoke evidence, not marketing baselines. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
+Public comparisons must record the G6Lite version and Git state, Node version, operating system, CPU, data scale, and layout configuration. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
 
 ## Selecting a graph library [#selecting-a-graph-library]
 

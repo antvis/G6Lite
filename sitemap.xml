@@ -97,6 +97,38 @@
 <priority>0.7</priority>
 </url>
 <url>
+<loc>https://g6lite.antv.vision/docs/concepts/architecture</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/architecture" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/architecture" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/architecture" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6lite.antv.vision/docs/concepts/data-model</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/data-model" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/data-model" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/data-model" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6lite.antv.vision/docs/concepts/graph-lifecycle</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/graph-lifecycle" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/graph-lifecycle" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/graph-lifecycle" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6lite.antv.vision/docs/concepts/overview</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/overview" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/overview" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/overview" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
 <loc>https://g6lite.antv.vision/docs/compatibility/api-stability</loc>
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/compatibility/api-stability" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/compatibility/api-stability" />
@@ -133,38 +165,6 @@
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/compatibility/library-comparison" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/compatibility/library-comparison" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/compatibility/library-comparison" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6lite.antv.vision/docs/concepts/architecture</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/architecture" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/architecture" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/architecture" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6lite.antv.vision/docs/concepts/data-model</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/data-model" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/data-model" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/data-model" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6lite.antv.vision/docs/concepts/graph-lifecycle</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/graph-lifecycle" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/graph-lifecycle" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/graph-lifecycle" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6lite.antv.vision/docs/concepts/overview</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/overview" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/overview" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/overview" />
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
 </url>
@@ -809,6 +809,38 @@
 <priority>0.7</priority>
 </url>
 <url>
+<loc>https://g6lite.antv.vision/en/docs/concepts/architecture</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/architecture" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/architecture" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/architecture" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6lite.antv.vision/en/docs/concepts/data-model</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/data-model" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/data-model" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/data-model" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6lite.antv.vision/en/docs/concepts/graph-lifecycle</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/graph-lifecycle" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/graph-lifecycle" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/graph-lifecycle" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
+<loc>https://g6lite.antv.vision/en/docs/concepts/overview</loc>
+<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/overview" />
+<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/overview" />
+<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/overview" />
+<changefreq>weekly</changefreq>
+<priority>0.7</priority>
+</url>
+<url>
 <loc>https://g6lite.antv.vision/en/docs/compatibility/api-stability</loc>
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/compatibility/api-stability" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/compatibility/api-stability" />
@@ -845,38 +877,6 @@
 <xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/compatibility/library-comparison" />
 <xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/compatibility/library-comparison" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/compatibility/library-comparison" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6lite.antv.vision/en/docs/concepts/architecture</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/architecture" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/architecture" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/architecture" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6lite.antv.vision/en/docs/concepts/data-model</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/data-model" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/data-model" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/data-model" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6lite.antv.vision/en/docs/concepts/graph-lifecycle</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/graph-lifecycle" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/graph-lifecycle" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/graph-lifecycle" />
-<changefreq>weekly</changefreq>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://g6lite.antv.vision/en/docs/concepts/overview</loc>
-<xhtml:link rel="alternate" hreflang="zh-CN" href="https://g6lite.antv.vision/docs/concepts/overview" />
-<xhtml:link rel="alternate" hreflang="en" href="https://g6lite.antv.vision/en/docs/concepts/overview" />
-<xhtml:link rel="alternate" hreflang="x-default" href="https://g6lite.antv.vision/docs/concepts/overview" />
 <changefreq>weekly</changefreq>
 <priority>0.7</priority>
 </url>

@@ -2,13 +2,19 @@
 
 
 
-G6Lite measures the initial `dist/index.js` payload and each real layout usage path with size-limit. The initial entry has a **90 kB minified and brotli-compressed budget**; the initial entry plus any one official layout keeps the existing **120 kB budget**.
+G6Lite gates the built artifacts with [limit-size](https://github.com/yutingzhao1991/limit-size); budgets live in the root `package.json#limit-size` field. The ESM entry `dist/index.js` has a **100 KB gzip budget**; the browser-facing UMD bundle `dist/g6-lite.min.js` has a **200 KB gzip budget**.
+
+## Measurement scope [#measurement-scope]
+
+* Entry: `dist/index.js`, corresponding to `import { Graph } from '@antv/g6-lite'`.
+* Scope: core engine and runtime dependencies; layout algorithms are not inlined and load lazily through internal dynamic imports — users do not need registration calls.
+* Method: `npm run size` gzip-compresses the built files and compares them against the budgets.
 
 ```bash
 npm run build
 npm run size
 ```
 
-The 2026-07-30 workspace result is **83.17 kB / 90 kB** before a layout is loaded. The official layout paths range from **86.70 kB to 119.48 kB / 120 kB**, with Dagre currently the largest. Layout algorithms are selected through internal dynamic imports; users do not need separate registration calls. Run the command on the current checkout for the latest result.
+The 2026-11-03 workspace result is **93.5 KB / 100 KB** for `dist/index.js` and **166.8 KB / 200 KB** for `dist/g6-lite.min.js`. Run the command on the current checkout for the latest result.
 
 Import from the package root, use a tree-shaking bundler, enable production compression, and inspect the final application bundle. Do not compare libraries unless feature scope and dependency boundaries are equivalent.

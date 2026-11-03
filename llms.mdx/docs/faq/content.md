@@ -15,7 +15,7 @@ G6Lite 聚焦 WebGL 渲染、高频状态更新和受控能力边界；G6 v5 提
 * 已有坐标时直接传入 `x` / `y`，省略重复布局。
 * 控制 force 系布局的迭代次数，并评估 `worker: true`。
 * 大图总览优先使用 grid、circular 等确定性布局。
-* 使用 [Benchmark 运行器](/docs/metrics/performance) 区分布局与渲染耗时。
+* 分别测量布局耗时与不含布局的渲染耗时，见 [性能指标](/docs/metrics/performance)。
 
 ## 高亮或选中卡顿怎么办？ [#高亮或选中卡顿怎么办]
 

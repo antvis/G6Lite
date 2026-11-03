@@ -8,7 +8,7 @@ Choose G6Lite when WebGL rendering, frequent state updates, and a smaller contro
 
 ## Why is first render slow with a force layout? [#why-is-first-render-slow-with-a-force-layout]
 
-Layout computation often dominates first render. Reuse existing coordinates, control iterations, use a worker, or choose a deterministic layout. Measure with the repository Benchmark runner.
+Layout computation often dominates first render. Reuse existing coordinates, control iterations, use a worker, or choose a deterministic layout. Measure layout time and rendering without layout separately.
 
 ## Can G6Lite run during SSR? [#can-g6lite-run-during-ssr]
 

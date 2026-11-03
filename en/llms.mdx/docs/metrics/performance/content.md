@@ -2,22 +2,11 @@
 
 
 
-G6Lite uses one repository runner for Node microbenchmarks and browser scenarios. Results are comparable only when version, commit, hardware, runtime, data, configuration, and sampling mode match.
+Results are comparable only when version, commit, hardware, runtime, data, and configuration match.
 
 This page documents measurement and selection boundaries. It does not claim that G6Lite is faster for every graph, layout, and device. Layout, rendering without layout, and post-render interaction updates must be evaluated separately.
 
-```bash
-npm run benchmark -- --suite all --mode quick
-```
-
-* `--suite node` covers DataModel and layout microbenchmarks.
-* `--suite browser` covers public Graph API updates, first render, viewport interaction, picking, and memory trends.
-* `--mode quick` validates the runner and release path.
-* `--mode full` expands workloads and samples for reviewed baselines.
-
-Reports are written to `performance/` as JSON and Markdown. Raw local reports are not committed by default. Public comparisons must record the G6Lite version and Git state, Node and Chromium versions, operating system, CPU, user agent, viewport, DPR, data scale, layout configuration, sample count, RME, and warnings.
-
-Quick results are smoke evidence, not marketing baselines. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
+Public comparisons must record the G6Lite version and Git state, Node version, operating system, CPU, data scale, and layout configuration. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
 
 ## Selecting a graph library [#selecting-a-graph-library]
 

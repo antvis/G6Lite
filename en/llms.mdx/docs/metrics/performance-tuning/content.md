@@ -9,9 +9,4 @@
 * Keep functional style callbacks inexpensive and precompute complex mappings.
 * Limit initial labels; reveal more by zoom, focus, or selection.
 
-```bash
-npm run benchmark -- --suite all --mode quick
-npm run benchmark -- --suite browser --mode full
-```
-
 Compare only equivalent environments and configurations. Desktop Headless Chrome cannot replace real mobile or low-end device testing.

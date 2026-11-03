@@ -111,7 +111,7 @@ This complete HTML example needs no additional dependency scripts: the UMD file 
   </head>
   <body>
     <div id="container" style="height: 360px"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"></script>
     <script>
       const data = {
         nodes: [

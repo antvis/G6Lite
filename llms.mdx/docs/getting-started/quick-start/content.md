@@ -111,7 +111,7 @@ UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使�
   </head>
   <body>
     <div id="container" style="height: 360px"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"></script>
     <script>
       const data = {
         nodes: [

@@ -249,7 +249,7 @@ G6Lite 聚焦 WebGL 渲染、高频状态更新和受控能力边界；G6 v5 提
 * 已有坐标时直接传入 `x` / `y`，省略重复布局。
 * 控制 force 系布局的迭代次数，并评估 `worker: true`。
 * 大图总览优先使用 grid、circular 等确定性布局。
-* 使用 [Benchmark 运行器](/docs/metrics/performance) 区分布局与渲染耗时。
+* 分别测量布局耗时与不含布局的渲染耗时，见 [性能指标](/docs/metrics/performance)。
 
 ## 高亮或选中卡顿怎么办？ [#高亮或选中卡顿怎么办]
 
@@ -1268,6 +1268,247 @@ transforms?: Array<'process-parallel-edges' | string | { type: string; options?:
 `plugins` 和自定义 `transforms` 的 `type` 必须先用 `register()` 注册。内置转换名目前是 `'process-parallel-edges'`。
 
 
+# 技术架构 (/docs/concepts/architecture)
+
+
+
+
+
+本页解释 G6Lite 各模块的职责及协作方式，适合需要理解渲染原理、性能路径和扩展边界的读者。初始化与卸载的调用顺序见 [Graph 生命周期](/docs/concepts/graph-lifecycle)。
+
+## 架构分层 [#架构分层]
+
+<ArchitectureDiagram locale="zh" />
+
+业务通过包根的 `Graph` 和扩展契约使用 G6Lite。Graph 编排数据转换、布局和运行时；DataModel 管理图数据与状态；RenderScheduler 根据变化范围协调绘制。Renderer、Picking 和 GPU Buffer 属于内部实现。
+
+各层围绕同一份图运行时协作：布局提供坐标，交互产生数据或状态变更，调度器将变更交给对应图层。职责分离使布局算法、信息层和交互能力可以独立扩展。
+
+## 绘制图层 [#绘制图层]
+
+G6Lite 使用 WebGL 批量绘制节点和边，并用 Canvas 2D 处理文本测量、标签碰撞与分组包围框：
+
+| 图层（从下到上）           | 绘制内容      | 选择原因                    |
+| ------------------ | --------- | ----------------------- |
+| Canvas 2D underlay | Combo 包围框 | 适合分组边界及背景信息             |
+| WebGL 主画布          | 节点、边和箭头   | 适合大量同类图元批量绘制与 Buffer 更新 |
+| Canvas 2D overlay  | 标签、图标与装饰  | 便于文字测量、排版和碰撞处理          |
+
+这些图层共享相机、尺寸、DPR 和调度信号，属于同一个 Graph。WebGL 优先使用 WebGL2，不可用时回退 WebGL1；运行环境限制见[浏览器与运行环境](/docs/compatibility/browser)。
+
+## 渲染与更新路径 [#渲染与更新路径]
+
+### 首次渲染数据流 [#首次渲染数据流]
+
+调用 `render()` 后，Graph 根据配置准备输入、建立运行时并完成首帧：
+
+<FirstRenderFlow locale="zh" />
+
+异步布局或扩展初始化返回时，Graph 会检查当前渲染代次和销毁状态，避免旧结果覆盖新数据。渲染代次是内部取消与结果提交机制，业务通过公开生命周期方法管理实例即可。
+
+### 高频更新路径 [#高频更新路径]
+
+RenderScheduler 根据变更级别选择处理路径：
+
+| 变化                                 | 主要路径                              |
+| ---------------------------------- | --------------------------------- |
+| 节点 selected / highlight / inactive | 状态解析与 GPU 样式 patch，必要时重新处理        |
+| 边业务字段或状态                           | 完整处理，保持边类型、可见性与箭头批次一致             |
+| 批量节点位置                             | 邻接数据更新、相关 Buffer 区间上传、Canvas 图层重绘 |
+| 标签或 Combo 信息                       | 对应 Canvas 2D 信息层重绘                |
+| 相机平移与缩放                            | 更新 uniform 后重新 draw，不重建图数据 Buffer |
+| 完整数据替换或结构变化                        | 更新 DataModel，完整或部分处理渲染数据与 Buffer  |
+
+因此选择、高亮和拖拽应通过状态、位置和批量 API 更新现有实例。业务侧如何选择更新方法见[数据指南](/docs/guides/data)，性能实践见[性能调优](/docs/metrics/performance-tuning)。
+
+## 布局与交互协作 [#布局与交互协作]
+
+### 布局与 Worker [#布局与-worker]
+
+布局层根据图数据和配置计算坐标，Graph 将结果写入 DataModel，再交给 Renderer。官方算法按 `layout.type` 懒加载；支持的耗时布局可通过 Worker 减少主线程阻塞。
+
+布局取消后，旧计算结果不会写回当前渲染代次。Worker 不会消除算法本身的成本，已有坐标的数据可以省略布局。算法选择、参数和 Worker 限制见[布局配置](/docs/guides/layout)。
+
+### 交互与 Picking [#交互与-picking]
+
+InteractionDispatcher 统一处理指针事件与命中检测，将规范化事件分发给 Behavior：
+
+```text
+原生事件 → 命中检测 → 图事件 → Behavior → 公开的数据或状态 API
+```
+
+节点和边优先使用 GPU Picking；命中缓冲不可用时回退 CPU 检测。Combo 使用自身的几何命中路径。Picking 缓冲按需维护，无需每次绘制都执行拾取。
+
+交互产生的变更重新进入更新调度路径，Behavior 无需直接操作 framebuffer。使用方式见[交互配置](/docs/guides/interactions)和[事件](/docs/guides/events)。
+
+## 扩展边界 [#扩展边界]
+
+G6Lite 支持 node、edge、label、decoration、layout、behavior、transform 和 plugin 八类扩展。它们分别参与图形描述、信息层绘制、坐标计算、事件响应或运行时编排。
+
+有状态扩展通过 `ExtensionContext` 的 data、state、viewport 和 `requestRender()` 能力协作，不应持有内部 DataModel、Renderer、WebGL context 或 GPU Buffer。
+
+注册方式、实例作用域与清理规则见[扩展体系](/docs/guides/extensions)；公开契约的稳定性见 [API 稳定性](/docs/compatibility/api-stability)。
+
+
+# 图数据模型 (/docs/concepts/data-model)
+
+
+
+
+
+一张图由节点和连接节点的边组成，也可以使用 Combo 对节点分组。G6Lite 通过 `GraphData` 接收这些数据，节点代表什么、连线表示什么，由使用场景决定。
+
+## 节点、边与分组 [#节点边与分组]
+
+下面是一张包含 6 个节点、8 条边的图，其中 A、B、C 属于同一个分组：
+
+<GraphDataModelDiagram locale="zh" />
+
+* **节点 `nodes`**：图中的点，通过 `id` 区分。
+* **边 `edges`**：连接两个节点，通过 `source` 和 `target` 指定两端节点的 `id`。
+* **Combo `combos`**：可选的节点分组，节点通过 `comboId` 加入。分组本身不会自动产生连线。
+
+## 数据与样式 [#数据与样式]
+
+节点和边可以附带自定义的 `data` 字段。它们用于保存需要随图携带的信息，具体含义由使用方定义。
+
+颜色、尺寸和标签由 `node`、`edge` 等外观配置决定，也可以从 `data` 中读取值进行映射。改变图形外观，不会改变节点之间的连接关系。配置方式见[节点](/docs/guides/node)和[边](/docs/guides/edge)。
+
+## 位置与状态 [#位置与状态]
+
+**位置**决定节点画在哪里，用 `x` / `y` 表示，可以由布局计算，也可以直接提供。移动节点不会改变它连接了哪些节点。
+
+**状态**用于表达选中、高亮等当前交互情况。同一个节点可以同时具有多个状态，对应的视觉效果通过 `stateStyles` 配置。
+
+## 继续阅读 [#继续阅读]
+
+* [数据接入与更新](/docs/guides/data)：准备数据，选择整份替换或增量更新。
+* [图数据字段参考](/docs/api/options#图数据)：字段类型、必填项与约束。
+* [Combo 配置](/docs/guides/combo)：分组的外观和使用方式。
+
+
+# Graph 生命周期 (/docs/concepts/graph-lifecycle)
+
+
+
+
+
+一张图通常只创建一次实例，在首次渲染完成后复用它处理数据和交互，离开页面时销毁。本页说明各阶段的调用顺序；方法参数见 [Graph API](/docs/api/graph)，内部处理过程见[技术架构](/docs/concepts/architecture)。
+
+## 生命周期总览 [#生命周期总览]
+
+<GraphLifecycleFlow locale="zh" />
+
+## 创建与首次渲染 [#创建与首次渲染]
+
+`new Graph(options)` 要求容器已经挂载且有明确宽高。构造阶段会创建画布和渲染器；调用 `render()` 后才会执行布局并绘制图形。
+
+以 `await graph.render()` 成功完成作为初始化边界。在此之前，不要执行数据写入、状态修改或重新布局。React、Vue 的挂载与卸载写法见[在框架中使用](/docs/getting-started/react)。
+
+## 运行中的更新 [#运行中的更新]
+
+首次渲染完成后，根据变化的范围选择操作：
+
+| 变化        | 使用方式                                                | 详细说明                                                             |
+| --------- | --------------------------------------------------- | ---------------------------------------------------------------- |
+| 替换整份数据    | `await graph.setData(nextData)`                     | [数据更新](/docs/guides/data#替换整份数据)                                 |
+| 修改部分元素或状态 | 元素增删改、状态 API                                        | [修改节点和边](/docs/api/graph#修改节点和边)、[状态操作](/docs/api/graph#状态显隐和定位) |
+| 重新计算节点位置  | `graph.setLayout(options)` 后 `await graph.layout()` | [运行时重新布局](/docs/guides/layout#运行时重新布局)                           |
+
+`setLayout()` 只保存布局配置，`layout()` 才会执行计算。常规更新会安排刷新，复用当前实例即可。
+
+缩放、平移和容器尺寸适配属于[视口操作](/docs/api/graph#视口)，无需重新创建 Graph。
+
+## 销毁与异步清理 [#销毁与异步清理]
+
+页面退出或组件卸载时调用 `graph.destroy()`，释放画布、事件监听和布局等实例资源。重复销毁不会产生额外效果；已销毁的实例不能重新使用。
+
+卸载可能早于渲染或业务请求完成。及时调用 `destroy()`，并在异步结果返回后检查 `graph.destroyed`，避免继续使用已失效的实例。业务自己创建的请求、定时器和监听器仍需由业务清理。
+
+## 完整使用示例 [#完整使用示例]
+
+下面将创建、首次渲染、状态更新和销毁串联起来。返回的清理函数应交给页面或框架的卸载逻辑调用。
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+export function mountGraph(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [{ id: 'alice' }, { id: 'bob' }],
+      edges: [{ source: 'alice', target: 'bob' }],
+    },
+    layout: { type: 'circular', radius: 100 },
+  });
+
+  async function initialize() {
+    await graph.render();
+    // 卸载可能发生在异步渲染完成之前。
+    if (graph.destroyed) return;
+    graph.setItemState('alice', 'selected', true);
+  }
+
+  void initialize().catch(console.error);
+
+  // 将返回的函数交给页面或组件的卸载逻辑调用。
+  return () => graph.destroy();
+}
+```
+
+
+# G6Lite 是什么 (/docs/concepts/overview)
+
+
+
+**G6Lite · 轻量图可视化，为大规模关系数据而生**
+
+丰富的布局与交互，配合轻量高效的 WebGL 渲染，让大规模关系清晰呈现，让数据探索流畅自如。
+
+它保留 G6 用户熟悉的图配置心智：数据、节点、边、布局、交互和主题，但实现重点放在 WebGL 渲染、增量刷新和高频交互上。
+
+## 适合的场景 [#适合的场景]
+
+* 万级节点的关系探索、资产拓扑、知识图谱、依赖分析。
+* 频繁高亮、选中、邻居聚焦、状态切换的分析型交互。
+* 需要轻量包体，同时希望接入 AntV 布局能力的项目。
+* 对首屏可接受布局耗时，但要求渲染后交互开销稳定的场景。
+
+## 需要评估的场景 [#需要评估的场景]
+
+* 10 万级以上超大图且首屏速度是唯一核心指标。
+* 强依赖完整插件生态、动画系统、图论分析算法的场景。
+* 需要 SVG / Canvas 细粒度 DOM 级定制的场景。
+* 服务端渲染输出图片或 SVG 的场景。
+
+## 与 G6 v5 的关系 [#与-g6-v5-的关系]
+
+G6 v5 是功能完整的图可视化框架，插件、元素、动画、交互和生态能力更全面。G6Lite 更像是一个性能优先的轻量内核：
+
+| 维度   | G6Lite                | G6 v5    |
+| ---- | --------------------- | -------- |
+| 渲染技术 | WebGL + Canvas 2D 标签层 | Canvas   |
+| 主要目标 | 大规模渲染和高频交互            | 完整图可视化能力 |
+| 包体   | 更轻                    | 更完整      |
+| 扩展生态 | 有限，聚焦核心能力             | 更丰富      |
+| 适用重点 | 分析型大图                 | 通用图可视化   |
+
+如果你的应用需要完整插件生态，优先评估 G6 v5。如果你的核心瓶颈是大图渲染、高亮和状态切换，优先评估 G6Lite。
+
+## 使用模型 [#使用模型]
+
+一张图由 `Graph` 实例管理：`data` 描述关系，`node` 和 `edge` 定义外观，`layout` 计算位置，`behaviors` 添加交互，`theme` 统一视觉风格。
+
+先理解[数据模型](/docs/concepts/data-model)，再按照 [Graph 生命周期](/docs/concepts/graph-lifecycle)组织创建、更新与销毁。渲染图层、调度和扩展的内部协作见[技术架构](/docs/concepts/architecture)。
+
+## 下一步 [#下一步]
+
+* [数据模型](/docs/concepts/data-model)
+* [Graph 生命周期](/docs/concepts/graph-lifecycle)
+* [技术架构](/docs/concepts/architecture)
+* [安装与第一个图](/docs/getting-started/quick-start)
+
+
 # API 稳定性与发布边界 (/docs/compatibility/api-stability)
 
 
@@ -1801,247 +2042,6 @@ G6Lite 的测量入口见[性能指标](/docs/metrics/performance)和[性能调�
 * [Cytoscape.js README](https://github.com/cytoscape/cytoscape.js#readme) 与 [Cytoscape.js 文档](https://js.cytoscape.org/)
 
 
-# 技术架构 (/docs/concepts/architecture)
-
-
-
-
-
-本页解释 G6Lite 各模块的职责及协作方式，适合需要理解渲染原理、性能路径和扩展边界的读者。初始化与卸载的调用顺序见 [Graph 生命周期](/docs/concepts/graph-lifecycle)。
-
-## 架构分层 [#架构分层]
-
-<ArchitectureDiagram locale="zh" />
-
-业务通过包根的 `Graph` 和扩展契约使用 G6Lite。Graph 编排数据转换、布局和运行时；DataModel 管理图数据与状态；RenderScheduler 根据变化范围协调绘制。Renderer、Picking 和 GPU Buffer 属于内部实现。
-
-各层围绕同一份图运行时协作：布局提供坐标，交互产生数据或状态变更，调度器将变更交给对应图层。职责分离使布局算法、信息层和交互能力可以独立扩展。
-
-## 绘制图层 [#绘制图层]
-
-G6Lite 使用 WebGL 批量绘制节点和边，并用 Canvas 2D 处理文本测量、标签碰撞与分组包围框：
-
-| 图层（从下到上）           | 绘制内容      | 选择原因                    |
-| ------------------ | --------- | ----------------------- |
-| Canvas 2D underlay | Combo 包围框 | 适合分组边界及背景信息             |
-| WebGL 主画布          | 节点、边和箭头   | 适合大量同类图元批量绘制与 Buffer 更新 |
-| Canvas 2D overlay  | 标签、图标与装饰  | 便于文字测量、排版和碰撞处理          |
-
-这些图层共享相机、尺寸、DPR 和调度信号，属于同一个 Graph。WebGL 优先使用 WebGL2，不可用时回退 WebGL1；运行环境限制见[浏览器与运行环境](/docs/compatibility/browser)。
-
-## 渲染与更新路径 [#渲染与更新路径]
-
-### 首次渲染数据流 [#首次渲染数据流]
-
-调用 `render()` 后，Graph 根据配置准备输入、建立运行时并完成首帧：
-
-<FirstRenderFlow locale="zh" />
-
-异步布局或扩展初始化返回时，Graph 会检查当前渲染代次和销毁状态，避免旧结果覆盖新数据。渲染代次是内部取消与结果提交机制，业务通过公开生命周期方法管理实例即可。
-
-### 高频更新路径 [#高频更新路径]
-
-RenderScheduler 根据变更级别选择处理路径：
-
-| 变化                                 | 主要路径                              |
-| ---------------------------------- | --------------------------------- |
-| 节点 selected / highlight / inactive | 状态解析与 GPU 样式 patch，必要时重新处理        |
-| 边业务字段或状态                           | 完整处理，保持边类型、可见性与箭头批次一致             |
-| 批量节点位置                             | 邻接数据更新、相关 Buffer 区间上传、Canvas 图层重绘 |
-| 标签或 Combo 信息                       | 对应 Canvas 2D 信息层重绘                |
-| 相机平移与缩放                            | 更新 uniform 后重新 draw，不重建图数据 Buffer |
-| 完整数据替换或结构变化                        | 更新 DataModel，完整或部分处理渲染数据与 Buffer  |
-
-因此选择、高亮和拖拽应通过状态、位置和批量 API 更新现有实例。业务侧如何选择更新方法见[数据指南](/docs/guides/data)，性能实践见[性能调优](/docs/metrics/performance-tuning)。
-
-## 布局与交互协作 [#布局与交互协作]
-
-### 布局与 Worker [#布局与-worker]
-
-布局层根据图数据和配置计算坐标，Graph 将结果写入 DataModel，再交给 Renderer。官方算法按 `layout.type` 懒加载；支持的耗时布局可通过 Worker 减少主线程阻塞。
-
-布局取消后，旧计算结果不会写回当前渲染代次。Worker 不会消除算法本身的成本，已有坐标的数据可以省略布局。算法选择、参数和 Worker 限制见[布局配置](/docs/guides/layout)。
-
-### 交互与 Picking [#交互与-picking]
-
-InteractionDispatcher 统一处理指针事件与命中检测，将规范化事件分发给 Behavior：
-
-```text
-原生事件 → 命中检测 → 图事件 → Behavior → 公开的数据或状态 API
-```
-
-节点和边优先使用 GPU Picking；命中缓冲不可用时回退 CPU 检测。Combo 使用自身的几何命中路径。Picking 缓冲按需维护，无需每次绘制都执行拾取。
-
-交互产生的变更重新进入更新调度路径，Behavior 无需直接操作 framebuffer。使用方式见[交互配置](/docs/guides/interactions)和[事件](/docs/guides/events)。
-
-## 扩展边界 [#扩展边界]
-
-G6Lite 支持 node、edge、label、decoration、layout、behavior、transform 和 plugin 八类扩展。它们分别参与图形描述、信息层绘制、坐标计算、事件响应或运行时编排。
-
-有状态扩展通过 `ExtensionContext` 的 data、state、viewport 和 `requestRender()` 能力协作，不应持有内部 DataModel、Renderer、WebGL context 或 GPU Buffer。
-
-注册方式、实例作用域与清理规则见[扩展体系](/docs/guides/extensions)；公开契约的稳定性见 [API 稳定性](/docs/compatibility/api-stability)。
-
-
-# 图数据模型 (/docs/concepts/data-model)
-
-
-
-
-
-一张图由节点和连接节点的边组成，也可以使用 Combo 对节点分组。G6Lite 通过 `GraphData` 接收这些数据，节点代表什么、连线表示什么，由使用场景决定。
-
-## 节点、边与分组 [#节点边与分组]
-
-下面是一张包含 6 个节点、8 条边的图，其中 A、B、C 属于同一个分组：
-
-<GraphDataModelDiagram locale="zh" />
-
-* **节点 `nodes`**：图中的点，通过 `id` 区分。
-* **边 `edges`**：连接两个节点，通过 `source` 和 `target` 指定两端节点的 `id`。
-* **Combo `combos`**：可选的节点分组，节点通过 `comboId` 加入。分组本身不会自动产生连线。
-
-## 数据与样式 [#数据与样式]
-
-节点和边可以附带自定义的 `data` 字段。它们用于保存需要随图携带的信息，具体含义由使用方定义。
-
-颜色、尺寸和标签由 `node`、`edge` 等外观配置决定，也可以从 `data` 中读取值进行映射。改变图形外观，不会改变节点之间的连接关系。配置方式见[节点](/docs/guides/node)和[边](/docs/guides/edge)。
-
-## 位置与状态 [#位置与状态]
-
-**位置**决定节点画在哪里，用 `x` / `y` 表示，可以由布局计算，也可以直接提供。移动节点不会改变它连接了哪些节点。
-
-**状态**用于表达选中、高亮等当前交互情况。同一个节点可以同时具有多个状态，对应的视觉效果通过 `stateStyles` 配置。
-
-## 继续阅读 [#继续阅读]
-
-* [数据接入与更新](/docs/guides/data)：准备数据，选择整份替换或增量更新。
-* [图数据字段参考](/docs/api/options#图数据)：字段类型、必填项与约束。
-* [Combo 配置](/docs/guides/combo)：分组的外观和使用方式。
-
-
-# Graph 生命周期 (/docs/concepts/graph-lifecycle)
-
-
-
-
-
-一张图通常只创建一次实例，在首次渲染完成后复用它处理数据和交互，离开页面时销毁。本页说明各阶段的调用顺序；方法参数见 [Graph API](/docs/api/graph)，内部处理过程见[技术架构](/docs/concepts/architecture)。
-
-## 生命周期总览 [#生命周期总览]
-
-<GraphLifecycleFlow locale="zh" />
-
-## 创建与首次渲染 [#创建与首次渲染]
-
-`new Graph(options)` 要求容器已经挂载且有明确宽高。构造阶段会创建画布和渲染器；调用 `render()` 后才会执行布局并绘制图形。
-
-以 `await graph.render()` 成功完成作为初始化边界。在此之前，不要执行数据写入、状态修改或重新布局。React、Vue 的挂载与卸载写法见[在框架中使用](/docs/getting-started/react)。
-
-## 运行中的更新 [#运行中的更新]
-
-首次渲染完成后，根据变化的范围选择操作：
-
-| 变化        | 使用方式                                                | 详细说明                                                             |
-| --------- | --------------------------------------------------- | ---------------------------------------------------------------- |
-| 替换整份数据    | `await graph.setData(nextData)`                     | [数据更新](/docs/guides/data#替换整份数据)                                 |
-| 修改部分元素或状态 | 元素增删改、状态 API                                        | [修改节点和边](/docs/api/graph#修改节点和边)、[状态操作](/docs/api/graph#状态显隐和定位) |
-| 重新计算节点位置  | `graph.setLayout(options)` 后 `await graph.layout()` | [运行时重新布局](/docs/guides/layout#运行时重新布局)                           |
-
-`setLayout()` 只保存布局配置，`layout()` 才会执行计算。常规更新会安排刷新，复用当前实例即可。
-
-缩放、平移和容器尺寸适配属于[视口操作](/docs/api/graph#视口)，无需重新创建 Graph。
-
-## 销毁与异步清理 [#销毁与异步清理]
-
-页面退出或组件卸载时调用 `graph.destroy()`，释放画布、事件监听和布局等实例资源。重复销毁不会产生额外效果；已销毁的实例不能重新使用。
-
-卸载可能早于渲染或业务请求完成。及时调用 `destroy()`，并在异步结果返回后检查 `graph.destroyed`，避免继续使用已失效的实例。业务自己创建的请求、定时器和监听器仍需由业务清理。
-
-## 完整使用示例 [#完整使用示例]
-
-下面将创建、首次渲染、状态更新和销毁串联起来。返回的清理函数应交给页面或框架的卸载逻辑调用。
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-export function mountGraph(container: HTMLElement) {
-  const graph = new Graph({
-    container,
-    data: {
-      nodes: [{ id: 'alice' }, { id: 'bob' }],
-      edges: [{ source: 'alice', target: 'bob' }],
-    },
-    layout: { type: 'circular', radius: 100 },
-  });
-
-  async function initialize() {
-    await graph.render();
-    // 卸载可能发生在异步渲染完成之前。
-    if (graph.destroyed) return;
-    graph.setItemState('alice', 'selected', true);
-  }
-
-  void initialize().catch(console.error);
-
-  // 将返回的函数交给页面或组件的卸载逻辑调用。
-  return () => graph.destroy();
-}
-```
-
-
-# G6Lite 是什么 (/docs/concepts/overview)
-
-
-
-**G6Lite · 轻量图可视化，为大规模关系数据而生**
-
-丰富的布局与交互，配合轻量高效的 WebGL 渲染，让大规模关系清晰呈现，让数据探索流畅自如。
-
-它保留 G6 用户熟悉的图配置心智：数据、节点、边、布局、交互和主题，但实现重点放在 WebGL 渲染、增量刷新和高频交互上。
-
-## 适合的场景 [#适合的场景]
-
-* 万级节点的关系探索、资产拓扑、知识图谱、依赖分析。
-* 频繁高亮、选中、邻居聚焦、状态切换的分析型交互。
-* 需要轻量包体，同时希望接入 AntV 布局能力的项目。
-* 对首屏可接受布局耗时，但要求渲染后交互开销稳定的场景。
-
-## 需要评估的场景 [#需要评估的场景]
-
-* 10 万级以上超大图且首屏速度是唯一核心指标。
-* 强依赖完整插件生态、动画系统、图论分析算法的场景。
-* 需要 SVG / Canvas 细粒度 DOM 级定制的场景。
-* 服务端渲染输出图片或 SVG 的场景。
-
-## 与 G6 v5 的关系 [#与-g6-v5-的关系]
-
-G6 v5 是功能完整的图可视化框架，插件、元素、动画、交互和生态能力更全面。G6Lite 更像是一个性能优先的轻量内核：
-
-| 维度   | G6Lite                | G6 v5    |
-| ---- | --------------------- | -------- |
-| 渲染技术 | WebGL + Canvas 2D 标签层 | Canvas   |
-| 主要目标 | 大规模渲染和高频交互            | 完整图可视化能力 |
-| 包体   | 更轻                    | 更完整      |
-| 扩展生态 | 有限，聚焦核心能力             | 更丰富      |
-| 适用重点 | 分析型大图                 | 通用图可视化   |
-
-如果你的应用需要完整插件生态，优先评估 G6 v5。如果你的核心瓶颈是大图渲染、高亮和状态切换，优先评估 G6Lite。
-
-## 使用模型 [#使用模型]
-
-一张图由 `Graph` 实例管理：`data` 描述关系，`node` 和 `edge` 定义外观，`layout` 计算位置，`behaviors` 添加交互，`theme` 统一视觉风格。
-
-先理解[数据模型](/docs/concepts/data-model)，再按照 [Graph 生命周期](/docs/concepts/graph-lifecycle)组织创建、更新与销毁。渲染图层、调度和扩展的内部协作见[技术架构](/docs/concepts/architecture)。
-
-## 下一步 [#下一步]
-
-* [数据模型](/docs/concepts/data-model)
-* [Graph 生命周期](/docs/concepts/graph-lifecycle)
-* [技术架构](/docs/concepts/architecture)
-* [安装与第一个图](/docs/getting-started/quick-start)
-
-
 # 快速上手 (/docs/getting-started/quick-start)
 
 
@@ -2155,7 +2155,7 @@ UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使�
   </head>
   <body>
     <div id="container" style="height: 360px"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"></script>
     <script>
       const data = {
         nodes: [
@@ -4453,14 +4453,14 @@ behaviors: [
 
 
 
-G6Lite 使用 [size-limit](https://github.com/ai/size-limit) 对真实首屏入口和各布局使用路径进行体积约束。未加载布局时的初始入口保持 &#x2A;*90 kB（minify + brotli）** 门槛，初始入口加任一官方布局继续保持既有 **120 kB** 门槛。
+G6Lite 使用 [limit-size](https://github.com/yutingzhao1991/limit-size) 对构建产物做体积门禁，门槛配置在根目录 `package.json` 的 `limit-size` 字段。ESM 入口 `dist/index.js` 保持 &#x2A;*100 KB（gzip）** 门槛，浏览器直引的 UMD 产物 `dist/g6-lite.min.js` 保持 &#x2A;*200 KB（gzip）** 门槛。
 
 ## 测量口径 [#测量口径]
 
 * 入口：`dist/index.js`，对应 `import { Graph } from '@antv/g6-lite'`。
-* 范围：核心引擎、regl、事件依赖，以及用户实际选择的单个官方布局算法。
-* 处理：size-limit 使用打包器模拟生产 bundle，执行 minify 与 brotli 压缩。
-* 门槛：根目录 `.size-limit.mjs` 分别约束初始入口和“初始入口 + 单个布局”的真实加载路径；官方布局由内部动态 import 按类型加载，用户无需手动注册。
+* 范围：核心引擎与运行时依赖；布局算法不内联，由内部动态 import 按类型加载，用户无需手动注册。
+* 处理：`npm run size` 直接对构建产物执行 gzip 压缩后与门槛比较。
+* 门槛：`package.json#limit-size` 分别约束 `dist/index.js` 和 `dist/g6-lite.min.js`。
 
 ## 复现 [#复现]
 
@@ -4469,7 +4469,7 @@ npm run build
 npm run size
 ```
 
-2026-07-30 当前工作区结果为：初始入口 **83.17 kB / 90 kB**；各官方布局使用路径为 **86.70–119.48 kB / 120 kB**，其中 Dagre 当前最大。最新结果以当前 checkout 执行 `npm run size` 为准。
+2026-11-03 当前工作区结果为：`dist/index.js` **93.5 KB / 100 KB**；`dist/g6-lite.min.js` **166.8 KB / 200 KB**。最新结果以当前 checkout 执行 `npm run size` 为准。
 
 ## 使用建议 [#使用建议]
 
@@ -4521,17 +4521,9 @@ graph.batchSetState([
 * 标签由 Canvas 2D 绘制；大规模图只展示关键标签，并随缩放级别或选中状态逐步展开。
 * 控制阴影、复杂描边、超长文本和全量边标签，避免把 CPU 绘制成本放在每次视口更新上。
 
-## 使用统一 Benchmark [#使用统一-benchmark]
+## 对比口径 [#对比口径]
 
-```bash
-# 快速确认 Node 与浏览器链路
-npm run benchmark -- --suite all --mode quick
-
-# 使用真实基线前扩大工作负载与采样量
-npm run benchmark -- --suite browser --mode full
-```
-
-对比前确保版本、commit、CPU、浏览器、视口、DPR、数据规模和布局配置一致。完整口径见 [Benchmark 与性能指标](/docs/metrics/performance)。
+对比前确保版本、commit、CPU、浏览器、视口、DPR、数据规模和布局配置一致。完整口径见 [性能指标](/docs/metrics/performance)。
 
 如果目标是极大规模或低端移动设备，请在真实设备上使用真实拓扑测试；桌面 Headless Chrome 的结果不能替代终端验收。
 
@@ -4540,65 +4532,27 @@ npm run benchmark -- --suite browser --mode full
 
 
 
-G6Lite 使用仓库内统一的 Node 与浏览器 Benchmark 运行器验证性能链路。性能结果只在运行环境、数据规模、配置和采样模式一致时具有可比性；官网不使用缺少环境信息的绝对跑分或跨机器营销对比。
+性能结果只在运行环境、数据规模与配置一致时具有可比性；官网不使用缺少环境信息的绝对跑分或跨机器营销对比。
 
 本页记录的是测量方法和选型边界，不表示 G6Lite 在所有数据、布局和设备上都快于其他图库。布局、纯渲染和交互更新必须分别比较。
 
-## 运行入口 [#运行入口]
-
-先安装依赖，然后在仓库根目录执行：
-
-```bash
-npm run benchmark -- --suite all --mode quick
-```
-
-参数含义：
-
-* `--suite node`：DataModel 与布局微基准。
-* `--suite browser`：公开 Graph API、首屏、交互、拾取和内存趋势。
-* `--suite all`：依次运行 Node 与浏览器套件。
-* `--mode quick`：用于本地和发布链路的快速验收。
-* `--mode full`：扩大数据档位与采样量，用于审核基线。
-
-例如：
-
-```bash
-npm run benchmark -- --suite node --mode full
-npm run benchmark -- --suite browser --mode full
-```
-
-命令会先构建 npm 包，再把 JSON 与 Markdown 报告写入 `performance/`。本地原始报告默认不提交；只有经过审核、环境可比的结果才进入 `tests/perf/baselines/`。
-
-## 指标范围 [#指标范围]
-
-Node 套件覆盖数据模型替换、位置与业务数据更新、状态切换、增删节点、邻居查询和布局计算。浏览器套件覆盖：
-
-* 批量更新节点位置和业务数据直到下一帧完成。
-* 批量状态更新、邻居与邻接边查询。
-* 首次渲染、布局耗时和不含布局的渲染耗时。
-* 拖拽与缩放帧率、P95 帧耗时和掉帧比例。
-* 拾取耗时、Highlight 延迟和销毁后的堆内存趋势。
-
-报告中的内存变化是趋势信号，不等同于内存泄漏证明；垃圾回收时机、浏览器进程复用和显卡驱动都会影响结果。
-
 ## 环境要求 [#环境要求]
 
-浏览器套件需要可用的 Chromium/Chrome 与 WebGL 硬件加速。公开或比较结果时至少记录：
+公开或比较结果时至少记录：
 
 * G6Lite 版本、Git commit 与工作区是否干净。
 * Node、Chromium、操作系统和架构。
 * CPU 型号；浏览器结果还需记录 user agent、视口和 DPR。
-* 数据节点/边数量、布局、迭代次数与 quick/full 模式。
-* 样本量、RME 与运行器产生的 warning。
+* 数据节点/边数量、布局与迭代次数。
+* 样本量与误差。
 
-Benchmark 报告会自动写入大部分环境字段。不同环境的结果不应直接计算“提升百分比”。
+不同环境的结果不应直接计算“提升百分比”。
 
 ## 当前公开口径 [#当前公开口径]
 
-* Quick 模式用于验证运行器、构建产物和关键路径可以完整执行，不作为营销基线。
 * 首页只展示 WebGL 1.0、内置布局能力与包体积预算等稳定事实。
-* 包体积由 `size-limit` 独立校验，详见 [包体积](/docs/metrics/bundle-size)。
-* 具体业务选型应使用真实数据和目标设备运行 full 模式，再结合 [性能调优](/docs/metrics/performance-tuning) 分析瓶颈。
+* 包体积由 `limit-size` 独立校验，详见 [包体积](/docs/metrics/bundle-size)。
+* 具体业务选型应使用真实数据和目标设备完整测量，再结合 [性能调优](/docs/metrics/performance-tuning) 分析瓶颈。
 
 ## 常用图库选型对比 [#常用图库选型对比]
 
@@ -4615,5 +4569,3 @@ Benchmark 报告会自动写入大部分环境字段。不同环境的结果不�
 * 同时记录中位数、P95、样本量和误差，不用一次运行结果得出结论。
 * 除首屏外，至少验证拖拽、缩放、拾取、高亮、批量更新和销毁后的内存趋势。
 * 将候选库版本、适配代码和完整配置与报告一起留档，避免后续无法复现。
-
-运行器实现与更完整说明位于仓库 `tests/perf/README.md`。

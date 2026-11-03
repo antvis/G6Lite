@@ -368,6 +368,21 @@ body:has(#nd-docs-layout.examples-route-layout) {
   vertical-align: super;
 }
 
+/* Mobile menu trigger: hamburger icon instead of chevron */
+.lg\:hidden button[data-state] > svg {
+  display: none;
+}
+
+.lg\:hidden button[data-state]::before {
+  display: block;
+  width: 22px;
+  height: 22px;
+  background-color: currentColor;
+  content: '';
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='4' x2='20' y1='6' y2='6'/%3E%3Cline x1='4' x2='20' y1='12' y2='12'/%3E%3Cline x1='4' x2='20' y1='18' y2='18'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
 .landing {
   overflow: hidden;
   background: var(--color-fd-background);
@@ -1887,7 +1902,7 @@ body.example-workspace-resizing {
   border-radius: 0.5rem;
   padding: 0 0.68rem;
   font-size: var(--example-font-sm);
-  font-weight: 720;
+  font-weight: 400;
   transition:
     background-color 150ms ease,
     border-color 150ms ease,
@@ -1914,7 +1929,7 @@ body.example-workspace-resizing {
   background: transparent;
   color: var(--example-code-subtle);
   font-size: var(--example-font-md);
-  font-weight: 550;
+  font-weight: 400;
   white-space: nowrap;
 }
 
@@ -1922,10 +1937,6 @@ body.example-workspace-resizing {
 .example-code-panel .example-tabs button.is-active {
   background: transparent;
   color: var(--example-code-text);
-}
-
-.example-code-panel .example-tabs button.is-active {
-  font-weight: 680;
 }
 
 .example-code-panel .example-tabs button.is-active::after {

@@ -54,7 +54,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
           <div className={styles.footerBrand}>
             <span>
               <AntVLogo />
-              <i /> G6Lite
+              <i /> <span className={styles.brandName}>G6</span><sup className={styles.brandTag}>Lite</sup>
             </span>
             <p>{copy.description}</p>
             <Link href={home}>

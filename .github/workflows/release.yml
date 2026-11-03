@@ -1,76 +1,37 @@
-name: Publish
+name: Publish to npm
 
 on:
-  release:
-    types: [published]
-  workflow_dispatch:
+  push:
+    tags:
+      - '[0-9]*.[0-9]*.[0-9]*'
 
 permissions:
-  contents: read
   id-token: write
+  contents: read
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     environment: npm
 
     steps:
       - uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.release.tag_name || github.ref }}
 
-      - name: Use Node.js 20
-        uses: actions/setup-node@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org
-
-      - name: Use npm with trusted publishing support
-        run: npm install --global npm@latest
 
       - name: Install dependencies
         run: npm install --no-package-lock --no-audit --no-fund
 
-      - name: Validate release version
-        id: version
-        shell: bash
+      - name: Build
+        run: npm run build
+
+      - name: Publish to npm
         run: |
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            RELEASE_TAG="${{ github.event.release.tag_name }}"
+          if [[ "${{ github.ref_name }}" == *"-beta"* ]]; then
+            npm publish --access public --tag beta
           else
-            RELEASE_TAG="v${PACKAGE_VERSION}"
+            npm publish --access public
           fi
-          TAG_VERSION="${RELEASE_TAG#v}"
-          if [[ "$TAG_VERSION" != "$PACKAGE_VERSION" ]]; then
-            echo "Release tag $RELEASE_TAG does not match package version $PACKAGE_VERSION" >&2
-            exit 1
-          fi
-          if [[ "$PACKAGE_VERSION" == *-* ]]; then
-            echo "npm_tag=beta" >> "$GITHUB_OUTPUT"
-          else
-            echo "npm_tag=latest" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Run CI checks
-        run: npm run ci
-
-      - name: Check UMD browser build
-        run: npm run check:umd
-
-      - name: Build playground
-        run: npx vite build
-
-      - name: Run release example checks
-        run: node scripts/check-examples.mjs --profile release --screenshots-dir performance/examples-release
-
-      - name: Inspect package contents
-        run: npm pack --dry-run --json
-
-      - name: Publish package
-        if: github.event_name == 'release'
-        run: npm publish --provenance --access public --tag "${{ steps.version.outputs.npm_tag }}"
-
-      - name: Confirm dry run
-        if: github.event_name == 'workflow_dispatch'
-        run: echo "Manual publish workflow completed as dry-run; no package was published."

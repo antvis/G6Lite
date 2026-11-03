@@ -291,7 +291,7 @@ const { quickStartNetworkOptions } = await import(
 for (const [file, snippet] of snippets) {
   const html = read(file).match(/```html\n(<!doctype html>[\s\S]*?)\n```/)?.[1];
   const script = html?.match(/<script>\s*([\s\S]*?)\s*<\/script>/)?.[1];
-  const umdSource = 'https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js';
+  const umdSource = 'https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js';
   if (!script || !html.includes(`src="${umdSource}"`)) {
     fail(`Missing complete UMD example in ${file}`);
     continue;

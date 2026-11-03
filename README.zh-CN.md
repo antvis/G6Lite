@@ -14,7 +14,7 @@
   <a href="https://www.npmjs.com/package/@antv/g6-lite"><img alt="npm 版本" src="https://img.shields.io/npm/v/@antv/g6-lite.svg"></a>
   <a href="https://github.com/antvis/G6Lite/actions/workflows/build.yml"><img alt="构建" src="https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg"></a>
   <a href="https://bundlephobia.com/package/@antv/g6-lite"><img alt="压缩后体积" src="https://img.shields.io/bundlephobia/minzip/@antv/g6-lite"></a>
-  <a href="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js"><img alt="UMD gzip 体积" src="https://img.badgesize.io/https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
+  <a href="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"><img alt="UMD gzip 体积" src="https://img.badgesize.io/https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
   <a href="./LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/@antv/g6-lite.svg"></a>
 </p>
 
@@ -90,7 +90,7 @@ await graph.render();
 
 ```html
 <div id="container" style="width: 100%; height: 500px"></div>
-<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"></script>
 <script>
   const graph = new G6Lite.Graph({
     container: '#container',
@@ -108,8 +108,8 @@ await graph.render();
 </script>
 ```
 
-- [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js)
-- [UNPKG](https://unpkg.com/@antv/g6-lite@beta/dist/g6-lite.umd.min.js)
+- [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js)
+- [UNPKG](https://unpkg.com/@antv/g6-lite@beta/dist/g6-lite.min.js)
 
 生产环境请将 `beta` 替换为已发布的确切版本号。UMD 徽章展示完整 CDN 文件的下载体积；Bundlephobia 徽章展示该服务打包 npm 入口后测得的体积。
 
@@ -133,7 +133,7 @@ npm run dev
 
 使用 `npm run ci` 执行项目验证流水线，使用 `npm run site` 构建文档站点。
 
-`npm run build` 会同时生成 ESM 产物和 `dist/g6-lite.umd.min.js`（含 source map）。使用 `npm run build:umd` 单独重新构建 UMD，使用 `npm run check:umd` 在 Chrome/Chromium 中验证产物和布局 Worker。
+`npm run build` 会同时生成 ESM 产物、类型声明和 `dist/g6-lite.min.js`（含 source map）。
 
 ## 贡献
 

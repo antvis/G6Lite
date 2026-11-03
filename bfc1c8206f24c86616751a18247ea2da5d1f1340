@@ -1,0 +1,19 @@
+.github/workflows/build.yml
+  s_f72ea014bfcfb1::t_888a4cd174e482 40-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "bfc1c8206f24c86616751a18247ea2da5d1f1340",
+  "prompts": {},
+  "sessions": {
+    "s_f72ea014bfcfb1": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "febb6910-4286-4f91-a813-646c181555e5",
+        "model": "codefuse_official_channel/Kimi-K3:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

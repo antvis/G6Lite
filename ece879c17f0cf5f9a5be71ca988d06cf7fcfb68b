@@ -1,0 +1,19 @@
+site/scripts/capture-live-example-thumbs.mjs
+  s_57c305f0b18204::t_7f32cdc7f4aa02 269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ece879c17f0cf5f9a5be71ca988d06cf7fcfb68b",
+  "prompts": {},
+  "sessions": {
+    "s_57c305f0b18204": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "89efa502-8882-405b-be72-d38abfa3c9b5",
+        "model": "codefuse_official_channel/Kimi-K3:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

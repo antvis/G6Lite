@@ -1,0 +1,498 @@
+.github/workflows/build.yml
+  h_63dffd5e80151f 79-81
+.github/workflows/release.yml
+  h_63dffd5e80151f 58-60
+.size-limit.mjs
+  h_63dffd5e80151f 1-57
+CONTRIBUTING.md
+  h_63dffd5e80151f 5-9
+README.md
+  h_63dffd5e80151f 6-10,17,32-36,49,58,87-115,136-137
+README.zh-CN.md
+  h_63dffd5e80151f 6-10,17,32-36,49,58,87-115,136-137
+package.json
+  h_63dffd5e80151f 4
+playground/demos/basic.ts
+  h_63dffd5e80151f 8
+playground/demos/batch-node-positions.ts
+  h_63dffd5e80151f 18
+playground/demos/behaviors.ts
+  h_63dffd5e80151f 10
+playground/demos/breathing-node.ts
+  h_63dffd5e80151f 11
+playground/demos/brush-click-select.ts
+  h_63dffd5e80151f 12
+playground/demos/combo.ts
+  h_63dffd5e80151f 25
+playground/demos/context-menu.ts
+  h_63dffd5e80151f 11
+playground/demos/custom-behavior.ts
+  h_63dffd5e80151f 49
+playground/demos/custom-label-renderer.ts
+  h_63dffd5e80151f 50
+playground/demos/custom-layout.ts
+  h_63dffd5e80151f 25
+playground/demos/data-mutations.ts
+  h_63dffd5e80151f 21
+playground/demos/decoration-badges.ts
+  h_63dffd5e80151f 9
+playground/demos/default-theme.ts
+  h_63dffd5e80151f 103
+playground/demos/dependency-graph.ts
+  h_63dffd5e80151f 25
+playground/demos/drag-edge.ts
+  h_63dffd5e80151f 6
+playground/demos/drag-node-threshold.ts
+  h_63dffd5e80151f 6
+playground/demos/drag-node.ts
+  h_63dffd5e80151f 8
+playground/demos/edge-arrows.ts
+  h_63dffd5e80151f 8
+playground/demos/edge-colors.ts
+  h_63dffd5e80151f 20
+playground/demos/edge-features.ts
+  h_63dffd5e80151f 32,71,101,121,165,185
+playground/demos/edge-hit-area.ts
+  h_63dffd5e80151f 43
+playground/demos/edge-loops.ts
+  h_63dffd5e80151f 8
+playground/demos/edge-states.ts
+  h_63dffd5e80151f 43
+playground/demos/edge-types.ts
+  h_63dffd5e80151f 17,53
+playground/demos/event-log.ts
+  h_63dffd5e80151f 9
+playground/demos/extension-system.ts
+  h_63dffd5e80151f 157
+playground/demos/fishbone.ts
+  h_63dffd5e80151f 112
+playground/demos/fit-incremental-nodes.ts
+  h_63dffd5e80151f 14
+playground/demos/flowchart.ts
+  h_63dffd5e80151f 61
+playground/demos/g6-v5-compat.ts
+  h_63dffd5e80151f 41
+playground/demos/hover.ts
+  h_63dffd5e80151f 13
+playground/demos/incremental-nodes.ts
+  h_63dffd5e80151f 6
+playground/demos/indented-tree.ts
+  h_63dffd5e80151f 169
+playground/demos/label-rendering-options.ts
+  h_63dffd5e80151f 33
+playground/demos/labels.ts
+  h_63dffd5e80151f 37
+playground/demos/large-labeled.ts
+  h_63dffd5e80151f 35
+playground/demos/large.ts
+  h_63dffd5e80151f 26
+playground/demos/layout-gallery.ts
+  h_63dffd5e80151f 18
+playground/demos/layout-worker-cancel.ts
+  h_63dffd5e80151f 19
+playground/demos/layout-worker.ts
+  h_63dffd5e80151f 24
+playground/demos/layouts.ts
+  h_63dffd5e80151f 44
+playground/demos/mindmap.ts
+  h_63dffd5e80151f 124
+playground/demos/neighbor-highlight.ts
+  h_63dffd5e80151f 8
+playground/demos/node-border.ts
+  h_63dffd5e80151f 17,49
+playground/demos/node-states.ts
+  h_63dffd5e80151f 19
+playground/demos/node-style.ts
+  h_63dffd5e80151f 8
+playground/demos/org-chart.ts
+  h_63dffd5e80151f 39
+playground/demos/parallel-edges.ts
+  h_63dffd5e80151f 9
+playground/demos/polyline-routing.ts
+  h_63dffd5e80151f 8
+playground/demos/queries-and-states.ts
+  h_63dffd5e80151f 28
+playground/demos/radial-tree.ts
+  h_63dffd5e80151f 21
+playground/demos/real-dataset.ts
+  h_63dffd5e80151f 26
+playground/demos/relationship.ts
+  h_63dffd5e80151f 44
+playground/demos/search-focus.ts
+  h_63dffd5e80151f 27
+playground/demos/selection-behaviors.ts
+  h_63dffd5e80151f 11
+playground/demos/self-loop-labels.ts
+  h_63dffd5e80151f 8
+playground/demos/set-data-fit-options.ts
+  h_63dffd5e80151f 21
+playground/demos/set-data.ts
+  h_63dffd5e80151f 54
+playground/demos/shapes.ts
+  h_63dffd5e80151f 18,70
+playground/demos/theme.ts
+  h_63dffd5e80151f 33
+playground/demos/tooltip.ts
+  h_63dffd5e80151f 12
+playground/demos/viewport-controls.ts
+  h_63dffd5e80151f 9
+playground/demos/zoom-options.ts
+  h_63dffd5e80151f 12
+scripts/check-package.mjs
+  h_63dffd5e80151f 1-157
+scripts/check-site.mjs
+  h_63dffd5e80151f 3,160-189,274-401
+scripts/check-umd.mjs
+  h_63dffd5e80151f 1-146
+site/content/docs/en/api/graph.mdx
+  h_63dffd5e80151f 30,38,271-278,306
+site/content/docs/en/api/options.mdx
+  h_63dffd5e80151f 10,29,40-42,46-71,76
+site/content/docs/en/concepts/architecture.mdx
+  h_63dffd5e80151f 3,9,11,15,17,19,21,23-27,29,31,33,35,37,39,41,43,45-52,54,56,58,60,62,64,66,69,72,74,76,78,80,82
+site/content/docs/en/concepts/data-model.mdx
+  h_63dffd5e80151f 2-3,6,8,10,12,14,16-36
+site/content/docs/en/concepts/graph-lifecycle.mdx
+  h_63dffd5e80151f 3,6,8,10,12,14,16,18,20-30,32,34,36,38-42,45-55,57-69
+site/content/docs/en/concepts/meta.json
+  h_63dffd5e80151f 3
+site/content/docs/en/concepts/overview.mdx
+  h_63dffd5e80151f 6-10,26,28,30,35-36
+site/content/docs/en/getting-started/quick-start.mdx
+  h_63dffd5e80151f 2-3,6-21,24,28-31,33-40,43,46,51-70,72-83,85-92,99-183,185
+site/content/docs/en/getting-started/react.mdx
+  h_63dffd5e80151f 2-3,6-16,20,31-42,44,46-47,50-51,55,59-61,63-107
+site/content/docs/en/guides/combo.mdx
+  h_63dffd5e80151f 10
+site/content/docs/en/guides/data.mdx
+  h_63dffd5e80151f 2-3,6-43,46,49-76
+site/content/docs/en/guides/parallel-edges.mdx
+  h_63dffd5e80151f 8
+site/content/docs/en/index.mdx
+  h_63dffd5e80151f 6-10,17,34-44
+site/content/docs/zh/api/graph.mdx
+  h_63dffd5e80151f 30,38,271-278,306
+site/content/docs/zh/api/options.mdx
+  h_63dffd5e80151f 10,29,40-42,46-71,76
+site/content/docs/zh/concepts/architecture.mdx
+  h_63dffd5e80151f 3,9,11,15,17,19,21,23-27,29,31,33,35,37,39,41,43,45-52,54,56,58,60,62,64,66,69,72,74,76,78,80,82
+site/content/docs/zh/concepts/data-model.mdx
+  h_63dffd5e80151f 2-3,6,8,10,12,14,16-18,20,22,24,26,28,30,32,34-36
+site/content/docs/zh/concepts/graph-lifecycle.mdx
+  h_63dffd5e80151f 3,6,8,10,12,14,16,18,20,22,24-28,30,32,34,36,38,40,42,45-68
+site/content/docs/zh/concepts/meta.json
+  h_63dffd5e80151f 3
+site/content/docs/zh/concepts/overview.mdx
+  h_63dffd5e80151f 6-8,40,42,44,49-50
+site/content/docs/zh/getting-started/quick-start.mdx
+  h_63dffd5e80151f 2-3,6,8,10-21,24,28-31,33-35,38,40-43,46,51-70,72-83,85-92,99,101,103,105,107-167,170,172,174,176-183,185
+site/content/docs/zh/getting-started/react.mdx
+  h_63dffd5e80151f 2-3,6-16,31-34,39-40,46-47,50,52,55,59-61,63-66,68-69,71-72,74-94,96-102,104-107
+site/content/docs/zh/guides/data.mdx
+  h_63dffd5e80151f 3,6,8,10,13-25,29,31,33-37,39,41,43,46-52,55-66,68,70,72,74-76
+site/content/docs/zh/index.mdx
+  h_63dffd5e80151f 3,6-10,17,38-42
+site/public/example-sources/basic.highlighted.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/basic.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/breathing-node.highlighted.txt
+  h_63dffd5e80151f 12
+site/public/example-sources/breathing-node.txt
+  h_63dffd5e80151f 12
+site/public/example-sources/combo.highlighted.txt
+  h_63dffd5e80151f 26
+site/public/example-sources/combo.txt
+  h_63dffd5e80151f 26
+site/public/example-sources/context-menu.highlighted.txt
+  h_63dffd5e80151f 11
+site/public/example-sources/context-menu.txt
+  h_63dffd5e80151f 11
+site/public/example-sources/custom-behavior.highlighted.txt
+  h_63dffd5e80151f 49
+site/public/example-sources/custom-behavior.txt
+  h_63dffd5e80151f 49
+site/public/example-sources/custom-label-renderer.highlighted.txt
+  h_63dffd5e80151f 50
+site/public/example-sources/custom-label-renderer.txt
+  h_63dffd5e80151f 50
+site/public/example-sources/custom-layout.highlighted.txt
+  h_63dffd5e80151f 25
+site/public/example-sources/custom-layout.txt
+  h_63dffd5e80151f 25
+site/public/example-sources/custom-node-extension.highlighted.txt
+  h_63dffd5e80151f 42
+site/public/example-sources/custom-node-extension.txt
+  h_63dffd5e80151f 42
+site/public/example-sources/data-mutations.highlighted.txt
+  h_63dffd5e80151f 22
+site/public/example-sources/data-mutations.txt
+  h_63dffd5e80151f 22
+site/public/example-sources/decoration-badges.highlighted.txt
+  h_63dffd5e80151f 9
+site/public/example-sources/decoration-badges.txt
+  h_63dffd5e80151f 9
+site/public/example-sources/default-theme.highlighted.txt
+  h_63dffd5e80151f 104
+site/public/example-sources/default-theme.txt
+  h_63dffd5e80151f 104
+site/public/example-sources/dependency-graph.highlighted.txt
+  h_63dffd5e80151f 25
+site/public/example-sources/dependency-graph.txt
+  h_63dffd5e80151f 25
+site/public/example-sources/drag-edge.highlighted.txt
+  h_63dffd5e80151f 7
+site/public/example-sources/drag-edge.txt
+  h_63dffd5e80151f 7
+site/public/example-sources/drag-node.highlighted.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/drag-node.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/edge-arrows.highlighted.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/edge-arrows.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/edge-colors.highlighted.txt
+  h_63dffd5e80151f 20
+site/public/example-sources/edge-colors.txt
+  h_63dffd5e80151f 20
+site/public/example-sources/edge-hit-area.highlighted.txt
+  h_63dffd5e80151f 44
+site/public/example-sources/edge-hit-area.txt
+  h_63dffd5e80151f 44
+site/public/example-sources/edge-loops.highlighted.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/edge-loops.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/edge-states.highlighted.txt
+  h_63dffd5e80151f 43
+site/public/example-sources/edge-states.txt
+  h_63dffd5e80151f 43
+site/public/example-sources/edge-types.highlighted.txt
+  h_63dffd5e80151f 17,53
+site/public/example-sources/edge-types.txt
+  h_63dffd5e80151f 17,53
+site/public/example-sources/event-log.highlighted.txt
+  h_63dffd5e80151f 10
+site/public/example-sources/event-log.txt
+  h_63dffd5e80151f 10
+site/public/example-sources/extension-system.highlighted.txt
+  h_63dffd5e80151f 157
+site/public/example-sources/extension-system.txt
+  h_63dffd5e80151f 157
+site/public/example-sources/fishbone.highlighted.txt
+  h_63dffd5e80151f 113
+site/public/example-sources/fishbone.txt
+  h_63dffd5e80151f 113
+site/public/example-sources/flowchart.highlighted.txt
+  h_63dffd5e80151f 62
+site/public/example-sources/flowchart.txt
+  h_63dffd5e80151f 62
+site/public/example-sources/hover.highlighted.txt
+  h_63dffd5e80151f 13
+site/public/example-sources/hover.txt
+  h_63dffd5e80151f 13
+site/public/example-sources/indented-tree.highlighted.txt
+  h_63dffd5e80151f 170
+site/public/example-sources/indented-tree.txt
+  h_63dffd5e80151f 170
+site/public/example-sources/label-rendering-options.highlighted.txt
+  h_63dffd5e80151f 34
+site/public/example-sources/label-rendering-options.txt
+  h_63dffd5e80151f 34
+site/public/example-sources/labels.highlighted.txt
+  h_63dffd5e80151f 38
+site/public/example-sources/labels.txt
+  h_63dffd5e80151f 38
+site/public/example-sources/large-labeled.highlighted.txt
+  h_63dffd5e80151f 36
+site/public/example-sources/large-labeled.txt
+  h_63dffd5e80151f 36
+site/public/example-sources/large.highlighted.txt
+  h_63dffd5e80151f 26
+site/public/example-sources/large.txt
+  h_63dffd5e80151f 26
+site/public/example-sources/layout-gallery.highlighted.txt
+  h_63dffd5e80151f 19
+site/public/example-sources/layout-gallery.txt
+  h_63dffd5e80151f 19
+site/public/example-sources/layout-worker.highlighted.txt
+  h_63dffd5e80151f 25
+site/public/example-sources/layout-worker.txt
+  h_63dffd5e80151f 25
+site/public/example-sources/layouts.highlighted.txt
+  h_63dffd5e80151f 45
+site/public/example-sources/layouts.txt
+  h_63dffd5e80151f 45
+site/public/example-sources/mindmap.highlighted.txt
+  h_63dffd5e80151f 125
+site/public/example-sources/mindmap.txt
+  h_63dffd5e80151f 125
+site/public/example-sources/neighbor-highlight.highlighted.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/neighbor-highlight.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/node-border.highlighted.txt
+  h_63dffd5e80151f 17,49
+site/public/example-sources/node-border.txt
+  h_63dffd5e80151f 17,49
+site/public/example-sources/node-style.highlighted.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/node-style.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/org-chart.highlighted.txt
+  h_63dffd5e80151f 40
+site/public/example-sources/org-chart.txt
+  h_63dffd5e80151f 40
+site/public/example-sources/parallel-edges.highlighted.txt
+  h_63dffd5e80151f 9
+site/public/example-sources/parallel-edges.txt
+  h_63dffd5e80151f 9
+site/public/example-sources/polyline-routing.highlighted.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/polyline-routing.txt
+  h_63dffd5e80151f 8
+site/public/example-sources/queries-and-states.highlighted.txt
+  h_63dffd5e80151f 29
+site/public/example-sources/queries-and-states.txt
+  h_63dffd5e80151f 29
+site/public/example-sources/radial-tree.highlighted.txt
+  h_63dffd5e80151f 21
+site/public/example-sources/radial-tree.txt
+  h_63dffd5e80151f 21
+site/public/example-sources/real-dataset.highlighted.txt
+  h_63dffd5e80151f 26
+site/public/example-sources/real-dataset.txt
+  h_63dffd5e80151f 26
+site/public/example-sources/relationship.highlighted.txt
+  h_63dffd5e80151f 45
+site/public/example-sources/relationship.txt
+  h_63dffd5e80151f 45
+site/public/example-sources/search-focus.highlighted.txt
+  h_63dffd5e80151f 28
+site/public/example-sources/search-focus.txt
+  h_63dffd5e80151f 28
+site/public/example-sources/selection-behaviors.highlighted.txt
+  h_63dffd5e80151f 12
+site/public/example-sources/selection-behaviors.txt
+  h_63dffd5e80151f 12
+site/public/example-sources/set-data.highlighted.txt
+  h_63dffd5e80151f 55
+site/public/example-sources/set-data.txt
+  h_63dffd5e80151f 55
+site/public/example-sources/shapes.highlighted.txt
+  h_63dffd5e80151f 18,70
+site/public/example-sources/shapes.txt
+  h_63dffd5e80151f 18,70
+site/public/example-sources/tooltip.highlighted.txt
+  h_63dffd5e80151f 12
+site/public/example-sources/tooltip.txt
+  h_63dffd5e80151f 12
+site/public/example-sources/viewport-controls.highlighted.txt
+  h_63dffd5e80151f 10
+site/public/example-sources/viewport-controls.txt
+  h_63dffd5e80151f 10
+site/public/example-sources/zoom-options.highlighted.txt
+  h_63dffd5e80151f 13
+site/public/example-sources/zoom-options.txt
+  h_63dffd5e80151f 13
+site/public/homepage/README.md
+  h_63dffd5e80151f 5
+site/src/app/(zh)/(home)/page.tsx
+  h_63dffd5e80151f 10-11,17-18
+site/src/app/(zh)/layout.tsx
+  h_63dffd5e80151f 12,15,22,31
+site/src/app/en/(home)/page.tsx
+  h_63dffd5e80151f 9-10,16-17
+site/src/app/en/layout.tsx
+  h_63dffd5e80151f 13,16,23,33
+site/src/app/global.css
+  h_63dffd5e80151f 6-7,72-75,77,81,83-84,88-91,94,114,117-120,129-192,269,283-288,1031,1423,1754,1758-1760,1787,1789,1791,1797-1802,2240-2243,2567,3265,3281,3517-3543
+site/src/components/ai-skill/ai-skill-page.module.css
+  h_63dffd5e80151f 2,70-71,249-250,326
+site/src/components/docs-route-layout.tsx
+  h_63dffd5e80151f 24-35
+site/src/components/example-detail.tsx
+  h_63dffd5e80151f 31,47-48
+site/src/components/graph-data-model-diagram.tsx
+  h_63dffd5e80151f 1-6
+site/src/components/graph-lifecycle-flow.module.css
+  h_63dffd5e80151f 1-77
+site/src/components/graph-lifecycle-flow.tsx
+  h_63dffd5e80151f 1-45
+site/src/components/homepage/content.ts
+  h_63dffd5e80151f 2,5,26-27,35-50,55-57,65-82,87,89,114,117,144,178,180,188-205,211-213,224-225,227-242,249,254-255,289,292
+site/src/components/homepage/example-showcase.tsx
+  h_63dffd5e80151f 1-229
+site/src/components/homepage/featured-examples.tsx
+  h_63dffd5e80151f 1,3-5,7-20,22
+site/src/components/homepage/hero-highlight.ts
+  h_63dffd5e80151f 1-75
+site/src/components/homepage/hero-live-graph.tsx
+  h_63dffd5e80151f 13,21,23,34-35,37,65-72,76-85,126-132,148,157-158,193-196,204-208,212-213,220-221,225-231
+site/src/components/homepage/homepage.module.css
+  h_63dffd5e80151f 37-38,42,53,76,139,147-150,152,155,157-158,161-162,166,169,172-181,183,187,191-192,216,289-290,520-522,560,611-612,614,616,618,620,622-628,630-632,634-640,643-649,651-654,656-664,666-691,693-706,709-717,721-724,726-727,730-732,857-858,860-861,863-864,866-867,869-871,873-898,900,902-911,913,915-920,922-967,969-970,972,976,978,980-981,983-984,986-987,989,991,993-994,996-1029,1031,1033-1037,1039-1093,1096-1180,1386-1387,1395,1401,1406,1435,1442,1446-1450,1470,1473,1518,1522
+site/src/components/homepage/homepage.tsx
+  h_63dffd5e80151f 15-16,33,37,79,116,118-121,123-125,127,131,133,138,140-164,166-167,180,182,212,219-238,251,261,267-275,279
+site/src/components/homepage/scroll-navigation.css
+  h_63dffd5e80151f 1,3,27-29,39-41,44-45,51,53,56-58
+site/src/components/homepage/scroll-navigation.tsx
+  h_63dffd5e80151f 7,22,25
+site/src/components/homepage/showcase-examples.ts
+  h_63dffd5e80151f 1-351
+site/src/components/homepage/update-scenarios.tsx
+  h_63dffd5e80151f 11-15,17-40,48,80,90,101,103,105,112
+site/src/components/provider.tsx
+  h_63dffd5e80151f 45
+site/src/components/quick-start-example.module.css
+  h_63dffd5e80151f 1-95
+site/src/components/quick-start-example.tsx
+  h_63dffd5e80151f 1-172
+site/src/components/site-footer.module.css
+  h_63dffd5e80151f 15,99,113
+site/src/lib/data-model-example.ts
+  h_63dffd5e80151f 1-64
+site/src/lib/docs-tree.ts
+  h_63dffd5e80151f 27-30,49-54
+site/src/lib/product-copy.ts
+  h_63dffd5e80151f 1-27
+site/src/lib/quick-start.ts
+  h_63dffd5e80151f 1-72
+site/src/lib/site-config.ts
+  h_63dffd5e80151f 2,8,10-11
+site/tsconfig.json
+  h_63dffd5e80151f 44-45
+skills/antv-g6lite-graph/SKILL.md
+  h_63dffd5e80151f 26
+src/graph.ts
+  h_63dffd5e80151f 150,1484
+src/renderer/renderer.ts
+  h_63dffd5e80151f 184,671,676,1779-1780,2110,2122-2145,2545
+src/types.ts
+  h_63dffd5e80151f 747,749
+tests/unit/graph.test.ts
+  h_63dffd5e80151f 739,748,757-758
+tests/unit/packageConsumer.type-test.ts
+  h_63dffd5e80151f 1-166
+tests/unit/playgroundAutoFit.test.ts
+  h_63dffd5e80151f 9,13,18,36
+tests/unit/publicApi.type-test.ts
+  h_63dffd5e80151f 1-225
+tests/unit/renderer/renderer.test.ts
+  h_63dffd5e80151f 10,33-34,372-453
+tests/unit/site/hero-highlight.test.ts
+  h_63dffd5e80151f 1-115
+vite.umd.config.ts
+  h_63dffd5e80151f 1-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a36fa95b5f0a917061b5a4be1955f1493612e4f5",
+  "prompts": {},
+  "humans": {
+    "h_63dffd5e80151f": {
+      "author": "hustcc <i@hust.cc>"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+site/content/docs/zh/metrics/performance-tuning.mdx
+  s_8e70039b9abdfa::t_851998b376cf38 42
+  s_6773a42103933a::t_92bc4478333623 44
+site/content/docs/en/metrics/performance.mdx
+  s_6773a42103933a::t_83bdc24a53d404 3,6,10
+site/content/docs/zh/metrics/performance.mdx
+  s_6773a42103933a::t_406049630ad657 17-18,20
+  s_6773a42103933a::t_b90b7960480bb7 26
+  s_6773a42103933a::t_736f9f8dd2c5b0 3,6
+playground/demos/README.md
+  s_6773a42103933a::t_cea52fcd073018 28
+site/content/docs/zh/faq.mdx
+  s_6773a42103933a::t_3b03e4471f427f 19
+site/content/docs/en/faq.mdx
+  s_6773a42103933a::t_81e6cfd8427084 12
+package.json
+  s_6773a42103933a::t_fd6fbf3064cfa6 69
+  s_8e70039b9abdfa::t_9027d5d3bcc095 31-42
+  s_8e70039b9abdfa::t_f6ac42e41dfa1a 27
+  s_8e70039b9abdfa::t_c14e5e20696024 64
+  s_6773a42103933a::t_8e73c0a3e185aa 23
+  s_6773a42103933a::t_7fafb89a4a1e8a 9-10,24,28,53-56,70-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6646e6f3f075eb4e6108cbce05bc9b4386ba64cb",
+  "prompts": {},
+  "sessions": {
+    "s_6773a42103933a": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "afbd3078-99c7-4f6a-a6fe-9e1a5acb47f0",
+        "model": "codefuse_official_channel/Kimi-K3:glink_domestic"
+      },
+      "human_author": "逍为 <xiaowei.wzw@antgroup.com>"
+    },
+    "s_8e70039b9abdfa": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "ebf73d00-88d7-4cc0-9b41-acd8d6bc2e07",
+        "model": "codefuse_official_channel/Kimi-K3:glink_domestic"
+      },
+      "human_author": "逍为 <xiaowei.wzw@antgroup.com>"
+    }
+  }
+}

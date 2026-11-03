@@ -154,7 +154,7 @@ export async function run(container: string | HTMLElement) {
   // Padding keeps the boundary badges (star, count pill) off the canvas edge.
   const viewPadding = 40;
   const graph = new Graph({
-    autoFit: { padding: viewPadding, maxZoom: 1.5 },
+    autoFit: { padding: viewPadding },
     container,
     data: {
       nodes: [
@@ -261,7 +261,7 @@ export async function run(container: string | HTMLElement) {
   // The business-click behavior toggles node sizes between 32 and 68; refit
   // after each toggle so resized nodes and their badges stay inside the view.
   graph.on('node:click', () => {
-    graph.fitView({ padding: viewPadding, maxZoom: 1.5 });
+    graph.fitView({ padding: viewPadding });
   });
   return graph;
 }

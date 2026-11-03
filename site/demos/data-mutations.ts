@@ -42,7 +42,7 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
   });
   await graph.render();
-  graph.fitView({ padding: 80, maxZoom: 1.5 });
+  graph.fitView({ padding: 80 });
 
   const ui = createDemoPanel(
     container,
@@ -112,7 +112,7 @@ export async function run(container: string | HTMLElement) {
       const nodeId = graph.hasNode('d') ? 'd' : graph.hasNode('f') ? 'f' : '';
       if (nodeId) graph.removeNode(nodeId);
     } else if (action === 'reset') {
-      await graph.setData(INITIAL_DATA, { fitView: { padding: 80, maxZoom: 1.5 } });
+      await graph.setData(INITIAL_DATA, { fitView: { padding: 80 } });
       lastEvent = 'datachange: reset';
     }
     renderStatus();
@@ -120,7 +120,7 @@ export async function run(container: string | HTMLElement) {
 
   renderStatus();
   return {
-    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
+    fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();
       ui.panel.remove();

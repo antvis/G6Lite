@@ -131,13 +131,13 @@ export async function run(container: string | HTMLElement) {
         theme,
       });
       await graph.render();
-      graph.fitView({ padding: 56, maxZoom: 1.4 });
+      graph.fitView({ padding: 56 });
       graphs.push(graph);
     }
   };
 
   const fitGraphs = () => {
-    graphs.forEach((graph) => graph.fitView({ padding: 56, maxZoom: 1.4 }));
+    graphs.forEach((graph) => graph.fitView({ padding: 56 }));
   };
 
   const updateView = (view: string) => {

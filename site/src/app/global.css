@@ -1314,24 +1314,11 @@ body:has(#nd-docs-layout.examples-route-layout) {
   background: #eff2fb;
 }
 
-.examples-center-card-crop {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(
-    calc(100% - var(--thumbnail-padding) * 2),
-    calc((var(--thumbnail-height) - var(--thumbnail-padding) * 2) * var(--crop-ratio))
-  );
-  aspect-ratio: var(--crop-ratio);
-  overflow: hidden;
-  transform: translate(-50%, -50%);
-  mix-blend-mode: multiply;
-}
-
-.examples-center-card-crop img {
-  position: absolute;
-  max-width: none;
+.examples-center-card-image img {
+  object-fit: contain;
+  padding: var(--thumbnail-padding);
   margin: 0;
+  mix-blend-mode: multiply;
 }
 
 .examples-center-card-body {
@@ -1596,16 +1583,9 @@ body:has(#nd-docs-layout.examples-route-layout) {
   isolation: isolate;
 }
 
-.example-directory-thumb-crop {
-  position: relative;
-  width: min(calc(100% - 4px), calc((2.25rem - 4px) * var(--crop-ratio)));
-  aspect-ratio: var(--crop-ratio);
-  overflow: hidden;
-}
-
 .example-directory-thumb img {
-  position: absolute;
-  max-width: none;
+  object-fit: contain;
+  padding: 2px;
   margin: 0 !important;
   border: 0;
   border-radius: 0;
@@ -2560,7 +2540,7 @@ html.dark .examples-center-card:hover .examples-center-card-image {
   background: #222b3c;
 }
 
-html.dark .examples-center-card-crop {
+html.dark .examples-center-card-image img {
   mix-blend-mode: normal;
 }
 

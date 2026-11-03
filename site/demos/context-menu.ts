@@ -37,7 +37,7 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas'],
   });
   await graph.render();
-  graph.fitView({ padding: 80, maxZoom: 1.3 });
+  graph.fitView({ padding: 80 });
 
   const menu = document.createElement('div');
   menu.hidden = true;
@@ -78,7 +78,7 @@ export async function run(container: string | HTMLElement) {
   graph.on('canvas:click', close);
 
   return {
-    fitView: () => graph.fitView({ padding: 80, maxZoom: 1.3 }),
+    fitView: () => graph.fitView({ padding: 80 }),
     destroy() {
       graph.destroy();
       menu.remove();

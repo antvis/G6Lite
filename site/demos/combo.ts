@@ -332,7 +332,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
-    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
+    fitView: () => graph.fitView({ padding: 64 }),
     destroy() {
       graph.destroy();
       toolbar.remove();

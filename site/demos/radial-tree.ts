@@ -37,6 +37,6 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas'],
   });
   await graph.render();
-  graph.fitView({ padding: [72, 72, 120, 72], maxZoom: 0.85 });
+  graph.fitView({ padding: [72, 72, 120, 72] });
   return graph;
 }

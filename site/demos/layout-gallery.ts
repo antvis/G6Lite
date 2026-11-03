@@ -24,7 +24,7 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
   });
   await graph.render();
-  graph.fitView({ padding: 72, maxZoom: 1.4 });
+  graph.fitView({ padding: 72 });
 
   const ui = createDemoPanel(
     container,
@@ -39,13 +39,13 @@ export async function run(container: string | HTMLElement) {
     ui.setStatus(`running ${LAYOUTS[index].label}…`);
     graph.setLayout(LAYOUTS[index].config);
     await graph.layout();
-    graph.fitView({ padding: 72, maxZoom: 1.4 });
+    graph.fitView({ padding: 72 });
     ui.setStatus(`${LAYOUTS[index].label} complete\nnodes=${graph.getNodeCount()} edges=${graph.getEdgeCount()}`);
   });
 
   ui.setStatus('Radial complete');
   return {
-    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.4 }),
+    fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();
       ui.panel.remove();

@@ -25,7 +25,7 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas'],
   });
   await graph.render();
-  graph.fitView({ padding: 80, maxZoom: 1.5 });
+  graph.fitView({ padding: 80 });
 
   const ui = createDemoPanel(
     container,
@@ -53,7 +53,7 @@ export async function run(container: string | HTMLElement) {
     const action = (event.target as HTMLElement).dataset.action;
     if (action === 'zoom-in') graph.zoomBy(1.25);
     else if (action === 'zoom-out') graph.zoomBy(0.8);
-    else if (action === 'fit') graph.fitView({ padding: 64, maxZoom: 1.5 });
+    else if (action === 'fit') graph.fitView({ padding: 64 });
     else if (action === 'center') graph.fitCenter();
     else if (action === 'focus') graph.focusItem('c');
     else if (action === 'camera') graph.setCamera({ zoom: 1.1, x: 80, y: 40 });
@@ -71,7 +71,7 @@ export async function run(container: string | HTMLElement) {
 
   showCamera('ready');
   return {
-    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
+    fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();
       ui.panel.remove();

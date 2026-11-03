@@ -22,7 +22,7 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-edge'],
   });
   await graph.render();
-  graph.fitView({ padding: 90, maxZoom: 1.4 });
+  graph.fitView({ padding: 90 });
 
   const ui = createDemoPanel(
     container,
@@ -48,7 +48,7 @@ export async function run(container: string | HTMLElement) {
   ui.setStatus('拖拽 editable-edge 或 reference-edge 的端点');
 
   return {
-    fitView: () => graph.fitView({ padding: 90, maxZoom: 1.4 }),
+    fitView: () => graph.fitView({ padding: 90 }),
     destroy: () => { graph.destroy(); ui.panel.remove(); },
   };
 }

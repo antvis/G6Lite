@@ -24,7 +24,7 @@ export async function run(container: string | HTMLElement) {
     ],
   });
   await graph.render();
-  graph.fitView({ padding: 80, maxZoom: 1.5 });
+  graph.fitView({ padding: 80 });
 
   const ui = createDemoPanel(
     container,
@@ -46,7 +46,7 @@ export async function run(container: string | HTMLElement) {
   render('ready');
 
   return {
-    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
+    fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();
       ui.panel.remove();

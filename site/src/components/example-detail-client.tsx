@@ -14,7 +14,6 @@ import {
 
 import dynamic from 'next/dynamic';
 
-import exampleCrops from '@/data/example-crops';
 import { runSiteExample, type SiteExampleHandle } from '@/lib/example-runtime';
 import { localizedPath, type Locale } from '@/lib/i18n';
 import {
@@ -39,16 +38,6 @@ const MIN_PREVIEW_WIDTH = 360;
 const MIN_CODE_WIDTH = 300;
 const MAX_DATA_PREVIEW_LENGTH = 100_000;
 
-type ExampleCrop = {
-  width: number;
-  height: number;
-  left: number;
-  top: number;
-  cropWidth: number;
-  cropHeight: number;
-};
-
-const exampleCropRecords = exampleCrops as Record<string, ExampleCrop>;
 const WORKSPACE_RESIZER_WIDTH = 12;
 // Start with equal panes instead of restoring ratios saved for the previous layout.
 const WORKSPACE_SPLIT_STORAGE_KEY = 'g6lite-example-workspace-split-v2';
@@ -73,30 +62,16 @@ function storeOpenCategories(ids: readonly string[]) {
 }
 
 function DirectoryThumb({ id, eager }: { id: string; eager: boolean }) {
-  const crop = exampleCropRecords[id];
-  if (!crop) return null;
-
   return (
-    <span
-      className="example-directory-thumb"
-      style={{ '--crop-ratio': crop.cropWidth / crop.cropHeight } as CSSProperties}
-    >
-      <span className="example-directory-thumb-crop">
-        <Image
-          src={withBasePath(`/examples/${id}.png`)}
-          alt=""
-          width={crop.width}
-          height={crop.height}
-          loading={eager ? 'eager' : 'lazy'}
-          unoptimized
-          style={{
-            width: `${(crop.width / crop.cropWidth) * 100}%`,
-            height: `${(crop.height / crop.cropHeight) * 100}%`,
-            left: `${(-crop.left / crop.cropWidth) * 100}%`,
-            top: `${(-crop.top / crop.cropHeight) * 100}%`,
-          }}
-        />
-      </span>
+    <span className="example-directory-thumb">
+      <Image
+        src={withBasePath(`/examples/${id}.png`)}
+        alt=""
+        fill
+        sizes="3.5rem"
+        loading={eager ? 'eager' : 'lazy'}
+        unoptimized
+      />
     </span>
   );
 }

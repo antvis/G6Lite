@@ -6,7 +6,7 @@ import { Graph, type TooltipContext } from '@antv/g6-lite';
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
     // Padding keeps arc-apex edge labels and bottom node labels inside view.
-    autoFit: { padding: 56, maxZoom: 1.5 },
+    autoFit: { padding: 56 },
     container,
     data: {
       nodes: [
@@ -82,7 +82,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
-    fitView: () => graph.fitView({ padding: 64, maxZoom: 1.5 }),
+    fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => graph.destroy(),
   };
 }

@@ -2,9 +2,7 @@
 
 import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
-import { useMemo, useState, type CSSProperties } from 'react';
-
-import exampleCrops from '@/data/example-crops';
+import { useMemo, useState } from 'react';
 
 import { localizedPath, type Locale } from '@/lib/i18n';
 import {
@@ -15,11 +13,6 @@ import {
   siteExamples,
 } from '@/lib/site-examples';
 import { withBasePath } from '@/lib/shared';
-
-const crops = exampleCrops as Record<
-  string,
-  { width: number; height: number; left: number; top: number; cropWidth: number; cropHeight: number }
->;
 
 export function ExamplesCenter({ locale }: { locale: Locale }) {
   const [query, setQuery] = useState('');
@@ -141,7 +134,6 @@ export function ExamplesCenter({ locale }: { locale: Locale }) {
 
                   <div className="examples-card-grid">
                     {examples.map((example) => {
-                      const crop = crops[example.id];
                       return (
                       <a
                         className="examples-center-card"
@@ -149,27 +141,14 @@ export function ExamplesCenter({ locale }: { locale: Locale }) {
                         key={example.id}
                       >
                         <span className="examples-center-card-image">
-                          {crop ? (
-                            <span
-                              className="examples-center-card-crop"
-                              style={{ '--crop-ratio': crop.cropWidth / crop.cropHeight } as CSSProperties}
-                            >
-                              <Image
-                                src={withBasePath(`/examples/${example.id}.png`)}
-                                alt={localizedText(example.title, locale)}
-                                width={crop.width}
-                                height={crop.height}
-                                loading={example.id === siteExamples[0]?.id ? 'eager' : 'lazy'}
-                                unoptimized
-                                style={{
-                                  width: `${(crop.width / crop.cropWidth) * 100}%`,
-                                  height: `${(crop.height / crop.cropHeight) * 100}%`,
-                                  left: `${(-crop.left / crop.cropWidth) * 100}%`,
-                                  top: `${(-crop.top / crop.cropHeight) * 100}%`,
-                                }}
-                              />
-                            </span>
-                          ) : null}
+                          <Image
+                            src={withBasePath(`/examples/${example.id}.png`)}
+                            alt={localizedText(example.title, locale)}
+                            fill
+                            sizes="(max-width: 900px) 100vw, 25rem"
+                            loading={example.id === siteExamples[0]?.id ? 'eager' : 'lazy'}
+                            unoptimized
+                          />
                         </span>
                         <span className="examples-center-card-body">
                           <span className="examples-center-card-title-row">

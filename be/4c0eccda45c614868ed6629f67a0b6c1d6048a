@@ -1,0 +1,27 @@
+site/src/components/homepage/content.ts
+  s_10dcc173a21e06::t_610baf2b7fc090 189
+  s_10dcc173a21e06::t_3e5c1cb28c5f8c 35
+site/src/components/homepage/homepage.module.css
+  s_10dcc173a21e06::t_c4efbcd62a16bd 587-594
+site/src/components/homepage/homepage.tsx
+  s_10dcc173a21e06::t_4732bfdf92b3f9 34-45
+  s_10dcc173a21e06::t_721af8a18c7824 106-108
+site/src/components/homepage/bundle-measurement.json
+  s_10dcc173a21e06::t_be8b98f9a7023d 10-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "be4c0eccda45c614868ed6629f67a0b6c1d6048a",
+  "prompts": {},
+  "sessions": {
+    "s_10dcc173a21e06": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "4edacd60-72f1-487a-98a0-ba5f2474743d",
+        "model": "codefuse_official_channel/Kimi-K3:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

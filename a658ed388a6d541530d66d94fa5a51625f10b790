@@ -1,0 +1,94 @@
+.cursor/rules/git-branch-workflow.mdc
+  h_bc34e7226ccce5 1-11
+site/content/docs/en/concepts/architecture.mdx
+  h_bc34e7226ccce5 7,11-12,27-28,30,32-35,44-51
+site/content/docs/en/concepts/graph-lifecycle.mdx
+  h_bc34e7226ccce5 6-7,15-19
+site/content/docs/zh/concepts/architecture.mdx
+  h_bc34e7226ccce5 7,11-12,27-28,30,32-35,44-51
+site/content/docs/zh/concepts/graph-lifecycle.mdx
+  h_bc34e7226ccce5 6-7,28-32
+site/content/docs/zh/guides/combo.mdx
+  h_bc34e7226ccce5 10-15
+site/content/docs/zh/guides/custom-behavior.mdx
+  h_bc34e7226ccce5 8-13
+site/content/docs/zh/guides/custom-label-renderer.mdx
+  h_bc34e7226ccce5 8-13
+site/content/docs/zh/guides/custom-node.mdx
+  h_bc34e7226ccce5 24-29
+site/content/docs/zh/guides/edge.mdx
+  h_bc34e7226ccce5 30-35,52-57,84-87
+site/content/docs/zh/guides/events.mdx
+  h_bc34e7226ccce5 24-29
+site/content/docs/zh/guides/extensions.mdx
+  h_bc34e7226ccce5 8-13
+site/content/docs/zh/guides/interactions.mdx
+  h_bc34e7226ccce5 10-15
+site/content/docs/zh/guides/label.mdx
+  h_bc34e7226ccce5 8-13
+site/content/docs/zh/guides/layout.mdx
+  h_bc34e7226ccce5 45-61
+site/content/docs/zh/guides/node.mdx
+  h_bc34e7226ccce5 27-36,61-64,85-86
+site/content/docs/zh/guides/parallel-edges.mdx
+  h_bc34e7226ccce5 8-13
+site/content/docs/zh/guides/theme.mdx
+  h_bc34e7226ccce5 8-13
+site/content/docs/zh/guides/tooltip.mdx
+  h_bc34e7226ccce5 12-17
+site/public/examples/docs-edge-hit-area.svg
+  h_bc34e7226ccce5 1-19
+site/public/examples/docs-edge-styles.svg
+  h_bc34e7226ccce5 1-38
+site/public/examples/docs-edge-types.svg
+  h_bc34e7226ccce5 1-29
+site/public/examples/docs-guide-combo.svg
+  h_bc34e7226ccce5 1-20
+site/public/examples/docs-guide-custom-behavior.svg
+  h_bc34e7226ccce5 1-27
+site/public/examples/docs-guide-custom-label-renderer.svg
+  h_bc34e7226ccce5 1-18
+site/public/examples/docs-guide-custom-node.svg
+  h_bc34e7226ccce5 1-14
+site/public/examples/docs-guide-events.svg
+  h_bc34e7226ccce5 1-23
+site/public/examples/docs-guide-extensions.svg
+  h_bc34e7226ccce5 1-25
+site/public/examples/docs-guide-interactions.svg
+  h_bc34e7226ccce5 1-33
+site/public/examples/docs-guide-label.svg
+  h_bc34e7226ccce5 1-22
+site/public/examples/docs-guide-parallel-edges.svg
+  h_bc34e7226ccce5 1-23
+site/public/examples/docs-guide-theme.svg
+  h_bc34e7226ccce5 1-34
+site/public/examples/docs-guide-tooltip.svg
+  h_bc34e7226ccce5 1-19
+site/src/app/global.css
+  h_bc34e7226ccce5 3297-3306,3313,3320,3333,3420-3424,3444,3454-3458,3462,3499-3597
+site/src/components/architecture-diagram.tsx
+  h_bc34e7226ccce5 3-4,152-153
+site/src/components/docs-architecture-diagram.module.css
+  h_bc34e7226ccce5 1-206
+site/src/components/docs-architecture-diagram.tsx
+  h_bc34e7226ccce5 1-338
+site/src/components/docs-example-image.tsx
+  h_bc34e7226ccce5 1-19
+site/src/components/first-render-flow.module.css
+  h_bc34e7226ccce5 1-189
+site/src/components/first-render-flow.tsx
+  h_bc34e7226ccce5 1-129
+site/src/components/mdx.tsx
+  h_bc34e7226ccce5 3,8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a658ed388a6d541530d66d94fa5a51625f10b790",
+  "prompts": {},
+  "humans": {
+    "h_bc34e7226ccce5": {
+      "author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

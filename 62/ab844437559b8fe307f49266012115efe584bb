@@ -1,0 +1,34 @@
+site/src/components/site-footer.tsx
+  s_0906c8e0059d2f::t_d4455decd58598 57
+site/src/app/global.css
+  s_0906c8e0059d2f::t_080929f2e91dc4 371-385
+  s_0906c8e0059d2f::t_598af61c2de36c 1932
+  s_0906c8e0059d2f::t_35d71b4ad3adc3 1905
+site/src/lib/layout.shared.tsx
+  s_0906c8e0059d2f::t_252aaa571cbb00 42-47
+  s_0906c8e0059d2f::t_a1cc722a28c07d 2,6
+site/src/components/docs-architecture-diagram.module.css
+  s_0906c8e0059d2f::t_f5a14a8f1f937b 12
+  s_0906c8e0059d2f::t_ade99e59a95d77 13
+site/src/components/language-toggle.tsx
+  s_0906c8e0059d2f::t_3523101a744325 1-22
+site/src/components/site-footer.module.css
+  s_0906c8e0059d2f::t_cad1299c92a097 40-43
+  s_0906c8e0059d2f::t_ff4cd33fc54ce3 44-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "62ab844437559b8fe307f49266012115efe584bb",
+  "prompts": {},
+  "sessions": {
+    "s_0906c8e0059d2f": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "d3db092b-9a46-433d-b96e-f06ddd7f4711",
+        "model": "codefuse_official_channel/Kimi-K3:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

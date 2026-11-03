@@ -42,7 +42,7 @@ const multiline: LabelRenderer<string[]> = {
 register('label', 'multiline', multiline);
 
 const graph = new Graph({
-  container: 'container',
+  container: '#container',
   data,
   node: {
     labelRenderer: 'multiline',

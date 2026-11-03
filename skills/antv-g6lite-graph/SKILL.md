@@ -23,7 +23,7 @@ Build and review G6Lite visualizations using the package-root contract. Keep gen
 import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
-  container: 'container',
+  container: '#container',
   data: {
     nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
     edges: [
@@ -38,7 +38,7 @@ const graph = new Graph({
 await graph.render();
 ```
 
-Give the container an explicit width and height. Call `graph.destroy()` when the page or component unmounts.
+`container` accepts a CSS selector or an `HTMLElement`. For `<div id="container">`, use `'#container'`. The element must already exist and have an explicit width and height. Call `graph.destroy()` when the page or component unmounts.
 
 ## Critical rules
 

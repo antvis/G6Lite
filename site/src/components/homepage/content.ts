@@ -124,6 +124,9 @@ const zh = {
   },
   graph: {
     region: '可交互的 AI 论文引用网络',
+    source: '来源：',
+    dataset: '示例数据：AI 论文关系网络',
+    license: '开源许可：',
     loading: '正在加载关系图',
     error: '关系图暂时无法加载',
     errorHint: '请检查网络或浏览器的 WebGL 支持',
@@ -300,6 +303,9 @@ const en: typeof zh = {
   },
   graph: {
     region: 'Interactive AI paper citation network',
+    source: 'Source: ',
+    dataset: 'Demo data: AI paper network',
+    license: 'License: ',
     loading: 'Loading graph',
     error: 'The graph could not be loaded',
     errorHint: 'Check your connection and make sure your browser supports WebGL.',

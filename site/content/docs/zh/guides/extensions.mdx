@@ -168,7 +168,7 @@ const createColumnLayout = (): LayoutExtension<ColumnLayoutOptions> => {
 register('layout', 'business-column', extensionFactory(createColumnLayout));
 
 const graph = new Graph({
-  container: 'container',
+  container: '#container',
   data: { nodes: [{ id: 'a' }, { id: 'b' }], edges: [] },
   layout: { type: 'business-column', gap: 120 },
 });

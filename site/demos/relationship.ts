@@ -40,8 +40,11 @@ export async function run(container: string | HTMLElement) {
   const wrapper = typeof container === 'string' ? document.querySelector(container)! as HTMLElement : container;
   wrapper.style.position = 'relative';
 
+  // Use the same fit for initial render, resize, and the toolbar action.
+  // A low maxZoom leaves this small network tiny on large or high-DPI canvases.
+  const fitOptions = { padding: 64 };
   const graph = new Graph({
-    autoFit: true,
+    autoFit: fitOptions,
     container: wrapper,
     data,
     node: {
@@ -72,7 +75,6 @@ export async function run(container: string | HTMLElement) {
   });
 
   await graph.render();
-  graph.fitView({ padding: 64 });
 
   const g = graph as unknown as GraphInstanceWithTools;
   const cleanupNodeLabels = attachLabelsCanvas(wrapper, g, {
@@ -89,7 +91,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
-    fitView: () => graph.fitView({ padding: 64 }),
+    fitView: () => graph.fitView(fitOptions),
     destroy: () => { cleanupNodeLabels(); cleanupEdgeLabels(); graph.destroy(); },
   };
 }

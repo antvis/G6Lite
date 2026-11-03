@@ -298,6 +298,27 @@ function HeroStage({ locale }: { locale: Locale }) {
           <div className={styles.heroCanvas}>
             <HeroLiveGraph locale={locale} />
           </div>
+          <p className={styles.graphAttribution}>
+            {copy.graph.dataset}
+            {' · '}
+            {copy.graph.source}
+            <a
+              href="https://github.com/jacomyal/sigma.js/tree/main/packages/website/public/data"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Sigma.js
+            </a>
+            {' · '}
+            {copy.graph.license}
+            <a
+              href="https://github.com/jacomyal/sigma.js/blob/main/LICENSE.txt"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              MIT
+            </a>
+          </p>
         </div>
       </div>
     </section>

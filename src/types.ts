@@ -739,6 +739,7 @@ export interface InternalCombo {
 
 /** Full graph options. */
 export interface GraphOptions {
+  /** CSS selector (for example, '#container') or an existing HTML element. */
   container: string | HTMLElement;
   data: GraphData;
   /**

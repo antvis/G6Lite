@@ -121,7 +121,7 @@ function createPackagePlugin(): PluginExtension<PackagePluginOptions> {
 register('plugin', PACKAGE_PLUGIN, extensionFactory(createPackagePlugin));
 
 const typedOptions: GraphOptions = {
-  container: 'container',
+  container: '#container',
   data: { nodes: [], edges: [] },
   label: { nodeMinZoom: 0.5, edgeMinZoom: 0.5 },
   node: {

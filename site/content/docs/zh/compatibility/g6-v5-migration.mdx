@@ -66,7 +66,7 @@ await graph.render();
 import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
-  container: 'container',
+  container: '#container',
   data: {
     nodes: [
       { id: 'a', data: { label: 'A' } },
@@ -95,13 +95,15 @@ const graph = new Graph({
 await graph.render();
 ```
 
+对于 `<div id="container">`，G6 v5 接受元素 ID `'container'`；G6Lite 使用 `document.querySelector()`，需要传入 CSS 选择器 `'#container'`。两者都接受 `HTMLElement`。
+
 关键差异是 `labelText` 改为 `label`、`drag-element` 改为 `drag-node`，并且 G6Lite 的节点、边和扩展样式字段需要按其公开类型重新核对。
 
 ## GraphOptions 对照
 
 | 配置 | G6 v5 | G6Lite 迁移方式 |
 | --- | --- | --- |
-| `container` | 支持字符串或容器 | 同样支持字符串或 `HTMLElement` |
+| `container` | 元素 ID 或 `HTMLElement` | CSS 选择器（例如 `'#container'`）或 `HTMLElement` |
 | `data` | nodes / edges / combos | 同样使用 nodes / edges / combos，但 G6Lite 要求 `nodes`、`edges` 数组存在 |
 | `node` / `edge` / `combo` | 完整元素配置 | 均支持，但类型、样式字段和扩展机制不是逐字段兼容 |
 | `layout` | 内置与自定义布局 | 支持 14 个内置布局和注册布局；具体算法选项需逐项验证 |

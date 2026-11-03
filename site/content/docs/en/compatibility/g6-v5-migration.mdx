@@ -66,7 +66,7 @@ Equivalent G6Lite starting point:
 import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
-  container: 'container',
+  container: '#container',
   data: {
     nodes: [
       { id: 'a', data: { label: 'A' } },
@@ -95,13 +95,15 @@ const graph = new Graph({
 await graph.render();
 ```
 
+For `<div id="container">`, G6 v5 accepts the ID `'container'`, while G6Lite uses `document.querySelector()` and requires the CSS selector `'#container'`. Both accept an `HTMLElement`.
+
 The immediate differences are `labelText` becoming `label`, `drag-element` becoming `drag-node`, and every node, edge, and extension style field needing validation against G6Lite package-root types.
 
 ## GraphOptions mapping
 
 | Option | G6 v5 | G6Lite migration |
 | --- | --- | --- |
-| `container` | String or container | String or `HTMLElement` |
+| `container` | Element ID or `HTMLElement` | CSS selector (such as `'#container'`) or `HTMLElement` |
 | `data` | nodes / edges / combos | Same concepts, but G6Lite requires `nodes` and `edges` arrays to exist |
 | `node` / `edge` / `combo` | Full element configuration | All supported, but types, style fields, and extension mechanisms are not field-compatible |
 | `layout` | Built-in and custom layouts | 14 built-ins plus registered layouts; validate algorithm options individually |

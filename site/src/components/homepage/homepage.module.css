@@ -219,6 +219,21 @@
   align-items: center;
   background: transparent;
 }
+.graphAttribution {
+  margin: 8px 0 0;
+  padding: 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+  text-align: right;
+}
+.graphAttribution a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.graphAttribution a:is(:hover, :focus-visible) {
+  color: var(--cyan-dark);
+}
 .canvasTools {
   position: absolute;
   right: 16px;

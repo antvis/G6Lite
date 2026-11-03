@@ -352,8 +352,8 @@ body:has(#nd-docs-layout.examples-route-layout) {
 
 .site-brand-product {
   color: var(--color-fd-foreground);
-  font-size: 1.15rem;
-  font-weight: 750;
+  font-size: 1.35rem;
+  font-weight: 500;
 }
 
 .site-brand-tag {
@@ -2289,7 +2289,7 @@ body.example-workspace-resizing {
 }
 
 /* Tooltip overlay (the library ships an unstyled div; apps provide the look).
-   Mirrors the playground tooltip styling. */
+   Mirrors the example tooltip styling. */
 .g6lite-tooltip {
   box-sizing: border-box;
   padding: 6px 10px;

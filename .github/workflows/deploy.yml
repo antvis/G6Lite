@@ -27,7 +27,8 @@ jobs:
         run: npm --prefix site install --no-package-lock --no-audit --no-fund
 
       - name: Build site
-        run: npm run site
+        working-directory: site
+        run: npm run build
 
       - name: Prepare GitHub Pages files
         run: |

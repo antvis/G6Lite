@@ -4,30 +4,22 @@ import { fileURLToPath } from 'node:url';
 import { codeToHtml } from 'shiki';
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const repositoryRoot = path.resolve(siteRoot, '..');
-const catalog = JSON.parse(
-  await readFile(path.join(repositoryRoot, 'playground/demos/catalog.json'), 'utf8'),
-);
+const demosRoot = path.join(siteRoot, 'demos');
+const catalog = JSON.parse(await readFile(path.join(demosRoot, 'catalog.json'), 'utf8'));
 const examples = catalog.filter((entry) => entry.audiences.includes('site'));
 const outputDirectory = path.join(siteRoot, 'public/example-sources');
 
 await mkdir(outputDirectory, { recursive: true });
 
 for (const example of examples) {
-  const sourcePath = path.join(repositoryRoot, 'playground/demos', example.file);
+  const sourcePath = path.join(demosRoot, example.file);
   const source = await readFile(sourcePath, 'utf8');
-  const publicSource = source
-    .replace(/from\s+(['"])\.\.\/\.\.\/src\/index\.ts\1/g, "from '@antv/g6-lite'")
-    .replace(
-      /from\s+(['"])\.\.\/\.\.\/src\/layout\/optional\/([a-z0-9-]+)\.ts\1/g,
-      (_match, _quote, layout) => `from '@antv/g6-lite/layouts/${layout}'`,
-    )
-    .replace(/\r\n/g, '\n')
-    .trim();
+  // Example sources import the library by package name, so they can be shown as-is.
+  const publicSource = source.replace(/\r\n/g, '\n').trim();
 
-  const helperNote = /from\s+['"]\.\//.test(publicSource)
+  const helperNote = /from\s+['"]\.\/demo-panel\.ts['"]/.test(publicSource)
     ? '// Local presentation helpers in this repository are used only for the example controls.\n'
-    : /from\s+['"]\.\.\//.test(publicSource)
+    : /from\s+['"]\.\/tooling\.ts['"]/.test(publicSource)
       ? '// Local presentation helpers in this repository provide example label overlays.\n'
       : '';
   const generated = `${helperNote}${publicSource}\n`;

@@ -47,7 +47,7 @@ cd G6Lite
 # 2. Install dependencies
 npm install
 
-# 3. Run the playground (dev server)
+# 3. Run the docs site and examples (dev server)
 npm run dev
 ```
 
@@ -55,13 +55,13 @@ npm run dev
 
 | Script | Purpose |
 | --- | --- |
-| `npm run dev` | Vite dev server for `playground/` |
+| `npm run dev` | Next.js dev server for the docs site and examples |
 | `npm run build` | Build the library (`tsc` → `dist/`) |
 | `npm run typecheck` | Type-check without emitting |
 | `npm run lint` | ESLint + Prettier checks; append `-- --fix` to fix |
 | `npm run test` | Vitest; append `-- --watch` or `-- --coverage` as needed |
 | `npm run size` | Check the bundle size against the configured limits |
-| `npm run site` | Generate API docs and build the documentation site |
+| `npm --prefix site run build` | Build the docs site and examples into `site/out` |
 
 ## Workflow
 

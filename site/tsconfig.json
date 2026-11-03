@@ -23,6 +23,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@antv/g6-lite": [
+        "../src/index.ts"
+      ],
       "collections/*": [
         "./.source/*"
       ]

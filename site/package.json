@@ -12,9 +12,7 @@
     "types:check": "fumadocs-mdx && _FUMADOCS_MDX=1 next typegen && tsc --noEmit",
     "postinstall": "fumadocs-mdx",
     "examples:generate": "node scripts/generate-example-sources.mjs",
-    "lint": "eslint",
-    "thumbnails:capture": "(cd .. && vite --config vite.config.ts --port 5179 --no-open) & sleep 5 && node scripts/capture-thumbnails.mjs; kill %1",
-    "examples:capture": "(cd .. && vite --config vite.config.ts --port 5179 --no-open) & sleep 5 && node scripts/capture-demo-thumbnails.mjs; kill %1"
+    "lint": "eslint"
   },
   "dependencies": {
     "fumadocs-core": "16.9.3",

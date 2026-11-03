@@ -31,6 +31,18 @@ const stageIcons = [Database, Network, Cpu, MousePointer2];
 export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
   const copy = homepageCopy[locale];
   const aiPrompt = `${locale === 'zh' ? '使用' : 'Use'} $${skillName}\n${copy.performance.aiRequest}`;
+  const baseline = bundleMeasurement.baseline;
+  const sizeVsBaseline = baseline
+    ? copy.performance.vsG6
+        .replace('{name}', baseline.name)
+        .replace(
+          '{percent}',
+          (
+            ((baseline.gzippedBytes - bundleMeasurement.initialBytes) / baseline.gzippedBytes) *
+            100
+          ).toFixed(1),
+        )
+    : null;
 
   return (
     <main
@@ -91,6 +103,9 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
                   <strong>
                     {(bundleMeasurement.initialBytes / bundleMeasurement.unitBytes).toFixed(1)}
                     <small>kB</small>
+                    {sizeVsBaseline ? (
+                      <span className={styles.sizeVsBaseline}>{sizeVsBaseline}</span>
+                    ) : null}
                   </strong>
                   <span>
                     {bundleMeasurement.compression} · {copy.performance.noLayouts}

@@ -7,5 +7,11 @@
   "entry": "dist/index.js",
   "compression": "minify + Gzip",
   "scope": "初始入口，未加载布局",
-  "command": "npm run build && npm run size"
+  "command": "npm run build && npm run size",
+  "baseline": {
+    "name": "G6",
+    "version": "5.1.1",
+    "gzippedBytes": 399800,
+    "source": "Bundlephobia"
+  }
 }

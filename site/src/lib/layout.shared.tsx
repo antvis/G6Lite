@@ -1,7 +1,9 @@
 import { AntVLogo } from '@/components/antv-logo';
+import { LanguageToggle } from '@/components/language-toggle';
 import { localizedPath, type Locale } from '@/lib/i18n';
 import { siteConfig } from '@/lib/site-config';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import { LanguageSelectText } from 'fumadocs-ui/layouts/shared/slots/language-select';
 
 export function baseOptions(locale: Locale): BaseLayoutProps {
   const text =
@@ -37,6 +39,12 @@ export function baseOptions(locale: Locale): BaseLayoutProps {
     ],
     searchToggle: { enabled: false },
     i18n: true,
+    slots: {
+      languageSelect: {
+        root: LanguageToggle,
+        text: LanguageSelectText,
+      },
+    },
     githubUrl: siteConfig.repository,
   };
 }

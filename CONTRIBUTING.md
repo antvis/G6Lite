@@ -47,24 +47,21 @@ cd G6Lite
 # 2. Install dependencies
 npm install
 
-# 3. Run the playground (dev server)
+# 3. Run the docs site and examples (dev server)
 npm run dev
-
-# 4. Run the core CI checks before pushing
-npm run ci   # lint + typecheck + test + library build + size limit
 ```
 
 ### Useful scripts
 
 | Script | Purpose |
 | --- | --- |
-| `npm run dev` | Vite dev server for `playground/` |
+| `npm run dev` | Next.js dev server for the docs site and examples |
 | `npm run build` | Build the library (`tsc` → `dist/`) |
 | `npm run typecheck` | Type-check without emitting |
 | `npm run lint` | ESLint + Prettier checks; append `-- --fix` to fix |
 | `npm run test` | Vitest; append `-- --watch` or `-- --coverage` as needed |
-| `npm run ci` | Run the core library checks used by CI |
-| `npm run site` | Generate API docs and build the documentation site |
+| `npm run size` | Check the bundle size against the configured limits |
+| `npm --prefix site run build` | Build the docs site and examples into `site/out` |
 
 ## Workflow
 
@@ -73,7 +70,7 @@ npm run ci   # lint + typecheck + test + library build + size limit
    git checkout -b feat/my-feature   # or fix/..., docs/..., chore/...
    ```
 2. **Make your change** with tests where applicable.
-3. **Run `npm run ci`** locally and make sure it passes.
+3. **Run `npm run lint`, `npm run typecheck`, `npm test` and `npm run build`** locally and make sure they pass.
 4. **Commit** using the [Conventional Commits](#commit-convention) format.
 5. **Push** to your fork and open a **Pull Request** against `master`.
 6. **CI must be green** and at least one maintainer review is required before merge.
@@ -128,7 +125,7 @@ message.
 
 Before requesting review, please confirm:
 
-- [ ] `npm run ci` passes locally
+- [ ] `npm run lint`, `npm run typecheck`, `npm test` and `npm run build` pass locally
 - [ ] New code has tests (or you've explained why not)
 - [ ] Public API changes are documented in `docs/`
 - [ ] The PR description follows the template (context / approach / impact / testing / screenshots)

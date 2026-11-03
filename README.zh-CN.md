@@ -131,7 +131,7 @@ npm install
 npm run dev
 ```
 
-使用 `npm run ci` 执行项目验证流水线，使用 `npm run site` 构建文档站点。
+使用 `npm run lint`、`npm run typecheck`、`npm test`、`npm run build` 和 `npm run size` 验证改动，使用 `npm --prefix site run build` 构建文档站点。
 
 `npm run build` 会同时生成 ESM 产物、类型声明和 `dist/g6-lite.min.js`（含 source map）。
 

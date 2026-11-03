@@ -19,6 +19,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist/', 'node_modules/', 'playground/', '*.js'],
+    ignores: ['dist/', 'node_modules/', '*.js'],
   },
 );

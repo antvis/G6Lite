@@ -9,6 +9,8 @@ const eslintConfig = defineConfig([
     'build/**',
     'next-env.d.ts',
     '.source/**',
+    // Examples are plain library usage, not Next.js app code.
+    'demos/**',
   ]),
 ]);
 

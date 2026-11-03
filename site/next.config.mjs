@@ -22,6 +22,9 @@ const config = {
     root: repositoryRoot,
     resolveAlias: {
       './layoutWorker.js': '../src/layout/layoutWorker.ts',
+      // Examples live in site/demos and import the library by package name, so
+      // point that name at the TypeScript source instead of the built dist.
+      '@antv/g6-lite': '../src/index.ts',
     },
   },
 };

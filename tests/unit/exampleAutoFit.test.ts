@@ -1,0 +1,50 @@
+import { readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+import ts from 'typescript';
+import { describe, expect, it } from 'vitest';
+
+const repositoryRoot = path.resolve('.');
+const demosDirectory = path.join(repositoryRoot, 'site/demos');
+
+function hasAutoFit(options: ts.ObjectLiteralExpression): boolean {
+  return options.properties.some((property) => {
+    if (!ts.isPropertyAssignment(property)) return false;
+    const { name } = property;
+    return (ts.isIdentifier(name) || ts.isStringLiteral(name)) && name.text === 'autoFit';
+  });
+}
+
+describe('Example resize fitting policy', () => {
+  it('configures every demo Graph through autoFit', () => {
+    const demoFiles = readdirSync(demosDirectory).filter((file) => file.endsWith('.ts'));
+    const missing: string[] = [];
+    let graphCount = 0;
+
+    for (const file of demoFiles) {
+      const filePath = path.join(demosDirectory, file);
+      const source = readFileSync(filePath, 'utf8');
+      const sourceFile = ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true);
+
+      const visit = (node: ts.Node): void => {
+        if (
+          ts.isNewExpression(node) &&
+          ts.isIdentifier(node.expression) &&
+          node.expression.text === 'Graph'
+        ) {
+          graphCount++;
+          const options = node.arguments?.[0];
+          if (!options || !ts.isObjectLiteralExpression(options) || !hasAutoFit(options)) {
+            const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+            missing.push(`${file}:${line + 1}`);
+          }
+        }
+        ts.forEachChild(node, visit);
+      };
+
+      visit(sourceFile);
+    }
+
+    expect(graphCount).toBe(71);
+    expect(missing).toEqual([]);
+  });
+});

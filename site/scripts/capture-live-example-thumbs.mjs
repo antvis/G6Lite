@@ -266,7 +266,7 @@ function writeOutputs(captured, failed) {
     `/**\n * Crop windows for example thumbnails.\n *\n * Each image is a screenshot of the docs live preview, and the crop is the\n * graph content, so the directory thumbnail shows the same picture as the canvas.\n */\nconst exampleCrops = {\n${[entries, ...kept].filter(Boolean).join('\n')}\n} as const;\n\nexport default exampleCrops;\n`,
   );
 
-  const recordsPath = resolve(siteRoot, 'public/homepage/examples/crop-records.json');
+  const recordsPath = resolve(__dirname, 'crop-records.json');
   const records = JSON.parse(readFileSync(recordsPath, 'utf8'));
   for (const item of captured) {
     const key = featured[item.id];

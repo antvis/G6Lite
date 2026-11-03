@@ -1,0 +1,70 @@
+README.md
+  s_4498b88cd7e5fd::t_71dee317c38775 17,93,111-112,136
+.github/workflows/release.yml
+  s_4498b88cd7e5fd::t_71dee317c38775 1,4-6,10,13,20,22,28-31,33-34,36
+.github/workflows/deploy.yml
+  s_4498b88cd7e5fd::t_71dee317c38775 21
+scripts/check-examples.mjs
+  s_4498b88cd7e5fd::t_71dee317c38775 129
+scripts/check-site.mjs
+  s_4498b88cd7e5fd::t_71dee317c38775 294
+site/content/docs/en/faq.mdx
+  s_4498b88cd7e5fd::t_71dee317c38775 12
+site/content/docs/en/metrics/bundle-size.mdx
+  s_4498b88cd7e5fd::t_71dee317c38775 3,6-12,19
+site/content/docs/en/metrics/performance.mdx
+  s_4498b88cd7e5fd::t_71dee317c38775 3,6,10
+package.json
+  s_4498b88cd7e5fd::t_71dee317c38775 9-10,23-25,27-28,31-42,53-56,64,69-71
+playground/demos/catalog.json
+  s_4498b88cd7e5fd::t_71dee317c38775 221,244
+site/src/components/homepage/bundle-measurement.json
+  s_4498b88cd7e5fd::t_71dee317c38775 3-5,8,10
+site/content/docs/zh/faq.mdx
+  s_4498b88cd7e5fd::t_71dee317c38775 19
+site/src/components/homepage/bundle-measurement.md
+  s_4498b88cd7e5fd::t_71dee317c38775 3-4,8,11-13,17
+tsconfig.json
+  s_4498b88cd7e5fd::t_71dee317c38775 8
+playground/demos/index.ts
+  s_4498b88cd7e5fd::t_71dee317c38775 19
+site/content/docs/zh/metrics/bundle-size.mdx
+  s_4498b88cd7e5fd::t_71dee317c38775 3,6,11-13,22
+site/content/docs/zh/getting-started/quick-start.mdx
+  s_4498b88cd7e5fd::t_71dee317c38775 117
+site/content/docs/zh/metrics/performance-tuning.mdx
+  s_4498b88cd7e5fd::t_71dee317c38775 42,44
+site/content/docs/zh/metrics/performance.mdx
+  s_4498b88cd7e5fd::t_71dee317c38775 3,6,12,17-18,20,25-26
+vite.config.ts
+  s_4498b88cd7e5fd::t_71dee317c38775 23
+.github/workflows/build.yml
+  s_4498b88cd7e5fd::t_71dee317c38775 13-14,31-32,34-35,37,41
+playground/demos/README.md
+  s_4498b88cd7e5fd::t_71dee317c38775 28
+rollup.config.js
+  s_4498b88cd7e5fd::t_71dee317c38775 1-9,11-19,23-41,43-46,48,50-59
+  s_4498b88cd7e5fd::t_8bef8dbc9fb87c 20-22,42,49,61
+site/content/docs/en/getting-started/quick-start.mdx
+  s_4498b88cd7e5fd::t_71dee317c38775 117
+.github/workflows/preview.yml
+  s_4498b88cd7e5fd::t_71dee317c38775 18
+README.zh-CN.md
+  s_4498b88cd7e5fd::t_71dee317c38775 17,93,111-112,136
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "aa3b209bb7c54f310a570473aaef162e461beea4",
+  "prompts": {},
+  "sessions": {
+    "s_4498b88cd7e5fd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a19f85-a533-7041-bf0b-93c29d1b93c4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -13,5 +13,5 @@
     "isolatedModules": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "playground", "tests"]
+  "exclude": ["node_modules", "dist", "tests"]
 }

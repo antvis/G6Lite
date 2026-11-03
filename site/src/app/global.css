@@ -352,8 +352,20 @@ body:has(#nd-docs-layout.examples-route-layout) {
 
 .site-brand-product {
   color: var(--color-fd-foreground);
-  font-size: 1rem;
-  font-weight: 750;
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.site-brand-tag {
+  margin-left: 0.3rem;
+  padding: 0.05rem 0.3rem;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 999px;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.6rem;
+  font-weight: 600;
+  line-height: 1;
+  vertical-align: super;
 }
 
 .landing {
@@ -1302,24 +1314,11 @@ body:has(#nd-docs-layout.examples-route-layout) {
   background: #eff2fb;
 }
 
-.examples-center-card-crop {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(
-    calc(100% - var(--thumbnail-padding) * 2),
-    calc((var(--thumbnail-height) - var(--thumbnail-padding) * 2) * var(--crop-ratio))
-  );
-  aspect-ratio: var(--crop-ratio);
-  overflow: hidden;
-  transform: translate(-50%, -50%);
-  mix-blend-mode: multiply;
-}
-
-.examples-center-card-crop img {
-  position: absolute;
-  max-width: none;
+.examples-center-card-image img {
+  object-fit: contain;
+  padding: var(--thumbnail-padding);
   margin: 0;
+  mix-blend-mode: multiply;
 }
 
 .examples-center-card-body {
@@ -1584,16 +1583,9 @@ body:has(#nd-docs-layout.examples-route-layout) {
   isolation: isolate;
 }
 
-.example-directory-thumb-crop {
-  position: relative;
-  width: min(calc(100% - 4px), calc((2.25rem - 4px) * var(--crop-ratio)));
-  aspect-ratio: var(--crop-ratio);
-  overflow: hidden;
-}
-
 .example-directory-thumb img {
-  position: absolute;
-  max-width: none;
+  object-fit: contain;
+  padding: 2px;
   margin: 0 !important;
   border: 0;
   border-radius: 0;
@@ -1982,6 +1974,11 @@ body.example-workspace-resizing {
   color: var(--example-code-text);
 }
 
+.example-code-panel .example-utility-button.is-dirty {
+  border-color: color-mix(in srgb, var(--example-code-active) 42%, var(--example-code-border));
+  color: var(--example-code-text);
+}
+
 .example-code-content {
   min-height: 0;
   flex: 1;
@@ -2020,6 +2017,27 @@ body.example-workspace-resizing {
   color: inherit !important;
   padding: 0 !important;
   text-decoration: none !important;
+}
+
+/* CodeMirror fills the source tab and inherits the panel typography. */
+.example-code-content > .cm-theme-light,
+.example-code-content > .cm-theme-dark {
+  height: 100%;
+}
+
+.example-code-content .cm-editor {
+  height: 100%;
+  background: transparent;
+  font-size: var(--example-code-font);
+}
+
+.example-code-content .cm-editor.cm-focused {
+  outline: none;
+}
+
+.example-code-content .cm-scroller {
+  font-family: var(--font-mono);
+  line-height: 1.615;
 }
 
 .example-panel-message {
@@ -2277,7 +2295,7 @@ body.example-workspace-resizing {
 }
 
 /* Tooltip overlay (the library ships an unstyled div; apps provide the look).
-   Mirrors the playground tooltip styling. */
+   Mirrors the example tooltip styling. */
 .g6lite-tooltip {
   box-sizing: border-box;
   padding: 6px 10px;
@@ -2522,7 +2540,7 @@ html.dark .examples-center-card:hover .examples-center-card-image {
   background: #222b3c;
 }
 
-html.dark .examples-center-card-crop {
+html.dark .examples-center-card-image img {
   mix-blend-mode: normal;
 }
 

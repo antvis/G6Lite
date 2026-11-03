@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-import catalog from '../../../playground/demos/catalog.json';
+import catalog from '../../demos/catalog.json';
 import { localizedPath, type Locale } from '@/lib/i18n';
 import { withBasePath } from '@/lib/shared';
 

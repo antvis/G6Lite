@@ -19,15 +19,12 @@
     "src"
   ],
   "scripts": {
-    "dev": "vite playground",
+    "dev": "npm --prefix site run dev",
     "build": "rimraf dist && rollup -c",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src tests vite.config.ts vitest.config.ts",
+    "lint": "eslint src tests vitest.config.ts",
     "test": "vitest run",
-    "test:examples": "node tests/browser/examples.mjs",
-    "size": "limit-size",
-    "ci": "npm run lint && npm run typecheck && npm test && npm run build && npm run size",
-    "site": "vite build && node scripts/check-site.mjs && npm --prefix site run build && node scripts/copy-playground-to-site.mjs"
+    "size": "limit-size"
   },
   "limit-size": [
     {

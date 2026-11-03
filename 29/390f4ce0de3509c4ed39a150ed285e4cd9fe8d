@@ -1,0 +1,92 @@
+site/demos/relationship.ts
+  s_9febce7f6f3133::t_99381a8d4d92c9 75
+  s_9febce7f6f3133::t_adeeddc17056bb 92
+site/demos/edge-arrows.ts
+  s_9febce7f6f3133::t_0b406fcc94f2a1 43
+site/demos/queries-and-states.ts
+  s_9febce7f6f3133::t_b8b3f754d6f07b 113
+  s_9febce7f6f3133::t_7972e8ef6c7edd 49
+site/demos/mindmap.ts
+  s_9febce7f6f3133::t_c8cb961ca241ef 161
+  s_9febce7f6f3133::t_b3bdf19a888199 182
+site/demos/layout-worker-cancel.ts
+  s_9febce7f6f3133::t_2bf5dc35a9ee59 28,44
+site/demos/selection-behaviors.ts
+  s_9febce7f6f3133::t_b98ed68d02b9f8 27
+  s_9febce7f6f3133::t_018acde4575e4b 49
+site/demos/combo.ts
+  s_9febce7f6f3133::t_1674ecef55295f 335
+site/src/components/examples-center.tsx
+  s_5632d64fc1589d::t_594e9bd769fa6c 144-151
+  s_5632d64fc1589d::t_61c785c258c545 5
+site/demos/drag-edge.ts
+  s_9febce7f6f3133::t_3067eb03034ef5 25,51
+site/demos/parallel-edges.ts
+  s_9febce7f6f3133::t_730652e23dd087 85
+  s_9febce7f6f3133::t_f584b542304255 9
+site/demos/decoration-badges.ts
+  s_9febce7f6f3133::t_086e9331f94f45 9
+site/demos/tooltip.ts
+  s_9febce7f6f3133::t_26c2862cc916d8 60
+site/demos/radial-tree.ts
+  s_9febce7f6f3133::t_bf39aa98a68730 40
+site/demos/drag-node.ts
+  s_9febce7f6f3133::t_376fc946f96e5f 48
+site/src/components/example-detail-client.tsx
+  s_5632d64fc1589d::t_6e606eca03782f 66-74
+site/demos/org-chart.ts
+  s_9febce7f6f3133::t_d6b1faaa4642e3 86
+  s_9febce7f6f3133::t_52c96471b8386c 69
+site/demos/context-menu.ts
+  s_9febce7f6f3133::t_803c5d4c551e41 40,81
+site/demos/default-theme.ts
+  s_9febce7f6f3133::t_15300d982a0391 134,140
+site/demos/layouts.ts
+  s_9febce7f6f3133::t_5663e3e1e495ed 64
+site/demos/data-mutations.ts
+  s_9febce7f6f3133::t_04bbc609a9d31a 45,115
+  s_9febce7f6f3133::t_d2125c0d153237 123
+site/demos/viewport-controls.ts
+  s_9febce7f6f3133::t_594272a4d92cbd 28
+  s_9febce7f6f3133::t_1eb256c0ddb243 56,74
+site/src/app/global.css
+  s_5632d64fc1589d::t_054a1b8c2c8413 1317-1319,1321
+  s_5632d64fc1589d::t_423a72e66e7860 2543
+  s_5632d64fc1589d::t_da675011ee07da 1587-1588
+site/scripts/capture-demo-thumbs.mjs
+  s_5632d64fc1589d::t_070f43a54c0dc9 2-3,5,17-21,25,27,66-70,72,80-82
+  s_5632d64fc1589d::t_cbbeb87050739d 83
+site/demos/fishbone.ts
+  s_9febce7f6f3133::t_b4d7ce76d9a0f4 144
+  s_9febce7f6f3133::t_d033e6bb96d8bc 123
+site/demos/layout-gallery.ts
+  s_9febce7f6f3133::t_ccd835ba1c3b8a 27,42
+  s_9febce7f6f3133::t_826a50c137aae0 48
+site/demos/extension-system.ts
+  s_9febce7f6f3133::t_363a735f0f4d3b 157
+  s_9febce7f6f3133::t_3fbe126cfce198 264
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "29390f4ce0de3509c4ed39a150ed285e4cd9fe8d",
+  "prompts": {},
+  "sessions": {
+    "s_5632d64fc1589d": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "ce437c8a-7ad3-4096-9242-e309c596419e",
+        "model": "codefuse_official_channel/Kimi-K3:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    },
+    "s_9febce7f6f3133": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "31c492c5-4404-4fb2-a3b1-d2afac7d4e94",
+        "model": "codefuse_official_channel/Kimi-K3:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

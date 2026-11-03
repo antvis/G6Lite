@@ -1,0 +1,238 @@
+site/demos/tooltip.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-63
+site/content/docs/zh/guides/custom-node.mdx
+  s_4534bc5c3d78f4::t_b2c511182cf612 49
+site/content/docs/zh/guides/parallel-edges.mdx
+  s_4534bc5c3d78f4::t_b2c511182cf612 43-45
+site/demos/batch-node-positions.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-65
+site/content/docs/zh/guides/custom-behavior.mdx
+  s_4534bc5c3d78f4::t_b2c511182cf612 189
+site/demos/combo.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-343
+site/demos/datasets/wikipedia.json
+  s_4534bc5c3d78f4::t_b2c511182cf612 1
+site/demos/indented-tree.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-222
+site/demos/node-style.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-40
+site/demos/self-loop-labels.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-76
+site/next.config.mjs
+  s_4534bc5c3d78f4::t_b2c511182cf612 25-27
+site/scripts/capture-demo-thumbs.mjs
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-7,10-15,17-21,25,27,35,37-46,48,50-51,53-78,80-82,86
+  s_4534bc5c3d78f4::t_e3b81a81615469 83
+site/src/components/example-detail.tsx
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-2,4-5,7,9-13,15-16,18,21-23,25-35,38
+site/src/components/homepage/bundle-measurement.json
+  s_4534bc5c3d78f4::t_b2c511182cf612 10-16
+site/demos/polyline-routing.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-53
+site/tsconfig.json
+  s_4534bc5c3d78f4::t_b2c511182cf612 26-28
+site/demos/context-menu.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-87
+site/demos/drag-edge.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-54
+site/demos/edge-colors.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-40
+site/demos/layout-gallery.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-54
+site/demos/extension-system.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-267
+site/demos/drag-node.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-50
+site/demos/parallel-edges.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-88
+site/demos/queries-and-states.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-119
+site/content/docs/zh/guides/extensions.mdx
+  s_4534bc5c3d78f4::t_b2c511182cf612 271
+site/eslint.config.mjs
+  s_4534bc5c3d78f4::t_b2c511182cf612 12-13
+site/demos/mindmap.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-185
+site/demos/org-chart.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-89
+site/src/components/examples-center.tsx
+  s_4534bc5c3d78f4::t_b2c511182cf612 5,144-151
+site/demos/edge-hit-area.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-98
+site/src/components/homepage/content.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 35,189
+site/package.json
+  s_4534bc5c3d78f4::t_b2c511182cf612 11,14-15,23
+site/demos/edge-types.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-85
+site/src/components/homepage/homepage.module.css
+  s_4534bc5c3d78f4::t_b2c511182cf612 587-594
+site/src/components/homepage/README.md
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-15
+site/demos/default-theme.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-191
+site/demos/radial-tree.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-42
+package.json
+  s_4534bc5c3d78f4::t_b2c511182cf612 22,25,27
+site/demos/node-states.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-36
+site/demos/fit-incremental-nodes.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-67
+site/demos/decoration-badges.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-65
+site/demos/relationship.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-95
+site/demos/theme.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-68
+site/demos/breathing-node.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-75
+eslint.config.js
+  s_4534bc5c3d78f4::t_b2c511182cf612 22
+site/demos/hover.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-88
+site/demos/drag-node-threshold.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-45
+site/content/docs/zh/metrics/bundle-size.mdx
+  s_4534bc5c3d78f4::t_b2c511182cf612 3,6,8-13,15
+README.zh-CN.md
+  s_4534bc5c3d78f4::t_b2c511182cf612 134
+site/content/docs/en/metrics/bundle-size.mdx
+  s_4534bc5c3d78f4::t_b2c511182cf612 3,6,8-13,15
+site/content/docs/zh/guides/custom-label-renderer.mdx
+  s_4534bc5c3d78f4::t_b2c511182cf612 70
+site/demos/behaviors.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-48
+README.md
+  s_4534bc5c3d78f4::t_b2c511182cf612 134
+site/demos/edge-features.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-223
+site/demos/labels.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-116
+site/demos/layout-worker-cancel.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-68
+site/demos/large.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-46
+site/demos/real-dataset.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-50
+site/demos/search-focus.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-89
+.github/workflows/deploy.yml
+  s_4534bc5c3d78f4::t_b2c511182cf612 30-31
+site/demos/fishbone.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-147
+site/demos/event-log.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-55
+site/demos/datasets/raw/ai-papers-nodes.csv
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-8799
+site/content/docs/en/guides/custom-behavior.mdx
+  s_4534bc5c3d78f4::t_b2c511182cf612 183
+site/demos/datasets/raw/wikipedia.sigma.json
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-26304
+site/demos/shapes.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-111
+site/demos/label-rendering-options.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-130
+site/demos/neighbor-highlight.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-36
+CONTRIBUTING.md
+  s_4534bc5c3d78f4::t_b2c511182cf612 50,58,63-64,73,128
+.github/workflows/preview.yml
+  s_4534bc5c3d78f4::t_b2c511182cf612 27-28
+site/demos/edge-states.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-72
+site/content/docs/zh/faq.mdx
+  s_4534bc5c3d78f4::t_b2c511182cf612 50
+site/demos/incremental-nodes.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-61
+site/demos/large-labeled.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-62
+site/demos/node-border.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-80
+site/README.md
+  s_4534bc5c3d78f4::t_b2c511182cf612 12,30,33
+site/src/components/example-detail-client.tsx
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-962
+site/demos/datasets/raw/ai-papers-edges.csv
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-71078
+site/demos/dependency-graph.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-49
+site/demos/layouts.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-71
+site/demos/set-data.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-151
+site/src/app/global.css
+  s_4534bc5c3d78f4::t_b2c511182cf612 355-368,1317-1319,1321,1587-1588,1977-1981,2022-2042,2298,2543
+site/demos/zoom-options.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-60
+site/src/components/homepage/homepage.tsx
+  s_4534bc5c3d78f4::t_b2c511182cf612 34-45,106-108
+site/src/lib/layout.shared.tsx
+  s_4534bc5c3d78f4::t_b2c511182cf612 27-29
+site/demos/viewport-controls.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-80
+site/demos/catalog.json
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-1456
+site/demos/datasets/README.md
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-40
+site/src/lib/example-runtime.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 15-65
+tests/unit/exampleAutoFit.test.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-50
+site/demos/edge-arrows.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-46
+site/demos/flowchart.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-111
+site/src/components/example-code-editor.tsx
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-46
+site/demos/custom-behavior.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-82
+site/src/components/examples-grid.tsx
+  s_4534bc5c3d78f4::t_b2c511182cf612 3
+site/demos/custom-layout.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-57
+site/demos/g6-v5-compat.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-137
+site/demos/README.md
+  s_4534bc5c3d78f4::t_b2c511182cf612 1,3,7-8,11,15,17,31,33-35
+site/demos/layout-worker.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-49
+site/demos/set-data-fit-options.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-82
+site/src/lib/playground-runtime.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-114
+tsconfig.json
+  s_4534bc5c3d78f4::t_b2c511182cf612 16
+site/demos/brush-click-select.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-51
+site/demos/edge-loops.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-49
+site/demos/data-mutations.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-129
+site/demos/custom-label-renderer.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-90
+site/demos/selection-behaviors.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-55
+site/demos/basic.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-32
+site/demos/demo-panel.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-496
+site/demos/tooling.ts
+  s_4534bc5c3d78f4::t_b2c511182cf612 1-698
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e79372a7a09f4d02f9274de6eac841cb6a9b2bb4",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

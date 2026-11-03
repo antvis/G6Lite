@@ -46,4 +46,4 @@ Combo 已支持分组容器、嵌套、折叠和运行时归组，但这些能�
 
 ## 示例能在线运行吗？ [#示例能在线运行吗]
 
-官网示例链接到随静态站点一起部署的 Playground，并与 `playground/demos/catalog.json`、源码、截图和 Release profile 检查共用同一份案例清单。入口见 [示例](/docs/examples)。
+官网示例在文档站点内直接运行，并与 `site/demos/catalog.json`、示例源码和截图共用同一份案例清单。入口见 [示例](/docs/examples)。

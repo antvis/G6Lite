@@ -1,8 +1,101 @@
 1:"$Sreact.fragment"
-2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-4:I[92746,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetail"]
-5:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
-6:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"搜索并聚焦\",\"description\":\"按名称搜索节点，高亮匹配项并把视口移过去。\",\"url\":\"https://g6lite.antv.vision/docs/examples/search-focus\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/search-focus\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/search-focus/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"搜索并聚焦\",\"item\":\"https://g6lite.antv.vision/docs/examples/search-focus\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"search-focus","locale":"zh"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]],["$","$L5",null,{"children":["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"BNek_swuL5KGT4aZPTJnE"}
-7:null
+2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
+3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
+4:I[66110,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
+9:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+a:"$Sreact.suspense"
+5:Tb44,// Local presentation helpers in this repository are used only for the example controls.
+/**
+ * Demo: search nodes by name, highlight matches, and focus the viewport.
+ */
+import { Graph } from '@antv/g6-lite';
+import { mountCanvasControl } from './demo-panel.ts';
+
+const PEOPLE = [
+  'Alice',
+  'Bob',
+  'Carol',
+  'David',
+  'Emma',
+  'Frank',
+  'Grace',
+  'Helen',
+  'Ivan',
+  'Julia',
+  'Kevin',
+  'Laura',
+];
+
+export async function run(container: string | HTMLElement) {
+  const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+  host.style.position = 'relative';
+
+  const graph = new Graph({
+    autoFit: true,
+    container: host,
+    data: {
+      nodes: PEOPLE.map((name, index) => ({
+        id: name.toLowerCase(),
+        data: { label: name, group: index % 3 },
+      })),
+      edges: PEOPLE.slice(1).map((name, index) => ({
+        source: PEOPLE[index % 4].toLowerCase(),
+        target: name.toLowerCase(),
+      })),
+    },
+    node: {
+      style: {
+        size: 32,
+        fill: (node) => ['#5B8FF9', '#5AD8A6', '#F6BD16'][Number(node.data?.group ?? 0)],
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'bottom',
+      },
+    },
+    layout: { type: 'circular', radius: 180 },
+    behaviors: ['zoom-canvas', 'drag-canvas'],
+  });
+  await graph.render();
+
+  const box = document.createElement('label');
+  box.style.cssText =
+    'display:inline-flex;gap:8px;align-items:center;color:#64748b;font:500 12px/1 system-ui,sans-serif;';
+  const input = document.createElement('input');
+  input.type = 'search';
+  input.placeholder = '搜索节点，例如 al';
+  input.setAttribute('aria-label', '搜索节点');
+  input.style.cssText =
+    'width:180px;height:28px;padding:0 10px;border:0;border-radius:8px;background:rgba(255,255,255,.96);color:#334155;box-shadow:0 1px 2px rgba(15,23,42,.08);';
+  const status = document.createElement('span');
+  box.append(input, status);
+  mountCanvasControl(host, box);
+
+  let highlighted: string[] = [];
+  const search = () => {
+    for (const id of highlighted) graph.clearItemStates(id);
+    const query = input.value.trim().toLowerCase();
+    highlighted = query
+      ? graph
+          .getNodes()
+          .filter((node) => String(node.data?.label ?? node.id).toLowerCase().includes(query))
+          .map((node) => node.id)
+      : [];
+    for (const id of highlighted) graph.setItemState(id, 'highlight', true);
+    if (highlighted.length > 0) graph.focusItem(highlighted, 48);
+    status.textContent = query ? `${highlighted.length} 个匹配` : '输入名称片段';
+  };
+  input.addEventListener('input', search);
+  status.textContent = '输入名称片段';
+
+  return {
+    fitView: () => graph.fitView(),
+    destroy() {
+      graph.destroy();
+      host.querySelector(':scope > [data-canvas-controls]')?.remove();
+    },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"搜索并聚焦\",\"description\":\"按名称搜索节点，高亮匹配项并把视口移过去。\",\"url\":\"https://g6lite.antv.vision/docs/examples/search-focus\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/search-focus\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/search-focus/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"搜索并聚焦\",\"item\":\"https://g6lite.antv.vision/docs/examples/search-focus\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"search-focus","locale":"zh","initialSource":"$5"}]}]}]],["$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"psb9hsHLi3HtnD4sjEXQr"}
+6:["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}]
+7:["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]
+8:["$","$L9",null,{"children":["$","$a",null,{"name":"Next.MetadataOutlet","children":"$@b"}]}]
+b:null

@@ -1,8 +1,163 @@
 1:"$Sreact.fragment"
-2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-4:I[92746,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetail"]
-5:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
-6:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"全量替换数据\",\"description\":\"用 setData 替换整图数据，并在替换后切换布局。\",\"url\":\"https://g6lite.antv.vision/docs/examples/set-data\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/set-data\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/set-data/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"全量替换数据\",\"item\":\"https://g6lite.antv.vision/docs/examples/set-data\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"set-data","locale":"zh"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]],["$","$L5",null,{"children":["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"BNek_swuL5KGT4aZPTJnE"}
-7:null
+2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
+3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
+4:I[66110,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
+9:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+a:"$Sreact.suspense"
+5:Tfdf,// Local presentation helpers in this repository are used only for the example controls.
+/**
+ * Demo: setData + layout() 端到端验证
+ * 测试运行时整体数据替换和布局切换
+ */
+import { Graph } from '@antv/g6-lite';
+import { mountCanvasMenu } from './demo-panel.ts';
+
+const DATA_A = {
+  nodes: [
+    { id: 'a1' },
+    { id: 'a2' },
+    { id: 'a3' },
+    { id: 'a4' },
+    { id: 'a5' },
+  ],
+  edges: [
+    { source: 'a1', target: 'a2' },
+    { source: 'a1', target: 'a3' },
+    { source: 'a2', target: 'a4' },
+    { source: 'a3', target: 'a5' },
+    { source: 'a4', target: 'a5' },
+  ],
+};
+
+const DATA_B = {
+  nodes: [
+    { id: 'b1' },
+    { id: 'b2' },
+    { id: 'b3' },
+    { id: 'b4' },
+    { id: 'b5' },
+    { id: 'b6' },
+    { id: 'b7' },
+    { id: 'b8' },
+  ],
+  edges: [
+    { source: 'b1', target: 'b2' },
+    { source: 'b1', target: 'b3' },
+    { source: 'b2', target: 'b4' },
+    { source: 'b3', target: 'b5' },
+    { source: 'b4', target: 'b6' },
+    { source: 'b5', target: 'b7' },
+    { source: 'b6', target: 'b8' },
+    { source: 'b7', target: 'b8' },
+  ],
+};
+
+export async function run(container: string | HTMLElement) {
+  const el = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+
+  el.style.position = 'relative';
+
+  const graph = new Graph({
+    autoFit: true,
+    container: el,
+    data: DATA_A,
+    layout: { type: 'circular', radius: 120 },
+    behaviors: [
+      'zoom-canvas',
+      'drag-canvas',
+      'drag-node',
+      { type: 'click-select', multiple: true, trigger: 'shift' },
+      'highlight-node',
+      'highlight-edge',
+    ],
+    node: { style: { size: 20, fill: '#5B8FF9' } },
+    theme: 'light',
+  });
+  await graph.render();
+
+  const log = (msg: string) => console.log(`[setData demo] ${msg}`);
+
+  graph.on('datachange', (e: any) => log(`datachange: ${e.nodeCount} nodes, ${e.edgeCount} edges`));
+  graph.on('layout:start', () => log('layout:start'));
+  graph.on('layout:end', (e: any) => log(`layout:end: ${e.duration.toFixed(1)}ms`));
+
+  mountCanvasMenu(el, {
+    caption: '数据',
+    items: [
+      { value: 'a', label: 'A · 5 节点' },
+      { value: 'b', label: 'B · 8 节点' },
+    ],
+    value: 'a',
+    onSelect(value) {
+      const next = value === 'b' ? DATA_B : DATA_A;
+      log(`setData → DATA_${value.toUpperCase()}`);
+      void graph.setData(next).then(() => {
+        graph.fitView();
+        log(`done. nodeCount=${graph.getNodeCount()}`);
+      });
+    },
+  });
+
+  mountCanvasMenu(el, {
+    caption: '布局',
+    items: [
+      { value: 'circular', label: 'circular' },
+      { value: 'grid', label: 'grid' },
+      { value: 'force', label: 'force' },
+    ],
+    value: 'circular',
+    onSelect(value) {
+      const apply = async () => {
+        log(`setLayout(${value}) + layout()`);
+        if (value === 'grid') graph.setLayout({ type: 'grid' });
+        else if (value === 'force') graph.setLayout({ type: 'd3-force' });
+        else graph.setLayout({ type: 'circular', radius: 150 });
+        await graph.layout();
+        graph.fitView();
+        log(`${value} done`);
+      };
+      void apply();
+    },
+  });
+
+  mountCanvasMenu(el, {
+    caption: '操作',
+    action: true,
+    items: [
+      { value: 'hide', label: 'hideItem' },
+      { value: 'show', label: 'showItem' },
+      { value: 'focus', label: 'focusItem' },
+    ],
+    value: '',
+    onSelect(value) {
+      if (value === 'focus') {
+        const id = graph.hasNode('b8') ? 'b8' : 'a5';
+        log(`focusItem(${id})`);
+        graph.focusItem(id);
+        return;
+      }
+      const id = graph.hasNode('b1') ? 'b1' : 'a1';
+      if (value === 'hide') {
+        log(`hideItem(${id})`);
+        graph.hideItem(id);
+      } else {
+        log(`showItem(${id})`);
+        graph.showItem(id);
+      }
+      log(`states after ${value}: ${JSON.stringify(graph.getItemStates(id))}`);
+    },
+  });
+
+  return {
+    fitView: () => graph.fitView(),
+    destroy() {
+      graph.destroy();
+      el.querySelector(':scope > [data-canvas-controls]')?.remove();
+    },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"全量替换数据\",\"description\":\"用 setData 替换整图数据，并在替换后切换布局。\",\"url\":\"https://g6lite.antv.vision/docs/examples/set-data\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/set-data\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/set-data/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"全量替换数据\",\"item\":\"https://g6lite.antv.vision/docs/examples/set-data\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"set-data","locale":"zh","initialSource":"$5"}]}]}]],["$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"psb9hsHLi3HtnD4sjEXQr"}
+6:["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}]
+7:["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]
+8:["$","$L9",null,{"children":["$","$a",null,{"name":"Next.MetadataOutlet","children":"$@b"}]}]
+b:null

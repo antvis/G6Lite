@@ -41,8 +41,8 @@ const graph = new Graph({
 
 ## 示例入口 [#示例入口]
 
-* `playground/demos/parallel-edges.ts`
-* `playground/demos/edge-loops.ts`
-* `playground/demos/edge-arrows.ts`
+* `site/demos/parallel-edges.ts`
+* `site/demos/edge-loops.ts`
+* `site/demos/edge-arrows.ts`
 
 见 [示例总览](/docs/examples)。

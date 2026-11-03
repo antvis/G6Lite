@@ -87,7 +87,7 @@
 - 技术指标
   - [性能指标](/docs/metrics/performance): G6Lite 的性能指标口径、环境记录与结果使用边界
   - [性能调优](/docs/metrics/performance-tuning): 大图首屏、交互、标签、状态与布局的优化建议和度量方法
-  - [包体积](/docs/metrics/bundle-size): G6Lite 的 limit-size 测量口径、gzip 预算与复现方法
+  - [包体积](/docs/metrics/bundle-size): G6Lite 与主流图表、图可视化库的包体积对比
 - 兼容性
   - [兼容性总览](/docs/compatibility): 浏览器、运行环境、公开 API 稳定性与 G6 v5 迁移边界
   - [浏览器与运行环境](/docs/compatibility/browser): G6Lite 的 WebGL 支持矩阵、最低浏览器版本与已知问题
@@ -186,7 +186,7 @@
 - Technical metrics
   - [Performance metrics](/en/docs/metrics/performance): Measurement boundaries and rules for keeping G6Lite performance comparisons reproducible
   - [Performance tuning](/en/docs/metrics/performance-tuning): Measure and optimize first render, layout, updates, labels, and viewport interaction
-  - [Bundle size](/en/docs/metrics/bundle-size): Reproduce the limit-size measurement and enforce the gzip budgets
+  - [Bundle size](/en/docs/metrics/bundle-size): Bundle size comparison between G6Lite and mainstream charting and graph visualization libraries
 - Compatibility
   - [Compatibility overview](/en/docs/compatibility): Browser, runtime, public API stability, and G6 v5 migration boundaries
   - [Browsers and runtime environment](/en/docs/compatibility/browser): WebGL, ESM, browser support, SSR boundaries, and known runtime constraints

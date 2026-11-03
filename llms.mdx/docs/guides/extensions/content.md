@@ -269,4 +269,4 @@ type NodeBadgeItem =
 * Edge Extension 复用内置 WebGL 边基型，保留批处理、拾取和箭头能力。
 * Label 与 Decoration 只负责内容，定位、旋转、碰撞和刷新由 G6Lite 管理。
 
-完整可运行代码见 `playground/demos/extension-system.ts`。
+完整可运行代码见 `site/demos/extension-system.ts`。

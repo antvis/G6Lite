@@ -47,7 +47,7 @@ const graph = new Graph({
 具体可参考：
 
 * `src/extensions/node.ts`
-* `playground/demos/breathing-node.ts`
+* `site/demos/breathing-node.ts`
 
 <Callout type="warn" title="注意事项">
   - 自定义节点应避免破坏 WebGL 批量渲染优势。

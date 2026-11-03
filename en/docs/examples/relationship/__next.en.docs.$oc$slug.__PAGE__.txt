@@ -1,8 +1,107 @@
 1:"$Sreact.fragment"
-3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-4:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-5:I[92746,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetail"]
-6:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
-7:"$Sreact.suspense"
-2:T407,{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Character relationship network","description":"Explore character connections with force layout and relationship labels","url":"https://g6lite.antv.vision/en/docs/examples/relationship","mainEntityOfPage":"https://g6lite.antv.vision/en/docs/examples/relationship","image":"https://g6lite.antv.vision/en/og/docs/examples/relationship/image.png","inLanguage":"en","author":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"publisher":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"isPartOf":{"@id":"https://g6lite.antv.vision/#website"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://g6lite.antv.vision/en"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://g6lite.antv.vision/en/docs"},{"@type":"ListItem","position":3,"name":"Character relationship network","item":"https://g6lite.antv.vision/en/docs/examples/relationship"}]}]}0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],["$","$L3",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L4",null,{"className":"examples-docs-body","children":["$","$L5",null,{"id":"relationship","locale":"en"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"BNek_swuL5KGT4aZPTJnE"}
-8:null
+3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
+4:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
+5:I[66110,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
+a:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+b:"$Sreact.suspense"
+2:T407,{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Character relationship network","description":"Explore character connections with force layout and relationship labels","url":"https://g6lite.antv.vision/en/docs/examples/relationship","mainEntityOfPage":"https://g6lite.antv.vision/en/docs/examples/relationship","image":"https://g6lite.antv.vision/en/og/docs/examples/relationship/image.png","inLanguage":"en","author":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"publisher":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"isPartOf":{"@id":"https://g6lite.antv.vision/#website"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://g6lite.antv.vision/en"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://g6lite.antv.vision/en/docs"},{"@type":"ListItem","position":3,"name":"Character relationship network","item":"https://g6lite.antv.vision/en/docs/examples/relationship"}]}]}6:Tca0,// Local presentation helpers in this repository provide example label overlays.
+/**
+ * Demo: 人物关系网络图 — 哈利波特角色关系 (force 布局 + 边标签)
+ */
+import { Graph } from '@antv/g6-lite';
+import { attachLabelsCanvas, attachEdgeLabelsCanvas, type GraphInstanceWithTools } from './tooling.ts';
+
+const COLORS: Record<string, string> = {
+  gryffindor: '#5B8FF9',
+  friend: '#F6BD16',
+  enemy: '#30BF78',
+  mentor: '#E86452',
+};
+
+const data = {
+  nodes: [
+    { id: 'harry', name: '哈利·波特', data: { house: 'gryffindor' } },
+    { id: 'ron', name: '罗恩·韦斯莱', data: { house: 'friend' } },
+    { id: 'hermione', name: '赫敏·格兰杰', data: { house: 'mentor' } },
+    { id: 'voldemort', name: '伏地魔', data: { house: 'enemy' } },
+    { id: 'dumbledore', name: '邓布利多', data: { house: 'mentor' } },
+    { id: 'snape', name: '斯内普', data: { house: 'friend' } },
+    { id: 'draco', name: '德拉科', data: { house: 'enemy' } },
+    { id: 'sirius', name: '小天狼星', data: { house: 'friend' } },
+  ],
+  edges: [
+    { source: 'ron', target: 'harry', data: { label: '朋友' } },
+    { source: 'hermione', target: 'harry', data: { label: '朋友' } },
+    { source: 'harry', target: 'voldemort', data: { label: '试图杀死' } },
+    { source: 'dumbledore', target: 'harry', data: { label: '导师' } },
+    { source: 'snape', target: 'harry', data: { label: '保护' } },
+    { source: 'draco', target: 'harry', data: { label: '敌对' } },
+    { source: 'sirius', target: 'harry', data: { label: '教父' } },
+    { source: 'ron', target: 'hermione', data: { label: '朋友' } },
+    { source: 'snape', target: 'voldemort', data: { label: '暗中效忠' } },
+    { source: 'dumbledore', target: 'snape', data: { label: '信任' } },
+  ],
+};
+
+export async function run(container: string | HTMLElement) {
+  const wrapper = typeof container === 'string' ? document.querySelector(container)! as HTMLElement : container;
+  wrapper.style.position = 'relative';
+
+  const graph = new Graph({
+    autoFit: true,
+    container: wrapper,
+    data,
+    node: {
+      type: 'circle',
+      style: {
+        fill: (n) => COLORS[n.data?.house as string] ?? '#5B8FF9',
+        stroke: '#fff',
+        strokeWidth: 2,
+      },
+    },
+    edge: {
+      type: 'line',
+      style: {
+        stroke: '#bbb',
+        lineWidth: 1.5,
+        endArrow: true,
+      },
+    },
+    layout: {
+      type: 'd3-force',
+      linkDistance: 180,
+      nodeStrength: -600,
+      collideRadius: 60,
+      forceSimulation: null,
+    },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node'],
+    theme: 'light',
+  });
+
+  await graph.render();
+  graph.fitView({ padding: 64 });
+
+  const g = graph as unknown as GraphInstanceWithTools;
+  const cleanupNodeLabels = attachLabelsCanvas(wrapper, g, {
+    nodeLabel: (n) => n.name ?? n.id,
+    position: 'below',
+    fontSize: 11,
+    color: '#333',
+  });
+  const cleanupEdgeLabels = attachEdgeLabelsCanvas(wrapper, g, {
+    fontSize: 9,
+    color: '#555',
+    rotated: true,
+    showBg: false,
+  });
+
+  return {
+    fitView: () => graph.fitView({ padding: 64 }),
+    destroy: () => { cleanupNodeLabels(); cleanupEdgeLabels(); graph.destroy(); },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],["$","$L3",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L4",null,{"className":"examples-docs-body","children":["$","$L5",null,{"id":"relationship","locale":"en","initialSource":"$6"}]}]}]],["$L7","$L8"],"$L9"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"psb9hsHLi3HtnD4sjEXQr"}
+7:["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}]
+8:["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]
+9:["$","$La",null,{"children":["$","$b",null,{"name":"Next.MetadataOutlet","children":"$@c"}]}]
+c:null

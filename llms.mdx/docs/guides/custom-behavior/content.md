@@ -187,4 +187,4 @@ Behavior 自己创建的 `window` / `document` 监听、timer、Observer 或异�
 
 需要底层手势 session、相机写操作、节点位置写入、通用 overlay root 等当前未公开能力时，应先扩展公共契约，而不是通过类型断言绕过边界。
 
-完整运行示例见 `playground/demos/extension-system.ts`。
+完整运行示例见 `site/demos/extension-system.ts`。

@@ -1,8 +1,128 @@
 1:"$Sreact.fragment"
-2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-4:I[92746,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetail"]
-5:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
-6:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"标签位置与图标\",\"description\":\"展示节点标签、边标签、图标，并在运行时切换位置。\",\"url\":\"https://g6lite.antv.vision/docs/examples/labels\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/labels\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/labels/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"标签位置与图标\",\"item\":\"https://g6lite.antv.vision/docs/examples/labels\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"labels","locale":"zh"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]],["$","$L5",null,{"children":["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"BNek_swuL5KGT4aZPTJnE"}
-7:null
+2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
+3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
+4:I[66110,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
+9:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+a:"$Sreact.suspense"
+5:Tf4f,// Local presentation helpers in this repository are used only for the example controls.
+/**
+ * Demo: 节点标签 / 边标签 / 节点图标
+ */
+import { Graph, type GraphEdge, type GraphNode, type LabelPlacement } from '@antv/g6-lite';
+import { mountCanvasMenu } from './demo-panel.ts';
+
+const DATA = {
+  nodes: [
+    { id: 'server', data: { name: 'API Server', type: 'server' } },
+    { id: 'db', data: { name: 'Database', type: 'database' } },
+    { id: 'cache', data: { name: 'Redis Cache', type: 'cache' } },
+    { id: 'queue', data: { name: 'Message Queue', type: 'queue' } },
+    { id: 'worker', data: { name: 'Worker', type: 'worker' } },
+    { id: 'gateway', data: { name: 'API Gateway', type: 'gateway' } },
+    { id: 'client', data: { name: 'Client App', type: 'client' } },
+    { id: 'monitor', data: { name: 'Monitor', type: 'monitor' } },
+  ],
+  edges: [
+    { source: 'client', target: 'gateway', data: { label: 'HTTPS' } },
+    { source: 'gateway', target: 'server', data: { label: 'gRPC' } },
+    { source: 'server', target: 'db', data: { label: 'SQL' } },
+    { source: 'server', target: 'cache', data: { label: 'TCP' } },
+    { source: 'server', target: 'queue', data: { label: 'AMQP' } },
+    { source: 'queue', target: 'worker', data: { label: 'consume' } },
+    { source: 'worker', target: 'db', data: { label: 'write' } },
+    { source: 'monitor', target: 'server', data: { label: 'metrics' } },
+    { source: 'monitor', target: 'gateway', data: { label: 'health' } },
+  ],
+};
+
+export async function run(container: string | HTMLElement) {
+  const el = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+
+  el.style.position = 'relative';
+
+  const graph = new Graph({
+    autoFit: true,
+    container: el,
+    data: DATA,
+    layout: { type: 'circular', radius: 180 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+    node: {
+      style: {
+        size: 20,
+        fill: '#5B8FF9',
+        label: (n) => (n.data?.name as string | undefined) ?? n.id,
+        labelPlacement: 'bottom',
+        labelFontSize: 12,
+        labelColor: '#333',
+      },
+    },
+    edge: {
+      style: {
+        label: (s, t, e) => (e.data?.label as string) ?? '',
+        labelFontSize: 10,
+        labelColor: '#666',
+        labelAutoRotate: true,
+      },
+    },
+    theme: 'light',
+  });
+  await graph.render();
+
+  const placements: LabelPlacement[] = ['bottom', 'center', 'top', 'right'];
+  mountCanvasMenu(el, {
+    caption: '标签',
+    items: placements.map((placement) => ({ value: placement, label: placement })),
+    value: 'bottom',
+    onSelect(value) {
+      graph.updateOptions({ node: { style: { labelPlacement: value as LabelPlacement } } });
+    },
+  });
+
+  let edgeLabelsVisible = true;
+  mountCanvasMenu(el, {
+    caption: '操作',
+    action: true,
+    items: [
+      { value: 'edge-labels', label: '切换边标签' },
+      { value: 'circular', label: 'circular' },
+      { value: 'force', label: 'force' },
+    ],
+    value: '',
+    onSelect(value) {
+      if (value === 'edge-labels') {
+        edgeLabelsVisible = !edgeLabelsVisible;
+        graph.updateOptions({
+          edge: {
+            style: {
+              label: edgeLabelsVisible
+                ? ((_source: GraphNode, _target: GraphNode, edge: GraphEdge) =>
+                    (edge.data?.label as string | undefined) ?? '')
+                : false,
+            },
+          },
+        });
+        return;
+      }
+      const applyLayout = async () => {
+        if (value === 'circular') graph.setLayout({ type: 'circular', radius: 180 });
+        else graph.setLayout({ type: 'd3-force' });
+        await graph.layout();
+        graph.fitView();
+      };
+      void applyLayout();
+    },
+  });
+
+  return {
+    fitView: () => graph.fitView(),
+    destroy() {
+      graph.destroy();
+      el.querySelector(':scope > [data-canvas-controls]')?.remove();
+    },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"标签位置与图标\",\"description\":\"展示节点标签、边标签、图标，并在运行时切换位置。\",\"url\":\"https://g6lite.antv.vision/docs/examples/labels\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/labels\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/labels/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"标签位置与图标\",\"item\":\"https://g6lite.antv.vision/docs/examples/labels\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"labels","locale":"zh","initialSource":"$5"}]}]}]],["$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"psb9hsHLi3HtnD4sjEXQr"}
+6:["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}]
+7:["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]
+8:["$","$L9",null,{"children":["$","$a",null,{"name":"Next.MetadataOutlet","children":"$@b"}]}]
+b:null

@@ -2,15 +2,15 @@
 2:I[36064,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"default"]
 3:I[81497,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"default"]
 4:I[36916,["/_next/static/chunks/19er7pl3gsmj_.js"],"Provider"]
-5:I[63789,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js"],"HomeLayout"]
-6:I[52246,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js"],"DocsRouteLayout"]
+5:I[63789,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js"],"HomeLayout"]
+6:I[52246,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js"],"DocsRouteLayout"]
 c:I[9986,[],"default",1]
-:HL["/_next/static/chunks/0i4ovwonoh_qv.css","style"]
-:HL["/_next/static/chunks/2p182-koaks7r.css","style"]
+:HL["/_next/static/chunks/3ffgrujo3oq_t.css","style"]
+:HL["/_next/static/chunks/360xeb00vf-yy.css","style"]
 :HL["/_next/static/chunks/2a-v4sjb0akl4.css","style"]
 :HL["/_next/static/media/heading_medium.p.3dgfxhplwx_bf.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/icon.svg","image"]
-0:{"P":null,"c":["","en","docs","examples","combo"],"q":"","i":false,"f":[[["",{"children":["en",{"children":["docs",{"children":[["slug","examples/combo","oc",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16]}],[["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/0i4ovwonoh_qv.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","link","1",{"rel":"stylesheet","href":"/_next/static/chunks/2p182-koaks7r.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/_next/static/chunks/19er7pl3gsmj_.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"headingfont_ef2ca4d9-module__HhpmZG__variable","suppressHydrationWarning":true,"children":[["$","head",null,{"children":null}],["$","body",null,{"className":"flex flex-col min-h-screen","children":["$","$L4",null,{"children":["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]}]}]]}]]}],{"children":[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/2a-v4sjb0akl4.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/_next/static/chunks/2-sa327wfgmkw.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/_next/static/chunks/2p057ktwm881o.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/_next/static/chunks/2s67_wufgmhmw.js","async":true,"nonce":"$undefined"}],["$","script","script-3",{"src":"/_next/static/chunks/0apz0ye3l27ab.js","async":true,"nonce":"$undefined"}],["$","script","script-4",{"src":"/_next/static/chunks/0rxxxf9va6vrr.js","async":true,"nonce":"$undefined"}]],["$","$L5",null,{"nav":{"url":"/en","title":["$","span",null,{"className":"site-brand","children":[["$","span",null,{"className":"antv-logo site-brand-logo","aria-label":"AntV","children":[["$","span",null,{"className":"antv-logo-mark","aria-hidden":true,"children":["$","img",null,{"src":"/icon.svg","alt":"","width":"32","height":"28"}]}],["$","span",null,{"className":"antv-logo-text","children":"AntV"}]]}],["$","span",null,{"className":"site-brand-divider"}],["$","span",null,{"className":"site-brand-product","children":"G6Lite"}]]}]},"links":[{"text":"Docs","url":"/en/docs"},{"text":"Examples","url":"/en/docs/examples"},{"text":"AI","url":"/en/ai"}],"searchToggle":{"enabled":false},"i18n":true,"githubUrl":"https://github.com/antvis/G6Lite","children":["$","$L6",null,{"locale":"en","tree":{"type":"root","$ref":{"folder":"","meta":"meta.json"},"$id":"docs-navigation-root-en","name":"Documentation","description":"$undefined","children":[{"type":"folder","$id":"docs-navigation-getting-started","name":"Quick start","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:index.mdx","type":"page","name":"Overview","description":"G6Lite documentation for getting started, configuration, API, examples, metrics, and compatibility","icon":"$undefined","url":"/en/docs","$ref":"index.mdx"},{"$id":"en:getting-started/quick-start.mdx","type":"page","name":"Quick start","description":"Install G6Lite and create your first interactive graph","icon":"$undefined","url":"/en/docs/getting-started/quick-start","$ref":"getting-started/quick-start.mdx"},{"$id":"en:getting-started/react.mdx","type":"page","name":"Use with React and Vue","description":"Use G6Lite in React and Vue 3","icon":"$undefined","url":"/en/docs/getting-started/react","$ref":"getting-started/react.mdx"}]},{"type":"folder","$id":"docs-navigation-concepts","name":"Core concepts","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:concepts/overview.mdx","type":"page","name":"What is G6Lite?","description":"Positioning, suitable workloads, and the relationship between G6Lite and G6 v5","icon":"$undefined","url":"/en/docs/concepts/overview","$ref":"concepts/overview.mdx"},{"$id":"en:concepts/data-model.mdx","type":"page","name":"Graph data model","description":"Nodes, edges, optional groups, and the relationship between data and appearance","icon":"$undefined","url":"/en/docs/concepts/data-model","$ref":"concepts/data-model.mdx"},{"$id":"en:concepts/graph-lifecycle.mdx","type":"page","name":"Graph lifecycle","description":"The calling sequence for creation, first render, updates, and destruction","icon":"$undefined","url":"/en/docs/concepts/graph-lifecycle","$ref":"concepts/graph-lifecycle.mdx"},{"$id":"en:concepts/architecture.mdx","type":"page","name":"Technical architecture","description":"How the graph runtime, drawing layers, scheduling, layouts, and interactions work together","icon":"$undefined","url":"/en/docs/concepts/architecture","$ref":"concepts/architecture.mdx"}]},{"type":"folder","$id":"docs-navigation-guides","name":"Configuration","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:guides/data.mdx","type":"page","name":"Data","description":"Map application data to GraphData and choose full replacement or incremental updates","icon":"$undefined","url":"/en/docs/guides/data","$ref":"guides/data.mdx"},{"$id":"en:guides/node.mdx","type":"page","name":"Nodes","description":"Configure node types, functional styles, labels, and state styles","icon":"$undefined","url":"/en/docs/guides/node","$ref":"guides/node.mdx"},{"$id":"en:guides/edge.mdx","type":"page","name":"Edges","description":"Configure line, arc, curve, polyline, arrows, labels, and state styles","icon":"$undefined","url":"/en/docs/guides/edge","$ref":"guides/edge.mdx"},{"$id":"en:guides/label.mdx","type":"page","name":"Labels and icons","description":"Configure node labels, edge labels, icons, placement, rotation, and collision behavior","icon":"$undefined","url":"/en/docs/guides/label","$ref":"guides/label.mdx"},{"$id":"en:guides/combo.mdx","type":"page","name":"Combos","description":"Group nodes with nested, collapsible, draggable combo containers","icon":"$undefined","url":"/en/docs/guides/combo","$ref":"guides/combo.mdx"},{"$id":"en:guides/theme.mdx","type":"page","name":"Themes","description":"Use light and dark presets or override G6Lite theme tokens","icon":"$undefined","url":"/en/docs/guides/theme","$ref":"guides/theme.mdx"},{"$id":"en:guides/layout.mdx","type":"page","name":"Layout configuration","description":"Choose built-in layouts, configure workers, and rerun layout at runtime","icon":"$undefined","url":"/en/docs/guides/layout","$ref":"guides/layout.mdx"},{"$id":"en:guides/interactions.mdx","type":"page","name":"Interaction configuration","description":"Combine viewport, element, selection, highlight, and tooltip behaviors","icon":"$undefined","url":"/en/docs/guides/interactions","$ref":"guides/interactions.mdx"},{"$id":"en:guides/custom-behavior.mdx","type":"page","name":"Custom Behavior","description":"Build reusable interactions with typed options, GraphEventMap, and extensionFactory","icon":"$undefined","url":"/en/docs/guides/custom-behavior","$ref":"guides/custom-behavior.mdx"},{"$id":"en:guides/events.mdx","type":"page","name":"Events","description":"Listen to public events with GraphEventMap and graph.on, graph.off, and graph.once","icon":"$undefined","url":"/en/docs/guides/events","$ref":"guides/events.mdx"},{"$id":"en:guides/tooltip.mdx","type":"page","name":"Tooltip configuration","description":"Show node and edge information with the built-in tooltip behavior","icon":"$undefined","url":"/en/docs/guides/tooltip","$ref":"guides/tooltip.mdx"},{"$id":"en:guides/parallel-edges.mdx","type":"page","name":"Parallel and self-loop edges","description":"Separate multiple edges that share endpoints and render self-loops clearly","icon":"$undefined","url":"/en/docs/guides/parallel-edges","$ref":"guides/parallel-edges.mdx"},{"$id":"en:guides/extensions.mdx","type":"page","name":"Extension system","description":"Extend nodes, edges, labels, layouts, behaviors, transforms, decorations, and plugins","icon":"$undefined","url":"/en/docs/guides/extensions","$ref":"guides/extensions.mdx"},{"$id":"en:guides/custom-node.mdx","type":"page","name":"Custom nodes","description":"Register functional NodeExtension implementations through the public package API","icon":"$undefined","url":"/en/docs/guides/custom-node","$ref":"guides/custom-node.mdx"},{"$id":"en:guides/custom-label-renderer.mdx","type":"page","name":"Custom label renderers","description":"Customize label measurement and drawing while reusing G6Lite placement and scheduling","icon":"$undefined","url":"/en/docs/guides/custom-label-renderer","$ref":"guides/custom-label-renderer.mdx"}]},{"type":"folder","$id":"docs-navigation-api","name":"API reference","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:api/index.mdx","type":"page","name":"Usable APIs","description":"Package-root functions, classes, and types application code can call","icon":"$undefined","url":"/en/docs/api","$ref":"api/index.mdx"},{"$id":"en:api/graph.mdx","type":"page","name":"Graph","description":"Create a graph and call its data, state, viewport, layout, and event methods","icon":"$undefined","url":"/en/docs/api/graph","$ref":"api/graph.mdx"},{"$id":"en:api/options.mdx","type":"page","name":"Options","description":"Data, node, edge, layout, interaction, label, and theme fields accepted by new Graph()","icon":"$undefined","url":"/en/docs/api/options","$ref":"api/options.mdx"},{"$id":"en:api/extensions.mdx","type":"page","name":"Extensions","description":"register, extensionFactory, runLayout, and the context an extension can call","icon":"$undefined","url":"/en/docs/api/extensions","$ref":"api/extensions.mdx"}]},{"type":"folder","$id":"docs-navigation-metrics","name":"Technical metrics","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:metrics/performance.mdx","type":"page","name":"Performance metrics","description":"Measurement boundaries and rules for keeping G6Lite performance comparisons reproducible","icon":"$undefined","url":"/en/docs/metrics/performance","$ref":"metrics/performance.mdx"},{"$id":"en:metrics/performance-tuning.mdx","type":"page","name":"Performance tuning","description":"Measure and optimize first render, layout, updates, labels, and viewport interaction","icon":"$undefined","url":"/en/docs/metrics/performance-tuning","$ref":"metrics/performance-tuning.mdx"},{"$id":"en:metrics/bundle-size.mdx","type":"page","name":"Bundle size","description":"Reproduce the limit-size measurement and enforce the gzip budgets","icon":"$undefined","url":"/en/docs/metrics/bundle-size","$ref":"metrics/bundle-size.mdx"}]},{"type":"folder","$id":"docs-navigation-compatibility","name":"Compatibility","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:compatibility/index.mdx","type":"page","name":"Compatibility overview","description":"Browser, runtime, public API stability, and G6 v5 migration boundaries","icon":"$undefined","url":"/en/docs/compatibility","$ref":"compatibility/index.mdx"},{"$id":"en:compatibility/browser.mdx","type":"page","name":"Browsers and runtime environment","description":"WebGL, ESM, browser support, SSR boundaries, and known runtime constraints","icon":"$undefined","url":"/en/docs/compatibility/browser","$ref":"compatibility/browser.mdx"},{"$id":"en:compatibility/api-stability.mdx","type":"page","name":"API stability and release boundary","description":"Public package entry points, deprecated compatibility APIs, and experimental capabilities","icon":"$undefined","url":"/en/docs/compatibility/api-stability","$ref":"compatibility/api-stability.mdx"},{"$id":"en:compatibility/library-comparison.mdx","type":"page","name":"Graph library comparison","description":"Compare G6Lite, G6 v5, sigma.js, and Cytoscape.js across rendering, layout, elements, interaction, extensions, algorithms, and runtimes","icon":"$undefined","url":"/en/docs/compatibility/library-comparison","$ref":"compatibility/library-comparison.mdx"}]},{"$id":"en:compatibility/g6-v5-migration.mdx","type":"page","name":"Migrate from G6 v5","description":"Migrate configuration, data, Behaviors, events, Graph APIs, and extensions from G6 v5 to G6Lite","icon":"$undefined","url":"/en/docs/compatibility/g6-v5-migration","$ref":"compatibility/g6-v5-migration.mdx"}]},"children":"$L7"}]}]]}],{"children":["$L8",{"children":["$L9",{},null,false,null]},null,false,"$@a"]},null,false,null]},null,false,null]},null,false,"$@a"],"$Lb",false]],"m":"$undefined","G":["$c",[]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"BNek_swuL5KGT4aZPTJnE"}
+0:{"P":null,"c":["","en","docs","examples","combo"],"q":"","i":false,"f":[[["",{"children":["en",{"children":["docs",{"children":[["slug","examples/combo","oc",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16]}],[["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/3ffgrujo3oq_t.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","link","1",{"rel":"stylesheet","href":"/_next/static/chunks/360xeb00vf-yy.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/_next/static/chunks/19er7pl3gsmj_.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"headingfont_ef2ca4d9-module__HhpmZG__variable","suppressHydrationWarning":true,"children":[["$","head",null,{"children":null}],["$","body",null,{"className":"flex flex-col min-h-screen","children":["$","$L4",null,{"children":["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]}]}]]}]]}],{"children":[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/2a-v4sjb0akl4.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/_next/static/chunks/31sae3sl7c8ev.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/_next/static/chunks/2p057ktwm881o.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/_next/static/chunks/2s67_wufgmhmw.js","async":true,"nonce":"$undefined"}],["$","script","script-3",{"src":"/_next/static/chunks/0apz0ye3l27ab.js","async":true,"nonce":"$undefined"}],["$","script","script-4",{"src":"/_next/static/chunks/1vsibcmejsino.js","async":true,"nonce":"$undefined"}]],["$","$L5",null,{"nav":{"url":"/en","title":["$","span",null,{"className":"site-brand","children":[["$","span",null,{"className":"antv-logo site-brand-logo","aria-label":"AntV","children":[["$","span",null,{"className":"antv-logo-mark","aria-hidden":true,"children":["$","img",null,{"src":"/icon.svg","alt":"","width":"32","height":"28"}]}],["$","span",null,{"className":"antv-logo-text","children":"AntV"}]]}],["$","span",null,{"className":"site-brand-divider"}],["$","span",null,{"className":"site-brand-product","children":["G6",["$","sup",null,{"className":"site-brand-tag","children":"Lite"}]]}]]}]},"links":[{"text":"Docs","url":"/en/docs"},{"text":"Examples","url":"/en/docs/examples"},{"text":"AI","url":"/en/ai"}],"searchToggle":{"enabled":false},"i18n":true,"githubUrl":"https://github.com/antvis/G6Lite","children":["$","$L6",null,{"locale":"en","tree":{"type":"root","$ref":{"folder":"","meta":"meta.json"},"$id":"docs-navigation-root-en","name":"Documentation","description":"$undefined","children":[{"type":"folder","$id":"docs-navigation-getting-started","name":"Quick start","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:index.mdx","type":"page","name":"Overview","description":"G6Lite documentation for getting started, configuration, API, examples, metrics, and compatibility","icon":"$undefined","url":"/en/docs","$ref":"index.mdx"},{"$id":"en:getting-started/quick-start.mdx","type":"page","name":"Quick start","description":"Install G6Lite and create your first interactive graph","icon":"$undefined","url":"/en/docs/getting-started/quick-start","$ref":"getting-started/quick-start.mdx"},{"$id":"en:getting-started/react.mdx","type":"page","name":"Use with React and Vue","description":"Use G6Lite in React and Vue 3","icon":"$undefined","url":"/en/docs/getting-started/react","$ref":"getting-started/react.mdx"}]},{"type":"folder","$id":"docs-navigation-concepts","name":"Core concepts","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:concepts/overview.mdx","type":"page","name":"What is G6Lite?","description":"Positioning, suitable workloads, and the relationship between G6Lite and G6 v5","icon":"$undefined","url":"/en/docs/concepts/overview","$ref":"concepts/overview.mdx"},{"$id":"en:concepts/data-model.mdx","type":"page","name":"Graph data model","description":"Nodes, edges, optional groups, and the relationship between data and appearance","icon":"$undefined","url":"/en/docs/concepts/data-model","$ref":"concepts/data-model.mdx"},{"$id":"en:concepts/graph-lifecycle.mdx","type":"page","name":"Graph lifecycle","description":"The calling sequence for creation, first render, updates, and destruction","icon":"$undefined","url":"/en/docs/concepts/graph-lifecycle","$ref":"concepts/graph-lifecycle.mdx"},{"$id":"en:concepts/architecture.mdx","type":"page","name":"Technical architecture","description":"How the graph runtime, drawing layers, scheduling, layouts, and interactions work together","icon":"$undefined","url":"/en/docs/concepts/architecture","$ref":"concepts/architecture.mdx"}]},{"type":"folder","$id":"docs-navigation-guides","name":"Configuration","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:guides/data.mdx","type":"page","name":"Data","description":"Map application data to GraphData and choose full replacement or incremental updates","icon":"$undefined","url":"/en/docs/guides/data","$ref":"guides/data.mdx"},{"$id":"en:guides/node.mdx","type":"page","name":"Nodes","description":"Configure node types, functional styles, labels, and state styles","icon":"$undefined","url":"/en/docs/guides/node","$ref":"guides/node.mdx"},{"$id":"en:guides/edge.mdx","type":"page","name":"Edges","description":"Configure line, arc, curve, polyline, arrows, labels, and state styles","icon":"$undefined","url":"/en/docs/guides/edge","$ref":"guides/edge.mdx"},{"$id":"en:guides/label.mdx","type":"page","name":"Labels and icons","description":"Configure node labels, edge labels, icons, placement, rotation, and collision behavior","icon":"$undefined","url":"/en/docs/guides/label","$ref":"guides/label.mdx"},{"$id":"en:guides/combo.mdx","type":"page","name":"Combos","description":"Group nodes with nested, collapsible, draggable combo containers","icon":"$undefined","url":"/en/docs/guides/combo","$ref":"guides/combo.mdx"},{"$id":"en:guides/theme.mdx","type":"page","name":"Themes","description":"Use light and dark presets or override G6Lite theme tokens","icon":"$undefined","url":"/en/docs/guides/theme","$ref":"guides/theme.mdx"},{"$id":"en:guides/layout.mdx","type":"page","name":"Layout configuration","description":"Choose built-in layouts, configure workers, and rerun layout at runtime","icon":"$undefined","url":"/en/docs/guides/layout","$ref":"guides/layout.mdx"},{"$id":"en:guides/interactions.mdx","type":"page","name":"Interaction configuration","description":"Combine viewport, element, selection, highlight, and tooltip behaviors","icon":"$undefined","url":"/en/docs/guides/interactions","$ref":"guides/interactions.mdx"},{"$id":"en:guides/custom-behavior.mdx","type":"page","name":"Custom Behavior","description":"Build reusable interactions with typed options, GraphEventMap, and extensionFactory","icon":"$undefined","url":"/en/docs/guides/custom-behavior","$ref":"guides/custom-behavior.mdx"},{"$id":"en:guides/events.mdx","type":"page","name":"Events","description":"Listen to public events with GraphEventMap and graph.on, graph.off, and graph.once","icon":"$undefined","url":"/en/docs/guides/events","$ref":"guides/events.mdx"},{"$id":"en:guides/tooltip.mdx","type":"page","name":"Tooltip configuration","description":"Show node and edge information with the built-in tooltip behavior","icon":"$undefined","url":"/en/docs/guides/tooltip","$ref":"guides/tooltip.mdx"},{"$id":"en:guides/parallel-edges.mdx","type":"page","name":"Parallel and self-loop edges","description":"Separate multiple edges that share endpoints and render self-loops clearly","icon":"$undefined","url":"/en/docs/guides/parallel-edges","$ref":"guides/parallel-edges.mdx"},{"$id":"en:guides/extensions.mdx","type":"page","name":"Extension system","description":"Extend nodes, edges, labels, layouts, behaviors, transforms, decorations, and plugins","icon":"$undefined","url":"/en/docs/guides/extensions","$ref":"guides/extensions.mdx"},{"$id":"en:guides/custom-node.mdx","type":"page","name":"Custom nodes","description":"Register functional NodeExtension implementations through the public package API","icon":"$undefined","url":"/en/docs/guides/custom-node","$ref":"guides/custom-node.mdx"},{"$id":"en:guides/custom-label-renderer.mdx","type":"page","name":"Custom label renderers","description":"Customize label measurement and drawing while reusing G6Lite placement and scheduling","icon":"$undefined","url":"/en/docs/guides/custom-label-renderer","$ref":"guides/custom-label-renderer.mdx"}]},{"type":"folder","$id":"docs-navigation-api","name":"API reference","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:api/index.mdx","type":"page","name":"Usable APIs","description":"Package-root functions, classes, and types application code can call","icon":"$undefined","url":"/en/docs/api","$ref":"api/index.mdx"},{"$id":"en:api/graph.mdx","type":"page","name":"Graph","description":"Create a graph and call its data, state, viewport, layout, and event methods","icon":"$undefined","url":"/en/docs/api/graph","$ref":"api/graph.mdx"},{"$id":"en:api/options.mdx","type":"page","name":"Options","description":"Data, node, edge, layout, interaction, label, and theme fields accepted by new Graph()","icon":"$undefined","url":"/en/docs/api/options","$ref":"api/options.mdx"},{"$id":"en:api/extensions.mdx","type":"page","name":"Extensions","description":"register, extensionFactory, runLayout, and the context an extension can call","icon":"$undefined","url":"/en/docs/api/extensions","$ref":"api/extensions.mdx"}]},{"type":"folder","$id":"docs-navigation-metrics","name":"Technical metrics","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:metrics/performance.mdx","type":"page","name":"Performance metrics","description":"Measurement boundaries and rules for keeping G6Lite performance comparisons reproducible","icon":"$undefined","url":"/en/docs/metrics/performance","$ref":"metrics/performance.mdx"},{"$id":"en:metrics/performance-tuning.mdx","type":"page","name":"Performance tuning","description":"Measure and optimize first render, layout, updates, labels, and viewport interaction","icon":"$undefined","url":"/en/docs/metrics/performance-tuning","$ref":"metrics/performance-tuning.mdx"},{"$id":"en:metrics/bundle-size.mdx","type":"page","name":"Bundle size","description":"Bundle size comparison between G6Lite and mainstream charting and graph visualization libraries","icon":"$undefined","url":"/en/docs/metrics/bundle-size","$ref":"metrics/bundle-size.mdx"}]},{"type":"folder","$id":"docs-navigation-compatibility","name":"Compatibility","root":false,"defaultOpen":true,"collapsible":false,"children":[{"$id":"en:compatibility/index.mdx","type":"page","name":"Compatibility overview","description":"Browser, runtime, public API stability, and G6 v5 migration boundaries","icon":"$undefined","url":"/en/docs/compatibility","$ref":"compatibility/index.mdx"},{"$id":"en:compatibility/browser.mdx","type":"page","name":"Browsers and runtime environment","description":"WebGL, ESM, browser support, SSR boundaries, and known runtime constraints","icon":"$undefined","url":"/en/docs/compatibility/browser","$ref":"compatibility/browser.mdx"},{"$id":"en:compatibility/api-stability.mdx","type":"page","name":"API stability and release boundary","description":"Public package entry points, deprecated compatibility APIs, and experimental capabilities","icon":"$undefined","url":"/en/docs/compatibility/api-stability","$ref":"compatibility/api-stability.mdx"},{"$id":"en:compatibility/library-comparison.mdx","type":"page","name":"Graph library comparison","description":"Compare G6Lite, G6 v5, sigma.js, and Cytoscape.js across rendering, layout, elements, interaction, extensions, algorithms, and runtimes","icon":"$undefined","url":"/en/docs/compatibility/library-comparison","$ref":"compatibility/library-comparison.mdx"}]},{"$id":"en:compatibility/g6-v5-migration.mdx","type":"page","name":"Migrate from G6 v5","description":"Migrate configuration, data, Behaviors, events, Graph APIs, and extensions from G6 v5 to G6Lite","icon":"$undefined","url":"/en/docs/compatibility/g6-v5-migration","$ref":"compatibility/g6-v5-migration.mdx"}]},"children":"$L7"}]}]]}],{"children":["$L8",{"children":["$L9",{},null,false,null]},null,false,"$@a"]},null,false,null]},null,false,null]},null,false,"$@a"],"$Lb",false]],"m":"$undefined","G":["$c",[]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"psb9hsHLi3HtnD4sjEXQr"}
 e:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
 f:"$Sreact.suspense"
 12:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"ViewportBoundary"]
@@ -21,11 +21,355 @@ f:"$Sreact.suspense"
 11:[]
 a:"$W11"
 b:["$","$1","h",{"children":[null,["$","$L12",null,{"children":"$L13"}],["$","div",null,{"hidden":true,"children":["$","$L14",null,{"children":["$","$f",null,{"name":"Next.Metadata","children":"$L15"}]}]}],null]}]
-16:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-17:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-18:I[92746,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetail"]
-d:[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Combo containers\",\"description\":\"Explore nested groups, collapse and expand, runtime regrouping, and data export\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/combo\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/combo\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/combo/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Combo containers\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/combo\"}]}]}"}}],["$","$L16",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L17",null,{"className":"examples-docs-body","children":["$","$L18",null,{"id":"combo","locale":"en"}]}]}]]
+16:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
+17:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
+18:I[66110,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
+19:T27ef,// Local presentation helpers in this repository are used only for the example controls.
+/**
+ * Combo (Group Container) Demo
+ * Demonstrates: nested application groups, fixed positioning, collapse/expand,
+ * membership changes, runtime combo creation, and data export.
+ */
+
+import { Graph } from '@antv/g6-lite';
+import { mountActionSelect } from './demo-panel.ts';
+
+const NODE_COLORS: Record<string, string> = {
+  client: '#7D9FD3',
+  service: '#70A991',
+  data: '#C89C5D',
+  observability: '#9299A8',
+};
+
+export async function run(container: string | HTMLElement) {
+  const containerEl =
+    typeof container === 'string'
+      ? (document.querySelector(container) as HTMLElement)
+      : container;
+  containerEl.style.position = 'relative';
+
+  const graph = new Graph({
+    autoFit: true,
+    container: containerEl,
+    data: {
+      nodes: [
+        {
+          id: 'web',
+          name: 'Web 端',
+          x: 100,
+          y: 150,
+          comboId: 'client-apps',
+          data: { layer: 'client' },
+        },
+        {
+          id: 'mobile',
+          name: '移动端',
+          x: 100,
+          y: 255,
+          comboId: 'client-apps',
+          data: { layer: 'client' },
+        },
+        {
+          id: 'console',
+          name: '运营控制台',
+          x: 100,
+          y: 360,
+          comboId: 'client-apps',
+          data: { layer: 'client' },
+        },
+        {
+          id: 'gateway',
+          name: 'API 网关',
+          x: 335,
+          y: 255,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'auth',
+          name: '认证服务',
+          x: 500,
+          y: 150,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'order',
+          name: '订单服务',
+          x: 500,
+          y: 255,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'worker',
+          name: '异步任务',
+          x: 500,
+          y: 360,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'cache',
+          name: 'Redis 缓存',
+          x: 720,
+          y: 150,
+          comboId: 'data-layer',
+          data: { layer: 'data' },
+        },
+        {
+          id: 'mysql',
+          name: 'MySQL',
+          x: 720,
+          y: 255,
+          comboId: 'data-layer',
+          data: { layer: 'data' },
+        },
+        {
+          id: 'mq',
+          name: '消息队列',
+          x: 720,
+          y: 360,
+          comboId: 'data-layer',
+          data: { layer: 'data' },
+        },
+      ],
+      edges: [
+        { source: 'web', target: 'gateway' },
+        { source: 'mobile', target: 'gateway' },
+        { source: 'console', target: 'gateway' },
+        { source: 'gateway', target: 'auth' },
+        { source: 'gateway', target: 'order' },
+        { source: 'gateway', target: 'worker' },
+        { source: 'auth', target: 'cache' },
+        { source: 'order', target: 'mysql' },
+        { source: 'worker', target: 'mq' },
+      ],
+      combos: [
+        {
+          id: 'client-apps',
+          data: { name: '客户端' },
+          style: {
+            fill: 'rgba(104, 145, 205, 0.08)',
+            stroke: 'rgba(104, 145, 205, 0.42)',
+            padding: 38,
+          },
+        },
+        {
+          id: 'business-platform',
+          data: { name: '业务平台' },
+          style: {
+            fill: 'rgba(112, 132, 160, 0.045)',
+            stroke: 'rgba(112, 132, 160, 0.28)',
+            padding: 24,
+            labelFontSize: 13,
+          },
+        },
+        {
+          id: 'service-layer',
+          parentId: 'business-platform',
+          data: { name: '服务层' },
+          style: {
+            fill: 'rgba(91, 158, 130, 0.08)',
+            stroke: 'rgba(91, 158, 130, 0.4)',
+            padding: 38,
+          },
+        },
+        {
+          id: 'data-layer',
+          parentId: 'business-platform',
+          data: { name: '数据层' },
+          style: {
+            fill: 'rgba(205, 155, 82, 0.09)',
+            stroke: 'rgba(205, 155, 82, 0.42)',
+            padding: 38,
+          },
+        },
+      ],
+    },
+    node: {
+      type: 'circle',
+      style: {
+        size: 18,
+        fill: (node) => NODE_COLORS[String(node.data?.layer)] ?? '#9CA3AF',
+        stroke: '#FFFFFF',
+        strokeWidth: 2,
+        label: (node) =>
+          node.name ?? (node.data?.label as string | undefined) ?? node.id,
+        labelPlacement: 'bottom',
+        labelOffsetY: 4,
+        labelFontSize: 11,
+        labelColor: '#475569',
+      },
+      stateStyles: {
+        selected: { stroke: '#3B82F6', strokeWidth: 3 },
+      },
+    },
+    edge: {
+      type: 'cubic',
+      style: {
+        stroke: 'rgba(115, 137, 166, 0.58)',
+        lineWidth: 1.2,
+        endArrow: false,
+      },
+    },
+    combo: {
+      style: {
+        borderRadius: 12,
+        label: (combo) =>
+          (combo.data as Record<string, string> | undefined)?.name ?? combo.id,
+        labelPlacement: 'inside',
+        labelFontSize: 12,
+        labelColor: '#526071',
+        collapsedType: 'rect',
+        collapsedSize: [72, 38],
+        count: false,
+        stateStyles: {
+          selected: { stroke: '#3B82F6', strokeWidth: 2 },
+          active: { stroke: '#60A5FA', strokeWidth: 2 },
+        },
+      },
+    },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+  });
+
+  await graph.render();
+  graph.fitView(0.82);
+
+  const toolbar = document.createElement('div');
+  toolbar.hidden = true;
+  toolbar.innerHTML = `
+    <button type="button" data-action="collapse-all">全部折叠</button>
+    <button type="button" data-action="expand-all">全部展开</button>
+    <button type="button" data-action="toggle-data">切换数据层</button>
+    <button type="button" data-action="move-console">控制台加入服务层</button>
+    <button type="button" data-action="create-runtime">创建可观测分组</button>
+    <button type="button" data-action="export">导出数据</button>
+  `;
+  containerEl.appendChild(toolbar);
+  mountActionSelect(containerEl, [...toolbar.querySelectorAll('button')]);
+
+  const status = document.createElement('div');
+  status.style.cssText =
+    'position:absolute;left:12px;bottom:10px;z-index:20;color:#64748b;font:12px/1.4 system-ui,sans-serif;pointer-events:none;';
+  status.textContent = '固定坐标 · 可拖拽';
+  containerEl.appendChild(status);
+  const consoleButton = toolbar.querySelector<HTMLButtonElement>(
+    '[data-action="move-console"]',
+  )!;
+  const runtimeButton = toolbar.querySelector<HTMLButtonElement>(
+    '[data-action="create-runtime"]',
+  )!;
+  let consoleInService = false;
+  let runtimeCreated = false;
+
+  const setStatus = (message: string) => {
+    status.textContent = message;
+  };
+
+  toolbar.querySelector('[data-action="collapse-all"]')!.addEventListener('click', () => {
+    graph.collapseCombo('client-apps');
+    graph.collapseCombo('business-platform');
+    if (runtimeCreated) graph.collapseCombo('observability');
+    setStatus('已折叠顶层分组');
+  });
+
+  toolbar.querySelector('[data-action="expand-all"]')!.addEventListener('click', () => {
+    graph.expandCombo('business-platform');
+    graph.expandCombo('client-apps');
+    graph.expandCombo('service-layer');
+    graph.expandCombo('data-layer');
+    if (runtimeCreated) graph.expandCombo('observability');
+    setStatus('已展开全部分组');
+  });
+
+  toolbar.querySelector('[data-action="toggle-data"]')!.addEventListener('click', () => {
+    graph.expandCombo('business-platform');
+    graph.toggleCombo('data-layer');
+    const collapsed = graph.getComboData('data-layer')?.collapsed;
+    setStatus(collapsed ? '数据层已折叠' : '数据层已展开');
+  });
+
+  consoleButton.addEventListener('click', () => {
+    graph.expandCombo('business-platform');
+    graph.expandCombo('service-layer');
+    if (consoleInService) {
+      graph.addToCombo('console', 'client-apps');
+      consoleButton.textContent = '控制台加入服务层';
+      setStatus('运营控制台已回到客户端');
+    } else {
+      graph.addToCombo('console', 'service-layer');
+      consoleButton.textContent = '控制台回到客户端';
+      setStatus('运营控制台已加入服务层');
+    }
+    consoleInService = !consoleInService;
+  });
+
+  runtimeButton.addEventListener('click', () => {
+    if (runtimeCreated) return;
+    graph.addNodes([
+      {
+        id: 'logs',
+        x: 570,
+        y: 455,
+        data: { layer: 'observability', label: '日志采集' },
+      },
+      {
+        id: 'metrics',
+        x: 720,
+        y: 455,
+        data: { layer: 'observability', label: '指标监控' },
+      },
+    ]);
+    graph.createCombo(
+      {
+        id: 'observability',
+        data: { name: '可观测性', source: 'createCombo' },
+        style: {
+          fill: 'rgba(134, 126, 176, 0.08)',
+          stroke: 'rgba(134, 126, 176, 0.42)',
+          padding: 32,
+          label: '可观测性',
+          labelPlacement: 'inside',
+          labelColor: '#645F83',
+          collapsedType: 'rect',
+          collapsedSize: [84, 38],
+          count: false,
+        },
+      },
+      ['logs', 'metrics'],
+    );
+    runtimeCreated = true;
+    runtimeButton.disabled = true;
+    runtimeButton.textContent = '已创建可观测分组';
+    graph.fitView(0.78);
+    setStatus('createCombo() 已执行');
+  });
+
+  toolbar.querySelector('[data-action="export"]')!.addEventListener('click', () => {
+    const data = graph.getData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'g6lite-combo-data.json';
+    link.click();
+    URL.revokeObjectURL(url);
+    setStatus(`${data.nodes.length} 节点 · ${data.combos?.length ?? 0} 分组`);
+  });
+
+  return {
+    fitView: () => graph.fitView({ padding: 64 }),
+    destroy() {
+      graph.destroy();
+      toolbar.remove();
+      status.remove();
+      containerEl.querySelector('[data-canvas-controls]')?.remove();
+    },
+  };
+}
+d:[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Combo containers\",\"description\":\"Explore nested groups, collapse and expand, runtime regrouping, and data export\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/combo\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/combo\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/combo/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Combo containers\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/combo\"}]}]}"}}],["$","$L16",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L17",null,{"className":"examples-docs-body","children":["$","$L18",null,{"id":"combo","locale":"en","initialSource":"$19"}]}]}]]
 13:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-19:I[34035,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"IconMark"]
+1a:I[34035,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"IconMark"]
 10:null
-15:[["$","title","0",{"children":"Combo containers | G6Lite"}],["$","meta","1",{"name":"description","content":"Explore nested groups, collapse and expand, runtime regrouping, and data export"}],["$","meta","2",{"name":"application-name","content":"G6Lite"}],["$","meta","3",{"name":"author","content":"AntV"}],["$","link","4",{"rel":"manifest","href":"/manifest.webmanifest","crossOrigin":"$undefined"}],["$","meta","5",{"name":"keywords","content":"G6Lite,graph visualization,WebGL,AntV,graph rendering,TypeScript"}],["$","link","6",{"rel":"canonical","href":"https://g6lite.antv.vision/en/docs/examples/combo"}],["$","link","7",{"rel":"alternate","hrefLang":"zh-CN","href":"https://g6lite.antv.vision/docs/examples/combo"}],["$","link","8",{"rel":"alternate","hrefLang":"en","href":"https://g6lite.antv.vision/en/docs/examples/combo"}],["$","link","9",{"rel":"alternate","hrefLang":"x-default","href":"https://g6lite.antv.vision/docs/examples/combo"}],["$","meta","10",{"property":"og:title","content":"Combo containers"}],["$","meta","11",{"property":"og:description","content":"Explore nested groups, collapse and expand, runtime regrouping, and data export"}],["$","meta","12",{"property":"og:url","content":"https://g6lite.antv.vision/en/docs/examples/combo"}],["$","meta","13",{"property":"og:site_name","content":"G6Lite"}],["$","meta","14",{"property":"og:locale","content":"en_US"}],["$","meta","15",{"property":"og:image","content":"https://g6lite.antv.vision/en/og/docs/examples/combo/image.png"}],["$","meta","16",{"property":"og:image:alt","content":"Combo containers"}],["$","meta","17",{"property":"og:type","content":"article"}],["$","meta","18",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","19",{"name":"twitter:title","content":"Combo containers"}],["$","meta","20",{"name":"twitter:description","content":"Explore nested groups, collapse and expand, runtime regrouping, and data export"}],["$","meta","21",{"name":"twitter:image","content":"https://g6lite.antv.vision/en/og/docs/examples/combo/image.png"}],["$","link","22",{"rel":"icon","href":"/icon.svg?v=antv-20260724"}],["$","$L19","23",{}]]
+15:[["$","title","0",{"children":"Combo containers | G6Lite"}],["$","meta","1",{"name":"description","content":"Explore nested groups, collapse and expand, runtime regrouping, and data export"}],["$","meta","2",{"name":"application-name","content":"G6Lite"}],["$","meta","3",{"name":"author","content":"AntV"}],["$","link","4",{"rel":"manifest","href":"/manifest.webmanifest","crossOrigin":"$undefined"}],["$","meta","5",{"name":"keywords","content":"G6Lite,graph visualization,WebGL,AntV,graph rendering,TypeScript"}],["$","link","6",{"rel":"canonical","href":"https://g6lite.antv.vision/en/docs/examples/combo"}],["$","link","7",{"rel":"alternate","hrefLang":"zh-CN","href":"https://g6lite.antv.vision/docs/examples/combo"}],["$","link","8",{"rel":"alternate","hrefLang":"en","href":"https://g6lite.antv.vision/en/docs/examples/combo"}],["$","link","9",{"rel":"alternate","hrefLang":"x-default","href":"https://g6lite.antv.vision/docs/examples/combo"}],["$","meta","10",{"property":"og:title","content":"Combo containers"}],["$","meta","11",{"property":"og:description","content":"Explore nested groups, collapse and expand, runtime regrouping, and data export"}],["$","meta","12",{"property":"og:url","content":"https://g6lite.antv.vision/en/docs/examples/combo"}],["$","meta","13",{"property":"og:site_name","content":"G6Lite"}],["$","meta","14",{"property":"og:locale","content":"en_US"}],["$","meta","15",{"property":"og:image","content":"https://g6lite.antv.vision/en/og/docs/examples/combo/image.png"}],["$","meta","16",{"property":"og:image:alt","content":"Combo containers"}],["$","meta","17",{"property":"og:type","content":"article"}],["$","meta","18",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","19",{"name":"twitter:title","content":"Combo containers"}],["$","meta","20",{"name":"twitter:description","content":"Explore nested groups, collapse and expand, runtime regrouping, and data export"}],["$","meta","21",{"name":"twitter:image","content":"https://g6lite.antv.vision/en/og/docs/examples/combo/image.png"}],["$","link","22",{"rel":"icon","href":"/icon.svg?v=antv-20260724"}],["$","$L1a","23",{}]]

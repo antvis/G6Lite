@@ -2,19 +2,13 @@
 
 
 
-G6Lite gates the built artifacts with [limit-size](https://github.com/yutingzhao1991/limit-size); budgets live in the root `package.json#limit-size` field. The ESM entry `dist/index.js` has a **100 KB gzip budget**; the browser-facing UMD bundle `dist/g6-lite.min.js` has a **200 KB gzip budget**.
+Bundle size comparison between G6Lite and mainstream charting and graph visualization libraries:
 
-## Measurement scope [#measurement-scope]
+| Library      |   Minified | Minified + Gzip |
+| ------------ | ---------: | --------------: |
+| **G6Lite** ⭐ |   202.5 KB |     **95.7 KB** |
+| G6           | 1,400.9 KB |        399.8 KB |
+| ECharts      | 1,114.8 KB |        368.0 KB |
+| Sigma.js     |   375.2 KB |         96.7 KB |
 
-* Entry: `dist/index.js`, corresponding to `import { Graph } from '@antv/g6-lite'`.
-* Scope: core engine and runtime dependencies; layout algorithms are not inlined and load lazily through internal dynamic imports — users do not need registration calls.
-* Method: `npm run size` gzip-compresses the built files and compares them against the budgets.
-
-```bash
-npm run build
-npm run size
-```
-
-The 2026-11-03 workspace result is **93.5 KB / 100 KB** for `dist/index.js` and **166.8 KB / 200 KB** for `dist/g6-lite.min.js`. Run the command on the current checkout for the latest result.
-
-Import from the package root, use a tree-shaking bundler, enable production compression, and inspect the final application bundle. Do not compare libraries unless feature scope and dependency boundaries are equivalent.
+As of 2026-11-03: G6Lite 0.1.0-beta.27 is measured from the built `dist/index.js` (initial entry; layouts load on demand and are not counted). G6 5.1.1, ECharts 6.1.0, and Sigma.js 4.0.4 are measured via Bundlephobia.

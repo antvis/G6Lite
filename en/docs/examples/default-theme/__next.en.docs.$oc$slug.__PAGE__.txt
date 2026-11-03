@@ -1,8 +1,203 @@
 1:"$Sreact.fragment"
-3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-4:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-5:I[92746,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetail"]
-6:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
-7:"$Sreact.suspense"
-2:T41c,{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Default themes and interaction states","description":"Inspect light and dark presets together with built-in node and edge states","url":"https://g6lite.antv.vision/en/docs/examples/default-theme","mainEntityOfPage":"https://g6lite.antv.vision/en/docs/examples/default-theme","image":"https://g6lite.antv.vision/en/og/docs/examples/default-theme/image.png","inLanguage":"en","author":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"publisher":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"isPartOf":{"@id":"https://g6lite.antv.vision/#website"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://g6lite.antv.vision/en"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://g6lite.antv.vision/en/docs"},{"@type":"ListItem","position":3,"name":"Default themes and interaction states","item":"https://g6lite.antv.vision/en/docs/examples/default-theme"}]}]}0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],["$","$L3",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L4",null,{"className":"examples-docs-body","children":["$","$L5",null,{"id":"default-theme","locale":"en"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"BNek_swuL5KGT4aZPTJnE"}
-8:null
+3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
+4:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
+5:I[66110,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
+a:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+b:"$Sreact.suspense"
+2:T41c,{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Default themes and interaction states","description":"Inspect light and dark presets together with built-in node and edge states","url":"https://g6lite.antv.vision/en/docs/examples/default-theme","mainEntityOfPage":"https://g6lite.antv.vision/en/docs/examples/default-theme","image":"https://g6lite.antv.vision/en/og/docs/examples/default-theme/image.png","inLanguage":"en","author":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"publisher":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"isPartOf":{"@id":"https://g6lite.antv.vision/#website"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://g6lite.antv.vision/en"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://g6lite.antv.vision/en/docs"},{"@type":"ListItem","position":3,"name":"Default themes and interaction states","item":"https://g6lite.antv.vision/en/docs/examples/default-theme"}]}]}6:T18f4,// Local presentation helpers in this repository are used only for the example controls.
+/**
+ * Demo: default light/dark theme, built-in states, node shapes, and edge shapes.
+ */
+import {
+  Graph,
+  type EdgeLabelPlacement,
+  type EdgeState,
+  type NodeState,
+} from '@antv/g6-lite';
+import { mountGroupedChoices } from './demo-panel.ts';
+
+type NodeType = 'circle' | 'rect';
+type EdgeType = 'line' | 'arc' | 'cubic' | 'polyline';
+type ThemeName = 'light' | 'dark';
+
+const nodeStates: Array<{ state: NodeState; label: string }> = [
+  { state: 'default', label: 'Default' },
+  { state: 'active', label: 'Active' },
+  { state: 'selected', label: 'Selected' },
+  { state: 'highlight', label: 'Highlight' },
+  { state: 'inactive', label: 'Inactive' },
+  { state: 'disabled', label: 'Disabled' },
+];
+
+const edgeStates: EdgeState[] = ['default', 'selected', 'highlight', 'inactive', 'disabled', 'active'];
+const edgeLabelPlacements: EdgeLabelPlacement[] = ['end', 'center', 'start'];
+
+const data = {
+  nodes: [
+    ...nodeStates.map(({ state, label }, index) => ({
+      id: `node-${state}`,
+      data: { label },
+      x: index % 2 === 0 ? 60 : 260,
+      y: 48 + Math.floor(index / 2) * 200,
+      states: state === 'default' ? undefined : [state],
+    })),
+    ...edgeStates.flatMap((state, index) => [
+      {
+        id: `edge-${state}-source`,
+        data: { sampleAnchor: true },
+        x: 340,
+        y: 48 + index * 62,
+      },
+      {
+        id: `edge-${state}-target`,
+        data: { sampleAnchor: true },
+        x: 520,
+        y: 48 + index * 62,
+      },
+    ]),
+  ],
+  edges: edgeStates.map((state, index) => ({
+    id: `edge-${state}`,
+    source: `edge-${state}-source`,
+    target: `edge-${state}-target`,
+    data: {
+      label: state === 'default' ? 'Default edge' : state,
+      placement: edgeLabelPlacements[index % edgeLabelPlacements.length],
+    },
+    states: state === 'default' ? undefined : [state],
+  })),
+};
+
+export async function run(container: string | HTMLElement) {
+  const root =
+    typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+  root.replaceChildren();
+  root.style.cssText =
+    'position:relative;display:flex;width:100%;height:100%;min-height:0;overflow:hidden;background:#fff;font-family:system-ui;';
+
+  const grid = document.createElement('div');
+  grid.style.cssText =
+    'flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:48px 12px 12px;';
+  root.append(grid);
+
+  const graphCards = new Map<ThemeName, { card: HTMLElement; surface: HTMLElement }>();
+  for (const theme of ['light', 'dark'] as const) {
+    const card = document.createElement('section');
+    card.style.cssText =
+      'min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;border:1px solid #cbd5e1;border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.08);';
+    const cardHeader = document.createElement('div');
+    cardHeader.style.cssText =
+      'height:38px;flex:none;display:flex;align-items:center;gap:10px;padding:0 13px;background:#fff;color:#0f172a;font-size:12px;';
+    cardHeader.innerHTML = `<strong>${theme === 'light' ? 'Light preset' : 'Dark preset'}</strong><code style="color:#64748b">theme: '${theme}'</code>`;
+    const surface = document.createElement('div');
+    surface.style.cssText = 'position:relative;flex:1;min-height:0;';
+    card.append(cardHeader, surface);
+    grid.appendChild(card);
+    graphCards.set(theme, { card, surface });
+  }
+
+  let graphs: Graph[] = [];
+  let nodeType: NodeType = 'circle';
+  let edgeType: EdgeType = 'line';
+
+  const renderGraphs = async () => {
+    graphs.forEach((graph) => graph.destroy());
+    graphs = [];
+    for (const theme of ['light', 'dark'] as const) {
+      const surface = graphCards.get(theme)!.surface;
+      surface.replaceChildren();
+      const graph = new Graph({
+        autoFit: true,
+        container: surface,
+        data,
+        node: {
+          type: nodeType,
+          style: {
+            opacity: (node) => (node.data?.sampleAnchor === true ? 0 : 1),
+            label: (node) =>
+              node.data?.sampleAnchor === true ? false : String(node.data?.label ?? node.id),
+            labelPlacement: 'bottom',
+            labelColor: theme === 'light' ? '#334155' : '#dbeafe',
+          },
+        },
+        edge: {
+          type: edgeType,
+          style: {
+            curvature: edgeType === 'arc' ? 0.22 : 0,
+            curveOffset: edgeType === 'cubic' ? 42 : 0,
+            radius: edgeType === 'polyline' ? 10 : 0,
+            label: (_source, _target, edge) => String(edge.data?.label ?? edge.id),
+            labelPlacement: (_source, _target, edge) =>
+              (edge.data?.placement as EdgeLabelPlacement | undefined) ?? 'center',
+            labelColor: theme === 'light' ? '#475569' : '#dbeafe',
+            labelBackground:
+              theme === 'light' ? 'rgba(255,255,255,0.9)' : 'rgba(26,26,26,0.9)',
+          },
+        },
+        behaviors: ['zoom-canvas', 'drag-canvas'],
+        theme,
+      });
+      await graph.render();
+      graph.fitView({ padding: 56 });
+      graphs.push(graph);
+    }
+  };
+
+  const fitGraphs = () => {
+    graphs.forEach((graph) => graph.fitView({ padding: 56 }));
+  };
+
+  const updateView = (view: string) => {
+    for (const theme of ['light', 'dark'] as const) {
+      graphCards.get(theme)!.card.style.display =
+        view === 'light + dark' || view === theme ? 'flex' : 'none';
+    }
+    grid.style.gridTemplateColumns = view === 'light + dark' ? '1fr 1fr' : '1fr';
+  };
+
+  mountGroupedChoices(root, [
+    {
+      label: 'Node',
+      values: ['circle', 'rect'],
+      selected: 'circle',
+      onChange(value) {
+        nodeType = value as NodeType;
+        void renderGraphs();
+      },
+    },
+    {
+      label: 'Edge',
+      values: ['line', 'arc', 'cubic', 'polyline'],
+      selected: 'line',
+      onChange(value) {
+        edgeType = value as EdgeType;
+        void renderGraphs();
+      },
+    },
+    {
+      label: 'View',
+      values: ['light + dark', 'light', 'dark'],
+      selected: 'light + dark',
+      onChange: updateView,
+    },
+  ]);
+
+  await renderGraphs();
+  updateView('light + dark');
+
+  return {
+    fitView() {
+      fitGraphs();
+    },
+    destroy() {
+      graphs.forEach((graph) => graph.destroy());
+      graphs = [];
+      root.replaceChildren();
+    },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],["$","$L3",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L4",null,{"className":"examples-docs-body","children":["$","$L5",null,{"id":"default-theme","locale":"en","initialSource":"$6"}]}]}]],["$L7","$L8"],"$L9"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"psb9hsHLi3HtnD4sjEXQr"}
+7:["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}]
+8:["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]
+9:["$","$La",null,{"children":["$","$b",null,{"name":"Next.MetadataOutlet","children":"$@c"}]}]
+c:null

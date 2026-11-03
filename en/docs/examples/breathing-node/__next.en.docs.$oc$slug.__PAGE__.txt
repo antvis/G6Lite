@@ -1,8 +1,87 @@
 1:"$Sreact.fragment"
-2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-4:I[92746,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetail"]
-5:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
-6:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Breathing node\",\"description\":\"Show selected and highlight states with a custom node animation.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/breathing-node\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/breathing-node\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/breathing-node/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Breathing node\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/breathing-node\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"breathing-node","locale":"en"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]],["$","$L5",null,{"children":["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"BNek_swuL5KGT4aZPTJnE"}
-7:null
+2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
+3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
+4:I[66110,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
+9:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+a:"$Sreact.suspense"
+5:T97a,// Local presentation helpers in this repository are used only for the example controls.
+/**
+ * Breathing node demo.
+ * Demonstrates the built-in breathing-node extension on selected/highlight states.
+ */
+
+import { Graph } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+export async function run(container: string | HTMLElement) {
+  const graph = new Graph({
+    autoFit: true,
+    container,
+    data: {
+      nodes: [
+        { id: 'selected', x: 180, y: 180, data: { label: 'Selected' }, states: ['selected'] },
+        { id: 'highlight', x: 360, y: 180, data: { label: 'Highlight' }, states: ['highlight'] },
+        { id: 'normal', x: 540, y: 180, data: { label: 'Normal' } },
+      ],
+      edges: [
+        { id: 'edge-selected-highlight', source: 'selected', target: 'highlight' },
+        { id: 'edge-highlight-normal', source: 'highlight', target: 'normal' },
+      ],
+    },
+    node: {
+      type: 'breathing-node',
+      style: {
+        size: 36,
+        fill: '#1677ff',
+        stroke: '#fff',
+        strokeWidth: 2,
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'bottom',
+        labelFontSize: 12,
+      },
+      stateStyles: {
+        selected: { fill: '#1677ff', stroke: '#003eb3', strokeWidth: 3, haloWidth: 16 },
+        highlight: { fill: '#2E8B57', stroke: '#1F6B43', strokeWidth: 3, haloWidth: 12 },
+      },
+    },
+    edge: {
+      style: {
+        stroke: '#d1d5db',
+        lineWidth: 2,
+        endArrow: true,
+      },
+    },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+  });
+
+  await graph.render();
+
+  const containerEl =
+    typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+
+  const ui = createDemoPanel(
+    containerEl,
+    '呼吸节点',
+    '切换选中和高亮，观察节点呼吸动画。',
+    '<button data-action="selected">切换选中</button><button data-action="highlight">切换高亮</button>',
+  );
+  ui.controls.addEventListener('click', (event) => {
+    const action = (event.target as HTMLElement).dataset.action;
+    if (action !== 'selected' && action !== 'highlight') return;
+    const active = graph.getItemStates(action).includes(action);
+    graph.setItemState(action, action, !active);
+  });
+
+  return {
+    fitView: () => graph.fitView(),
+    destroy() {
+      graph.destroy();
+      ui.panel.remove();
+    },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Breathing node\",\"description\":\"Show selected and highlight states with a custom node animation.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/breathing-node\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/breathing-node\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/breathing-node/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Breathing node\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/breathing-node\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"breathing-node","locale":"en","initialSource":"$5"}]}]}]],["$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"psb9hsHLi3HtnD4sjEXQr"}
+6:["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}]
+7:["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]
+8:["$","$L9",null,{"children":["$","$a",null,{"name":"Next.MetadataOutlet","children":"$@b"}]}]
+b:null

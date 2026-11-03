@@ -1,8 +1,64 @@
 1:"$Sreact.fragment"
-2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-4:I[92746,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetail"]
-5:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
-6:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Event log\",\"description\":\"Inspect the public events emitted by click, drag, and selection.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/event-log\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/event-log\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/event-log/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Event log\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/event-log\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"event-log","locale":"en"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]],["$","$L5",null,{"children":["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"BNek_swuL5KGT4aZPTJnE"}
-7:null
+2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
+3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
+4:I[66110,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
+6:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+5:T707,// Local presentation helpers in this repository are used only for the example controls.
+/**
+ * Demo: listen to click, drag, and selection events.
+ */
+import { Graph } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+export async function run(container: string | HTMLElement) {
+  const graph = new Graph({
+    autoFit: true,
+    container,
+    data: {
+      nodes: [
+        { id: 'a', data: { label: 'A' }, x: 140, y: 180 },
+        { id: 'b', data: { label: 'B' }, x: 320, y: 100 },
+        { id: 'c', data: { label: 'C' }, x: 320, y: 260 },
+        { id: 'd', data: { label: 'D' }, x: 500, y: 180 },
+      ],
+      edges: [
+        { source: 'a', target: 'b' },
+        { source: 'a', target: 'c' },
+        { source: 'b', target: 'd' },
+        { source: 'c', target: 'd' },
+      ],
+    },
+    node: {
+      style: {
+        size: 36,
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'center',
+        labelColor: '#fff',
+      },
+    },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'click-select', 'drag-node'],
+  });
+  await graph.render();
+
+  const ui = createDemoPanel(container, '事件', '点击或拖拽节点，查看最近的公开事件。', '');
+  const lines: string[] = ['点击或拖拽节点'];
+  const push = (line: string) => {
+    lines.unshift(line);
+    ui.setStatus(lines.slice(0, 4).join('\n'));
+  };
+  graph.on('node:click', ({ nodeId }) => push(`node:click ${nodeId}`));
+  graph.on('node:dragend', ({ nodeId }) => push(`node:dragend ${nodeId}`));
+  graph.on('node:selectchange', ({ nodeId, selected }) => push(`node:selectchange ${nodeId} ${selected}`));
+  ui.setStatus(lines[0]);
+
+  return {
+    fitView: () => graph.fitView(),
+    destroy() {
+      graph.destroy();
+      ui.panel.remove();
+    },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Event log\",\"description\":\"Inspect the public events emitted by click, drag, and selection.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/event-log\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/event-log\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/event-log/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Event log\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/event-log\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"event-log","locale":"en","initialSource":"$5"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"psb9hsHLi3HtnD4sjEXQr"}
+8:null

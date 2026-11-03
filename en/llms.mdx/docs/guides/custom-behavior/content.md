@@ -179,4 +179,4 @@ Listeners on `window` or `document`, timers, observers, and asynchronous work cr
 
 If an interaction requires low-level gesture sessions, camera writes, position writes, or a general overlay root that is not public yet, extend the public contract first instead of bypassing it with assertions.
 
-See `playground/demos/extension-system.ts` for a complete runnable example.
+See `site/demos/extension-system.ts` for a complete runnable example.

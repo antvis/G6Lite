@@ -280,7 +280,7 @@ Combo 已支持分组容器、嵌套、折叠和运行时归组，但这些能�
 
 ## 示例能在线运行吗？ [#示例能在线运行吗]
 
-官网示例链接到随静态站点一起部署的 Playground，并与 `playground/demos/catalog.json`、源码、截图和 Release profile 检查共用同一份案例清单。入口见 [示例](/docs/examples)。
+官网示例在文档站点内直接运行，并与 `site/demos/catalog.json`、示例源码和截图共用同一份案例清单。入口见 [示例](/docs/examples)。
 
 
 # 概览 (/docs)
@@ -2042,299 +2042,6 @@ G6Lite 的测量入口见[性能指标](/docs/metrics/performance)和[性能调�
 * [Cytoscape.js README](https://github.com/cytoscape/cytoscape.js#readme) 与 [Cytoscape.js 文档](https://js.cytoscape.org/)
 
 
-# 快速上手 (/docs/getting-started/quick-start)
-
-
-
-
-
-下面用 6 个节点展示一个简单的协作关系图，通过颜色和大小区分成员。试着拖拽节点或悬停查看关联高亮。
-
-<QuickStartExample locale="zh" variant="network" />
-
-可以通过以下两种方式运行这个示例：
-
-* [包管理器](#包管理器)
-* [CDN](#cdn)
-
-## 包管理器 [#包管理器]
-
-在使用 Vite、Webpack 等构建工具的项目中，选择一种包管理器安装：
-
-<div className="quick-start-install">
-  ```bash
-  # npm
-  npm install @antv/g6-lite
-  ```
-
-  ```bash
-  # pnpm
-  pnpm add @antv/g6-lite
-  ```
-
-  ```bash
-  # Yarn
-  yarn add @antv/g6-lite
-  ```
-</div>
-
-安装后，在页面中添加一个有明确宽高的容器：
-
-```html
-<div id="container" style="height: 360px"></div>
-```
-
-然后在 JavaScript 或 TypeScript 入口中创建关系图。容器需要先挂载到页面，`await` 应在 ES 模块或 `async` 函数中使用。
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const data = {
-  nodes: [
-    { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
-    { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
-    { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
-    { id: 'David', data: { color: '#61DDAA', size: 40 } },
-    { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
-    { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
-  ],
-  edges: [
-    { source: 'Alice', target: 'Bob' },
-    { source: 'Alice', target: 'Carol' },
-    { source: 'David', target: 'Eva' },
-    { source: 'David', target: 'Frank' },
-    { source: 'Alice', target: 'David' },
-    { source: 'Bob', target: 'Eva' },
-    { source: 'Carol', target: 'Frank' },
-  ],
-};
-
-const graph = new Graph({
-  container: '#container',
-  data,
-  node: {
-    style: {
-      size: (node) => Number(node.data?.size ?? 26),
-      fill: (node) => String(node.data?.color ?? '#5B8FF9'),
-      stroke: '#fff',
-      strokeWidth: 2,
-      label: (node) => node.id,
-      labelPlacement: 'bottom',
-      labelColor: '#334155',
-    },
-  },
-  edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
-  layout: {
-    type: 'd3-force',
-    linkDistance: 100,
-    nodeStrength: -400,
-    collideRadius: 32,
-  },
-  autoFit: { padding: 48, maxZoom: 1.2 },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-});
-
-await graph.render();
-```
-
-示例使用力导向布局自动排列节点，并通过节点数据映射颜色和大小。`behaviors` 启用缩放、平移、节点拖拽和悬停高亮。包中已包含 TypeScript 类型。
-
-## CDN [#cdn]
-
-UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使用 `new G6Lite.Graph()`。
-
-下面是完整的 HTML 示例。UMD 文件已包含运行时依赖和布局算法，无需再加载其他脚本：
-
-```html
-<!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>G6Lite 团队协作关系图</title>
-  </head>
-  <body>
-    <div id="container" style="height: 360px"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"></script>
-    <script>
-      const data = {
-        nodes: [
-          { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
-          { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
-          { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
-          { id: 'David', data: { color: '#61DDAA', size: 40 } },
-          { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
-          { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
-        ],
-        edges: [
-          { source: 'Alice', target: 'Bob' },
-          { source: 'Alice', target: 'Carol' },
-          { source: 'David', target: 'Eva' },
-          { source: 'David', target: 'Frank' },
-          { source: 'Alice', target: 'David' },
-          { source: 'Bob', target: 'Eva' },
-          { source: 'Carol', target: 'Frank' },
-        ],
-      };
-
-      const graph = new G6Lite.Graph({
-        container: '#container',
-        data,
-        node: {
-          style: {
-            size: (node) => Number(node.data?.size ?? 26),
-            fill: (node) => String(node.data?.color ?? '#5B8FF9'),
-            stroke: '#fff',
-            strokeWidth: 2,
-            label: (node) => node.id,
-            labelPlacement: 'bottom',
-            labelColor: '#334155',
-          },
-        },
-        edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
-        layout: {
-          type: 'd3-force',
-          linkDistance: 100,
-          nodeStrength: -400,
-          collideRadius: 32,
-        },
-        autoFit: { padding: 48, maxZoom: 1.2 },
-        behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-      });
-
-      graph.render().catch(console.error);
-    </script>
-  </body>
-</html>
-```
-
-生产环境使用 CDN 时，应锁定包含 UMD 文件的确切版本号。ESM 入口按需加载布局，UMD 则包含布局算法，两者的下载体积不同，详见[包体积](/docs/metrics/bundle-size)。
-
-## 在前端框架中使用 [#在前端框架中使用]
-
-在 React / Vue 中，通过 ref 获取真实 DOM，在客户端挂载后创建实例，并在组件卸载时调用 `graph.destroy()` 释放资源。
-
-<Cards>
-  <Card title="在 React 中使用" href="/docs/getting-started/react#在-react-中使用">
-    在 effect 中挂载关系图，更新数据，并处理组件卸载。
-  </Card>
-
-  <Card title="在 Vue 中使用" href="/docs/getting-started/react#在-vue-中使用">
-    通过模板 ref 和生命周期钩子管理图实例。
-  </Card>
-</Cards>
-
-Next.js、Nuxt 等框架应只在客户端创建 `Graph`，不要在服务端渲染阶段访问 DOM。
-
-
-# 在框架中使用 (/docs/getting-started/react)
-
-
-
-
-
-下面分别用 React 和 Vue 3 实现同一个关系图。可以缩放画布、拖拽节点，并悬停查看高亮效果。
-
-<QuickStartExample locale="zh" />
-
-在已有框架项目中运行 `npm install @antv/g6-lite`，然后使用对应的组件示例。
-
-## 在 React 中使用 [#在-react-中使用]
-
-将以下代码保存为 `GraphView.tsx`，在页面中使用 `<GraphView />`。组件挂载后创建图，卸载时销毁实例。
-
-```tsx
-import { useEffect, useRef } from 'react';
-import { Graph } from '@antv/g6-lite';
-
-export function GraphView() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const graph = new Graph({
-      container: containerRef.current,
-      data: {
-        nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-        edges: [
-          { source: 'Alice', target: 'Bob' },
-          { source: 'Alice', target: 'Carol' },
-        ],
-      },
-      node: {
-        style: {
-          size: 24,
-          label: (node) => node.id,
-          labelPlacement: 'bottom',
-        },
-      },
-      edge: { style: { endArrow: true } },
-      layout: { type: 'circular', radius: 120 },
-      autoFit: { padding: 32, maxZoom: 1 },
-      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-    });
-
-    void graph.render().catch(console.error);
-
-    return () => graph.destroy();
-  }, []);
-
-  return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
-}
-```
-
-## 在 Vue 中使用 [#在-vue-中使用]
-
-将以下代码保存为 `GraphView.vue`，在页面中导入并使用 `<GraphView />`。通过模板 ref 获取容器，在生命周期钩子中创建和销毁图。
-
-```vue
-<script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { Graph } from '@antv/g6-lite';
-
-const containerRef = ref<HTMLDivElement | null>(null);
-let graph: Graph | undefined;
-
-onMounted(() => {
-  if (!containerRef.value) return;
-
-  graph = new Graph({
-    container: containerRef.value,
-    data: {
-      nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-      edges: [
-        { source: 'Alice', target: 'Bob' },
-        { source: 'Alice', target: 'Carol' },
-      ],
-    },
-    node: {
-      style: {
-        size: 24,
-        label: (node) => node.id,
-        labelPlacement: 'bottom',
-      },
-    },
-    edge: { style: { endArrow: true } },
-    layout: { type: 'circular', radius: 120 },
-    autoFit: { padding: 32, maxZoom: 1 },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-  });
-
-  void graph.render().catch(console.error);
-});
-
-onBeforeUnmount(() => {
-  graph?.destroy();
-});
-</script>
-
-<template>
-  <div ref="containerRef" style="width: 100%; height: 360px" />
-</template>
-```
-
-
 # 最简关系图 (/docs/examples/basic)
 
 
@@ -2803,6 +2510,299 @@ onBeforeUnmount(() => {
 <ExampleDetail id="zoom-options" locale="zh" />
 
 
+# 快速上手 (/docs/getting-started/quick-start)
+
+
+
+
+
+下面用 6 个节点展示一个简单的协作关系图，通过颜色和大小区分成员。试着拖拽节点或悬停查看关联高亮。
+
+<QuickStartExample locale="zh" variant="network" />
+
+可以通过以下两种方式运行这个示例：
+
+* [包管理器](#包管理器)
+* [CDN](#cdn)
+
+## 包管理器 [#包管理器]
+
+在使用 Vite、Webpack 等构建工具的项目中，选择一种包管理器安装：
+
+<div className="quick-start-install">
+  ```bash
+  # npm
+  npm install @antv/g6-lite
+  ```
+
+  ```bash
+  # pnpm
+  pnpm add @antv/g6-lite
+  ```
+
+  ```bash
+  # Yarn
+  yarn add @antv/g6-lite
+  ```
+</div>
+
+安装后，在页面中添加一个有明确宽高的容器：
+
+```html
+<div id="container" style="height: 360px"></div>
+```
+
+然后在 JavaScript 或 TypeScript 入口中创建关系图。容器需要先挂载到页面，`await` 应在 ES 模块或 `async` 函数中使用。
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const data = {
+  nodes: [
+    { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
+    { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
+    { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
+    { id: 'David', data: { color: '#61DDAA', size: 40 } },
+    { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
+    { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
+  ],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+    { source: 'David', target: 'Eva' },
+    { source: 'David', target: 'Frank' },
+    { source: 'Alice', target: 'David' },
+    { source: 'Bob', target: 'Eva' },
+    { source: 'Carol', target: 'Frank' },
+  ],
+};
+
+const graph = new Graph({
+  container: '#container',
+  data,
+  node: {
+    style: {
+      size: (node) => Number(node.data?.size ?? 26),
+      fill: (node) => String(node.data?.color ?? '#5B8FF9'),
+      stroke: '#fff',
+      strokeWidth: 2,
+      label: (node) => node.id,
+      labelPlacement: 'bottom',
+      labelColor: '#334155',
+    },
+  },
+  edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
+  layout: {
+    type: 'd3-force',
+    linkDistance: 100,
+    nodeStrength: -400,
+    collideRadius: 32,
+  },
+  autoFit: { padding: 48, maxZoom: 1.2 },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+});
+
+await graph.render();
+```
+
+示例使用力导向布局自动排列节点，并通过节点数据映射颜色和大小。`behaviors` 启用缩放、平移、节点拖拽和悬停高亮。包中已包含 TypeScript 类型。
+
+## CDN [#cdn]
+
+UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使用 `new G6Lite.Graph()`。
+
+下面是完整的 HTML 示例。UMD 文件已包含运行时依赖和布局算法，无需再加载其他脚本：
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>G6Lite 团队协作关系图</title>
+  </head>
+  <body>
+    <div id="container" style="height: 360px"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"></script>
+    <script>
+      const data = {
+        nodes: [
+          { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
+          { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
+          { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
+          { id: 'David', data: { color: '#61DDAA', size: 40 } },
+          { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
+          { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
+        ],
+        edges: [
+          { source: 'Alice', target: 'Bob' },
+          { source: 'Alice', target: 'Carol' },
+          { source: 'David', target: 'Eva' },
+          { source: 'David', target: 'Frank' },
+          { source: 'Alice', target: 'David' },
+          { source: 'Bob', target: 'Eva' },
+          { source: 'Carol', target: 'Frank' },
+        ],
+      };
+
+      const graph = new G6Lite.Graph({
+        container: '#container',
+        data,
+        node: {
+          style: {
+            size: (node) => Number(node.data?.size ?? 26),
+            fill: (node) => String(node.data?.color ?? '#5B8FF9'),
+            stroke: '#fff',
+            strokeWidth: 2,
+            label: (node) => node.id,
+            labelPlacement: 'bottom',
+            labelColor: '#334155',
+          },
+        },
+        edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
+        layout: {
+          type: 'd3-force',
+          linkDistance: 100,
+          nodeStrength: -400,
+          collideRadius: 32,
+        },
+        autoFit: { padding: 48, maxZoom: 1.2 },
+        behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+      });
+
+      graph.render().catch(console.error);
+    </script>
+  </body>
+</html>
+```
+
+生产环境使用 CDN 时，应锁定包含 UMD 文件的确切版本号。ESM 入口按需加载布局，UMD 则包含布局算法，两者的下载体积不同，详见[包体积](/docs/metrics/bundle-size)。
+
+## 在前端框架中使用 [#在前端框架中使用]
+
+在 React / Vue 中，通过 ref 获取真实 DOM，在客户端挂载后创建实例，并在组件卸载时调用 `graph.destroy()` 释放资源。
+
+<Cards>
+  <Card title="在 React 中使用" href="/docs/getting-started/react#在-react-中使用">
+    在 effect 中挂载关系图，更新数据，并处理组件卸载。
+  </Card>
+
+  <Card title="在 Vue 中使用" href="/docs/getting-started/react#在-vue-中使用">
+    通过模板 ref 和生命周期钩子管理图实例。
+  </Card>
+</Cards>
+
+Next.js、Nuxt 等框架应只在客户端创建 `Graph`，不要在服务端渲染阶段访问 DOM。
+
+
+# 在框架中使用 (/docs/getting-started/react)
+
+
+
+
+
+下面分别用 React 和 Vue 3 实现同一个关系图。可以缩放画布、拖拽节点，并悬停查看高亮效果。
+
+<QuickStartExample locale="zh" />
+
+在已有框架项目中运行 `npm install @antv/g6-lite`，然后使用对应的组件示例。
+
+## 在 React 中使用 [#在-react-中使用]
+
+将以下代码保存为 `GraphView.tsx`，在页面中使用 `<GraphView />`。组件挂载后创建图，卸载时销毁实例。
+
+```tsx
+import { useEffect, useRef } from 'react';
+import { Graph } from '@antv/g6-lite';
+
+export function GraphView() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: {
+        nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+        edges: [
+          { source: 'Alice', target: 'Bob' },
+          { source: 'Alice', target: 'Carol' },
+        ],
+      },
+      node: {
+        style: {
+          size: 24,
+          label: (node) => node.id,
+          labelPlacement: 'bottom',
+        },
+      },
+      edge: { style: { endArrow: true } },
+      layout: { type: 'circular', radius: 120 },
+      autoFit: { padding: 32, maxZoom: 1 },
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+    });
+
+    void graph.render().catch(console.error);
+
+    return () => graph.destroy();
+  }, []);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
+}
+```
+
+## 在 Vue 中使用 [#在-vue-中使用]
+
+将以下代码保存为 `GraphView.vue`，在页面中导入并使用 `<GraphView />`。通过模板 ref 获取容器，在生命周期钩子中创建和销毁图。
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Graph } from '@antv/g6-lite';
+
+const containerRef = ref<HTMLDivElement | null>(null);
+let graph: Graph | undefined;
+
+onMounted(() => {
+  if (!containerRef.value) return;
+
+  graph = new Graph({
+    container: containerRef.value,
+    data: {
+      nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+      edges: [
+        { source: 'Alice', target: 'Bob' },
+        { source: 'Alice', target: 'Carol' },
+      ],
+    },
+    node: {
+      style: {
+        size: 24,
+        label: (node) => node.id,
+        labelPlacement: 'bottom',
+      },
+    },
+    edge: { style: { endArrow: true } },
+    layout: { type: 'circular', radius: 120 },
+    autoFit: { padding: 32, maxZoom: 1 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+
+  void graph.render().catch(console.error);
+});
+
+onBeforeUnmount(() => {
+  graph?.destroy();
+});
+</script>
+
+<template>
+  <div ref="containerRef" style="width: 100%; height: 360px" />
+</template>
+```
+
+
 # Combo (/docs/guides/combo)
 
 
@@ -3088,7 +3088,7 @@ Behavior 自己创建的 `window` / `document` 监听、timer、Observer 或异�
 
 需要底层手势 session、相机写操作、节点位置写入、通用 overlay root 等当前未公开能力时，应先扩展公共契约，而不是通过类型断言绕过边界。
 
-完整运行示例见 `playground/demos/extension-system.ts`。
+完整运行示例见 `site/demos/extension-system.ts`。
 
 
 # 自定义 Label Renderer (/docs/guides/custom-label-renderer)
@@ -3161,7 +3161,7 @@ const graph = new Graph({
 
 未注册的名称、非法宽高或 Renderer 异常会给出警告，并仅对当前 Label 回退到默认单行渲染，不会中断 WebGL 主图层。
 
-完整示例见 `playground/demos/custom-label-renderer.ts`。
+完整示例见 `site/demos/custom-label-renderer.ts`。
 
 
 # 自定义节点 (/docs/guides/custom-node)
@@ -3213,7 +3213,7 @@ const graph = new Graph({
 具体可参考：
 
 * `src/extensions/node.ts`
-* `playground/demos/breathing-node.ts`
+* `site/demos/breathing-node.ts`
 
 <Callout type="warn" title="注意事项">
   - 自定义节点应避免破坏 WebGL 批量渲染优势。
@@ -3805,7 +3805,7 @@ type NodeBadgeItem =
 * Edge Extension 复用内置 WebGL 边基型，保留批处理、拾取和箭头能力。
 * Label 与 Decoration 只负责内容，定位、旋转、碰撞和刷新由 G6Lite 管理。
 
-完整可运行代码见 `playground/demos/extension-system.ts`。
+完整可运行代码见 `site/demos/extension-system.ts`。
 
 
 # 交互配置 (/docs/guides/interactions)
@@ -4291,9 +4291,9 @@ const graph = new Graph({
 
 ## 示例入口 [#示例入口]
 
-* `playground/demos/parallel-edges.ts`
-* `playground/demos/edge-loops.ts`
-* `playground/demos/edge-arrows.ts`
+* `site/demos/parallel-edges.ts`
+* `site/demos/edge-loops.ts`
+* `site/demos/edge-arrows.ts`
 
 见 [示例总览](/docs/examples)。
 
@@ -4453,32 +4453,16 @@ behaviors: [
 
 
 
-G6Lite 使用 [limit-size](https://github.com/yutingzhao1991/limit-size) 对构建产物做体积门禁，门槛配置在根目录 `package.json` 的 `limit-size` 字段。ESM 入口 `dist/index.js` 保持 &#x2A;*100 KB（gzip）** 门槛，浏览器直引的 UMD 产物 `dist/g6-lite.min.js` 保持 &#x2A;*200 KB（gzip）** 门槛。
+G6Lite 与主流图表、图可视化库的包体积对比如下：
 
-## 测量口径 [#测量口径]
+| 库        |       Minified | Minified + Gzip |
+| -------- | -------------: | --------------: |
+| G6Lite   | **202.5 KB** ⭐ |   **95.7 KB** ⭐ |
+| G6       |     1,400.9 KB |        399.8 KB |
+| ECharts  |     1,114.8 KB |        368.0 KB |
+| Sigma.js |       375.2 KB |         96.7 KB |
 
-* 入口：`dist/index.js`，对应 `import { Graph } from '@antv/g6-lite'`。
-* 范围：核心引擎与运行时依赖；布局算法不内联，由内部动态 import 按类型加载，用户无需手动注册。
-* 处理：`npm run size` 直接对构建产物执行 gzip 压缩后与门槛比较。
-* 门槛：`package.json#limit-size` 分别约束 `dist/index.js` 和 `dist/g6-lite.min.js`。
-
-## 复现 [#复现]
-
-```bash
-npm run build
-npm run size
-```
-
-2026-11-03 当前工作区结果为：`dist/index.js` **93.5 KB / 100 KB**；`dist/g6-lite.min.js` **166.8 KB / 200 KB**。最新结果以当前 checkout 执行 `npm run size` 为准。
-
-## 使用建议 [#使用建议]
-
-* 从包根导入公开 API，让业务打包器可以正确分析依赖。
-* 使用支持 tree-shaking 的 Vite、Rollup、esbuild 或等价工具；包已声明 `sideEffects: false`。
-* 生产 CDN 开启 brotli 或 gzip，并以业务最终 bundle analyzer 结果评估真实增量。
-* 不把 G6Lite 与功能范围、依赖口径不同的图库做未经复现的体积倍数比较。
-
-体积门槛是工程约束，不代表所有业务只增加同等下载量；业务打包器版本、去重策略和已有共享依赖都会影响最终结果。
+数据截至 2026-11-03：G6Lite 0.1.0-beta.27 为 `dist/index.js` 构建产物实测（初始入口，布局按需加载，不计入初始体积）；G6 5.1.1、ECharts 6.1.0、Sigma.js 4.0.4 数据来自 Bundlephobia。
 
 
 # 性能调优 (/docs/metrics/performance-tuning)

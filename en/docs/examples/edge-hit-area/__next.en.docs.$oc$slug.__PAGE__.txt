@@ -1,8 +1,110 @@
 1:"$Sreact.fragment"
-2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-4:I[92746,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/2-sa327wfgmkw.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/0rxxxf9va6vrr.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetail"]
-5:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
-6:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Thin-edge hit area\",\"description\":\"Keep a thin stroke while expanding the pick area of lines, curves, and loops.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/edge-hit-area\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/edge-hit-area\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/edge-hit-area/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Thin-edge hit area\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/edge-hit-area\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"edge-hit-area","locale":"en"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]],["$","$L5",null,{"children":["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"BNek_swuL5KGT4aZPTJnE"}
-7:null
+2:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
+3:I[17787,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
+4:I[66110,["/_next/static/chunks/19er7pl3gsmj_.js","/_next/static/chunks/31sae3sl7c8ev.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/2s67_wufgmhmw.js","/_next/static/chunks/0apz0ye3l27ab.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
+9:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+a:"$Sreact.suspense"
+5:Tdc4,// Local presentation helpers in this repository are used only for the example controls.
+import { Graph } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+const EDGE_TYPES = [
+  { type: 'line' as const, title: '直线 + 箭头' },
+  { type: 'arc' as const, title: '弧线 / 平行边' },
+  { type: 'cubic' as const, title: '三次曲线' },
+  { type: 'polyline' as const, title: '折线' },
+];
+
+export async function run(container: string | HTMLElement) {
+  const root =
+    typeof container === 'string' ? (document.querySelector(container)! as HTMLElement) : container;
+  const graphs: Graph[] = [];
+  const board = document.createElement('div');
+  board.style.cssText =
+    'display:grid;grid-template-columns:repeat(2,minmax(280px,1fr));gap:12px;width:100%;height:100%;padding:16px;box-sizing:border-box;';
+  root.appendChild(board);
+
+  const ui = createDemoPanel(
+    root,
+    '边交互热区',
+    '边保持 1.5px 视觉宽度，但中心线两侧约 8px 都可悬停或点击。缩放后屏幕热区保持不变。',
+    '',
+  );
+
+  for (const [index, item] of EDGE_TYPES.entries()) {
+    const panel = document.createElement('div');
+    panel.className = 'demo-canvas-card';
+    panel.style.cssText = 'position:relative;min-height:210px;';
+    const title = document.createElement('div');
+    title.textContent = item.title;
+    title.style.cssText =
+      'position:absolute;z-index:2;left:12px;top:10px;font:12px/1.5 system-ui;color:#475569;pointer-events:none;';
+    const canvasHost = document.createElement('div');
+    canvasHost.style.cssText = 'position:absolute;inset:0;';
+    panel.append(title, canvasHost);
+    board.appendChild(panel);
+
+    const sourceId = `source-${index}`;
+    const targetId = `target-${index}`;
+    const graph = new Graph({
+      autoFit: true,
+      container: canvasHost,
+      data: {
+        nodes: [
+          { id: sourceId, x: 100, y: 120 },
+          { id: targetId, x: 340, y: index === 2 || index === 3 ? 150 : 120 },
+        ],
+        edges: [
+          { id: `edge-${index}`, source: sourceId, target: targetId },
+          ...(item.type === 'line'
+            ? [{ id: `loop-${index}`, source: sourceId, target: sourceId }]
+            : []),
+        ],
+      },
+      node: {
+        type: 'circle',
+        style: { size: 26, fill: '#1677ff', stroke: '#fff', strokeWidth: 2 },
+      },
+      edge: {
+        type: item.type,
+        style: {
+          stroke: '#64748b',
+          lineWidth: 1.5,
+          hitAreaWidth: 16,
+          endArrow: true,
+          curvature: 0.35,
+          curveOffset: 80,
+          router: 'orth',
+        },
+        stateStyles: {
+          highlight: { stroke: '#1677ff', lineWidth: 2 },
+          selected: { stroke: '#873bf4', lineWidth: 2, hitAreaWidth: 20 },
+        },
+      },
+      behaviors: ['zoom-canvas', 'highlight-edge', 'click-select'],
+      theme: 'light',
+    });
+    graph.on('edge:pointerover', ({ edgeId }) => ui.setStatus(`hover: ${edgeId ?? '-'}`));
+    graph.on('edge:pointerleave', () => ui.setStatus('move near a thin edge'));
+    graph.on('edge:selectchange', ({ edgeId, selected }) =>
+      ui.setStatus(`${selected ? 'selected' : 'unselected'}: ${edgeId ?? '-'}`),
+    );
+    await graph.render();
+    graphs.push(graph);
+  }
+
+  ui.setStatus('move near a thin edge');
+  return {
+    fitView: () => graphs.forEach((graph) => graph.fitView()),
+    destroy: () => {
+      graphs.forEach((graph) => graph.destroy());
+      board.remove();
+      ui.panel.remove();
+    },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Thin-edge hit area\",\"description\":\"Keep a thin stroke while expanding the pick area of lines, curves, and loops.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/edge-hit-area\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/edge-hit-area\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/edge-hit-area/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Thin-edge hit area\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/edge-hit-area\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"edge-hit-area","locale":"en","initialSource":"$5"}]}]}]],["$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"psb9hsHLi3HtnD4sjEXQr"}
+6:["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}]
+7:["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]
+8:["$","$L9",null,{"children":["$","$a",null,{"name":"Next.MetadataOutlet","children":"$@b"}]}]
+b:null

@@ -131,7 +131,7 @@ npm install
 npm run dev
 ```
 
-Run the project verification pipeline with `npm run ci`, and build the documentation site with `npm run site`.
+Verify your change with `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` and `npm run size`, and build the documentation site with `npm run site`.
 
 `npm run build` generates the ESM output, type declarations, and `dist/g6-lite.min.js` (with a source map).
 

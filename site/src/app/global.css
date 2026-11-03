@@ -352,8 +352,20 @@ body:has(#nd-docs-layout.examples-route-layout) {
 
 .site-brand-product {
   color: var(--color-fd-foreground);
-  font-size: 1rem;
+  font-size: 1.15rem;
   font-weight: 750;
+}
+
+.site-brand-tag {
+  margin-left: 0.3rem;
+  padding: 0.05rem 0.3rem;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 999px;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.6rem;
+  font-weight: 600;
+  line-height: 1;
+  vertical-align: super;
 }
 
 .landing {

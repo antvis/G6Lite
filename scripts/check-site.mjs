@@ -282,6 +282,60 @@ const { showcaseIds, showcaseOptions, showcaseSource } = await import(
 );
 const normalizeOptions = (options) =>
   JSON.stringify(options, (_key, value) => (typeof value === 'function' ? '__function__' : value));
+const quickStartModule = ts.transpileModule(read('site/src/lib/quick-start.ts'), {
+  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
+}).outputText;
+const { quickStartNetworkOptions } = await import(
+  `data:text/javascript;base64,${Buffer.from(quickStartModule).toString('base64')}`
+);
+for (const [file, snippet] of snippets) {
+  const html = read(file).match(/```html\n(<!doctype html>[\s\S]*?)\n```/)?.[1];
+  const script = html?.match(/<script>\s*([\s\S]*?)\s*<\/script>/)?.[1];
+  const umdSource = 'https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js';
+  if (!script || !html.includes(`src="${umdSource}"`)) {
+    fail(`Missing complete UMD example in ${file}`);
+    continue;
+  }
+  for (const [format, code] of [
+    ['ESM', snippet],
+    ['UMD', script],
+  ]) {
+    try {
+      let captured;
+      class Graph {
+        constructor(options) {
+          captured = options;
+        }
+        async render() {}
+      }
+      const executable = ts.transpileModule(
+        code.replace("import { Graph } from '@antv/g6-lite';", ''),
+        { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 } },
+      ).outputText;
+      await new Function('Graph', 'G6Lite', `return (async () => {\n${executable}\n})();`)(Graph, {
+        Graph,
+      });
+      const { container, ...options } = captured;
+      if (container !== '#container') throw new Error('Container must be a CSS id selector');
+      if (normalizeOptions(options) !== normalizeOptions(quickStartNetworkOptions())) {
+        throw new Error('Documented options differ from the live preview');
+      }
+      if (options.node.style.label({ id: 'Alice' }) !== 'Alice') {
+        throw new Error('Node label must display its id');
+      }
+      for (const node of options.data.nodes) {
+        if (options.node.style.fill(node) !== node.data.color) {
+          throw new Error('Copied node color must match its team');
+        }
+        if (options.node.style.size(node) !== node.data.size) {
+          throw new Error('Copied node size must match its role');
+        }
+      }
+    } catch (error) {
+      fail(`Invalid quick-start ${format} example in ${file}: ${error.message}`);
+    }
+  }
+}
 for (const locale of ['zh', 'en']) {
   for (const id of showcaseIds) {
     for (const dark of [false, true]) {
@@ -292,6 +346,10 @@ for (const locale of ['zh', 'en']) {
             captured = options;
           }
           async render() {}
+          getEdges() {
+            return captured.data.edges.map((edge, index) => ({ ...edge, id: `edge-${index}` }));
+          }
+          on() {}
         }
         const source = showcaseSource(id, locale, dark);
         const entry = "import { Graph } from '@antv/g6-lite';";

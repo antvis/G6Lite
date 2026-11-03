@@ -23,8 +23,8 @@ const zh = {
     layers: ['Canvas · 标签信息', 'WebGL · 节点与边', 'Canvas · Combo 分组'],
   },
   performance: {
-    title: '轻量、高效，支持 AI 协作',
-    description: '按需加载降低开销，WebGL 与增量更新支撑流畅交互，Agent Skill 辅助关系图开发。',
+    title: '轻量、高性能，支持 AI 协作',
+    description: '按需加载降低开销，WebGL 与增量更新支撑高效渲染，Agent Skill 辅助关系图开发。',
     loadTitle: '轻量加载',
     loadDescription: '核心入口与布局算法分离，按需加载所选布局，降低初始化阶段的加载开销。',
     measured: '初始入口实测',
@@ -32,12 +32,12 @@ const zh = {
     core: '核心入口',
     lazyLayouts: '布局按需加载',
     sizeLink: '查看体积测量口径',
-    interactionTitle: '流畅交互',
+    interactionTitle: '高性能渲染',
     interactionDescription:
-      'WebGL 批量绘制节点与边，交互时按状态、位置和视口变化更新，减少重复计算。',
+      'WebGL 批量绘制节点与边，结合增量更新，降低大规模关系图的绘制与交互开销。',
     batchRendering: 'WebGL 批量绘制',
     incrementalUpdates: '增量更新',
-    tuning: '查看交互性能调优',
+    tuning: '了解渲染性能',
     aiTitle: 'AI 协作',
     aiDescription: '把 G6Lite Skill 交给 Agent，从项目数据创建关系图，继续调整布局、样式与交互。',
     aiRequest: '读取当前项目的节点和边，创建力导向图，加入节点拖拽和悬停高亮。',
@@ -52,9 +52,9 @@ const zh = {
     method: '查看性能验证方法',
   },
   update: {
-    group: '切换交互更新示意',
-    illustration: '更新机制示意，非实时性能测试',
-    caption: '交互机制示意 · 更新方式随变化类型而定',
+    group: '切换渲染更新示意',
+    illustration: '关系网络渲染机制示意，非实时性能测试',
+    caption: '渲染机制示意 · 按变化类型更新',
     scenarios: [
       { label: '高亮', detail: '状态变化，更新节点与邻接关系的颜色' },
       { label: '移动', detail: '位置变化，更新节点及关联边的位置' },
@@ -175,9 +175,9 @@ const en: typeof zh = {
     layers: ['Canvas · Labels', 'WebGL · Nodes and edges', 'Canvas · Combo groups'],
   },
   performance: {
-    title: 'Lightweight, responsive, ready for AI',
+    title: 'Lightweight, high-performance, ready for AI',
     description:
-      'Load layouts on demand, keep interactions responsive with WebGL and incremental updates, and build graphs with an Agent Skill.',
+      'Load layouts on demand, render efficiently with WebGL and incremental updates, and build graphs with an Agent Skill.',
     loadTitle: 'Lightweight loading',
     loadDescription: 'Layout algorithms load on demand, keeping the initial core bundle small.',
     measured: 'Measured entry size',
@@ -185,12 +185,12 @@ const en: typeof zh = {
     core: 'Core entry',
     lazyLayouts: 'On-demand layouts',
     sizeLink: 'How we measure bundle size',
-    interactionTitle: 'Responsive interactions',
+    interactionTitle: 'High-performance rendering',
     interactionDescription:
-      'Batch nodes and edges with WebGL, then update state, positions, and the viewport without unnecessary recomputation.',
+      'Batch nodes and edges with WebGL and use incremental updates to reduce rendering and interaction overhead for large graphs.',
     batchRendering: 'WebGL batches',
     incrementalUpdates: 'Incremental updates',
-    tuning: 'Tune interaction performance',
+    tuning: 'Explore rendering performance',
     aiTitle: 'AI collaboration',
     aiDescription:
       'Give your agent the G6Lite Skill to build graphs from project data and refine layouts, styles, and interactions.',
@@ -208,9 +208,9 @@ const en: typeof zh = {
     method: 'Explore performance testing',
   },
   update: {
-    group: 'Explore update behavior',
-    illustration: 'update illustration, not a live performance test',
-    caption: 'Illustration · Each change follows its own update path',
+    group: 'Explore rendering updates',
+    illustration: 'network rendering illustration, not a live performance test',
+    caption: 'Rendering illustration · Updates follow the change type',
     scenarios: [
       {
         label: 'Highlight',

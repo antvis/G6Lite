@@ -1,118 +1,69 @@
 ---
 title: Graph 生命周期
-description: 从创建 Graph 到 render、更新、重新布局和销毁
+description: 创建、首次渲染、运行中更新与销毁的调用顺序
 ---
 
-import { FirstRenderFlow } from '@/components/first-render-flow';
+import { GraphLifecycleFlow } from '@/components/graph-lifecycle-flow';
 
-`Graph` 是 G6Lite 的主入口。理解它的生命周期，有助于正确组织初始化、数据更新和组件卸载。
+一张图通常只创建一次实例，在首次渲染完成后复用它处理数据和交互，离开页面时销毁。本页说明各阶段的调用顺序；方法参数见 [Graph API](/docs/api/graph)，内部处理过程见[技术架构](/docs/concepts/architecture)。
 
-## 创建实例
+## 生命周期总览
 
-```ts
-const graph = new Graph({
-  container: 'container',
-  data,
-  layout: { type: 'force' },
-});
-```
+<GraphLifecycleFlow locale="zh" />
 
-构造阶段会解析容器并准备 canvas，但不会执行布局，也不会绘制图形。
+## 创建与首次渲染
 
-## 首次渲染
+`new Graph(options)` 要求容器已经挂载且有明确宽高。构造阶段会创建画布和渲染器；调用 `render()` 后才会执行布局并绘制图形。
 
-```ts
-await graph.render();
-```
+以 `await graph.render()` 成功完成作为初始化边界。在此之前，不要执行数据写入、状态修改或重新布局。React、Vue 的挂载与卸载写法见[在框架中使用](/docs/getting-started/react)。
 
-首次渲染的主要流程如下：
+## 运行中的更新
 
-<FirstRenderFlow locale="zh" />
+首次渲染完成后，根据变化的范围选择操作：
 
-数据、状态写入和重新布局需等待首次 `await graph.render()` 成功完成。更详细的处理步骤见[首次渲染数据流](/docs/concepts/architecture#首次渲染数据流)。
+| 变化 | 使用方式 | 详细说明 |
+| --- | --- | --- |
+| 替换整份数据 | `await graph.setData(nextData)` | [数据更新](/docs/guides/data#替换整份数据) |
+| 修改部分元素或状态 | 元素增删改、状态 API | [修改节点和边](/docs/api/graph#修改节点和边)、[状态操作](/docs/api/graph#状态显隐和定位) |
+| 重新计算节点位置 | `graph.setLayout(options)` 后 `await graph.layout()` | [运行时重新布局](/docs/guides/layout#运行时重新布局) |
 
-## 更新数据
+`setLayout()` 只保存布局配置，`layout()` 才会执行计算。常规更新会安排刷新，复用当前实例即可。
 
-替换整份数据：
+缩放、平移和容器尺寸适配属于[视口操作](/docs/api/graph#视口)，无需重新创建 Graph。
 
-```ts
-await graph.setData(nextData);
-```
+## 销毁与异步清理
 
-增量更新：
+页面退出或组件卸载时调用 `graph.destroy()`，释放画布、事件监听和布局等实例资源。重复销毁不会产生额外效果；已销毁的实例不能重新使用。
 
-```ts
-graph.addNode({ id: 'n3', x: 120, y: 80 });
-graph.addEdge({ source: 'n1', target: 'n3' });
-graph.updateNodeData('n3', { label: '新节点' });
-graph.removeNode('n2');
-```
+卸载可能早于渲染或业务请求完成。及时调用 `destroy()`，并在异步结果返回后检查 `graph.destroyed`，避免继续使用已失效的实例。业务自己创建的请求、定时器和监听器仍需由业务清理。
 
-状态更新：
+## 完整使用示例
+
+下面将创建、首次渲染、状态更新和销毁串联起来。返回的清理函数应交给页面或框架的卸载逻辑调用。
 
 ```ts
-graph.setItemState('n1', 'selected', true);
-graph.batchSetState([
-  { id: 'n1', state: 'highlight', value: true },
-  { id: 'n2', state: 'inactive', value: true },
-]);
+import { Graph } from '@antv/g6-lite';
+
+export function mountGraph(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [{ id: 'alice' }, { id: 'bob' }],
+      edges: [{ source: 'alice', target: 'bob' }],
+    },
+    layout: { type: 'circular', radius: 100 },
+  });
+
+  async function initialize() {
+    await graph.render();
+    // 卸载可能发生在异步渲染完成之前。
+    if (graph.destroyed) return;
+    graph.setItemState('alice', 'selected', true);
+  }
+
+  void initialize().catch(console.error);
+
+  // 将返回的函数交给页面或组件的卸载逻辑调用。
+  return () => graph.destroy();
+}
 ```
-
-高频交互优先使用状态 API，它会走更轻的刷新路径。
-
-## 重新布局
-
-```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR' });
-await graph.layout();
-```
-
-`setLayout()` 只更新布局配置，`layout()` 才会重新计算坐标并刷新画布。
-
-## 视口与坐标
-
-常用视口 API：
-
-```ts
-graph.fitView();
-graph.focusItem('n1', 40);
-graph.setCamera({ zoom: 1.5 });
-graph.resetCamera();
-```
-
-坐标转换：
-
-```ts
-const graphPoint = graph.screenToGraph(clientX, clientY);
-const screenPoint = graph.graphToScreen(x, y);
-```
-
-### 容器尺寸变化
-
-G6Lite 会通过 `ResizeObserver` 自动同步容器与 canvas 尺寸，调用 `setSize(width, height)` 时也会走相同的视口更新流程。默认情况下，这两种变化都会保留当前 camera，避免覆盖用户手动缩放和平移。
-
-可变分栏、侧栏展开收起等场景可以在创建 Graph 时开启自动适应：
-
-```ts
-const graph = new Graph({
-  container: 'container',
-  data,
-  autoFit: {
-    padding: 24,
-    minZoom: 0.2,
-    maxZoom: 1.5,
-  },
-});
-```
-
-`autoFit: true` 等价于尺寸变化后调用 `fitView(0.9)`，也可以直接传数值缩放系数或 `FitViewOptions`。自动适应完成后才会触发 `resize` 事件，因此监听器读取到的是最终 camera。大图或需要保留用户视口的场景建议保持默认关闭。
-
-关闭 `autoFit` 不影响首次 `render()` 的适配；对象配置中的 `padding`、`minZoom`、`maxZoom` 也会用于首次适配。
-
-## 销毁
-
-```ts
-graph.destroy();
-```
-
-销毁会释放 behavior、交互分发、ResizeObserver、scheduler、标签层、Combo 层和 WebGL renderer，并触发 `destroy` 事件。React、Vue 等框架中应在组件卸载时调用。

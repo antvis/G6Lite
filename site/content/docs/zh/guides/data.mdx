@@ -1,76 +1,76 @@
 ---
 title: 数据
-description: G6Lite 的图数据格式与 Graph 顶层配置项
+description: 将业务数据转换为 GraphData，并选择整份替换或增量更新
 ---
 
-本页介绍 `Graph` 的数据结构和顶层配置项。节点、边、布局、交互和主题的细节见各自页面。
+本页介绍数据接入与运行时更新。节点、边和 Combo 的关系见[数据模型](/docs/concepts/data-model)，完整字段见[配置参考](/docs/api/options#图数据)。
 
-## 数据格式
+## 接入业务数据
 
-图数据通过 `data` 传入：
+将业务实体映射为节点，将实体之间的关系映射为边。业务字段放入 `data`，供样式函数、Tooltip 和业务逻辑读取：
 
 ```ts
-const data = {
-  nodes: [
-    { id: '0', data: { cluster: 'a', value: 1 } },
-    { id: '1', data: { cluster: 'b' } },
-  ],
-  edges: [{ source: '0', target: '1', data: { weight: 2 } }],
+import type { GraphData } from '@antv/g6-lite';
+
+const users = [
+  { id: 'alice', name: 'Alice', team: 'design' },
+  { id: 'bob', name: 'Bob', team: 'engineering' },
+];
+
+const data: GraphData = {
+  nodes: users.map((user) => ({
+    id: user.id,
+    data: { name: user.name, team: user.team },
+  })),
+  edges: [{ source: 'alice', target: 'bob' }],
 };
 ```
 
-### nodes
+将转换后的数据作为 `new Graph({ container, data })` 的 `data` 选项。首次创建与渲染的完整代码见[快速上手](/docs/getting-started/quick-start)。
 
-| 字段      | 必填 | 说明                                   |
-| --------- | ---- | -------------------------------------- |
-| `id`      | 是   | 节点唯一标识                           |
-| `name`    | 否   | 节点名称                               |
-| `data`    | 否   | 业务扩展字段，可用于样式函数或业务逻辑 |
-| `x` / `y` | 否   | 节点坐标；无布局或预布局场景使用       |
-| `states`  | 否   | 初始状态数组，如 `['selected']`        |
-| `comboId` | 否   | 所属 Combo id                          |
+## 校验数据
 
-### edges
+- 节点 `id` 在图内唯一，后续更新时保持稳定。
+- 边的 `source` 和 `target` 必须对应已有节点。
+- 使用 Combo 时，节点的 `comboId` 应对应已声明的分组。
+- 未配置布局时，应提供节点的 `x` / `y`，避免所有节点落在缺省坐标。
+- 修改图数据应通过公开方法完成，不要直接改写查询返回的 Model。
 
-| 字段     | 必填 | 说明                  |
-| -------- | ---- | --------------------- |
-| `source` | 是   | 起点节点 id           |
-| `target` | 是   | 终点节点 id           |
-| `id`     | 否   | 边 id；不传时内部生成 |
-| `data`   | 否   | 业务扩展字段          |
-| `states` | 否   | 初始状态数组          |
+## 替换整份数据
 
-### combos
+以下操作都应在首次 `await graph.render()` 完成后执行。
 
-`combos` 用于声明节点分组，节点通过 `comboId` 归属到对应分组。
+筛选条件变化、切换数据集或请求返回完整结果时，使用 `setData()`：
 
 ```ts
-const data = {
-  nodes: [{ id: 'n1', comboId: 'group-a' }],
-  edges: [],
-  combos: [{ id: 'group-a', data: { name: 'Group A' } }],
-};
+await graph.setData(nextData);
 ```
 
-## Graph 配置项
+配置了布局时会重新计算坐标；默认会重新适配视口。如果希望保留用户当前的缩放和平移：
 
-| 选项         | 类型                    | 说明                                          |
-| ------------ | ----------------------- | --------------------------------------------- |
-| `container`  | `string \| HTMLElement` | 挂载画布的容器                                |
-| `data`       | `GraphData`             | 图数据                                        |
-| `node`       | `NodeConfig`            | [节点](/docs/guides/node)类型、样式和状态样式 |
-| `edge`       | `EdgeConfig`            | [边](/docs/guides/edge)类型、样式和箭头       |
-| `combo`      | `ComboConfig`           | [Combo](/docs/guides/combo) 样式              |
-| `layout`     | `LayoutConfig`          | [布局](/docs/guides/layout)类型与参数         |
-| `behaviors`  | `BehaviorOption[]`      | [交互](/docs/guides/interactions)列表         |
-| `theme`      | `ThemeOption`           | [主题](/docs/guides/theme)                    |
-| `transforms` | `TransformOption[]`     | 数据转换，如平行边处理                        |
+```ts
+await graph.setData(nextData, { fitView: false });
+```
 
-创建 `Graph` 后必须调用 `await graph.render()` 才会执行布局并绘制。销毁时调用 `graph.destroy()`。
+这里的 `fitView` 控制本次数据替换后的适配；容器尺寸变化后的适配由 [`autoFit`](/docs/api/options#autofit) 控制。
 
-## 下一步
+## 增量更新
 
-- [节点](/docs/guides/node)
-- [边](/docs/guides/edge)
-- [Graph 生命周期](/docs/concepts/graph-lifecycle)
-- [API 总览](/docs/api)
+只修改少量元素时，使用增删改方法：
+
+```ts
+graph.addNode({ id: 'carol', x: 120, y: 80, data: { name: 'Carol' } });
+graph.addEdge({ source: 'alice', target: 'carol' });
+graph.updateNodeData('carol', { name: 'Carol Chen' });
+graph.removeNode('bob');
+```
+
+新增节点需要提供坐标，增量方法不会自动重新布局。需要重新排列时，按[布局指南](/docs/guides/layout#运行时重新布局)调用 `layout()`；更新多个元素时，可使用批量方法减少重复刷新。
+
+选中、高亮、隐藏等变化使用[状态与显隐 API](/docs/api/graph#状态显隐和定位)，无需替换整份数据。
+
+## 相关参考
+
+- [Graph 生命周期](/docs/concepts/graph-lifecycle)：初始化完成后更新，卸载时销毁。
+- [Graph 数据 API](/docs/api/graph#修改节点和边)：元素增删改、批量操作及参数。
+- [节点配置](/docs/guides/node)：将业务字段映射为颜色、尺寸与标签。

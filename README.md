@@ -29,10 +29,11 @@ English | [简体中文](./README.zh-CN.md)
 
 ## Why G6Lite
 
-- **GPU-first graph rendering** — Nodes and edges share a batched WebGL pipeline designed for responsive relationship exploration.
-- **Refresh by change level** — State, position, and data changes are scheduled by refresh level, with support for partial updates; edge state changes and other cases trigger full rebuilds.
-- **Built-in layouts and interactions** — Select layouts from `@antv/layout` and other built-in algorithms through `layout`, and configure zoom, pan, drag, select, and highlight through `behaviors`; omitting `behaviors` enables only zoom and pan by default.
-- **An explicit extension surface** — Import from the package root, map data to styles with functions, and add capabilities through the unified `register()` API.
+- **Lightweight loading** — Keep the core separate from layouts and load algorithms on demand to reduce initial loading overhead.
+- **Efficient rendering** — Combine batched WebGL rendering with incremental updates to display and explore large-scale relationship graphs.
+- **Flexible layouts and interactions** — Choose from multiple graph layouts and add zoom, pan, drag, selection, and highlighting.
+- **Customization and extensions** — Map business data to visual styles and extend graph elements, layouts, and interactions as needed.
+- **AI-assisted development** — Use the G6Lite Skill to help an agent create graphs, refine styles, and configure interactions.
 
 ## Install
 
@@ -110,7 +111,7 @@ Use the UMD build directly in a browser without a bundler. It exposes `window.G6
 - [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js)
 - [UNPKG](https://unpkg.com/@antv/g6-lite@beta/dist/g6-lite.umd.min.js)
 
-These URLs and the UMD gzip badge become available after a release containing the UMD build is published to npm under the `beta` tag. Pin `beta` to an exact published version in production. The UMD badge measures the complete CDN download; the Bundlephobia badge measures the npm entry bundled by that service.
+Pin `beta` to an exact published version in production. The UMD badge measures the complete CDN download; the Bundlephobia badge measures the npm entry bundled by that service.
 
 ## Learn More
 

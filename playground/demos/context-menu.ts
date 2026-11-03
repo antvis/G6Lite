@@ -8,7 +8,7 @@ export async function run(container: string | HTMLElement) {
   host.style.position = 'relative';
 
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container: host,
     data: {
       nodes: [

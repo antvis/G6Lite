@@ -27,7 +27,7 @@ const graph = new Graph({
 
 保存 `container`、`data` 和其余配置，并在容器内创建 canvas。此时还没有布局结果，也没有可查询的元素。
 
-`container` 接受元素 id 或 `HTMLElement`。容器在构造时必须已经存在于文档中。
+`container` 接受 CSS 选择器（例如 `#container`）或 `HTMLElement`。容器在构造时必须已经存在于文档中。
 
 ### `render()`
 
@@ -35,7 +35,7 @@ const graph = new Graph({
 await graph.render();
 ```
 
-按当前配置执行数据转换和布局，创建渲染数据，挂载交互、标签和插件，然后调用一次 `fitView()` 并绘制。完成后 `destroyed` 仍为 `false`，后续数据方法可以调用。
+按当前配置执行数据转换和布局，初始化运行时并绘制首帧。等待首次渲染完成，再调用数据和状态方法。初始化与异步清理的顺序见 [Graph 生命周期](/docs/concepts/graph-lifecycle)。
 
 同一实例重复调用会取消仍在进行的布局，并按最新数据和配置重新绘制。
 
@@ -268,6 +268,14 @@ graph.resetCamera();
 | `setSize(width, height)` | 按 CSS 像素设置画布尺寸 |
 | `fitCenter()` | 保持缩放，把图内容移到视口中心 |
 
+### 容器尺寸变化
+
+Graph 使用 `ResizeObserver` 自动同步容器与画布尺寸。`setSize(width, height)` 按 CSS 像素更新画布，并使用相同的视口更新流程。
+
+默认只更新画布尺寸，保留当前相机，避免覆盖用户的缩放和平移。开启 [`autoFit`](/docs/api/options#autofit) 后，尺寸变化会按配置重新适配内容。
+
+`resize` 事件在可选的自动适配完成后发出，监听器读取到的是最终相机。容器尺寸变化无需重新创建实例或调用 `render()`。
+
 ### `zoomTo()` 与 `zoomBy()`
 
 ```ts
@@ -295,7 +303,7 @@ graph.fitView({ padding: [24, 16, 24, 16], minZoom: 0.2, maxZoom: 2 });
 
 按全部节点的包围盒调整相机，使内容进入视口。
 
-- 数字是相对适配结果的缩放系数，默认 `0.9`。`render()` 结束时使用的就是这个默认值。
+- 数字是相对适配结果的缩放系数，默认 `0.9`。首次 `render()` 未通过 [`autoFit`](/docs/api/options#autofit) 指定其他策略时使用此默认值。
 - 对象使用 `padding`、`minZoom`、`maxZoom`。`padding` 可以是统一的 CSS 像素，或 `[上, 右, 下, 左]`。对象形式下缩放系数按 `1` 计算，`minZoom` 默认 `0.1`，`maxZoom` 默认 `20`。
 
 ### 坐标转换

@@ -25,7 +25,7 @@ const button = (action: string, label: string) =>
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container,
     data: DATA,
     node: {

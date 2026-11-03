@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { localizedPath, type Locale } from '@/lib/i18n';
-import { ScrollNavigation } from './homepage/scroll-navigation';
 
 export function DocsRouteLayout({
   children,
@@ -22,20 +21,17 @@ export function DocsRouteLayout({
   const isExamplesRoute = pathname === examplesRoot || pathname.startsWith(`${examplesRoot}/`);
 
   return (
-    <>
-      <ScrollNavigation />
-      <DocsLayout
-        tree={tree}
-        nav={{ enabled: false }}
-        searchToggle={{ enabled: false }}
-        themeSwitch={{ enabled: false }}
-        sidebar={{ enabled: !isExamplesRoute, collapsible: false }}
-        containerProps={{
-          className: isExamplesRoute ? 'examples-route-layout' : 'docs-brand-layout',
-        }}
-      >
-        {children}
-      </DocsLayout>
-    </>
+    <DocsLayout
+      tree={tree}
+      nav={{ enabled: false }}
+      searchToggle={{ enabled: false }}
+      themeSwitch={{ enabled: false }}
+      sidebar={{ enabled: !isExamplesRoute, collapsible: false }}
+      containerProps={{
+        className: isExamplesRoute ? 'examples-route-layout' : 'docs-brand-layout',
+      }}
+    >
+      {children}
+    </DocsLayout>
   );
 }

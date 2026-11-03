@@ -154,7 +154,7 @@ export async function run(container: string | HTMLElement) {
   // Padding keeps the boundary badges (star, count pill) off the canvas edge.
   const viewPadding = 40;
   const graph = new Graph({
-    autoFitOnResize: { padding: viewPadding, maxZoom: 1.5 },
+    autoFit: { padding: viewPadding, maxZoom: 1.5 },
     container,
     data: {
       nodes: [

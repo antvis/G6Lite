@@ -181,6 +181,7 @@ export class Renderer {
   // State
   private highlightNodeIds = new Set<string>();
   private highlightEdgeIndices = new Set<number>();
+  private stateHighlightEdgeIndices = new Set<number>();
   private prevHighlightNodeIds = new Set<string>();
   private prevHighlightEdgeIndices = new Set<number>();
 
@@ -667,10 +668,12 @@ export class Renderer {
     this.resetEdgeDrawMapping(edges.length);
     const regularIndices: number[] = [];
     const selfLoopIndices: number[] = [];
+    this.stateHighlightEdgeIndices.clear();
 
     for (let i = 0; i < edges.length; i++) {
       const e = edges[i];
       if (edgeHasState(e, 'hidden')) continue;
+      if (edgeHasState(e, 'highlight')) this.stateHighlightEdgeIndices.add(i);
       if (e.source === e.target) {
         selfLoopIndices.push(i);
       } else {
@@ -1773,6 +1776,8 @@ export class Renderer {
 
       const dataModelEdge = dataModel.getEdge(edgeId);
       const edge = dataModelEdge ? getRendererEdge(dataModelEdge) : this.edges[index];
+      if (edgeHasState(edge, 'highlight')) this.stateHighlightEdgeIndices.add(index);
+      else this.stateHighlightEdgeIndices.delete(index);
       const drawStart = this.edgeDrawStart[index] ?? -1;
       const drawCount = this.edgeDrawCount[index] ?? 0;
       const loopSlot = this.edgeLoopSlot[index] ?? -1;
@@ -2102,6 +2107,7 @@ export class Renderer {
       edgeProgram.render(params);
       this.getProgram('edgeLoop').render(params);
       this.getProgram('edgeArrow').render(params);
+      this.drawOpaqueHighlightedEdges(params);
     }
 
     nodeProgram.render(params);
@@ -2111,6 +2117,30 @@ export class Renderer {
 
   onBeforeDraw(cb: () => void): void {
     this.beforeDrawCallback = cb;
+  }
+
+  /** Restore opaque highlighted lines above the context edges that can wash them out. */
+  private drawOpaqueHighlightedEdges(params: RenderParams): void {
+    if (!this.stateHighlightEdgeIndices.size && !this.highlightEdgeIndices.size) return;
+    const indices = new Set([...this.stateHighlightEdgeIndices, ...this.highlightEdgeIndices]);
+    for (const index of indices) {
+      const edge = this.edges[index];
+      if (!edge || edgeHasState(edge, 'hidden')) continue;
+      const source = this.nodes[this.edgeSourceIdx[index]];
+      const target = this.nodes[this.edgeTargetIdx[index]];
+      if (!source || !target) continue;
+      const style = resolveEdgeStyle(source, target, edge, this.edgeConfig, this.theme);
+      // Repainting translucent edges would compound their requested opacity.
+      if (style.opacity !== 1) continue;
+      const start = this.edgeDrawStart[index];
+      const count = this.edgeDrawCount[index];
+      if (start >= 0 && count > 0) this.activeEdgeProgram.renderRange(params, start, count);
+      const loop = this.edgeLoopSlot[index];
+      if (loop >= 0) this.getProgram('edgeLoop').renderRange(params, loop, 1);
+      const arrow = this.edgeArrowStart[index];
+      const arrows = this.edgeArrowCount[index];
+      if (arrow >= 0 && arrows > 0) this.getProgram('edgeArrow').renderRange(params, arrow, arrows);
+    }
   }
 
   onAfterDraw(cb: () => void): void {
@@ -2512,6 +2542,7 @@ export class Renderer {
     this.edgeArrowCount = new Int32Array(0);
     this.highlightNodeIds.clear();
     this.highlightEdgeIndices.clear();
+    this.stateHighlightEdgeIndices.clear();
     this.prevHighlightNodeIds.clear();
     this.prevHighlightEdgeIndices.clear();
   }

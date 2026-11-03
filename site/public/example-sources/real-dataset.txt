@@ -23,7 +23,7 @@ export async function run(container: string | HTMLElement) {
   const data: GraphData = await fetch(DATASET).then((r) => r.json());
 
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container,
     data,
     node: {

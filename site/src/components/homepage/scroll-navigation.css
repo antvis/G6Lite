@@ -1,6 +1,6 @@
-/* The homepage marker unmounts on navigation; other routes retain their navigation. */
+/* Keep the header in document flow while its surface becomes a floating bar. */
 body:has([data-g6lite-home-navigation]) #nd-nav > div {
-  width: calc(100% - 0px);
+  width: 100%;
   margin-inline: auto;
   border: 1px solid transparent;
   border-bottom-color: var(--color-fd-border);
@@ -24,8 +24,9 @@ body:has([data-g6lite-home-navigation]) #nd-nav nav {
     padding 360ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-body:has([data-g6lite-home-navigation='compact']) #nd-nav > div {
-  width: min(1160px, calc(100% - 48px));
+/* Only the homepage floats: documentation keeps its header aligned with the sidebar. */
+body:has([data-g6lite-homepage] [data-g6lite-home-navigation='compact']) #nd-nav > div {
+  width: min(calc(100% - 48px), 1280px);
   border-color: color-mix(in srgb, var(--color-fd-border) 68%, transparent);
   border-radius: 40px;
   background: color-mix(in srgb, var(--color-fd-background) 95%, transparent);
@@ -35,31 +36,26 @@ body:has([data-g6lite-home-navigation='compact']) #nd-nav > div {
   transform: translateY(14px);
 }
 
-body:has([data-g6lite-home-navigation='compact']) #nd-nav nav {
-  height: 64px;
-  padding-inline: 30px;
+body:has([data-g6lite-homepage] [data-g6lite-home-navigation='compact']) #nd-nav nav {
+  height: 52px;
+  padding-inline: 24px;
 }
 
-@media (max-width: 767px) {
-  body:has([data-g6lite-home-navigation='compact']) #nd-nav > div {
+@media (max-width: 1023px) {
+  body:has([data-g6lite-homepage] [data-g6lite-home-navigation='compact']) #nd-nav > div {
     width: calc(100% - 24px);
     border-radius: 26px;
     transform: translateY(8px);
   }
 
-  body:has([data-g6lite-home-navigation='compact']) #nd-nav nav {
+  body:has([data-g6lite-homepage] [data-g6lite-home-navigation='compact']) #nd-nav nav {
     height: 52px;
-    padding-inline: 18px;
-  }
-}
-
-/* English labels need a little more room in the compact tablet navigation. */
-@media (min-width: 768px) and (max-width: 1023px) {
-  body:has(main[lang='en'] [data-g6lite-home-navigation='compact']) #nd-nav > div {
-    width: calc(100% - 24px);
-  }
-  body:has(main[lang='en'] [data-g6lite-home-navigation='compact']) #nd-nav nav {
     padding-inline: 16px;
+  }
+
+  /* The dropdown shares the surface with the bar, so give it usable corners. */
+  body:has([data-g6lite-home-navigation]) #nd-nav > div:has(nav button[aria-expanded='true']) {
+    border-radius: 20px;
   }
 }
 

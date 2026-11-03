@@ -9,17 +9,17 @@ import '../global.css';
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} — ${siteConfig.description.zh}`,
+    default: siteConfig.title.zh,
     template: `%s | ${siteConfig.name}`,
   },
-  description: `${siteConfig.name} 是${siteConfig.description.zh}，提供数据、布局、交互、状态与扩展的一体化 API。`,
+  description: siteConfig.description.zh,
   keywords: ['G6Lite', 'graph', 'visualization', 'webgl', 'antv', 'g6', '图可视化', '图分析'],
   authors: [{ name: 'AntV' }],
   applicationName: siteConfig.name,
   manifest: '/manifest.webmanifest',
   icons: { icon: '/icon.svg?v=antv-20260724' },
   openGraph: {
-    title: `${siteConfig.name} — ${siteConfig.description.zh}`,
+    title: siteConfig.title.zh,
     description: siteConfig.description.zh,
     url: siteConfig.url,
     siteName: siteConfig.name,
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: siteConfig.name,
+    title: siteConfig.title.zh,
     description: siteConfig.description.zh,
     images: ['/examples/real-dataset.png'],
   },

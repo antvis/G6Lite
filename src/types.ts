@@ -744,8 +744,9 @@ export interface GraphOptions {
   /**
    * Refit the graph after its viewport size changes.
    * Defaults to false so resizing preserves the current camera.
+   * Initial rendering still fits the graph when false or omitted.
    */
-  autoFitOnResize?: boolean | number | FitViewOptions;
+  autoFit?: boolean | number | FitViewOptions;
   /** Engine-managed node and edge label rendering policies. */
   label?: LabelOptions;
   node?: NodeConfig;

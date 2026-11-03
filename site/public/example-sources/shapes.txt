@@ -15,7 +15,7 @@ export async function run(container: string | HTMLElement) {
   (typeof container === 'string' ? document.querySelector(container)! : container).appendChild(rectContainer);
 
   const graph1 = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container: rectContainer,
     data: {
       nodes: [
@@ -67,7 +67,7 @@ export async function run(container: string | HTMLElement) {
   (typeof container === 'string' ? document.querySelector(container)! : container).appendChild(thickContainer);
 
   const graph2 = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container: thickContainer,
     data: {
       nodes: [

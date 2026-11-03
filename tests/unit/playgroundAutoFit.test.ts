@@ -6,16 +6,16 @@ import { describe, expect, it } from 'vitest';
 const repositoryRoot = path.resolve('.');
 const demosDirectory = path.join(repositoryRoot, 'playground/demos');
 
-function hasAutoFitOnResize(options: ts.ObjectLiteralExpression): boolean {
+function hasAutoFit(options: ts.ObjectLiteralExpression): boolean {
   return options.properties.some((property) => {
     if (!ts.isPropertyAssignment(property)) return false;
     const { name } = property;
-    return (ts.isIdentifier(name) || ts.isStringLiteral(name)) && name.text === 'autoFitOnResize';
+    return (ts.isIdentifier(name) || ts.isStringLiteral(name)) && name.text === 'autoFit';
   });
 }
 
 describe('Playground resize fitting policy', () => {
-  it('configures every demo Graph through autoFitOnResize', () => {
+  it('configures every demo Graph through autoFit', () => {
     const demoFiles = readdirSync(demosDirectory).filter((file) => file.endsWith('.ts'));
     const missing: string[] = [];
     let graphCount = 0;
@@ -33,7 +33,7 @@ describe('Playground resize fitting policy', () => {
         ) {
           graphCount++;
           const options = node.arguments?.[0];
-          if (!options || !ts.isObjectLiteralExpression(options) || !hasAutoFitOnResize(options)) {
+          if (!options || !ts.isObjectLiteralExpression(options) || !hasAutoFit(options)) {
             const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
             missing.push(`${file}:${line + 1}`);
           }

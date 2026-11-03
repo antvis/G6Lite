@@ -3,13 +3,18 @@
 <h1 align="center">G6Lite</h1>
 
 <p align="center">
-  面向交互式图可视化的轻量、高性能 WebGL 引擎。
+  <strong>轻量图可视化，为大规模关系数据而生</strong>
+</p>
+
+<p align="center">
+  丰富的布局与交互，配合轻量高效的 WebGL 渲染，让大规模关系清晰呈现，让数据探索流畅自如。
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@antv/g6-lite"><img alt="npm 版本" src="https://img.shields.io/npm/v/@antv/g6-lite.svg"></a>
   <a href="https://github.com/antvis/G6Lite/actions/workflows/build.yml"><img alt="构建" src="https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg"></a>
   <a href="https://bundlephobia.com/package/@antv/g6-lite"><img alt="压缩后体积" src="https://img.shields.io/bundlephobia/minzip/@antv/g6-lite"></a>
+  <a href="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js"><img alt="UMD gzip 体积" src="https://img.badgesize.io/https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
   <a href="./LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/@antv/g6-lite.svg"></a>
 </p>
 
@@ -24,10 +29,11 @@
 
 ## 为什么选择 G6Lite
 
-- **面向图数据的 GPU 渲染** — 节点与边共享 WebGL 批量渲染管线，为流畅探索关系数据而设计。
-- **按变化增量更新** — 状态、位置和业务数据变更按刷新级别调度，避免无关的全量重建。
-- **布局与交互开箱即用** — 组合使用 `@antv/layout` 布局与可配置的缩放、平移、拖拽、选择和高亮交互。
-- **清晰的扩展边界** — 从包根导入公开 API，通过函数映射数据与样式，并使用统一的 `register()` API 扩展能力。
+- **轻量加载** — 核心与布局分离，算法按需加载，降低初始加载开销。
+- **高效渲染** — WebGL 批量绘制与增量更新，支撑大规模关系图的展示与探索。
+- **丰富布局与交互** — 提供多种图布局，支持缩放、平移、拖拽、选择与高亮。
+- **灵活定制与扩展** — 按业务数据配置样式，按需扩展图形、布局与交互能力。
+- **AI 协作开发** — 通过 G6Lite Skill，让 Agent 协助创建关系图、调整样式和配置交互。
 
 ## 安装
 
@@ -40,7 +46,7 @@ npm install @antv/g6-lite
 准备一个有明确宽高的容器：
 
 ```html
-<div id="graph" style="width: 800px; height: 500px"></div>
+<div id="container" style="width: 800px; height: 500px"></div>
 ```
 
 然后创建并渲染一个可交互的图：
@@ -49,7 +55,7 @@ npm install @antv/g6-lite
 import { Graph } from '@antv/g6-lite';
 
 const graph = new Graph({
-  container: 'graph',
+  container: '#container',
   data: {
     nodes: [
       { id: 'gateway', data: { role: 'core' } },
@@ -78,6 +84,35 @@ await graph.render();
 
 公开 API 只以 `@antv/g6-lite` 包根导出和 `package.json#exports` 为准。`src/` 深层路径属于内部实现，可能随版本调整。
 
+## CDN / UMD
+
+无需构建工具，在浏览器中直接加载 UMD 包即可使用 `window.G6Lite`。产物包含运行时依赖、布局算法和内联的布局 Worker：
+
+```html
+<div id="container" style="width: 100%; height: 500px"></div>
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js"></script>
+<script>
+  const graph = new G6Lite.Graph({
+    container: '#container',
+    data: {
+      nodes: [{ id: 'gateway' }, { id: 'orders' }, { id: 'inventory' }],
+      edges: [
+        { source: 'gateway', target: 'orders' },
+        { source: 'gateway', target: 'inventory' },
+      ],
+    },
+    layout: { type: 'circular', radius: 140 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+  });
+  graph.render().catch(console.error);
+</script>
+```
+
+- [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.umd.min.js)
+- [UNPKG](https://unpkg.com/@antv/g6-lite@beta/dist/g6-lite.umd.min.js)
+
+生产环境请将 `beta` 替换为已发布的确切版本号。UMD 徽章展示完整 CDN 文件的下载体积；Bundlephobia 徽章展示该服务打包 npm 入口后测得的体积。
+
 ## 继续阅读
 
 - [官网](https://g6lite.antv.vision)
@@ -97,6 +132,8 @@ npm run dev
 ```
 
 使用 `npm run ci` 执行项目验证流水线，使用 `npm run site` 构建文档站点。
+
+`npm run build` 会同时生成 ESM 产物和 `dist/g6-lite.umd.min.js`（含 source map）。使用 `npm run build:umd` 单独重新构建 UMD，使用 `npm run check:umd` 在 Chrome/Chromium 中验证产物和布局 Worker。
 
 ## 贡献
 

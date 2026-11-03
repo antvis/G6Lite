@@ -7,6 +7,7 @@ import {
 } from '@src/renderer/edgePath.js';
 import { encodeId } from '@src/renderer/picking.js';
 import { Renderer } from '@src/renderer/renderer.js';
+import type { Program } from '@src/renderer/programs/program.js';
 import { analyzeEdgeConfig, analyzeNodeConfig } from '@src/renderer/style.js';
 import { resolveTheme } from '@src/theme.js';
 import type { EdgeConfig, GraphEdge, LayoutNode, ThemeTokens } from '@src/types.js';
@@ -29,6 +30,8 @@ const theme: ThemeTokens = resolveTheme('light');
 interface ProgramView {
   itemCount: number;
   array: Float32Array;
+  render: Program['render'];
+  renderRange: Program['renderRange'];
 }
 
 interface RendererInternals {
@@ -364,6 +367,88 @@ describe('Renderer — data pipeline', () => {
     expect(program.array[secondEdgeOffset + 10]).toBeCloseTo(0.9196, 3);
     expect(program.array[secondEdgeOffset + 11]).toBeCloseTo(0.9549, 3);
     expect(program.array[secondEdgeOffset + 12]).toBeCloseTo(0.25);
+  });
+
+  it.each(['line', 'arc', 'cubic', 'polyline'] as const)(
+    'draws opaque highlighted %s edges above context edges and below nodes',
+    (type) => {
+      renderer.setData({
+        ...rendererData(
+          [
+            { id: 'a', x: 0, y: 0 },
+            { id: 'b', x: 100, y: 100 },
+            { id: 'c', x: 200, y: 0 },
+          ],
+          [
+            { source: 'a', target: 'b', states: ['highlight'] },
+            { source: 'b', target: 'c' },
+          ],
+        ),
+        edgeConfig: { type, style: { lineWidth: 2, endArrow: false } },
+      });
+      renderer.draw();
+      const edge = rendererInternals(renderer).activeEdgeProgram;
+      const node = rendererInternals(renderer).activeNodeProgram;
+      const context = vi.spyOn(edge, 'render');
+      const foreground = vi.spyOn(edge, 'renderRange');
+      const nodes = vi.spyOn(node, 'render');
+      renderer.draw();
+      expect(foreground).toHaveBeenCalledTimes(1);
+      expect(foreground.mock.calls[0][1]).toBe(0);
+      expect(foreground.mock.calls[0][2]).toBeGreaterThan(0);
+      expect(context.mock.invocationCallOrder[0]).toBeLessThan(
+        foreground.mock.invocationCallOrder[0],
+      );
+      expect(foreground.mock.invocationCallOrder[0]).toBeLessThan(
+        nodes.mock.invocationCallOrder[0],
+      );
+      renderer.destroy();
+    },
+  );
+
+  it('does not repaint translucent or hidden highlights', () => {
+    renderer.setData({
+      ...rendererData(
+        [
+          { id: 'a', x: 0, y: 0 },
+          { id: 'b', x: 100, y: 100 },
+        ],
+        [
+          { source: 'a', target: 'b', states: ['highlight'] },
+          { source: 'b', target: 'a', states: ['highlight', 'hidden'] },
+        ],
+      ),
+      edgeConfig: { stateStyles: { highlight: { opacity: 0.4 } } },
+    });
+    renderer.draw();
+    const foreground = vi.spyOn(rendererInternals(renderer).activeEdgeProgram, 'renderRange');
+    renderer.draw();
+    expect(foreground).not.toHaveBeenCalled();
+    renderer.destroy();
+  });
+
+  it('updates foreground edges when highlight states are patched or cleared', () => {
+    const dataModel = new DataModel({ theme });
+    dataModel.addNode({ id: 'a', x: 0, y: 0 });
+    dataModel.addNode({ id: 'b', x: 100, y: 100 });
+    dataModel.addEdge({ id: 'ab', source: 'a', target: 'b' });
+    renderer.setData({
+      nodes: dataModel.getNodes() as LayoutNode[],
+      edges: dataModel.getEdges() as GraphEdge[],
+      theme,
+    });
+    renderer.draw();
+    const foreground = vi.spyOn(rendererInternals(renderer).activeEdgeProgram, 'renderRange');
+    dataModel.setEdgeState('ab', 'highlight', true);
+    renderer.patchStyles(dataModel, new Set(), new Set(['ab']));
+    renderer.draw();
+    expect(foreground).toHaveBeenCalledTimes(1);
+    foreground.mockClear();
+    dataModel.setEdgeState('ab', 'highlight', false);
+    renderer.patchStyles(dataModel, new Set(), new Set(['ab']));
+    renderer.draw();
+    expect(foreground).not.toHaveBeenCalled();
+    renderer.destroy();
   });
 
   it('builds an id→index map covering every node', () => {

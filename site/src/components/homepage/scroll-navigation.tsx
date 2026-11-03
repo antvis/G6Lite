@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import './scroll-navigation.css';
 
-/** Scope the floating navigation to pages using the shared homepage and preserve the existing menu. */
+/** Animate only the homepage header; other pages keep their full-width top navigation. */
 export function ScrollNavigation() {
   const [compact, setCompact] = useState(false);
 
@@ -19,8 +19,10 @@ export function ScrollNavigation() {
     };
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('pageshow', onScroll);
     return () => {
       window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('pageshow', onScroll);
       window.cancelAnimationFrame(frame);
     };
   }, []);

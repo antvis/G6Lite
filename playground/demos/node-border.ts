@@ -14,7 +14,7 @@ export async function run(container: string | HTMLElement) {
   root.appendChild(div1);
 
   const g1 = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container: div1,
     data: {
       nodes: [
@@ -46,7 +46,7 @@ export async function run(container: string | HTMLElement) {
   root.appendChild(div2);
 
   const g2 = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container: div2,
     data: {
       nodes: [

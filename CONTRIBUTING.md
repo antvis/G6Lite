@@ -2,7 +2,11 @@
 
 First off, thanks for taking the time to contribute! 🎉
 
-G6Lite is a 100% WebGL, AI-first high-performance graph engine in the [AntV](https://antv.antgroup.com/) family. This guide explains how to propose changes and get them merged.
+**G6Lite · Lightweight graph visualization, built for large-scale relationship data**
+
+Flexible layouts and interactions, paired with lightweight, efficient WebGL rendering, bring large-scale relationships into focus and make data exploration feel fluid.
+
+G6Lite is part of the [AntV](https://antv.antgroup.com/) family. This guide explains how to propose changes and get them merged.
 
 ## Table of Contents
 

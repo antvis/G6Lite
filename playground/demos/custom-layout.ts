@@ -22,7 +22,7 @@ register('layout', TWO_ROW_LAYOUT, extensionFactory(() => ({ ...twoRowLayout }))
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container,
     data: {
       nodes: ['采集', '清洗', '特征', '训练', '评估', '发布'].map((label) => ({

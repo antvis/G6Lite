@@ -12,7 +12,7 @@
 }
 
 .shell {
-  width: min(100% - 64px, 1160px);
+  width: min(100% - 64px, var(--site-content-max-width));
   margin-inline: auto;
 }
 
@@ -96,7 +96,7 @@
 
 @media (max-width: 1023px) {
   .shell {
-    width: min(100% - 48px, 1160px);
+    width: min(100% - 48px, var(--site-content-max-width));
   }
 
   .footerGrid {
@@ -110,7 +110,7 @@
 
 @media (max-width: 767px) {
   .shell {
-    width: min(100% - 36px, 1160px);
+    width: min(100% - 36px, var(--site-content-max-width));
   }
 
   .footerGrid {

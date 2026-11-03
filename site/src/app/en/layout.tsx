@@ -10,17 +10,17 @@ import '../global.css';
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} — ${siteConfig.description.en}`,
+    default: siteConfig.title.en,
     template: `%s | ${siteConfig.name}`,
   },
-  description: `${siteConfig.name} is ${siteConfig.description.en.toLowerCase()}, with one API for data, layouts, interactions, states, and extensions.`,
+  description: siteConfig.description.en,
   keywords: ['G6Lite', 'graph visualization', 'WebGL', 'AntV', 'graph rendering', 'TypeScript'],
   authors: [{ name: 'AntV' }],
   applicationName: siteConfig.name,
   manifest: '/manifest.webmanifest',
   icons: { icon: '/icon.svg?v=antv-20260724' },
   openGraph: {
-    title: `${siteConfig.name} — ${siteConfig.description.en}`,
+    title: siteConfig.title.en,
     description: siteConfig.description.en,
     url: `${siteConfig.url}/en`,
     siteName: siteConfig.name,
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: siteConfig.name,
+    title: siteConfig.title.en,
     description: siteConfig.description.en,
     images: ['/examples/real-dataset.png'],
   },

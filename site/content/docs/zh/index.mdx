@@ -1,16 +1,20 @@
 ---
 title: 概览
-description: G6Lite — 基于 WebGL 的高性能图可视化与分析引擎
+description: G6Lite 文档：入门、概念、配置、API、示例与性能验证
 ---
 
-G6Lite 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL 引擎。文档按任务组织：先完成第一个图，再深入数据、样式、布局、交互、性能和 API。
+**G6Lite · 轻量图可视化，为大规模关系数据而生**
+
+丰富的布局与交互，配合轻量高效的 WebGL 渲染，让大规模关系清晰呈现，让数据探索流畅自如。
+
+文档按任务组织：先完成第一个图，再深入数据、样式、布局、交互、性能和 API。
 
 ## 先从这里开始
 
 <Cards>
   <Card title="安装与第一个图" href="/docs/getting-started/quick-start" />
   <Card title="用 AI 构建 G6Lite 图" href="/docs/ai" />
-  <Card title="在 React 中使用" href="/docs/getting-started/react" />
+  <Card title="在框架中使用" href="/docs/getting-started/react" />
   <Card title="示例总览" href="/docs/examples" />
   <Card title="API 总览" href="/docs/api" />
 </Cards>
@@ -31,11 +35,11 @@ G6Lite 是一个聚焦**大规模图数据**渲染与分析的轻量级 WebGL �
 
 ## 核心能力
 
-- **WebGL 高性能渲染**：节点和边通过 GPU 批量绘制，适合大规模图数据。
-- **增量更新**：高亮、选中、隐藏等状态变化走分级刷新和局部 patch。
-- **布局能力**：提供 force、circular、grid、dagre、radial、mds、mindmap、fishbone 等布局，并按类型自动加载对应算法。
-- **交互行为**：缩放、拖拽、选择、高亮、框选、套索、Tooltip 开箱可用。
-- **轻量扩展**：支持主题覆盖、Combo、标签、图标和节点扩展。
+- **轻量加载** — 核心与布局分离，算法按需加载，降低初始加载开销。
+- **高效渲染** — WebGL 批量绘制与增量更新，支撑大规模关系图的展示与探索。
+- **丰富布局与交互** — 提供多种图布局，支持缩放、平移、拖拽、选择与高亮。
+- **灵活定制与扩展** — 按业务数据配置样式，按需扩展图形、布局与交互能力。
+- **AI 协作开发** — 通过 G6Lite Skill，让 Agent 协助创建关系图、调整样式和配置交互。
 
 ## 选型提示
 

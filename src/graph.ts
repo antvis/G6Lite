@@ -147,7 +147,7 @@ export class Graph {
     this.renderer.ensureProcessed();
     // Honor the same fit policy as resize-driven fits: an options object
     // (e.g. padding for label breathing room) or a custom scale.
-    const autoFit = this.options.autoFitOnResize;
+    const autoFit = this.options.autoFit;
     this.fitView(autoFit && autoFit !== true ? autoFit : 0.9);
     this.renderer.draw();
     if (!this.isGenerationCurrent(generation)) return;
@@ -1481,7 +1481,7 @@ export class Graph {
 
   private resizeViewport(width: number, height: number): void {
     this.renderer.resize(width, height);
-    const autoFit = this.options.autoFitOnResize;
+    const autoFit = this.options.autoFit;
     if (autoFit !== undefined && autoFit !== false) {
       this.fitView(autoFit === true ? 0.9 : autoFit);
     }

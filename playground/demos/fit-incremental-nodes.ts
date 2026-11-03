@@ -11,7 +11,7 @@ const BASE_DATA = {
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container,
     data: BASE_DATA,
     node: {

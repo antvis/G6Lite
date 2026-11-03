@@ -1,13 +1,23 @@
 ---
-title: Use G6Lite with React
-description: Mount and clean up a Graph instance with useRef and useEffect
+title: Use with React and Vue
+description: Use G6Lite in React and Vue 3
 ---
 
-Create the graph after the DOM container mounts and destroy it in the effect cleanup:
+import { QuickStartExample } from '@/components/quick-start-example';
+
+The React and Vue 3 examples below create the same graph. Zoom the canvas, drag nodes, and hover to highlight connections.
+
+<QuickStartExample locale="en" />
+
+Run `npm install @antv/g6-lite` in your existing framework project, then use the matching component below.
+
+## Use with React
+
+Save this as `GraphView.tsx` and use `<GraphView />` in your page. The component creates the graph after mounting and destroys it on unmount.
 
 ```tsx
-import { Graph } from '@antv/g6-lite';
 import { useEffect, useRef } from 'react';
+import { Graph } from '@antv/g6-lite';
 
 export function GraphView() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -18,22 +28,80 @@ export function GraphView() {
     const graph = new Graph({
       container: containerRef.current,
       data: {
-        nodes: [{ id: 'a' }, { id: 'b' }],
-        edges: [{ source: 'a', target: 'b' }],
+        nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+        edges: [
+          { source: 'Alice', target: 'Bob' },
+          { source: 'Alice', target: 'Carol' },
+        ],
       },
+      node: {
+        style: {
+          size: 24,
+          label: (node) => node.id,
+          labelPlacement: 'bottom',
+        },
+      },
+      edge: { style: { endArrow: true } },
       layout: { type: 'circular', radius: 120 },
-      autoFitOnResize: { padding: 24, maxZoom: 1.5 },
-      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+      autoFit: { padding: 32, maxZoom: 1 },
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
     });
 
-    graph.render();
+    void graph.render().catch(console.error);
+
     return () => graph.destroy();
   }, []);
 
-  return <div ref={containerRef} style={{ width: '100%', height: 480 }} />;
+  return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
 }
 ```
 
-Give the container a real height. Cleanup is especially important because React Strict Mode can run effects twice during development. Keep the graph in a ref when props change, then call `setData()` or an incremental update API from a separate effect.
+## Use with Vue
 
-G6Lite observes container size changes and keeps the canvas dimensions in sync. The current camera is preserved by default. Set `autoFitOnResize: true` when a resizable panel should keep the whole graph visible, or pass `FitViewOptions` to control padding and zoom limits.
+Save this as `GraphView.vue`, then import and use `<GraphView />` in your page. A template ref provides the container, and lifecycle hooks create and destroy the graph.
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Graph } from '@antv/g6-lite';
+
+const containerRef = ref<HTMLDivElement | null>(null);
+let graph: Graph | undefined;
+
+onMounted(() => {
+  if (!containerRef.value) return;
+
+  graph = new Graph({
+    container: containerRef.value,
+    data: {
+      nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+      edges: [
+        { source: 'Alice', target: 'Bob' },
+        { source: 'Alice', target: 'Carol' },
+      ],
+    },
+    node: {
+      style: {
+        size: 24,
+        label: (node) => node.id,
+        labelPlacement: 'bottom',
+      },
+    },
+    edge: { style: { endArrow: true } },
+    layout: { type: 'circular', radius: 120 },
+    autoFit: { padding: 32, maxZoom: 1 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+
+  void graph.render().catch(console.error);
+});
+
+onBeforeUnmount(() => {
+  graph?.destroy();
+});
+</script>
+
+<template>
+  <div ref="containerRef" style="width: 100%; height: 360px" />
+</template>
+```

@@ -23,7 +23,7 @@ export async function run(container: string | HTMLElement) {
   const { nodes, edges } = generateData(200, 4);
 
   const graph = new Graph({
-    autoFitOnResize: true,
+    autoFit: true,
     container,
     data: { nodes, edges },
     node: {

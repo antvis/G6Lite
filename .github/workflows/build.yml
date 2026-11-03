@@ -76,6 +76,9 @@ jobs:
       - name: Build library
         run: npm run build
 
+      - name: Check UMD browser build
+        run: npm run check:umd
+
       - name: Size limit
         run: npm run size
 

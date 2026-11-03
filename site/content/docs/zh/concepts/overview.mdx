@@ -3,7 +3,9 @@ title: G6Lite 是什么
 description: G6Lite 的定位、适用场景和与 G6 v5 的关系
 ---
 
-G6Lite 是一个基于 WebGL 的轻量图可视化与分析引擎，目标是让大规模图数据在浏览器中保持稳定渲染和低成本交互。
+**G6Lite · 轻量图可视化，为大规模关系数据而生**
+
+丰富的布局与交互，配合轻量高效的 WebGL 渲染，让大规模关系清晰呈现，让数据探索流畅自如。
 
 它保留 G6 用户熟悉的图配置心智：数据、节点、边、布局、交互和主题，但实现重点放在 WebGL 渲染、增量刷新和高频交互上。
 
@@ -35,20 +37,15 @@ G6 v5 是功能完整的图可视化框架，插件、元素、动画、交互�
 
 如果你的应用需要完整插件生态，优先评估 G6 v5。如果你的核心瓶颈是大图渲染、高亮和状态切换，优先评估 G6Lite。
 
-## 核心组成
+## 使用模型
 
-- `Graph`：用户入口，负责容器、布局、渲染、交互和生命周期。
-- `DataModel`：维护节点、边、Combo、状态和增量变更。
-- `Renderer`：WebGL 绘制节点、边和拾取缓冲。
-- `LabelLayerRenderer` / `ComboRenderer`：分别用 Canvas 2D overlay 和 underlay 绘制标签、图标与 Combo 包围框。
-- `RenderScheduler`：根据变更级别选择全量刷新或局部 patch。
-- `InteractionDispatcher`：统一处理拾取和元素事件分发。
+一张图由 `Graph` 实例管理：`data` 描述关系，`node` 和 `edge` 定义外观，`layout` 计算位置，`behaviors` 添加交互，`theme` 统一视觉风格。
 
-完整的分层、首次渲染和高频更新路径见[技术架构](/docs/concepts/architecture)。
+先理解[数据模型](/docs/concepts/data-model)，再按照 [Graph 生命周期](/docs/concepts/graph-lifecycle)组织创建、更新与销毁。渲染图层、调度和扩展的内部协作见[技术架构](/docs/concepts/architecture)。
 
 ## 下一步
 
-- [技术架构](/docs/concepts/architecture)
-- [Graph 生命周期](/docs/concepts/graph-lifecycle)
 - [数据模型](/docs/concepts/data-model)
+- [Graph 生命周期](/docs/concepts/graph-lifecycle)
+- [技术架构](/docs/concepts/architecture)
 - [安装与第一个图](/docs/getting-started/quick-start)

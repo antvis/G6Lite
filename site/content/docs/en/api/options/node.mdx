@@ -1,9 +1,9 @@
 ---
 title: Node configuration reference
-description: NodeConfig body, label, icon, callback, and state configuration
+description: NodeConfig body, label, icon, decoration, callback, and state configuration
 ---
 
-`GraphOptions.node` has type `NodeConfig`. This page details top-level options, body appearance, labels, icons, and states; existing decoration documentation is linked below. See the [node guide](/en/docs/guides/node) for configuration steps and effects.
+`GraphOptions.node` has type `NodeConfig`. This page details top-level options, body appearance, labels, icons, decorations, and states. See the [node guide](/en/docs/guides/node) for configuration steps and effects.
 
 ```ts
 import type { NodeConfig } from '@antv/g6-lite';
@@ -37,7 +37,7 @@ All top-level fields are optional.
 | `style` | `NodeStyleConfig \| ((node: GraphNode) => Partial<NodeStyleConfig>)` | Theme and field fallbacks when omitted; whole-object functions differ as described below |
 | `stateStyles` | `Partial<Record<ElementState, NodeStateStyleOverride>>` | Override body appearance per state; undefined states use extension or theme definitions |
 | `labelRenderer` | `string` | Built-in label renderer by default; a named label renderer must be registered and `style.label` must supply nonempty text |
-| `decorations` | `NodeDecorationConfig[]` | No decorations by default; use built-in `builtin-badge` or a registered decoration renderer |
+| `decorations` | `NodeDecorationConfig[]` | No decorations by default; see [NodeDecorationConfig](#nodedecorationconfig). Use built-in `builtin-badge` or a registered decoration renderer |
 | `autoExternalLabelPlacement` | `boolean` | Type declaration only, not read by the current runtime; neither `true` nor `false` changes placement. Set `style.labelPlacement` explicitly |
 
 Unknown node names currently fall back to a circle primitive; do not use that fallback instead of registration.
@@ -146,6 +146,102 @@ const node: NodeConfig = {
 ```
 
 See the [label and icon guide](/en/docs/guides/label) and [label and icon example](/en/docs/examples/labels) for usage and effects.
+
+## NodeDecorationConfig
+
+Configure decorations at `node.decorations[]`, alongside `style`. Decorations and icons are separate: a node can have an icon, text label, and multiple decorations together. Each decoration requires `renderer`; all other fields are optional.
+
+### Content and visibility
+
+| Field | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `renderer` | `string` | Required | Registered decoration name; `builtin-badge` is registered by the library |
+| `data` | `T \| ((node: GraphNode) => T)` | `undefined` | Single-item renderer input; custom renderers define `T` |
+| `layout` | `'single' \| 'stack'` | Single-item mode | `'stack'` uses `items`; single-item mode uses `data` |
+| `items` | `T[] \| ((node: GraphNode) => T[])` | `[]` | Stack mode only; measured items form a vertical stack. Empty arrays draw nothing |
+| `minZoom` | `number` | `0` | Skip below this camera zoom, using the same scale as `graph.getZoom()`; negative or non-finite values fall back to `0` |
+| `hideOnCollision` | `boolean` | `true` | Hide groups colliding with earlier decorations on other nodes; `false` permits overlap and does not reserve decoration-grid space |
+
+Decorations use a collision grid separate from text labels and do not suppress the node's label. Multiple decorations on the same node may overlap. Top-level text policies such as `label.nodeMinZoom` and `label.hideOnCollision` do not control decorations; decorations have their own visibility options. Hidden nodes skip decoration drawing.
+
+### Placement and offsets
+
+| Field | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `placement` | `NodeStyleValue<NodeDecorationPlacement>` | `'top'` | `'center'`, `'top'`, `'bottom'`, `'left'`, `'right'`, or `'follow-label'` |
+| `attachment` | `'boundary' \| 'outside' \| 'inside'` | `'boundary'` | On the outline, entirely outside, or inside it; `'center'` placement uses the node center |
+| `anchor` | `'start' \| 'center' \| 'end'` | `'center'` | Align the decoration box's start, center, or end along its placement direction, not its text |
+| `crossOffsetRatio` | `NodeStyleValue<number>` | `0` | Cross-axis offset ratio: node height on left/right sides, width on top/bottom; boundary calculations clamp to the outline |
+| `boundaryOverlap` | `NodeStyleValue<number \| 'half-badge'>` | `0` | With `anchor: 'start'`, overlap toward the node; a number is CSS pixels, `'half-badge'` uses half the boundary-adjacent item's height |
+| `offsetX` | `number` | `0` | Final horizontal offset in CSS pixels, positive right; does not additionally follow camera zoom |
+| `offsetY` | `number` | `0` | Final vertical offset in CSS pixels, positive down; does not additionally follow camera zoom |
+
+`'follow-label'` chooses the left side only when the label placement is `'left'`; every other label placement selects the right side. It does not copy label placement directly. `'half-badge'` uses the last item of a top stack and the first item otherwise. Built-in circle and rect primitives use their actual outlines; custom nodes can provide `getBoundaryAnchor()`.
+
+### Stacks and overflow
+
+| Field | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `sort` | `'none' \| 'width-desc'` | Input order | Descending measured width; equal widths retain input order |
+| `itemGap` | `number` | `2` | Vertical stack gap in CSS pixels |
+| `maxVisible` | `number` | All items | Use a positive integer; when folded, the limit includes a reserved overflow slot |
+| `overflow` | `'clip' \| 'hover-expand'` | Clip folded items | `'hover-expand'` expands on entering the overflow item region and folds on leaving the expanded region |
+| `overflowData` | `T \| ((hiddenCount: number, node: GraphNode) => T)` | No placeholder | Overflow input for the same renderer; the engine does not generate an ellipsis automatically |
+
+For 4 items with `maxVisible: 3`, a folded stack retains 2 items and reserves one overflow slot; `hiddenCount` is `2`. Supplying `overflowData` draws the third placeholder. Without it, the slot remains reserved and only 2 items appear. Pair `'hover-expand'` with visible `overflowData` to provide a hover target.
+
+Stacks are vertical, right-aligned on the left side and left-aligned otherwise. Collision detection uses the measured box of the entire group.
+
+### Built-in badges
+
+`builtin-badge` consumes `NodeBadgeItem`:
+
+| Field | Type | Default or purpose |
+| --- | --- | --- |
+| `kind` | `'count' \| 'lock' \| 'warning' \| 'favorite' \| 'text' \| 'icon'` | Required; chooses content and default colors |
+| `value` | `number \| string` | Count content, empty text when omitted |
+| `text` | `string` | Text content, empty when omitted |
+| `icon` | `string` | Icon text or font glyph, empty when omitted; not an image URL |
+| `iconFontFamily` | `string` | Icon font family, default `'sans-serif'`; load the font in the application |
+| `fill` | `string` | Override background; defaults are `'#F4664A'` for count/warning/text, `'#7E92B5'` for lock/icon, `'#FFBE3A'` for favorite |
+| `color` | `string` | Override foreground, default `'#FFFFFF'` |
+
+Circular badge diameter is one third of the smaller rendered node dimension. Text badges have the same height and a maximum width of `1.5` times that smaller dimension, truncating long text. Icon glyph size is two thirds of badge diameter.
+
+```ts
+import type { NodeBadgeItem, NodeConfig } from '@antv/g6-lite';
+
+const badges = [
+  { kind: 'count', value: 12 },
+  { kind: 'warning' },
+  { kind: 'text', text: 'Priority' },
+  { kind: 'lock' },
+] satisfies NodeBadgeItem[];
+
+const node: NodeConfig = {
+  style: { size: 56, label: (item) => item.id, labelPlacement: 'bottom' },
+  decorations: [{
+    renderer: 'builtin-badge',
+    placement: 'right',
+    attachment: 'boundary',
+    anchor: 'start',
+    boundaryOverlap: 'half-badge',
+    layout: 'stack',
+    items: badges,
+    maxVisible: 3,
+    overflow: 'hover-expand',
+    overflowData: { kind: 'text', text: '···' } satisfies NodeBadgeItem,
+  }],
+};
+```
+
+Try [node badges](/en/docs/examples/decoration-badges). `data`, `items`, `placement`, `crossOffsetRatio`, and `boundaryOverlap` accept node callbacks; `overflowData` also receives the hidden count. `offsetX`, `offsetY`, and `itemGap` do not accept functions.
+
+### Custom decoration renderers
+
+Register with `register('decoration', name, renderer)`. `measure()` receives `ctx`, `node`, the current `data`, `dpr`, `zoom`, `nodeWidth`, and `nodeHeight`, returning `{ width, height, data? }`. Width and height must be finite, positive Canvas-pixel values. Node dimensions are already converted to rendered pixels. `draw()` also receives the measured `layout`; `layout.data` can carry measurement results.
+
+The engine handles placement, group layout, collision, and viewport culling. The drawing context is translated to the current item's center. Missing registration, invalid measurements, and measure/draw errors warn and skip the decoration without falling back to a label renderer or blocking node text. See [decoration usage](/en/docs/guides/extensions#decoration-visibility).
 
 ## State styles
 

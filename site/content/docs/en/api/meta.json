@@ -1,4 +1,4 @@
 {
   "title": "API reference",
-  "pages": ["index", "graph", "options", "extensions"]
+  "pages": ["index", "graph", "options.mdx", "extensions"]
 }

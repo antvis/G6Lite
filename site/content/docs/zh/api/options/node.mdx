@@ -1,9 +1,9 @@
 ---
 title: 节点配置参考
-description: NodeConfig 的基础样式、标签、图标、函数签名与状态覆盖规则
+description: NodeConfig 的基础样式、标签、图标、装饰、函数签名与状态覆盖规则
 ---
 
-`GraphOptions.node` 的类型是 `NodeConfig`。本页详细说明顶层选项、基础外观、标签、图标与状态；装饰的现有说明可从文末进入。配置步骤与效果见[节点指南](/docs/guides/node)。
+`GraphOptions.node` 的类型是 `NodeConfig`。本页详细说明顶层选项、基础外观、标签、图标、装饰与状态。配置步骤与效果见[节点指南](/docs/guides/node)。
 
 ```ts
 import type { NodeConfig } from '@antv/g6-lite';
@@ -37,7 +37,7 @@ const node: NodeConfig = {
 | `style` | `NodeStyleConfig \| ((node: GraphNode) => Partial<NodeStyleConfig>)` | 未配置时使用主题和字段回退值；整对象函数的差异见下文 |
 | `stateStyles` | `Partial<Record<ElementState, NodeStateStyleOverride>>` | 按状态覆盖基础外观；未配置的状态使用扩展或主题状态定义 |
 | `labelRenderer` | `string` | 默认标签渲染器；指定名称须先注册 label 扩展，且 `style.label` 必须提供非空文本 |
-| `decorations` | `NodeDecorationConfig[]` | 默认无装饰；可使用内置 `builtin-badge` 或注册的 decoration 渲染器 |
+| `decorations` | `NodeDecorationConfig[]` | 默认无装饰；字段见下方 [NodeDecorationConfig](#nodedecorationconfig)，可使用内置 `builtin-badge` 或注册的 decoration 渲染器 |
 | `autoExternalLabelPlacement` | `boolean` | 仅类型声明，当前运行时未读取；设置为 `true` 或 `false` 均不会改变布局。请显式设置 `style.labelPlacement` |
 
 未知节点类型当前会回退到圆形基型，但不应依赖此回退代替注册。
@@ -146,6 +146,102 @@ const node: NodeConfig = {
 ```
 
 完整操作与效果见[标签与图标指南](/docs/guides/label)和[标签位置与图标示例](/docs/examples/labels)。
+
+## NodeDecorationConfig
+
+配置位置为 `node.decorations[]`，与 `style` 同级。装饰和图标是独立能力：一个节点可以同时有图标、文本标签和多个装饰。`renderer` 是每个装饰的必填项，其余字段均可省略。
+
+### 内容与显示
+
+| 字段 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `renderer` | `string` | 必填 | 已注册的 decoration 名称；`builtin-badge` 随库注册，无需再次注册 |
+| `data` | `T \| ((node: GraphNode) => T)` | `undefined` | 单项模式下传给渲染器的数据；业务渲染器自行约定 `T` |
+| `layout` | `'single' \| 'stack'` | 单项模式 | `'stack'` 使用 `items`，单项模式使用 `data` |
+| `items` | `T[] \| ((node: GraphNode) => T[])` | `[]` | 仅 stack 模式，按项测量后组成纵向栈；空数组不绘制 |
+| `minZoom` | `number` | `0` | 低于此相机缩放时跳过，数值与 `graph.getZoom()` 同一口径；负数或非有限值回退 `0` |
+| `hideOnCollision` | `boolean` | `true` | 装饰组与先绘制的其他节点装饰碰撞时隐藏；`false` 允许重叠且不占用装饰碰撞网格 |
+
+装饰使用独立于文字标签的碰撞网格，不会因碰撞策略抑制本节点标签；同一节点的多个装饰可以重叠。Graph 顶层 `label.nodeMinZoom`、`label.hideOnCollision` 等文字策略不控制装饰，装饰使用自己的显示选项。`hidden` 节点跳过装饰绘制。
+
+### 放置与偏移
+
+| 字段 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `placement` | `NodeStyleValue<NodeDecorationPlacement>` | `'top'` | `'center'`、`'top'`、`'bottom'`、`'left'`、`'right'` 或 `'follow-label'` |
+| `attachment` | `'boundary' \| 'outside' \| 'inside'` | `'boundary'` | 沿节点轮廓、完整放在外侧或内侧；`placement: 'center'` 时放在节点中心 |
+| `anchor` | `'start' \| 'center' \| 'end'` | `'center'` | 选择装饰盒沿放置方向的起点、中点或终点对齐，不是文字对齐方式 |
+| `crossOffsetRatio` | `NodeStyleValue<number>` | `0` | 沿节点侧边的垂直方向偏移比例：左右侧按节点高度，上下侧按节点宽度；边界计算会限制到实际轮廓 |
+| `boundaryOverlap` | `NodeStyleValue<number \| 'half-badge'>` | `0` | `anchor: 'start'` 时向节点侧重叠；数值为 CSS 像素，`'half-badge'` 取临近边界项高度的一半 |
+| `offsetX` | `number` | `0` | 锚点计算后的水平偏移，CSS 像素，正值向右，不额外跟随相机缩放 |
+| `offsetY` | `number` | `0` | 锚点计算后的垂直偏移，CSS 像素，正值向下，不额外跟随相机缩放 |
+
+`'follow-label'` 当前仅在标签位置为 `'left'` 时选择左侧，其余标签位置均选择右侧，并非直接复制标签位置。`'half-badge'` 在顶部 stack 使用最后一项，其余方向使用第一项。内置 circle、rect 按实际轮廓计算边界；自定义节点可提供 `getBoundaryAnchor()`。
+
+### 堆叠与溢出
+
+| 字段 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `sort` | `'none' \| 'width-desc'` | 保持输入顺序 | 宽度降序排序；相同宽度保留原顺序 |
+| `itemGap` | `number` | `2` | stack 项之间的纵向间距，CSS 像素 |
+| `maxVisible` | `number` | 全部显示 | 使用正整数；发生折叠时，该上限包含为溢出项预留的位置 |
+| `overflow` | `'clip' \| 'hover-expand'` | 折叠截断 | `'hover-expand'` 在鼠标进入溢出项区域后展开，离开展开区域后折叠 |
+| `overflowData` | `T \| ((hiddenCount: number, node: GraphNode) => T)` | 无占位项 | 传给同一个渲染器的溢出项数据；引擎不会自动生成省略号 |
+
+当有 4 项、`maxVisible: 3` 且未展开时，保留 2 项并预留一个溢出位置，`hiddenCount` 为 `2`。提供 `overflowData` 后会绘制第 3 个占位项；未提供时仍预留该位置，只显示前 2 项。`overflow: 'hover-expand'` 应搭配可见的 `overflowData`，以提供可悬停的展开入口。
+
+stack 沿纵向排列，左侧装饰靠右对齐，其余放置方向靠左对齐。碰撞检测使用整个装饰组的测量框。
+
+### 内置徽章
+
+`builtin-badge` 消费 `NodeBadgeItem`。字段如下：
+
+| 字段 | 类型 | 默认或用途 |
+| --- | --- | --- |
+| `kind` | `'count' \| 'lock' \| 'warning' \| 'favorite' \| 'text' \| 'icon'` | 必填，决定内容与默认配色 |
+| `value` | `number \| string` | count 的数字或字符串，缺省为空文本 |
+| `text` | `string` | text 的内容，缺省为空文本 |
+| `icon` | `string` | icon 的文字或字体图标字符，缺省为空文本；这里不是图片 URL |
+| `iconFontFamily` | `string` | icon 使用的字体族，默认 `'sans-serif'`，应用负责加载字体 |
+| `fill` | `string` | 覆盖徽章背景色；默认 count、warning、text 为 `'#F4664A'`，lock、icon 为 `'#7E92B5'`，favorite 为 `'#FFBE3A'` |
+| `color` | `string` | 覆盖前景色，默认 `'#FFFFFF'` |
+
+圆形徽章直径为渲染后节点宽高中较小值的 `1/3`。text 徽章高度相同，最大宽度为该较小值的 `1.5` 倍，超长文字省略；icon 字符尺寸为徽章直径的 `2/3`。
+
+```ts
+import type { NodeBadgeItem, NodeConfig } from '@antv/g6-lite';
+
+const badges = [
+  { kind: 'count', value: 12 },
+  { kind: 'warning' },
+  { kind: 'text', text: '优先' },
+  { kind: 'lock' },
+] satisfies NodeBadgeItem[];
+
+const node: NodeConfig = {
+  style: { size: 56, label: (item) => item.id, labelPlacement: 'bottom' },
+  decorations: [{
+    renderer: 'builtin-badge',
+    placement: 'right',
+    attachment: 'boundary',
+    anchor: 'start',
+    boundaryOverlap: 'half-badge',
+    layout: 'stack',
+    items: badges,
+    maxVisible: 3,
+    overflow: 'hover-expand',
+    overflowData: { kind: 'text', text: '···' } satisfies NodeBadgeItem,
+  }],
+};
+```
+
+可在[节点徽章示例](/docs/examples/decoration-badges)中验证内置徽章。`data`、`items`、`placement`、`crossOffsetRatio`、`boundaryOverlap` 支持节点回调，`overflowData` 额外接收隐藏数量；`offsetX`、`offsetY`、`itemGap` 等不支持函数。
+
+### 自定义装饰渲染器
+
+通过 `register('decoration', name, renderer)` 注册。`measure()` 接收 `ctx`、`node`、当前 `data`、`dpr`、`zoom`、`nodeWidth`、`nodeHeight`，返回 `{ width, height, data? }`；宽高必须是有限正数，单位为 Canvas 像素。节点宽高已经换算到渲染像素。`draw()` 还收到该次测量的 `layout`，其中 `layout.data` 可存放测量阶段的结果。
+
+引擎负责定位、组布局、碰撞和视口裁剪；绘制上下文已平移到当前项中心。未注册的装饰、非法测量和测量或绘制异常会警告并跳过，不回退到标签渲染器，也不会阻断节点文字标签。完整用法见[Decoration Renderer](/docs/guides/extensions#decoration-renderer)。
 
 ## 状态样式
 

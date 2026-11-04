@@ -3,29 +3,15 @@ title: Node configuration reference
 description: NodeConfig body, label, icon, decoration, callback, and state configuration
 ---
 
+import { NodeDocExample } from '@/components/node-doc-example';
+
 `GraphOptions.node` has type `NodeConfig`. This page details top-level options, body appearance, labels, icons, decorations, and states. See the [node guide](/en/docs/guides/node) for configuration steps and effects.
 
-```ts
-import type { NodeConfig } from '@antv/g6-lite';
+Both nodes are rectangles with width 96, height 40, and corner radius 8. The left node has `risk: 'high'` and is red; the right node is blue. Click either node to inspect its `selected` stroke. The preview runs the complete code below.
 
-const node: NodeConfig = {
-  type: 'rect',
-  style: {
-    size: 32,
-    width: 96,
-    height: 40,
-    borderRadius: 8,
-    fill: (item) => item.data?.risk === 'high' ? '#ff4d4f' : '#1783FF',
-    stroke: '#fff',
-    strokeWidth: 1,
-  },
-  stateStyles: {
-    selected: { stroke: '#163B65', strokeWidth: 2 },
-  },
-};
-```
+<NodeDocExample id="body" locale="en" />
 
-Pass this object as `node` in `new Graph({ container, data, node })`.
+The `NodeConfig` table below describes top-level fields of `node`; `NodeStyleConfig` details appearance fields.
 
 ## NodeConfig
 
@@ -63,16 +49,9 @@ Defaults below apply to built-in nodes with a **style object**, including per-fi
 
 `NodeStyleValue<T>` is `T | ((node: GraphNode) => T)`. A callback receives only the current node; read business fields from `node.data`. It receives no camera or zoom argument. Supply explicit fallbacks for missing data rather than returning `undefined` or invalid numbers.
 
-```ts
-import type { NodeConfig } from '@antv/g6-lite';
+Values 16, 28, and 40 in `data.value` become node diameters. The `core` group is blue; the other group is green. Click a node to inspect its state override.
 
-const node: NodeConfig = {
-  style: {
-    size: (item) => Number(item.data?.size ?? 24),
-    fill: (item) => item.data?.group === 'core' ? '#1783FF' : '#61DDAA',
-  },
-};
-```
+<NodeDocExample id="style" locale="en" />
 
 Per-field body-style precedence is: node `style` object → extension `getStyle()` result → extension default `style` → theme or built-in fallback. Keep callbacks inexpensive and free of side effects; do not depend on how often they run per frame.
 
@@ -126,24 +105,9 @@ Icon fields also belong in `node.style` and accept constants or per-field callba
 
 Icon sizes and offsets follow camera zoom rather than the `label.scaleWithZoom` text policy. Icons do not participate in label collision hiding or `nodeMinZoom`; hidden nodes still skip drawing. Images load asynchronously and trigger a redraw when ready. Cross-origin images must permit anonymous CORS; failed URLs are not automatically retried by the instance.
 
-```ts
-import type { NodeConfig } from '@antv/g6-lite';
+The central `G` is a text icon; business names appear below. The long name on the right is truncated by `labelMaxWidth: 120`. Labels and icons are configured independently, using the exact code below.
 
-const node: NodeConfig = {
-  style: {
-    size: 40,
-    label: (item) => String(item.data?.name ?? item.id),
-    labelPlacement: 'bottom',
-    labelMaxWidth: 120,
-    labelBackground: '#fff',
-    labelFontWeight: '600',
-    icon: 'G',
-    iconType: 'text',
-    iconFontSize: 20,
-    iconColor: '#fff',
-  },
-};
-```
+<NodeDocExample id="label-options" locale="en" />
 
 See the [label and icon guide](/en/docs/guides/label) and [label and icon example](/en/docs/examples/labels) for usage and effects.
 
@@ -208,32 +172,9 @@ Stacks are vertical, right-aligned on the left side and left-aligned otherwise. 
 
 Circular badge diameter is one third of the smaller rendered node dimension. Text badges have the same height and a maximum width of `1.5` times that smaller dimension, truncating long text. Icon glyph size is two thirds of badge diameter.
 
-```ts
-import type { NodeBadgeItem, NodeConfig } from '@antv/g6-lite';
+These 5 badges initially show a count, warning, and `···` with `maxVisible: 3`. Hover `···` to expand every item and leave the expanded region to fold them.
 
-const badges = [
-  { kind: 'count', value: 12 },
-  { kind: 'warning' },
-  { kind: 'text', text: 'Priority' },
-  { kind: 'lock' },
-] satisfies NodeBadgeItem[];
-
-const node: NodeConfig = {
-  style: { size: 56, label: (item) => item.id, labelPlacement: 'bottom' },
-  decorations: [{
-    renderer: 'builtin-badge',
-    placement: 'right',
-    attachment: 'boundary',
-    anchor: 'start',
-    boundaryOverlap: 'half-badge',
-    layout: 'stack',
-    items: badges,
-    maxVisible: 3,
-    overflow: 'hover-expand',
-    overflowData: { kind: 'text', text: '···' } satisfies NodeBadgeItem,
-  }],
-};
-```
+<NodeDocExample id="badges" locale="en" />
 
 Try [node badges](/en/docs/examples/decoration-badges). `data`, `items`, `placement`, `crossOffsetRatio`, and `boundaryOverlap` accept node callbacks; `overflowData` also receives the hidden count. `offsetX`, `offsetY`, and `itemGap` do not accept functions.
 

@@ -7,8 +7,10 @@ import type { NodeDocExampleId } from '@/lib/node-doc-example-source';
 import styles from './node-doc-preview.module.css';
 
 const loaders = {
+  body: () => import('../../demos/docs-node-body.ts'),
   style: () => import('../../demos/docs-node-style.ts'),
   labels: () => import('../../demos/docs-node-labels.ts'),
+  'label-options': () => import('../../demos/docs-node-label-options.ts'),
   badges: () => import('../../demos/docs-node-badges.ts'),
 };
 

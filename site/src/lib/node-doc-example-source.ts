@@ -1,10 +1,12 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-export type NodeDocExampleId = 'style' | 'labels' | 'badges';
+export type NodeDocExampleId = 'body' | 'style' | 'labels' | 'label-options' | 'badges';
 const files: Record<NodeDocExampleId, string> = {
+  body: 'docs-node-body.ts',
   style: 'docs-node-style.ts',
   labels: 'docs-node-labels.ts',
+  'label-options': 'docs-node-label-options.ts',
   badges: 'docs-node-badges.ts',
 };
 
@@ -16,7 +18,7 @@ export function readNodeDocExample(id: NodeDocExampleId) {
 // rather than an MDX component placeholder.
 export function expandNodeDocExamples(markdown: string) {
   return markdown.replace(/<NodeDocExample\b([^>]*)\/>/g, (_match, attributes: string) => {
-    const id = /\bid="(style|labels|badges)"/.exec(attributes)?.[1] as NodeDocExampleId | undefined;
+    const id = /\bid="(body|style|labels|label-options|badges)"/.exec(attributes)?.[1] as NodeDocExampleId | undefined;
     if (!id) throw new Error('Unknown inline node example in Markdown');
     return `\n\n\`\`\`ts\n${readNodeDocExample(id).trimEnd()}\n\`\`\`\n\n`;
   });

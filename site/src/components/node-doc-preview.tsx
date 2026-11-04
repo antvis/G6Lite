@@ -32,6 +32,7 @@ const loaders = {
   'theme-precedence': () => import('../../demos/docs-theme-precedence.ts'),
   'layout-switch': () => import('../../demos/docs-layout-switch.ts'),
   'layout-tree': () => import('../../demos/docs-layout-tree.ts'),
+  'layout-worker': () => import('../../demos/docs-layout-worker.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -48,7 +49,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'layout-tree'
+  const hint = id === 'layout-worker'
+    ? (zh ? '运行 Worker 请求，或启动后取消并恢复网格；完成状态不表示未发生主线程回退' : 'Request a Worker layout, or start, cancel, and restore the grid. Completion alone does not prove no main-thread fallback occurred')
+    : id === 'layout-tree'
     ? (zh ? '同一棵三层树切换 mindmap、indented、fishbone；重置恢复 mindmap' : 'Switch mindmap, indented, and fishbone on the same three-level tree. Reset restores mindmap')
     : id === 'layout-switch'
     ? (zh ? '同一组数据切换 grid、circular、dagre、force；布局后显式适配，重置恢复 grid' : 'Switch grid, circular, dagre, and force on the same data; fit explicitly after layout. Reset restores grid')

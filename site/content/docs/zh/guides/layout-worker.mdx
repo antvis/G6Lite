@@ -1,0 +1,63 @@
+---
+title: Worker 布局指南
+description: 启用异步布局、取消旧任务，并检查 Worker 回退与部署资源
+---
+
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+Worker 将库布局的计算移出主线程；结果仍由主线程写回并绘制。它不减少绘制成本，也不保证算法本身更快。先完成[布局选择](/docs/guides/layout)，再决定执行位置。
+
+## 启用方式
+
+| layout.worker | Graph 中的行为 |
+| --- | --- |
+| 省略 | 节点数 ≥ 1000 时尝试启用；低于 1000 时走主线程 |
+| true | 对库布局尝试 Worker；注册扩展与三个内置树布局仍优先在主线程执行 |
+| false | 显式关闭，包括大图 |
+
+独立 runLayout 没有按节点数自动启用的行为。Worker 失败会回退到同一算法的主线程实现；具体执行顺序和默认迭代值见[布局参考](/docs/api/options/layout#worker)。
+
+## 代码与对应效果
+
+先显示 160 个节点的网格。点击 Run Worker 请求 ForceAtlas2；点击 Grid 恢复网格。Start + cancel 启动较长任务，20ms 后取消并重新排列为网格；最终应保持 cancelled → grid ready，不被旧结果覆盖。
+
+<LayoutDocExample id="layout-worker" locale="zh" />
+
+完成状态只表示本次布局调用完成；要确认实际使用了 Worker，还需检查下方的资源和线程。
+
+## 传输与回退
+
+传入 Worker 的 layout 配置、节点 data 和边 data 必须可结构化克隆。函数、DOM 节点等值会导致传输失败；需要算法回调时显式设置 worker: false。node/edge.style 的回调不在这次传输中，可正常用于绘制。
+
+Worker 仅收到节点 id/x/y/data 和边 source/target/data。Graph 在结果回写时处理 fx/fy；不要依赖未传递字段在 Worker 算法内可用。
+
+创建失败、资源加载失败、postMessage 克隆失败或计算报错，都可能触发主线程回退。配置了 worker: true、触发 layout:end 或 await 正常返回，都不能单独证明实际执行线程。
+
+## 取消与清理
+
+在渲染完成的实例上调用 graph.cancelLayout()，可终止该实例正在使用的 Worker 并放弃结果；不会回滚已完成布局，也不会影响其他 Graph 的 Worker。继续切换时，重新 setLayout 后 await layout。
+
+示例的 generation 检查还保护应用自己的完成提示和 fitView，避免过期调用结束后继续执行这些副作用。卸载时调用 graph.destroy()；自行创建的按钮、计时器和订阅也要清理。
+
+## 部署与确认
+
+1. npm ESM 产物包含 layoutWorker.js 及其依赖，部署时保留文件相对关系；不要只复制 index.js。
+2. 构建器需识别模块 Worker 的 new URL 入口；检查 Network 中 Worker 及算法资源请求成功、响应是 JavaScript，而非站点的 HTML 回退页。
+3. 在开发工具的线程列表中确认 Worker；如业务受 CSP 约束，按实际资源来源配置 worker-src 和脚本策略，不要仅以布局成功判断。
+4. 当前 UMD 入口不保证独立 Worker 资源可用，失败时会回退；需要稳定离线程计算时优先使用 ESM 接入并验证构建产物。
+
+## 常见问题
+
+### 启用后仍然卡顿？
+
+先确认是否回退到主线程，再分别测量计算和绘制。数据传输、主线程渲染及大量标签不会因 worker 开关消失；控制迭代次数，并使用实际数据测试。
+
+### 布局回调为什么在小图正常、大图不一样？
+
+大图可能触发自动 Worker。layout 配置中的函数无法克隆，导致回退；需要回调时显式关闭 Worker，使执行路径稳定。
+
+### cancelLayout 会抛出 AbortError 吗？
+
+Graph 会放弃被取消任务的结果，正常取消通常不会作为 AbortError 向调用方抛出。完成 Promise 也不表示坐标已写入；应用仍需检查自己的任务代次或销毁状态。
+
+继续阅读：[布局指南](/docs/guides/layout) · [布局方法](/docs/api/graph#布局) · [性能调优](/docs/metrics/performance-tuning)。

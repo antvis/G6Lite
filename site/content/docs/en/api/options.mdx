@@ -28,7 +28,7 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 | --- | --- | --- |
 | `container` | `string \| HTMLElement` | Canvas container. A string is a CSS selector, such as `#container` |
 | `data` | `GraphData` | Nodes, edges, and optional combos |
-| `node` | `NodeConfig` | Node shape, style, and state styles |
+| `node` | [`NodeConfig`](/en/docs/api/options/node#nodeconfig) | Node shapes, appearance, states, labels, icons, and decorations; see the node reference for full definitions |
 | `edge` | `EdgeConfig` | Edge shape, style, arrows, and state styles |
 | `combo` | `ComboConfig` | Combo appearance. Collapse and nesting are still experimental |
 | `label` | `LabelOptions` | Zoom and collision policy shared by node and edge labels |
@@ -114,42 +114,15 @@ const data: GraphData = {
 
 ## Node
 
-See the [node configuration reference](/en/docs/api/options/node) for body styles, callback signatures, and state precedence. Existing field entries remain below.
+`node` has type [`NodeConfig`](/en/docs/api/options/node#nodeconfig), configuring node shapes, appearance, states, labels, icons, and decorations. The [node configuration reference](/en/docs/api/options/node) is the detailed source for fields and matching code previews:
 
-```ts
-node?: {
-  type?: 'circle' | 'rect' | string;
-  labelRenderer?: string;
-  decorations?: NodeDecorationConfig[];
-  autoExternalLabelPlacement?: boolean;
-  style?: NodeStyleConfig | ((node: GraphNode) => Partial<NodeStyleConfig>);
-  stateStyles?: Partial<Record<ElementState, NodeStateStyleOverride>>;
-}
-```
+- [Top-level options and support](/en/docs/api/options/node#nodeconfig): type selection, configuration structure, and unimplemented options.
+- [Body appearance](/en/docs/api/options/node#nodestyleconfig) and [style callbacks](/en/docs/api/options/node#style-callbacks): dimensions, colors, units, callbacks, and precedence.
+- [Node labels](/en/docs/api/options/node#labels), [`labelRenderer`](/en/docs/api/options/node#labelrenderer), and [icons](/en/docs/api/options/node#icons): content, placement, visibility conditions, and registration.
+- [Decorations](/en/docs/api/options/node#nodedecorationconfig) and [built-in badges](/en/docs/api/options/node#built-in-badges): placement, collision, stacks, and overflow.
+- [State styles](/en/docs/api/options/node#state-styles) and [runtime updates](/en/docs/api/options/node#runtime-updates): state precedence and configuration merging.
 
-An omitted `type`, or `'circle'`, draws a circle. `'rect'` draws a rounded rectangle. Any other string must already be registered with `register('node', ...)`.
-
-`autoExternalLabelPlacement` is currently declared in the type only and is not read by the runtime. Position labels explicitly with `node.style.labelPlacement`; this flag does not move labels around `decorations`.
-
-Each visual field in `style` can be a constant or `(node: GraphNode) => value`. `label: false` and `icon: false` skip that layer.
-
-| Style field | Description |
-| --- | --- |
-| `fill` / `stroke` / `strokeWidth` / `opacity` | Fill, stroke, and opacity |
-| `size` | Circle diameter, or the size used when width and height are not set separately |
-| `width` / `height` / `borderRadius` | Rectangle size and corner radius |
-| `label` | Text, or a function that returns text. Omitted means no node label; `false` explicitly hides it |
-| `labelFontSize` / `labelFontFamily` / `labelFontWeight` / `labelColor` | Text appearance |
-| `labelPlacement` | `'center' \| 'top' \| 'bottom' \| 'left' \| 'right'`, default `'bottom'` |
-| `labelOffsetX` / `labelOffsetY` | Offset from the placement point |
-| `labelBackground` / `labelBackgroundPadding` / `labelMaxWidth` | Text background, padding, and maximum width |
-| `icon` / `iconType` | Icon content. `iconType` is `'image'` or `'text'` |
-| `iconWidth` / `iconHeight` / `iconFontFamily` / `iconFontSize` / `iconColor` | Icon size and text-icon style |
-| `iconOffsetX` / `iconOffsetY` | Icon offset |
-
-`stateStyles` overrides `fill`, `stroke`, `strokeWidth`, `opacity`, and `haloWidth` while that state is active. Turn states on and off with the [Graph state methods](/en/docs/api/graph#state-visibility-and-focus).
-
-`labelRenderer` is the name of a registered custom label renderer. `decorations` attaches badges and other node decorations; register the renderer with `register('decoration', ...)`. Fields and collision rules are in [Label](/en/docs/guides/label) and [Custom node](/en/docs/guides/custom-node).
+Follow the [node guide](/en/docs/guides/node) to build an effect. Node IDs, business `data`, coordinates, and initial states are data fields; see [`GraphNode`](#node-graphnode) on this page.
 
 ## Edge
 

@@ -28,7 +28,7 @@ const graph = new Graph({
 | --- | --- | --- |
 | `container` | `string \| HTMLElement` | 画布容器。字符串是 CSS 选择器，例如 `#container` |
 | `data` | `GraphData` | 节点、边，以及可选的 Combo |
-| `node` | `NodeConfig` | 节点形状、样式和状态样式 |
+| `node` | [`NodeConfig`](/docs/api/options/node#nodeconfig) | 节点形状、样式、状态、标签、图标和装饰；完整定义见节点配置参考 |
 | `edge` | `EdgeConfig` | 边形状、样式、箭头和状态样式 |
 | `combo` | `ComboConfig` | Combo 外观。折叠和嵌套仍是实验能力 |
 | `label` | `LabelOptions` | 节点和边标签共用的缩放、碰撞策略 |
@@ -114,42 +114,15 @@ const data: GraphData = {
 
 ## 节点
 
-基础外观、函数签名与状态覆盖规则见[节点配置参考](/docs/api/options/node)。本页保留原有字段入口。
+`node` 的类型是 [`NodeConfig`](/docs/api/options/node#nodeconfig)，用于配置节点图形、外观、状态、标签、图标和装饰。完整字段与对应代码效果统一在[节点配置参考](/docs/api/options/node)中查阅：
 
-```ts
-node?: {
-  type?: 'circle' | 'rect' | string;
-  labelRenderer?: string;
-  decorations?: NodeDecorationConfig[];
-  autoExternalLabelPlacement?: boolean;
-  style?: NodeStyleConfig | ((node: GraphNode) => Partial<NodeStyleConfig>);
-  stateStyles?: Partial<Record<ElementState, NodeStateStyleOverride>>;
-}
-```
+- [顶层选项与支持状态](/docs/api/options/node#nodeconfig)：类型选择、配置结构和未实现选项。
+- [基础外观](/docs/api/options/node#nodestyleconfig)与[样式函数](/docs/api/options/node#样式函数)：尺寸、颜色、单位、回调和优先级。
+- [节点标签](/docs/api/options/node#标签)、[`labelRenderer`](/docs/api/options/node#labelrenderer)与[图标](/docs/api/options/node#图标)：内容、定位、显示条件和注册要求。
+- [节点装饰](/docs/api/options/node#nodedecorationconfig)与[内置徽章](/docs/api/options/node#内置徽章)：定位、碰撞、堆叠和溢出。
+- [状态样式](/docs/api/options/node#状态样式)与[运行时更新](/docs/api/options/node#运行时更新)：状态覆盖及配置合并规则。
 
-`type` 省略或为 `'circle'` 时画圆形，`'rect'` 画圆角矩形。其他字符串必须是已经 `register('node', ...)` 的类型名。
-
-`autoExternalLabelPlacement` 当前仅有类型声明，运行时未读取该选项。请通过 `node.style.labelPlacement` 显式定位标签；`decorations` 不会通过此开关自动改变标签位置。
-
-`style` 的每个视觉字段都可以是固定值，或 `(node: GraphNode) => 值`。`label: false` 和 `icon: false` 表示不绘制该项。
-
-| 样式字段 | 说明 |
-| --- | --- |
-| `fill` / `stroke` / `strokeWidth` / `opacity` | 填充、描边和透明度 |
-| `size` | 圆形直径或未分别指定宽高时的尺寸 |
-| `width` / `height` / `borderRadius` | 矩形尺寸和圆角 |
-| `label` | 文本，或返回文本的函数。未配置时不绘制节点标签；`false` 表示明确不显示 |
-| `labelFontSize` / `labelFontFamily` / `labelFontWeight` / `labelColor` | 文本外观 |
-| `labelPlacement` | `'center' \| 'top' \| 'bottom' \| 'left' \| 'right'`，默认 `'bottom'` |
-| `labelOffsetX` / `labelOffsetY` | 相对放置点的偏移 |
-| `labelBackground` / `labelBackgroundPadding` / `labelMaxWidth` | 文本底色、内边距和最大宽度 |
-| `icon` / `iconType` | 图标内容。`iconType` 为 `'image'` 或 `'text'` |
-| `iconWidth` / `iconHeight` / `iconFontFamily` / `iconFontSize` / `iconColor` | 图标尺寸和文字图标样式 |
-| `iconOffsetX` / `iconOffsetY` | 图标偏移 |
-
-`stateStyles` 在元素进入对应状态时覆盖 `fill`、`stroke`、`strokeWidth`、`opacity`、`haloWidth`。状态怎么开关见 [Graph 状态方法](/docs/api/graph#状态显隐和定位)。
-
-`labelRenderer` 是已注册的自定义标签渲染器名称。`decorations` 用来挂 badge 等节点装饰，渲染器通过 `register('decoration', ...)` 注册。字段和碰撞规则见 [标签](/docs/guides/label) 与 [自定义节点](/docs/guides/custom-node)。
+按业务效果配置节点，见[节点使用指南](/docs/guides/node)。节点的 `id`、业务 `data`、坐标和初始状态属于数据结构，仍见本页的 [`GraphNode`](#节点-graphnode)。
 
 ## 边
 

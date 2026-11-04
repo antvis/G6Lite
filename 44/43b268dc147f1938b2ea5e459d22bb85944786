@@ -1,0 +1,27 @@
+site/content/docs/en/guides/combo.mdx
+  s_4534bc5c3d78f4::t_598a545182c4ee 3,6,8,10-41,44-48,51-122
+site/demos/docs-combo-membership.ts
+  s_4534bc5c3d78f4::t_791d222adce7a2 1-40
+site/content/docs/zh/guides/combo.mdx
+  s_4534bc5c3d78f4::t_07c3b409751112 3,6,8,10,12-14,16,18,22,26-30,33-34,37-38,41,43-48,51-54,57-67,69-72,75-78,81-82,84-87,92-122
+site/src/lib/node-doc-example-source.ts
+  s_4534bc5c3d78f4::t_791d222adce7a2 4,23
+site/src/components/node-doc-preview.tsx
+  s_4534bc5c3d78f4::t_791d222adce7a2 29,46-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4443b268dc147f1938b2ea5e459d22bb85944786",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -3,7 +3,7 @@ title: Parallel and self-loop edges
 description: Separate multiple edges that share endpoints and render self-loops clearly
 ---
 
-Multiple edges between the same endpoints can overlap. Enable `process-parallel-edges` to separate them, including reverse-direction edges by default.
+Multiple edges between the same endpoints can overlap. Enable `process-parallel-edges` to separate them, including reverse-direction edges by default. See the [configuration reference](/en/docs/api/options/edge#parallel-edges-and-self-loops) for fields, grouping formulas, and precedence. Use default `line` or `arc` for automatic separation; dedicated `cubic` and `polyline` paths do not use parallel offsets.
 
 ![Parallel edges overlap before processing and follow separate paths afterward; self-loops connect a node to itself.](/examples/docs-guide-parallel-edges.svg 'Parallel and self-loop edges')
 

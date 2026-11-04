@@ -90,6 +90,39 @@ import { NodeDocExample as EdgeDocExample } from '@/components/node-doc-example'
 
 首次 `await graph.render()` 完成后，可用 `graph.updateOptions({ edge: { style: ... } })` 更新已有实例。`style` 按字段合并，提供的 `stateStyles` 替换整个状态映射；保留其他状态时提交完整映射。该操作重算样式，不自动重新布局。修改业务字段使用 `updateEdgeData()`，修改端点使用该方法的批量格式，在更新项中提供 `id`、`source`、`target`；详见[边增量操作](/docs/api/graph#边)与 [`updateOptions()`](/docs/api/graph#updateoptions)。
 
+## 平行边与自环
+
+`edge.parallelEdges` 接受布尔值或 `ParallelEdgesConfig`。仅用对象入口时，`{ offset: 30 }` 不会启用分离，须写 `{ enabled: true, offset: 30 }`；`true` 使用默认参数。
+
+| 字段 | 类型 | 默认与规则 |
+| --- | --- | --- |
+| `enabled` | `boolean` | 默认关闭；对象入口须显式启用，transform 入口也可启用。边配置中的 `false` 可关闭两种入口 |
+| `offset` | `number` | `20`，图坐标中的偏移步长；须为有限正数，否则回退为 `20` |
+| `mergeBy` | `Array<'source' \| 'target'>` | `['source', 'target']`；当前始终按两端分组，子集或空数组不会启用业务字段分组 |
+| `includeReverse` | `boolean` | `true`，将 A→B 和 B→A 归为同组；`false` 时按方向分组，两条单独的反向边可能仍重叠 |
+| `minOffset` | `number` | `0`，非中心边的最小绝对偏移；有限非负数，否则回退为 `0` |
+| `maxOffset` | `number` | `80`，最大绝对偏移；有限非负数，否则回退为 `80` |
+
+### 分组与间距
+
+同组按当前边数组顺序分配偏移，公式为 `(index - (count - 1) / 2) * offset`，再限制绝对值到 min/max；中心偏移始终为 `0`。例如三条边、步长 `20` 得到 `-20, 0, 20`，两条得到 `-10, 10`。建议 `0 <= minOffset <= maxOffset`；达到上限的多条边可能重叠，`maxOffset: 0` 会压为零。
+
+`offset` 是曲线控制点的法向偏移步长，并非路径在屏幕上的等距间隔；二次曲线中点的偏移约为该值的一半，缩放也会改变屏幕间距。方向符号由引擎处理，业务无需给反向边手动取负。
+
+分离作用于 `arc`；默认 `line` 在存在多边组时会自动走弧线路径。`cubic` 和 `polyline` 的专用路径优先，不使用此偏移，不能依靠此配置拆开它们。启用分离的 `arc` 单边组会回到零曲率，同组曲率替代 `style.curvature`。需要稳定展示时保持数据顺序及边 `id`；重排或增删同组边可能改变路径。
+
+下面分别展示三条同向边、一对反向边和两个自环。反向边用橙色区分；自环独立绘制，不参与分组，关闭平行边处理也不会关闭自环。
+
+<EdgeDocExample id="edge-parallel" locale="zh" />
+
+### 两种入口与优先级
+
+transform 写法为 `transforms: [{ type: 'process-parallel-edges', options: { offset: 30 } }]`，也可使用字符串 `'process-parallel-edges'`。参数必须放在 `options` 内，`distance` 不是配置项。
+
+解析顺序为：内置默认 → 最后一个同名对象 transform 的 `options` → `edge.parallelEdges` 对象，按字段覆盖。字符串 transform 只负责启用。任一同名 transform 条目都会启用，因此 transform 的 `options.enabled: false` 本身不关闭它；使用 `edge.parallelEdges: false` 或 `{ enabled: false }` 明确关闭。仅有 `parallelEdges: true` 不会重置已提供的 transform 参数。
+
+运行时可用 `graph.updateOptions({ edge: { parallelEdges: { enabled: true, offset: 30 } } })` 重算分组，无需重新布局；新对象替换原 `parallelEdges` 对象，保留其他选项时一并提交。`updateOptions()` 不接受 `transforms`。自环尺寸与层级由内置渲染器决定，本配置的 offset/min/max 不控制它们。步骤与更多场景见[平行边指南](/docs/guides/parallel-edges)。
+
 ## 其他配置
 
 - [边使用指南](/docs/guides/edge)：类型选择、配置步骤和路径示意。

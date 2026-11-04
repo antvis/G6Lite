@@ -90,6 +90,39 @@ Activate states through behaviors or `graph.setItemState(edgeId, state, value)`.
 
 After the first `await graph.render()`, call `graph.updateOptions({ edge: { style: ... } })` on the existing instance. Style fields merge, while a supplied `stateStyles` replaces the entire state map; submit a complete map to retain other states. This recomputes appearance without rerunning layout. Update business fields with `updateEdgeData()`; update endpoints through its batch form, supplying `id`, `source`, and `target` in each update item. See [Edge mutations](/en/docs/api/graph#edges) and [`updateOptions()`](/en/docs/api/graph#updateoptions).
 
+## Parallel edges and self-loops
+
+`edge.parallelEdges` accepts a boolean or `ParallelEdgesConfig`. With only the object entry, `{ offset: 30 }` does not enable separation; use `{ enabled: true, offset: 30 }`. Use `true` for defaults.
+
+| Field | Type | Default and rules |
+| --- | --- | --- |
+| `enabled` | `boolean` | Disabled by default; explicitly enable the object entry or supply the transform. A false value in edge configuration disables both entries |
+| `offset` | `number` | `20`, offset step in graph coordinates; non-finite or nonpositive values fall back to `20` |
+| `mergeBy` | `Array<'source' \| 'target'>` | `['source', 'target']`; grouping always uses both endpoints. Subsets or an empty array do not enable business-field grouping |
+| `includeReverse` | `boolean` | `true` groups A→B with B→A; `false` groups each direction separately, so two single reverse edges may still overlap |
+| `minOffset` | `number` | `0`, minimum absolute non-center offset; non-finite or negative values fall back to `0` |
+| `maxOffset` | `number` | `80`, maximum absolute offset; non-finite or negative values fall back to `80` |
+
+### Grouping and spacing
+
+Offsets follow the current edge-array order: `(index - (count - 1) / 2) * offset`, then clamp the magnitude to min/max; a center offset stays `0`. Three edges at step `20` receive `-20, 0, 20`; two receive `-10, 10`. Keep `0 <= minOffset <= maxOffset`. Several edges can overlap at the cap; `maxOffset: 0` collapses all offsets.
+
+The step offsets the curve control point along its normal, rather than guaranteeing equal screen-space distances between paths. A quadratic midpoint moves by about half the control-point offset; zoom also changes screen spacing. The engine handles direction signs, so do not manually negate reverse-edge values.
+
+Separation affects `arc`; default `line` switches to an arc path when a multi-edge group exists. Dedicated `cubic` and `polyline` paths take priority and do not use this offset. An enabled single-edge `arc` group becomes straight, and grouped curvature replaces `style.curvature`. Keep data order and edge IDs stable; reordering, adding, or removing grouped edges can change their paths.
+
+The preview shows three same-direction edges, two reverse edges (orange for reverse), and two self-loops. Self-loops render independently and do not join separation groups; disabling separation does not disable loops.
+
+<EdgeDocExample id="edge-parallel" locale="en" />
+
+### Entries and precedence
+
+Use `transforms: [{ type: 'process-parallel-edges', options: { offset: 30 } }]`, or the string `'process-parallel-edges'`. Parameters belong inside `options`; `distance` is not an option.
+
+Resolution is field-based: built-in defaults → the last matching object transform's `options` → the `edge.parallelEdges` object. String entries only enable processing. Any matching transform entry enables it, so `options.enabled: false` alone does not disable that transform. Explicitly disable with `edge.parallelEdges: false` or `{ enabled: false }`. A boolean `parallelEdges: true` does not reset supplied transform options.
+
+Call `graph.updateOptions({ edge: { parallelEdges: { enabled: true, offset: 30 } } })` to regroup at runtime without rerunning layout. The new object replaces the previous `parallelEdges` object; resubmit other options to retain them. `updateOptions()` does not accept `transforms`. Loop size and levels are internal; offset/min/max do not control them. See the [parallel-edge guide](/en/docs/guides/parallel-edges) for steps.
+
 ## Other configuration
 
 - [Edge guide](/en/docs/guides/edge): type selection, steps, and path illustrations.

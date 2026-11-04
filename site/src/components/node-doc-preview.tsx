@@ -16,6 +16,7 @@ const loaders = {
   badges: () => import('../../demos/docs-node-badges.ts'),
   'edge-style': () => import('../../demos/docs-edge-style.ts'),
   'edge-hit-area': () => import('../../demos/docs-edge-hit-area.ts'),
+  'edge-parallel': () => import('../../demos/docs-edge-parallel.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -32,7 +33,7 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'edge-style' || id === 'edge-hit-area'
+  const hint = id.startsWith('edge-')
     ? (zh ? '点击边查看选中样式' : 'Click an edge to inspect its selected style')
     : id === 'badges'
     ? (zh ? '悬停 ··· 展开徽章' : 'Hover ··· to expand badges')

@@ -1,0 +1,33 @@
+site/demos/labels.ts
+  s_4534bc5c3d78f4::t_d807d26244230c 31-33,49-52,71,82,88,94-98
+site/demos/decoration-badges.ts
+  s_4534bc5c3d78f4::t_d807d26244230c 21-22
+site/content/docs/en/examples/decoration-badges.mdx
+  s_4534bc5c3d78f4::t_d807d26244230c 10-19
+site/content/docs/en/examples/labels.mdx
+  s_4534bc5c3d78f4::t_d807d26244230c 10-19
+site/content/docs/en/api/options/node.mdx
+  s_4534bc5c3d78f4::t_d807d26244230c 270-283
+site/content/docs/zh/examples/labels.mdx
+  s_4534bc5c3d78f4::t_d807d26244230c 10-19
+site/content/docs/zh/examples/decoration-badges.mdx
+  s_4534bc5c3d78f4::t_d807d26244230c 10-19
+site/content/docs/zh/api/options/node.mdx
+  s_4534bc5c3d78f4::t_d807d26244230c 270-283
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e0ec3ad4c755ca9fa733dea6c2883750f6170e93",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

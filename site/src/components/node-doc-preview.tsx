@@ -27,6 +27,7 @@ const loaders = {
   'combo-collapsed': () => import('../../demos/docs-combo-collapsed.ts'),
   'combo-states': () => import('../../demos/docs-combo-states.ts'),
   'combo-membership': () => import('../../demos/docs-combo-membership.ts'),
+  'label-policy': () => import('../../demos/docs-label-policy.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -43,7 +44,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'combo-membership'
+  const hint = id === 'label-policy'
+    ? (zh ? '初始 zoom 0.4、固定字号；切换策略，再用放大/缩小比较，重置恢复初始配置' : 'Starts at zoom 0.4 with fixed text size. Toggle policies and zoom to compare; reset restores initial options')
+    : id === 'combo-membership'
     ? (zh ? '点击 mobile 切换归属；拖动分组空白处整体移动，拖动节点单独移动' : 'Click mobile to switch groups. Drag group backgrounds to move members together, or drag nodes individually')
     : id === 'combo-collapsed'
     ? (zh ? '从左到右：自动计数、自定义计数、显式标签；点击分组展开或折叠' : 'Auto count, custom count, explicit label. Click a group to expand or collapse')

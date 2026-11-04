@@ -1,0 +1,34 @@
+site/src/components/node-doc-preview.tsx
+  s_4534bc5c3d78f4::t_8769728b032374 31,48-50
+  s_4534bc5c3d78f4::t_e4bb9660911d9c 110
+site/src/lib/node-doc-example-source.ts
+  s_4534bc5c3d78f4::t_8769728b032374 4,25,35
+site/content/docs/zh/api/options/theme.mdx
+  s_4534bc5c3d78f4::t_55f1dc363c8482 1-116
+site/content/docs/en/api/options/theme.mdx
+  s_4534bc5c3d78f4::t_55f1dc363c8482 1-116
+site/demos/docs-theme-switch.ts
+  s_4534bc5c3d78f4::t_8769728b032374 1-55
+site/content/docs/en/api/options/meta.json
+  s_4534bc5c3d78f4::t_8769728b032374 5
+site/content/docs/zh/api/options/meta.json
+  s_4534bc5c3d78f4::t_8769728b032374 5
+site/src/components/node-doc-preview.module.css
+  s_4534bc5c3d78f4::t_e4bb9660911d9c 18-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a7879b2e94e3df98544fa17f9089084b51bd0850",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

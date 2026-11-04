@@ -107,12 +107,12 @@ edge: {
 transforms: [
   {
     type: 'process-parallel-edges',
-    distance: 18,
+    options: { offset: 18 },
   },
 ];
 ```
 
-更多说明见 [平行边与自环](/docs/guides/parallel-edges)。
+`offset` 是图坐标中的偏移步长，需要放在 transform 的 `options` 中；未配置时默认 `20`。更多说明见 [平行边与自环](/docs/guides/parallel-edges)。
 
 ## 相关
 

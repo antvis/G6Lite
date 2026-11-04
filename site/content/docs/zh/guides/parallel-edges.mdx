@@ -25,11 +25,26 @@ const graph = new Graph({
   transforms: [
     {
       type: 'process-parallel-edges',
-      distance: 18,
+      options: { offset: 18 },
     },
   ],
 });
 ```
+
+`offset` 是平行边在图坐标中的偏移步长，默认 `20`。transform 的参数放在 `options` 中；例如，将 `offset` 从 `18` 改为 `36`，会增大同组平行边的间距。`distance` 不是这里的配置项。
+
+也可以直接配置 `edge.parallelEdges`，无需再添加 transform：
+
+```ts
+edge: {
+  type: 'arc',
+  parallelEdges: { enabled: true, offset: 18 },
+}
+```
+
+仅使用对象形式的 `edge.parallelEdges` 启用分离时，需要设置 `enabled: true`；使用默认参数可直接写 `parallelEdges: true`。两种入口选一种即可；同时配置时，`edge.parallelEdges` 对象中的字段覆盖 transform 的对应选项，显式设置 `parallelEdges: false` 或 `enabled: false` 会关闭分离。
+
+自环边的 `source` 和 `target` 相同，由内置渲染器单独绘制，无需启用此 transform。`offset` 控制平行边分离，不控制自环大小。更新边时建议保留稳定的边 `id`。
 
 ## 使用建议
 

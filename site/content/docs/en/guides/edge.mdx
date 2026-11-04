@@ -20,6 +20,21 @@ edge: {
 
 Use line, arc, cubic, or polyline edges according to the topology. Enable `process-parallel-edges` when multiple edges share endpoints. See [parallel edges](/en/docs/guides/parallel-edges).
 
+## Parallel-edge spacing
+
+Put the transform parameters inside `options`:
+
+```ts
+transforms: [
+  {
+    type: 'process-parallel-edges',
+    options: { offset: 18 },
+  },
+];
+```
+
+`offset` is the offset step in graph coordinates and defaults to `20`. See [parallel and self-loop edges](/en/docs/guides/parallel-edges) for the alternative `edge.parallelEdges` configuration and self-loop behavior.
+
 ## Thin-edge hit areas
 
 Use `hitAreaWidth` to make a thin edge easier to interact with without changing its visual width:

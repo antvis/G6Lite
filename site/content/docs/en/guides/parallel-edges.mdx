@@ -3,13 +3,44 @@ title: Parallel and self-loop edges
 description: Separate multiple edges that share endpoints and render self-loops clearly
 ---
 
+Multiple edges between the same endpoints can overlap. Enable `process-parallel-edges` to separate them, including reverse-direction edges by default.
+
+![Parallel edges overlap before processing and follow separate paths afterward; self-loops connect a node to itself.](/examples/docs-guide-parallel-edges.svg 'Parallel and self-loop edges')
+
+Try the [parallel edges](/en/docs/examples/parallel-edges) and [self-loops](/en/docs/examples/edge-loops) examples.
+
 ```ts
 const graph = new Graph({
   container: '#container',
   data,
-  edge: { type: 'line', style: { endArrow: true } },
-  transforms: [{ type: 'process-parallel-edges', distance: 20 }],
+  edge: { type: 'arc', style: { endArrow: true, lineWidth: 2 } },
+  transforms: [
+    {
+      type: 'process-parallel-edges',
+      options: { offset: 18 },
+    },
+  ],
 });
 ```
 
-The transform assigns different paths to same-direction, reverse, and self-loop edges. Keep stable edge IDs when updates need to preserve identity.
+`offset` is the offset step in graph coordinates and defaults to `20`. Transform parameters belong in `options`; for example, changing `offset` from `18` to `36` increases the spacing within a parallel-edge group. `distance` is not a configuration option here.
+
+Alternatively, configure `edge.parallelEdges` directly without adding the transform:
+
+```ts
+edge: {
+  type: 'arc',
+  parallelEdges: { enabled: true, offset: 18 },
+}
+```
+
+When enabling separation through the `edge.parallelEdges` object alone, set `enabled: true`; use `parallelEdges: true` for the defaults. Choose either entry point. If both are configured, fields in the `edge.parallelEdges` object override the corresponding transform options. Explicit `parallelEdges: false` or `enabled: false` disables separation.
+
+Self-loops have the same `source` and `target`. The built-in renderer draws them separately without this transform. `offset` controls parallel-edge separation, not self-loop size. Keep stable edge IDs when updating edges.
+
+## Usage tips
+
+- Prefer `arc` or `cubic` when many parallel edges share endpoints.
+- Enable `endArrow` for directed relationships.
+- Avoid showing every label when parallel edges are dense.
+- Store business grouping information in `edge.data` and map it to colors or labels.

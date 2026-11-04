@@ -1,0 +1,33 @@
+site/content/docs/en/api/graph.mdx
+  s_4534bc5c3d78f4::t_8cca866b3227ca 323,325
+site/content/docs/en/api/extensions.mdx
+  s_4534bc5c3d78f4::t_8cca866b3227ca 94,96
+site/content/docs/zh/api/graph.mdx
+  s_4534bc5c3d78f4::t_8cca866b3227ca 323,325
+site/content/docs/zh/api/options.mdx
+  s_4534bc5c3d78f4::t_8cca866b3227ca 35,153,155
+site/content/docs/zh/guides/layout.mdx
+  s_4534bc5c3d78f4::t_8cca866b3227ca 54,73
+site/content/docs/zh/api/extensions.mdx
+  s_4534bc5c3d78f4::t_8cca866b3227ca 94,96
+site/content/docs/en/api/options.mdx
+  s_4534bc5c3d78f4::t_8cca866b3227ca 35,153,155
+site/content/docs/en/guides/layout.mdx
+  s_4534bc5c3d78f4::t_8cca866b3227ca 54,73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "aebbe5a5d24990deec178e36607425fe5308bdf7",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

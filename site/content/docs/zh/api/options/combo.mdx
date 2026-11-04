@@ -1,11 +1,11 @@
 ---
 title: Combo 配置参考
-description: ComboData 字段、节点归属、嵌套关系、初始折叠与状态，以及只读查询模型
+description: Combo 数据、初始状态、基础外观、字段回调、局部覆盖与只读查询
 ---
 
 import { NodeDocExample as ComboDocExample } from '@/components/node-doc-example';
 
-本批参考覆盖 Combo 的数据声明与初始状态。外观字段和完整使用流程暂见[Combo 指南](/docs/guides/combo)；全局入口为 `GraphOptions.combo: ComboConfig`，当前顶层只有 `style?: ComboStyleConfig`。
+本页覆盖 Combo 的数据声明、初始状态以及展开状态的[基础外观与局部覆盖](#基础外观与局部覆盖)。折叠形态与状态样式的完整清单仍按后续批次整理，现有使用流程见[Combo 指南](/docs/guides/combo)；全局入口为 `GraphOptions.combo: ComboConfig`，当前顶层只有 `style?: ComboStyleConfig`。
 
 Combo 的嵌套、折叠和运行时归组仍是实验性能力，配置可能在 `0.1.x` 内调整，见[API 稳定性](/docs/compatibility/api-stability#实验性能力)。
 
@@ -18,7 +18,7 @@ Combo 的嵌套、折叠和运行时归组仍是实验性能力，配置可能�
 | `id` | `string` | 是 | Combo 唯一标识；建议与节点、边 id 也不重复，避免统一元素查询与状态操作的身份歧义 |
 | `parentId` | `string` | 否 | 无父级；指向同一 combos 数组内的父 Combo，形成嵌套 |
 | `collapsed` | `boolean` | 否 | `false`；首次渲染时是否折叠，见[初始折叠](#初始折叠) |
-| `style` | `Partial<ComboStyleConfig>` | 否 | 无局部覆盖；覆盖全局 combo.style 中相应的基础外观字段，完整覆盖关系后续按样式主题整理，现有入口见[样式指南](/docs/guides/combo#样式) |
+| `style` | `Partial<ComboStyleConfig>` | 否 | 无局部覆盖；覆盖全局 combo.style 中相应的基础外观字段，见[覆盖顺序](#字段回调与覆盖顺序) |
 | `data` | `Record<string, unknown>` | 否 | 无业务数据；自定义业务字段，不自动转成标签或布局参数 |
 | `states` | `ElementState[]` | 否 | 空状态集合；读取时规范为 Set，重复状态合并，见[初始状态](#初始状态) |
 
@@ -79,6 +79,68 @@ const selected = group?.states.has('selected');
 ```
 
 需要修改分组时使用[公开 Combo 方法](/docs/api/graph#combo)和[状态方法](/docs/api/graph#状态显隐和定位)。`graph.getData()` 返回当前 GraphData 快照，节点归属和 Combo 的 parentId、collapsed、states 会反映当前状态；由折叠推导出的成员 hidden 不会被导出成业务 hidden。style 中的函数不适合直接当作 JSON 持久化配置。
+
+## 基础外观与局部覆盖
+
+本节覆盖展开状态的基础外观和标签。全局配置位于 `combo.style`，单个分组在 `data.combos[].style` 中覆盖；两处使用相同的 `ComboStyleConfig` 字段。折叠图形的 collapsedType、collapsedSize、size、count，以及状态样式完整清单留在后续批次；现有操作入口见[Combo 指南](/docs/guides/combo)。
+
+### 基础样式字段
+
+| 字段 | 类型 | 默认值 | 单位与生效规则 |
+| --- | --- | --- | --- |
+| `fill` | `ComboStyleValue<string>` | `'rgba(100, 150, 255, 0.08)'` | Canvas 填充颜色；用 `'transparent'` 关闭底色 |
+| `stroke` | `ComboStyleValue<string>` | `'rgba(100, 150, 255, 0.3)'` | Canvas 描边颜色；独立于填充 |
+| `strokeWidth` | `ComboStyleValue<number>` | `1` | 屏幕像素，随 DPR 处理但不随相机 zoom 加粗；使用有限正数 |
+| `opacity` | `ComboStyleValue<number>` | `1` | 分组底色、描边和分组标签共用透明度，使用 0–1；不改变成员节点和边的透明度 |
+| `borderRadius` | `ComboStyleValue<number>` | `8` | 展开边界的圆角，图坐标单位；使用有限非负数，显示时受边框宽高各一半限制 |
+| `padding` | `number \| [number, number, number, number]` | `20` | 图坐标单位，参与包围框计算；固定值，不支持回调。数组当前取最大值作为四周留白，见下文 |
+| `label` | `ComboStyleValue<string \| false>` | 不绘制展开标签 | 非空文本才绘制；`false` 或空串隐藏，不自动读取 id 或 data.name |
+| `labelFontSize` | `ComboStyleValue<number>` | `12` | 缩放前字号（CSS 像素），使用有限正数；展开绘制字号为 `labelFontSize * DPR * min(zoom, 1.5)`，小于 6 绘制像素时跳过 |
+| `labelColor` | `ComboStyleValue<string>` | `'rgba(0, 0, 0, 0.65)'` | 分组标签颜色 |
+| `labelPlacement` | `'top' \| 'bottom' \| 'inside' \| 'center'` | `'top'` | 展开标签的位置，固定值，不支持逐分组回调 |
+
+分组由 Canvas 2D 绘制，支持 Canvas 颜色字符串。样式值不经过统一数值清洗，业务应提供有效范围；不能依赖无效颜色、负线宽或非有限数值自动恢复默认值。Combo 基础样式没有主题 token 注入，默认值来自分组渲染器。
+
+### 代码与对应效果
+
+三组使用相同的节点尺寸与排列：左侧使用全局蓝色样式；中间用局部橙色、透明度、方角、较小留白和 inside 标签覆盖；右侧通过分组回调映射填充与成员数标签，padding 数组最终按 40 对称留白。缩放时比较边界尺寸与描边宽度的差异，重置恢复原画布。
+
+<ComboDocExample id="combo-style" locale="zh" />
+
+该示例没有激活状态层，便于单独比较全局与局部基础字段。中间分组的 opacity 不影响两个蓝色成员节点。inside 标签位于左上内侧，并不等同于 center。
+
+### 字段回调与覆盖顺序
+
+`ComboStyleValue<T> = T | ((combo: ComboModel) => T)`。支持回调的字段只接收一个分组模型，可读取 id、data、直接成员集合和当前状态；不是节点/边的签名，也没有逐字段 index 参数。直接成员数不包含嵌套分组中的孙级节点。回调保持轻量，不修改模型或触发图更新。
+
+基础字段按“全局 combo.style → 当前 ComboData.style”逐字段覆盖，再解析最终字段回调；没有局部值的字段继续使用全局值，两处都省略时使用内置回退。局部常量和局部函数均会替换同名全局字段，回调返回值不是另一层配置合并。显式 false 可以关闭 label；undefined 不会清除已定义的全局值。
+
+若存在状态层，则先完成基础合并，再按 active → highlight → selected → disabled → inactive 顺序合并每个已激活状态的全局覆盖、局部覆盖，最后执行存留下来的字段回调。因此全局 selected 的 stroke 可以覆盖局部基础 stroke；同一状态的局部 stroke 又优先于全局 stroke。这是与基础覆盖相接的边界，状态字段及回退描边将在下一批单独展开。
+
+### 留白、包围框与标签
+
+padding 先取当前分组的局部值，否则取全局值，否则为 20。当前 `[8, 40, 12, 24]` 与 `40` 得到相同的四周留白，不按 CSS 上右下左分别计算。使用有限非负值；数组只支持四项固定元组。padding 不受状态覆盖或字段回调控制。
+
+包围框包含节点主体和子分组边界，再在四周增加 padding；不会额外测量成员标签或分组标签来扩边。父分组还会在子分组边界之外加入自己的留白。没有内容的分组仍不因 padding 而生成占位边框。
+
+展开标签的 top/bottom 位于边框外侧并水平居中，center 在框中心，inside 在左上内侧；没有自动换行、截断、碰撞隐藏或分组标签偏移字段。Combo 标签不走节点/边的 LabelOptions 策略，不能用 label.hideOnCollision 或 scaleWithZoom 改变其行为。较长标题需业务缩短或增加空间，单纯增大 padding 不会自动换行。
+
+### 运行时修改边界
+
+当前 `graph.updateOptions()` 只接受 node、edge、label、theme，不接受 combo。不要使用 `updateOptions({ combo: ... })` 或修改 getComboData() 返回值来更新外观。
+
+修改局部样式可以在首次 render 后复制当前 GraphData 快照，更新相应 ComboData.style，再替换数据。以下代码用于业务实例中的异步函数；它不是本页预览的操作按钮：
+
+```ts
+const data = graph.getData();
+const group = data.combos?.find((combo) => combo.id === 'local');
+if (group) {
+  group.style = { ...group.style, fill: 'rgba(22,160,133,0.12)' };
+  await graph.setData(data, { fitView: false });
+}
+```
+
+这是完整数据替换，会重跑已配置的布局；fitView: false 只保留当前视口，不代表跳过布局。需要替换全局 combo.style 时以新配置重建实例。临时选中或高亮优先使用状态 API；更多方法见[Graph 配置与数据更新](/docs/api/graph#替换数据与样式)。
 
 ## 相关入口
 

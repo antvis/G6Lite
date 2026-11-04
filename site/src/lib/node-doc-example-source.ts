@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-export type NodeDocExampleId = 'body' | 'style' | 'labels' | 'label-options' | 'badges' | 'edge-style' | 'edge-hit-area' | 'edge-parallel' | 'edge-curves' | 'edge-cubic' | 'edge-orth' | 'edge-indented' | 'edge-labels' | 'combo-data';
+export type NodeDocExampleId = 'body' | 'style' | 'labels' | 'label-options' | 'badges' | 'edge-style' | 'edge-hit-area' | 'edge-parallel' | 'edge-curves' | 'edge-cubic' | 'edge-orth' | 'edge-indented' | 'edge-labels' | 'combo-data' | 'combo-style';
 const files: Record<NodeDocExampleId, string> = {
   body: 'docs-node-body.ts',
   style: 'docs-node-style.ts',
@@ -17,6 +17,7 @@ const files: Record<NodeDocExampleId, string> = {
   'edge-indented': 'docs-edge-indented.ts',
   'edge-labels': 'docs-edge-labels.ts',
   'combo-data': 'docs-combo-data.ts',
+  'combo-style': 'docs-combo-style.ts',
 };
 
 export function readNodeDocExample(id: NodeDocExampleId) {

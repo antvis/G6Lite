@@ -1,135 +1,131 @@
 ---
 title: Combo configuration reference
-description: Combo data, initial states, basic appearance, callbacks, local overrides, and read-only queries
+description: Combo data, appearance, collapsed shapes, state styles, and precedence
 ---
 
 import { NodeDocExample as ComboDocExample } from '@/components/node-doc-example';
 
-This page covers Combo data declarations, initial states, and expanded [basic appearance and local overrides](#basic-appearance-and-local-overrides). Complete collapsed-shape and state-style lists remain for later batches; see the [Combo guide](/en/docs/guides/combo) for existing usage. The global entry is `GraphOptions.combo: ComboConfig`, whose only top-level field is currently `style?: ComboStyleConfig`.
+Global entry: `GraphOptions.combo.style`. Per-group overrides: `data.combos[].style`. Find [data](#combodata), [base appearance](#basic-appearance-and-local-overrides), [collapsed appearance](#collapsed-appearance), or [state styles](#state-styles). For workflows, see the [Combo guide](/en/docs/guides/combo).
 
-Nesting, collapse, and runtime grouping remain experimental and may change within `0.1.x`; see [API stability](/en/docs/compatibility/api-stability).
+Nesting, collapse, and runtime grouping are [experimental](/en/docs/compatibility/api-stability) and may change within `0.1.x`. `ComboConfig` currently has one field: `style?: ComboStyleConfig`.
 
 ## ComboData
 
-Declare groups with `GraphData.combos?: ComboData[]`; nodes join through their own `comboId`. A Combo is not a node: edge source and target still reference node IDs.
+Declare groups with `GraphData.combos?: ComboData[]`; nodes join through `comboId`. Edge source and target still reference node IDs.
 
 | Field | Type | Required | Default and rules |
 | --- | --- | --- | --- |
-| `id` | `string` | Yes | Unique Combo identity; also avoid node/edge ID collisions to prevent ambiguity in unified queries and state operations |
-| `parentId` | `string` | No | No parent; references a parent Combo in the same combos array |
-| `collapsed` | `boolean` | No | `false`; whether the first render starts collapsed, see [Initial collapse](#initial-collapse) |
-| `style` | `Partial<ComboStyleConfig>` | No | No local overrides; overrides corresponding base fields in global combo.style. See [precedence](#callbacks-and-precedence) |
-| `data` | `Record<string, unknown>` | No | No business data; fields do not automatically become labels or layout parameters |
-| `states` | `ElementState[]` | No | Empty state set; normalized to a Set, removing duplicates. See [Initial states](#initial-states) |
+| `id` | `string` | Yes | Unique identity; avoid collisions with node and edge IDs |
+| `parentId` | `string` | No | No parent; references a parent in the same combos array |
+| `collapsed` | `boolean` | No | `false`; see [Initial collapse](#initial-collapse) |
+| `style` | `Partial<ComboStyleConfig>` | No | Overrides matching global style fields |
+| `data` | `Record<string, unknown>` | No | Business data; not automatically used as labels or layout parameters |
+| `states` | `ElementState[]` | No | Empty; read as a deduplicated Set |
 
 ### Membership and nesting
 
-- A node's `comboId?: string` names one direct group. Omission means ungrouped; nodes in child groups do not also need membership in the parent.
-- A Combo's `parentId` declares hierarchy. Direct members come from node comboId; do not write childNodeIds or childComboIds into ComboData.
-- Groups are all declared before relationships are linked, so a parent may appear after its children. Parent IDs must exist and hierarchy must be acyclic; cycle guards do not make circular nesting valid.
-- Unknown comboId references are currently ignored: the node remains in the graph without valid membership. Unknown parentId references do not establish a real parent. Validate references in your application.
-- Bounds come from member positions, node dimensions, child-group bounds, and padding. x/y and width/height are not ComboData fields. Empty groups have no content bounds and currently do not draw placeholder containers.
+- Node `comboId` sets direct membership; Combo `parentId` sets hierarchy. The engine computes member sets.
+- Parents may be declared later. References must be valid and hierarchy acyclic; currently invalid references are ignored, so validate them in your application.
+- Bounds use member positions, sizes, child groups, and padding. x/y and width/height are not input fields. Empty groups draw no placeholder.
 
-On the left, Platform contains Client, and web/mobile belong directly to Client. Client starts with a purple selected outline. The outside node has no group. Archive starts collapsed on the right: old-a, old-b, and the archived edge are invisible, while the collapsed shape and label remain. The live edge still connects mobile to outside.
+Left: nesting and initial selection. Right: initial collapse. Names come from an explicit label callback.
 
 <ComboDocExample id="combo-data" locale="en" />
 
-Fixed node coordinates avoid layout differences. The example installs no selection behavior; selected comes from data. Reset reruns the same source and restores initial selected and collapsed values. The explicit label callback reads data.name; business names do not automatically become titles.
-
 ## Initial collapse
 
-`collapsed: true` applies during initial data loading, hiding all descendant nodes and edges connected to them. Cross-group edges are not reconnected as virtual edges to a collapsed group. Child Combo outlines are not automatically suppressed solely because an ancestor is collapsed; validate the actual nested presentation.
+`collapsed: true` hides descendant nodes and their connected edges without creating virtual edges. `states: ['collapsed']` does not collapse a group. See [appearance fields](#collapsed-appearance) or [runtime methods](/en/docs/guides/combo).
 
-Expanding should preserve preexisting business hidden states on nodes and edges. Multiple collapsed ancestors jointly retain member hiding; expanding one does not necessarily reveal everything. See the [existing guide](/en/docs/guides/combo) for runtime collapse methods; this example verifies initial declarations.
+<details>
+<summary>Nested collapse and hidden states</summary>
 
-`collapsed` and `states` are independent: `states: ['collapsed']` stores a custom state name and does not collapse the group.
+Child Combo outlines are not automatically hidden by ancestor collapse. Expanding preserves existing business hidden states on nodes and edges. Multiple collapsed ancestors retain member hiding; expanding one may not reveal members.
+
+</details>
 
 ## Initial states
 
-`states` accepts built-in names and custom strings. Current built-in Combo style processing follows active → highlight → selected → disabled → inactive. Hidden skips the group's own drawing and picking. Custom names are retained but do not automatically receive built-in effects. Full style fields and precedence will be documented in the appearance batch.
-
-Combo state styles belong in `combo.style.stateStyles` or local `ComboData.style.stateStyles`, not `combo.stateStyles`. The preview explicitly defines a purple selected outline. Initial states need no behavior. Built-in `click-select` currently handles nodes and edges only. Update subsequent Combo selection with `setItemState()`, or handle `combo:click` and call state APIs; installing that behavior alone does not toggle Combo states.
-
-`states: ['hidden']` hides only the group itself, unlike collapsed. It does not automatically hide member nodes, connected edges, or child Combos, and cannot declare a whole invisible subtree.
+`states` declares initial states; [state styles](#state-styles) define their appearance. `hidden` hides only the group itself. Built-in `click-select` handles nodes and edges only; use state APIs for Combo selection, as in the interactive example below.
 
 ## Read-only query model
 
-After the first `await graph.render()`, `graph.getComboData(id)` returns `ComboModel | undefined`. It is a read-only Graph-managed view; mutating returned objects or collections is not an update API.
+After the first `await graph.render()`, `getComboData(id)` returns `ComboModel | undefined`. Results are read-only; use [Combo methods](/en/docs/api/graph#combo) or [state methods](/en/docs/api/graph#state-visibility-and-focus) for updates.
 
 | Field | Type | Meaning |
 | --- | --- | --- |
-| `id` / `parentId` | `string` / `string \| undefined` | Group identity and declared parent |
+| `id` / `parentId` | `string` / `string \| undefined` | Identity and parent |
 | `childNodeIds` | `ReadonlySet<string>` | Direct node members, excluding nodes inside child groups |
-| `childComboIds` | `ReadonlySet<string>` | Direct child Combo IDs |
+| `childComboIds` | `ReadonlySet<string>` | Direct child groups |
 | `collapsed` | `boolean` | Current collapsed state |
-| `x` / `y` | `number` | Computed graph-coordinate bounds center |
-| `width` / `height` | `number` | Computed bounds in graph units, not the collapsed shape's display size |
-| `style` | `Readonly<Partial<ComboStyleConfig>> \| undefined` | Local input, not fully resolved defaults plus state styles |
+| `x` / `y` | `number` | Bounds center in graph coordinates |
+| `width` / `height` | `number` | Bounds dimensions, not collapsed display dimensions |
+| `style` | `Readonly<Partial<ComboStyleConfig>> \| undefined` | Local input, not fully resolved styles |
 | `data` | `Readonly<Record<string, unknown>> \| undefined` | Business data |
-| `states` | `ReadonlySet<ElementState>` | Current state set |
-
-Bounds are recomputed during rendering. After membership changes, do not treat queries as synchronous geometry calculation. Query direct children with `getComboChildren()` and node membership with `getNodeCombo()`:
+| `states` | `ReadonlySet<ElementState>` | Current states |
 
 ```ts
 const group = graph.getComboData('client');
 const directChildren = graph.getComboChildren('platform');
-// directChildren.combos includes client; nodes excludes web/mobile inside client
 const membership = graph.getNodeCombo('web'); // 'client'
 const selected = group?.states.has('selected');
 ```
 
-Use [public Combo methods](/en/docs/api/graph#combo) and [state methods](/en/docs/api/graph#state-visibility-and-focus) for changes. `graph.getData()` returns current GraphData snapshots, including membership, parentId, collapsed, and states. Member hidden states derived from collapse are not exported as business hidden. Functions in style are unsuitable for direct JSON persistence.
+<details>
+<summary>Bounds updates and data export</summary>
+
+Bounds are recalculated during rendering; membership queries do not guarantee synchronously updated geometry. `getData()` exports current membership, parentId, collapsed, and states, excluding hidden states derived from collapse. Style functions cannot be persisted directly as JSON.
+
+</details>
 
 ## Basic appearance and local overrides
 
-This section covers expanded appearance and labels. Set global values in `combo.style` and override one group in `data.combos[].style`; both use `ComboStyleConfig`. Collapsed-shape fields collapsedType, collapsedSize, size, count, and the complete state-style list remain for later batches. Existing operations are in the [Combo guide](/en/docs/guides/combo).
+Set global values in `combo.style`, or override one group in `data.combos[].style`. Both accept these fields.
 
 ### Basic style fields
 
-| Field | Type | Default | Units and behavior |
+| Field | Type | Default | Rules |
 | --- | --- | --- | --- |
-| `fill` | `ComboStyleValue<string>` | `'rgba(100, 150, 255, 0.08)'` | Canvas fill color; use `'transparent'` for no fill |
-| `stroke` | `ComboStyleValue<string>` | `'rgba(100, 150, 255, 0.3)'` | Canvas outline color, independent of fill |
-| `strokeWidth` | `ComboStyleValue<number>` | `1` | Screen pixels; DPR-adjusted but not thickened by camera zoom. Use a finite positive value |
-| `opacity` | `ComboStyleValue<number>` | `1` | Shared alpha for group fill, outline, and label; use 0–1. Does not change member-node or edge opacity |
-| `borderRadius` | `ComboStyleValue<number>` | `8` | Expanded corner radius in graph units; use a finite nonnegative value, limited to half of displayed width/height |
-| `padding` | `number \| [number, number, number, number]` | `20` | Graph units used for bounds; a constant without callbacks. Arrays currently use their maximum as uniform padding |
-| `label` | `ComboStyleValue<string \| false>` | No expanded label | Nonempty text renders; `false` or an empty string hides it. IDs/data.name are not read automatically |
-| `labelFontSize` | `ComboStyleValue<number>` | `12` | Unscaled CSS-pixel size; use a finite positive value. Expanded Canvas font size is `labelFontSize * DPR * min(zoom, 1.5)` and is skipped below 6 drawing pixels |
-| `labelColor` | `ComboStyleValue<string>` | `'rgba(0, 0, 0, 0.65)'` | Group-label color |
-| `labelPlacement` | `'top' \| 'bottom' \| 'inside' \| 'center'` | `'top'` | Expanded-label location; a constant without per-group callbacks |
+| `fill` | `ComboStyleValue<string>` | `'rgba(100, 150, 255, 0.08)'` | Canvas color; `'transparent'` removes fill |
+| `stroke` | `ComboStyleValue<string>` | `'rgba(100, 150, 255, 0.3)'` | Canvas outline color |
+| `strokeWidth` | `ComboStyleValue<number>` | `1` | Screen pixels; does not thicken with zoom |
+| `opacity` | `ComboStyleValue<number>` | `1` | 0–1; affects group fill, outline, and text only |
+| `borderRadius` | `ComboStyleValue<number>` | `8` | Expanded corners in graph units; capped at half the box dimensions |
+| `padding` | `number \| [number, number, number, number]` | `20` | Graph units; arrays use their maximum on all sides; no callback |
+| `label` | `ComboStyleValue<string \| false>` | No expanded label | false/empty string hides text; no automatic id/data.name label |
+| `labelFontSize` | `ComboStyleValue<number>` | `12` | Unscaled CSS-pixel font size |
+| `labelColor` | `ComboStyleValue<string>` | `'rgba(0, 0, 0, 0.65)'` | Text color |
+| `labelPlacement` | `'top' \| 'bottom' \| 'inside' \| 'center'` | `'top'` | Expanded text location; no callback |
 
-Groups render with Canvas 2D and accept Canvas color strings. Values do not pass through uniform numeric validation; supply valid ranges instead of relying on invalid colors, negative widths, or non-finite values to restore defaults. Combo base styles do not receive theme tokens; defaults come from the group renderer.
+<details>
+<summary>Valid values, themes, and text scaling</summary>
+
+Use valid Canvas colors, finite positive dimensions/widths/font sizes, and finite nonnegative padding/radii. There is no uniform invalid-value cleanup or theme-token injection.
+
+Outlines account for DPR. Expanded font size is `labelFontSize * DPR * min(zoom, 1.5)`; text is skipped below 6 drawing pixels.
+
+</details>
 
 ### Code and matching result
 
-All groups use the same node sizes and arrangement. Left uses global blue styles. Middle overrides fill, alpha, square corners, smaller padding, and an inside label. Right maps fill and member-count text through callbacks; its padding array produces uniform padding of 40. Zoom to compare geometry with outline width; reset restores the initial view.
+Left: global styles. Middle: local overrides. Right: callbacks and padding arrays. Group opacity does not fade member nodes.
 
 <ComboDocExample id="combo-style" locale="en" />
 
-No states are activated, so only global/local base fields are compared. The middle group's opacity does not fade its blue member nodes. Inside means the upper-left interior, rather than center.
-
 ### Callbacks and precedence
 
-`ComboStyleValue<T> = T | ((combo: ComboModel) => T)`. Callback fields receive one group model, including identity, business data, direct-member sets, and current states. This is not the node/edge signature and has no index argument. Direct-member counts exclude nodes inside child groups. Keep callbacks inexpensive and do not mutate the model or trigger updates.
+`ComboStyleValue<T> = T | ((combo: ComboModel) => T)`. Callbacks receive one group model, including data, direct-member sets, and states. Keep them inexpensive and do not mutate the model.
 
-Base fields merge from global combo.style to local ComboData.style, then surviving callbacks resolve. Missing local fields retain global values; fields omitted from both use built-in fallbacks. Local constants and functions both replace their global counterpart. Callback results are values, not another configuration merge. Explicit false disables label; undefined does not clear a defined global field.
-
-State layers apply after base merging, in active → highlight → selected → disabled → inactive order. Each active state merges its global override, then its local override, before surviving callbacks run. Consequently a global selected stroke can override a local base stroke, while that state's local stroke wins over its global stroke. The full state list and fallback outlines will be covered in the next batch.
+Merge each field: **global base → local base → active state overrides → resolve surviving callbacks**. Local constants or callbacks replace the global field; undefined does not clear it. See [state ordering](#state-styles).
 
 ### Padding, bounds, and labels
 
-Padding chooses the local value, then global, then 20. Currently `[8, 40, 12, 24]` and `40` produce identical uniform padding, not separate CSS-like top/right/bottom/left insets. Use finite nonnegative values and exactly four tuple entries. States and field callbacks do not control padding.
-
-Bounds wrap node bodies and child-group bounds, then add padding on every side. Member and group labels are not measured to expand the box. A parent adds its own padding around child-group bounds. Padding does not create a placeholder box for an empty group.
-
-Expanded top/bottom labels sit outside the outline and are horizontally centered; center uses the box center, and inside uses the upper-left interior. There are no automatic wrapping, truncation, collision hiding, or group-label offset fields. Combo labels do not use node/edge LabelOptions; label.hideOnCollision and scaleWithZoom do not change them. Shorten long titles or provide space; increasing padding does not enable wrapping.
+- `[8, 40, 12, 24]` equals uniform `40`, rather than CSS directional padding. State styles cannot override padding.
+- Bounds include node bodies and child groups, not labels. Parents add their padding outside child-group bounds.
+- top/bottom sit outside and centered; inside is upper-left; center is box-centered. No wrapping, truncation, collision handling, or node/edge LabelOptions.
 
 ### Runtime updates
 
-`graph.updateOptions()` currently accepts node, edge, label, and theme only. It does not accept combo. Do not use `updateOptions({ combo: ... })` or mutate getComboData() results to update appearance.
-
-For local appearance, get a current GraphData snapshot after the first render, modify the appropriate ComboData.style, and replace data. This code belongs in an application's async function, not a control for this page:
+Replace a data snapshot to change local styles. `updateOptions()` currently does not accept combo.
 
 ```ts
 const data = graph.getData();
@@ -140,11 +136,66 @@ if (group) {
 }
 ```
 
-This replaces all data and reruns any configured layout. fitView: false preserves the view; it does not skip layout. Recreate with new options to replace global combo.style. Prefer state APIs for temporary selection or highlights. See [Graph data and configuration updates](/en/docs/api/graph#replacing-data-and-styles).
+This replaces all data and reruns configured layout; `fitView: false` only preserves the view. Recreate the instance for global style changes. Use [state APIs](/en/docs/api/graph#state-visibility-and-focus) for temporary highlights.
+
+## Collapsed appearance
+
+These fields belong in `combo.style` or local `style`, and affect the collapsed shape only.
+
+| Field | Type | Default | Rules |
+| --- | --- | --- | --- |
+| `collapsedType` | `'circle' \| 'rect'` | `'circle'` | Circle or rounded rectangle; no callback |
+| `collapsedSize` | `ComboStyleValue<number \| [number, number]>` | `30` | Graph units; scalar for equal dimensions, tuple for width/height |
+| `size` | `ComboStyleValue<number \| [number, number]>` | None | Fallback alias; collapsedSize wins when both are set |
+| `count` | `boolean \| string \| ((combo: ComboModel) => boolean \| string)` | `true` | true counts descendant nodes recursively; false hides; string displays custom text |
+
+**label takes priority over count.** Explicit `label: false` or an empty string also suppresses count. Text is always centered; labelPlacement does not apply.
+
+<ComboDocExample id="combo-collapsed" locale="en" />
+
+<details>
+<summary>Collapsed dimensions and text rendering</summary>
+
+Shapes scale with zoom. Circles use the smaller dimension as diameter, not an ellipse. Rectangles have a maximum corner radius of 8 screen pixels, ignoring borderRadius. Position uses computed group centers; empty groups remain undrawn.
+
+Text has no wrapping, truncation, or collision handling. It renders when the drawing radius exceeds 8 pixels, with font size `max(10 * DPR, min(labelFontSize * DPR, radius * 0.7))`. Automatic count includes nodes in child groups; `childNodeIds.size` counts direct members only.
+
+</details>
+
+## State styles
+
+Entry: `combo.style.stateStyles` or `ComboData.style.stateStyles`. Type: `Partial<Record<ElementState, ComboStateStyleOverride>>`. Each state can override these **8 fields**; omitted fields retain their previous values.
+
+| Field | Type | Overrides |
+| --- | --- | --- |
+| `fill` | `ComboStyleValue<string>` | Fill color |
+| `stroke` | `ComboStyleValue<string>` | Outline color |
+| `strokeWidth` | `ComboStyleValue<number>` | Outline width |
+| `opacity` | `ComboStyleValue<number>` | Group alpha |
+| `borderRadius` | `ComboStyleValue<number>` | Expanded corners |
+| `label` | `ComboStyleValue<string \| false>` | Text, or hides text |
+| `labelFontSize` | `ComboStyleValue<number>` | Font size |
+| `labelColor` | `ComboStyleValue<string>` | Text color |
+
+Order: **active → highlight → selected → disabled → inactive**. Each state merges global then local overrides; later matching fields win. Padding, collapsed dimensions, and labelPlacement cannot be state overrides.
+
+The example explicitly handles `combo:click` to toggle selected. The last group keeps inactive to demonstrate combined states.
+
+<ComboDocExample id="combo-states" locale="en" />
+
+<details>
+<summary>Fallback outlines and custom states</summary>
+
+- Without configured styles, selected adds a blue 2-screen-pixel outline; active/highlight add a blue 1.5-pixel outline. The selected fallback wins.
+- Explicit selected styles, including an empty object, suppress that fallback. Configuring either active or highlight suppresses the fallback outlines for both.
+- disabled/inactive have no automatic dimming; configure them explicitly. Custom names are stored but do not enter built-in style merging; default is also excluded.
+- hidden skips the group's own rendering and picking without hiding members; it is independent of collapsed.
+
+</details>
 
 ## Related entries
 
-- [Combo guide](/en/docs/guides/combo): existing appearance, collapse, membership, and dragging usage.
-- [Combo example](/en/docs/examples/combo): nesting, collapse/expand, and membership changes.
-- [GraphOptions and data](/en/docs/api/options): overall graph configuration and GraphData.
-- [Graph data model](/en/docs/concepts/data-model): node and edge responsibilities.
+- [Combo guide](/en/docs/guides/combo): configuration, collapse, membership, and dragging.
+- [Combo example](/en/docs/examples/combo): complete interactions.
+- [GraphOptions and data](/en/docs/api/options): overall configuration.
+- [Graph data model](/en/docs/concepts/data-model): data responsibilities.

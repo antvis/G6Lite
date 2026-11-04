@@ -24,6 +24,8 @@ const loaders = {
   'edge-labels': () => import('../../demos/docs-edge-labels.ts'),
   'combo-data': () => import('../../demos/docs-combo-data.ts'),
   'combo-style': () => import('../../demos/docs-combo-style.ts'),
+  'combo-collapsed': () => import('../../demos/docs-combo-collapsed.ts'),
+  'combo-states': () => import('../../demos/docs-combo-states.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -40,7 +42,11 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'combo-style'
+  const hint = id === 'combo-collapsed'
+    ? (zh ? '从左到右：自动计数、自定义计数、显式标签；点击分组展开或折叠' : 'Auto count, custom count, explicit label. Click a group to expand or collapse')
+    : id === 'combo-states'
+    ? (zh ? '基础、全局选中、局部选中、多状态叠加；点击分组空白处切换选中' : 'Base, global selection, local selection, combined states. Click group backgrounds to toggle selection')
+    : id === 'combo-style'
     ? (zh ? '从左到右：全局样式、局部覆盖、字段回调；缩放对比线宽与几何尺寸' : 'Left to right: global styles, local overrides, field callbacks. Zoom to compare widths and geometry')
     : id === 'combo-data'
     ? (zh ? '左侧嵌套与初始选中；右侧初始折叠，状态来自数据声明' : 'Nested and initially selected on the left; initially collapsed on the right. States come from data')

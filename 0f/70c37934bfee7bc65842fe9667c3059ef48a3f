@@ -1,0 +1,38 @@
+site/content/docs/en/api/options/combo.mdx
+  s_4534bc5c3d78f4::t_783834cacc0363 3,8,21
+  s_4534bc5c3d78f4::t_e7a8d42f00f748 83-97,99-142,144
+  s_4534bc5c3d78f4::t_0169e6199098f3 98
+  s_4534bc5c3d78f4::t_f961f78e97f8b2 143
+site/src/lib/node-doc-example-source.ts
+  s_4534bc5c3d78f4::t_8ef69e5a47a319 4,20
+site/src/components/node-doc-preview.tsx
+  s_4534bc5c3d78f4::t_8ef69e5a47a319 26,43-45
+site/content/docs/en/guides/combo.mdx
+  s_4534bc5c3d78f4::t_783834cacc0363 8-9
+site/content/docs/zh/guides/combo.mdx
+  s_4534bc5c3d78f4::t_783834cacc0363 53-54
+site/demos/docs-combo-style.ts
+  s_4534bc5c3d78f4::t_f961f78e97f8b2 14-15
+  s_4534bc5c3d78f4::t_46d8bff7604b30 17,30
+  s_4534bc5c3d78f4::t_8ef69e5a47a319 1-13,16,18-29,31-44
+site/content/docs/zh/api/options/combo.mdx
+  s_4534bc5c3d78f4::t_e7a8d42f00f748 83-97,99-144
+  s_4534bc5c3d78f4::t_783834cacc0363 3,8,21
+  s_4534bc5c3d78f4::t_0169e6199098f3 98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0f70c37934bfee7bc65842fe9667c3059ef48a3f",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -1,0 +1,126 @@
+---
+title: Layout configuration reference
+description: LayoutConfig, 14 built-in layouts, shared defaults, tree options, and Worker rules
+---
+
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+Entry: `GraphOptions.layout?: LayoutConfig`. Omit it to retain node x/y, defaulting missing coordinates to 0. Layout computes graph positions; it does not fit the camera. See the [Layout guide](/en/docs/guides/layout) for usage.
+
+## LayoutConfig
+
+```ts
+import type { LayoutConfig } from '@antv/g6-lite';
+
+const layout: LayoutConfig = { type: 'dagre', rankdir: 'LR', ranksep: 64 };
+```
+
+| Field | Type | Default or behavior |
+| --- | --- | --- |
+| `type` | Required `string` | One of the 14 built-in names below, or a registered layout; unknown names fall back to random rather than loading arbitrary upstream layouts |
+| `worker` | `boolean` | Graph attempts a Worker when omitted and node count ≥ 1000; false explicitly disables it; tree layouts and registered extensions run on the main thread first |
+| `width` | `number` | Graph supplies the current canvas width; explicit values win |
+| `height` | `number` | Graph supplies the current canvas height; explicit values win |
+| `center` | `[number, number]` | With a viewport, [width / 2, height / 2]; whether it is used depends on the algorithm |
+| `[key: string]` | `unknown` | Algorithm options, passed through with normalization below; the type does not validate spelling or algorithm compatibility |
+
+Dimensions, distances, center, and node x/y share graph coordinate space. Canvas dimensions supplied by Graph are CSS pixel values; do not multiply by DPR. Width/height are not final graph bounds, and center is not fitCenter. Built-in mindmap, indented, and fishbone ignore shared width/height/center.
+
+## Supported layouts
+
+These 11 algorithms are loaded through internal dynamic imports, without manual registration. The table lists common options; other algorithm options belong to the installed version's [AntV Layout documentation](https://layout.antv.vision/). Wrapper behavior here was checked against the current @antv/layout 2.0.0 dependency; additional upstream algorithms are not automatically supported.
+
+| type | Purpose | Common algorithm options |
+| --- | --- | --- |
+| `circular` | Circle or spiral | radius, startRadius, endRadius, startAngle, endAngle, clockwise |
+| `concentric` | Rings by importance | sortBy, maxLevelDiff, nodeSize, nodeSpacing, preventOverlap |
+| `grid` | Rows and columns | rows, cols, begin, sortBy, nodeSize, nodeSpacing, preventOverlap |
+| `random` | Random positions | width, height, center |
+| `dagre` | Directed layers | rankdir: TB/BT/LR/RL, nodesep, ranksep, edgesep, nodeSize, ranker |
+| `force` | Force-directed network | linkDistance, nodeStrength, edgeStrength, maxIteration, minMovement |
+| `d3-force` | D3 simulation | linkDistance, nodeStrength, alphaDecay, alphaMin; use nodeStrength, not charge |
+| `force-atlas2` | ForceAtlas2 network | kr, kg, barnesHut, prune, maxIteration |
+| `fruchterman` | Fruchterman network | gravity, speed, maxIteration, minMovement |
+| `radial` | Rings around a focus | focusNode, unitRadius, linkDistance, preventOverlap |
+| `mds` | Positions from graph distances | linkDistance, center |
+
+Rendered node sizes are not automatically passed to algorithms. For overlap avoidance, also set the algorithm's nodeSize/nodeSpacing or equivalent options; preventOverlap alone does not ensure agreement with drawn sizes.
+
+## Code and rendered result
+
+Switch four layouts on the same data. setLayout stores configuration, layout computes positions, and the example then calls fitView explicitly.
+
+<LayoutDocExample id="layout-switch" locale="en" />
+
+## Computation defaults
+
+G6Lite injects or rewrites the following options; explicit values win. These rules apply to library layouts, not the three functional tree layouts.
+
+| Algorithm / option | Default or rule |
+| --- | --- |
+| All library layouts: `animate` | false when omitted; Graph applies positions after computation rather than drawing every iteration |
+| `iterations` | Mapped to maxIteration only when maxIteration is absent, then removed. It is not a universal iteration control for every algorithm |
+| force / fruchterman, fewer than 1000 nodes | maxIteration: 100, minMovement: 1 |
+| force / fruchterman, 1000–5000 nodes | maxIteration: 200, minMovement: 1.5 |
+| force / fruchterman, more than 5000 nodes | maxIteration: 50, minMovement: 2 |
+| force-atlas2 | barnesHut: true; prune defaults to false above 200 nodes; maxIteration: 100, or 50 above 5000 nodes |
+| d3-force | alphaDecay: 0.1; linkDistance: max(200, √node count × 80) |
+
+Main-thread d3-force is ticked manually up to 300 times, checking alphaMin (default 0.001). The Worker path awaits the algorithm's completion; the paths do not guarantee identical positions. Other internal defaults belong to the installed algorithm version.
+
+## Functional tree layouts
+
+Use flat nodes/edges with source → target parent relationships. Supply a connected, acyclic, single-root tree; these algorithms do not arrange a forest as independent trees. Unvisited nodes generally fall back to (0, 0); this tolerance is not forest layout support.
+
+### mindmap
+
+| Option | Type | Default / behavior |
+| --- | --- | --- |
+| `direction` | `'H' \| 'LR' \| 'RL'` | H; LR places branches right, RL left; H uses getSide, whose default also returns right |
+| `levelGap` | `number` | 120, horizontal gap between parent and child boundaries |
+| `nodeGap` | `number` | 30, gap between adjacent children on one side |
+| `branchColors` | `string[]` | Built-in 10 colors; writes data._branchColor, which needs an explicit style callback to affect colors |
+| `getWidth` | `(node: GraphNode) => number` | Returns 100 |
+| `getHeight` | `(node: GraphNode) => number` | Returns 40 |
+| `getSide` | `(node: GraphNode, index: number, parentSide?: 'left' \| 'right') => 'left' \| 'right'` | Returns right; node contains only id and data |
+
+The first parentless input node becomes root; otherwise the first node does. Root position is (0, 0). Use levelGap/nodeGap; legacy hGap/vGap names are not supported.
+
+### indented
+
+| Option | Type | Default / behavior |
+| --- | --- | --- |
+| `indent` | `number` | 80, horizontal offset per depth |
+| `rowHeight` | `number` | 40, gap between consecutive DFS rows |
+| `direction` | `'LR' \| 'RL'` | LR; RL uses negative horizontal positions |
+| `rootId` | `string` | Explicit root, otherwise first parentless node, then first node |
+| `nodeColors` | `string[]` | Omitted: no color written; a nonempty palette writes data._nodeColor by depth |
+| `edgeColors` | `string[]` | Omitted: no color written; a nonempty palette writes data._edgeColor onto nodes, for edge style callbacks to read |
+
+Visited nodes also receive data.depth and data._isRoot; root position is (0, 0). Generated metadata does not automatically change visual styles.
+
+### fishbone
+
+For root → category → item structures. Deeper nodes do not receive a complete position assignment.
+
+| Option | Type | Default / behavior |
+| --- | --- | --- |
+| `direction` | `'LR' \| 'RL'` | LR; RL mirrors horizontal positions |
+| `categoryGap` | `number` | 180, spacing of categories along the spine |
+| `categoryDistance` | `number` | 200, category offset scale from the spine |
+| `itemHStep` | `number` | 20, extra horizontal item offset |
+| `getWidth` | `(node: GraphNode) => number` | Returns 80; used for root and item positions |
+| `getHeight` | `(node: GraphNode) => number` | Returns 30; called, but stored heights currently do not affect positions |
+| `itemGap` | `number` | Declared only; the runtime does not read it to adjust spacing |
+
+## Worker
+
+Graph supplies worker: true when node count ≥ 1000 and worker is omitted, without filtering by algorithm name. Standalone runLayout has no automatic switch. Execution order is registered extension → built-in tree → Worker → main-thread library. Worker creation, cloning, or execution failures fall back to the same main-thread algorithm, which may block again.
+
+Prefer explicit worker: false for function-valued options. See [layout methods](/en/docs/api/graph#layout) for cancellation. Successful configuration does not prove a Worker actually ran.
+
+## Coordinates and runtime
+
+Before applying results, Graph overrides each axis with the node's fx/fy when present. This fixes final positions, without guaranteeing the algorithm itself respected fixed constraints. Layout may replace existing x/y; omit layout to use existing coordinates directly.
+
+[setLayout and layout](/en/docs/api/graph#layout) replace and execute configuration; updateOptions does not accept layout. Rerunning layout does not automatically fit the camera or recreate interaction/rendering instances. New positions are applied only after successful computation. Continue with the [Layout guide](/en/docs/guides/layout).

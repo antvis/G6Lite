@@ -1,0 +1,126 @@
+---
+title: 布局配置参考
+description: LayoutConfig、14 种内置布局、通用默认值、树布局参数与 Worker 规则
+---
+
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+入口：`GraphOptions.layout?: LayoutConfig`。省略时保留节点 x/y，缺失坐标补 0；布局负责图坐标，不负责相机适配。选择与操作见[布局指南](/docs/guides/layout)。
+
+## LayoutConfig
+
+```ts
+import type { LayoutConfig } from '@antv/g6-lite';
+
+const layout: LayoutConfig = { type: 'dagre', rankdir: 'LR', ranksep: 64 };
+```
+
+| 字段 | 类型 | 默认或行为 |
+| --- | --- | --- |
+| `type` | `string`，必填 | 下方 14 个内置名称或已注册的布局名；不识别的名称回退 random，不会自动加载任意上游布局 |
+| `worker` | `boolean` | Graph 中未设置且节点数 ≥ 1000 时尝试启用；false 显式关闭；树布局与注册扩展优先在主线程执行 |
+| `width` | `number` | Graph 注入当前画布宽；显式值优先 |
+| `height` | `number` | Graph 注入当前画布高；显式值优先 |
+| `center` | `[number, number]` | 有 viewport 时默认 [width / 2, height / 2]；算法是否使用取决于其实现 |
+| `[key: string]` | `unknown` | 算法专用选项，透传并按下方规则归一化；类型不会校验拼写及算法兼容性 |
+
+尺寸、距离、center 与节点 x/y 使用图坐标空间，Graph 默认注入的画布尺寸为 CSS 像素值，无需乘 DPR。宽高不是最终图形边界，center 也不是 fitCenter。内置 mindmap、indented、fishbone 不使用通用 width/height/center。
+
+## 支持的布局类型
+
+以下 11 种通过内部动态导入加载，无需手动注册。常用参数列用于定位；其余算法选项查所安装版本的 [AntV Layout 文档](https://layout.antv.vision/)。本页封装行为按当前依赖 @antv/layout 2.0.0 核对，上游的其他算法不等于本包已接入。
+
+| type | 用途 | 常用算法参数 |
+| --- | --- | --- |
+| `circular` | 圆周或螺旋排列 | radius、startRadius、endRadius、startAngle、endAngle、clockwise |
+| `concentric` | 按重要程度分圈 | sortBy、maxLevelDiff、nodeSize、nodeSpacing、preventOverlap |
+| `grid` | 规则行列 | rows、cols、begin、sortBy、nodeSize、nodeSpacing、preventOverlap |
+| `random` | 随机位置 | width、height、center |
+| `dagre` | 有向分层 | rankdir: TB/BT/LR/RL，nodesep、ranksep、edgesep、nodeSize、ranker |
+| `force` | 力导向网络 | linkDistance、nodeStrength、edgeStrength、maxIteration、minMovement |
+| `d3-force` | D3 力模拟 | linkDistance、nodeStrength、alphaDecay、alphaMin；使用 nodeStrength，不是 charge |
+| `force-atlas2` | ForceAtlas2 网络 | kr、kg、barnesHut、prune、maxIteration |
+| `fruchterman` | Fruchterman 网络 | gravity、speed、maxIteration、minMovement |
+| `radial` | 围绕焦点的同心层 | focusNode、unitRadius、linkDistance、preventOverlap |
+| `mds` | 按图距离求二维位置 | linkDistance、center |
+
+节点的绘制尺寸不会自动传入算法。需要避让节点时，同时配置该算法支持的 nodeSize/nodeSpacing 等选项；仅开启 preventOverlap 不保证与实际绘制尺寸匹配。
+
+## 代码与对应效果
+
+相同数据在四种布局间切换；setLayout 只存配置，layout 执行计算，示例随后显式 fitView。
+
+<LayoutDocExample id="layout-switch" locale="zh" />
+
+## 计算默认值
+
+以下由 G6Lite 注入或改写，用户显式值优先；仅适用于上面的库布局，不用于三个函数式树布局。
+
+| 算法 / 选项 | 默认或规则 |
+| --- | --- |
+| 全部库布局 `animate` | 省略时 false；Graph 在计算完成后写回坐标，不提供逐帧布局绘制 |
+| `iterations` | 若有此字段且无 maxIteration，映射到 maxIteration；随后删除 iterations。不要把它当作所有算法通用的迭代开关 |
+| force / fruchterman，节点数 < 1000 | maxIteration: 100，minMovement: 1 |
+| force / fruchterman，1000–5000 个节点 | maxIteration: 200，minMovement: 1.5 |
+| force / fruchterman，节点数 > 5000 | maxIteration: 50，minMovement: 2 |
+| force-atlas2 | barnesHut: true；节点数 > 200 时默认 prune: false；maxIteration 默认 100，节点数 > 5000 时 50 |
+| d3-force | alphaDecay: 0.1；linkDistance: max(200, √节点数 × 80) |
+
+主线程 d3-force 由封装手动 tick，最多 300 次，并检查 alphaMin（默认 0.001）；Worker 路径等待算法结束，两条执行路径不保证逐点相同。算法内部其他默认值以安装版本为准，不与 G6Lite 的注入值混用。
+
+## 函数式树布局
+
+输入仍是平铺 nodes/edges，边按 source → target 表达父子。建议传单根、连通、无环的树；不会把森林自动排成多个独立树。未遍历到的节点通常落到 (0, 0)，不要将容错行为作为森林布局能力。
+
+### mindmap
+
+| 选项 | 类型 | 默认 / 行为 |
+| --- | --- | --- |
+| `direction` | `'H' \| 'LR' \| 'RL'` | H；LR 全右、RL 全左；H 通过 getSide 决定左右，默认也返回 right |
+| `levelGap` | `number` | 120，父子节点边界间的水平距离 |
+| `nodeGap` | `number` | 30，同侧相邻子节点间距 |
+| `branchColors` | `string[]` | 内置 10 色；结果写入节点 data._branchColor，需样式回调读取才会着色 |
+| `getWidth` | `(node: GraphNode) => number` | 返回 100 |
+| `getHeight` | `(node: GraphNode) => number` | 返回 40 |
+| `getSide` | `(node: GraphNode, index: number, parentSide?: 'left' \| 'right') => 'left' \| 'right'` | 返回 right；node 仅包含 id 和 data |
+
+根取输入中第一个无父节点；没有时取第一个节点，根坐标 (0, 0)。不支持旧写法 hGap/vGap，使用 levelGap/nodeGap。
+
+### indented
+
+| 选项 | 类型 | 默认 / 行为 |
+| --- | --- | --- |
+| `indent` | `number` | 80，每深入一层的水平偏移 |
+| `rowHeight` | `number` | 40，DFS 顺序下相邻行的距离 |
+| `direction` | `'LR' \| 'RL'` | LR；RL 使用负的水平坐标 |
+| `rootId` | `string` | 优先指定根，否则取第一个无父节点，再回退第一个节点 |
+| `nodeColors` | `string[]` | 省略不写色值；传非空色板后按深度写 data._nodeColor |
+| `edgeColors` | `string[]` | 省略不写色值；传非空色板后按深度写节点 data._edgeColor，边样式需从节点读取 |
+
+遍历到的节点还会得到 data.depth 与 data._isRoot；根坐标 (0, 0)。这些是布局产生的数据，不会自动改变节点或边样式。
+
+### fishbone
+
+用于根 → 分类 → 条目的三层结构，更深节点没有完整的位置分配。
+
+| 选项 | 类型 | 默认 / 行为 |
+| --- | --- | --- |
+| `direction` | `'LR' \| 'RL'` | LR；RL 镜像水平位置 |
+| `categoryGap` | `number` | 180，分类在主干上的间距 |
+| `categoryDistance` | `number` | 200，分类与主干的偏移尺度 |
+| `itemHStep` | `number` | 20，条目的额外水平偏移 |
+| `getWidth` | `(node: GraphNode) => number` | 返回 80，参与根和条目的定位 |
+| `getHeight` | `(node: GraphNode) => number` | 返回 30；当前会被调用，但保存的高度不参与坐标计算 |
+| `itemGap` | `number` | 当前只有类型声明，运行时不读取，不应依赖其调整间距 |
+
+## Worker
+
+Graph 在节点数 ≥ 1000 且 worker 未设置时传入 worker: true；该判断不按算法名筛选。独立 runLayout 没有这个自动开关。执行顺序为注册扩展 → 内置树布局 → Worker → 主线程库布局；Worker 创建、克隆或执行失败后，回退到主线程同一算法，可能再次占用主线程。
+
+需要函数回调的算法优先显式设置 worker: false。取消放弃结果与中断计算的区别见[布局方法](/docs/api/graph#布局)。配置成功并不能证明实际在 Worker 执行。
+
+## 坐标与运行时
+
+Graph 在布局结果写回前用节点 fx/fy 分别覆盖对应轴；这能固定最终坐标，不保证算法计算过程考虑了固定约束。已有 x/y 可能被布局改写；省略 layout 才直接使用已有坐标。
+
+[setLayout 与 layout](/docs/api/graph#布局)替换并执行布局配置；updateOptions 不接收 layout。重排不自动 fitView，也不重建交互或绘图实例；新布局成功后才写入坐标。更多操作见[布局指南](/docs/guides/layout)。

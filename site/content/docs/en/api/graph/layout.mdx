@@ -1,0 +1,100 @@
+---
+title: Layout method reference
+description: Signatures, timing, and cancellation for setLayout, layout, cancelLayout, and standalone runLayout
+---
+
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+Use setLayout + layout on an existing graph, or runLayout to compute positions alone. See the [configuration reference](/en/docs/api/options/layout), [Layout guide](/en/docs/guides/layout), and [Worker guide](/en/docs/guides/layout-worker).
+
+## setLayout
+
+`graph.setLayout(config: LayoutConfig): void`
+
+Replaces the entire configuration without deeply merging previous options, starting computation, or cancelling a running layout. It can be called before render and does nothing after destruction. It does not accept undefined or provide an entry for clearing the layout configuration.
+
+## layout
+
+`graph.layout(): Promise<void>`
+
+After the first render completes, computes positions from current nodes, edges, and configuration. Before rendering, its Promise rejects; after destruction, it returns. Missing configuration or empty nodes skip computation and layout events.
+
+Valid results update node positions, Graph overrides axes with fx/fy, then requests drawing. Promise completion does not establish that the browser has drawn the frame. The method does not call fitView or remount interactions/plugins.
+
+### Code and rendered result
+
+Selecting an algorithm calls setLayout, awaits layout, then calls fitView. Application generation checks protect camera and status updates.
+
+<LayoutDocExample id="layout-switch" locale="en" />
+
+### Computation and fitting
+
+| Call | Layout | Camera |
+| --- | --- | --- |
+| First render | Computes when configured | Fits initially; autoFit objects or numeric values affect that fit |
+| layout | Computes when configured and nonempty | Retains current camera |
+| setData | Computes configured layout on new data | Fits by default; `{ fitView: false }` retains camera |
+
+setLayout needs a subsequent layout call to start computation; updateOptions does not include layout. Container autoFit primarily controls fitting after resize, not automatic fitting on every layout call.
+
+<details>
+<summary>Events, stale results, and errors</summary>
+
+Normal nonempty execution: beforelayout → layout:start → compute → layout:end → afterlayout → apply positions and request drawing. Start/before payloads contain `{ nodeCount }`; end/after contain `{ duration, nodeCount }`. duration is milliseconds of computation, excluding subsequent drawing. Skipped, cancelled, or superseded tasks need not produce end events.
+
+A new render, setData, or layout call invalidates older results; starting the next actual computation also aborts the previous signal. Stale results are not applied, although their Promises may resolve normally. Cancelling or updating from an event callback can also invalidate the current result.
+
+Registered extension and built-in tree errors are logged and fall back to input positions. Worker errors attempt main-thread fallback. Main-thread library loading or execution errors can still reject the Promise. Handle errors and guard application-side status updates and fitView against stale generations.
+
+</details>
+
+## cancelLayout
+
+`graph.cancelLayout(): void`
+
+Invalidates the current result and aborts its AbortSignal. An active Worker is terminated. Synchronous main-thread computation cannot be preempted; a registered layout stops promptly only if it responds to signal.
+
+It does not clear configuration, roll back applied positions, or destroy Graph. Repeated calls and calls after destruction safely return. You can run layout again after cancellation.
+
+A cancelled Graph layout Promise usually resolves normally; AbortError is not a reliable signal that positions were applied. graph.destroy() also invalidates pending work and cleans up the instance. Application timers and listeners still need cleanup. See the runnable [cancellation example](/en/docs/guides/layout-worker#code-and-rendered-result).
+
+## runLayout
+
+Import from the package root to compute positions without Graph:
+
+```ts
+import type { ExtensionContext, GraphData, LayoutConfig, LayoutResult } from '@antv/g6-lite';
+
+declare function runLayout(
+  data: GraphData,
+  config: LayoutConfig,
+  viewport?: { width: number; height: number },
+  runtime?: { signal?: AbortSignal; extensionContext?: ExtensionContext },
+): Promise<LayoutResult>;
+```
+
+| Input / result | Contract |
+| --- | --- |
+| data | Flat nodes/edges; the function creates no Graph and performs no drawing or fitting |
+| config | LayoutConfig; Workers require an explicit option, without the ≥ 1000-node automatic switch |
+| viewport | Defaults missing width/height/center; omitted values use algorithm defaults rather than a Graph container |
+| runtime.signal | Optional cancellation signal; cancellation generally returns input positions as a fallback rather than guaranteeing AbortError |
+| runtime.extensionContext | Optional extension initialization context; provided by Graph's internal call, omitted by default in standalone calls |
+| result | `{ nodes: Array<GraphNode & { x: number; y: number }> }`; no edges are returned; do not treat it as a deep clone |
+
+### Compute and display coordinates
+
+This example calls runLayout first, then displays its result in Graph without a layout option, so rendering does not compute layout again:
+
+<LayoutDocExample id="layout-result" locale="en" />
+
+<details>
+<summary>Standalone calculation boundaries</summary>
+
+Execution order follows the configuration reference: registered names, built-in functional trees, Worker, then library algorithm. With viewport, extension execute context width/height prefer viewport values; explicit config.width/height remain in context.options. Without viewport, context dimensions fall back to config or 800×600.
+
+Standalone runLayout does not perform Graph's final fx/fy override, execute Graph transforms, or emit Graph layout events. Use results in your own renderer; use instance layout for Graph's writeback, state, and event sequence.
+
+</details>
+
+Continue with the [configuration reference](/en/docs/api/options/layout), [Graph overview](/en/docs/api/graph), or [custom layouts](/en/docs/guides/extensions).

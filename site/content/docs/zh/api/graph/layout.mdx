@@ -1,0 +1,100 @@
+---
+title: 布局方法参考
+description: setLayout、layout、cancelLayout 与独立 runLayout 的签名、时机和取消语义
+---
+
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+已有图实例用 setLayout + layout；只计算坐标用 runLayout。配置字段查[布局配置参考](/docs/api/options/layout)，操作步骤见[布局指南](/docs/guides/layout)和 [Worker 指南](/docs/guides/layout-worker)。
+
+## setLayout
+
+`graph.setLayout(config: LayoutConfig): void`
+
+替换整份布局配置，不深合并上次参数、不开始计算、不取消正在运行的布局。可在 render 前设置；销毁后不执行。此方法不接受 undefined，不提供清除布局配置的入口。
+
+## layout
+
+`graph.layout(): Promise<void>`
+
+首次 render 完成后，用当前节点、边和布局配置重新计算。调用前未完成 render 会拒绝 Promise；销毁后直接返回。没有布局配置或节点为空时不计算，也不发出布局事件。
+
+结果有效时写回节点坐标，Graph 再按 fx/fy 覆盖对应轴，并请求一次绘制。Promise 完成不表示浏览器已经绘制该帧；本方法不调用 fitView，不重新挂载交互或插件。
+
+### 代码与对应效果
+
+选择算法后依次 setLayout、await layout、fitView；应用用自己的 generation 保护后续相机与提示更新。
+
+<LayoutDocExample id="layout-switch" locale="zh" />
+
+### 执行与适配时机
+
+| 调用 | 布局 | 视口 |
+| --- | --- | --- |
+| 首次 render | 有配置就计算 | 首次会适配；autoFit 对象或数值参与首次适配 |
+| layout | 有配置且非空时计算 | 保留当前相机 |
+| setData | 有配置就按新数据计算 | 默认适配；传 `{ fitView: false }` 保留相机 |
+
+setLayout 后再次 layout 才开始新算法；updateOptions 不包含 layout。配置容器的 autoFit 主要控制尺寸变化后的适配，不会让每次 layout 自动适配。
+
+<details>
+<summary>事件顺序、过期结果与异常</summary>
+
+有布局且非空的正常执行顺序为 beforelayout → layout:start → 计算 → layout:end → afterlayout → 写回结果并请求绘制。start/before 的 payload 为 `{ nodeCount }`，end/after 为 `{ duration, nodeCount }`；duration 单位毫秒，仅覆盖计算阶段，不含后续绘制。未执行、取消或被更新代次替代的任务不保证产生结束事件。
+
+新的 render、setData、layout 调用会使旧结果过期；成功启动下一次布局时也会中止上一个布局的信号。旧结果不写回，但旧 Promise 仍可能正常完成。事件回调中调用取消或更新，也可能使当前结果失效。
+
+注册扩展和内置树布局的执行错误会记录日志并回退到输入坐标；Worker 错误尝试主线程回退；主线程库的加载或执行错误仍可能拒绝 Promise。调用方应处理异常，并对自己的完成提示、fitView 等副作用检查代次。
+
+</details>
+
+## cancelLayout
+
+`graph.cancelLayout(): void`
+
+使当前布局结果过期，并中止当前请求的 AbortSignal。正在使用的 Worker 会被终止；主线程同步计算不能被抢占，注册布局是否及时停止取决于是否响应 signal。
+
+取消不清除配置、不回滚已写入坐标，也不销毁 Graph。重复调用或销毁后调用均可安全返回；取消后可继续 layout。
+
+取消任务的 Graph Promise 通常正常完成，不能以是否抛出 AbortError 判断是否写回。调用 graph.destroy() 也会使未完成布局失效并清理实例；应用自己创建的计时器和监听仍需清理。可运行的取消示例见 [Worker 指南](/docs/guides/layout-worker#代码与对应效果)。
+
+## runLayout
+
+从包根导入，直接计算坐标，不需要创建 Graph：
+
+```ts
+import type { ExtensionContext, GraphData, LayoutConfig, LayoutResult } from '@antv/g6-lite';
+
+declare function runLayout(
+  data: GraphData,
+  config: LayoutConfig,
+  viewport?: { width: number; height: number },
+  runtime?: { signal?: AbortSignal; extensionContext?: ExtensionContext },
+): Promise<LayoutResult>;
+```
+
+| 参数 / 返回值 | 规则 |
+| --- | --- |
+| data | 平铺 nodes/edges；函数不创建 Graph，也不绘制或适配相机 |
+| config | LayoutConfig；worker 只按显式值启用，没有 ≥ 1000 节点的自动开关 |
+| viewport | 为缺失的 width/height/center 提供默认值；省略时交由算法默认，不读取 Graph 容器 |
+| runtime.signal | 可选取消信号；取消时通常返回输入坐标作为后备结果，不保证抛 AbortError |
+| runtime.extensionContext | 可选扩展初始化上下文；Graph 内部调用会提供，独立调用默认不提供 |
+| result | `{ nodes: Array<GraphNode & { x: number; y: number }> }`；不返回 edges；不要当作输入数据的深拷贝 |
+
+### 坐标计算与展示
+
+下面先 runLayout，再将结果交给未配置 layout 的 Graph，因此展示阶段不会重新计算布局：
+
+<LayoutDocExample id="layout-result" locale="zh" />
+
+<details>
+<summary>独立计算的边界</summary>
+
+执行顺序同布局配置参考：已注册同名扩展、内置函数式树布局、Worker、库算法。传 viewport 时，扩展 execute 上下文的 width/height 优先使用 viewport；显式 config.width/height 仍在 context.options 中。无 viewport 时，上下文尺寸回退到 config 或 800×600。
+
+独立 runLayout 不执行 Graph 的最终 fx/fy 覆盖，不运行 Graph transforms，也不发送 Graph 布局事件。返回后将坐标用于自己的渲染器；需要 Graph 的数据写回、状态和事件链时，使用实例 layout。
+
+</details>
+
+继续阅读：[配置参考](/docs/api/options/layout) · [Graph 方法总览](/docs/api/graph) · [自定义布局](/docs/guides/extensions)。

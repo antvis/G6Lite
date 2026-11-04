@@ -29,7 +29,7 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 | `container` | `string \| HTMLElement` | Canvas container. A string is a CSS selector, such as `#container` |
 | `data` | `GraphData` | Nodes, edges, and optional combos |
 | `node` | [`NodeConfig`](/en/docs/api/options/node#nodeconfig) | Node shapes, appearance, states, labels, icons, and decorations; see the node reference for full definitions |
-| `edge` | `EdgeConfig` | Edge shape, style, arrows, and state styles |
+| `edge` | [`EdgeConfig`](/en/docs/api/options/edge#edgeconfig) | Edge type, appearance, arrows, labels, states, routing, and parallel edges; see the edge reference for full definitions |
 | `combo` | `ComboConfig` | Combo appearance. Collapse and nesting are still experimental |
 | `label` | `LabelOptions` | Zoom and collision policy shared by node and edge labels |
 | `layout` | `LayoutConfig` | Layout type and algorithm parameters |
@@ -126,46 +126,16 @@ Follow the [node guide](/en/docs/guides/node) to build an effect. Node IDs, busi
 
 ## Edge
 
-See the [edge configuration reference](/en/docs/api/options/edge) for basic appearance, arrows, picking width, state rules, and matching previews. Existing curve, routing, label, and parallel-edge information remains below.
+`edge` has type [`EdgeConfig`](/en/docs/api/options/edge#edgeconfig), configuring type, appearance, arrows, picking width, labels, states, and parallel edges. The [edge reference](/en/docs/api/options/edge) is the detailed source for fields, defaults, constraints, and matching code previews:
 
-```ts
-edge?: {
-  type?: 'line' | 'arc' | 'polyline' | 'cubic' | string;
-  labelRenderer?: string;
-  parallelEdges?: boolean | ParallelEdgesConfig;
-  style?: { /* fields below; values may be functions */ };
-  stateStyles?: Partial<Record<ElementState, EdgeStateStyleOverride>>;
-}
-```
+- [Basic styles](/en/docs/api/options/edge#basic-styles), [arrows](/en/docs/api/options/edge#arrows), and [picking width](/en/docs/api/options/edge#picking-width): color, width, dashes, units, and interaction bounds.
+- [Style callbacks](/en/docs/api/options/edge#style-callbacks) and [state styles](/en/docs/api/options/edge#state-styles): three-argument callbacks, field precedence, and state overrides.
+- [Curves and polyline routing](/en/docs/api/options/edge#curves-and-polyline-routing): curvature, curveOffset, radius, router, indentTarget, and currently inactive trunkGap.
+- [Edge labels](/en/docs/api/options/edge#edge-labels): text, font, placement, backgrounds, visibility, and custom renderers.
+- [Parallel edges and self-loops](/en/docs/api/options/edge#parallel-edges-and-self-loops): object enablement, grouping, spacing, and transform precedence.
+- [Runtime updates](/en/docs/api/options/edge#runtime-updates): style merging and data mutation entries; see routing for mode-change constraints.
 
-An edge style function is `(source, target, edge) => value`.
-
-| Style field | Description |
-| --- | --- |
-| `stroke` / `lineWidth` / `opacity` / `lineDash` | Color, width, opacity, and dash pattern |
-| `hitAreaWidth` | Pickable width in screen pixels. Defaults to the final line width |
-| `curvature` / `curveOffset` | Bend of arcs and curves |
-| `endArrow` / `startArrow` / `arrowSize` | End arrow, start arrow, and size |
-| `radius` | Polyline corner radius |
-| `router` | Polyline routing: `'orth' \| 'tree' \| 'indented' \| 'fishbone'` |
-| `label`, plus `labelFontSize`, `labelFontFamily`, `labelColor` | Edge label content. Omitted `label` draws nothing; the default font size is `10` |
-| `labelPlacement` | `'start' \| 'center' \| 'end'` |
-| `labelBackground` / `labelBackgroundPadding` / `labelAutoRotate` | Background, padding, and whether the text follows the edge |
-
-`stateStyles` can override `stroke`, `lineWidth`, `hitAreaWidth`, `opacity`, and `lineDash`.
-
-`parallelEdges: true` separates edges that share endpoints with the default spacing. The object form is:
-
-| Field | Default | Description |
-| --- | --- | --- |
-| `enabled` | on | Whether separation runs |
-| `offset` | `20` | Graph-space distance between adjacent edges |
-| `mergeBy` | source/target | Grouping currently supports the two endpoints |
-| `includeReverse` | `true` | `A→B` and `B→A` belong to one group |
-| `minOffset` | `0` | Minimum absolute offset for non-center edges |
-| `maxOffset` | `80` | Maximum absolute offset |
-
-`'process-parallel-edges'` in `transforms` has the same effect. See [Parallel edges](/en/docs/guides/parallel-edges).
+Follow the [edge guide](/en/docs/guides/edge) to build an effect. Edge `source`, `target`, `id`, business `data`, and initial states remain on this page under [`GraphEdge`](#edge-graphedge).
 
 ## Label policy
 

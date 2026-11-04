@@ -1,11 +1,11 @@
 ---
 title: Edge configuration reference
-description: EdgeConfig appearance, arrows, picking width, callbacks, and state precedence
+description: Complete EdgeConfig fields, defaults, callbacks, states, curve routing, labels, and parallel edges
 ---
 
 import { NodeDocExample as EdgeDocExample } from '@/components/node-doc-example';
 
-`GraphOptions.edge` has type `EdgeConfig`. This page covers basic appearance, arrows, picking width, states, and runtime updates. Follow the [edge guide](/en/docs/guides/edge) for steps; existing curve, routing, label, and parallel-edge references are under [Other configuration](#other-configuration).
+`GraphOptions.edge` has type `EdgeConfig`. This page defines top-level configuration, every style field, state overrides, curve routing, labels, parallel edges, and runtime updates, with code and previews from the same source. Follow the [edge guide](/en/docs/guides/edge) for steps and troubleshooting; see [GraphOptions](/en/docs/api/options) for the overall structure.
 
 ## EdgeConfig
 
@@ -201,7 +201,7 @@ Edge configuration does not provide node-only `labelMaxWidth`, `labelOffsetX/Y`,
 ## Other configuration
 
 - [Edge guide](/en/docs/guides/edge): type selection, steps, and path illustrations.
-- [Existing edge options](/en/docs/api/options#edge): curve, polyline routing, and edge-label fields.
+- [GraphEdge data](/en/docs/api/options#edge-graphedge): edge identity, endpoints, business data, and initial states.
 - [Parallel edges and self-loops](/en/docs/guides/parallel-edges): `parallelEdges` objects and transforms.
 - [Label guide](/en/docs/guides/label): edge-label content and placement.
 - [Custom Label Renderer](/en/docs/guides/custom-label-renderer): registration and drawing protocols.

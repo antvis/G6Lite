@@ -1,11 +1,11 @@
 ---
 title: 边配置参考
-description: EdgeConfig 的基础外观、箭头、点击热区、回调和状态覆盖规则
+description: EdgeConfig 的完整字段、默认值、回调、状态、曲线路由、标签和平行边规则
 ---
 
 import { NodeDocExample as EdgeDocExample } from '@/components/node-doc-example';
 
-`GraphOptions.edge` 的类型是 `EdgeConfig`。本页覆盖基础外观、箭头、点击热区、状态和热更新；按步骤配置见[边指南](/docs/guides/edge)。曲线与折线路径、边标签和平行边的现有入口见[其他配置](#其他配置)。
+`GraphOptions.edge` 的类型是 `EdgeConfig`。本页统一定义顶层配置、全部样式字段、状态覆盖、曲线路由、标签、平行边和运行时更新，提供同源码的代码与效果对照。按步骤配置与排查见[边使用指南](/docs/guides/edge)，整体结构见 [GraphOptions](/docs/api/options)。
 
 ## EdgeConfig
 
@@ -201,7 +201,7 @@ transform 写法为 `transforms: [{ type: 'process-parallel-edges', options: { o
 ## 其他配置
 
 - [边使用指南](/docs/guides/edge)：类型选择、配置步骤和路径示意。
-- [现有边配置](/docs/api/options#边)：曲线参数、折线路由和边标签字段。
+- [GraphEdge 数据](/docs/api/options#边-graphedge)：边身份、端点、业务数据和初始状态。
 - [平行边与自环](/docs/guides/parallel-edges)：`parallelEdges` 对象和 transform 入口。
 - [标签与图标指南](/docs/guides/label#边标签)：边标签内容和放置方式。
 - [自定义 Label Renderer](/docs/guides/custom-label-renderer)：注册和绘制协议。

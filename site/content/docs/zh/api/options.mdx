@@ -29,7 +29,7 @@ const graph = new Graph({
 | `container` | `string \| HTMLElement` | 画布容器。字符串是 CSS 选择器，例如 `#container` |
 | `data` | `GraphData` | 节点、边，以及可选的 Combo |
 | `node` | [`NodeConfig`](/docs/api/options/node#nodeconfig) | 节点形状、样式、状态、标签、图标和装饰；完整定义见节点配置参考 |
-| `edge` | `EdgeConfig` | 边形状、样式、箭头和状态样式 |
+| `edge` | [`EdgeConfig`](/docs/api/options/edge#edgeconfig) | 边类型、外观、箭头、标签、状态、路由和平行边；完整定义见边配置参考 |
 | `combo` | `ComboConfig` | Combo 外观。折叠和嵌套仍是实验能力 |
 | `label` | `LabelOptions` | 节点和边标签共用的缩放、碰撞策略 |
 | `layout` | `LayoutConfig` | 布局类型和算法参数 |
@@ -126,46 +126,16 @@ const data: GraphData = {
 
 ## 边
 
-基础外观、箭头、点击热区与状态覆盖的详细定义和对应效果见[边配置参考](/docs/api/options/edge)。曲线、路由、标签和平行边的现有说明继续保留在下方。
+`edge` 的类型是 [`EdgeConfig`](/docs/api/options/edge#edgeconfig)，配置边类型、外观、箭头、交互热区、标签、状态和平行边。[边配置参考](/docs/api/options/edge)统一提供字段定义、默认值、限制和代码与效果对照：
 
-```ts
-edge?: {
-  type?: 'line' | 'arc' | 'polyline' | 'cubic' | string;
-  labelRenderer?: string;
-  parallelEdges?: boolean | ParallelEdgesConfig;
-  style?: { /* 见下表，值可以是函数 */ };
-  stateStyles?: Partial<Record<ElementState, EdgeStateStyleOverride>>;
-}
-```
+- [基础样式](/docs/api/options/edge#基础样式)、[箭头](/docs/api/options/edge#箭头)与[点击热区](/docs/api/options/edge#点击热区)：颜色、线宽、虚线、尺寸单位和命中范围。
+- [样式回调](/docs/api/options/edge#样式回调)与[状态样式](/docs/api/options/edge#状态样式)：三参数回调、字段优先级及状态覆盖。
+- [曲线与折线路由](/docs/api/options/edge#曲线与折线路由)：curvature、curveOffset、radius、router、indentTarget 和当前不生效的 trunkGap。
+- [边标签](/docs/api/options/edge#边标签)：文本、字号、位置、底色、显示条件与自定义渲染器。
+- [平行边与自环](/docs/api/options/edge#平行边与自环)：对象启用条件、分组、间距及 transform 优先级。
+- [运行时更新](/docs/api/options/edge#运行时更新)：样式合并与数据更新入口；路由模式限制见对应路由章节。
 
-边的样式函数签名是 `(source, target, edge) => 值`。
-
-| 样式字段 | 说明 |
-| --- | --- |
-| `stroke` / `lineWidth` / `opacity` / `lineDash` | 颜色、宽度、透明度和虚线 |
-| `hitAreaWidth` | 可点中的屏幕像素宽度。省略时等于最终线宽 |
-| `curvature` / `curveOffset` | 弧线和曲线的弯曲 |
-| `endArrow` / `startArrow` / `arrowSize` | 终点箭头、起点箭头和尺寸 |
-| `radius` | 折线拐角半径 |
-| `router` | 折线路由：`'orth' \| 'tree' \| 'indented' \| 'fishbone'` |
-| `label` 及 `labelFontSize`、`labelFontFamily`、`labelColor` | 边标签内容。未配置 `label` 时不绘制；字号默认 `10` |
-| `labelPlacement` | `'start' \| 'center' \| 'end'` |
-| `labelBackground` / `labelBackgroundPadding` / `labelAutoRotate` | 底色、内边距，以及是否沿边旋转 |
-
-`stateStyles` 可覆盖 `stroke`、`lineWidth`、`hitAreaWidth`、`opacity`、`lineDash`。
-
-`parallelEdges: true` 使用默认间距拆开同端点的多条边。对象形式：
-
-| 字段 | 默认 | 说明 |
-| --- | --- | --- |
-| `enabled` | 开启 | 是否分离 |
-| `offset` | `20` | 相邻边的图坐标间距 |
-| `mergeBy` | 按 source/target | 当前只支持按两端分组 |
-| `includeReverse` | `true` | `A→B` 与 `B→A` 算同一组 |
-| `minOffset` | `0` | 非中心边的最小绝对偏移 |
-| `maxOffset` | `80` | 最大绝对偏移 |
-
-也可以把 `'process-parallel-edges'` 放进 `transforms`，两种写法的效果相同。详见 [平行边](/docs/guides/parallel-edges)。
+按业务效果配置边，见[边使用指南](/docs/guides/edge)。边的 `source`、`target`、`id`、业务 `data` 与初始状态仍见本页 [`GraphEdge`](#边-graphedge)。
 
 ## 标签策略
 

@@ -1,0 +1,100 @@
+---
+title: 边配置参考
+description: EdgeConfig 的基础外观、箭头、点击热区、回调和状态覆盖规则
+---
+
+import { NodeDocExample as EdgeDocExample } from '@/components/node-doc-example';
+
+`GraphOptions.edge` 的类型是 `EdgeConfig`。本页覆盖基础外观、箭头、点击热区、状态和热更新；按步骤配置见[边指南](/docs/guides/edge)。曲线与折线路径、边标签和平行边的现有入口见[其他配置](#其他配置)。
+
+## EdgeConfig
+
+所有顶层字段均可省略。
+
+| 字段 | 类型 | 默认行为与入口 |
+| --- | --- | --- |
+| `type` | `'line' \| 'arc' \| 'polyline' \| 'cubic' \| string` | 默认 `'line'`；自定义名称先通过 `register('edge', ...)` 注册，使用扩展声明的 `base` |
+| `style` | `EdgeConfig['style']` | 外观字段对象；支持回调的字段使用 `EdgeStyleValue<T>`，见下文 |
+| `stateStyles` | `Partial<Record<EdgeState, EdgeStateStyleOverride>>` | 按状态覆盖基础外观，见[状态样式](#状态样式) |
+| `labelRenderer` | `string` | 使用默认边标签渲染器；指定名称须先注册 label 扩展，并通过 `edge.style.label` 提供非空文本 |
+| `parallelEdges` | `boolean \| ParallelEdgesConfig` | 未配置时不从此字段启用平行边分离；已有 transform 入口仍独立生效，详见[平行边指南](/docs/guides/parallel-edges) |
+
+内置类型分别表示直线、弧线、折线和三次贝塞尔曲线。未知名称当前回退为直线基型，不应依赖该回退代替注册。边数据中的 `source`、`target`、`id` 见 [`GraphEdge`](/docs/api/options#边-graphedge)。
+
+## 基础样式
+
+以下字段位于 `edge.style`。默认值适用于内置边；主题和边扩展可改变回退值。
+
+| 字段 | 类型 | 默认或回退 | 说明 |
+| --- | --- | --- | --- |
+| `stroke` | `EdgeStyleValue<string>` | `theme.edgeStroke`；light 为 `'#99ADD1'`，dark 为 `'#637088'` | 边和箭头颜色 |
+| `lineWidth` | `EdgeStyleValue<number>` | `theme.edgeLineWidth`，预设为 `1` | 视觉线宽，使用有限正数 |
+| `opacity` | `EdgeStyleValue<number>` | `1` | 不透明度，使用 `0` 到 `1` |
+| `lineDash` | `EdgeStyleValue<number[]>` | `[]` | 空数组为实线；当前按前两个值之和计算虚线周期，见[虚线规则](#虚线规则) |
+| `startArrow` | `EdgeStyleValue<boolean>` | `false` | 起点箭头，指向 `source` |
+| `endArrow` | `EdgeStyleValue<boolean>` | `theme.edgeArrow`，light、dark 均为 `true` | 终点箭头，指向 `target` |
+| `arrowSize` | `EdgeStyleValue<number>` | 根据线宽自动计算 | 箭头沿路径方向的长度；显式长度使用有限正数，非正值使用自动长度 |
+| `hitAreaWidth` | `EdgeStyleValue<number>` | 最终 `lineWidth` | 总点击热区宽度，不改变视觉线宽，见[点击热区](#点击热区) |
+
+`lineWidth`、`hitAreaWidth`、`arrowSize` 和虚线周期使用屏幕渲染像素，随相机缩放保持其渲染尺寸；业务无需自行乘 zoom、DPR 或 Picking framebuffer 比例。节点位置仍使用图坐标。
+
+三行预览分别为：Plain（灰色细实线、无箭头）、Dash（半透明橙色虚线、终点箭头）、Both（蓝色粗实线、双向箭头）。所有箭头显式设置 `arrowSize: 16`。点击边会变为紫色选中样式；重置恢复初始效果。
+
+<EdgeDocExample id="edge-style" locale="zh" />
+
+### 样式回调
+
+`EdgeStyleValue<T>` 为 `T | ((source: GraphNode, target: GraphNode, edge: GraphEdge) => T)`。前两个入参是端点节点，第三个才是当前边；边的业务字段从 `edge.data` 读取。上面示例同时映射颜色、线宽、虚线、透明度和箭头方向。
+
+`style` 的公开类型是字段对象，不是返回整个对象的函数。逐字段优先级为：显式边样式 → 边扩展 `getStyle(source, target, edge)` 的结果 → 扩展默认样式 → 主题或内置回退。回调只做轻量计算，并为缺失数据提供有效回退。
+
+### 虚线规则
+
+当前渲染使用 `lineDash[0] + lineDash[1]` 作为周期，每个周期中一半绘制、一半留空；后续数组项不参与。因此 `[4, 12]` 和 `[8, 8]` 的效果相同，并非 Canvas 的任意长短交替模式。少于两项或非正周期不产生虚线；使用有限非负数且总和大于零。
+
+内置直线在没有额外加宽或状态要求时可能使用 1 像素绘制路径，该路径不绘制虚线。需要确定的虚线效果时，像上例一样显式设置 `lineWidth > 1`。虚线间隙仍可被命中，箭头本身不跟随虚线周期断开。
+
+## 箭头
+
+`startArrow` 和 `endArrow` 分别控制起点和终点；起终点由数据的 `source`、`target` 决定。关闭默认终点箭头需显式设置 `endArrow: false`。
+
+自动长度按线宽计算：不大于 `2` 时为 `10`，大于 `2` 且不大于 `4` 时为 `12`，更粗时为 `Math.round(lineWidth * 2.5)`。`arrowSize` 控制沿边方向的长度，横向宽度由线宽加 `12` 决定，并非同时设置箭头宽高。箭头贴合端点节点边界，线段会为箭头预留空间。
+
+当前静态配置会缓存基础线宽对应的自动长度；状态改变线宽时，静态与逐字段回调路径可能得到不同的自动箭头长度。需要跨状态保持确定尺寸时，显式设置正的 `arrowSize`，如上例的 `16`。
+
+## 点击热区
+
+`hitAreaWidth` 是路径两侧合计的命中宽度。例如 `24` 相当于中心线两侧各约 `12` 的范围；热区本身不可见。解析完成后，其值至少为当前视觉线宽；负值、非有限值或省略值使用视觉线宽。
+
+下面两条边都以 `lineWidth: 1.5` 绘制，上方热区为 `2`，下方为 `24`。尝试在细线附近点击：下方更容易选中；选中只变为紫色，线条保持细线。工具栏缩放后再比较，热区保持同一屏幕尺寸口径。
+
+<EdgeDocExample id="edge-hit-area" locale="zh" />
+
+热区供悬停、点击选择、Tooltip 和拖拽边等共享 Picking 交互使用；配置热区本身不会安装交互行为，示例通过 `click-select` 激活选中状态。直线、弧线、曲线、折线、自环和箭头均使用该热区策略；更多路径可在[细边交互示例](/docs/examples/edge-hit-area)中比较。
+
+## 状态样式
+
+`EdgeStateStyleOverride` 支持下列固定值，不支持字段回调：
+
+| 字段 | 类型 | 作用 |
+| --- | --- | --- |
+| `stroke` | `string` | 覆盖边和箭头颜色 |
+| `lineWidth` | `number` | 覆盖视觉线宽 |
+| `hitAreaWidth` | `number` | 覆盖总命中宽度，最终不会小于当前视觉线宽 |
+| `opacity` | `number` | 覆盖不透明度 |
+| `lineDash` | `number[]` | 覆盖虚线周期输入 |
+
+状态由交互行为或 `graph.setItemState(edgeId, state, value)` 激活。每个状态选用配置、扩展、主题中的第一个已定义对象，不会逐字段补齐同名主题状态。多个状态按状态集合的迭代顺序覆盖，后处理的同名字段优先，`default` 不参与覆盖；`hidden` 优先令解析后的不透明度为 `0`。状态和显隐方法见 [Graph API](/docs/api/graph#状态显隐和定位)。
+
+## 运行时更新
+
+首次 `await graph.render()` 完成后，可用 `graph.updateOptions({ edge: { style: ... } })` 更新已有实例。`style` 按字段合并，提供的 `stateStyles` 替换整个状态映射；保留其他状态时提交完整映射。该操作重算样式，不自动重新布局。修改业务字段使用 `updateEdgeData()`，修改端点使用该方法的批量格式，在更新项中提供 `id`、`source`、`target`；详见[边增量操作](/docs/api/graph#边)与 [`updateOptions()`](/docs/api/graph#updateoptions)。
+
+## 其他配置
+
+- [边使用指南](/docs/guides/edge)：类型选择、配置步骤和路径示意。
+- [现有边配置](/docs/api/options#边)：曲线参数、折线路由和边标签字段。
+- [平行边与自环](/docs/guides/parallel-edges)：`parallelEdges` 对象和 transform 入口。
+- [标签与图标指南](/docs/guides/label#边标签)：边标签内容和放置方式。
+- [自定义 Label Renderer](/docs/guides/custom-label-renderer)：注册和绘制协议。
+- [GraphOptions 配置入口](/docs/api/options)：顶层配置结构。

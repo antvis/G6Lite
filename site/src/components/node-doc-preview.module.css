@@ -1,52 +1,18 @@
 .example {
   margin-block: 20px 28px;
   min-width: 0;
-  border: 1px solid var(--color-fd-border);
-  border-radius: 12px;
-  overflow: hidden;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 10px 14px;
-  background: var(--color-fd-muted);
-  font-size: 12px;
-}
-
-.header span {
-  color: var(--color-fd-muted-foreground);
-}
-
-.header button {
-  margin-left: auto;
-  padding: 4px 8px;
-  border: 1px solid var(--color-fd-border);
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.header button:focus-visible {
-  outline: 2px solid var(--color-fd-primary);
-  outline-offset: 2px;
-}
-
-.header button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.canvas {
-  position: relative;
-  height: 220px;
-  background: #fff;
+:global(.docs-brand-layout) :global(#nd-page) .preview {
+  max-width: none;
+  margin: 0 0 16px;
 }
 
 .code {
-  border-top: 1px solid var(--color-fd-border);
   min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 10px;
 }
 
 .code > figure {
@@ -58,11 +24,4 @@
 .code pre {
   max-height: 300px;
   overflow: auto;
-}
-
-.error {
-  margin: 0;
-  padding: 10px 14px;
-  color: var(--color-fd-muted-foreground);
-  font-size: 13px;
 }

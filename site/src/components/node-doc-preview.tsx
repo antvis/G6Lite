@@ -35,6 +35,7 @@ const loaders = {
   'layout-worker': () => import('../../demos/docs-layout-worker.ts'),
   'layout-result': () => import('../../demos/docs-layout-result.ts'),
   'behavior-selection': () => import('../../demos/docs-behavior-selection.ts'),
+  'behavior-highlight': () => import('../../demos/docs-behavior-highlight.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -51,7 +52,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'behavior-selection'
+  const hint = id === 'behavior-highlight'
+    ? (zh ? '悬停 B 查看一度邻域；悬停边查看两端；移开清理高亮，拖动空白平移' : 'Hover B for its one-hop neighborhood, or an edge for its endpoints. Move away to clear; drag empty space to pan')
+    : id === 'behavior-selection'
     ? (zh ? '空白处拖拽框选；Shift+单击追加选择；拖动已选节点整体移动；单击空白清空，重置恢复' : 'Drag empty space to brush; Shift-click to add; drag a selected node to move the selection; click empty space to clear')
     : id === 'layout-result'
     ? (zh ? '先用 runLayout 计算坐标，再创建未配置 layout 的 Graph 展示结果' : 'Compute positions with runLayout, then display them in a Graph without a layout option')

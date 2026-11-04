@@ -1,0 +1,108 @@
+---
+title: Node configuration reference
+description: NodeConfig options, body styles, callback signatures, and state overrides
+---
+
+`GraphOptions.node` has type `NodeConfig`. This page details top-level options, body appearance, and states; existing label, icon, and decoration documentation is linked below. See the [node guide](/en/docs/guides/node) for configuration steps and effects.
+
+```ts
+import type { NodeConfig } from '@antv/g6-lite';
+
+const node: NodeConfig = {
+  type: 'rect',
+  style: {
+    size: 32,
+    width: 96,
+    height: 40,
+    borderRadius: 8,
+    fill: (item) => item.data?.risk === 'high' ? '#ff4d4f' : '#1783FF',
+    stroke: '#fff',
+    strokeWidth: 1,
+  },
+  stateStyles: {
+    selected: { stroke: '#163B65', strokeWidth: 2 },
+  },
+};
+```
+
+Pass this object as `node` in `new Graph({ container, data, node })`.
+
+## NodeConfig
+
+All top-level fields are optional.
+
+| Field | Type | Default behavior and constraints |
+| --- | --- | --- |
+| `type` | `'circle' \| 'rect' \| string` | Defaults to `'circle'`; register custom names with `register('node', ...)`, with the extension's `base` choosing the primitive |
+| `style` | `NodeStyleConfig \| ((node: GraphNode) => Partial<NodeStyleConfig>)` | Theme and field fallbacks when omitted; whole-object functions differ as described below |
+| `stateStyles` | `Partial<Record<ElementState, NodeStateStyleOverride>>` | Override body appearance per state; undefined states use extension or theme definitions |
+| `labelRenderer` | `string` | Built-in label renderer by default; a named label renderer must be registered and `style.label` must supply nonempty text |
+| `decorations` | `NodeDecorationConfig[]` | No decorations by default; use built-in `builtin-badge` or a registered decoration renderer |
+| `autoExternalLabelPlacement` | `boolean` | Type declaration only, not read by the current runtime; neither `true` nor `false` changes placement. Set `style.labelPlacement` explicitly |
+
+Unknown node names currently fall back to a circle primitive; do not use that fallback instead of registration.
+
+## NodeStyleConfig
+
+Defaults below apply to built-in nodes with a **style object**, including per-field callbacks. With no `theme`, the light preset applies; custom themes and node extensions can change fallbacks.
+
+| Field | Type | Default or fallback | Meaning |
+| --- | --- | --- | --- |
+| `fill` | `NodeStyleValue<string>` | `theme.nodeFill`, preset `'#1783FF'` | Fill color |
+| `size` | `NodeStyleValue<number>` | `theme.nodeSize`, preset `24` | Circle diameter; rectangle fallback when dimensions are omitted |
+| `width` | `NodeStyleValue<number>` | Resolved `size` | Rectangle width; does not change a built-in circle's diameter |
+| `height` | `NodeStyleValue<number>` | Resolved `size` | Rectangle height; does not change a built-in circle's diameter |
+| `stroke` | `NodeStyleValue<string>` | `theme.nodeStroke`; light `'#fff'`, dark `'#333'` | Stroke color |
+| `strokeWidth` | `NodeStyleValue<number>` | `theme.nodeStrokeWidth`, preset `0` | Stroke width; `0` draws no stroke |
+| `opacity` | `NodeStyleValue<number>` | `1` | Opacity; use values from `0` to `1` |
+| `borderRadius` | `NodeStyleValue<number>` | `0` | Rectangle corner radius, limited when drawing to half the smaller dimension |
+
+`size`, `width`, `height`, `strokeWidth`, and `borderRadius` are graph-space lengths that follow camera zoom, rather than fixed CSS pixels. Do not multiply them by DPR. Setting `opacity: 0` does not replace the visibility APIs; see [Graph state methods](/en/docs/api/graph#state-visibility-and-focus).
+
+### Style callbacks
+
+`NodeStyleValue<T>` is `T | ((node: GraphNode) => T)`. A callback receives only the current node; read business fields from `node.data`. It receives no camera or zoom argument. Supply explicit fallbacks for missing data rather than returning `undefined` or invalid numbers.
+
+```ts
+import type { NodeConfig } from '@antv/g6-lite';
+
+const node: NodeConfig = {
+  style: {
+    size: (item) => Number(item.data?.size ?? 24),
+    fill: (item) => item.data?.group === 'core' ? '#1783FF' : '#61DDAA',
+  },
+};
+```
+
+Per-field body-style precedence is: node `style` object → extension `getStyle()` result → extension default `style` → theme or built-in fallback. Keep callbacks inexpensive and free of side effects; do not depend on how often they run per frame.
+
+Whole-object functions, `style: (node) => ({ ... })`, currently use a different body-style resolution branch. Missing `size`, `width`, and `height` fall back to `40`, `100`, and `40`, and that branch does not apply `stateStyles`. Prefer per-field callbacks when relying on theme dimensions or state appearance. This is a current implementation limitation; the two forms are not fully equivalent.
+
+## State styles
+
+`NodeStateStyleOverride` accepts these constants, not per-field callbacks:
+
+| Field | Type | Effect |
+| --- | --- | --- |
+| `fill` | `string` | Override fill color |
+| `stroke` | `string` | Override stroke color |
+| `strokeWidth` | `number` | Override stroke width in graph units |
+| `opacity` | `number` | Override opacity |
+| `haloWidth` | `number` | Outside halo width in graph units |
+
+For each active state, the engine selects `node.stateStyles[state]`, otherwise the extension or theme definition for that state. Selection uses the entire state object; missing fields are not filled from the theme's same-name state. Include all effects you want to retain. Multiple states apply in their current collection iteration order; later fields win. The `default` state is skipped.
+
+`hidden` makes body appearance transparent and skips other state appearance calculations. Built-in states also impose halo effects: `active` supplies `8` when the halo is `0`, and `selected` supplies at least `12`. Setting `haloWidth: 0` on the selected style therefore does not remove its halo.
+
+## Runtime updates
+
+After the first `await graph.render()`, update with `graph.updateOptions({ node: ... })`. Top-level fields merge shallowly. Two style objects merge by field; when a style function is involved, the supplied function or object replaces the previous style. `stateStyles` and `decorations` are top-level fields, so updates replace the entire state map or decoration array rather than individual states or items.
+
+Updates do not rerun layout. See [`updateOptions()`](/en/docs/api/graph#updateoptions).
+
+## Related references
+
+- [Label and icon configuration](/en/docs/api/options#node): existing field reference.
+- [Label guide](/en/docs/guides/label): content, placement, and visibility.
+- [Custom Label Renderer](/en/docs/guides/custom-label-renderer): registration and drawing contract.
+- [Decoration usage](/en/docs/guides/extensions#decoration-visibility): badge visibility.

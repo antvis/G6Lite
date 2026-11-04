@@ -1,0 +1,108 @@
+---
+title: 节点配置参考
+description: NodeConfig 的顶层选项、基础样式、函数签名与状态覆盖规则
+---
+
+`GraphOptions.node` 的类型是 `NodeConfig`。本页详细说明顶层选项、基础外观与状态；标签、图标和装饰的现有说明可从文末进入。配置步骤与效果见[节点指南](/docs/guides/node)。
+
+```ts
+import type { NodeConfig } from '@antv/g6-lite';
+
+const node: NodeConfig = {
+  type: 'rect',
+  style: {
+    size: 32,
+    width: 96,
+    height: 40,
+    borderRadius: 8,
+    fill: (item) => item.data?.risk === 'high' ? '#ff4d4f' : '#1783FF',
+    stroke: '#fff',
+    strokeWidth: 1,
+  },
+  stateStyles: {
+    selected: { stroke: '#163B65', strokeWidth: 2 },
+  },
+};
+```
+
+将该对象作为 `new Graph({ container, data, node })` 的 `node` 配置。
+
+## NodeConfig
+
+所有顶层字段均可省略。
+
+| 字段 | 类型 | 默认行为与约束 |
+| --- | --- | --- |
+| `type` | `'circle' \| 'rect' \| string` | 默认 `'circle'`；自定义名称先通过 `register('node', ...)` 注册，实际图元取自扩展的 `base` |
+| `style` | `NodeStyleConfig \| ((node: GraphNode) => Partial<NodeStyleConfig>)` | 未配置时使用主题和字段回退值；整对象函数的差异见下文 |
+| `stateStyles` | `Partial<Record<ElementState, NodeStateStyleOverride>>` | 按状态覆盖基础外观；未配置的状态使用扩展或主题状态定义 |
+| `labelRenderer` | `string` | 默认标签渲染器；指定名称须先注册 label 扩展，且 `style.label` 必须提供非空文本 |
+| `decorations` | `NodeDecorationConfig[]` | 默认无装饰；可使用内置 `builtin-badge` 或注册的 decoration 渲染器 |
+| `autoExternalLabelPlacement` | `boolean` | 仅类型声明，当前运行时未读取；设置为 `true` 或 `false` 均不会改变布局。请显式设置 `style.labelPlacement` |
+
+未知节点类型当前会回退到圆形基型，但不应依赖此回退代替注册。
+
+## NodeStyleConfig
+
+下表默认值适用于内置节点的 **style 对象**，包括对象中逐字段配置函数的形式。示例中未传 `theme` 时采用 light 预设；自定义主题和节点扩展可改变回退值。
+
+| 字段 | 类型 | 默认或回退 | 说明 |
+| --- | --- | --- | --- |
+| `fill` | `NodeStyleValue<string>` | `theme.nodeFill`，预设为 `'#1783FF'` | 填充颜色 |
+| `size` | `NodeStyleValue<number>` | `theme.nodeSize`，预设为 `24` | 圆形直径；矩形未单独指定宽高时的回退尺寸 |
+| `width` | `NodeStyleValue<number>` | 解析后的 `size` | 矩形宽度；不改变内置圆形的直径 |
+| `height` | `NodeStyleValue<number>` | 解析后的 `size` | 矩形高度；不改变内置圆形的直径 |
+| `stroke` | `NodeStyleValue<string>` | `theme.nodeStroke`；light 为 `'#fff'`，dark 为 `'#333'` | 描边颜色 |
+| `strokeWidth` | `NodeStyleValue<number>` | `theme.nodeStrokeWidth`，预设为 `0` | 描边宽度；为 `0` 时不显示描边 |
+| `opacity` | `NodeStyleValue<number>` | `1` | 不透明度，使用 `0` 到 `1` |
+| `borderRadius` | `NodeStyleValue<number>` | `0` | 矩形圆角；绘制时不超过宽高较小值的一半 |
+
+`size`、`width`、`height`、`strokeWidth` 和 `borderRadius` 使用图坐标长度，随相机缩放。它们不是固定的屏幕 CSS 像素；业务无需自行乘 DPR。只设置 `opacity: 0` 不等同于调用隐藏 API，显隐操作见 [Graph 状态方法](/docs/api/graph#状态显隐和定位)。
+
+### 样式函数
+
+`NodeStyleValue<T>` 为 `T | ((node: GraphNode) => T)`。回调只接收当前节点，业务字段从 `node.data` 读取；无额外的相机或缩放参数。为缺失业务数据提供明确回退，避免返回 `undefined` 或无效数值。
+
+```ts
+import type { NodeConfig } from '@antv/g6-lite';
+
+const node: NodeConfig = {
+  style: {
+    size: (item) => Number(item.data?.size ?? 24),
+    fill: (item) => item.data?.group === 'core' ? '#1783FF' : '#61DDAA',
+  },
+};
+```
+
+基础外观的逐字段优先级为：节点 `style` 对象 → 节点扩展的 `getStyle()` 结果 → 扩展默认 `style` → 主题或内置回退。回调应保持轻量且无副作用，不依赖每帧的调用次数。
+
+整对象函数 `style: (node) => ({ ... })` 当前走不同的基础外观解析分支：未返回的 `size`、`width`、`height` 分别回退为 `40`、`100`、`40`，并且该分支未应用 `stateStyles`。需要主题尺寸回退或状态外观时，优先使用上面的逐字段函数。该差异属于当前实现限制，不代表两种写法完全等价。
+
+## 状态样式
+
+`NodeStateStyleOverride` 支持以下固定值，不支持逐字段函数：
+
+| 字段 | 类型 | 作用 |
+| --- | --- | --- |
+| `fill` | `string` | 覆盖填充色 |
+| `stroke` | `string` | 覆盖描边色 |
+| `strokeWidth` | `number` | 覆盖描边宽度，图坐标长度 |
+| `opacity` | `number` | 覆盖不透明度 |
+| `haloWidth` | `number` | 节点外侧光晕宽度，图坐标长度 |
+
+对每个已激活状态，引擎选择 `node.stateStyles[状态]`，未定义时再取扩展、主题中的同名状态对象。该选择以整个状态对象为单位，不会逐字段补齐主题同名状态；自定义状态样式需要写全希望保留的效果。多个状态按当前状态集合的迭代顺序覆盖，后处理的同名字段优先，`default` 不参与覆盖。
+
+`hidden` 状态使基础外观透明并跳过其他状态外观计算。内置状态还对光晕有最低效果：`active` 的光晕为 `0` 时补为 `8`，`selected` 小于 `12` 时补为 `12`。因此仅在选中样式中设置 `haloWidth: 0` 不会移除选中光晕。
+
+## 运行时更新
+
+首次 `await graph.render()` 完成后，使用 `graph.updateOptions({ node: ... })` 更新。顶层字段浅合并；两侧都是 style 对象时按样式字段合并，涉及 style 函数时提供的新函数或对象替换旧 style。`stateStyles` 和 `decorations` 是顶层字段，更新时分别替换整个状态映射和装饰数组，不会按状态名或数组项逐项合并。
+
+更新不重新执行布局，详见 [`updateOptions()`](/docs/api/graph#updateoptions)。
+
+## 相关参考
+
+- [标签与图标配置](/docs/api/options#节点)：现有完整字段入口。
+- [标签使用指南](/docs/guides/label)：内容、位置与显示策略。
+- [自定义 Label Renderer](/docs/guides/custom-label-renderer)：注册和绘制协议。
+- [节点装饰用法](/docs/guides/extensions#decoration-renderer)：徽章和堆叠示例。

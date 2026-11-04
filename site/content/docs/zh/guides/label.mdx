@@ -1,117 +1,98 @@
 ---
 title: 标签与图标
-description: 节点标签、边标签和节点图标配置
+description: 配置节点与边标签、节点图标、长文本、显示策略和运行时更新
 ---
 
-G6Lite 用 Canvas 2D 在 WebGL 画布上方绘制文本标签与图标。GPU 负责海量节点和边，Canvas 2D 负责文本排版。
+import { NodeDocExample as LabelDocExample } from '@/components/node-doc-example';
 
-节点标签与图标的完整类型、默认值、单位和生效条件见[节点配置参考](/docs/api/options/node#标签)。下文按使用步骤介绍配置方式。
-
-节点下方标签、节点内图标和边标签的配置效果示意：
-
-![节点标签、节点图标与边标签的位置示意](/examples/docs-guide-label.svg '标签与图标')
-
-可运行示例：[标签与图标](/docs/examples/labels)、[标签显示策略](/docs/examples/label-rendering-options)。
+先配置文本与位置，再选择显示策略。查完整字段见[节点标签与图标](/docs/api/options/node#标签)、[边标签](/docs/api/options/edge#边标签)和[标签策略参考](/docs/api/options/label)。
 
 ## 节点标签
 
-```ts
-node: {
-  style: {
-    size: 20,
-    label: (node) => (node.data?.name as string) ?? node.id,
-    labelPlacement: 'bottom',
-    labelFontSize: 12,
-    labelColor: '#333',
-  },
-}
-```
+1. 在 `node.style.label` 提供文本，或用回调读取节点数据；data.name 不会自动显示。
+2. 用 labelPlacement 选择位置，再用 labelOffsetX/Y 微调。
+3. 用 labelFontSize、labelColor 设置字号和颜色，默认渲染器无需手动换算 DPR。
 
-| 字段                            | 说明                                           |
-| ------------------------------- | ---------------------------------------------- |
-| `label`                         | 文本；`false` 表示不显示                       |
-| `labelFontSize`                 | 字号                                           |
-| `labelFontFamily`               | 字体                                           |
-| `labelFontWeight`               | 字重                                           |
-| `labelColor`                    | 文本颜色                                       |
-| `labelPlacement`                | `center` / `top` / `bottom` / `left` / `right` |
-| `labelOffsetX` / `labelOffsetY` | 偏移                                           |
-| `labelBackground`               | 标签底色                                       |
-| `labelBackgroundPadding`        | 底色内边距                                     |
-| `labelMaxWidth`                 | 最大宽度，超出截断                             |
+下面分别将标签放在左、下、右；完整代码与画布来自同一源码。
+
+<LabelDocExample id="labels" locale="zh" />
 
 ## 节点图标
 
-```ts
-node: {
-  style: {
-    size: 28,
-    icon: (node) => iconMap[node.data?.type as string],
-    iconWidth: 16,
-    iconHeight: 16,
-  },
-}
-```
+上例圆内的 A、D、C 是文字图标，与外侧标签分别配置。
 
-| 字段         | 说明                           |
-| ------------ | ------------------------------ |
-| `icon`       | 图标内容，如图片地址或文本符号 |
-| `iconWidth`  | 图标宽度                       |
-| `iconHeight` | 图标高度                       |
+- 文字或字体图标：设置 `iconType: 'text'`，用 iconFontSize、iconColor 调整；字体须由应用加载。
+- 图片图标：设置 `iconType: 'image'` 和图片 URL，用 iconWidth/Height 调整。图片异步加载，跨域资源需允许匿名 CORS。
+
+图标随节点缩放，不受全局标签的低缩放或碰撞隐藏控制。完整字段见[图标参考](/docs/api/options/node#图标)。
+
+## 长文本与背景
+
+默认节点标签用 labelMaxWidth 截断长文本，用 labelBackground 和 labelBackgroundPadding 增加底色与留白。下面长名称限制为 120，中央 G 是独立的文字图标。
+
+<LabelDocExample id="label-options" locale="zh" />
+
+需要特殊排版时使用[自定义 Label Renderer](/docs/guides/custom-label-renderer)：先注册，再指定 node.labelRenderer 或 edge.labelRenderer，并保留非空 style.label。自定义绘制自行处理截断。
 
 ## 边标签
 
-```ts
-edge: {
-  style: {
-    label: (_source, _target, edge) => (edge.data?.label as string) ?? '',
-    labelPlacement: 'center',
-    labelAutoRotate: true,
-  },
-}
-```
+在 `edge.style.label` 配置文本。回调为 `(source, target, edge) => text`，第三项才是边数据；文字颜色使用 labelColor，与边线颜色独立。
 
-| 字段                     | 说明                       |
-| ------------------------ | -------------------------- |
-| `label`                  | 边标签文本                 |
-| `labelFontSize`          | 字号                       |
-| `labelFontFamily`        | 字体                       |
-| `labelColor`             | 文本颜色                   |
-| `labelPlacement`         | `start` / `center` / `end` |
-| `labelBackground`        | 标签底色                   |
-| `labelBackgroundPadding` | 底色内边距                 |
-| `labelAutoRotate`        | 是否随边方向旋转           |
+下面对比 start、center、end 三个位置，开启 labelAutoRotate 随方向旋转。示例关闭低缩放与碰撞隐藏，方便观察。
+
+<LabelDocExample id="edge-labels" locale="zh" />
+
+业务中可保留默认显示策略。边标签保持屏幕字号；曲线、折线路径的定位限制见[位置与显示条件](/docs/api/options/edge#位置与显示条件)。
 
 ## 全局标签策略
 
-完整字段、默认值和代码与效果对照见[标签策略参考](/docs/api/options/label)。
+配置 Graph 顶层 `label`，按目标选择：
 
-通过 Graph 顶层 `label` 配置控制节点与边标签的缩放、低 zoom 隐藏和碰撞策略：
+- 保持文字屏幕大小：设置 `scaleWithZoom: false`；该开关影响节点标签，边标签始终保持屏幕尺寸。
+- 调整出现时机：设置 nodeMinZoom、edgeMinZoom；只关闭一种阈值时将对应值设为 0。
+- 检查重叠或隐藏原因：暂时关闭 hideOnCollision 或 hideOnLowZoom，确认后再恢复需要的策略。
+
+下面可直接切换开关并缩放；完整默认值、碰撞顺序和适用范围见[标签策略参考](/docs/api/options/label)。
+
+<LabelDocExample id="label-policy" locale="zh" />
+
+## 运行时更新
+
+首次 `await graph.render()` 后，更新外观和显示策略，无需重建实例：
 
 ```ts
-const graph = new Graph({
-  label: {
-    scaleWithZoom: true,
-    hideOnLowZoom: true,
-    hideOnCollision: true,
-    nodeMinZoom: 0.5,
-    edgeMinZoom: 0.5,
-  },
-});
+graph.updateOptions({ node: { style: { labelColor: '#334155' } } });
+graph.updateOptions({ edge: { style: { labelColor: '#475569' } } });
+graph.updateOptions({ label: { hideOnCollision: false } });
 ```
 
-| 字段              | 默认值 | 说明                                 |
-| ----------------- | ------ | ------------------------------------ |
-| `scaleWithZoom`   | `true` | 节点标签尺寸是否随 camera zoom 缩放  |
-| `hideOnLowZoom`   | `true` | 是否启用节点与边标签的最小 zoom 隐藏 |
-| `hideOnCollision` | `true` | 是否隐藏与先绘制标签发生碰撞的标签   |
-| `nodeMinZoom`     | `0.3`  | 节点标签最小展示 zoom                |
-| `edgeMinZoom`     | `0.5`  | 边标签最小展示 zoom                  |
-
-`hideOnLowZoom: false` 时会忽略两个数值阈值。运行时可通过 `graph.updateOptions({ label: ... })` 更新策略，不会重新执行布局。
+省略字段保留当前值，更新不重跑布局。业务字段变化时用 updateNodeData/updateEdgeData，标签回调读取对应字段后才会改变内容；见[配置更新](/docs/api/graph#updateoptions)。
 
 ## 性能提示
 
-- 大规模图不建议全量显示所有标签。
-- 可以让 `label` 函数根据缩放层级、选中状态或业务过滤条件返回 `false`。
-- 优先在高亮、选中或聚焦场景显示局部标签。
+- 大图优先显示关键节点与关系；业务过滤可让 label 回调返回 false。
+- 缩放显隐使用全局标签策略；标签回调接收元素数据，不接收相机 zoom，保持回调轻量。
+
+## 常见问题
+
+### 为什么标签没有显示？
+
+依次检查非空 label、缩放阈值、碰撞、元素与边端点的 hidden 状态。业务 data 本身不生成文字，关闭阈值也不会关闭碰撞隐藏。
+
+### 为什么文字图标或图片没有显示？
+
+文字图标须设置 iconType: 'text' 并加载对应字体；图片检查 URL 和匿名 CORS。图标仍受节点 hidden 和视口范围影响。
+
+### 为什么长文本没有截断？
+
+labelMaxWidth 用于默认节点标签，需大于 0；边不提供该字段，自定义渲染器需自行处理。默认节点标签不会自动换行。
+
+### 为什么设置颜色后文字没变？
+
+使用 labelColor；labelFill 不是受支持字段。边的 stroke、文字图标的 iconColor 与标签颜色分别配置。
+
+## 相关
+
+- [节点标签与图标参考](/docs/api/options/node#标签)：字段与生效条件。
+- [边标签参考](/docs/api/options/edge#边标签)：位置、旋转和路径限制。
+- [标签策略参考](/docs/api/options/label)：缩放、碰撞与热更新。

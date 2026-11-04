@@ -1,38 +1,98 @@
 ---
 title: Labels and icons
-description: Configure node labels, edge labels, icons, placement, rotation, and collision behavior
+description: Configure node and edge labels, node icons, long text, visibility policies, and runtime updates
 ---
 
-See the [node configuration reference](/en/docs/api/options/node#labels) for complete node-label and icon types, defaults, units, and applicability. This guide covers usage.
+import { NodeDocExample as LabelDocExample } from '@/components/node-doc-example';
 
-```ts
-node: {
-  style: {
-    label: (node) => String(node.data?.name ?? node.id),
-    labelPlacement: 'bottom',
-    labelFill: '#344054',
-  },
-}
-```
+Configure text and placement first, then choose visibility policies. Find full fields in [node labels and icons](/en/docs/api/options/node#labels), [edge labels](/en/docs/api/options/edge#edge-labels), and the [label policy reference](/en/docs/api/options/label).
 
-Edge labels can read source, target, and edge data. Labels and combo outlines use Canvas 2D above the WebGL surface. For large graphs, show only important labels initially and reveal more by zoom level, selection, or focus.
+## Node labels
+
+1. Set `node.style.label`, or read node data in a callback. data.name does not display automatically.
+2. Choose labelPlacement, then fine-tune with labelOffsetX/Y.
+3. Set labelFontSize and labelColor. The default renderer handles DPR conversion.
+
+The example places labels left, bottom, and right. Code and canvas use the same source.
+
+<LabelDocExample id="labels" locale="en" />
+
+## Node icons
+
+The A, D, and C inside the nodes above are text icons, configured separately from external labels.
+
+- Text/font icons: set `iconType: 'text'`, then iconFontSize and iconColor. Load the font in your application.
+- Images: set `iconType: 'image'` and an image URL, then iconWidth/Height. Loading is asynchronous; cross-origin resources need anonymous CORS.
+
+Icons scale with nodes and do not follow global label threshold/collision hiding. See the [icon reference](/en/docs/api/options/node#icons) for fields.
+
+## Long text and backgrounds
+
+Use labelMaxWidth to truncate default node labels, and labelBackground/labelBackgroundPadding for a background and spacing. The long name below is limited to 120; the central G is a separate text icon.
+
+<LabelDocExample id="label-options" locale="en" />
+
+For special layouts, use a [custom Label Renderer](/en/docs/guides/custom-label-renderer): register it, set node.labelRenderer or edge.labelRenderer, and keep nonempty style.label. Custom drawing handles truncation itself.
+
+## Edge labels
+
+Set text in `edge.style.label`. The callback is `(source, target, edge) => text`; its third argument is edge data. Use labelColor independently of the edge stroke.
+
+Compare start, center, and end below, with labelAutoRotate enabled. Low-zoom and collision hiding are disabled for this comparison.
+
+<LabelDocExample id="edge-labels" locale="en" />
+
+Keep default visibility policies where appropriate. Edge text retains screen dimensions; see [position and visibility](/en/docs/api/options/edge#position-and-visibility) for curved/polyline limitations.
 
 ## Global label policies
 
-See the [label policy reference](/en/docs/api/options/label) for fields, defaults, and matching code with live results.
+Configure the top-level Graph `label` option for your goal:
 
-Use the top-level `label` option to configure zoom thresholds and collision behavior:
+- Keep text at a fixed screen size: set `scaleWithZoom: false`. This affects node labels; edge labels always keep screen dimensions.
+- Adjust when labels appear: set nodeMinZoom and edgeMinZoom. Set one threshold to 0 to bypass it independently.
+- Diagnose hidden/overlapping labels: temporarily disable hideOnCollision or hideOnLowZoom, then restore the policies you need.
+
+Toggle the controls and zoom below. See the [label policy reference](/en/docs/api/options/label) for defaults, collision order, and scope.
+
+<LabelDocExample id="label-policy" locale="en" />
+
+## Runtime updates
+
+After the first `await graph.render()`, update appearance and visibility without recreating the instance:
 
 ```ts
-const graph = new Graph({
-  label: {
-    scaleWithZoom: true,
-    hideOnLowZoom: true,
-    hideOnCollision: true,
-    nodeMinZoom: 0.5,
-    edgeMinZoom: 0.5,
-  },
-});
+graph.updateOptions({ node: { style: { labelColor: '#334155' } } });
+graph.updateOptions({ edge: { style: { labelColor: '#475569' } } });
+graph.updateOptions({ label: { hideOnCollision: false } });
 ```
 
-Node labels default to a minimum zoom of `0.3`; edge labels default to `0.5`. Setting `hideOnLowZoom` to `false` bypasses both thresholds. These options can be updated at runtime with `graph.updateOptions({ label: ... })` without rerunning layout.
+Omitted fields keep current values; updates do not rerun layout. Use updateNodeData/updateEdgeData for business changes; label callbacks must read the changed fields to affect text. See [configuration updates](/en/docs/api/graph#updateoptions).
+
+## Performance tips
+
+- Show important nodes and relationships first in large graphs; business filtering can return false from label callbacks.
+- Use global policies for zoom-based hiding. Label callbacks receive element data, not camera zoom; keep them inexpensive.
+
+## Common questions
+
+### Why is a label missing?
+
+Check nonempty label, zoom thresholds, collisions, and hidden states on the element or edge endpoints. Business data alone does not generate text. Disabling thresholds does not disable collision hiding.
+
+### Why is a text icon or image missing?
+
+Text icons require iconType: 'text' and a loaded font. Check image URLs and anonymous CORS. Node hidden states and viewport bounds still apply.
+
+### Why is long text not truncated?
+
+labelMaxWidth applies to default node labels and must be positive. Edges do not expose it; custom renderers handle truncation themselves. Default node labels do not wrap automatically.
+
+### Why did the text color not change?
+
+Use labelColor; labelFill is not supported. Edge stroke, text-icon iconColor, and label colors are configured independently.
+
+## Related
+
+- [Node labels and icons](/en/docs/api/options/node#labels): fields and applicability.
+- [Edge labels](/en/docs/api/options/edge#edge-labels): placement, rotation, and path limitations.
+- [Label policy reference](/en/docs/api/options/label): zoom, collisions, and runtime updates.

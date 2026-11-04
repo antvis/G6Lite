@@ -1,6 +1,6 @@
 ---
 title: Options
-description: Data, node, edge, layout, interaction, label, and theme fields accepted by new Graph()
+description: Data, node, edge, Combo, layout, interaction, label, and theme fields accepted by new Graph()
 ---
 
 The argument of `new Graph(options)` is `GraphOptions`. Only `container` and `data` are required. Node appearance, edge appearance, layout, interaction, and theme all have defaults and can be overridden where the graph needs to differ.
@@ -20,7 +20,7 @@ const graph = new Graph({
 });
 ```
 
-Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs/guides/node), [Edge](/en/docs/guides/edge), [Label](/en/docs/guides/label), [Layout](/en/docs/guides/layout), [Interactions](/en/docs/guides/interactions), and [Theme](/en/docs/guides/theme).
+Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs/guides/node), [Edge](/en/docs/guides/edge), [Combo](/en/docs/guides/combo), [Label](/en/docs/guides/label), [Layout](/en/docs/guides/layout), [Interactions](/en/docs/guides/interactions), and [Theme](/en/docs/guides/theme).
 
 ## GraphOptions
 
@@ -30,7 +30,7 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 | `data` | `GraphData` | Nodes, edges, and optional combos |
 | `node` | [`NodeConfig`](/en/docs/api/options/node#nodeconfig) | Node shapes, appearance, states, labels, icons, and decorations; see the node reference for full definitions |
 | `edge` | [`EdgeConfig`](/en/docs/api/options/edge#edgeconfig) | Edge type, appearance, arrows, labels, states, routing, and parallel edges; see the edge reference for full definitions |
-| `combo` | `ComboConfig` | Combo appearance. Collapse and nesting are still experimental |
+| `combo` | [`ComboConfig`](/en/docs/api/options/combo) | Group appearance, labels, collapsed shapes, and state styles; nesting and collapse remain experimental |
 | `label` | `LabelOptions` | Zoom and collision policy shared by node and edge labels |
 | `layout` | `LayoutConfig` | Layout type and algorithm parameters |
 | `behaviors` | `BehaviorOption[]` | Interaction list. Omitted means wheel zoom and drag pan |
@@ -103,16 +103,7 @@ const data: GraphData = {
 
 ### Combo `ComboData`
 
-See the [Combo reference](/en/docs/api/options/combo) for complete field types, initial states, nesting, and matching code previews. This page retains the GraphData summary.
-
-| Field | Description |
-| --- | --- |
-| `id` | Required and unique |
-| `parentId` | Parent combo, used for nesting |
-| `collapsed` | Whether it starts collapsed |
-| `style` | Style overrides on top of `combo.style` |
-| `data` | Business fields |
-| `states` | Initial states |
+Declare groups in `GraphData.combos`; nodes join through `comboId`. See the [`ComboData` reference](/en/docs/api/options/combo#combodata) for fields, initial states, and nesting rules.
 
 ## Node
 
@@ -138,6 +129,15 @@ Follow the [node guide](/en/docs/guides/node) to build an effect. Node IDs, busi
 - [Runtime updates](/en/docs/api/options/edge#runtime-updates): style merging and data mutation entries; see routing for mode-change constraints.
 
 Follow the [edge guide](/en/docs/guides/edge) to build an effect. Edge `source`, `target`, `id`, business `data`, and initial states remain on this page under [`GraphEdge`](#edge-graphedge).
+
+## Combo
+
+`combo` has type [`ComboConfig`](/en/docs/api/options/combo); its `style` sets group appearance. Find detailed definitions and matching previews here:
+
+- [Basic appearance and local overrides](/en/docs/api/options/combo#basic-appearance-and-local-overrides), [callbacks and precedence](/en/docs/api/options/combo#callbacks-and-precedence).
+- [Collapsed appearance](/en/docs/api/options/combo#collapsed-appearance), [state styles](/en/docs/api/options/combo#state-styles).
+
+Nesting, collapse, and runtime grouping remain experimental. Follow the [Combo guide](/en/docs/guides/combo) for workflows; see [runtime updates](/en/docs/api/options/combo#runtime-updates) for style-update limitations.
 
 ## Label policy
 

@@ -1,6 +1,6 @@
 ---
 title: 配置
-description: new Graph() 可传入的数据、节点、边、布局、交互、标签和主题
+description: new Graph() 可传入的数据、节点、边、Combo、布局、交互、标签和主题
 ---
 
 `new Graph(options)` 的参数类型是 `GraphOptions`。必填字段只有 `container` 和 `data`。节点外观、边外观、布局、交互和主题都有默认值，需要差异化时再覆盖。
@@ -20,7 +20,7 @@ const graph = new Graph({
 });
 ```
 
-各主题的视觉效果和完整示例在配置指南里： [数据](/docs/guides/data)、[节点](/docs/guides/node)、[边](/docs/guides/edge)、[标签](/docs/guides/label)、[布局](/docs/guides/layout)、[交互](/docs/guides/interactions)、[主题](/docs/guides/theme)。
+各主题的视觉效果和完整示例在配置指南里： [数据](/docs/guides/data)、[节点](/docs/guides/node)、[边](/docs/guides/edge)、[Combo](/docs/guides/combo)、[标签](/docs/guides/label)、[布局](/docs/guides/layout)、[交互](/docs/guides/interactions)、[主题](/docs/guides/theme)。
 
 ## GraphOptions
 
@@ -30,7 +30,7 @@ const graph = new Graph({
 | `data` | `GraphData` | 节点、边，以及可选的 Combo |
 | `node` | [`NodeConfig`](/docs/api/options/node#nodeconfig) | 节点形状、样式、状态、标签、图标和装饰；完整定义见节点配置参考 |
 | `edge` | [`EdgeConfig`](/docs/api/options/edge#edgeconfig) | 边类型、外观、箭头、标签、状态、路由和平行边；完整定义见边配置参考 |
-| `combo` | `ComboConfig` | Combo 外观。折叠和嵌套仍是实验能力 |
+| `combo` | [`ComboConfig`](/docs/api/options/combo) | 分组外观、标签、折叠形态与状态样式；嵌套和折叠仍是实验性能力 |
 | `label` | `LabelOptions` | 节点和边标签共用的缩放、碰撞策略 |
 | `layout` | `LayoutConfig` | 布局类型和算法参数 |
 | `behaviors` | `BehaviorOption[]` | 交互列表。省略时启用滚轮缩放和拖拽平移 |
@@ -103,16 +103,7 @@ const data: GraphData = {
 
 ### Combo `ComboData`
 
-完整字段类型、初始状态和嵌套归属规则，以及对应代码与效果见[Combo 配置参考](/docs/api/options/combo)。本页保留 GraphData 结构摘要。
-
-| 字段 | 说明 |
-| --- | --- |
-| `id` | 必填，唯一 |
-| `parentId` | 父 Combo，用于嵌套 |
-| `collapsed` | 初始是否折叠 |
-| `style` | 覆盖 `combo.style` 的局部样式 |
-| `data` | 业务字段 |
-| `states` | 初始状态 |
+用 `GraphData.combos` 声明分组，节点通过 `comboId` 加入；完整字段、初始状态与嵌套规则统一见 [`ComboData` 参考](/docs/api/options/combo#combodata)。
 
 ## 节点
 
@@ -138,6 +129,15 @@ const data: GraphData = {
 - [运行时更新](/docs/api/options/edge#运行时更新)：样式合并与数据更新入口；路由模式限制见对应路由章节。
 
 按业务效果配置边，见[边使用指南](/docs/guides/edge)。边的 `source`、`target`、`id`、业务 `data` 与初始状态仍见本页 [`GraphEdge`](#边-graphedge)。
+
+## Combo
+
+`combo` 的类型是 [`ComboConfig`](/docs/api/options/combo)，通过 `style` 设置分组外观。详细定义与代码效果见：
+
+- [基础外观与局部覆盖](/docs/api/options/combo#基础外观与局部覆盖)、[字段回调与覆盖顺序](/docs/api/options/combo#字段回调与覆盖顺序)。
+- [折叠形态](/docs/api/options/combo#折叠形态)、[状态样式](/docs/api/options/combo#状态样式)。
+
+嵌套、折叠和动态归组属于实验性能力。操作步骤见 [Combo 使用指南](/docs/guides/combo)，样式更新限制见[运行时修改边界](/docs/api/options/combo#运行时修改边界)。
 
 ## 标签策略
 

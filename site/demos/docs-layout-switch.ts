@@ -4,7 +4,7 @@ export async function run(container: HTMLElement) {
   const layouts: Record<string, LayoutConfig> = {
     grid: { type: 'grid', rows: 2, cols: 3, width: 360, height: 160 },
     circular: { type: 'circular', radius: 100 },
-    dagre: { type: 'dagre', rankdir: 'LR', nodesep: 32, ranksep: 64 },
+    dagre: { type: 'dagre', rankdir: 'LR', nodesep: 64, ranksep: 96, nodeSize: 28 },
     force: { type: 'force', worker: false, linkDistance: 100, maxIteration: 60 },
   };
   const graph = new Graph({

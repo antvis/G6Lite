@@ -171,6 +171,33 @@ transform 写法为 `transforms: [{ type: 'process-parallel-edges', options: { o
 
 当前 `router` 和布局方向保存在创建时的数据模型中，`updateOptions()` 不更新它们；改变路由模式或方向应销毁后以新配置创建实例。`curvature`、`curveOffset`、`radius` 的逐字段更新可使用 `updateOptions()`。不要把样式更新描述为重新布局。
 
+## 边标签
+
+下列字段位于 `edge.style`，均支持与基础样式相同的三参数回调。文本内容不会自动取自边的 id 或 data；须配置 `label`。
+
+| 字段 | 类型 | 默认与规则 |
+| --- | --- | --- |
+| `label` | `EdgeStyleValue<string \| false>` | `false`；非空字符串才绘制，空串或 `false` 隐藏 |
+| `labelFontSize` | `EdgeStyleValue<number>` | `10` 屏幕像素；使用有限正数 |
+| `labelFontFamily` | `EdgeStyleValue<string>` | 系统无衬线字体栈：-apple-system、BlinkMacSystemFont、Segoe UI、Roboto、Helvetica Neue、Arial、sans-serif |
+| `labelColor` | `EdgeStyleValue<string>` | `'#666'`，独立于边线颜色 |
+| `labelPlacement` | `EdgeStyleValue<'start' \| 'center' \| 'end'>` | `'center'`；分别取路径参数 `t = 0.2 / 0.5 / 0.8`，不是精确端点 |
+| `labelBackground` | `EdgeStyleValue<string \| false>` | `'rgba(255,255,255,0.8)'`；`false` 关闭底色 |
+| `labelBackgroundPadding` | `EdgeStyleValue<number>` | `2` 屏幕像素，底色四周内边距，使用有限非负数 |
+| `labelAutoRotate` | `EdgeStyleValue<boolean>` | `true`；随路径切线旋转并保持文字正向，`false` 保持水平 |
+
+下面三行分别展示 start、center、end，淡色底框由标签配置绘制；点击边只改变线条颜色，标签颜色仍由 `labelColor` 决定。为清楚比较，示例显式关闭碰撞和低缩放隐藏；业务可保留默认策略。
+
+<EdgeDocExample id="edge-labels" locale="zh" />
+
+### 位置与显示条件
+
+标签层使用已缓存的边路径采样位置与切线；没有路径缓存时沿端点连线插值。当前 `cubic`、`polyline` 的标签位置和旋转采用端点连线，不保证贴合实际弯曲或折线；也不能把 `center` 理解为所有路径的等弧长中点。
+
+边标签字号和内边距保持屏幕尺寸，不随 `label.scaleWithZoom` 缩放。默认 `hideOnLowZoom: true`、`edgeMinZoom: 0.5` 和 `hideOnCollision: true` 可能隐藏标签；边或任一端点处于 hidden 状态时也不绘制。排查时先确认文本非空，再检查全局[标签策略](/docs/api/options#标签策略)及缩放、碰撞。边线 `opacity` 不等同于标签的显隐开关。
+
+边配置不提供节点的 `labelMaxWidth`、`labelOffsetX/Y`、`labelFontWeight` 或图标字段，状态样式也不覆盖这些标签字段。复杂绘制使用已注册的 `edge.labelRenderer`，仍须提供非空 `edge.style.label`；注册和 measure/draw 协议见[自定义 Label Renderer](/docs/guides/custom-label-renderer)。
+
 ## 其他配置
 
 - [边使用指南](/docs/guides/edge)：类型选择、配置步骤和路径示意。

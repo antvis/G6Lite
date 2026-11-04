@@ -21,6 +21,7 @@ const loaders = {
   'edge-cubic': () => import('../../demos/docs-edge-cubic.ts'),
   'edge-orth': () => import('../../demos/polyline-routing.ts'),
   'edge-indented': () => import('../../demos/docs-edge-indented.ts'),
+  'edge-labels': () => import('../../demos/docs-edge-labels.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {

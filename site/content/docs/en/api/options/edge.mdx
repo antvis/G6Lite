@@ -171,6 +171,33 @@ The preview uses rectangles, an LR indented layout, `indentTarget: 'left'`, and 
 
 The data model currently captures `router` and layout direction at creation; `updateOptions()` does not update those values. Destroy and recreate the instance to change routing mode or direction. Per-field updates to `curvature`, `curveOffset`, and `radius` can use `updateOptions()`; updating styles does not rerun layout.
 
+## Edge labels
+
+These `edge.style` fields all support the same three-argument callbacks as basic styles. Text is not automatically taken from edge IDs or data; configure `label` explicitly.
+
+| Field | Type | Default and rules |
+| --- | --- | --- |
+| `label` | `EdgeStyleValue<string \| false>` | `false`; only nonempty strings render, while empty strings or `false` hide the label |
+| `labelFontSize` | `EdgeStyleValue<number>` | `10` screen pixels; use a finite positive value |
+| `labelFontFamily` | `EdgeStyleValue<string>` | System sans-serif stack: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif |
+| `labelColor` | `EdgeStyleValue<string>` | `'#666'`, independent of line color |
+| `labelPlacement` | `EdgeStyleValue<'start' \| 'center' \| 'end'>` | `'center'`; path parameters `t = 0.2 / 0.5 / 0.8`, not exact endpoints |
+| `labelBackground` | `EdgeStyleValue<string \| false>` | `'rgba(255,255,255,0.8)'`; `false` disables the background |
+| `labelBackgroundPadding` | `EdgeStyleValue<number>` | `2` screen pixels around the background; use a finite nonnegative value |
+| `labelAutoRotate` | `EdgeStyleValue<boolean>` | `true`; follow the tangent while keeping text upright. `false` keeps text horizontal |
+
+The three rows show start, center, and end positions with label backgrounds. Clicking changes line color while label color still comes from `labelColor`. Collision and low-zoom hiding are explicitly disabled for comparison; applications can retain the default policies.
+
+<EdgeDocExample id="edge-labels" locale="en" />
+
+### Position and visibility
+
+The label layer samples cached edge paths for position and tangent, falling back to interpolation along the endpoint chord when no path is cached. Currently `cubic` and `polyline` labels use that chord for positioning and rotation, so they are not guaranteed to follow the rendered curve or route. `center` is not an equal-arc-length midpoint for every path.
+
+Edge font sizes and padding retain screen dimensions, independent of `label.scaleWithZoom`. Defaults `hideOnLowZoom: true`, `edgeMinZoom: 0.5`, and `hideOnCollision: true` can hide labels. A hidden edge or endpoint also suppresses its label. First check nonempty text, then [global label policies](/en/docs/api/options#label-policy), zoom, and collisions. Line `opacity` is not a label-visibility switch.
+
+Edge configuration does not provide node-only `labelMaxWidth`, `labelOffsetX/Y`, `labelFontWeight`, or icon fields; state styles do not override label fields either. For complex drawing, use a registered `edge.labelRenderer` and still supply nonempty `edge.style.label`. See [Custom Label Renderer](/en/docs/guides/custom-label-renderer) for registration and measure/draw contracts.
+
 ## Other configuration
 
 - [Edge guide](/en/docs/guides/edge): type selection, steps, and path illustrations.

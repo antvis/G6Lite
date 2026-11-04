@@ -320,17 +320,9 @@ graph.on('canvas:click', (event) => {
 
 ## 布局
 
-```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR' });
-await graph.layout();
-graph.cancelLayout();
-```
+签名、前提、事件顺序和取消语义统一见[布局方法参考](/docs/api/graph/layout)：[setLayout](/docs/api/graph/layout#setlayout) 保存配置，[layout](/docs/api/graph/layout#layout) 重新计算，[cancelLayout](/docs/api/graph/layout#cancellayout) 放弃当前任务。
 
-`setLayout()` 只替换之后要使用的布局配置。`layout()` 用当前图数据执行它，并把算出的坐标写回节点。没有 `layout` 配置或没有节点时，`layout()` 直接返回。
-
-`cancelLayout()` 放弃仍在进行的布局。后完成的旧布局不会覆盖更新的结果。
-
-布局类型和参数见 [布局配置](/docs/guides/layout)。不创建 Graph、只计算结果时使用 [`runLayout()`](/docs/api/extensions#runlayout)。
+布局字段见[配置参考](/docs/api/options/layout)，操作步骤见[布局指南](/docs/guides/layout)。不创建 Graph、只计算坐标时用 [runLayout](/docs/api/graph/layout#runlayout)。
 
 ## Combo
 

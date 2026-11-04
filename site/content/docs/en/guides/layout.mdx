@@ -51,7 +51,7 @@ Layout may change existing x/y. Graph's fx/fy override the corresponding final a
 
 ## Worker
 
-For expensive computation, set worker: true in layout configuration. Graph also attempts it when there are at least 1000 nodes and worker is omitted. Tree layouts and registered extensions still run on the main thread first. Prefer worker: false for function options. See [Worker rules](/en/docs/api/options/layout#worker).
+For setup, fallback, transfer restrictions, and a cancellation example, see the [Worker layout guide](/en/docs/guides/layout-worker). Automatic switching and execution priority are in the [configuration reference](/en/docs/api/options/layout#worker).
 
 ## Common questions
 
@@ -70,5 +70,5 @@ Check roots, edge direction, and connectivity. mindmap uses levelGap/nodeGap, no
 ## Related
 
 - [Layout configuration reference](/en/docs/api/options/layout): fields, defaults, and algorithm boundaries.
-- [Graph layout methods](/en/docs/api/graph#layout): rerunning and cancellation.
+- [Graph layout methods](/en/docs/api/graph/layout): rerunning and cancellation.
 - [Layout gallery](/en/docs/examples/layout-gallery) · [Performance tuning](/en/docs/metrics/performance-tuning).

@@ -32,7 +32,7 @@ const graph = new Graph({
 | `edge` | [`EdgeConfig`](/docs/api/options/edge#edgeconfig) | 边类型、外观、箭头、标签、状态、路由和平行边；完整定义见边配置参考 |
 | `combo` | [`ComboConfig`](/docs/api/options/combo) | 分组外观、标签、折叠形态与状态样式；嵌套和折叠仍是实验性能力 |
 | `label` | [`LabelOptions`](/docs/api/options/label#labeloptions) | 节点和边标签共用的缩放、碰撞策略 |
-| `layout` | `LayoutConfig` | 布局类型和算法参数 |
+| `layout` | [`LayoutConfig`](/docs/api/options/layout#layoutconfig) | 布局类型和算法参数 |
 | `behaviors` | `BehaviorOption[]` | 交互列表。省略时启用滚轮缩放和拖拽平移 |
 | `transforms` | `TransformOption[]` | 绘制前的数据转换，例如平行边 |
 | `plugins` | `PluginOption[]` | 已注册插件 |
@@ -150,20 +150,9 @@ const data: GraphData = {
 
 ## 布局
 
-```ts
-layout?: {
-  type: string;
-  worker?: boolean;
-  width?: number;
-  height?: number;
-  center?: [number, number];
-  [algorithmOption: string]: unknown;
-}
-```
+layout 决定节点的图坐标；省略时使用已有 x/y，缺失坐标补 0。完整字段、支持算法、树布局参数与默认值见[布局配置参考](/docs/api/options/layout)。
 
-`type` 使用内置名称或已注册的布局名，例如 `'force'`、`'dagre'`、`'mindmap'`。其余字段传给对应算法。`worker: true` 把支持的算法放到 Web Worker。`width`、`height`、`center` 省略时按画布尺寸计算。
-
-可选类型、参数和运行时重跑见 [布局配置](/docs/guides/layout)。
+选择算法与运行时切换见[布局指南](/docs/guides/layout)；异步计算、取消与部署见 [Worker 指南](/docs/guides/layout-worker)。
 
 ## 交互
 

@@ -51,7 +51,7 @@ graph.fitView({ padding: 48, maxZoom: 1 });
 
 ## Worker
 
-计算耗时明显时，可在布局配置中设置 worker: true。Graph 也会在节点数达到 1000 且未显式设置 worker 时尝试启用；树布局与注册扩展仍优先在主线程执行。需要函数回调时先使用 worker: false。开关与回退条件见[Worker 规则](/docs/api/options/layout#worker)。
+耗时布局的启用、回退、传输限制与取消示例见 [Worker 布局指南](/docs/guides/layout-worker)。自动开关与执行优先级查[配置参考](/docs/api/options/layout#worker)。
 
 ## 常见问题
 
@@ -70,5 +70,5 @@ layout 不自动适配相机。需要展示全图时，在完成后显式调用 
 ## 相关
 
 - [布局配置参考](/docs/api/options/layout)：字段、默认值与算法边界。
-- [Graph 布局方法](/docs/api/graph#布局)：重排与取消。
+- [Graph 布局方法](/docs/api/graph/layout)：重排与取消。
 - [布局总览](/docs/examples/layout-gallery) · [性能调优](/docs/metrics/performance-tuning)。

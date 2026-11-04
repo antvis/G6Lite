@@ -32,7 +32,7 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 | `edge` | [`EdgeConfig`](/en/docs/api/options/edge#edgeconfig) | Edge type, appearance, arrows, labels, states, routing, and parallel edges; see the edge reference for full definitions |
 | `combo` | [`ComboConfig`](/en/docs/api/options/combo) | Group appearance, labels, collapsed shapes, and state styles; nesting and collapse remain experimental |
 | `label` | [`LabelOptions`](/en/docs/api/options/label#labeloptions) | Zoom and collision policy shared by node and edge labels |
-| `layout` | `LayoutConfig` | Layout type and algorithm parameters |
+| `layout` | [`LayoutConfig`](/en/docs/api/options/layout#layoutconfig) | Layout type and algorithm parameters |
 | `behaviors` | `BehaviorOption[]` | Interaction list. Omitted means wheel zoom and drag pan |
 | `transforms` | `TransformOption[]` | Data transforms before drawing, such as parallel edges |
 | `plugins` | `PluginOption[]` | Registered plugins |
@@ -150,20 +150,9 @@ See [Labels and icons](/en/docs/guides/label#global-label-policies) for steps an
 
 ## Layout
 
-```ts
-layout?: {
-  type: string;
-  worker?: boolean;
-  width?: number;
-  height?: number;
-  center?: [number, number];
-  [algorithmOption: string]: unknown;
-}
-```
+layout determines node positions. Omit it to use existing x/y, with missing values defaulting to 0. Fields, supported algorithms, tree options, and defaults are in the [layout configuration reference](/en/docs/api/options/layout).
 
-`type` is a built-in name or a registered layout name, such as `'force'`, `'dagre'`, or `'mindmap'`. The remaining fields are passed to that algorithm. `worker: true` runs supported algorithms in a Web Worker. Omitted `width`, `height`, and `center` are derived from the canvas.
-
-Available types, parameters, and rerunning layout are in [Layout](/en/docs/guides/layout).
+See the [Layout guide](/en/docs/guides/layout) for selection and switching, or the [Worker guide](/en/docs/guides/layout-worker) for asynchronous computation, cancellation, and deployment.
 
 ## Interactions
 

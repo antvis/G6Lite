@@ -91,31 +91,6 @@ extensionFactory(factory: () => Extension): () => Extension
 
 ## `runLayout()`
 
-不创建 Graph、只需要坐标时直接计算布局：
+从包根导入 runLayout 可独立计算节点坐标；完整签名、viewport 与取消信号、返回值和代码效果见 [runLayout 参考](/docs/api/graph/layout#runlayout)。
 
-```ts
-import { runLayout } from '@antv/g6-lite';
-
-const result = await runLayout(
-  { nodes, edges },
-  { type: 'dagre', rankdir: 'LR' },
-  { width: 800, height: 600 },
-);
-
-result.nodes.forEach((node) => {
-  node.x;
-  node.y;
-});
-```
-
-```ts
-runLayout(
-  data: GraphData,
-  config: LayoutConfig,
-  viewport?: { width: number; height: number },
-): Promise<LayoutResult>
-```
-
-`LayoutResult` 是 `{ nodes }`，每个节点都带数值 `x` 和 `y`。已注册的同名布局和内置的 `mindmap`、`indented`、`fishbone` 优先于 `@antv/layout`。`config.worker: true` 时，支持 Worker 的算法在 Worker 中计算，失败后回退到主线程的同一算法。
-
-在已经渲染的 Graph 上重新布局，使用 [`graph.setLayout()`](/docs/api/graph#布局) 和 `graph.layout()`，这样坐标会写回当前图并触发绘制。
+已有 Graph 的布局更新用[实例布局方法](/docs/api/graph/layout)。自定义布局的注册与 execute 协议仍见本页的[扩展类别](/docs/api/extensions#register)。

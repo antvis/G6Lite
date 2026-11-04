@@ -320,17 +320,9 @@ Arguments and return values are client coordinates, the same space as `MouseEven
 
 ## Layout
 
-```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR' });
-await graph.layout();
-graph.cancelLayout();
-```
+Signatures, preconditions, events, and cancellation are in the [layout method reference](/en/docs/api/graph/layout): [setLayout](/en/docs/api/graph/layout#setlayout) stores configuration, [layout](/en/docs/api/graph/layout#layout) computes positions, and [cancelLayout](/en/docs/api/graph/layout#cancellayout) discards pending work.
 
-`setLayout()` replaces the layout used by the next run. `layout()` executes it on the current graph data and writes the resulting coordinates back to the nodes. It returns immediately when no layout is configured or the graph has no nodes.
-
-`cancelLayout()` abandons an in-flight layout. An older run that finishes later does not overwrite a newer result.
-
-Layout names and parameters are in [Layout](/en/docs/guides/layout). To compute positions without a Graph, use [`runLayout()`](/en/docs/api/extensions#runlayout).
+See the [configuration reference](/en/docs/api/options/layout) for fields and the [Layout guide](/en/docs/guides/layout) for steps. Use [runLayout](/en/docs/api/graph/layout#runlayout) to compute positions without Graph.
 
 ## Combo
 

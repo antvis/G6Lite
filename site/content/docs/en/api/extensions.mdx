@@ -91,31 +91,6 @@ Snapshots from `data` cannot be mutated in place. Write through `updateNode`, `u
 
 ## `runLayout()`
 
-Compute positions without creating a Graph:
+Import runLayout from the package root to compute node positions independently. See the [runLayout reference](/en/docs/api/graph/layout#runlayout) for its full signature, viewport, cancellation signal, result, and rendered example.
 
-```ts
-import { runLayout } from '@antv/g6-lite';
-
-const result = await runLayout(
-  { nodes, edges },
-  { type: 'dagre', rankdir: 'LR' },
-  { width: 800, height: 600 },
-);
-
-result.nodes.forEach((node) => {
-  node.x;
-  node.y;
-});
-```
-
-```ts
-runLayout(
-  data: GraphData,
-  config: LayoutConfig,
-  viewport?: { width: number; height: number },
-): Promise<LayoutResult>
-```
-
-`LayoutResult` is `{ nodes }`, and every node has numeric `x` and `y`. A registered layout of the same name, and the built-in `mindmap`, `indented`, and `fishbone` layouts, run before `@antv/layout`. With `config.worker: true`, algorithms that support a Worker run there and fall back to the same algorithm on the main thread if the Worker fails.
-
-To rerun layout on a Graph that is already rendered, use [`graph.setLayout()`](/en/docs/api/graph#layout) and `graph.layout()`. Those calls write coordinates back into the current graph and draw.
+For an existing Graph, use [instance layout methods](/en/docs/api/graph/layout). Custom layout registration and execute contracts remain in this page's [extension categories](/en/docs/api/extensions#register).

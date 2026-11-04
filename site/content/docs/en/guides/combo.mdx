@@ -1,27 +1,122 @@
 ---
 title: Combos
-description: Group nodes with nested, collapsible, draggable combo containers
+description: Declare nested groups, style them, collapse and expand, change membership, and drag groups
 ---
 
-Combo capabilities are experimental during `0.1.x`.
+import { NodeDocExample as ComboDocExample } from '@/components/node-doc-example';
 
-See [Basic appearance and local overrides](/en/docs/api/options/combo#basic-appearance-and-local-overrides) for fields, defaults, units, callbacks, and matching previews. Padding arrays currently apply their maximum uniformly, rather than setting each side separately.
+Combos organize nodes within bounds. Start with [declarations](#declare-combos), [collapse](#collapse-and-expand), or [membership changes](#change-membership). See the [Combo reference](/en/docs/api/options/combo) for fields. Nesting, collapse, and runtime grouping are [experimental](/en/docs/compatibility/api-stability).
 
-See the [Combo reference](/en/docs/api/options/combo) for complete data fields, node membership, initial collapse and states, and matching code with live results. Existing appearance and runtime usage remain below.
+## Declare Combos
+
+1. Declare unique IDs in `data.combos`; assign nodes through `comboId`.
+2. For nesting, set `parentId` on child groups. Edges still connect node IDs.
+3. Provide node positions or a layout, then `await graph.render()`. Bounds follow members and padding.
+
+Client nests inside Platform; Archive starts collapsed. Client's purple outline comes from its initial selected state.
+
+<ComboDocExample id="combo-data" locale="en" />
+
+## ComboData
+
+Use `collapsed` and `states` for initial state; put business fields in `data`. See [ComboData](/en/docs/api/options/combo#combodata) for types and membership rules.
+
+## Style
+
+Set shared appearance in the example's `combo.style`; override one group in `data.combos[].style`.
+
+- Titles: configure `label`, for example with a callback reading data.name. Business names do not display automatically.
+- Bounds: use padding for spacing and fill/stroke for categories. Padding arrays currently apply their maximum uniformly.
+- Selection: define `combo.style.stateStyles.selected`, then activate it with state APIs. Built-in click-select does not select Combos.
 
 ```ts
-const graph = new Graph({
-  container: '#container',
-  data: {
-    nodes: [
-      { id: 'n1', comboId: 'frontend' },
-      { id: 'n2', comboId: 'frontend' },
-    ],
-    edges: [],
-    combos: [{ id: 'frontend', data: { label: 'Frontend' } }],
-  },
-  combo: { style: { padding: 24, fill: 'rgba(22,119,255,0.06)' } },
-});
+graph.setItemState('client', 'selected', true);
+graph.setItemState('client', 'selected', false);
 ```
 
-Use `collapseCombo()`, `expandCombo()`, and `toggleCombo()` for visibility. Runtime grouping APIs include `addToCombo()`, `removeFromCombo()`, `createCombo()`, and `removeCombo()`.
+Compare [global/local appearance](/en/docs/api/options/combo#code-and-matching-result) or the [state-style example](/en/docs/api/options/combo#state-styles).
+
+## Collapse and expand
+
+Use `ComboData.collapsed: true` initially, or these methods after the first render. Collapse hides descendant nodes and connected edges; it currently creates no virtual edges to collapsed groups.
+
+```ts
+graph.on('combo:collapse', ({ comboId }) => console.log('Collapsed:', comboId));
+graph.on('combo:expand', ({ comboId }) => console.log('Expanded:', comboId));
+graph.collapseCombo('client');
+graph.expandCombo('client');
+graph.toggleCombo('client');
+```
+
+Click groups below to expand or collapse. The circle shows automatic count; rectangles show custom count and a label. See [collapsed appearance](/en/docs/api/options/combo#collapsed-appearance) for dimensions and text precedence.
+
+<ComboDocExample id="combo-collapsed" locale="en" />
+
+## Change membership
+
+After the first render, `addToCombo(nodeId, comboId)` moves an existing node into an existing group. Bounds update during rendering; membership changes do not reposition nodes or rerun layout.
+
+Click mobile below to switch groups. This example also calls `updateNodePosition()` to arrange it. Reset restores Client membership.
+
+<ComboDocExample id="combo-membership" locale="en" />
+
+<details>
+<summary>Ungroup nodes, create and remove groups</summary>
+
+Use a unique new group ID and existing member nodes. This sequence ungroups mobile, creates a temporary group, removes it, and returns mobile to Client. Removing a group does not delete its nodes.
+
+```ts
+graph.removeFromCombo('mobile');
+graph.createCombo({ id: 'temporary', style: { label: 'Temporary' } }, ['mobile']);
+graph.removeCombo('temporary');
+graph.addToCombo('mobile', 'client');
+```
+
+These methods update the existing instance without another render call. See [Combo methods](/en/docs/api/graph#combo) for signatures.
+
+</details>
+
+## Queries
+
+Check membership and collapse state through read-only models. `getComboChildren()` returns direct members only.
+
+```ts
+const membership = graph.getNodeCombo('mobile'); // 'client' or 'service'
+const children = graph.getComboChildren('client'); // { nodes, combos }
+const collapsed = graph.getComboData('client')?.collapsed;
+const snapshot = graph.getData(); // Current membership and states
+```
+
+## Drag groups
+
+The membership example enables `drag-node`: dragging a group background moves descendant nodes together; dragging a node moves that node. `drag-canvas` pans empty canvas. Crossing group boundaries does not change membership.
+
+Listen to `combo:dragstart`, `combo:drag`, and `combo:dragend` to sync application state; read positions with `getData()` after dragging.
+
+## Common questions
+
+### Why is there no group outline or title?
+
+Check valid comboId references and node positions. Empty groups draw no placeholder. Provide titles explicitly through label.
+
+### Why does content remain after hiding or collapsing a parent?
+
+hidden affects only the group itself. Collapse hides descendant nodes and connected edges, but does not automatically hide child Combo outlines. Check nested results against the [collapse boundaries](/en/docs/api/options/combo#initial-collapse).
+
+### Why do some nodes stay hidden after expanding?
+
+Check business hidden states on nodes/edges and other collapsed ancestors. Expansion preserves those hiding conditions.
+
+### Why does dragging not change membership or selection?
+
+drag-node changes positions. Use addToCombo/removeFromCombo for membership and state APIs for selection; handle each explicitly.
+
+### Why can updateOptions not change Combo appearance?
+
+It currently does not accept combo. Replace data snapshots for local styles, or recreate the instance for global styles. See [runtime updates](/en/docs/api/options/combo#runtime-updates).
+
+## Related
+
+- [Combo reference](/en/docs/api/options/combo): fields, defaults, and comparisons.
+- [Combo methods](/en/docs/api/graph#combo): runtime APIs.
+- [Complete Combo example](/en/docs/examples/combo): more nesting, membership, and data-export actions.

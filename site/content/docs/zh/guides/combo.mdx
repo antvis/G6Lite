@@ -1,99 +1,122 @@
 ---
 title: Combo
-description: 节点分组容器的声明、样式、折叠展开和整体拖拽
+description: 声明分组与嵌套，配置外观，折叠展开、动态归组和整体拖拽
 ---
 
-Combo 是节点的分组容器，用于把一组节点圈在一个可视包围框内。它支持嵌套、折叠 / 展开，以及整体拖拽。嵌套、折叠和运行时归组仍是实验性能力，配置可能在 `0.1.x` 内调整。
+import { NodeDocExample as ComboDocExample } from '@/components/node-doc-example';
 
-完整数据字段、节点归属、初始折叠和状态，以及代码与实际效果见[Combo 配置参考](/docs/api/options/combo)。下文保留现有外观与操作入口。
-
-Combo 包围框由 Canvas 2D 在 WebGL 画布下方叠加绘制，不影响节点和边的 GPU 渲染路径。
-
-下面的分组示意对应声明中的归属关系：`n1`、`n2` 属于 Frontend，`n3` 属于 Backend；边可以跨组连接。
-
-![Frontend 包含 n1 和 n2，Backend 包含 n3，n1 与 n3 跨组连接](/examples/docs-guide-combo.svg '节点分组与跨组连接')
-
-在 [Combo 示例](/docs/examples/combo) 中可体验嵌套、折叠展开和整体拖拽。
+Combo 用包围框组织节点。按需从[声明分组](#声明-combo)、[折叠展开](#折叠与展开)或[动态归组](#动态调整归属)开始；完整字段见 [Combo 配置参考](/docs/api/options/combo)。嵌套、折叠和运行时归组属于[实验性能力](/docs/compatibility/api-stability#实验性能力)。
 
 ## 声明 Combo
 
-```ts
-const graph = new Graph({
-  container: '#container',
-  data: {
-    nodes: [
-      { id: 'n1', comboId: 'frontend' },
-      { id: 'n2', comboId: 'frontend' },
-      { id: 'n3', comboId: 'backend' },
-    ],
-    edges: [{ source: 'n1', target: 'n3' }],
-    combos: [
-      { id: 'frontend', data: { name: 'Frontend' } },
-      { id: 'backend', data: { name: 'Backend' } },
-    ],
-  },
-  layout: { type: 'd3-force' },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
-});
-```
+1. 在 `data.combos` 中声明唯一 id，节点用 `comboId` 加入分组。
+2. 需要嵌套时，在子 Combo 上写 `parentId`；边仍连接节点 id。
+3. 提供节点坐标或布局，再调用 `await graph.render()`。边界随成员位置和 padding 计算。
+
+下面 Client 嵌套在 Platform 内，Archive 初始折叠；Client 的紫色来自初始 selected 状态。
+
+<ComboDocExample id="combo-data" locale="zh" />
 
 ## ComboData
 
-| 字段       | 说明                  |
-| ---------- | --------------------- |
-| `id`       | Combo 唯一标识        |
-| `parentId` | 父 Combo id，用于嵌套 |
-| `collapsed` | 初始是否折叠，默认 false；独立于 states |
-| `style`    | 单个 Combo 的样式覆盖 |
-| `data`     | 业务扩展字段          |
-| `states` | 初始状态，默认空数组；状态样式位于 combo.style.stateStyles |
+数据中用 `collapsed`、`states` 声明初始状态，业务字段放 `data`。完整类型与归属规则见 [ComboData 参考](/docs/api/options/combo#combodata)。
 
 ## 样式
 
-完整基础字段、默认值、单位、回调及全局与局部覆盖，见[基础外观参考](/docs/api/options/combo#基础外观与局部覆盖)。其中 padding 数组当前取最大值统一应用四周；它不按四边分别留白。
+在上例的 `combo.style` 中配置公共外观，单组用 `data.combos[].style` 覆盖。
+
+- 标题：显式配置 `label`，例如回调读取 data.name；业务名称不会自动显示。
+- 边界：用 padding 留白、fill/stroke 区分类别。padding 数组当前取最大值应用四周。
+- 选中：在 `combo.style.stateStyles.selected` 中定义效果，再用状态 API 激活；内置 click-select 不会自动选择 Combo。
 
 ```ts
-combo: {
-  style: {
-    fill: 'rgba(91, 143, 249, 0.08)',
-    stroke: 'rgba(91, 143, 249, 0.35)',
-    strokeWidth: 1,
-    borderRadius: 12,
-    padding: 30,
-    label: (combo) => (combo.data as Record<string, string>)?.name ?? combo.id,
-    labelPlacement: 'top',
-  },
-}
+graph.setItemState('client', 'selected', true);
+graph.setItemState('client', 'selected', false);
 ```
+
+需要对照效果时看[全局与局部外观](/docs/api/options/combo#代码与对应效果)和[状态样式示例](/docs/api/options/combo#状态样式)。
 
 ## 折叠与展开
 
-```ts
-graph.collapseCombo('frontend');
-graph.expandCombo('frontend');
-graph.toggleCombo('frontend');
+首次折叠用 `ComboData.collapsed: true`；首次 render 后使用以下方法。折叠隐藏后代节点与关联边，当前不生成连接到折叠分组的虚拟边。
 
-graph.on('combo:collapse', ({ comboId }) => console.log(comboId));
-graph.on('combo:expand', ({ comboId }) => console.log(comboId));
+```ts
+graph.on('combo:collapse', ({ comboId }) => console.log('Collapsed:', comboId));
+graph.on('combo:expand', ({ comboId }) => console.log('Expanded:', comboId));
+graph.collapseCombo('client');
+graph.expandCombo('client');
+graph.toggleCombo('client');
 ```
+
+下面点击分组可展开、折叠。圆形显示自动计数，矩形分别显示自定义计数和标签；尺寸与文字优先级见[折叠形态参考](/docs/api/options/combo#折叠形态)。
+
+<ComboDocExample id="combo-collapsed" locale="zh" />
 
 ## 动态调整归属
 
+首次 render 后，`addToCombo(nodeId, comboId)` 将已有节点转入已有分组，包围框随渲染更新。它不自动搬动节点或重新布局。
+
+点击下面的 mobile 在两组间切换。示例额外调用 `updateNodePosition()` 安排位置；重置恢复 Client 归属。
+
+<ComboDocExample id="combo-membership" locale="zh" />
+
+<details>
+<summary>解除归属、创建与移除分组</summary>
+
+为新分组提供唯一 id，成员节点须已存在。以下片段依次解除 mobile 归属、创建临时分组、移除该分组并把节点归回 Client；移除分组不会删除节点。
+
 ```ts
-graph.addToCombo('n4', 'frontend');
-graph.removeFromCombo('n4');
-graph.createCombo({ id: 'new-group' }, ['n1', 'n2']);
-graph.removeCombo('new-group');
+graph.removeFromCombo('mobile');
+graph.createCombo({ id: 'temporary', style: { label: 'Temporary' } }, ['mobile']);
+graph.removeCombo('temporary');
+graph.addToCombo('mobile', 'client');
 ```
+
+这些方法更新已有实例，不需要重新 render。更多签名见 [Combo 方法](/docs/api/graph#combo)。
+
+</details>
 
 ## 查询
 
+用查询确认归属和折叠状态，返回的模型只读；`getComboChildren()` 只返回直接成员。
+
 ```ts
-graph.getComboData('frontend');
-graph.getComboChildren('frontend');
-graph.getNodeCombo('n1');
+const membership = graph.getNodeCombo('mobile'); // 'client' 或 'service'
+const children = graph.getComboChildren('client'); // { nodes, combos }
+const collapsed = graph.getComboData('client')?.collapsed;
+const snapshot = graph.getData(); // 当前归属与状态的数据快照
 ```
 
 ## 整体拖拽
 
-启用 `drag-node` 后，拖拽 Combo 区域会带动其子节点一起移动，并触发 `combo:dragstart`、`combo:drag`、`combo:dragend` 事件。
+上面的归组示例已启用 `drag-node`：拖动分组空白处会移动全部后代节点，拖动节点则移动该节点；空画布由 `drag-canvas` 平移。拖动越过分组边界不会自动改变归属。
+
+需要同步业务状态时，监听 `combo:dragstart`、`combo:drag`、`combo:dragend`；结束后通过 `getData()` 读取位置。
+
+## 常见问题
+
+### 为什么分组没有边框或标题？
+
+确认成员 comboId 有效、节点已有位置；空分组不绘制占位框。标题必须通过 label 显式提供。
+
+### 为什么隐藏或折叠父组后仍有内容？
+
+hidden 仅隐藏分组自身；折叠隐藏后代节点和关联边，但子 Combo 边框不随祖先折叠自动隐藏。嵌套折叠需核对实际效果，见[边界说明](/docs/api/options/combo#初始折叠)。
+
+### 为什么展开后仍有节点看不到？
+
+检查节点、边原有的 hidden，以及其他祖先是否仍折叠；展开会保留这些隐藏条件。
+
+### 为什么拖动没有改变归属或选中状态？
+
+drag-node 只移动位置。归属由 addToCombo/removeFromCombo 控制，选中由状态 API 控制；三者需分别处理。
+
+### 为什么 updateOptions 不能改 Combo 外观？
+
+当前不接受 combo。局部样式用数据快照配合 setData，全局样式重建实例，见[更新方式](/docs/api/options/combo#运行时修改边界)。
+
+## 相关
+
+- [Combo 配置参考](/docs/api/options/combo)：字段、默认值与效果对照。
+- [Combo 方法](/docs/api/graph#combo)：运行时 API。
+- [完整 Combo 示例](/docs/examples/combo)：更多嵌套、归组与数据导出操作。

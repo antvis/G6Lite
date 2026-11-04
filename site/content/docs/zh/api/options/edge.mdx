@@ -123,6 +123,54 @@ transform 写法为 `transforms: [{ type: 'process-parallel-edges', options: { o
 
 运行时可用 `graph.updateOptions({ edge: { parallelEdges: { enabled: true, offset: 30 } } })` 重算分组，无需重新布局；新对象替换原 `parallelEdges` 对象，保留其他选项时一并提交。`updateOptions()` 不接受 `transforms`。自环尺寸与层级由内置渲染器决定，本配置的 offset/min/max 不控制它们。步骤与更多场景见[平行边指南](/docs/guides/parallel-edges)。
 
+## 曲线与折线路由
+
+这些字段位于 `edge.style`。路由决定两端之间的路径，布局决定节点位置；设置 `router` 不会自动把数据排成树。路径几何使用图坐标，随相机缩放；它与屏幕像素线宽的单位不同。
+
+| 字段 | 类型 | 默认与生效条件 |
+| --- | --- | --- |
+| `curvature` | `EdgeStyleValue<number>` | `0.3`；仅 `arc`，无量纲；控制点为两端中点加垂直向量乘该值。正负控制弯曲方向，`0` 为直线；平行边元数据优先 |
+| `curveOffset` | `EdgeStyleValue<number>` | `60` 图坐标单位；仅 `cubic`，控制起终点处的水平控制柄长度 |
+| `radius` | `EdgeStyleValue<number>` | `0` 图坐标单位；`orth`、`indented`、`fishbone` 路径的圆角；使用有限非负数，实际半径受相邻线段各一半长度约束 |
+| `router` | `'orth' \| 'tree' \| 'indented' \| 'fishbone'` | `'orth'`；仅 `polyline`，全图固定值，不支持逐边回调 |
+| `indentTarget` | `'left' \| 'right'` | `'left'`；仅横向 `indented` 路由，详见下文；固定值 |
+| `trunkGap` | `number` | `0`；公开类型保留此字段，但当前路由计算不读取它，设置后不会移动主干 |
+
+### 弧线与三次曲线
+
+下面三行以相同端点距离对比 `curvature: -0.35 / 0 / 0.35`。该示例不启用平行边处理，避免自动偏移覆盖手动曲率。
+
+<EdgeDocExample id="edge-curves" locale="zh" />
+
+`cubic` 从节点的左/右边缘出入，按端点的横向关系选择方向；`curveOffset` 在图坐标中控制两端的水平控制柄，`curvature` 对它不生效。下面保持两端相对位置一致，对比 `30` 与 `120`。同一高度的端点可能仍呈直线，不能仅靠增大 offset 保证可见弯曲；过大的控制柄也可能回折。
+
+<EdgeDocExample id="edge-cubic" locale="zh" />
+
+### 路由选择
+
+| router | 路径与限制 |
+| --- | --- |
+| `orth` | 横纵折线，根据两端矩形边界及方向连接；节点太近或方向相反时绕到一侧。只考虑当前两端，不是全图障碍物避让 |
+| `tree` | 同源节点分组并分配端口，当前渲染器使用平滑三次路径细分，而非硬直角；`radius` 不控制其平滑程度 |
+| `indented` | 父节点主干加通往子节点的 L 形分支，适合目录树；可配合圆角 |
+| `fishbone` | 按鱼骨图的横向主骨和斜骨几何连接，当前方向参数不改变计算；应配合内置 fishbone 布局，不作通用正交路由 |
+
+方向来自创建图时的 `layout.rankdir ?? layout.direction ?? 'TB'`，设置在 `layout`，不是 `edge.style`。正交路由支持 TB/BT/LR/RL；当前 tree 将 BT 与 TB、RL 与 LR 共用端口计算，不能承诺镜像后的端口。缩进示例显式提供 LR，避免布局内部 LR 默认与路由 TB 默认不一致。
+
+下面复用正交折线路由示例：Dagre 布局排列节点，`router: 'orth'` 连接端点，`radius: 12` 处理拐角。它不保证绕开其他节点或消除所有边交叉。
+
+<EdgeDocExample id="edge-orth" locale="zh" />
+
+### 缩进目标与主干
+
+横向 `indented` 配置 `indentTarget: 'left'` 时，从父节点中心的下边缘沿竖直主干连接到子节点的近侧边缘；LR 到左边，RL 到右边。`'right'` 采用无背景文本的约定：从父节点中心出发，到 `target.x ± target.width`，并非普通居中矩形的右边界。不应用它为矩形节点切换任意连接端口。TB/BT 路由不读取这个选项。
+
+下面使用矩形节点、LR 缩进布局、`indentTarget: 'left'` 与 `radius: 10`。主干位置由父节点坐标确定；调整层级缩进用 `layout.indent`，行距用 `layout.rowHeight`，当前不能通过 `trunkGap` 调整主干。
+
+<EdgeDocExample id="edge-indented" locale="zh" />
+
+当前 `router` 和布局方向保存在创建时的数据模型中，`updateOptions()` 不更新它们；改变路由模式或方向应销毁后以新配置创建实例。`curvature`、`curveOffset`、`radius` 的逐字段更新可使用 `updateOptions()`。不要把样式更新描述为重新布局。
+
 ## 其他配置
 
 - [边使用指南](/docs/guides/edge)：类型选择、配置步骤和路径示意。

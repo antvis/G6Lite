@@ -123,6 +123,54 @@ Resolution is field-based: built-in defaults → the last matching object transf
 
 Call `graph.updateOptions({ edge: { parallelEdges: { enabled: true, offset: 30 } } })` to regroup at runtime without rerunning layout. The new object replaces the previous `parallelEdges` object; resubmit other options to retain them. `updateOptions()` does not accept `transforms`. Loop size and levels are internal; offset/min/max do not control them. See the [parallel-edge guide](/en/docs/guides/parallel-edges) for steps.
 
+## Curves and polyline routing
+
+These fields belong in `edge.style`. Routing determines the connecting path; layout determines node positions. Setting `router` does not arrange data as a tree. Path geometry uses graph coordinates and scales with the camera, unlike screen-space line width.
+
+| Field | Type | Default and applicability |
+| --- | --- | --- |
+| `curvature` | `EdgeStyleValue<number>` | `0.3`; only `arc`, dimensionless. The control point is the endpoint midpoint plus the perpendicular endpoint vector times this value. Sign changes side; `0` is straight; parallel metadata takes priority |
+| `curveOffset` | `EdgeStyleValue<number>` | `60` graph units; only `cubic`, horizontal control-handle length at each endpoint |
+| `radius` | `EdgeStyleValue<number>` | `0` graph units; rounded corners for `orth`, `indented`, and `fishbone`. Use a finite nonnegative value; the actual radius is limited to half of each neighboring segment |
+| `router` | `'orth' \| 'tree' \| 'indented' \| 'fishbone'` | `'orth'`; only `polyline`, a graph-wide constant without per-edge callbacks |
+| `indentTarget` | `'left' \| 'right'` | `'left'`; horizontal `indented` routing only, described below; a constant |
+| `trunkGap` | `number` | `0`; retained in the public type, but currently not read by routing calculations, so it does not move the trunk |
+
+### Arcs and cubic curves
+
+The following rows compare `curvature: -0.35 / 0 / 0.35` at equal endpoint distances. Parallel-edge processing is disabled so automatic offsets do not replace manual curvature.
+
+<EdgeDocExample id="edge-curves" locale="en" />
+
+`cubic` enters and exits the left/right node boundaries according to the endpoints' horizontal order. `curveOffset` sets horizontal control handles in graph units; `curvature` does not affect it. The two rows below compare `30` and `120` with equal relative endpoint positions. Endpoints at the same height may still produce a straight line; a larger offset does not guarantee visible bending, and oversized handles can fold back.
+
+<EdgeDocExample id="edge-cubic" locale="en" />
+
+### Choosing a router
+
+| router | Path and constraints |
+| --- | --- |
+| `orth` | Horizontal/vertical paths based on endpoint rectangles and direction; routes to one side for close or reversed endpoints. Only considers those endpoints, not all graph obstacles |
+| `tree` | Groups outgoing edges and distributes ports. The renderer currently tessellates smooth cubic paths rather than sharp right angles; `radius` does not control that smoothing |
+| `indented` | A parent trunk with L-shaped child branches for directory trees; supports rounded corners |
+| `fishbone` | Horizontal spine and diagonal bone geometry; the current direction parameter does not change calculations. Pair with the built-in fishbone layout, rather than using it as a general orthogonal router |
+
+Direction comes from `layout.rankdir ?? layout.direction ?? 'TB'` when creating the graph, not from `edge.style`. Orthogonal routing supports TB/BT/LR/RL. Tree routing currently shares port calculations between BT/TB and RL/LR, so mirrored ports are not guaranteed. The indented example explicitly supplies LR because the layout's internal LR default differs from routing's TB default.
+
+The reused orthogonal example below lets Dagre position nodes, `router: 'orth'` connect them, and `radius: 12` round corners. It does not guarantee avoidance of other nodes or every edge crossing.
+
+<EdgeDocExample id="edge-orth" locale="en" />
+
+### Indented targets and trunks
+
+For horizontal `indented` routing, `indentTarget: 'left'` starts at the parent's bottom center and follows a vertical trunk to the child's near boundary: left for LR, right for RL. The `'right'` mode uses a background-free text convention: from the parent center to `target.x ± target.width`, not the right boundary of a centered rectangle. It is not an arbitrary rectangular port selector. TB/BT routing does not read this option.
+
+The preview uses rectangles, an LR indented layout, `indentTarget: 'left'`, and `radius: 10`. The parent position determines the trunk; change `layout.indent` for depth spacing and `layout.rowHeight` for row spacing. `trunkGap` currently cannot adjust the trunk.
+
+<EdgeDocExample id="edge-indented" locale="en" />
+
+The data model currently captures `router` and layout direction at creation; `updateOptions()` does not update those values. Destroy and recreate the instance to change routing mode or direction. Per-field updates to `curvature`, `curveOffset`, and `radius` can use `updateOptions()`; updating styles does not rerun layout.
+
 ## Other configuration
 
 - [Edge guide](/en/docs/guides/edge): type selection, steps, and path illustrations.

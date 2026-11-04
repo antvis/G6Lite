@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-export type NodeDocExampleId = 'body' | 'style' | 'labels' | 'label-options' | 'badges' | 'edge-style' | 'edge-hit-area' | 'edge-parallel';
+export type NodeDocExampleId = 'body' | 'style' | 'labels' | 'label-options' | 'badges' | 'edge-style' | 'edge-hit-area' | 'edge-parallel' | 'edge-curves' | 'edge-cubic' | 'edge-orth' | 'edge-indented';
 const files: Record<NodeDocExampleId, string> = {
   body: 'docs-node-body.ts',
   style: 'docs-node-style.ts',
@@ -11,6 +11,10 @@ const files: Record<NodeDocExampleId, string> = {
   'edge-style': 'docs-edge-style.ts',
   'edge-hit-area': 'docs-edge-hit-area.ts',
   'edge-parallel': 'docs-edge-parallel.ts',
+  'edge-curves': 'docs-edge-curves.ts',
+  'edge-cubic': 'docs-edge-cubic.ts',
+  'edge-orth': 'polyline-routing.ts',
+  'edge-indented': 'docs-edge-indented.ts',
 };
 
 export function readNodeDocExample(id: NodeDocExampleId) {
@@ -21,8 +25,8 @@ export function readNodeDocExample(id: NodeDocExampleId) {
 // rather than an MDX component placeholder.
 export function expandNodeDocExamples(markdown: string) {
   return markdown.replace(/<(?:NodeDocExample|EdgeDocExample)\b([^>]*)\/>/g, (_match, attributes: string) => {
-    const id = /\bid="(body|style|labels|label-options|badges|edge-style|edge-hit-area|edge-parallel)"/.exec(attributes)?.[1] as NodeDocExampleId | undefined;
-    if (!id) throw new Error('Unknown inline configuration example in Markdown');
+    const id = /\bid="([a-z-]+)"/.exec(attributes)?.[1] as NodeDocExampleId | undefined;
+    if (!id || !Object.hasOwn(files, id)) throw new Error('Unknown inline configuration example in Markdown');
     return `\n\n\`\`\`ts\n${readNodeDocExample(id).trimEnd()}\n\`\`\`\n\n`;
   });
 }

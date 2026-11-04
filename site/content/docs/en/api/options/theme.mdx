@@ -1,0 +1,116 @@
+---
+title: Theme reference
+description: ThemeOption, all 12 theme tokens, preset defaults, precedence, and resolveTheme
+---
+
+import { NodeDocExample as ThemeDocExample } from '@/components/node-doc-example';
+
+Entry: `GraphOptions.theme?: ThemeOption`, defaulting to light. Themes supply default node and edge styles and the graph background. For setup and troubleshooting, see [Themes](/en/docs/guides/theme).
+
+## ThemeOption
+
+```ts
+import type { ThemeOption, ThemeTokens } from '@antv/g6-lite';
+
+// ThemeOption = 'light' | 'dark'
+//   | ({ type: 'light' | 'dark' } & Partial<ThemeTokens>)
+const theme: ThemeOption = { type: 'light', nodeFill: '#00A876' };
+```
+
+Objects require `type`; all tokens are optional fixed values, without callbacks. Resolution starts from the preset and replaces top-level fields. Explicit undefined overwrites a preset value; omit fields you do not need to change.
+
+## ThemeTokens
+
+Built-in defaults follow. Units and valid values match the corresponding [node styles](/en/docs/api/options/node#nodestyleconfig) and [edge styles](/en/docs/api/options/edge#basic-styles); theme resolution adds no numeric validation or normalization.
+
+| Token | Type | light | dark | Effect |
+| --- | --- | --- | --- | --- |
+| `nodeFill` | `string` | `#1783FF` | Same as light | Default node fill |
+| `nodeSize` | `number` | `24` | Same as light | Default node size |
+| `nodeStroke` | `string` | `#fff` | `#333` | Default node outline color |
+| `nodeStrokeWidth` | `number` | `0` | Same as light | Default node outline width |
+| `edgeStroke` | `string` | `#99ADD1` | `#637088` | Default edge color |
+| `edgeLineWidth` | `number` | `1` | Same as light | Default edge lineWidth |
+| `edgeArrow` | `boolean` | `true` | Same as light | Default edge endArrow |
+| `canvasBackground` | `string` | `#fff` | `#1a1a1a` | Graph canvas clear color |
+| `edgeDefaultColor` | `string` | `#99ADD1` | `#637088` | Fallback when edgeStroke is absent |
+| `edgeCategoryPalette` | `string[]` | 10 colors, below | 10 colors, below | Readable palette; no automatic data mapping |
+| `nodeStateStyles` | `Partial<Record<NodeState, NodeStateStyleOverride>>` | Below | Below | Default node state styles |
+| `edgeStateStyles` | `Partial<Record<EdgeState, EdgeStateStyleOverride>>` | Below | Same as light | Default edge state styles |
+
+Both presets define edgeStroke, so changing only edgeDefaultColor does not change default edge colors. Themes have no label, icon, or Combo tokens; configure those styles separately.
+
+<details>
+<summary>Complete category palettes</summary>
+
+light: `['#1783FF', '#00C9C9', '#F08F56', '#D580FF', '#7863FF', '#DB9D0D', '#60C42D', '#FF80CA', '#2491B3', '#17C76F']`.
+
+dark: `['#0F55A6', '#008383', '#9C5D38', '#8B53A6', '#4E40A6', '#8F6608', '#3E801D', '#A65383', '#175E75', '#0F8248']`.
+
+For category colors, read edgeCategoryPalette from resolveTheme and map business categories to colors in an edge.style.stroke field callback. Setting the palette alone does not recolor edges.
+
+</details>
+
+## Code and rendered result
+
+Choose light, dark, or brand. Default uses base theme styles; Selected and Disabled use state styles. The brand theme preserves other preset node states. Label colors are updated separately on each switch.
+
+<ThemeDocExample id="theme-switch" locale="en" />
+
+## State presets
+
+The node emphasis outline is `#163B65` in light and `#B7D3FF` in dark. Only overridden fields are listed below.
+
+| State | nodeStateStyles | edgeStateStyles |
+| --- | --- | --- |
+| `active` | haloWidth: 8, opacity: 1 | stroke: #1783FF, opacity: 1 |
+| `selected` | stroke: emphasis, strokeWidth: 2, haloWidth: 12, opacity: 1 | stroke: #1783FF, opacity: 1 |
+| `disabled` | opacity: 0.15 | opacity: 0.15, lineDash: [4, 4] |
+| `highlight` | stroke: emphasis, strokeWidth: 1, opacity: 1 | stroke: #1783FF, opacity: 1 |
+| `inactive` | opacity: 0.25 | opacity: 0.25 |
+
+See [node state styles](/en/docs/api/options/node#state-styles) and [edge state styles](/en/docs/api/options/edge#state-styles) for supported fields. The renderer hides hidden directly and skips overrides for default. Multiple states apply in list order; later states overwrite the same fields. An active node gets halo 8 when its halo is 0; selected has a minimum halo of 12. haloWidth: 0 cannot disable these built-in effects.
+
+## Precedence
+
+For field-object base styles: explicit node/edge.style fields > registered extension defaults > theme tokens > renderer fallbacks. Whole-object node style callbacks use a compatibility path with different defaults and state handling; see [Style callbacks](/en/docs/api/options/node#style-callbacks).
+
+State styles apply after base styles. For each state, the renderer chooses the object from node/edge.stateStyles, then extension state styles, then theme state styles. Once an object is chosen, missing fields are not filled from lower levels. An empty object also suppresses the theme override for that state.
+
+<details>
+<summary>Preserving preset state styles</summary>
+
+A theme's nodeStateStyles or edgeStateStyles replaces the entire preset map. Spread both levels to keep other states and other fields within the same state:
+
+```ts
+import { resolveTheme, type ThemeOption } from '@antv/g6-lite';
+
+const base = resolveTheme('light');
+const theme: ThemeOption = {
+  type: 'light',
+  nodeStateStyles: {
+    ...base.nodeStateStyles,
+    selected: { ...base.nodeStateStyles?.selected, stroke: '#00A876' },
+  },
+};
+```
+
+</details>
+
+## resolveTheme
+
+```ts
+import { resolveTheme, type ThemeTokens } from '@antv/g6-lite';
+
+const tokens: ThemeTokens = resolveTheme({ type: 'dark', nodeSize: 32 });
+```
+
+Accepts ThemeOption and returns `ThemeTokens`. Fields remain optional in the public type; account for undefined when reading them. The function creates a top-level object and copies the palette array; state maps and nested objects are not deeply cloned. Treat results as read-only and construct new state objects using spreads, rather than mutating shared objects.
+
+## Runtime updates
+
+`graph.updateOptions({ theme: nextTheme })` replaces the entire previous theme option and refreshes styles. It does not accumulate previous custom tokens, rerun layout, or call fitView.
+
+Switching from `{ type: 'light', nodeSize: 36 }` to `'dark'` restores default node size 24; explicit node.style.size still wins. Construct a complete nextTheme to retain brand tokens. The application must synchronize label colors, page backgrounds, and system dark mode separately.
+
+Continue with [Themes](/en/docs/guides/theme), [Graph.updateOptions](/en/docs/api/graph), or [Default themes and states](/en/docs/examples/default-theme).

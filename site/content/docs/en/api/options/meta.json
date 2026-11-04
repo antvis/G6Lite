@@ -1,0 +1,6 @@
+{
+  "title": "Options",
+  "pagesIndex": "../options.mdx",
+  "defaultOpen": true,
+  "pages": ["node"]
+}

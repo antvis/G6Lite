@@ -1,9 +1,9 @@
 ---
 title: Node configuration reference
-description: NodeConfig options, body styles, callback signatures, and state overrides
+description: NodeConfig body, label, icon, callback, and state configuration
 ---
 
-`GraphOptions.node` has type `NodeConfig`. This page details top-level options, body appearance, and states; existing label, icon, and decoration documentation is linked below. See the [node guide](/en/docs/guides/node) for configuration steps and effects.
+`GraphOptions.node` has type `NodeConfig`. This page details top-level options, body appearance, labels, icons, and states; existing decoration documentation is linked below. See the [node guide](/en/docs/guides/node) for configuration steps and effects.
 
 ```ts
 import type { NodeConfig } from '@antv/g6-lite';
@@ -78,6 +78,75 @@ Per-field body-style precedence is: node `style` object → extension `getStyle(
 
 Whole-object functions, `style: (node) => ({ ... })`, currently use a different body-style resolution branch. Missing `size`, `width`, and `height` fall back to `40`, `100`, and `40`, and that branch does not apply `stateStyles`. Prefer per-field callbacks when relying on theme dimensions or state appearance. This is a current implementation limitation; the two forms are not fully equivalent.
 
+## Labels
+
+These fields belong in `node.style`. Each accepts a constant or `NodeStyleValue<T>` callback.
+
+| Field | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `label` | `NodeStyleValue<string \| false>` | Not drawn | Text; `false`, an empty string, or omission draws no label |
+| `labelFontSize` | `NodeStyleValue<number>` | `12` | Base CSS-pixel font size, converted for DPR and label zoom |
+| `labelFontFamily` | `NodeStyleValue<string>` | System sans-serif stack | Canvas font family |
+| `labelFontWeight` | `NodeStyleValue<string>` | `'normal'` | Canvas font weight, such as `'600'` |
+| `labelColor` | `NodeStyleValue<string>` | `'#333'` | Text color; does not automatically become white for the dark theme |
+| `labelPlacement` | `NodeStyleValue<LabelPlacement>` | `'bottom'` | `'center'`, `'top'`, `'bottom'`, `'left'`, or `'right'` |
+| `labelOffsetX` | `NodeStyleValue<number>` | `0` | Base CSS-pixel horizontal offset; positive moves right |
+| `labelOffsetY` | `NodeStyleValue<number>` | `0` | Base CSS-pixel vertical offset; positive moves down |
+| `labelBackground` | `NodeStyleValue<string \| false>` | `false` | Background color; `false` disables it |
+| `labelBackgroundPadding` | `NodeStyleValue<number>` | `2` | Base CSS-pixel padding on each side of the background |
+| `labelMaxWidth` | `NodeStyleValue<number>` | `0` | Default renderer's text width limit; positive values truncate with `...`, nonpositive values leave width unlimited |
+
+The default font stack is `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`. Camera zoom affects default font size, offsets, and background dimensions, but label zoom is clamped rather than growing indefinitely with node geometry. Use top-level `label.scaleWithZoom: false` for fixed screen font size and offsets. Do not multiply values by DPR.
+
+Default label placement references `size`. For precise outline-relative placement on nonsquare rectangles, a custom Label Renderer uses the rendered width and height for its anchor. `autoExternalLabelPlacement` currently neither avoids decorations nor moves the label.
+
+Top-level `label` policies also apply: `hideOnLowZoom` defaults to `true`, with `nodeMinZoom: 0.3`; `hideOnCollision` defaults to `true` and hides text overlapping an earlier label's measured text box. Background padding does not expand the default text collision box. Disabling these policies does not reveal nodes with `label: false`.
+
+### labelRenderer
+
+Register with `register('label', name, renderer)` before setting `node.labelRenderer: name`. A custom renderer still needs nonempty `style.label` and follows node-label zoom and collision policies. `measure()` must return finite, positive width and height. Missing registration, invalid measurements, or measure/draw errors produce a warning and fall back to the default label.
+
+The supplied `style` is already converted to Canvas pixels, and `ctx` is translated to the label anchor. Do not apply DPR or node coordinates again. Custom renderers consume appearance fields such as `labelMaxWidth` themselves; the engine does not truncate their text. See [Custom Label Renderer](/en/docs/guides/custom-label-renderer) for full signatures.
+
+## Icons
+
+Icon fields also belong in `node.style` and accept constants or per-field callbacks.
+
+| Field | Type | Default | Applicability and units |
+| --- | --- | --- | --- |
+| `icon` | `NodeStyleValue<string \| false>` | Not drawn | Image URL or text according to `iconType`; empty strings and `false` draw nothing |
+| `iconType` | `NodeStyleValue<'image' \| 'text'>` | `'image'` | Image or text icon |
+| `iconWidth` | `NodeStyleValue<number>` | Resolved `size` × `0.6` | Image icons only; graph-space width |
+| `iconHeight` | `NodeStyleValue<number>` | Resolved `size` × `0.6` | Image icons only; graph-space height |
+| `iconFontFamily` | `NodeStyleValue<string>` | System sans-serif stack | Text icons only; load the font in the application |
+| `iconFontSize` | `NodeStyleValue<number>` | Resolved `size` × `0.6` | Text icons only; graph-space font size, skipped below 4 rendered Canvas pixels |
+| `iconColor` | `NodeStyleValue<string>` | `'#fff'` | Text icons only |
+| `iconOffsetX` | `NodeStyleValue<number>` | `0` | Graph-space offset; positive moves right |
+| `iconOffsetY` | `NodeStyleValue<number>` | `0` | Graph-space offset; positive moves down |
+
+Icon sizes and offsets follow camera zoom rather than the `label.scaleWithZoom` text policy. Icons do not participate in label collision hiding or `nodeMinZoom`; hidden nodes still skip drawing. Images load asynchronously and trigger a redraw when ready. Cross-origin images must permit anonymous CORS; failed URLs are not automatically retried by the instance.
+
+```ts
+import type { NodeConfig } from '@antv/g6-lite';
+
+const node: NodeConfig = {
+  style: {
+    size: 40,
+    label: (item) => String(item.data?.name ?? item.id),
+    labelPlacement: 'bottom',
+    labelMaxWidth: 120,
+    labelBackground: '#fff',
+    labelFontWeight: '600',
+    icon: 'G',
+    iconType: 'text',
+    iconFontSize: 20,
+    iconColor: '#fff',
+  },
+};
+```
+
+See the [label and icon guide](/en/docs/guides/label) and [label and icon example](/en/docs/examples/labels) for usage and effects.
+
 ## State styles
 
 `NodeStateStyleOverride` accepts these constants, not per-field callbacks:
@@ -102,7 +171,7 @@ Updates do not rerun layout. See [`updateOptions()`](/en/docs/api/graph#updateop
 
 ## Related references
 
-- [Label and icon configuration](/en/docs/api/options#node): existing field reference.
+- [GraphOptions node entry](/en/docs/api/options#node): existing overview and field entries.
 - [Label guide](/en/docs/guides/label): content, placement, and visibility.
 - [Custom Label Renderer](/en/docs/guides/custom-label-renderer): registration and drawing contract.
 - [Decoration usage](/en/docs/guides/extensions#decoration-visibility): badge visibility.

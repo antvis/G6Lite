@@ -22,6 +22,7 @@ const loaders = {
   'edge-orth': () => import('../../demos/polyline-routing.ts'),
   'edge-indented': () => import('../../demos/docs-edge-indented.ts'),
   'edge-labels': () => import('../../demos/docs-edge-labels.ts'),
+  'combo-data': () => import('../../demos/docs-combo-data.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -38,7 +39,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'edge-orth'
+  const hint = id === 'combo-data'
+    ? (zh ? '左侧嵌套与初始选中；右侧初始折叠，状态来自数据声明' : 'Nested and initially selected on the left; initially collapsed on the right. States come from data')
+    : id === 'edge-orth'
     ? (zh ? '拖动画布或滚轮缩放查看路由' : 'Pan or zoom to inspect routes')
     : id.startsWith('edge-')
     ? (zh ? '点击边查看选中样式' : 'Click an edge to inspect its selected style')
@@ -64,8 +67,7 @@ export function NodeDocPreview({ id, locale, children }: {
         }
         graph = result;
         graphRef.current = result;
-        const canvas = mount.querySelector('canvas');
-        if (canvas) canvas.dataset.previewLayer = 'graph';
+        result.getCanvas().dataset.previewLayer = 'graph';
         setStatus('ready');
       } catch {
         if (!disposed) setStatus('error');

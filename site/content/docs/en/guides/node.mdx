@@ -120,16 +120,37 @@ These calls operate on the Graph instance held by your business code. Reset exam
 
 ## Common questions
 
-| Symptom | Check and action |
-| --- | --- |
-| Width and height do not change a circle | Set `type: 'rect'` for rectangles. Built-in circles use `size` instead of rectangle dimensions |
-| Clicking does not apply state appearance | Enable a selection behavior or call a state API. Replace a whole-object style function with per-field callbacks when you need state appearance |
-| Labels are missing or disappear when zooming out | Check for nonempty `style.label`, then check top-level label zoom and collision policies; see the [label guide](/en/docs/guides/label#global-label-policies) |
-| An icon is missing | Use `iconType: 'text'` for text or `'image'` for URLs, and check URL, cross-origin access, and loading results |
-| A custom type or renderer has no effect | Register before creating or updating configuration. Custom labels also need nonempty `style.label` |
-| Fewer items appear than `maxVisible` | A folded stack reserves an overflow slot. Supply `overflowData` to show it, and use `overflow: 'hover-expand'` for expansion |
-| Automatic external labels do not move | `autoExternalLabelPlacement` is not implemented; set `labelPlacement` explicitly |
-| Other states or badges disappear after an update | `stateStyles` and `decorations` are replaced as whole collections; submit everything you want to retain |
+**Width and height do not change a circle**
+
+Set `type: 'rect'` for rectangles. Built-in circles use `size` instead of rectangle dimensions.
+
+**Clicking does not apply state appearance**
+
+Enable a selection behavior or call a state API. Replace a whole-object style function with per-field callbacks when you need state appearance.
+
+**Labels are missing or disappear when zooming out**
+
+Check for nonempty `style.label`, then check top-level label zoom and collision policies; see the [label guide](/en/docs/guides/label#global-label-policies).
+
+**An icon is missing**
+
+Use `iconType: 'text'` for text or `'image'` for URLs, and check URL, cross-origin access, and loading results.
+
+**A custom type or renderer has no effect**
+
+Register before creating or updating configuration. Custom labels also need nonempty `style.label`.
+
+**Fewer items appear than `maxVisible`**
+
+A folded stack reserves an overflow slot. Supply `overflowData` to show it, and use `overflow: 'hover-expand'` for expansion.
+
+**Automatic external labels do not move**
+
+`autoExternalLabelPlacement` is not implemented; set `labelPlacement` explicitly.
+
+**Other states or badges disappear after an update**
+
+`stateStyles` and `decorations` are replaced as whole collections; submit everything you want to retain.
 
 ## Performance
 

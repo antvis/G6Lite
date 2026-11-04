@@ -120,16 +120,37 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 ## 常见问题
 
-| 现象 | 检查与处理 |
-| --- | --- |
-| 设置了宽高，节点仍是圆形 | 确认 `type: 'rect'`；内置圆形使用 `size`，不使用矩形宽高 |
-| 设置了状态样式，点击却没有变化 | 同时配置选择行为或调用状态 API；若 `style` 使用整对象函数，先改为逐字段回调以应用状态外观 |
-| 标签不显示，或缩小后消失 | 先检查 `style.label` 是否非空，再检查顶层 `label` 的低缩放和碰撞策略；见[标签指南](/docs/guides/label#全局标签策略) |
-| 图标未显示 | 文字指定 `iconType: 'text'`；图片指定 `'image'`，检查地址、跨域访问和加载结果 |
-| 指定了自定义类型或渲染器却不生效 | 先注册，再创建或更新配置；自定义标签还需非空 `style.label` |
-| 徽章比 `maxVisible` 少一项 | 折叠时会预留溢出位置；提供 `overflowData` 显示占位项，悬停展开还需 `overflow: 'hover-expand'` |
-| 自动外置标签没有移动 | `autoExternalLabelPlacement` 当前未实现；显式配置 `labelPlacement` |
-| 热更新后其他状态或徽章丢失 | `stateStyles` 和 `decorations` 整体替换；更新时提交希望保留的完整集合 |
+**设置了宽高，节点仍是圆形**
+
+确认 `type: 'rect'`；内置圆形使用 `size`，不使用矩形宽高。
+
+**设置了状态样式，点击却没有变化**
+
+同时配置选择行为或调用状态 API；若 `style` 使用整对象函数，先改为逐字段回调以应用状态外观。
+
+**标签不显示，或缩小后消失**
+
+先检查 `style.label` 是否非空，再检查顶层 `label` 的低缩放和碰撞策略；见[标签指南](/docs/guides/label#全局标签策略)。
+
+**图标未显示**
+
+文字指定 `iconType: 'text'`；图片指定 `'image'`，检查地址、跨域访问和加载结果。
+
+**指定了自定义类型或渲染器却不生效**
+
+先注册，再创建或更新配置；自定义标签还需非空 `style.label`。
+
+**徽章比 `maxVisible` 少一项**
+
+折叠时会预留溢出位置；提供 `overflowData` 显示占位项，悬停展开还需 `overflow: 'hover-expand'`。
+
+**自动外置标签没有移动**
+
+`autoExternalLabelPlacement` 当前未实现；显式配置 `labelPlacement`。
+
+**热更新后其他状态或徽章丢失**
+
+`stateStyles` 和 `decorations` 整体替换；更新时提交希望保留的完整集合。
 
 ## 性能建议
 

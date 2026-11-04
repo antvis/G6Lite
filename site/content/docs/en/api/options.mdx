@@ -141,17 +141,12 @@ Nesting, collapse, and runtime grouping remain experimental. Follow the [Combo g
 
 ## Label policy
 
-See the [label policy reference](/en/docs/api/options/label) for fields, thresholds, collision order, and an interactive preview. The existing lookup table remains below.
+`label` controls node/edge label sizing and visibility without choosing their text. Find fields and defaults in the [`LabelOptions` reference](/en/docs/api/options/label#labeloptions).
 
-`label` controls how the engine shows node and edge labels that already have text. It does not choose the text.
+- [Zoom thresholds](/en/docs/api/options/label#zoom-thresholds) and [collision order](/en/docs/api/options/label#collision-order): when labels appear and which ones remain.
+- [Scope](/en/docs/api/options/label#scope) and [runtime updates](/en/docs/api/options/label#runtime-updates): applicability, field merging, and updates.
 
-| Field | Default | Description |
-| --- | --- | --- |
-| `scaleWithZoom` | `true` | Whether node-label size follows camera zoom. Edge labels stay in screen space |
-| `hideOnLowZoom` | `true` | Hide labels below their zoom threshold |
-| `hideOnCollision` | `true` | Hide a label that overlaps an earlier one |
-| `nodeMinZoom` | `0.3` | Minimum zoom for node labels |
-| `edgeMinZoom` | `0.5` | Minimum zoom for edge labels |
+See [Labels and icons](/en/docs/guides/label#global-label-policies) for steps and an interactive preview.
 
 ## Layout
 

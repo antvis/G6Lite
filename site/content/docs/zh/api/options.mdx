@@ -141,17 +141,12 @@ const data: GraphData = {
 
 ## 标签策略
 
-完整字段、阈值规则、碰撞顺序与可切换预览见[标签策略参考](/docs/api/options/label)。下表保留原查询入口。
+`label` 控制节点与边标签的缩放和隐藏，不决定文本内容。完整字段与默认值统一见 [`LabelOptions` 参考](/docs/api/options/label#labeloptions)。
 
-`label` 控制引擎如何显示已经算好的节点和边标签，不决定文本内容。
+- [缩放阈值](/docs/api/options/label#缩放阈值)与[碰撞顺序](/docs/api/options/label#碰撞顺序)：何时显示、保留哪些标签。
+- [生效范围](/docs/api/options/label#生效范围)与[运行时更新](/docs/api/options/label#运行时更新)：适用对象、字段合并和更新方式。
 
-| 字段 | 默认 | 说明 |
-| --- | --- | --- |
-| `scaleWithZoom` | `true` | 节点标签尺寸是否跟随相机缩放。边标签保持屏幕尺寸 |
-| `hideOnLowZoom` | `true` | 缩放低于阈值时隐藏标签 |
-| `hideOnCollision` | `true` | 与更早的标签重叠时隐藏 |
-| `nodeMinZoom` | `0.3` | 节点标签的最小缩放 |
-| `edgeMinZoom` | `0.5` | 边标签的最小缩放 |
+操作步骤和可切换预览见[标签与图标指南](/docs/guides/label#全局标签策略)。
 
 ## 布局
 

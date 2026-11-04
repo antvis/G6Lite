@@ -194,7 +194,7 @@ The three rows show start, center, and end positions with label backgrounds. Cli
 
 The label layer samples cached edge paths for position and tangent, falling back to interpolation along the endpoint chord when no path is cached. Currently `cubic` and `polyline` labels use that chord for positioning and rotation, so they are not guaranteed to follow the rendered curve or route. `center` is not an equal-arc-length midpoint for every path.
 
-Edge font sizes and padding retain screen dimensions, independent of `label.scaleWithZoom`. Defaults `hideOnLowZoom: true`, `edgeMinZoom: 0.5`, and `hideOnCollision: true` can hide labels. A hidden edge or endpoint also suppresses its label. First check nonempty text, then [global label policies](/en/docs/api/options#label-policy), zoom, and collisions. Line `opacity` is not a label-visibility switch.
+Edge font sizes and padding retain screen dimensions, independent of `label.scaleWithZoom`. Defaults `hideOnLowZoom: true`, `edgeMinZoom: 0.5`, and `hideOnCollision: true` can hide labels. A hidden edge or endpoint also suppresses its label. First check nonempty text, then [global label policies](/en/docs/api/options/label#labeloptions), zoom, and collisions. Line `opacity` is not a label-visibility switch.
 
 Edge configuration does not provide node-only `labelMaxWidth`, `labelOffsetX/Y`, `labelFontWeight`, or icon fields; state styles do not override label fields either. For complex drawing, use a registered `edge.labelRenderer` and still supply nonempty `edge.style.label`. See [Custom Label Renderer](/en/docs/guides/custom-label-renderer) for registration and measure/draw contracts.
 

@@ -194,7 +194,7 @@ transform 写法为 `transforms: [{ type: 'process-parallel-edges', options: { o
 
 标签层使用已缓存的边路径采样位置与切线；没有路径缓存时沿端点连线插值。当前 `cubic`、`polyline` 的标签位置和旋转采用端点连线，不保证贴合实际弯曲或折线；也不能把 `center` 理解为所有路径的等弧长中点。
 
-边标签字号和内边距保持屏幕尺寸，不随 `label.scaleWithZoom` 缩放。默认 `hideOnLowZoom: true`、`edgeMinZoom: 0.5` 和 `hideOnCollision: true` 可能隐藏标签；边或任一端点处于 hidden 状态时也不绘制。排查时先确认文本非空，再检查全局[标签策略](/docs/api/options#标签策略)及缩放、碰撞。边线 `opacity` 不等同于标签的显隐开关。
+边标签字号和内边距保持屏幕尺寸，不随 `label.scaleWithZoom` 缩放。默认 `hideOnLowZoom: true`、`edgeMinZoom: 0.5` 和 `hideOnCollision: true` 可能隐藏标签；边或任一端点处于 hidden 状态时也不绘制。排查时先确认文本非空，再检查全局[标签策略](/docs/api/options/label#labeloptions)及缩放、碰撞。边线 `opacity` 不等同于标签的显隐开关。
 
 边配置不提供节点的 `labelMaxWidth`、`labelOffsetX/Y`、`labelFontWeight` 或图标字段，状态样式也不覆盖这些标签字段。复杂绘制使用已注册的 `edge.labelRenderer`，仍须提供非空 `edge.style.label`；注册和 measure/draw 协议见[自定义 Label Renderer](/docs/guides/custom-label-renderer)。
 

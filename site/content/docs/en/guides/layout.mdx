@@ -1,21 +1,74 @@
 ---
-title: Layout configuration
-description: Choose built-in layouts, configure workers, and rerun layout at runtime
+title: Choose and switch layouts
+description: Choose a network or tree layout, retain existing coordinates, and rearrange at runtime
 ---
 
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+Layout determines graph coordinates; fitView determines the camera's visible region. Choose an algorithm that matches the data, then tune spacing. All fields and defaults are in the [Layout configuration reference](/en/docs/api/options/layout).
+
+## Choose a layout
+
+| Data and goal | Start here |
+| --- | --- |
+| Server-generated or precomputed positions | Omit layout and use node x/y |
+| Regular or circular overview | grid / circular |
+| Directed layers for workflows or dependencies | dagre; adjust rankdir, nodesep, and ranksep |
+| Network exploration | force / d3-force; try force-atlas2 for larger networks and measure |
+| Single-root tree | mindmap / indented; fishbone for root→category→item structures |
+
+## Supported layout types
+
+Find names and options in [Supported layouts](/en/docs/api/options/layout#supported-layouts). Algorithms load automatically; do not assume additional upstream types are integrated.
+
+## Preview
+
+Switch four algorithms on the same data without recreating Graph. The selector shows ready when finished; reset restores grid.
+
+<LayoutDocExample id="layout-switch" locale="en" />
+
+## Tree example
+
+Trees also use flat nodes/edges, with source → target parent relationships. Combo and children fields do not define the tree. Prefer connected, acyclic data with a single root.
+
+<LayoutDocExample id="layout-tree" locale="en" />
+
+Layout does not inspect rendered node dimensions. See [tree options](/en/docs/api/options/layout#functional-tree-layouts) for supported getWidth/getHeight behavior; library algorithms need their own nodeSize or equivalent options to match drawn nodes.
+
+## Rerun layout at runtime
+
+For a graph that has completed render: setLayout replaces the entire configuration. Fit the graph after layout only when needed:
+
 ```ts
-layout: { type: 'force', linkDistance: 100, worker: true }
-```
-
-Use circular or grid for deterministic overviews, dagre for hierarchies, force and d3-force for networks, and mindmap, indented, or fishbone for tree-oriented presentation. If coordinates already exist, omit layout and use node `x` / `y`.
-
-Official layouts are loaded automatically by type. G6Lite keeps each algorithm behind an internal dynamic import, so no separate registration or enable call is required.
-
-Run another layout at runtime:
-
-```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR' });
+graph.setLayout({ type: 'dagre', rankdir: 'LR', nodesep: 32, ranksep: 64 });
 await graph.layout();
+graph.fitView({ padding: 48, maxZoom: 1 });
 ```
 
-Worker execution reduces main-thread blocking but does not make expensive layouts free. Control iterations and measure with real data.
+Omit the last line to retain the user's camera. To replace all data, use `await graph.setData(nextData, { fitView: false })`; this still runs the current layout. Updating individual nodes does not itself rerun layout; call layout when needed.
+
+Layout may change existing x/y. Graph's fx/fy override the corresponding final axes, without guaranteeing the algorithm treated them as fixed constraints.
+
+## Worker
+
+For expensive computation, set worker: true in layout configuration. Graph also attempts it when there are at least 1000 nodes and worker is omitted. Tree layouts and registered extensions still run on the main thread first. Prefer worker: false for function options. See [Worker rules](/en/docs/api/options/layout#worker).
+
+## Common questions
+
+### Why did configuration changes leave nodes in place?
+
+setLayout only stores configuration; follow it with await graph.layout(). updateOptions does not update layout. Call layout after the first render completes.
+
+### Why did the graph move outside the canvas?
+
+layout does not fit the camera automatically. Call fitView after completion when you want the entire graph visible. A graph-coordinate center is not camera fitting.
+
+### Why do tree nodes overlap at the origin or ignore spacing?
+
+Check roots, edge direction, and connectivity. mindmap uses levelGap/nodeGap, not hGap/vGap. fishbone's itemGap is currently ineffective.
+
+## Related
+
+- [Layout configuration reference](/en/docs/api/options/layout): fields, defaults, and algorithm boundaries.
+- [Graph layout methods](/en/docs/api/graph#layout): rerunning and cancellation.
+- [Layout gallery](/en/docs/examples/layout-gallery) · [Performance tuning](/en/docs/metrics/performance-tuning).

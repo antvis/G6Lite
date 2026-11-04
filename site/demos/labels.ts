@@ -28,6 +28,9 @@ const DATA = {
   ],
 };
 
+// Text icons use the first letter of each node's business type.
+const iconForNode = (node: GraphNode) => String(node.data?.type ?? '').slice(0, 1).toUpperCase();
+
 export async function run(container: string | HTMLElement) {
   const el = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
 
@@ -43,6 +46,10 @@ export async function run(container: string | HTMLElement) {
       style: {
         size: 20,
         fill: '#5B8FF9',
+        icon: iconForNode,
+        iconType: 'text',
+        iconFontSize: 12,
+        iconColor: '#fff',
         label: (n) => (n.data?.name as string | undefined) ?? n.id,
         labelPlacement: 'bottom',
         labelFontSize: 12,
@@ -61,7 +68,7 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const placements: LabelPlacement[] = ['bottom', 'center', 'top', 'right'];
+  const placements: LabelPlacement[] = ['bottom', 'center', 'top', 'left', 'right'];
   mountCanvasMenu(el, {
     caption: '标签',
     items: placements.map((placement) => ({ value: placement, label: placement })),
@@ -72,16 +79,23 @@ export async function run(container: string | HTMLElement) {
   });
 
   let edgeLabelsVisible = true;
+  let iconsVisible = true;
   mountCanvasMenu(el, {
     caption: '操作',
     action: true,
     items: [
       { value: 'edge-labels', label: '切换边标签' },
+      { value: 'icons', label: '切换节点图标' },
       { value: 'circular', label: 'circular' },
       { value: 'force', label: 'force' },
     ],
     value: '',
     onSelect(value) {
+      if (value === 'icons') {
+        iconsVisible = !iconsVisible;
+        graph.updateOptions({ node: { style: { icon: iconsVisible ? iconForNode : false } } });
+        return;
+      }
       if (value === 'edge-labels') {
         edgeLabelsVisible = !edgeLabelsVisible;
         graph.updateOptions({

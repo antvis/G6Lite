@@ -18,6 +18,8 @@ export async function run(container: string | HTMLElement) {
               { kind: 'count', value: 12 },
               { kind: 'warning' },
               { kind: 'text', text: '优先' },
+              { kind: 'lock' },
+              { kind: 'favorite' },
             ] satisfies NodeBadgeItem[],
           },
         },

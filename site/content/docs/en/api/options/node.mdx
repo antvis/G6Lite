@@ -267,6 +267,20 @@ Updates do not rerun layout. See [`updateOptions()`](/en/docs/api/graph#updateop
 
 ## Related references
 
+### Choose an example by effect
+
+| Configuration to verify | Runnable example | Action and expected result |
+| --- | --- | --- |
+| `type` and basic dimensions | [Node shapes](/en/docs/examples/shapes) | Compare circle and rectangle outlines and dimensions |
+| Per-field style callbacks | [Data-driven node styles](/en/docs/examples/node-style) | Compare cluster colors and hub size; hover for relationship highlighting |
+| State overrides | [Default theme and states](/en/docs/examples/default-theme) | Compare theme and built-in state appearances |
+| `label*`, `icon*`, and runtime updates | [Label placement and icons](/en/docs/examples/labels) | Change placement, toggle icons and edge labels, and observe each independently |
+| Global label visibility policies | [Label rendering policy](/en/docs/examples/label-rendering-options) | Switch policies and zoom to compare text visibility; these policies differ from icon options |
+| `labelRenderer` | [Custom label rendering](/en/docs/examples/custom-label-renderer) | Compare custom content with plain text; inspect registration and configuration in the source |
+| `decorations` | [Node badges](/en/docs/examples/decoration-badges) | Hover the overflow marker to expand 5 badges and leave to fold; change `maxVisible` to compare |
+
+### Guides and protocols
+
 - [GraphOptions node entry](/en/docs/api/options#node): existing overview and field entries.
 - [Label guide](/en/docs/guides/label): content, placement, and visibility.
 - [Custom Label Renderer](/en/docs/guides/custom-label-renderer): registration and drawing contract.

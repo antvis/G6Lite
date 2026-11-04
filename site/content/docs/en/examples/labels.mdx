@@ -7,3 +7,13 @@ full: true
 import { ExampleDetail } from '@/components/example-detail';
 
 <ExampleDetail id="labels" locale="en" />
+
+## Steps and expected results
+
+1. White letters at node centers are `iconType: 'text'` icons derived from each business `type`. Node names start below the nodes; edge labels show protocol names.
+2. In the 标签 (label) menu at the top right of the canvas, choose `top`, `left`, or `right`. Names move to that side while icons remain centered. Choosing `center` may overlap labels and icons because they share the center.
+3. In 操作 (actions), choose 切换节点图标 (toggle node icons). Letters disappear while names remain; choose it again to restore them. 切换边标签 (toggle edge labels) affects protocol names only.
+
+The menus call `graph.updateOptions()` without rebuilding the Graph. Icons, node labels, and edge labels are configured separately. Layout actions let you compare labels across layouts.
+
+See the [label and icon guide](/en/docs/guides/label), [node label fields](/en/docs/api/options/node#labels), and [icon fields](/en/docs/api/options/node#icons). For global scaling and collision behavior, try [label rendering policy](/en/docs/examples/label-rendering-options).

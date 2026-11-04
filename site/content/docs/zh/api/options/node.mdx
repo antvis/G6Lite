@@ -267,6 +267,20 @@ const node: NodeConfig = {
 
 ## 相关参考
 
+### 按效果选择示例
+
+| 要验证的配置 | 可运行示例 | 操作与预期 |
+| --- | --- | --- |
+| `type` 与基础尺寸 | [图形类型](/docs/examples/shapes) | 对比圆形和矩形的轮廓、宽高 |
+| 逐字段样式函数 | [节点数据映射样式](/docs/examples/node-style) | 对比不同分组颜色和中心节点尺寸，悬停查看关联高亮 |
+| 状态覆盖 | [默认主题与状态](/docs/examples/default-theme) | 对比主题与内置状态的外观 |
+| `label*`、`icon*` 与热更新 | [标签位置与图标](/docs/examples/labels) | 切换位置、节点图标和边标签，观察它们各自变化 |
+| 全局标签显示策略 | [标签渲染策略](/docs/examples/label-rendering-options) | 切换策略并缩放，对比文字显示；这些策略不等同于图标配置 |
+| `labelRenderer` | [自定义标签渲染](/docs/examples/custom-label-renderer) | 对比自定义内容与普通文字；注册与配置过程见源码 |
+| `decorations` | [节点徽章](/docs/examples/decoration-badges) | 悬停溢出入口展开 5 项徽章，移出后折叠；修改 `maxVisible` 比较结果 |
+
+### 指南与协议
+
 - [GraphOptions 中的节点入口](/docs/api/options#节点)：保留原有概览与字段说明。
 - [标签使用指南](/docs/guides/label)：内容、位置与显示策略。
 - [自定义 Label Renderer](/docs/guides/custom-label-renderer)：注册和绘制协议。

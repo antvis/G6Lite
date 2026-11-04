@@ -7,3 +7,13 @@ full: true
 import { ExampleDetail } from '@/components/example-detail';
 
 <ExampleDetail id="labels" locale="zh" />
+
+## 操作与预期
+
+1. 节点中央的白色字母是 `iconType: 'text'` 图标，来自业务 `type` 的首字母；节点名称默认显示在下方，边上显示协议名称。
+2. 在画布右上角“标签”菜单依次选择 `top`、`left`、`right`，节点名称应移到对应方向，中央图标保持原位。`center` 会让文字与图标共享中心位置，可能重叠。
+3. 在“操作”菜单选择“切换节点图标”，字母隐藏而节点名称保留；再次选择后恢复。选择“切换边标签”只影响边上的协议名称。
+
+菜单通过 `graph.updateOptions()` 更新样式，无需重建 Graph；图标、节点标签与边标签分别配置。操作菜单中的布局选项用于比较不同布局下的标签效果。
+
+用法见[标签与图标指南](/docs/guides/label)；字段见[节点标签](/docs/api/options/node#标签)与[节点图标](/docs/api/options/node#图标)，整体缩放与碰撞另见[标签渲染策略示例](/docs/examples/label-rendering-options)。

@@ -1,0 +1,28 @@
+site/demos/docs-behavior-custom.ts
+  s_4534bc5c3d78f4::t_12c2e8b7a96cb1 1-78
+site/src/lib/node-doc-example-source.ts
+  s_4534bc5c3d78f4::t_12c2e8b7a96cb1 33
+  s_4534bc5c3d78f4::t_7a31edf3bff2c1 4
+site/content/docs/zh/guides/custom-behavior.mdx
+  s_4534bc5c3d78f4::t_8304381f963384 3,6,8,12,16,20,22,26,28,32,35,38,41,46,50,52,56-66,68,70
+site/content/docs/en/guides/custom-behavior.mdx
+  s_4534bc5c3d78f4::t_459cb894c1373a 3,6,8,10,12,16,20,22,26,28,32,35,38,41,46,50,52,56-66,68,70
+site/src/components/node-doc-preview.tsx
+  s_4534bc5c3d78f4::t_12c2e8b7a96cb1 39,56-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "86e33cdcb68c0970a33b12a95d308219f5905935",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

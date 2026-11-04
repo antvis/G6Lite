@@ -1,53 +1,152 @@
 ---
 title: Edges
-description: Configure line, arc, curve, polyline, arrows, labels, and state styles
+description: Choose edge types and configure appearance, labels, interactions, parallel edges, and routing
 ---
 
-```ts
-edge: {
-  type: 'line',
-  style: {
-    stroke: '#91a3b0',
-    lineWidth: 2,
-    endArrow: true,
-  },
-  stateStyles: {
-    highlight: { stroke: '#1677ff', lineWidth: 3 },
-    inactive: { opacity: 0.2 },
-  },
-}
-```
+import { NodeDocExample as EdgeDocExample } from '@/components/node-doc-example';
 
-Use line, arc, cubic, or polyline edges according to the topology. Enable `process-parallel-edges` when multiple edges share endpoints. See [parallel edges](/en/docs/guides/parallel-edges).
+This guide follows a usage workflow. Look up types, defaults, and constraints in the [edge reference](/en/docs/api/options/edge); see [GraphEdge](/en/docs/api/options#edge-graphedge) for source, target, IDs, and business data.
 
-## Parallel-edge spacing
+- Draw the first relationship with [Basic configuration](#basic-configuration), then [choose a type](#types).
+- Separate overlapping relationships with [Parallel-edge spacing](#parallel-edge-spacing); connect hierarchical data with [Polyline routing](#polyline-routing).
+- Improve selection and text readability with [hit areas](#thin-edge-hit-areas), [labels](#edge-labels), and [Common questions](#common-questions).
 
-Put the transform parameters inside `options`:
+## Basic configuration
 
-```ts
-transforms: [
-  {
-    type: 'process-parallel-edges',
-    options: { offset: 18 },
-  },
-];
-```
+Prepare both endpoint nodes first. Edge source and target must reference existing node IDs. Then configure edge.type and edge.style. Provide stable IDs for edges you need to update, select, or delete.
 
-`offset` is the offset step in graph coordinates and defaults to `20`. See [parallel and self-loop edges](/en/docs/guides/parallel-edges) for the alternative `edge.parallelEdges` configuration and self-loop behavior.
+This complete example maps three data rows to thin solid, dashed, and bidirectional edges. Click an edge to activate its purple selected state; reset restores it. The code and preview use the same source.
+
+<EdgeDocExample id="edge-style" locale="en" />
+
+## Types
+
+Choose a graph-wide edge type according to the topology, then decide whether automatic separation or routing is needed.
+
+| Scenario | Type | Next step |
+| --- | --- | --- |
+| Ordinary relationship | Default `line` | Set color, width, and direction first |
+| Multiple relationships between endpoints or manual bends | `arc` | Enable parallelEdges, or set curvature with separation disabled |
+| Smooth left/right hierarchy connections | `cubic` | Adjust horizontal handles with curveOffset; automatic parallel offsets do not apply |
+| Processes, directory trees, or fishbones | `polyline` | Match layout direction and router; routing does not position nodes |
+
+See the runnable [curvature and handle comparisons](/en/docs/api/options/edge#arcs-and-cubic-curves). Register custom edge extensions before use; the base type determines the path. Falling back to a line does not prove that registration succeeded.
+
+## Style fields
+
+Put business attributes in edge.data and map individual fields to appearance: risk to color, weight to width, relationship category to text. Callbacks receive `(source, target, edge) => value`. The first two arguments are nodes; the third is the edge, as shown in the basic example.
+
+Configure appearance in this order:
+
+1. Distinguish categories and weights with stroke and lineWidth; reduce opacity for secondary relationships.
+2. Keep endArrow for direction; add startArrow for both directions. Explicitly disable the preset target arrow for undirected data.
+3. For dashes, supply two period values and a width above 1. The current renderer does not implement arbitrary Canvas dash sequences.
+4. Match geometry fields to the type: curvature does not bend line edges, and router does not affect arc edges.
+
+See [Basic styles](/en/docs/api/options/edge#basic-styles), [Arrows](/en/docs/api/options/edge#arrows), and [Style callbacks](/en/docs/api/options/edge#style-callbacks) for exact rules. Use a style field object, with functions on supported fields.
 
 ## Thin-edge hit areas
 
-Use `hitAreaWidth` to make a thin edge easier to interact with without changing its visual width:
+Keep the visual density of thin lines and enlarge hitAreaWidth, then install click-select, tooltip, or the behavior you need. A wider hit area alone does not install interactions.
+
+Both lines below have visual width 1.5; their hit widths are 2 and 24. Click near each line to compare. Selection changes color while keeping the same thin width; the hit area is invisible.
+
+<EdgeDocExample id="edge-hit-area" locale="en" />
+
+Hit width is a total screen-space width: 24 gives roughly 12 on either side. Do not manually multiply by zoom or DPR. See [Picking width](/en/docs/api/options/edge#picking-width) for validation and applicable paths.
+
+## State styles
+
+Declare selected, highlight, or inactive effects in edge.stateStyles, then activate them through behaviors or state APIs. The basic example installs click-select and a selected style; declaring stateStyles alone does not trigger selection.
+
+After the application's first render, control a state by ID:
 
 ```ts
-edge: {
-  style: {
-    lineWidth: 1.5,
-    hitAreaWidth: 16,
-  },
-}
+graph.setItemState('Plain', 'selected', true);
+graph.setItemState('Plain', 'selected', false);
 ```
 
-`hitAreaWidth` is the total picking width, so `16` gives roughly `8` pixels on each side of the path. It applies consistently to lines, parallel or arc edges, polylines, cubic curves, self-loops, and arrowheads. Hover, click selection, tooltips, and edge dragging all use the shared picking result.
+Plain is an edge ID from the basic example. A configured state object replaces that theme state's object; multiple states also depend on application order. See [State styles](/en/docs/api/options/edge#state-styles). State fields do not switch edge types or label colors.
 
-When omitted, it inherits the final `lineWidth`. Values below the visual width, negative values, and non-finite values fall back to the visual width. It uses the same screen-rendering pixel semantics as `lineWidth`; do not multiply it by zoom, DPR, or the picking framebuffer scale. Dashed gaps remain interactive.
+## Parallel-edge spacing
+
+Confirm that several relationships share the same endpoints, then set `parallelEdges: true` or explicitly use `{ enabled: true, offset: 60 }`. Choose arc or default line; cubic and polyline do not consume automatic parallel offsets.
+
+The preview shows three same-direction edges, two reverse edges, and two self-loops. Orange marks the reverse relationship. Data order participates in offset allocation; regrouping after adding or removing edges is expected.
+
+<EdgeDocExample id="edge-parallel" locale="en" />
+
+Existing applications can keep `transforms: [{ type: 'process-parallel-edges', options: { offset: 18 } }]`. Usually choose one entry; if both exist, check [precedence](/en/docs/api/options/edge#entries-and-precedence). distance is not an option. offset moves control points in graph coordinates, not paths by a fixed screen-space distance.
+
+Self-loops only require matching source and target. They do not depend on separation, and offset does not resize them. See the [parallel and self-loop guide](/en/docs/guides/parallel-edges).
+
+## Polyline routing
+
+Let layout determine positions and direction before choosing edge.type: 'polyline' and a router. Start with orth for process graphs; choose indented for directories and explicitly set layout.direction. Tree currently makes smooth tree connections, while fishbone pairs with fishbone layout.
+
+Dagre below positions nodes left to right, orth connects their boundaries, and radius rounds corners. Pan, zoom, or reset the preview. Endpoint routing does not guarantee avoidance of every other node.
+
+<EdgeDocExample id="edge-orth" locale="en" />
+
+The [indented reference](/en/docs/api/options/edge#indented-targets-and-trunks) provides a rectangle directory tree with matching code and effect. Prefer indentTarget: 'left' for ordinary rectangles; 'right' follows a background-free text coordinate convention. trunkGap currently has no effect; adjust layout spacing instead. Changing router or direction requires recreation; see [routing constraints](/en/docs/api/options/edge#curves-and-polyline-routing).
+
+## Edge labels
+
+First return nonempty text from label, then configure placement, font size, and background. Label color is independent of line color. The three rows show start, center, and end with matching runnable code.
+
+<EdgeDocExample id="edge-labels" locale="en" />
+
+Collision and low-zoom hiding are disabled for this comparison. Applications can retain defaults and show only important relationships to reduce clutter. Edge labels keep screen dimensions. Current cubic and polyline labels use the endpoint chord and may not follow the rendered path. See [Edge labels](/en/docs/api/options/edge#edge-labels) for fields, visibility rules, and custom renderers.
+
+## Runtime updates
+
+Choose an API by the change you need. These calls apply to an application instance after its first render; they are not controls for this page's previews.
+
+| Change | Operation |
+| --- | --- |
+| One edge's business attributes | `graph.updateEdgeData('Plain', { risk: 'high' })`; a style callback must read that attribute for a visual change |
+| Reconnect endpoints | `graph.updateEdgeData([{ id: 'Plain', source: 'a', target: 'b' }])`; both nodes must exist |
+| Graph-wide edge appearance | `graph.updateOptions({ edge: { style: { lineWidth: 2 } } })` |
+| Separation options | `graph.updateOptions({ edge: { parallelEdges: { enabled: true, offset: 30 } } })`; submit the full object you want to retain |
+| Temporary selection or hiding | Use state and visibility APIs instead of replacing all data |
+| Routing mode or layout direction | Destroy and recreate with the new configuration; style updates do not update the routing mode and direction captured at creation |
+
+See [Edge mutations](/en/docs/api/graph#edges) and [Configuration updates](/en/docs/api/graph#updateoptions). Batch frequent data updates and keep edge IDs stable.
+
+## Common questions
+
+### Why do parallel edges still overlap?
+
+Check enabled: true for the object entry and choose default line or arc. Check whether maxOffset clamps several paths together, and whether includeReverse separates the directions into different groups. Two single reverse edges may overlap when grouped separately.
+
+### Why does offset not resize self-loops?
+
+Loops do not join parallel groups. Their current size and levels are internal to the loop renderer; parallelEdges spacing does not control them.
+
+### Why is a thin line still difficult to select?
+
+Enlarge hitAreaWidth and install the interaction behavior. It is a total width, not a radius, and never shrinks below visual width. Compare the 2/24 preview above.
+
+### Why is a label missing?
+
+Check nonempty label text, zoom thresholds, collisions, and hidden states on the edge and endpoints. Storing text in data alone does not draw it. Temporarily disable hiding policies when diagnosing.
+
+### Why do router or trunkGap changes do nothing?
+
+Router is captured at creation and currently needs a recreated instance to change. trunkGap is typed but unused. The current layout and route determine trunk placement and spacing.
+
+### Why does an edge cross another node?
+
+Orth only computes from its two endpoints and does not implement graph-wide obstacle avoidance. Adjust node spacing and layout before selecting the path; corner radius is not an avoidance option.
+
+### Why does a configured state not activate?
+
+State styles describe effects. A behavior or setItemState must activate them. Check the edge ID and configured state fields.
+
+## Related
+
+- [Edge reference](/en/docs/api/options/edge): fields, defaults, limits, and runnable comparisons.
+- [Data model](/en/docs/concepts/data-model): edge identity, endpoints, and business attributes.
+- [Interactions](/en/docs/guides/interactions): behavior combinations and selection.
+- [Labels and icons](/en/docs/guides/label): label usage across nodes and edges.
+- [Examples](/en/docs/examples): more scenarios and runnable cases.

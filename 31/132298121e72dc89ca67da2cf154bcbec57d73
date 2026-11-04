@@ -1,0 +1,27 @@
+site/content/docs/en/api/options/edge.mdx
+  s_4534bc5c3d78f4::t_eb54eb7ae1aca5 3,8,204
+site/content/docs/en/api/options.mdx
+  s_4534bc5c3d78f4::t_eb54eb7ae1aca5 32
+  s_4534bc5c3d78f4::t_0f803dee7d5f1b 129,131-136,138
+site/content/docs/zh/api/options/edge.mdx
+  s_4534bc5c3d78f4::t_eb54eb7ae1aca5 3,8,204
+site/content/docs/zh/api/options.mdx
+  s_4534bc5c3d78f4::t_eb54eb7ae1aca5 32
+  s_4534bc5c3d78f4::t_0f803dee7d5f1b 129,131-136,138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "31132298121e72dc89ca67da2cf154bcbec57d73",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

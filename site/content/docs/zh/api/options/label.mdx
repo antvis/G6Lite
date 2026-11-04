@@ -1,0 +1,84 @@
+---
+title: 标签策略参考
+description: LabelOptions 的默认值、缩放阈值、碰撞顺序、生效范围与运行时更新
+---
+
+import { NodeDocExample as LabelDocExample } from '@/components/node-doc-example';
+
+入口：`GraphOptions.label?: LabelOptions`。控制节点、边标签的显示；文本和外观分别配置在 [node.style](/docs/api/options/node#标签) 和 [edge.style](/docs/api/options/edge#边标签)。使用步骤见[标签与图标指南](/docs/guides/label)。
+
+## LabelOptions
+
+以下字段均可省略，使用固定值，不支持回调。
+
+| 字段 | 类型 | 默认值 | 规则 |
+| --- | --- | --- | --- |
+| `scaleWithZoom` | `boolean` | `true` | 节点标签尺寸随相机 zoom 变化；false 保持屏幕尺寸。边标签始终保持屏幕尺寸 |
+| `hideOnLowZoom` | `boolean` | `true` | 启用下方两个最小 zoom 阈值；false 同时绕过两者 |
+| `hideOnCollision` | `boolean` | `true` | 隐藏与先绘制标签重叠的标签；节点与边共用碰撞层 |
+| `nodeMinZoom` | `number` | `0.3` | 节点标签最小相机 zoom；达到阈值即通过检查 |
+| `edgeMinZoom` | `number` | `0.5` | 边标签最小相机 zoom；达到阈值即通过检查 |
+
+阈值接受有限非负数，`0` 有效；负数、NaN、Infinity 回退到各自默认值。zoom 是相机缩放值，无像素单位，不需要乘 DPR。
+
+## 代码与对应效果
+
+示例初始 zoom 为 0.4，并显式关闭 scaleWithZoom，保持文字可读。节点标签通过阈值，Request 边标签低于 0.5 而隐藏；两条相邻节点标签因碰撞仅保留先绘制的一条。
+
+- 关闭 hideOnCollision：查看相邻标签重叠。
+- 关闭 hideOnLowZoom：在当前缩放下显示边标签。
+- 开启 scaleWithZoom，再放大或缩小：比较节点与边的字号变化。
+
+<LabelDocExample id="label-policy" locale="zh" />
+
+## 缩放阈值
+
+默认开启低缩放隐藏时，通过阈值检查的标签如下；最终还须通过内容、显隐与碰撞检查。
+
+| 相机 zoom | 节点标签 | 边标签 |
+| --- | --- | --- |
+| 小于 0.3 | 隐藏 | 隐藏 |
+| 0.3 至小于 0.5 | 进入绘制候选 | 隐藏 |
+| 大于等于 0.5 | 进入绘制候选 | 进入绘制候选 |
+
+仅需让一种标签始终通过阈值时，将其 MinZoom 设为 0。关闭 hideOnLowZoom 不会关闭碰撞隐藏。
+
+## 碰撞顺序
+
+每帧先处理节点标签，再处理边标签；各自按渲染数据顺序处理。先绘制的标签占用空间，后续重叠标签被隐藏。每帧重新计算，缩放或数据顺序变化可能改变保留结果；selected、highlight 不自动获得优先级。
+
+<details>
+<summary>碰撞范围与自定义渲染器</summary>
+
+内置标签按未旋转的文字矩形检测，不额外包含背景内边距；自定义 labelRenderer 使用 measure 返回的宽高。该策略隐藏重叠标签，不负责移动标签或避让节点主体。
+
+自定义节点、边 labelRenderer 也经过低缩放与碰撞检查；尺寸策略作用于引擎提供的 style。若渲染器自行根据 zoom 绘制尺寸，需自行保持一致。节点标签缩放有内部限幅，极端 zoom 下并非无限线性变化。
+
+</details>
+
+## 生效范围
+
+- 标签须有非空文本；`label: false` 或空串不绘制。业务 data 本身不会生成标签。
+- 节点图标、decorations 徽章和 Combo 标签使用各自规则，不受这 5 个字段控制。
+- hidden 元素、隐藏端点关联的边标签和视口裁剪仍会影响显示；关闭两种隐藏策略不保证所有文本都可见。
+
+内容、位置和字号的完整定义见[节点标签](/docs/api/options/node#标签)、[边标签](/docs/api/options/edge#边标签)；Combo 的规则见[分组标签](/docs/api/options/combo#留白包围框与标签)。
+
+## 运行时更新
+
+首次 `await graph.render()` 后可逐字段更新；未传的字段保留当前值：
+
+```ts
+graph.updateOptions({ label: { hideOnCollision: false } });
+graph.updateOptions({ label: { nodeMinZoom: 0.6 } });
+```
+
+两次调用会同时保留这两项修改。`label: {}` 不重置策略；显式传入某字段的 undefined 会恢复其内置默认值。
+
+更新会重新处理样式和已配置的转换，不重跑布局或自动适配视口。方法签名见 [updateOptions](/docs/api/graph#updateoptions)。
+
+## 相关入口
+
+- [标签与图标指南](/docs/guides/label)：内容和外观配置。
+- [自定义 Label Renderer](/docs/guides/custom-label-renderer)：测量与绘制契约。
+- [标签策略完整示例](/docs/examples/label-rendering-options)：更多缩放对照。

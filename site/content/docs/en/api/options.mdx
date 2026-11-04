@@ -31,7 +31,7 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 | `node` | [`NodeConfig`](/en/docs/api/options/node#nodeconfig) | Node shapes, appearance, states, labels, icons, and decorations; see the node reference for full definitions |
 | `edge` | [`EdgeConfig`](/en/docs/api/options/edge#edgeconfig) | Edge type, appearance, arrows, labels, states, routing, and parallel edges; see the edge reference for full definitions |
 | `combo` | [`ComboConfig`](/en/docs/api/options/combo) | Group appearance, labels, collapsed shapes, and state styles; nesting and collapse remain experimental |
-| `label` | `LabelOptions` | Zoom and collision policy shared by node and edge labels |
+| `label` | [`LabelOptions`](/en/docs/api/options/label#labeloptions) | Zoom and collision policy shared by node and edge labels |
 | `layout` | `LayoutConfig` | Layout type and algorithm parameters |
 | `behaviors` | `BehaviorOption[]` | Interaction list. Omitted means wheel zoom and drag pan |
 | `transforms` | `TransformOption[]` | Data transforms before drawing, such as parallel edges |
@@ -140,6 +140,8 @@ Follow the [edge guide](/en/docs/guides/edge) to build an effect. Edge `source`,
 Nesting, collapse, and runtime grouping remain experimental. Follow the [Combo guide](/en/docs/guides/combo) for workflows; see [runtime updates](/en/docs/api/options/combo#runtime-updates) for style-update limitations.
 
 ## Label policy
+
+See the [label policy reference](/en/docs/api/options/label) for fields, thresholds, collision order, and an interactive preview. The existing lookup table remains below.
 
 `label` controls how the engine shows node and edge labels that already have text. It does not choose the text.
 

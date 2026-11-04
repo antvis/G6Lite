@@ -31,7 +31,7 @@ const graph = new Graph({
 | `node` | [`NodeConfig`](/docs/api/options/node#nodeconfig) | 节点形状、样式、状态、标签、图标和装饰；完整定义见节点配置参考 |
 | `edge` | [`EdgeConfig`](/docs/api/options/edge#edgeconfig) | 边类型、外观、箭头、标签、状态、路由和平行边；完整定义见边配置参考 |
 | `combo` | [`ComboConfig`](/docs/api/options/combo) | 分组外观、标签、折叠形态与状态样式；嵌套和折叠仍是实验性能力 |
-| `label` | `LabelOptions` | 节点和边标签共用的缩放、碰撞策略 |
+| `label` | [`LabelOptions`](/docs/api/options/label#labeloptions) | 节点和边标签共用的缩放、碰撞策略 |
 | `layout` | `LayoutConfig` | 布局类型和算法参数 |
 | `behaviors` | `BehaviorOption[]` | 交互列表。省略时启用滚轮缩放和拖拽平移 |
 | `transforms` | `TransformOption[]` | 绘制前的数据转换，例如平行边 |
@@ -140,6 +140,8 @@ const data: GraphData = {
 嵌套、折叠和动态归组属于实验性能力。操作步骤见 [Combo 使用指南](/docs/guides/combo)，样式更新限制见[运行时修改边界](/docs/api/options/combo#运行时修改边界)。
 
 ## 标签策略
+
+完整字段、阈值规则、碰撞顺序与可切换预览见[标签策略参考](/docs/api/options/label)。下表保留原查询入口。
 
 `label` 控制引擎如何显示已经算好的节点和边标签，不决定文本内容。
 

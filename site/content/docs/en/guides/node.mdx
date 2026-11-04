@@ -3,6 +3,8 @@ title: Nodes
 description: Configure node types, functional styles, labels, and state styles
 ---
 
+import { NodeDocExample } from '@/components/node-doc-example';
+
 Nodes support built-in circle and rectangle rendering plus registered extensions.
 
 ```ts
@@ -36,3 +38,27 @@ These options belong directly under `node`, alongside `style`:
 Set `node.style.labelPlacement` explicitly, for example to `'bottom'`, when positioning labels. See [decoration visibility](/en/docs/guides/extensions#decoration-visibility) for decoration usage and [node configuration](/en/docs/api/options#node) for the configuration structure.
 
 Use state APIs for runtime selection and highlighting. Prefer static or precomputed fields for large graphs; keep functional style callbacks inexpensive.
+
+## Data mapping and selected styles
+
+The complete code below runs this preview directly. Values 16, 28, and 40 in `data.value` become node diameters; the `core` group is blue and the other group is green. Click a node to apply the configured `selected` stroke and halo while retaining its base size and group color.
+
+<NodeDocExample id="style" locale="en" />
+
+See the [node reference](/en/docs/api/options/node) for fields, callbacks, and state precedence.
+
+## Labels and icons
+
+Labels and icons both belong in `node.style`. The three nodes share one configuration: center letters come from `data.icon`, while names appear on the left, bottom, and right. `labelPlacement` moves names independently of center icons.
+
+<NodeDocExample id="labels" locale="en" />
+
+Follow the [label and icon guide](/en/docs/guides/label) for steps and consult the [node label and icon reference](/en/docs/api/options/node#labels) for fields.
+
+## Badge decorations
+
+Decorations belong in `node.decorations[]`, alongside `style`. The code supplies 5 badges. With `maxVisible: 3`, the initial view shows a count, warning, and `···`. Hover `···` to expand all 5 items; leave the expanded region to fold. The node name remains below, independently of the stack.
+
+<NodeDocExample id="badges" locale="en" />
+
+`builtin-badge` needs no extra registration. See [decoration usage](/en/docs/guides/extensions#decoration-visibility) for custom registration and the [decoration reference](/en/docs/api/options/node#nodedecorationconfig) for placement, collision, and overflow rules.

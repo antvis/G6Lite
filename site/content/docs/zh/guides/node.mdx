@@ -3,6 +3,8 @@ title: 节点
 description: 节点类型、样式函数、状态样式和性能建议
 ---
 
+import { NodeDocExample } from '@/components/node-doc-example';
+
 节点通过 `node` 配置类型与样式。`circle` 与 `rect` 都由 WebGL program 绘制，适合大规模渲染。
 
 ## 基础配置
@@ -62,20 +64,19 @@ node: {
 | `label*`                 | 标签字段，见 [标签与图标](/docs/guides/label) |
 | `icon*`                  | 图标字段，见 [标签与图标](/docs/guides/label) |
 
-大多数字段支持值或函数形式：
+大多数字段支持值或函数形式。下面的完整代码直接驱动本页预览：`data.value` 分别为 16、28、40，映射到节点直径；`core` 组为蓝色，其他组为绿色。点击任一节点，会显示代码中 `selected` 定义的描边与光晕，基础尺寸和分组颜色保持不变。
 
-```ts
-node: {
-  style: {
-    size: (node) => ((node.data?.value as number) ?? 1) * 4 + 12,
-    fill: (node) => (node.data?.cluster === 'a' ? '#1783FF' : '#00C9C9'),
-  },
-}
-```
+<NodeDocExample id="style" locale="zh" />
 
-函数式样式的实际效果——节点颜色和尺寸都来自数据字段（[查看完整示例](/docs/examples/node-style)）：
+基础字段、回调和状态覆盖规则见[节点配置参考](/docs/api/options/node)。
 
-![节点颜色与尺寸由数据字段映射，同一组关系中可使用不同的节点样式。](/examples/docs-node-style.png '函数式节点样式')
+## 标签与图标
+
+标签和图标都位于 `node.style`。下面三个节点使用同一份配置：中央字母来自 `data.icon`，名称分别放在左侧、下方和右侧。`labelPlacement` 只移动名称，`icon` 仍留在节点中心。
+
+<NodeDocExample id="labels" locale="zh" />
+
+按步骤配置见[标签与图标指南](/docs/guides/label)，完整字段见[节点标签与图标参考](/docs/api/options/node#标签)。
 
 ## 状态样式
 
@@ -98,6 +99,14 @@ graph.setItemState('node-b', 'inactive', true);
 ```
 
 六种内置状态在节点和边上的实际表现见 [默认主题与交互状态](/docs/examples/default-theme) 示例。
+
+## 徽章装饰
+
+装饰配置在 `node.decorations[]`，与 `style` 同级。下面的代码提供 5 项徽章，`maxVisible: 3` 初始显示计数、警告和 `···`。将鼠标移到 `···` 上可展开全部 5 项；移出展开区域后折叠。节点名称始终在下方，独立于徽章堆叠。
+
+<NodeDocExample id="badges" locale="zh" />
+
+`builtin-badge` 无需额外注册。自定义装饰需要先注册渲染器，见[装饰扩展](/docs/guides/extensions#decoration-renderer)；定位、碰撞与溢出的完整规则见[节点装饰参考](/docs/api/options/node#nodedecorationconfig)。
 
 ## 性能建议
 

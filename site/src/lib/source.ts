@@ -2,6 +2,7 @@ import { docs } from 'collections/server';
 import { loader } from 'fumadocs-core/source';
 import { i18n, localizedDocsPath, type Locale } from './i18n';
 import { docsContentRoute, docsImageRoute, withBasePath } from './shared';
+import { expandNodeDocExamples } from './node-doc-example-source';
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
@@ -40,5 +41,5 @@ export async function getLLMText(page: (typeof source)['$inferPage']) {
 
   return `# ${page.data.title} (${page.url})
 
-${processed}`;
+${expandNodeDocExamples(processed)}`;
 }

@@ -1,0 +1,137 @@
+---
+title: Behavior configuration reference
+description: All 11 built-in behaviors, defaults, selection rules, Tooltip, and custom Behavior contracts
+---
+
+import { NodeDocExample as BehaviorDocExample } from '@/components/node-doc-example';
+
+Entry: `GraphOptions.behaviors?: BehaviorOption[]`. See the [interaction guide](/en/docs/guides/interactions) for combinations and [Custom Behavior](/en/docs/guides/custom-behavior) for extensions.
+
+## BehaviorOption
+
+`BehaviorOption = string | BehaviorConfig`; `BehaviorConfig<TType, TOptions> = Readonly<{ type: TType } & TOptions>`. Strings normalize to objects with type. GraphOptions remains open for third-party names, without validating every field.
+
+| Configuration | Behavior |
+| --- | --- |
+| Omitted | Enables zoom-canvas and drag-canvas |
+| Explicit array | Complete list replacing defaults; tooltip alone does not retain navigation |
+| Empty array | Mounts no Behaviors; public Graph element events remain available |
+
+BuiltInBehaviorOptionsMap provides a configuration by name; BuiltInBehaviorConfig checks built-in objects:
+
+```ts
+import type { BuiltInBehaviorConfig } from '@antv/g6-lite';
+
+const behaviors = [
+  { type: 'zoom-canvas', minZoom: 0.2, maxZoom: 4 },
+  { type: 'click-select', multiple: true, trigger: 'shift' },
+] satisfies BuiltInBehaviorConfig[];
+```
+
+### Mounting and updates
+
+The first render mounts Behaviors. setData, layout, and updateOptions do not reconfigure behaviors; no public setBehaviors method exists. Choose combinations at initialization; create another instance and destroy the old one when replacing the combination. Do not mutate internal options.
+
+Arrays are not deduplicated, so repeated names can handle events twice. Unknown unregistered names are ignored. Registered names override built-ins without falling back if creation or initialization fails.
+
+## Built-in index
+
+| type | Effect | Dedicated options |
+| --- | --- | --- |
+| zoom-canvas | Wheel zoom centered on the canvas | sensitivity, minZoom, maxZoom |
+| drag-canvas | Left-button pan starting on empty canvas | ignoreModifierKeys |
+| drag-node | Move a node, all selected nodes when dragging a selected node, or a Combo group | None |
+| drag-edge | Emits drag/drop results; does not update endpoints or draw a temporary edge | None |
+| click-select | Toggle selected on nodes and edges | multiple, trigger |
+| brush-select | Rectangle selection by node centers | key; throttleMs is not forwarded |
+| lasso-select | Polygon selection by node centers | key; throttleMs is not forwarded |
+| highlight-node | Emphasize a hovered node and adjacent nodes/edges | None |
+| highlight-edge | Emphasize a hovered edge and endpoints | None |
+| hover-highlight | Emphasize neighborhoods or edges, optionally dim others | degree, inactiveState |
+| tooltip | Node/edge hover or click overlay | See TooltipOptions |
+
+## Navigation and dragging
+
+| Field | Type | Default / rule |
+| --- | --- | --- |
+| zoom-canvas.sensitivity | number | 1, multiplier for normalized wheel-delta percentage |
+| zoom-canvas.minZoom | number | 0.1 |
+| zoom-canvas.maxZoom | number | 20 |
+| drag-canvas.ignoreModifierKeys | boolean | true; Shift/Ctrl/Meta gestures are left for area selection |
+
+All three zoom options require finite positive numbers; invalid individual values use their defaults. If the resulting minZoom ≥ maxZoom, all three options reset to defaults. Same-direction wheel events merge within a frame, opposite direction replaces pending input, and each frame is capped at 15%. Line deltas multiply by 16, page deltas by canvas CSS height. Bounds constrain wheel behavior, not programmatic zoomBy or fitView.
+
+drag-node starts after more than 3 client pixels of left-button movement. It does not rerun layout, and a later layout can overwrite moved positions. drag-edge starts on a hit edge, choosing the nearer endpoint, target on ties. It emits edge:dragstart/drag/dragend. A dragend reconnected result proposes a valid node drop; it does not indicate changed data. Apply endpoints through application data and public methods such as setData. updateEdgeData updates business data, not source/target.
+
+## Selection
+
+| Field | Type | Default / rule |
+| --- | --- | --- |
+| click-select.multiple | boolean | false; true appends only while trigger is held |
+| click-select.trigger | shift / ctrl / meta | shift; ctrl means Ctrl only, meta means Meta only |
+| brush-select.key / lasso-select.key | shift / ctrl / null | null, no modifier; ctrl accepts Ctrl or Meta |
+| brush-select.throttleMs / lasso-select.throttleMs | number | Declared but not forwarded by Graph; actual interval is 100ms, with immediate final selection on release |
+
+click-select toggles an already selected element off. Clicking an unselected element without the append modifier clears node and edge selections first; empty canvas clears them too. It does not select Combos.
+
+Brush starts on non-node surfaces (canvas, edge, Combo) and tests node centers. Each update replaces all node selected states, without clearing edges. Lasso clears only nodes from its own previous selection, retaining selections from other sources; at least three samples form a valid polygon. Do not bind both area-selection behaviors to the same gesture.
+
+Area selection emits brush:select/end or lasso:select/end rather than per-node node:selectchange. select is emitted for nonempty results; end can return empty nodeIds. Listening only to node:selectchange misses other selection sources.
+
+### Code and rendered result
+
+This example omits canvas panning so empty-space dragging brushes without modifiers. Click, Shift-click, or brush to select; drag a selected node to move the group.
+
+<BehaviorDocExample id="behavior-selection" locale="en" />
+
+## Highlighting
+
+| Field | Type | Default / rule |
+| --- | --- | --- |
+| hover-highlight.degree | number | 1; prefer finite nonnegative integers; currently not numerically normalized |
+| hover-highlight.inactiveState | string | Omitted: no dimming state written; commonly inactive, with node/edge state styles |
+
+highlight-node and highlight-edge control renderer emphasis without writing highlight states. hover-highlight writes highlight and optional inactiveState, cleans up its tracked states on leave, and freezes hover during node/Combo dragging.
+
+degree controls neighbor traversal, but directly incident edges and endpoints are always included, so degree: 0 does not isolate the hovered node. Enabling both built-in highlight-node + highlight-edge combines them into hover-highlight; state effects differ from using either alone. Prefer hover-highlight directly instead of stacking overlapping hover behaviors.
+
+## TooltipOptions
+
+| Field | Type | Default / rule |
+| --- | --- | --- |
+| trigger | hover / click | hover; click toggles the same element, canvas click hides |
+| getContent | (ctx: TooltipContext) => string / HTMLElement | Node data.label or id; edge data.label or source → target |
+| enable | (ctx: TooltipContext) => boolean | Omitted: allowed; false suppresses this display attempt |
+| offset | [number, number] | [10, 10], CSS pixel pointer offset |
+| delay | number | 80ms before initial hover display; not used for click |
+| className | string | g6lite-tooltip |
+| container | HTMLElement | document.body; mount and collision boundary |
+
+delay uses browser timer semantics and offset does not validate finiteness. Prefer finite values and nonnegative delay. Default text uses textContent; custom strings use innerHTML, so escape untrusted values or return an HTMLElement populated with textContent. No visual skin is provided, and pointer-events is none. Use an application overlay for clickable content.
+
+### TooltipContext
+
+| Field | Type | Source |
+| --- | --- | --- |
+| itemType | node / edge | Hit category, excluding Combo |
+| nodeId | Optional string | Node hits |
+| edgeId / edgeIndex | Optional string / number | Edge hits |
+| source / target | Optional string | Edge endpoint ids |
+| data | Optional `Record<string, unknown>` | Node or edge business data |
+| event | MouseEvent | Original event with clientX/clientY; this context has no nativeEvent field |
+
+Body-mounted overlays use viewport positioning and flip at boundaries. For a custom container, verify positioning ancestors, scrolling, and clipping. See the [Tooltip guide](/en/docs/guides/tooltip).
+
+## Custom Behavior contract
+
+| Member | Signature | Contract |
+| --- | --- | --- |
+| Optional init | `(context: ExtensionContext, options: Readonly<TOptions>) => void` | options includes type; Readonly is a type constraint, not runtime freezing on this path |
+| Required getEvents | `() => BehaviorEventHandlers<TEventMap>` | Partial event-to-function map, automatically bound and unbound |
+| Optional destroy | () => void | Clean up owned DOM, listeners, timers, and asynchronous tasks |
+
+`BehaviorExtension<TOptions extends BehaviorOptions = BehaviorConfig, TEventMap extends object = GraphEventMap>`. BehaviorEventHandlers maps each event argument tuple to a handler; destroy has zero arguments. Extending TEventMap adds consumer types, not a public emit API.
+
+Use extensionFactory for fresh closures: create → init → getEvents → destroy. There is no promised update hook; remounting destroys and recreates instances. Registry replacement does not immediately replace mounted instances.
+
+Creation, init, getEvents, and handler synchronous errors are isolated and logged with behavior/phase details. Handle asynchronous rejections yourself. Use context.data/state/viewport, requestRender, and isDestroyed; do not write through snapshots or depend on internal renderer/eventEmitter or deprecated context.graph. See [Custom Behavior](/en/docs/guides/custom-behavior) for implementation and cleanup.

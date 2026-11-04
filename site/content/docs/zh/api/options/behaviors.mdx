@@ -1,0 +1,137 @@
+---
+title: Behavior 配置参考
+description: 11 种内置行为、参数默认值、选择语义、Tooltip 与自定义 Behavior 契约
+---
+
+import { NodeDocExample as BehaviorDocExample } from '@/components/node-doc-example';
+
+入口：`GraphOptions.behaviors?: BehaviorOption[]`。组合与操作见[交互指南](/docs/guides/interactions)，开发扩展见[自定义 Behavior](/docs/guides/custom-behavior)。
+
+## BehaviorOption
+
+`BehaviorOption = string | BehaviorConfig`，`BehaviorConfig<TType, TOptions> = Readonly<{ type: TType } & TOptions>`。字符串归一化为带 type 的对象；GraphOptions 为第三方名称保持开放，不自动校验所有字段。
+
+| 配置 | 行为 |
+| --- | --- |
+| 省略 behaviors | 启用 zoom-canvas、drag-canvas |
+| 显式数组 | 整份列表，覆盖默认；仅传 tooltip 不保留默认缩放与平移 |
+| 空数组 | 不挂载 Behavior；Graph 的公开元素事件仍可监听 |
+
+内置配置用 BuiltInBehaviorOptionsMap 按名称查询，或用 BuiltInBehaviorConfig 联合类型检查对象：
+
+```ts
+import type { BuiltInBehaviorConfig } from '@antv/g6-lite';
+
+const behaviors = [
+  { type: 'zoom-canvas', minZoom: 0.2, maxZoom: 4 },
+  { type: 'click-select', multiple: true, trigger: 'shift' },
+] satisfies BuiltInBehaviorConfig[];
+```
+
+### 挂载与更新
+
+首次 render 挂载行为；setData、layout、updateOptions 不重新配置 behaviors，也没有公开 setBehaviors 方法。组合在初始化时确定；需要另一套组合时创建新实例并销毁旧实例。不要通过内部 options 改配置。
+
+数组不自动去重，重复名称可能重复处理事件。未知且未注册的名称被忽略。注册的同名 Behavior 优先于内置，创建或初始化失败不自动回退内置。
+
+## 内置行为索引
+
+| type | 作用 | 专用参数 |
+| --- | --- | --- |
+| zoom-canvas | 滚轮缩放，以画布中心为缩放中心 | sensitivity、minZoom、maxZoom |
+| drag-canvas | 鼠标左键从空白画布开始平移 | ignoreModifierKeys |
+| drag-node | 拖节点；拖已选节点时移动全部已选节点；支持 Combo 整体拖动 | 无 |
+| drag-edge | 边拖拽与松开目标的事件，不自动写回端点或绘制临时边 | 无 |
+| click-select | 节点和边的 selected 状态切换 | multiple、trigger |
+| brush-select | 矩形范围内的节点中心点选择 | key；throttleMs 当前不透传 |
+| lasso-select | 套索多边形内的节点中心点选择 | key；throttleMs 当前不透传 |
+| highlight-node | 悬停节点时强调它及相邻节点、边 | 无 |
+| highlight-edge | 悬停边时强调边及其两端节点 | 无 |
+| hover-highlight | 节点邻域或边高亮，可弱化其余元素 | degree、inactiveState |
+| tooltip | 节点、边的悬停或点击浮层 | 见 TooltipOptions |
+
+## 导航与拖拽
+
+| 字段 | 类型 | 默认 / 规则 |
+| --- | --- | --- |
+| zoom-canvas.sensitivity | number | 1，归一化 wheel delta 的百分比乘数 |
+| zoom-canvas.minZoom | number | 0.1 |
+| zoom-canvas.maxZoom | number | 20 |
+| drag-canvas.ignoreModifierKeys | boolean | true；按 Shift/Ctrl/Meta 时不平移，把手势留给框选/套索 |
+
+缩放三项均需有限正数；非法单项回退其默认值。若最终 minZoom ≥ maxZoom，整组恢复默认（含 sensitivity）。同帧滚轮同方向合并、反方向覆盖，单帧最多改变 15%；按行 delta 乘 16，按页 delta 乘画布 CSS 高度。范围只约束滚轮行为，不约束程序调用 zoomBy、fitView。
+
+drag-node 左键移动超过 3 个客户端像素才开始拖动；不重新布局，后续 layout 可能覆盖拖后位置。drag-edge 从命中边处开始，根据距离选择较近端点，距离相同时取 target；发出 edge:dragstart/drag/dragend。dragend 的 reconnected 表示松开节点能形成重连建议，不表示数据已修改；需通过应用数据更新并 setData 等公开方法写回。updateEdgeData 只改业务 data，不能修改 source/target。
+
+## 选择
+
+| 字段 | 类型 | 默认 / 规则 |
+| --- | --- | --- |
+| click-select.multiple | boolean | false；true 时只有同时按 trigger 才追加 |
+| click-select.trigger | 'shift' / 'ctrl' / 'meta' | shift；ctrl 仅 Ctrl，meta 仅 Meta，不互相替代 |
+| brush-select.key / lasso-select.key | 'shift' / 'ctrl' / null | null；无需修饰键；ctrl 接受 Ctrl 或 Meta |
+| brush-select.throttleMs / lasso-select.throttleMs | number | 类型已声明，但 Graph 当前不透传；实际使用 100ms，并在松开时立即最终选择 |
+
+click-select 再点已选元素会取消它，点未选元素且无追加修饰键会先清空节点与边选择；点空白也清空。它不处理 Combo 的选中。
+
+框选从非节点位置（画布、边、Combo）开始，按节点中心坐标命中；每次选择替换所有节点的 selected，不清空边。套索只清除自己上次圈中的节点，不统一清空其他来源的选择；至少三个采样点才形成有效多边形。不要把两个区域选择行为绑定到相同手势。
+
+区域选择发出 brush:select/end 或 lasso:select/end，不逐个发出 node:selectchange。select 仅在非空结果时发出，end 也可返回空 nodeIds；仅监听 node:selectchange 不能覆盖所有选择来源。
+
+### 代码与对应效果
+
+此例关闭画布平移，让空白拖拽专门用于无需修饰键的框选。点击节点、Shift 多选或框选后，拖动已选节点观察整体移动。
+
+<BehaviorDocExample id="behavior-selection" locale="zh" />
+
+## 高亮
+
+| 字段 | 类型 | 默认 / 规则 |
+| --- | --- | --- |
+| hover-highlight.degree | number | 1；建议有限非负整数，当前不做数值归一化 |
+| hover-highlight.inactiveState | string | 省略不写弱化状态；通常传 inactive，配合节点/边状态样式 |
+
+highlight-node、highlight-edge 只控制渲染强调，不写入元素的 highlight 状态。hover-highlight 会写 highlight 及可选 inactiveState，并在离开时清理其记录；拖动节点/Combo 时冻结当前悬停。
+
+degree 控制邻居遍历层数，但节点的直接相连边及端点始终被纳入，因此 degree: 0 不表示仅高亮自身。两个内置 highlight-node + highlight-edge 同时启用时合并为 hover-highlight；该合并路径的状态行为与分别单独启用不完全相同。建议直接使用 hover-highlight，避免同时叠加多套高亮。
+
+## TooltipOptions
+
+| 字段 | 类型 | 默认 / 规则 |
+| --- | --- | --- |
+| trigger | 'hover' / 'click' | hover；click 再点相同元素切换关闭，点画布关闭 |
+| getContent | (ctx: TooltipContext) => string / HTMLElement | 节点 data.label 或 id；边 data.label 或 source → target |
+| enable | (ctx: TooltipContext) => boolean | 省略允许显示；返回 false 阻止本次显示 |
+| offset | [number, number] | [10, 10]，相对指针的 CSS 像素偏移 |
+| delay | number | 80，hover 首次显示等待毫秒；click 不等待 |
+| className | string | g6lite-tooltip |
+| container | HTMLElement | document.body；挂载节点及碰撞边界 |
+
+delay 交给浏览器计时器，offset 不校验有限性；建议有限的数值，delay 非负。默认内容用 textContent；自定义字符串写入 innerHTML，应转义不可信值，或返回用 textContent 填充的 HTMLElement。内部没有视觉皮肤，浮层 pointer-events: none；需要可点击内容时使用应用自有浮层。
+
+### TooltipContext
+
+| 字段 | 类型 | 来源 |
+| --- | --- | --- |
+| itemType | 'node' / 'edge' | 命中元素类别，不含 Combo |
+| nodeId | string，可选 | 节点命中时有值 |
+| edgeId / edgeIndex | string / number，可选 | 边命中时有值 |
+| source / target | string，可选 | 边的两端 id |
+| data | `Record<string, unknown>`，可选 | 节点或边业务数据 |
+| event | MouseEvent | 原始鼠标事件，使用 clientX/clientY；此上下文没有 nativeEvent 字段 |
+
+默认 body 挂载按视口定位并在边界翻转；自定义 container 时需核对定位祖先、滚动和裁剪效果。完整用法见 [Tooltip 指南](/docs/guides/tooltip)。
+
+## 自定义 Behavior 契约
+
+| 成员 | 签名 | 规则 |
+| --- | --- | --- |
+| init，可选 | `(context: ExtensionContext, options: Readonly<TOptions>) => void` | options 包含 type；Readonly 是类型约束，当前 Behavior 路径不冻结对象 |
+| getEvents，必需 | `() => BehaviorEventHandlers<TEventMap>` | 事件名到处理函数的部分映射；引擎绑定并自动解绑 |
+| destroy，可选 | () => void | 清理自身 DOM、监听、计时器和异步任务 |
+
+`BehaviorExtension<TOptions extends BehaviorOptions = BehaviorConfig, TEventMap extends object = GraphEventMap>`。BehaviorEventHandlers 将每个事件对应的参数元组映射成函数；destroy 事件为零参数。扩展 TEventMap 只补消费端类型，不新增公开 emit API。
+
+推荐用 extensionFactory 返回全新闭包，生命周期为 create → init → getEvents → destroy。不承诺 update；Graph 重新挂载时销毁旧实例再创建。注册覆盖不会立即替换已挂载实例。
+
+创建、init、getEvents 及事件 handler 的同步异常会隔离并记录行为名/阶段；异步任务需自行处理拒绝。使用 context.data/state/viewport、requestRender、isDestroyed；只读快照不能当作写入入口，不使用内部 renderer、eventEmitter 或已弃用 context.graph。实现与多实例清理见[自定义 Behavior 教程](/docs/guides/custom-behavior)。

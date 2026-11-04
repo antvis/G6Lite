@@ -127,6 +127,8 @@ node?: {
 
 An omitted `type`, or `'circle'`, draws a circle. `'rect'` draws a rounded rectangle. Any other string must already be registered with `register('node', ...)`.
 
+`autoExternalLabelPlacement` is currently declared in the type only and is not read by the runtime. Position labels explicitly with `node.style.labelPlacement`; this flag does not move labels around `decorations`.
+
 Each visual field in `style` can be a constant or `(node: GraphNode) => value`. `label: false` and `icon: false` skip that layer.
 
 | Style field | Description |

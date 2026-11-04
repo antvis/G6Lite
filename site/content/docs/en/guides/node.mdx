@@ -20,4 +20,19 @@ node: {
 }
 ```
 
+## Top-level configuration
+
+These options belong directly under `node`, alongside `style`:
+
+| Option | Purpose and support |
+| --- | --- |
+| `type` | Select built-in `circle`, `rect`, or a registered node type |
+| `style` | Configure the body, label, and icon through an object or style function |
+| `stateStyles` | Override body appearance for selected, highlighted, or other states |
+| `labelRenderer` | Use a renderer registered with `register('label', ...)`; `style.label` must still supply text |
+| `decorations` | Attach badges and other decorations using built-in `builtin-badge` or a registered decoration renderer |
+| `autoExternalLabelPlacement` | Declared in the type only; the runtime does not read it, so setting it does not reposition labels |
+
+Set `node.style.labelPlacement` explicitly, for example to `'bottom'`, when positioning labels. See [decoration visibility](/en/docs/guides/extensions#decoration-visibility) for decoration usage and [node configuration](/en/docs/api/options#node) for the configuration structure.
+
 Use state APIs for runtime selection and highlighting. Prefer static or precomputed fields for large graphs; keep functional style callbacks inexpensive.

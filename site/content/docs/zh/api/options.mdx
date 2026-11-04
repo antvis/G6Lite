@@ -127,6 +127,8 @@ node?: {
 
 `type` 省略或为 `'circle'` 时画圆形，`'rect'` 画圆角矩形。其他字符串必须是已经 `register('node', ...)` 的类型名。
 
+`autoExternalLabelPlacement` 当前仅有类型声明，运行时未读取该选项。请通过 `node.style.labelPlacement` 显式定位标签；`decorations` 不会通过此开关自动改变标签位置。
+
 `style` 的每个视觉字段都可以是固定值，或 `(node: GraphNode) => 值`。`label: false` 和 `icon: false` 表示不绘制该项。
 
 | 样式字段 | 说明 |

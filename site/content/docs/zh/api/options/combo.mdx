@@ -1,0 +1,88 @@
+---
+title: Combo 配置参考
+description: ComboData 字段、节点归属、嵌套关系、初始折叠与状态，以及只读查询模型
+---
+
+import { NodeDocExample as ComboDocExample } from '@/components/node-doc-example';
+
+本批参考覆盖 Combo 的数据声明与初始状态。外观字段和完整使用流程暂见[Combo 指南](/docs/guides/combo)；全局入口为 `GraphOptions.combo: ComboConfig`，当前顶层只有 `style?: ComboStyleConfig`。
+
+Combo 的嵌套、折叠和运行时归组仍是实验性能力，配置可能在 `0.1.x` 内调整，见[API 稳定性](/docs/compatibility/api-stability#实验性能力)。
+
+## ComboData
+
+`GraphData.combos?: ComboData[]` 声明分组，节点通过自己的 `comboId` 加入分组。分组不是节点，边的 source、target 仍须指向节点 id。
+
+| 字段 | 类型 | 必填 | 默认与规则 |
+| --- | --- | --- | --- |
+| `id` | `string` | 是 | Combo 唯一标识；建议与节点、边 id 也不重复，避免统一元素查询与状态操作的身份歧义 |
+| `parentId` | `string` | 否 | 无父级；指向同一 combos 数组内的父 Combo，形成嵌套 |
+| `collapsed` | `boolean` | 否 | `false`；首次渲染时是否折叠，见[初始折叠](#初始折叠) |
+| `style` | `Partial<ComboStyleConfig>` | 否 | 无局部覆盖；覆盖全局 combo.style 中相应的基础外观字段，完整覆盖关系后续按样式主题整理，现有入口见[样式指南](/docs/guides/combo#样式) |
+| `data` | `Record<string, unknown>` | 否 | 无业务数据；自定义业务字段，不自动转成标签或布局参数 |
+| `states` | `ElementState[]` | 否 | 空状态集合；读取时规范为 Set，重复状态合并，见[初始状态](#初始状态) |
+
+### 节点归属与嵌套
+
+- 节点的 `comboId?: string` 表示一个直接所属分组；省略时为未分组节点。归入子 Combo 后，无需再把节点重复加入父 Combo。
+- Combo 的 `parentId` 只声明父子关系，直接成员从节点 comboId 计算，不在 ComboData 中写 childNodeIds 或 childComboIds。
+- 先声明全部分组后再建立关系，因此父分组可以出现在子分组之后。父 id 须存在，层级须无环，不能把循环保护当成合法嵌套支持。
+- 引用不存在的 comboId 当前会被忽略，节点仍保留在图中且没有有效归属；不存在的 parentId 不建立真实父级。引擎不代替业务校验这些引用。
+- 分组边界由成员节点位置、节点尺寸、子分组边界及 padding 计算。数据中的 x/y、width/height 不是 ComboData 配置字段；空分组没有内容边界，当前不会凭空绘制占位容器。
+
+下面左侧 Platform 包含 Client，web 与 mobile 直接归属 Client；Client 在首次渲染即为紫色 selected 状态。outside 没有分组。右侧 Archive 首次即折叠，old-a、old-b 及 archived 边不可见，只显示折叠形态与名称；live 边仍连接 mobile 与 outside。
+
+<ComboDocExample id="combo-data" locale="zh" />
+
+示例以固定节点坐标排除布局差异，不安装选中交互；selected 来自数据声明。工具栏重置会重新执行相同数据并恢复初始 selected 和 collapsed。名称来自显式 label 回调读取 data.name，不是分组自动生成的标题。
+
+## 初始折叠
+
+`collapsed: true` 在初次装载数据时就生效，隐藏该分组中所有后代节点以及连接这些节点的边。当前不把跨组边重连为指向折叠分组的虚拟边。子 Combo 自身的边框不会仅因为父分组折叠而自动按祖先级联隐藏，使用嵌套折叠前应验证实际层级效果。
+
+节点或边原本就有业务 hidden 状态时，展开不应将它强制显示。多个折叠祖先会共同维持成员节点的隐藏，展开其中一个不代表全部恢复。折叠与展开的完整交互、形态和事件留在[现有指南](/docs/guides/combo#折叠与展开)，本例只验证初始声明。
+
+`collapsed` 与 `states` 是独立字段：`states: ['collapsed']` 只存入一个自定义状态名，不会触发折叠。
+
+## 初始状态
+
+`states` 接受内置状态和自定义字符串。当前内置分组样式按 active → highlight → selected → disabled → inactive 顺序处理，hidden 负责跳过分组自身绘制与命中；自定义名会被保存，但不会自动获得内置效果。状态样式的详细字段和覆盖表将在外观批次整理。
+
+Combo 的状态样式放在 `combo.style.stateStyles` 或局部 `ComboData.style.stateStyles`，不是 `combo.stateStyles`。示例显式给 selected 配置紫色描边，不需要行为才能显示初始状态。内置 `click-select` 当前只处理节点和边；后续分组选择可通过 `setItemState()` 或监听 `combo:click` 后调用状态 API 实现，不能仅配置该行为就期待分组自动切换状态。
+
+`states: ['hidden']` 只隐藏该分组自身，不等同于 collapsed，也不自动隐藏子节点、关联边或子 Combo。它不能用于声明“整棵分组树不可见”。
+
+## 只读查询模型
+
+首次 `await graph.render()` 完成后，`graph.getComboData(id)` 返回 `ComboModel | undefined`。该模型是由 Graph 管理的只读视图，不能靠修改返回对象或集合更新图。
+
+| 字段 | 类型 | 含义 |
+| --- | --- | --- |
+| `id` / `parentId` | `string` / `string \| undefined` | 分组身份与声明的父级 |
+| `childNodeIds` | `ReadonlySet<string>` | 直接成员节点 id，不含孙级分组内的节点 |
+| `childComboIds` | `ReadonlySet<string>` | 直接子 Combo id |
+| `collapsed` | `boolean` | 当前折叠状态 |
+| `x` / `y` | `number` | 已计算包围框中心，图坐标 |
+| `width` / `height` | `number` | 已计算包围框尺寸，图坐标；不等同于折叠图形的显示尺寸 |
+| `style` | `Readonly<Partial<ComboStyleConfig>> \| undefined` | 局部样式输入，不是全部默认值和状态合成后的最终样式 |
+| `data` | `Readonly<Record<string, unknown>> \| undefined` | 业务数据 |
+| `states` | `ReadonlySet<ElementState>` | 当前状态集合 |
+
+包围框在渲染流程中重算；归属变更后不要把它当成同步计算所有几何的接口。查询直接成员可以用 `getComboChildren()`，节点归属用 `getNodeCombo()`：
+
+```ts
+const group = graph.getComboData('client');
+const directChildren = graph.getComboChildren('platform');
+// directChildren.combos 包含 client；nodes 不包含 client 内的 web/mobile
+const membership = graph.getNodeCombo('web'); // 'client'
+const selected = group?.states.has('selected');
+```
+
+需要修改分组时使用[公开 Combo 方法](/docs/api/graph#combo)和[状态方法](/docs/api/graph#状态显隐和定位)。`graph.getData()` 返回当前 GraphData 快照，节点归属和 Combo 的 parentId、collapsed、states 会反映当前状态；由折叠推导出的成员 hidden 不会被导出成业务 hidden。style 中的函数不适合直接当作 JSON 持久化配置。
+
+## 相关入口
+
+- [Combo 指南](/docs/guides/combo)：现有外观、折叠、归组和拖拽用法。
+- [Combo 示例](/docs/examples/combo)：嵌套、折叠展开和归属变更。
+- [GraphOptions 与数据入口](/docs/api/options)：图配置及 GraphData 的整体结构。
+- [图数据模型](/docs/concepts/data-model)：节点和边的数据职责。

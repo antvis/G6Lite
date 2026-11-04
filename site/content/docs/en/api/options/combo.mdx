@@ -1,0 +1,88 @@
+---
+title: Combo configuration reference
+description: ComboData fields, membership, nesting, initial collapse and states, and read-only query models
+---
+
+import { NodeDocExample as ComboDocExample } from '@/components/node-doc-example';
+
+This batch covers Combo data declarations and initial states. See the [Combo guide](/en/docs/guides/combo) for existing appearance and usage. The global entry is `GraphOptions.combo: ComboConfig`, whose only top-level field is currently `style?: ComboStyleConfig`.
+
+Nesting, collapse, and runtime grouping remain experimental and may change within `0.1.x`; see [API stability](/en/docs/compatibility/api-stability).
+
+## ComboData
+
+Declare groups with `GraphData.combos?: ComboData[]`; nodes join through their own `comboId`. A Combo is not a node: edge source and target still reference node IDs.
+
+| Field | Type | Required | Default and rules |
+| --- | --- | --- | --- |
+| `id` | `string` | Yes | Unique Combo identity; also avoid node/edge ID collisions to prevent ambiguity in unified queries and state operations |
+| `parentId` | `string` | No | No parent; references a parent Combo in the same combos array |
+| `collapsed` | `boolean` | No | `false`; whether the first render starts collapsed, see [Initial collapse](#initial-collapse) |
+| `style` | `Partial<ComboStyleConfig>` | No | No local overrides; overrides corresponding base appearance fields in global combo.style. Full style precedence will be handled in the appearance batch; see the [existing guide](/en/docs/guides/combo) |
+| `data` | `Record<string, unknown>` | No | No business data; fields do not automatically become labels or layout parameters |
+| `states` | `ElementState[]` | No | Empty state set; normalized to a Set, removing duplicates. See [Initial states](#initial-states) |
+
+### Membership and nesting
+
+- A node's `comboId?: string` names one direct group. Omission means ungrouped; nodes in child groups do not also need membership in the parent.
+- A Combo's `parentId` declares hierarchy. Direct members come from node comboId; do not write childNodeIds or childComboIds into ComboData.
+- Groups are all declared before relationships are linked, so a parent may appear after its children. Parent IDs must exist and hierarchy must be acyclic; cycle guards do not make circular nesting valid.
+- Unknown comboId references are currently ignored: the node remains in the graph without valid membership. Unknown parentId references do not establish a real parent. Validate references in your application.
+- Bounds come from member positions, node dimensions, child-group bounds, and padding. x/y and width/height are not ComboData fields. Empty groups have no content bounds and currently do not draw placeholder containers.
+
+On the left, Platform contains Client, and web/mobile belong directly to Client. Client starts with a purple selected outline. The outside node has no group. Archive starts collapsed on the right: old-a, old-b, and the archived edge are invisible, while the collapsed shape and label remain. The live edge still connects mobile to outside.
+
+<ComboDocExample id="combo-data" locale="en" />
+
+Fixed node coordinates avoid layout differences. The example installs no selection behavior; selected comes from data. Reset reruns the same source and restores initial selected and collapsed values. The explicit label callback reads data.name; business names do not automatically become titles.
+
+## Initial collapse
+
+`collapsed: true` applies during initial data loading, hiding all descendant nodes and edges connected to them. Cross-group edges are not reconnected as virtual edges to a collapsed group. Child Combo outlines are not automatically suppressed solely because an ancestor is collapsed; validate the actual nested presentation.
+
+Expanding should preserve preexisting business hidden states on nodes and edges. Multiple collapsed ancestors jointly retain member hiding; expanding one does not necessarily reveal everything. See the [existing guide](/en/docs/guides/combo) for runtime collapse methods; this example verifies initial declarations.
+
+`collapsed` and `states` are independent: `states: ['collapsed']` stores a custom state name and does not collapse the group.
+
+## Initial states
+
+`states` accepts built-in names and custom strings. Current built-in Combo style processing follows active → highlight → selected → disabled → inactive. Hidden skips the group's own drawing and picking. Custom names are retained but do not automatically receive built-in effects. Full style fields and precedence will be documented in the appearance batch.
+
+Combo state styles belong in `combo.style.stateStyles` or local `ComboData.style.stateStyles`, not `combo.stateStyles`. The preview explicitly defines a purple selected outline. Initial states need no behavior. Built-in `click-select` currently handles nodes and edges only. Update subsequent Combo selection with `setItemState()`, or handle `combo:click` and call state APIs; installing that behavior alone does not toggle Combo states.
+
+`states: ['hidden']` hides only the group itself, unlike collapsed. It does not automatically hide member nodes, connected edges, or child Combos, and cannot declare a whole invisible subtree.
+
+## Read-only query model
+
+After the first `await graph.render()`, `graph.getComboData(id)` returns `ComboModel | undefined`. It is a read-only Graph-managed view; mutating returned objects or collections is not an update API.
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `id` / `parentId` | `string` / `string \| undefined` | Group identity and declared parent |
+| `childNodeIds` | `ReadonlySet<string>` | Direct node members, excluding nodes inside child groups |
+| `childComboIds` | `ReadonlySet<string>` | Direct child Combo IDs |
+| `collapsed` | `boolean` | Current collapsed state |
+| `x` / `y` | `number` | Computed graph-coordinate bounds center |
+| `width` / `height` | `number` | Computed bounds in graph units, not the collapsed shape's display size |
+| `style` | `Readonly<Partial<ComboStyleConfig>> \| undefined` | Local input, not fully resolved defaults plus state styles |
+| `data` | `Readonly<Record<string, unknown>> \| undefined` | Business data |
+| `states` | `ReadonlySet<ElementState>` | Current state set |
+
+Bounds are recomputed during rendering. After membership changes, do not treat queries as synchronous geometry calculation. Query direct children with `getComboChildren()` and node membership with `getNodeCombo()`:
+
+```ts
+const group = graph.getComboData('client');
+const directChildren = graph.getComboChildren('platform');
+// directChildren.combos includes client; nodes excludes web/mobile inside client
+const membership = graph.getNodeCombo('web'); // 'client'
+const selected = group?.states.has('selected');
+```
+
+Use [public Combo methods](/en/docs/api/graph#combo) and [state methods](/en/docs/api/graph#state-visibility-and-focus) for changes. `graph.getData()` returns current GraphData snapshots, including membership, parentId, collapsed, and states. Member hidden states derived from collapse are not exported as business hidden. Functions in style are unsuitable for direct JSON persistence.
+
+## Related entries
+
+- [Combo guide](/en/docs/guides/combo): existing appearance, collapse, membership, and dragging usage.
+- [Combo example](/en/docs/examples/combo): nesting, collapse/expand, and membership changes.
+- [GraphOptions and data](/en/docs/api/options): overall graph configuration and GraphData.
+- [Graph data model](/en/docs/concepts/data-model): node and edge responsibilities.

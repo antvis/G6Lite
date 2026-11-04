@@ -3,7 +3,9 @@ title: Combo
 description: 节点分组容器的声明、样式、折叠展开和整体拖拽
 ---
 
-Combo 是节点的分组容器，用于把一组节点圈在一个可视包围框内。它支持嵌套、折叠 / 展开，以及整体拖拽。
+Combo 是节点的分组容器，用于把一组节点圈在一个可视包围框内。它支持嵌套、折叠 / 展开，以及整体拖拽。嵌套、折叠和运行时归组仍是实验性能力，配置可能在 `0.1.x` 内调整。
+
+完整数据字段、节点归属、初始折叠和状态，以及代码与实际效果见[Combo 配置参考](/docs/api/options/combo)。下文保留现有外观与操作入口。
 
 Combo 包围框由 Canvas 2D 在 WebGL 画布下方叠加绘制，不影响节点和边的 GPU 渲染路径。
 
@@ -41,8 +43,10 @@ const graph = new Graph({
 | ---------- | --------------------- |
 | `id`       | Combo 唯一标识        |
 | `parentId` | 父 Combo id，用于嵌套 |
+| `collapsed` | 初始是否折叠，默认 false；独立于 states |
 | `style`    | 单个 Combo 的样式覆盖 |
 | `data`     | 业务扩展字段          |
+| `states` | 初始状态，默认空数组；状态样式位于 combo.style.stateStyles |
 
 ## 样式
 

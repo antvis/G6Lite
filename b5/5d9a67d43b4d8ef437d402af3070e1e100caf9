@@ -1,0 +1,43 @@
+site/demos/docs-node-style.ts
+  s_4534bc5c3d78f4::t_e336fe5b166c58 1-38
+site/content/docs/en/guides/node.mdx
+  s_4534bc5c3d78f4::t_e336fe5b166c58 6-7,41-64
+site/src/components/node-doc-preview.module.css
+  s_4534bc5c3d78f4::t_e336fe5b166c58 1-35,41-68
+  s_4534bc5c3d78f4::t_eab2292a23a892 36-40
+site/src/components/node-doc-example.tsx
+  s_4534bc5c3d78f4::t_e336fe5b166c58 1-2,5-8,10-15
+  s_4534bc5c3d78f4::t_0aefa64279d1eb 3-4,9
+site/src/components/node-doc-preview.tsx
+  s_4534bc5c3d78f4::t_eab2292a23a892 64
+  s_4534bc5c3d78f4::t_5a8a3d758a7ef9 33,35
+  s_4534bc5c3d78f4::t_0aefa64279d1eb 6
+  s_4534bc5c3d78f4::t_e336fe5b166c58 1-5,7-32,34,36-63,65-73
+site/content/docs/zh/guides/node.mdx
+  s_4534bc5c3d78f4::t_e336fe5b166c58 6-7,67,69,71,73-79,103-109
+  s_4534bc5c3d78f4::t_74dcf59d195561 110
+site/demos/docs-node-badges.ts
+  s_4534bc5c3d78f4::t_e336fe5b166c58 1-39
+site/src/lib/node-doc-example-source.ts
+  s_4534bc5c3d78f4::t_0aefa64279d1eb 1-23
+site/src/lib/source.ts
+  s_4534bc5c3d78f4::t_0aefa64279d1eb 5,44
+site/demos/docs-node-labels.ts
+  s_4534bc5c3d78f4::t_e336fe5b166c58 1-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b55d9a67d43b4d8ef437d402af3070e1e100caf9",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

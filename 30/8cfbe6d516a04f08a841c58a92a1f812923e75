@@ -1,0 +1,26 @@
+site/content/docs/zh/guides/parallel-edges.mdx
+  s_4534bc5c3d78f4::t_60db581d9701a3 28,34-47
+  s_4534bc5c3d78f4::t_a2af96159a9936 48
+site/content/docs/en/guides/edge.mdx
+  s_4534bc5c3d78f4::t_60db581d9701a3 23-37
+site/content/docs/en/guides/parallel-edges.mdx
+  s_4534bc5c3d78f4::t_60db581d9701a3 6-11,16-22,26-46
+site/content/docs/zh/guides/edge.mdx
+  s_4534bc5c3d78f4::t_60db581d9701a3 110,115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "308cfbe6d516a04f08a841c58a92a1f812923e75",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -36,7 +36,7 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 | `behaviors` | `BehaviorOption[]` | Interaction list. Omitted means wheel zoom and drag pan |
 | `transforms` | `TransformOption[]` | Data transforms before drawing, such as parallel edges |
 | `plugins` | `PluginOption[]` | Registered plugins |
-| `theme` | `ThemeOption` | `'light'`, `'dark'`, or a preset plus token overrides |
+| `theme` | [`ThemeOption`](/en/docs/api/options/theme#themeoption) | `'light'`, `'dark'`, or a preset plus token overrides |
 | `autoFit` | `boolean \| number \| FitViewOptions` | Whether a container resize calls `fitView()` again. Default `false`, which keeps the current camera |
 
 See [`autoFit`](#autofit) below for initial fitting and resize fitting.
@@ -203,19 +203,9 @@ Behavior combinations and events are in [Interactions](/en/docs/guides/interacti
 
 ## Theme
 
-```ts
-theme?: 'light' | 'dark' | ({ type: 'light' | 'dark' } & Partial<ThemeTokens>)
-```
+Omitting `theme` selects light. Types, all tokens, preset defaults, and precedence are in the [Theme reference](/en/docs/api/options/theme). To read theme tokens, see [resolveTheme](/en/docs/api/options/theme#resolvetheme).
 
-An object starts from the preset named by `type`, then overrides tokens on that object. Overridable tokens are `nodeFill`, `nodeSize`, `nodeStroke`, `nodeStrokeWidth`, `edgeStroke`, `edgeLineWidth`, `edgeArrow`, `canvasBackground`, `edgeDefaultColor`, `edgeCategoryPalette`, `nodeStateStyles`, and `edgeStateStyles`.
-
-```ts
-import { resolveTheme } from '@antv/g6-lite';
-
-const tokens = resolveTheme({ type: 'light', nodeFill: '#1677ff' });
-```
-
-`resolveTheme()` returns a new complete `ThemeTokens` and does not mutate the preset.
+For choosing presets, applying brand colors, and switching at runtime, see [Themes](/en/docs/guides/theme), with code and matching canvas previews.
 
 ## Plugins and transforms
 

@@ -36,7 +36,7 @@ const graph = new Graph({
 | `behaviors` | `BehaviorOption[]` | 交互列表。省略时启用滚轮缩放和拖拽平移 |
 | `transforms` | `TransformOption[]` | 绘制前的数据转换，例如平行边 |
 | `plugins` | `PluginOption[]` | 已注册插件 |
-| `theme` | `ThemeOption` | `'light'`、`'dark'`，或在预设上覆盖 token |
+| `theme` | [`ThemeOption`](/docs/api/options/theme#themeoption) | `'light'`、`'dark'`，或在预设上覆盖 token |
 | `autoFit` | `boolean \| number \| FitViewOptions` | 容器尺寸变化后是否重新 `fitView()`。默认 `false`，保留当前相机 |
 
 首次适配与尺寸变化后的适配规则见下方 [`autoFit`](#autofit)。
@@ -203,19 +203,9 @@ layout?: {
 
 ## 主题
 
-```ts
-theme?: 'light' | 'dark' | ({ type: 'light' | 'dark' } & Partial<ThemeTokens>)
-```
+`theme` 省略时使用 light。类型、全部 token、预设默认值与覆盖规则见[主题配置参考](/docs/api/options/theme)；读取主题 token 的辅助函数见 [resolveTheme](/docs/api/options/theme#resolvetheme)。
 
-对象形式先取 `type` 对应的预设，再用同层字段覆盖。可覆盖的 token 包括 `nodeFill`、`nodeSize`、`nodeStroke`、`nodeStrokeWidth`、`edgeStroke`、`edgeLineWidth`、`edgeArrow`、`canvasBackground`、`edgeDefaultColor`、`edgeCategoryPalette`、`nodeStateStyles`、`edgeStateStyles`。
-
-```ts
-import { resolveTheme } from '@antv/g6-lite';
-
-const tokens = resolveTheme({ type: 'light', nodeFill: '#1677ff' });
-```
-
-`resolveTheme()` 返回一份新的完整 `ThemeTokens`，不修改预设。
+选择预设、设置品牌色和运行时切换见[主题指南](/docs/guides/theme)，含代码与对应画布效果。
 
 ## 插件与转换
 

@@ -1,64 +1,146 @@
 ---
 title: Nodes
-description: Configure node types, functional styles, labels, and state styles
+description: Choose shapes, map data and states, add labels, icons and badges, and update nodes at runtime
 ---
 
 import { NodeDocExample } from '@/components/node-doc-example';
 
-Nodes support built-in circle and rectangle rendering plus registered extensions.
+Configure nodes through `GraphOptions.node`. This guide follows the steps for building a business effect. Consult the [node reference](/en/docs/api/options/node) for exact types, defaults, units, and precedence.
 
-```ts
-node: {
-  type: 'circle',
-  style: {
-    size: (node) => node.data?.important ? 28 : 18,
-    fill: (node) => node.data?.group === 'core' ? '#1783FF' : '#00C9C9',
-    label: (node) => String(node.data?.label ?? node.id),
-  },
-  stateStyles: {
-    selected: { stroke: '#1677ff', strokeWidth: 3 },
-    inactive: { opacity: 0.25 },
-  },
-}
-```
+| Desired effect | Start here |
+| --- | --- |
+| Dots, cards, and rounded rectangles | [Types](#types) |
+| Business data controls color and size | [Data mapping](#data-mapping-and-selected-styles) |
+| Select a node or emphasize important items | [State styles](#state-styles) |
+| Names, text icons, or image icons | [Labels and icons](#labels-and-icons) |
+| Counts and business status badges | [Badge decorations](#badge-decorations) |
+| Update after data or configuration changes | [Runtime updates](#runtime-updates) |
+
+## Basic configuration
+
+1. Prepare a container with explicit dimensions and node data with unique IDs. Use `x` and `y` for existing positions, or configure a layout for automatic placement. See [Quick start](/en/docs/getting-started/quick-start) for initial setup.
+2. Pass node configuration as `node` in `new Graph({ container, data, node })`, then call and await `graph.render()`.
+3. Handle business events and runtime updates after the first render completes. Call `graph.destroy()` when the page unmounts.
+
+Each preview and its complete code use the same source. The code exports `run(container)`: pass a container element and await the returned Graph instance. The preview toolbar fits, zooms, or resets that example.
 
 ## Top-level configuration
 
-These options belong directly under `node`, alongside `style`:
+Choose the configuration location first. These options belong directly under `node`, alongside `style`; individual label and icon appearance fields belong inside `style`.
 
-| Option | Purpose and support |
+| Option | When to use it |
 | --- | --- |
-| `type` | Select built-in `circle`, `rect`, or a registered node type |
-| `style` | Configure the body, label, and icon through an object or style function |
-| `stateStyles` | Override body appearance for selected, highlighted, or other states |
-| `labelRenderer` | Use a renderer registered with `register('label', ...)`; `style.label` must still supply text |
-| `decorations` | Attach badges and other decorations using built-in `builtin-badge` or a registered decoration renderer |
-| `autoExternalLabelPlacement` | Declared in the type only; the runtime does not read it, so setting it does not reposition labels |
+| `type` | Choose `circle`, `rect`, or a registered business node type |
+| `style` | Configure body appearance, labels, and icons; use callbacks for data-dependent fields |
+| `stateStyles` | Configure selected or highlighted appearance; activate the state through behaviors or APIs |
+| `labelRenderer` | Choose a registered label renderer for richer content, while supplying nonempty `style.label` |
+| `decorations` | Attach badges or other supplemental content with built-in or registered decoration renderers |
+| `autoExternalLabelPlacement` | Type declaration only: the runtime does not read it. Set `style.labelPlacement` explicitly |
 
-Set `node.style.labelPlacement` explicitly, for example to `'bottom'`, when positioning labels. See [decoration visibility](/en/docs/guides/extensions#decoration-visibility) for decoration usage and [node configuration](/en/docs/api/options#node) for the configuration structure.
+See [`NodeConfig`](/en/docs/api/options/node#nodeconfig) for the complete structure and support status.
 
-Use state APIs for runtime selection and highlighting. Prefer static or precomputed fields for large graphs; keep functional style callbacks inexpensive.
+## Types
+
+| Shape requirement | Type and dimensions |
+| --- | --- |
+| Dots, people, or device markers | `type: 'circle'`, with diameter set by `size` |
+| Business cards or wide nodes | `type: 'rect'`, with `width`, `height`, and `borderRadius` |
+| Reusable business appearance | Call `register('node', name, extension)` before using that `type`; see [Custom nodes](/en/docs/guides/custom-node) |
+
+Both rectangles below are 96×40 with corner radius 8. The high-risk node on the left is red; the normal node on the right is blue. Click either node to inspect its selected stroke. The following data-mapping example uses circles so you can compare the relevant size fields.
+
+<NodeDocExample id="body" locale="en" />
+
+Use `style` directly for colors, dimensions, or strokes. Register an extension when you need a reusable business node type. See [Node shapes](/en/docs/examples/shapes) for other combinations and the [body reference](/en/docs/api/options/node#nodestyleconfig) for units and fallback rules.
 
 ## Data mapping and selected styles
 
-The complete code below runs this preview directly. Values 16, 28, and 40 in `data.value` become node diameters; the `core` group is blue and the other group is green. Click a node to apply the configured `selected` stroke and halo while retaining its base size and group color.
+Put business properties in each node's `data`, then read them in the corresponding style callbacks. A callback receives the current node, without an additional camera or zoom argument.
+
+The example maps `data.value` values 16, 28, and 40 to circle diameters. The `core` group is blue; the other group is green. A and C share a color, B is green, and sizes increase from left to right. Clicking a node also applies the selected style described next.
 
 <NodeDocExample id="style" locale="en" />
 
-See the [node reference](/en/docs/api/options/node) for fields, callbacks, and state precedence.
+Supply explicit fallbacks for missing business data and validate dimensions as finite positive numbers before passing data to the graph. Prefer per-field callbacks such as `style: { fill: callback, size: callback }` to retain other styles and state effects. Whole-object functions, `style: (node) => ({ ... })`, currently have different dimension fallbacks and state handling; see [Style callbacks](/en/docs/api/options/node#style-callbacks).
+
+## State styles
+
+Base styles express the node's classification and values. `stateStyles` expresses interaction states such as selection or highlighting. A behavior or state API must activate the state after you configure its appearance.
+
+The circle example combines `stateStyles.selected` with `click-select`. Click B: its green fill and diameter 28 remain, while a dark stroke and halo appear. Click the canvas background to clear selection. In business code, call `graph.setItemState('B', 'selected', true)` on the same Graph instance; use `false` to remove that state, or `graph.clearItemStates('B')` to clear every state.
+
+Specify every effect you want to retain when customizing a state: the same theme state is not merged field by field. Selection also has a minimum halo, so `haloWidth: 0` does not directly remove it. See [State styles](/en/docs/api/options/node#state-styles) for precedence and [Graph state methods](/en/docs/api/graph#state-visibility-and-focus) for visibility and batch operations.
+
+Compare the six built-in states on nodes and edges in [Default theme and states](/en/docs/examples/default-theme).
 
 ## Labels and icons
 
-Labels and icons both belong in `node.style`. The three nodes share one configuration: center letters come from `data.icon`, while names appear on the left, bottom, and right. `labelPlacement` moves names independently of center icons.
+1. Supply a name with `style.label`, usually from `node.data`, and place it with `labelPlacement`.
+2. Supply icon content with `style.icon` and choose `iconType` explicitly: `'text'` for text or font glyphs, `'image'` for image URLs. Set the relevant font size or image dimensions.
+3. Check the spacing between name and icon. Placing names outside and icons at the center avoids overlap. Top-level `label` policies separately control text scaling, low-zoom hiding, and collision hiding.
+
+These three nodes share one configuration: center letters A, D, and C come from `data.icon`, while names appear on the left, bottom, and right. `labelPlacement` moves names independently of center icons.
 
 <NodeDocExample id="labels" locale="en" />
 
-Follow the [label and icon guide](/en/docs/guides/label) for steps and consult the [node label and icon reference](/en/docs/api/options/node#labels) for fields.
+For composite labels or custom measurement and drawing, call `register('label', name, renderer)` before setting `node.labelRenderer`, and still provide nonempty `style.label`. See [Custom Label Renderer](/en/docs/guides/custom-label-renderer).
+
+See the [label and icon guide](/en/docs/guides/label) for width limits, backgrounds, and visibility policies; consult the [label fields](/en/docs/api/options/node#labels) and [icon fields](/en/docs/api/options/node#icons) for exact definitions.
 
 ## Badge decorations
 
-Decorations belong in `node.decorations[]`, alongside `style`. The code supplies 5 badges. With `maxVisible: 3`, the initial view shows a count, warning, and `···`. Hover `···` to expand all 5 items; leave the expanded region to fold. The node name remains below, independently of the stack.
+Counts, warnings, and permission markers can supplement the node body:
+
+1. Specify `renderer` in `node.decorations[]`. `builtin-badge` is already registered; register custom decoration renderers first.
+2. Use `data` for a single item, or `layout: 'stack'` with `items` for multiple items. An `items` callback can read business data to produce different badges for each node.
+3. Position decorations with `placement`, `attachment`, and `anchor`. Fold long lists with `maxVisible`, `overflow`, and visible `overflowData`.
+
+With 5 badge items and `maxVisible: 3`, the initial view shows a count, warning, and `···`. Hover `···` to expand all 5 items and leave the expanded region to fold them. The node name remains below independently.
 
 <NodeDocExample id="badges" locale="en" />
 
-`builtin-badge` needs no extra registration. See [decoration usage](/en/docs/guides/extensions#decoration-visibility) for custom registration and the [decoration reference](/en/docs/api/options/node#nodedecorationconfig) for placement, collision, and overflow rules.
+Decorations have their own zoom threshold and collision policy. See the [decoration reference](/en/docs/api/options/node#nodedecorationconfig) for placement, offsets, and visibility constraints, and [decoration usage](/en/docs/guides/extensions#decoration-visibility) for custom measurement, drawing, and registration.
+
+## Runtime updates
+
+Reuse the current instance after the first `await graph.render()` completes. Choose the operation by what changed:
+
+| What changed | Operation | Effect on the examples above |
+| --- | --- | --- |
+| One node's business value | `graph.updateNodeData('B', { value: 40 })` | B becomes diameter 40 in the data-mapping example and retains its group color |
+| All nodes need a uniform fill | `graph.updateOptions({ node: { style: { fill: '#7262FD' } } })` | Replace the color callback while retaining size mapping and other appearance fields |
+| Business logic selects a node | `graph.setItemState('B', 'selected', true)` | Activate `stateStyles.selected` without rebuilding data |
+| All node names move | `graph.updateOptions({ node: { style: { labelPlacement: 'top' } } })` | Move names above nodes while icons remain centered |
+| Remove configured decorations | `graph.updateOptions({ node: { decorations: [] } })` | Clear the decoration array while retaining node bodies and labels |
+| Replace the entire dataset | `await graph.setData(nextData, { fitView: false })` | Use new data, rerun a configured layout, and retain the camera |
+
+These calls operate on the Graph instance held by your business code. Reset example restores the corresponding initial preview configuration on this page. See [Node mutations](/en/docs/api/graph#nodes) and [`setData()`](/en/docs/api/graph#setdata).
+
+`updateOptions()` merges fields of a style object, but a supplied `stateStyles` or `decorations` replaces the entire state map or decoration array. Submit the complete collection you want to retain. Style updates normally require neither another `render()` nor a layout run. See [Runtime updates](/en/docs/api/options/node#runtime-updates) and [`updateOptions()`](/en/docs/api/graph#updateoptions).
+
+## Common questions
+
+| Symptom | Check and action |
+| --- | --- |
+| Width and height do not change a circle | Set `type: 'rect'` for rectangles. Built-in circles use `size` instead of rectangle dimensions |
+| Clicking does not apply state appearance | Enable a selection behavior or call a state API. Replace a whole-object style function with per-field callbacks when you need state appearance |
+| Labels are missing or disappear when zooming out | Check for nonempty `style.label`, then check top-level label zoom and collision policies; see the [label guide](/en/docs/guides/label#global-label-policies) |
+| An icon is missing | Use `iconType: 'text'` for text or `'image'` for URLs, and check URL, cross-origin access, and loading results |
+| A custom type or renderer has no effect | Register before creating or updating configuration. Custom labels also need nonempty `style.label` |
+| Fewer items appear than `maxVisible` | A folded stack reserves an overflow slot. Supply `overflowData` to show it, and use `overflow: 'hover-expand'` for expansion |
+| Automatic external labels do not move | `autoExternalLabelPlacement` is not implemented; set `labelPlacement` explicitly |
+| Other states or badges disappear after an update | `stateStyles` and `decorations` are replaced as whole collections; submit everything you want to retain |
+
+## Performance
+
+- Built-in circles and rectangles use WebGL. Prefer constants for uniform appearance and lightweight callbacks for data-dependent fields; avoid fetching data or doing expensive work inside callbacks.
+- Use state APIs for frequent selection or highlight changes and incremental operations for business-data changes, reducing full data replacements and layout runs.
+- Show labels and decorations as needed, with zoom, collision, and item-count limits. Keep custom label and decoration measurement and drawing inexpensive.
+
+## Related resources
+
+- [Node reference](/en/docs/api/options/node): fields, units, precedence, and edge cases.
+- [Labels and icons](/en/docs/guides/label): visibility policies and additional configuration steps.
+- [Custom nodes](/en/docs/guides/custom-node): reusable business node types.
+- [Edges](/en/docs/guides/edge): connections and related appearance.
+- [Examples](/en/docs/examples): further experiments with data, configuration, and interaction.

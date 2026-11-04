@@ -1,0 +1,35 @@
+site/src/lib/node-doc-example-source.ts
+  s_4534bc5c3d78f4::t_51e25d66616f69 31,41
+  s_4534bc5c3d78f4::t_23bc3460311a9c 4
+site/content/docs/zh/api/options/meta.json
+  s_4534bc5c3d78f4::t_51e25d66616f69 5
+site/content/docs/zh/api/options/behaviors.mdx
+  s_4534bc5c3d78f4::t_7a1a9957eafe3e 120,129-130
+  s_4534bc5c3d78f4::t_aa3fe085b4f608 1-119,121-128,131-137
+site/content/docs/en/api/options/behaviors.mdx
+  s_4534bc5c3d78f4::t_7a1a9957eafe3e 120,129-130
+  s_4534bc5c3d78f4::t_aa3fe085b4f608 1-119,121-128,131-137
+site/demos/docs-behavior-selection.ts
+  s_4534bc5c3d78f4::t_51e25d66616f69 2-8,10-45
+  s_4534bc5c3d78f4::t_730df9b80801f1 1,9
+site/src/components/node-doc-preview.tsx
+  s_4534bc5c3d78f4::t_51e25d66616f69 37,54-56
+site/content/docs/en/api/options/meta.json
+  s_4534bc5c3d78f4::t_51e25d66616f69 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "114e9bd463add03a74152bded5df0bc170b9a74c",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

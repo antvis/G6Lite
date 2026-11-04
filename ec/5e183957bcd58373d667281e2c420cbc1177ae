@@ -1,0 +1,25 @@
+site/demos/docs-edge-hit-area.ts
+  s_4534bc5c3d78f4::t_dfb48ec61137d7 1-39
+site/src/lib/node-doc-example-source.ts
+  s_4534bc5c3d78f4::t_dfb48ec61137d7 4,11-12,22-24
+site/demos/docs-edge-style.ts
+  s_4534bc5c3d78f4::t_dfb48ec61137d7 1-45
+site/src/components/node-doc-preview.tsx
+  s_4534bc5c3d78f4::t_dfb48ec61137d7 17-18,35-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ec5e183957bcd58373d667281e2c420cbc1177ae",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

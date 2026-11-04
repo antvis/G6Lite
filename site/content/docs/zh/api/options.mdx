@@ -33,7 +33,7 @@ const graph = new Graph({
 | `combo` | [`ComboConfig`](/docs/api/options/combo) | 分组外观、标签、折叠形态与状态样式；嵌套和折叠仍是实验性能力 |
 | `label` | [`LabelOptions`](/docs/api/options/label#labeloptions) | 节点和边标签共用的缩放、碰撞策略 |
 | `layout` | [`LayoutConfig`](/docs/api/options/layout#layoutconfig) | 布局类型和算法参数 |
-| `behaviors` | `BehaviorOption[]` | 交互列表。省略时启用滚轮缩放和拖拽平移 |
+| `behaviors` | [`BehaviorOption[]`](/docs/api/options/behaviors#behavioroption) | 交互列表。省略时启用滚轮缩放和拖拽平移 |
 | `transforms` | `TransformOption[]` | 绘制前的数据转换，例如平行边 |
 | `plugins` | `PluginOption[]` | 已注册插件 |
 | `theme` | [`ThemeOption`](/docs/api/options/theme#themeoption) | `'light'`、`'dark'`，或在预设上覆盖 token |
@@ -156,39 +156,13 @@ layout 决定节点的图坐标；省略时使用已有 x/y，缺失坐标补 0�
 
 ## 交互
 
-`behaviors` 的每一项是行为名，或 `{ type, ...选项 }`。
+behaviors 是完整行为列表，省略时启用缩放与画布平移；显式数组覆盖默认，空数组不挂载行为。完整定义统一见 [Behavior 配置参考](/docs/api/options/behaviors)。
 
-省略整个字段时等价于 `['zoom-canvas', 'drag-canvas']`。传入数组后，数组就是完整列表，`[]` 表示关闭默认的缩放和平移。
+- [类型与挂载](/docs/api/options/behaviors#behavioroption)：名称、严格类型、默认列表和更新边界。
+- [导航与拖拽](/docs/api/options/behaviors#导航与拖拽)、[选择](/docs/api/options/behaviors#选择)、[高亮](/docs/api/options/behaviors#高亮)：参数、手势与实际生效范围。
+- [TooltipOptions](/docs/api/options/behaviors#tooltipoptions) 与 [TooltipContext](/docs/api/options/behaviors#tooltipcontext)：浮层参数、内容、事件与挂载。
 
-| `type` | 作用 | 可写选项 |
-| --- | --- | --- |
-| `zoom-canvas` | 滚轮缩放 | `sensitivity` 默认 `1`，`minZoom` 默认 `0.1`，`maxZoom` 默认 `20` |
-| `drag-canvas` | 拖拽平移 | `ignoreModifierKeys` 默认 `true`，按住修饰键时不平移，留给框选 |
-| `drag-node` | 拖拽节点 | 无额外选项 |
-| `drag-edge` | 拖拽边的端点重新连线 | 无额外选项 |
-| `click-select` | 点击选中节点或边 | `multiple` 默认 `false`，`trigger` 默认 `'shift'`，还可为 `'ctrl'` 或 `'meta'` |
-| `hover-highlight` | 悬停高亮邻域 | `degree` 默认 `1`，`inactiveState` 可选 |
-| `highlight-node` | 悬停节点时高亮该节点、一度邻居和相连的边 | 无额外选项 |
-| `highlight-edge` | 悬停边时高亮边和两端节点 | 无额外选项 |
-| `brush-select` | 矩形框选 | `key` 为 `'shift'`、`'ctrl'` 或 `null`，`throttleMs` 默认 `100` |
-| `lasso-select` | 套索选择 | 与 `brush-select` 相同 |
-| `tooltip` | 浮层 | 见下表 |
-
-`tooltip` 选项：
-
-| 字段 | 默认 | 说明 |
-| --- | --- | --- |
-| `trigger` | `'hover'` | `'hover'` 或 `'click'` |
-| `getContent` | 节点 id 或边的两端 | 返回字符串或 `HTMLElement`。自定义字符串按 HTML 写入，不可信内容需要调用方转义 |
-| `enable` | 始终显示 | 返回 `false` 时不显示该元素 |
-| `offset` | `[10, 10]` | 相对指针的像素偏移 |
-| `delay` | `80` | 悬停出现前的等待毫秒 |
-| `className` | `'g6lite-tooltip'` | 浮层类名 |
-| `container` | `document.body` | 浮层挂载节点 |
-
-`getContent` 收到的 `TooltipContext` 包含 `itemType`、`nodeId` 或边的 `edgeId` / `source` / `target`、`data` 和原始 `event`。
-
-行为组合和事件见 [交互配置](/docs/guides/interactions)。自定义行为用 [`register('behavior', ...)`](/docs/api/extensions)。
+操作流程与代码效果见[交互组合](/docs/guides/interactions)、[Tooltip 指南](/docs/guides/tooltip)；业务扩展见[自定义 Behavior](/docs/guides/custom-behavior)。
 
 ## 主题
 

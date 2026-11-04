@@ -33,7 +33,7 @@ Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs
 | `combo` | [`ComboConfig`](/en/docs/api/options/combo) | Group appearance, labels, collapsed shapes, and state styles; nesting and collapse remain experimental |
 | `label` | [`LabelOptions`](/en/docs/api/options/label#labeloptions) | Zoom and collision policy shared by node and edge labels |
 | `layout` | [`LayoutConfig`](/en/docs/api/options/layout#layoutconfig) | Layout type and algorithm parameters |
-| `behaviors` | `BehaviorOption[]` | Interaction list. Omitted means wheel zoom and drag pan |
+| `behaviors` | [`BehaviorOption[]`](/en/docs/api/options/behaviors#behavioroption) | Interaction list. Omitted means wheel zoom and drag pan |
 | `transforms` | `TransformOption[]` | Data transforms before drawing, such as parallel edges |
 | `plugins` | `PluginOption[]` | Registered plugins |
 | `theme` | [`ThemeOption`](/en/docs/api/options/theme#themeoption) | `'light'`, `'dark'`, or a preset plus token overrides |
@@ -156,39 +156,13 @@ See the [Layout guide](/en/docs/guides/layout) for selection and switching, or t
 
 ## Interactions
 
-Each `behaviors` item is a behavior name or `{ type, ...options }`.
+behaviors is the complete list. Omission enables wheel zoom and canvas panning; explicit arrays replace defaults, and an empty array mounts no Behavior. Full definitions are in the [Behavior reference](/en/docs/api/options/behaviors).
 
-Omitting the field is equivalent to `['zoom-canvas', 'drag-canvas']`. Once an array is passed, that array is the complete list. `[]` turns off the default zoom and pan.
+- [Types and mounting](/en/docs/api/options/behaviors#behavioroption): names, strict types, defaults, and update boundaries.
+- [Navigation and dragging](/en/docs/api/options/behaviors#navigation-and-dragging), [selection](/en/docs/api/options/behaviors#selection), and [highlighting](/en/docs/api/options/behaviors#highlighting): options, gestures, and runtime scope.
+- [TooltipOptions](/en/docs/api/options/behaviors#tooltipoptions) and [TooltipContext](/en/docs/api/options/behaviors#tooltipcontext): overlay options, content, events, and mounting.
 
-| `type` | Effect | Options |
-| --- | --- | --- |
-| `zoom-canvas` | Wheel zoom | `sensitivity` default `1`, `minZoom` default `0.1`, `maxZoom` default `20` |
-| `drag-canvas` | Drag to pan | `ignoreModifierKeys` default `true`, so a modifier key stays available for brush select |
-| `drag-node` | Drag a node | No extra options |
-| `drag-edge` | Drag an edge endpoint to reconnect it | No extra options |
-| `click-select` | Click to select a node or edge | `multiple` default `false`; `trigger` default `'shift'`, also `'ctrl'` or `'meta'` |
-| `hover-highlight` | Highlight a neighborhood on hover | `degree` default `1`; optional `inactiveState` |
-| `highlight-node` | Hovering a node highlights it, its one-hop neighbors, and the connecting edges | No extra options |
-| `highlight-edge` | Hovering an edge highlights it and its endpoints | No extra options |
-| `brush-select` | Rectangular selection | `key` is `'shift'`, `'ctrl'`, or `null`; `throttleMs` default `100` |
-| `lasso-select` | Freeform selection | Same options as `brush-select` |
-| `tooltip` | Overlay | See the table below |
-
-`tooltip` options:
-
-| Field | Default | Description |
-| --- | --- | --- |
-| `trigger` | `'hover'` | `'hover'` or `'click'` |
-| `getContent` | Node id, or the edge endpoints | Returns a string or `HTMLElement`. A custom string is written as HTML, so untrusted content must be escaped by the caller |
-| `enable` | Always shown | Return `false` to skip that element |
-| `offset` | `[10, 10]` | Pixel offset from the pointer |
-| `delay` | `80` | Milliseconds to wait before a hover tooltip appears |
-| `className` | `'g6lite-tooltip'` | Overlay class name |
-| `container` | `document.body` | DOM node that hosts the overlay |
-
-`getContent` receives a `TooltipContext` with `itemType`, `nodeId` or the edge's `edgeId` / `source` / `target`, `data`, and the original `event`.
-
-Behavior combinations and events are in [Interactions](/en/docs/guides/interactions). A custom behavior uses [`register('behavior', ...)`](/en/docs/api/extensions).
+For workflows and rendered code examples, see [Interactions](/en/docs/guides/interactions) and [Tooltip](/en/docs/guides/tooltip). For extensions, see [Custom Behavior](/en/docs/guides/custom-behavior).
 
 ## Theme
 

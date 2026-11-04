@@ -24,7 +24,7 @@ register(type, name, extension): void
 | `'label'` | `node.labelRenderer` 或 `edge.labelRenderer` | `measure(params)` 返回宽高，`draw(params)` 把内容画到 canvas |
 | `'decoration'` | `node.decorations[].renderer` | 与标签相同的 `measure` / `draw`，数据来自装饰配置 |
 | `'layout'` | `layout.type` | `execute(data, context)` 返回带 `x`、`y` 的节点。`context` 含 `width`、`height`、`signal` 和本次 `options` |
-| `'behavior'` | `behaviors` 的 `type` | `getEvents()` 返回事件名到处理函数的映射。需要时实现 `init(context, options)` 和 `destroy()` |
+| 'behavior' | behaviors 的 type | [BehaviorExtension 契约](/docs/api/options/behaviors#自定义-behavior-契约)：init、getEvents、destroy；完整实现见[自定义 Behavior](/docs/guides/custom-behavior) |
 | `'transform'` | `transforms` 的 `type` | `beforeRender(data)` 返回新的 `GraphData`。选项变化时可以实现 `update(options)` |
 | `'plugin'` | `plugins` 的 `type` | `mount(container)` 挂载独立 DOM。用 `init` / `destroy` 管理生命周期 |
 
@@ -35,27 +35,9 @@ register('edge', 'dependency', {
   base: 'arc',
   style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
 });
-
-register(
-  'behavior',
-  'pin-click',
-  extensionFactory(() => {
-    let context: ExtensionContext | undefined;
-    return {
-      init(next) {
-        context = next;
-      },
-      getEvents() {
-        return {
-          'node:click': ({ nodeId }) => context?.state.set(nodeId, ['selected']),
-        };
-      },
-    };
-  }),
-);
 ```
 
-注册完成后再创建 Graph，或在已创建的 Graph 上通过配置引用这个名字。行为、转换和插件读取的是渲染时的注册表。
+在首次 render 前完成注册。Behavior 在挂载时创建，后注册或覆盖不会替换已挂载实例；激活与清理见[自定义 Behavior](/docs/guides/custom-behavior)。
 
 对象和零参数 class 仍能注册。对象会被尽量克隆，class 会被重新构造。有状态扩展要可预测的实例隔离时，使用 `extensionFactory()`。
 

@@ -24,7 +24,7 @@ register(type, name, extension): void
 | `'label'` | `node.labelRenderer` or `edge.labelRenderer` | `measure(params)` returns width and height; `draw(params)` paints onto the canvas |
 | `'decoration'` | `node.decorations[].renderer` | The same `measure` / `draw` pair, with data from the decoration config |
 | `'layout'` | `layout.type` | `execute(data, context)` returns nodes with `x` and `y`. `context` includes `width`, `height`, `signal`, and the current `options` |
-| `'behavior'` | `type` inside `behaviors` | `getEvents()` maps event names to handlers. Implement `init(context, options)` and `destroy()` when the behavior has a lifecycle |
+| 'behavior' | behaviors type | [BehaviorExtension contract](/en/docs/api/options/behaviors#custom-behavior-contract): init, getEvents, destroy; complete implementation in [Custom Behavior](/en/docs/guides/custom-behavior) |
 | `'transform'` | `type` inside `transforms` | `beforeRender(data)` returns the next `GraphData`. Implement `update(options)` when options can change |
 | `'plugin'` | `type` inside `plugins` | `mount(container)` attaches independent DOM. Use `init` / `destroy` for its lifecycle |
 
@@ -35,27 +35,9 @@ register('edge', 'dependency', {
   base: 'arc',
   style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
 });
-
-register(
-  'behavior',
-  'pin-click',
-  extensionFactory(() => {
-    let context: ExtensionContext | undefined;
-    return {
-      init(next) {
-        context = next;
-      },
-      getEvents() {
-        return {
-          'node:click': ({ nodeId }) => context?.state.set(nodeId, ['selected']),
-        };
-      },
-    };
-  }),
-);
 ```
 
-Register before creating the Graph, or before a render that reads the name. Behaviors, transforms, and plugins resolve names from the registry at render time.
+Register before the first render. Behaviors are created on mounting; later registration or replacement does not replace mounted instances. See [Custom Behavior](/en/docs/guides/custom-behavior) for activation and cleanup.
 
 A plain object or a zero-argument class can still be registered. Objects are cloned on a best-effort basis, and classes are constructed again. Use `extensionFactory()` when a stateful extension needs a predictable instance per graph.
 

@@ -37,6 +37,8 @@ const loaders = {
   'behavior-selection': () => import('../../demos/docs-behavior-selection.ts'),
   'behavior-highlight': () => import('../../demos/docs-behavior-highlight.ts'),
   'behavior-custom': () => import('../../demos/docs-behavior-custom.ts'),
+  'behavior-tooltip': () => import('../../demos/docs-behavior-tooltip.ts'),
+  'behavior-tooltip-hover': () => import('../../demos/docs-behavior-tooltip-hover.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -53,7 +55,11 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'behavior-custom'
+  const hint = id === 'behavior-tooltip'
+    ? (zh ? '单击 API、DB 或边显示；再点相同元素或空白关闭；Cache 节点被 enable 排除' : 'Click API, DB, or an edge; click again or on canvas to close. Cache is excluded by enable')
+    : id === 'behavior-tooltip-hover'
+    ? (zh ? '悬停 API、DB 或边显示，等待 120ms；移开隐藏，Cache 节点不显示' : 'Hover API, DB, or an edge for 120ms; leaving hides it. Cache nodes show no tooltip')
+    : id === 'behavior-custom'
     ? (zh ? '单击节点切换唯一 active；单击空白只清理 active，保留 A 原有的 selected' : 'Click a node to make it uniquely active; canvas click clears active while preserving A’s initial selected state')
     : id === 'behavior-highlight'
     ? (zh ? '悬停 B 查看一度邻域；悬停边查看两端；移开清理高亮，拖动空白平移' : 'Hover B for its one-hop neighborhood, or an edge for its endpoints. Move away to clear; drag empty space to pan')

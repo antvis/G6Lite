@@ -1,65 +1,61 @@
 ---
-title: Tooltip 配置
-description: 使用内置 tooltip behavior 展示节点和边信息
+title: Tooltip
+description: 用悬停或点击显示节点与边信息，自定义安全内容和视觉样式
 ---
 
-启用 `tooltip` behavior 后，G6Lite 会在命中节点或边时显示浮层。
+import { NodeDocExample as BehaviorDocExample } from '@/components/node-doc-example';
 
-```ts
-behaviors: ['tooltip'];
-```
-
-自定义浮层效果示意：悬停节点后展示业务信息。图中的内容和深色卡片均由业务配置，库不预设这些视觉样式。
-
-![悬停服务节点时展示名称、运行状态和请求量的自定义 Tooltip 示意](/examples/docs-guide-tooltip.svg '自定义 Tooltip')
-
-可运行示例：[Tooltip](/docs/examples/tooltip)。
+Tooltip 通过 behaviors 启用，只处理节点和边。需要缩放和平移时，将 zoom-canvas、drag-canvas 一并写入列表；仅写 tooltip 会替换默认导航。
 
 ## 自定义内容
 
-```ts
-behaviors: [
-  {
-    type: 'tooltip',
-    trigger: 'hover',
-    getContent: (ctx) =>
-      ctx.itemType === 'node'
-        ? `<b>${ctx.data?.label ?? ctx.nodeId}</b>`
-        : `${ctx.source} -> ${ctx.target}`,
-  },
-];
-```
+悬停 API、DB 或边，等待 120ms 显示卡片；移开隐藏。Cache 节点被 enable 排除。代码返回 HTMLElement，用 textContent 展示业务值，因此 API 名称中的尖括号会作为普通文字显示。
 
-`getContent` 可以返回字符串或 HTMLElement。返回字符串时会写入 `innerHTML`，需要自行确保内容安全。
+<BehaviorDocExample id="behavior-tooltip-hover" locale="zh" />
+
+## 点击显示
+
+点击 API、DB 或边显示，重复点击同一元素或点击空白关闭。click 模式不使用 hover 的 delay；画布示例中的代码就是这一份配置。
+
+<BehaviorDocExample id="behavior-tooltip" locale="zh" />
 
 ## 配置项
 
-| 选项         | 类型                             | 默认值             | 说明                |
-| ------------ | -------------------------------- | ------------------ | ------------------- |
-| `trigger`    | `'hover' \| 'click'`             | `'hover'`          | 触发方式            |
-| `getContent` | `(ctx) => string \| HTMLElement` | label / id         | 自定义内容          |
-| `enable`     | `(ctx) => boolean`               | 总是显示           | 按元素控制是否显示  |
-| `offset`     | `[number, number]`               | `[10, 10]`         | 相对指针偏移        |
-| `delay`      | `number`                         | `80`               | hover 防抖，单位 ms |
-| `className`  | `string`                         | `'g6lite-tooltip'` | 浮层 class          |
+完整默认值、函数签名、container 和 TooltipContext 字段统一查 [TooltipOptions](/docs/api/options/behaviors#tooltipoptions) 与 [TooltipContext](/docs/api/options/behaviors#tooltipcontext)。ctx.event 是原始鼠标事件；它与普通 Graph 事件的 nativeEvent 命名不同。
+
+默认内容是节点 data.label/id、边 data.label 或两端名称。自定义 getContent 返回字符串时按 HTML 写入，应自行转义动态内容；不需要 HTML 时，优先像上例一样返回填充 textContent 的元素。
 
 ## 样式
 
-库本身不附带 tooltip 视觉样式。你可以用默认 class 自定义：
+库只负责定位与显隐，不附带视觉皮肤。两个示例直接在返回元素上设置样式；也可给浮层 className 配置样式，例如默认类名：
 
 ```css
 .g6lite-tooltip {
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.78);
-  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #163b65;
+  color: white;
   font-size: 12px;
-  pointer-events: none;
 }
 ```
 
+默认挂载 document.body，按视口定位并在边缘翻转。自定义 container 同时改变挂载与碰撞边界，需检查定位祖先、滚动和裁剪；不要假定祖先的 transform 不影响 fixed 定位。
+
+## 常见问题
+
+### 为什么卡片没有背景，或者点击不了？
+
+库没有内置视觉皮肤，需要业务 CSS。浮层默认 pointer-events: none；需要按钮、表单或可交互卡片时，用应用自己的浮层承接。
+
+### 为什么 Combo 上没有 Tooltip？
+
+内置 tooltip 只处理 node/edge。Combo 说明可用公开事件结合业务浮层实现，不使用内部拾取接口。
+
+### 更新数据后，已打开的内容会立即更新吗？
+
+不会因 setData 自动重建 Tooltip；在后续指针事件中重新读取内容。切换配置需更换实例，销毁实例会解除监听、清理计时器并移除浮层。
+
 ## 相关
 
-- [交互总览](/docs/guides/interactions)
-- [事件](/docs/guides/events)
-- [API: TooltipOptions](/docs/api)
+- [Behavior 参考](/docs/api/options/behaviors#tooltipoptions) · [交互组合](/docs/guides/interactions)。
+- [事件指南](/docs/guides/events) · [独立 Tooltip 示例](/docs/examples/tooltip)。

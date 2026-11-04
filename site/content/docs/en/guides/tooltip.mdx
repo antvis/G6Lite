@@ -1,16 +1,61 @@
 ---
-title: Tooltip configuration
-description: Show node and edge information with the built-in tooltip behavior
+title: Tooltip
+description: Show node and edge details on hover or click, with safe content and custom styling
 ---
 
-```ts
-behaviors: [
-  {
-    type: 'tooltip',
-    getContent: ({ itemType, data }) =>
-      `<strong>${itemType}</strong><br />${String(data?.label ?? '')}`,
-  },
-];
+import { NodeDocExample as BehaviorDocExample } from '@/components/node-doc-example';
+
+Enable Tooltip through behaviors. It handles nodes and edges. Include zoom-canvas and drag-canvas when navigation is needed; tooltip alone replaces default navigation.
+
+## Custom content
+
+Hover API, DB, or an edge for 120ms to show a card; leave to hide it. enable excludes the Cache node. The code returns an HTMLElement populated with textContent, so angle brackets in the API name remain literal text.
+
+<BehaviorDocExample id="behavior-tooltip-hover" locale="en" />
+
+## Click to show
+
+Click API, DB, or an edge to show details. Repeating the same element or clicking empty canvas closes the card. Click mode does not use the hover delay; the displayed code runs this exact configuration.
+
+<BehaviorDocExample id="behavior-tooltip" locale="en" />
+
+## Options
+
+Find defaults, callback signatures, container, and context fields in [TooltipOptions](/en/docs/api/options/behaviors#tooltipoptions) and [TooltipContext](/en/docs/api/options/behaviors#tooltipcontext). ctx.event is the original mouse event, unlike the nativeEvent property on ordinary Graph events.
+
+Default content uses node data.label/id, or edge data.label/endpoint names. Custom getContent strings are written as HTML, so escape dynamic values. When HTML is unnecessary, prefer an element filled through textContent as above.
+
+## Styling
+
+The library positions and shows/hides the surface without a visual skin. Both examples style the returned element directly. Alternatively, configure className and style the outer surface, such as its default class:
+
+```css
+.g6lite-tooltip {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #163b65;
+  color: white;
+  font-size: 12px;
+}
 ```
 
-Use application-safe rendering when content contains user input. Tooltip positioning follows the shared pointer and picking pipeline. Style the generated surface through the documented tooltip class names or your own controlled content.
+By default the surface mounts in document.body, uses viewport positioning, and flips at edges. A custom container changes both mounting and collision boundaries; verify positioning ancestors, scrolling, and clipping, including how transforms affect fixed positioning.
+
+## Common questions
+
+### Why is the card unstyled or unclickable?
+
+Provide application CSS; there is no built-in visual skin. The overlay has pointer-events: none. Use your own application overlay for buttons, forms, or interactive cards.
+
+### Why does a Combo show no Tooltip?
+
+The built-in handles nodes/edges only. Use public events with an application overlay for Combo details rather than internal picking.
+
+### Does an open card update immediately after data changes?
+
+setData does not recreate Tooltip. Later pointer events read content again. Configuration changes require replacing the instance; destruction unbinds handlers, clears timers, and removes the surface.
+
+## Related
+
+- [Behavior reference](/en/docs/api/options/behaviors#tooltipoptions) · [Interaction guide](/en/docs/guides/interactions).
+- [Events](/en/docs/guides/events) · [Standalone Tooltip example](/en/docs/examples/tooltip).

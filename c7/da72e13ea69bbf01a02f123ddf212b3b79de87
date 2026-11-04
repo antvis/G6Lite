@@ -1,0 +1,25 @@
+site/content/docs/en/api/options/meta.json
+  s_4534bc5c3d78f4::t_1cc3a77d9ded7b 1-6
+site/content/docs/zh/api/meta.json
+  s_4534bc5c3d78f4::t_1cc3a77d9ded7b 3
+site/content/docs/en/api/meta.json
+  s_4534bc5c3d78f4::t_1cc3a77d9ded7b 3
+site/content/docs/zh/api/options/meta.json
+  s_4534bc5c3d78f4::t_1cc3a77d9ded7b 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c7da72e13ea69bbf01a02f123ddf212b3b79de87",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

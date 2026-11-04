@@ -1,0 +1,26 @@
+site/content/docs/en/guides/node.mdx
+  s_4534bc5c3d78f4::t_6d7c36612f3a11 36
+  s_4534bc5c3d78f4::t_91bf127813da42 23-35,37
+site/content/docs/zh/guides/node.mdx
+  s_4534bc5c3d78f4::t_91bf127813da42 20-34
+site/content/docs/en/api/options.mdx
+  s_4534bc5c3d78f4::t_91bf127813da42 130-131
+site/content/docs/zh/api/options.mdx
+  s_4534bc5c3d78f4::t_91bf127813da42 130-131
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "bad3ffab860df00178b1411c64e6841b4abaffe7",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

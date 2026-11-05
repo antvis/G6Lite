@@ -29,8 +29,9 @@ export async function measureOnce(container: HTMLElement, data: GraphData) {
   const start = performance.now();
   const positions = await runLayout(data, { type: 'grid' });
   const layoutMs = performance.now() - start;
+  const coordinates = new Map(positions.nodes.map((node) => [node.id, node]));
   const positioned = { ...data, nodes: data.nodes.map((node) => ({
-    ...node, ...positions.nodes.find((point) => point.id === node.id),
+    ...node, ...coordinates.get(node.id),
   })) };
   const createStart = performance.now();
   const graph = new Graph({ container, data: positioned, behaviors: [] });
@@ -59,4 +60,4 @@ Use the [capability comparison](/en/docs/compatibility/library-comparison) to se
 2. Keep all samples; report median, P95, and range. Explain outliers instead of silently deleting them.
 3. Progress through 200/5000-node and realistic datasets, then verify dragging, labels, and cleanup on target devices.
 
-Runnable workloads: [200 nodes](/en/docs/examples/large) · [5000 nodes](/en/docs/examples/large-labels) · [AI Papers](/en/docs/examples/ai-papers)。Read each example’s dataset description. For tuning see [performance tuning](/en/docs/metrics/performance-tuning)。
+Runnable workloads: [200 nodes](/en/docs/examples/large) · [5000 nodes](/en/docs/examples/large-labeled) · [AI Papers](/en/docs/examples/ai-papers)。Read each example’s dataset description. For tuning see [performance tuning](/en/docs/metrics/performance-tuning)。

@@ -1,46 +1,44 @@
 ---
-title: 性能调优
-description: 大图首屏、交互、标签、状态与布局的优化建议和度量方法
+title: 性能优化
+description: 从首屏、交互、标签和资源症状定位瓶颈，并验证调整结果
 ---
 
-G6Lite 的首屏耗时通常由数据准备和布局计算主导；渲染后的状态更新、视口交互和拾取则更依赖浏览器、GPU 与单屏元素数量。调优应先测量，再针对瓶颈调整。
+一次只调整一个变量，按[测量方法](/docs/metrics/performance)保存调整前后样本。先区分布局、主线程绘制和 GPU/设备限制。
 
 ## 首屏与布局
 
-- 后端已有坐标时，直接提供 `x` / `y` 并使用 preset 数据，避免重复布局。
-- 大图优先评估 `grid`、`circular` 等确定性布局；力导向布局需要控制迭代次数。
-- force 系布局可开启 `worker: true`，降低主线程阻塞。
-- 先渲染关键节点和边，再按业务优先级补充非关键元素。
+**症状：首次出现图很慢。** 先看布局与模块加载耗时。已有坐标时省略 layout；需要布局时先用 grid 验证绘制，再按业务选择 force 等算法、限制相应迭代参数。不要把 grid 的速度当成 force 优化结果。
 
-```ts
-layout: {
-  type: 'force',
-  worker: true,
-  maxIteration: 100,
-}
-```
+支持的算法可尝试 Worker，但要在 Network/Performance 中确认任务确实离开主线程；克隆失败、资源加载或 CSP 问题会回退。参数与取消查[Worker](/docs/guides/layout-worker) · [布局配置](/docs/api/options/layout)。
 
 ## 高频更新
 
-高亮、选中、隐藏等交互优先使用状态 API，让调度器只刷新变化部分：
+**症状：每次选择或更新都卡顿。** 检查是否反复 new Graph、render 或 setData。状态用状态 API，批量位置用 updateNodePositions；只有全量替换才用 setData。不要将业务字段更新与坐标更新混在一起。
 
 ```ts
-graph.batchSetState([
-  { id: 'n2', state: 'inactive', value: true },
-  { id: 'e1', state: 'inactive', value: true },
-]);
+import type { Graph } from '@antv/g6-lite';
+
+export function markRelated(graph: Graph, nodeIds: string[]) {
+  graph.batchSetState(nodeIds.map((id) => ({
+    id, state: 'highlight', value: true,
+  })));
+}
 ```
 
-批量更新位置或业务数据时，优先使用对应批量 API，避免在同一帧内循环触发大量独立调度。
+验证相同数据下连续选择/清空、拖拽和批量写入的帧时间；状态切换不应重建实例。完整返回值和刷新边界查[状态](/docs/api/graph/states) · [写入](/docs/api/graph/data-mutations)。
 
 ## 样式与标签
 
-- 函数式样式中只读取已准备好的字段，不执行复杂聚合或网络查询。
-- 标签由 Canvas 2D 绘制；大规模图只展示关键标签，并随缩放级别或选中状态逐步展开。
-- 控制阴影、复杂描边、超长文本和全量边标签，避免把 CPU 绘制成本放在每次视口更新上。
+**症状：缩放、拖拽时掉帧。** 暂时关闭标签，比较相同视口；再逐步恢复必要标签、边文字和装饰。缓存样式回调所需业务计算，回调中只读字段，不执行网络请求或全图聚合。
+
+使用真实标签密度测试阈值和碰撞策略，查[标签策略](/docs/api/options/label)。用 [5000 节点与标签](/docs/examples/large-labeled)对比开关，不能把无标签结果当成完整业务效果。
+
+## 资源与设备
+
+**症状：多次进入后变慢或画布丢失。** 检查卸载是否 destroy、订阅是否退订、业务请求是否取消。比较挂载/销毁后的画布与活动实例数量。高 DPR、大画布和同时打开多个图都会增加资源成本，不能只靠减少节点解决。
+
+[React](/docs/getting-started/react) · [Vue](/docs/getting-started/vue) · [环境要求](/docs/compatibility/browser)
 
 ## 对比口径
 
-对比前确保版本、commit、CPU、浏览器、视口、DPR、数据规模和布局配置一致。完整口径见 [性能指标](/docs/metrics/performance)。
-
-如果目标是极大规模或低端移动设备，请在真实设备上使用真实拓扑测试；桌面 Headless Chrome 的结果不能替代终端验收。
+保留相同视觉与交互要求，重复测量中位数、P95、帧时间和资源趋势。桌面自动化结果不能替代移动设备验收；性能预算由业务目标决定，不使用通用“最大节点数”承诺。

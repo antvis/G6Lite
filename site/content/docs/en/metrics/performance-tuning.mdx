@@ -1,13 +1,44 @@
 ---
 title: Performance tuning
-description: Measure and optimize first render, layout, updates, labels, and viewport interaction
+description: Locate startup, interaction, label, and resource bottlenecks, then verify changes
 ---
 
-- Reuse backend coordinates when available and omit layout.
-- Control iterations for force layouts and consider `worker: true`.
-- Prefer deterministic layouts for large overview screens.
-- Use state and batch update APIs for high-frequency interaction.
-- Keep functional style callbacks inexpensive and precompute complex mappings.
-- Limit initial labels; reveal more by zoom, focus, or selection.
+Change one variable at a time and save before/after samples using the [measurement method](/en/docs/metrics/performance). Separate layout, main-thread drawing, and GPU/device limits.
 
-Compare only equivalent environments and configurations. Desktop Headless Chrome cannot replace real mobile or low-end device testing.
+## Startup and layout
+
+**Slow first graph.** Inspect layout and module-loading time. Omit layout for supplied positions. Use grid to establish a drawing baseline, then select algorithms and their iteration limits for the workload. A faster grid is not a force-layout optimization.
+
+Try Worker execution where supported, and confirm it in Network/Performance. Clone, resource, or CSP failures can cause fallback. See [Worker](/en/docs/guides/layout-worker) · [layout options](/en/docs/api/options/layout)。
+
+## Frequent updates
+
+**Selection or updates stall.** Check for repeated construction, render, or setData. Use state APIs for state, updateNodePositions for bulk positions, and setData for full replacement. Keep business-data and position updates distinct.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+export function markRelated(graph: Graph, nodeIds: string[]) {
+  graph.batchSetState(nodeIds.map((id) => ({
+    id, state: 'highlight', value: true,
+  })));
+}
+```
+
+Compare frame times for repeated select/clear, dragging, and bulk writes on the same data. State changes should reuse the instance. Full contracts: [states](/en/docs/api/graph/states) · [mutations](/en/docs/api/graph/data-mutations)。
+
+## Styles and labels
+
+**Zooming or dragging drops frames.** Disable labels temporarily and compare the same viewport, then restore necessary labels, edge text, and decorations. Precompute business values; keep style callbacks to field access instead of requests or whole-graph aggregation.
+
+Test thresholds and collision policies at real label density; see [label policy](/en/docs/api/options/label). Compare with [5,000 labeled nodes](/en/docs/examples/large-labeled); an unlabeled result does not represent the full workload.
+
+## Resources and devices
+
+**Repeated navigation slows down or loses a canvas.** Check destroy, unsubscription, and application-request cancellation. Compare canvases and live instances after mount/destroy. High DPR, large canvases, and concurrent graphs increase costs independently of node counts.
+
+[React](/en/docs/getting-started/react) · [Vue](/en/docs/getting-started/vue) · [Runtime requirements](/en/docs/compatibility/browser)
+
+## Comparison conditions
+
+Keep visual and interaction requirements equivalent. Repeat median/P95, frame-time, and resource measurements. Desktop automation does not replace target-device acceptance. Set workload-specific budgets instead of promising a universal maximum node count.

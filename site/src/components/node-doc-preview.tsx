@@ -41,6 +41,7 @@ const loaders = {
   'behavior-tooltip-hover': () => import('../../demos/docs-behavior-tooltip-hover.ts'),
   'events-listen': () => import('../../demos/docs-events-listen.ts'),
   'events-lifecycle': () => import('../../demos/docs-events-lifecycle.ts'),
+  'state-concept': () => import('../../demos/docs-state-concept.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -57,7 +58,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'events-lifecycle'
+  const hint = id === 'state-concept'
+    ? (zh ? 'A 初始 selected；Toggle review 叠加橙色；Replace 只保留 highlight；Clear 清空 A，B 始终作为基础外观对照' : 'A starts selected. Toggle review adds orange; Replace keeps only highlight; Clear removes A’s states. B remains the base-style comparison')
+    : id === 'events-lifecycle'
     ? (zh ? 'Update A 修改数据；Add/Remove D 增删节点；Replace data 整体替换；Layout 重排。日志按发生顺序保留最近六行，重置恢复初始渲染事件' : 'Update A, add/remove D, replace data, or run Layout. The log keeps the last six lines in occurrence order; reset restores initial render events')
     : id === 'events-listen'
     ? (zh ? '点击节点、边或空白查看三种坐标；Listening 切换持续监听，Arm once 等待下一次节点点击；监听不会自动选中元素' : 'Click a node, edge, or canvas for coordinates. Toggle Listening, or Arm once for the next node click. Listeners do not select elements')

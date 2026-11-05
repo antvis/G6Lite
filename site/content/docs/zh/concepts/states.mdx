@@ -1,0 +1,69 @@
+---
+title: 元素状态
+description: 理解状态、行为与样式的关系，观察状态叠加、替换和清除
+---
+
+import { NodeDocExample as StateDocExample } from '@/components/node-doc-example';
+
+状态用来表达一个元素当前是否选中、高亮，或处于业务标记中。同一元素可以同时有多个状态，例如“已选中 + 待复核”。
+
+## 状态、行为与样式
+
+- **状态**记录当前标记，例如 selected。
+- **行为**决定何时改变标记，例如 click-select 响应点击。
+- **状态样式**决定标记怎样显示，例如 selected 使用紫色描边。
+
+因此，只监听 node:click 不会选中节点；只配置 stateStyles 也不会自动产生交互。可以由 Behavior 修改状态，也可以由业务代码调用状态方法。
+
+## 试一试状态变化
+
+A 初始选中，B 保持基础外观。先点 Toggle review：A 增加橙色填充，同时保留选中的紫色描边；再点 Replace with highlight：A 只保留绿色高亮。Clear A 清空状态。
+
+<StateDocExample id="state-concept" locale="zh" focus="states" />
+
+状态行直接读取 getItemStates。按钮修改状态后即安排绘制，无需重新调用 render；完整运行代码中包含初始数据和对应 stateStyles。
+
+## 叠加、替换与清除
+
+setItemState(id, name, true) 增加一个状态，false 只移除该状态，其他状态保留。示例中的 Toggle selected / Toggle review 使用这种方式。
+
+setElementStates(id, names) 替换整个状态集合。Replace with highlight 将 A 替换为 ['highlight']，不会保留 selected 或 review。
+
+clearItemStates(id) 清空集合，回到基础外观；也可用 setElementStates(id, [])。首次状态修改应等待 await graph.render() 完成。
+
+## 状态样式放在哪里
+
+节点和边配置 node.stateStyles / edge.stateStyles；Combo 配置 combo.style.stateStyles。每个状态只覆盖它定义的外观字段，未覆盖的字段仍取基础样式或其他有效状态。
+
+selected、active、highlight、disabled、inactive 在内置主题中有预设。review 是示例自定义的状态名，橙色效果来自显式配置。自定义名称应选择当前元素支持的样式字段。
+
+<details>
+<summary>多个状态同时影响同一个字段</summary>
+
+节点、边按状态集合顺序叠加，后面的同名字段可以覆盖前面；Combo 按内置顺序处理支持的状态，不应套用同一套优先级。也不要假设 selected 永远优先。完整覆盖规则分别见[节点](/docs/api/options/node#状态样式)、[边](/docs/api/options/edge#状态样式)、[Combo](/docs/api/options/combo#状态样式)。
+
+</details>
+
+## 状态名称与数据
+
+selected 常用来表示业务选择；active / highlight 用于交互强调，inactive 用于弱化。disabled 在这里是视觉状态，不会自动禁止点击或拖拽；需要禁止业务操作时，在应用逻辑中判断。
+
+hidden 表示隐藏；default 表示基础外观，不需要手动添加一个 default 状态来“恢复默认”。Combo 折叠造成的结构性隐藏，应通过展开 Combo 恢复。
+
+状态与业务 data 分开维护。初始状态写在数据的 states 数组中；整体 setData 时应在新数据中携带希望保留的状态，不能假设旧的临时选择自动保留。
+
+## 常见问题
+
+### 加了状态，为什么外观没变？
+
+检查是否为该状态配置了支持的样式字段。节点 style 使用整对象函数时，当前实现不应用 stateStyles；需要状态外观时使用逐字段配置，见[节点样式函数](/docs/api/options/node#样式函数)。
+
+### 设置 selected，为什么没有选择事件？
+
+程序修改状态不会补发 node:selectchange。该事件由 click-select 发出；业务同步应在程序更新后主动执行，见[选择同步](/docs/guides/events/selection-drag#同步选择结果)。
+
+### 清空状态，为什么元素还是隐藏？
+
+检查元素是否位于折叠 Combo 内。展开结构性分组后，再检查业务 hidden 状态。
+
+继续阅读：[状态方法](/docs/api/graph#状态显隐和定位) · [交互组合](/docs/guides/interactions) · [主题状态预设](/docs/api/options/theme#状态预设)。

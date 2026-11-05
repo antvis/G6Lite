@@ -1,4 +1,4 @@
 {
   "title": "Core concepts",
-  "pages": ["overview", "data-model", "graph-lifecycle", "architecture"]
+  "pages": ["overview", "data-model", "graph-lifecycle", "states", "architecture"]
 }

@@ -1,0 +1,25 @@
+site/content/docs/zh/metrics/performance-tuning.mdx
+  s_4534bc5c3d78f4::t_316fce2a12f469 2-3,6,10,12,16,19-25,28,32,34-38,40-42,44
+site/content/docs/en/metrics/performance-tuning.mdx
+  s_4534bc5c3d78f4::t_316fce2a12f469 3,6,8-44
+site/content/docs/zh/metrics/performance.mdx
+  s_4534bc5c3d78f4::t_316fce2a12f469 32,34,63
+site/content/docs/en/metrics/performance.mdx
+  s_4534bc5c3d78f4::t_316fce2a12f469 32,34,63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8e38f1f1bcdbc63b6cad70d16db430ec8610bc0d",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

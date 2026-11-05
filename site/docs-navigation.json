@@ -141,6 +141,22 @@
         "metrics/bundle-size",
         "concepts/architecture"
       ]
+    },
+    "help": {
+      "id": "help",
+      "title": {
+        "zh": "帮助与升级",
+        "en": "Help and upgrades"
+      },
+      "children": [
+        "compatibility/index",
+        "compatibility/browser",
+        "compatibility/api-stability",
+        "compatibility/g6-v5-migration",
+        "compatibility/troubleshooting",
+        "faq",
+        "changelog"
+      ]
     }
   }
 }

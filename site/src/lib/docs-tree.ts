@@ -25,14 +25,9 @@ const labels = {
 export function getDocsNavigationTree(tree: PageTree.Root, locale: Locale): PageTree.Root {
   const text = labels[locale];
   const docsOverview = findPageByUrl(tree, locale === 'en' ? '/en/docs' : '/docs');
-  const migration = findPageByUrl(
-    tree,
-    locale === 'en' ? '/en/docs/compatibility/g6-v5-migration' : '/docs/compatibility/g6-v5-migration',
-  );
 
   const gettingStarted = findFolderByPath(tree, 'getting-started');
   const concepts = findFolderByPath(tree, 'concepts');
-  const compatibility = findFolderByPath(tree, 'compatibility');
 
   const children: PageTree.Node[] = [
     createSection(
@@ -45,12 +40,7 @@ export function getDocsNavigationTree(tree: PageTree.Root, locale: Locale): Page
     getManifestSection('extensions', tree, locale),
     getManifestSection('api', tree, locale),
     getManifestSection('performance', tree, locale),
-    createSection(
-      'compatibility',
-      text.compatibility,
-      sectionPages(compatibility).filter((node) => node.type !== 'page' || node.url !== migration?.url),
-    ),
-    ...compactNodes([migration]),
+    getManifestSection('help', tree, locale),
   ];
 
   return { ...tree, $id: `docs-navigation-root-${locale}`, children };

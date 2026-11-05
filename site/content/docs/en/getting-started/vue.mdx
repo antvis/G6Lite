@@ -42,13 +42,13 @@ onMounted(async () => {
     },
     edge: { style: { endArrow: true } },
     layout: { type: 'circular', radius: 120 },
-    autoFit: { padding: 32, maxZoom: 1 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
   });
 
   const instance = graph;
   try {
     await instance.render();
+    if (!instance.destroyed) instance.fitView({ padding: 32, maxZoom: 1 });
   } catch (error) {
     if (!instance.destroyed) {
       instance.destroy();
@@ -121,7 +121,6 @@ onMounted(async () => {
     layout: { type: 'circular', radius: 120 },
     node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
     edge: { style: { endArrow: true } },
-    autoFit: { padding: 32, maxZoom: 1 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
   });
   graph = instance;

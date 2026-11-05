@@ -12,11 +12,11 @@ Create a collaboration network with 6 nodes and 7 edges: install → prepare the
 There are two ways to run this example:
 
 - [Package manager](#package-manager)
-- [CDN](#cdn)
+- [script / CDN (requires a source build)](#cdn)
 
 ## Package manager
 
-This tutorial pins `0.1.0-beta.27`. The npm latest tag may point to an earlier version; check installed versions and types when upgrading.
+This tutorial pins `0.1.0-beta.27`. The npm latest tag may point to an earlier version; check installed versions and types when upgrading. The introductory code is checked against published types. Development features such as autoFit differ from the archive; use only fields available in the installed package.
 
 For projects using a bundler such as Vite or Webpack, install G6Lite with one of the following package managers:
 
@@ -91,12 +91,12 @@ const graph = new Graph({
     nodeStrength: -400,
     collideRadius: 32,
   },
-  autoFit: { padding: 48, maxZoom: 1.2 },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
 
 try {
   await graph.render();
+  graph.fitView({ padding: 48, maxZoom: 1.2 });
 } catch (error) {
   graph.destroy();
   throw error;
@@ -107,9 +107,19 @@ The force-directed layout positions the nodes automatically. Node data controls 
 
 ## CDN
 
-The UMD build exposes the public API through `window.G6Lite`, allowing `new G6Lite.Graph()` in a plain HTML page.
+The checked npm `0.1.0-beta.27` archive does not include `dist/g6-lite.min.js`; that npm CDN file URL cannot be used. For script integration, build from source that provides UMD:
 
-This complete HTML example needs no additional dependency scripts: the UMD file includes the runtime dependencies and layout algorithms.
+```bash
+git clone https://github.com/antvis/G6Lite.git
+cd G6Lite
+git checkout 6fec8e82
+npm install
+npm run build
+```
+
+The output is `dist/g6-lite.min.js`; Node.js 20+ is required. UMD exposes the API through `window.G6Lite`.
+
+Place the built file beside index.html below and serve the folder with a static server. Alternatively upload the script to your own CDN and replace src. The UMD build inlines runtime dependencies and layouts.
 
 <details>
 <summary>Complete HTML; save as index.html</summary>
@@ -124,7 +134,7 @@ This complete HTML example needs no additional dependency scripts: the UMD file 
   </head>
   <body>
     <div id="container" style="height: 360px"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0-beta.27/dist/g6-lite.min.js"></script>
+    <script src="./g6-lite.min.js"></script>
     <script>
       const data = {
         nodes: [
@@ -167,11 +177,12 @@ This complete HTML example needs no additional dependency scripts: the UMD file 
           nodeStrength: -400,
           collideRadius: 32,
         },
-        autoFit: { padding: 48, maxZoom: 1.2 },
         behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
       });
 
-      graph.render().catch((error) => {
+      graph.render().then(() => {
+        graph.fitView({ padding: 48, maxZoom: 1.2 });
+      }).catch((error) => {
         graph.destroy();
         console.error(error);
       });
@@ -183,7 +194,7 @@ This complete HTML example needs no additional dependency scripts: the UMD file 
 
 </details>
 
-For production CDN use, pin an exact published version containing the UMD file. The ESM entry loads layouts on demand, while UMD bundles them, so their download sizes differ. See [bundle size](/en/docs/metrics/bundle-size).
+Pin the source commit and built artifact in production instead of floating master or beta URLs. See [bundle size](/en/docs/metrics/bundle-size) for ESM and UMD loading differences.
 
 ## Verify and clean up
 

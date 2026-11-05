@@ -12,11 +12,11 @@ import { QuickStartExample } from '@/components/quick-start-example';
 可以通过以下两种方式运行这个示例：
 
 - [包管理器](#包管理器)
-- [CDN](#cdn)
+- [script / CDN（需源码构建）](#cdn)
 
 ## 包管理器
 
-本教程锁定 `0.1.0-beta.27`，npm 的 latest 标签可能指向较早版本；项目升级时先核对所装版本与类型。
+本教程锁定 `0.1.0-beta.27`，npm 的 latest 标签可能指向较早版本；项目升级时先核对所装版本与类型。 入门代码按发布包类型校验。当前源码中的 autoFit 等开发能力与已发布包有差异；安装包未导出的字段不能直接使用。
 
 在使用 Vite、Webpack 等构建工具的项目中，选择一种包管理器安装：
 
@@ -91,12 +91,12 @@ const graph = new Graph({
     nodeStrength: -400,
     collideRadius: 32,
   },
-  autoFit: { padding: 48, maxZoom: 1.2 },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
 
 try {
   await graph.render();
+  graph.fitView({ padding: 48, maxZoom: 1.2 });
 } catch (error) {
   graph.destroy();
   throw error;
@@ -107,9 +107,19 @@ try {
 
 ## CDN
 
-UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使用 `new G6Lite.Graph()`。
+当前核验的 npm `0.1.0-beta.27` 发布包未包含 `dist/g6-lite.min.js`，不能使用该版本的 npm CDN 文件地址。需要 script 接入时，先从支持 UMD 的源码构建：
 
-下面是完整的 HTML 示例。UMD 文件已包含运行时依赖和布局算法，无需再加载其他脚本：
+```bash
+git clone https://github.com/antvis/G6Lite.git
+cd G6Lite
+git checkout 6fec8e82
+npm install
+npm run build
+```
+
+构建输出 `dist/g6-lite.min.js`；需要 Node.js 20+。UMD 通过 `window.G6Lite` 暴露 API。
+
+将构建出的文件与下面的 index.html 放在同一目录，用静态服务器访问；也可以把脚本上传到自己的 CDN，并替换 src。UMD 已内联运行时和布局，不需其他依赖脚本。
 
 <details>
 <summary>完整 HTML，可保存为 index.html</summary>
@@ -124,7 +134,7 @@ UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使�
   </head>
   <body>
     <div id="container" style="height: 360px"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0-beta.27/dist/g6-lite.min.js"></script>
+    <script src="./g6-lite.min.js"></script>
     <script>
       const data = {
         nodes: [
@@ -167,11 +177,12 @@ UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使�
           nodeStrength: -400,
           collideRadius: 32,
         },
-        autoFit: { padding: 48, maxZoom: 1.2 },
         behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
       });
 
-      graph.render().catch((error) => {
+      graph.render().then(() => {
+        graph.fitView({ padding: 48, maxZoom: 1.2 });
+      }).catch((error) => {
         graph.destroy();
         console.error(error);
       });
@@ -183,7 +194,7 @@ UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使�
 
 </details>
 
-生产环境使用 CDN 时，应锁定包含 UMD 文件的确切版本号。ESM 入口按需加载布局，UMD 则包含布局算法，两者的下载体积不同，详见[包体积](/docs/metrics/bundle-size)。
+生产环境应锁定源码提交和构建产物，不使用浮动 master 或 beta 文件地址。ESM 与 UMD 的加载和体积口径见[包体积](/docs/metrics/bundle-size)。
 
 ## 验证效果与清理
 

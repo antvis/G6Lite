@@ -44,11 +44,12 @@ export function GraphView() {
       },
       edge: { style: { endArrow: true } },
       layout: { type: 'circular', radius: 120 },
-      autoFit: { padding: 32, maxZoom: 1 },
       behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
     });
 
-    graph.render().catch((error) => {
+    graph.render().then(() => {
+      if (!disposed) graph.fitView({ padding: 32, maxZoom: 1 });
+    }).catch((error) => {
       if (!disposed) {
         graph.destroy();
         console.error(error);
@@ -124,7 +125,6 @@ function GraphView({ data }: { data: GraphData }) {
       layout: { type: 'circular', radius: 120 },
       node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
       edge: { style: { endArrow: true } },
-      autoFit: { padding: 32, maxZoom: 1 },
       behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
     });
     graphRef.current = graph;

@@ -1,0 +1,21 @@
+site/content/docs/zh/compatibility/g6-v5-migration.mdx
+  s_4534bc5c3d78f4::t_8cd661a2e4f981 3,6,10,15,18,22,27-32,34-46,49,53-60,62,64,66,68,70,72,74,78-85,87,91,95,97,101-108,110,112,114,118,122-125
+site/content/docs/en/compatibility/g6-v5-migration.mdx
+  s_4534bc5c3d78f4::t_8cd661a2e4f981 3,6,10,15,18,20,22,27-32,34-46,49,53-60,62,64,66,68,70,72,74,76,78-85,87,89,91,95,97,101-108,110,112,114,118,122-125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "91f1f716bf5e4c1d7072946201854068b6a73209",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

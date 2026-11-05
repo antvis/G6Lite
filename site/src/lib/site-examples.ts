@@ -279,8 +279,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Hover nodes or edges to inspect relationship highlighting.',
     },
     dataDescription: {
-      zh: '节点通过 cluster 字段映射颜色，中心节点使用更大尺寸。',
-      en: 'Nodes map the cluster field to color while the hub uses a larger size.',
+      zh: 'cluster=a 映射蓝色、cluster=b 映射绿色；id=0 的节点尺寸为 16，其他节点为 12。',
+      en: 'cluster=a maps to blue and cluster=b to green. Node id=0 has size 16; the others have size 12.',
     },
     tags: ['node.style', 'data mapping', 'highlight-node'],
     metrics: [
@@ -321,8 +321,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     },
     interaction: { zh: '查看不同描边宽度和圆角。', en: 'Inspect stroke widths and corner radii.' },
     dataDescription: {
-      zh: '矩形节点使用不同线宽和圆角。',
-      en: 'Rectangle nodes use different stroke widths and radii.',
+      zh: '上图圆节点对比描边宽度与颜色；下图矩形对比 0、4、8、14 的圆角，数据按两个视图导出。',
+      en: 'The upper circles compare stroke widths and colors; lower rectangles compare radii 0, 4, 8 and 14. Data is exported for both views.',
     },
     tags: ['node.stroke', 'node.border-radius'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '2' }],

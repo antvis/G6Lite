@@ -1,4 +1,8 @@
 {
   "title": "Quick start",
-  "pages": ["quick-start", "react"]
+  "pages": [
+    "quick-start",
+    "react",
+    "vue"
+  ]
 }

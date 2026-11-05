@@ -5,7 +5,7 @@ description: 挂载、数据同步、异步清理和 StrictMode 中的 Graph 实
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-React 负责 DOM 与业务数据，Graph 负责画布。挂载时创建一个实例，数据变化时复用，卸载时销毁。已安装项目先运行 `npm install @antv/g6-lite`。Vue 内容将在独立入口查询。
+React 负责 DOM 与业务数据，Graph 负责画布。挂载时创建一个实例，数据变化时复用，卸载时销毁。已安装项目先运行 `npm install @antv/g6-lite`。Vue 项目直接看 [Vue 接入](/docs/getting-started/vue)。
 
 <QuickStartExample locale="zh" />
 
@@ -69,53 +69,7 @@ export function GraphView() {
 
 ## 在 Vue 中使用
 
-将以下代码保存为 `GraphView.vue`，在页面中导入并使用 `<GraphView />`。通过模板 ref 获取容器，在生命周期钩子中创建和销毁图。
-
-```vue
-<script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { Graph } from '@antv/g6-lite';
-
-const containerRef = ref<HTMLDivElement | null>(null);
-let graph: Graph | undefined;
-
-onMounted(() => {
-  if (!containerRef.value) return;
-
-  graph = new Graph({
-    container: containerRef.value,
-    data: {
-      nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-      edges: [
-        { source: 'Alice', target: 'Bob' },
-        { source: 'Alice', target: 'Carol' },
-      ],
-    },
-    node: {
-      style: {
-        size: 24,
-        label: (node) => node.id,
-        labelPlacement: 'bottom',
-      },
-    },
-    edge: { style: { endArrow: true } },
-    layout: { type: 'circular', radius: 120 },
-    autoFit: { padding: 32, maxZoom: 1 },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-  });
-
-  graph.render().catch(console.error);
-});
-
-onBeforeUnmount(() => {
-  graph?.destroy();
-});
-</script>
-
-<template>
-  <div ref="containerRef" style="width: 100%; height: 360px" />
-</template>
-```
+Vue 的完整挂载与清理示例已移至 [Vue 接入](/docs/getting-started/vue#在-vue-中使用)。
 
 ## 数据变化时更新图
 
@@ -174,7 +128,7 @@ function GraphView({ data }: { data: GraphData }) {
       container: containerRef.current,
       data: { nodes: [], edges: [] },
       layout: { type: 'circular', radius: 120 },
-      node: { style: { size: 24, label: (node) => node.id } },
+      node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
       edge: { style: { endArrow: true } },
       autoFit: { padding: 32, maxZoom: 1 },
       behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
@@ -233,90 +187,7 @@ export default function GraphDataDemo() {
 
 ### Vue：用 watch 同步数据
 
-将下面代码保存为 `ReactiveGraphView.vue`。通过 `watch(() => props.data, …)` 监听数据引用变化，并更新已有实例。首次渲染期间发生的数据变化，会在渲染完成后通过最新的 `props.data` 同步。
-
-```vue
-<script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Graph, type GraphData } from '@antv/g6-lite';
-
-const props = defineProps<{ data: GraphData }>();
-const containerRef = ref<HTMLDivElement | null>(null);
-let graph: Graph | undefined;
-let ready = false;
-
-onMounted(async () => {
-  if (!containerRef.value) return;
-
-  const instance = new Graph({
-    container: containerRef.value,
-    data: { nodes: [], edges: [] },
-    layout: { type: 'circular', radius: 120 },
-    node: { style: { size: 24, label: (node) => node.id } },
-    edge: { style: { endArrow: true } },
-    autoFit: { padding: 32, maxZoom: 1 },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-  });
-  graph = instance;
-  try {
-    await instance.render();
-    if (instance.destroyed) return;
-    ready = true;
-    await instance.setData(props.data, {
-      fitView: { padding: 32, maxZoom: 1 },
-    });
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-watch(
-  () => props.data,
-  async (data) => {
-    if (!ready || !graph) return;
-    try {
-      await graph.setData(data, {
-        fitView: { padding: 32, maxZoom: 1 },
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  },
-);
-
-onBeforeUnmount(() => {
-  ready = false;
-  graph?.destroy();
-  graph = undefined;
-});
-</script>
-
-<template>
-  <div ref="containerRef" style="width: 100%; height: 360px" />
-</template>
-```
-
-父组件 `GraphDataDemo.vue` 用 `shallowRef` 保存数据，点击按钮时替换整组数据：
-
-```vue
-<script setup lang="ts">
-import { shallowRef } from 'vue';
-import GraphView from './ReactiveGraphView.vue';
-import { basicData, expandedData } from './graph-data';
-
-const data = shallowRef(basicData);
-</script>
-
-<template>
-  <button @click="data = basicData">基础关系</button>
-  <button @click="data = expandedData">扩展关系</button>
-  <GraphView :data="data" />
-</template>
-```
-
-两个示例都通过替换数据对象触发更新。React 中直接修改原数组不会改变依赖引用；上面的 Vue watcher 也不监听嵌套字段的原地修改，请为变化后的数据创建新对象。
-
-`setData()` 会执行已配置的布局并重新绘制。示例通过 `fitView` 参数适配新数据；数据自带坐标且希望保留当前视口时，可以使用 `setData(data, { fitView: false })`。参见 [setData()](/docs/api/graph/data-mutations#setdata)。
+watch、父组件和异步清理查 [Vue 数据更新](/docs/getting-started/vue#vue用-watch-同步数据)。
 
 ## StrictMode 与异步卸载
 

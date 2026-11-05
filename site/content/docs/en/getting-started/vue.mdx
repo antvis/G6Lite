@@ -1,0 +1,206 @@
+---
+title: Vue integration
+description: Mount, update, and unmount a Graph in Vue 3 with asynchronous rendering
+---
+
+import { QuickStartExample } from '@/components/quick-start-example';
+
+Install `@antv/g6-lite` in an existing Vue 3 project. Get the container through a template ref, create the Graph in onMounted, and destroy it in onBeforeUnmount.
+
+<QuickStartExample locale="en" />
+
+## Use with Vue
+
+Save this as `GraphView.vue`, then import and use `<GraphView />` in your page. A template ref provides the container, and lifecycle hooks create and destroy the graph.
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Graph } from '@antv/g6-lite';
+
+const containerRef = ref<HTMLDivElement | null>(null);
+let graph: Graph | undefined;
+
+onMounted(async () => {
+  if (!containerRef.value) return;
+
+  graph = new Graph({
+    container: containerRef.value,
+    data: {
+      nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+      edges: [
+        { source: 'Alice', target: 'Bob' },
+        { source: 'Alice', target: 'Carol' },
+      ],
+    },
+    node: {
+      style: {
+        size: 24,
+        label: (node) => node.id,
+        labelPlacement: 'bottom',
+      },
+    },
+    edge: { style: { endArrow: true } },
+    layout: { type: 'circular', radius: 120 },
+    autoFit: { padding: 32, maxZoom: 1 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+
+  const instance = graph;
+  try {
+    await instance.render();
+  } catch (error) {
+    if (!instance.destroyed) {
+      instance.destroy();
+      console.error(error);
+    }
+  }
+});
+
+onBeforeUnmount(() => {
+  graph?.destroy();
+});
+</script>
+
+<template>
+  <div ref="containerRef" style="width: 100%; height: 360px" />
+</template>
+```
+
+## Update the graph when data changes
+
+Switch to the extended network for 4 nodes / 3 edges and back for 3 / 2. The preview reuses one Graph; the Vue code below synchronizes the same data with props and watch.
+
+<QuickStartExample locale="en" variant="framework-data" />
+
+### Prepare two datasets
+
+Save this as `graph-data.ts` for the React and Vue examples below.
+
+```ts
+import type { GraphData } from '@antv/g6-lite';
+
+export const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+export const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+```
+
+### Vue: synchronize data with watch
+
+Save this as `ReactiveGraphView.vue`. The watcher observes the data reference through `watch(() => props.data, …)` and updates the existing instance. If data changes during the initial render, the latest `props.data` is applied when rendering finishes.
+
+<details>
+<summary>Complete data component: ReactiveGraphView.vue</summary>
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const props = defineProps<{ data: GraphData }>();
+const containerRef = ref<HTMLDivElement | null>(null);
+let graph: Graph | undefined;
+let ready = false;
+let disposed = false;
+
+onMounted(async () => {
+  if (!containerRef.value) return;
+
+  const instance = new Graph({
+    container: containerRef.value,
+    data: { nodes: [], edges: [] },
+    layout: { type: 'circular', radius: 120 },
+    node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
+    edge: { style: { endArrow: true } },
+    autoFit: { padding: 32, maxZoom: 1 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+  graph = instance;
+  try {
+    await instance.render();
+    if (instance.destroyed) return;
+    ready = true;
+    await instance.setData(props.data, {
+      fitView: { padding: 32, maxZoom: 1 },
+    });
+  } catch (error) {
+    if (!disposed) console.error(error);
+  }
+});
+
+watch(
+  () => props.data,
+  async (data) => {
+    const instance = graph;
+    if (!ready || !instance || instance.destroyed) return;
+    try {
+      await instance.setData(data, {
+        fitView: { padding: 32, maxZoom: 1 },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);
+
+onBeforeUnmount(() => {
+  disposed = true;
+  ready = false;
+  graph?.destroy();
+  graph = undefined;
+});
+</script>
+
+<template>
+  <div ref="containerRef" style="width: 100%; height: 360px" />
+</template>
+```
+
+</details>
+
+The parent, `GraphDataDemo.vue`, stores data in a `shallowRef` and replaces the dataset when a button is clicked:
+
+<details>
+<summary>Parent component: GraphDataDemo.vue</summary>
+
+```vue
+<script setup lang="ts">
+import { shallowRef } from 'vue';
+import GraphView from './ReactiveGraphView.vue';
+import { basicData, expandedData } from './graph-data';
+
+const data = shallowRef(basicData);
+</script>
+
+<template>
+  <button @click="data = basicData">Basic network</button>
+  <button @click="data = expandedData">Extended network</button>
+  <GraphView :data="data" />
+</template>
+```
+
+</details>
+
+Both examples replace the data object to trigger updates. Mutating an array in place does not change a React dependency reference; the Vue watcher above does not observe nested mutations either. Create a new object for updated data.
+
+`setData()` runs the configured layout and redraws the graph. The examples use its `fitView` option to fit the new data. When data already includes coordinates and you want to preserve the viewport, use `setData(data, { fitView: false })`. See [setData()](/en/docs/api/graph/data-mutations#setdata).
+
+
+## Asynchronous unmounting and the client boundary
+
+Store Graph in an ordinary variable to avoid deep reactive proxies. onBeforeUnmount invalidates pending work and releases the instance. The example checks destroyed after render and captures the current instance in each watcher. Cancel business requests separately. Register lifecycle hooks synchronously during setup; see [Vue lifecycle hooks](https://vuejs.org/guide/essentials/lifecycle.html).
+
+In Nuxt and other SSR applications, create Graph only after client mounting. Show hidden containers and give them non-zero dimensions first. See [layouts](/en/docs/guides/layout) and the [viewport guide](/en/docs/guides/viewport) for switching layouts and preserving camera state.
+
+## Common questions
+
+**Why does an in-place push not update?** This watcher observes the data reference. Replace objects and arrays; see [mutation APIs](/en/docs/api/graph/data-mutations) for frequent partial writes.\n\n**Why are canvases or subscriptions left after navigation?** Destroy in onBeforeUnmount and unsubscribe application listeners. Clearing DOM alone is insufficient.\n\n**What about KeepAlive?** Deactivation is not unmounting. If resources must be released, destroy in onDeactivated and rebuild in onActivated instead of relying only on unmount hooks.

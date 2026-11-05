@@ -1,0 +1,206 @@
+---
+title: Vue 接入
+description: 在 Vue 3 中挂载、同步数据和卸载 Graph，处理异步渲染
+---
+
+import { QuickStartExample } from '@/components/quick-start-example';
+
+在已有 Vue 3 项目安装 `@antv/g6-lite`。通过模板 ref 获取容器，在 onMounted 创建图，在 onBeforeUnmount 销毁。
+
+<QuickStartExample locale="zh" />
+
+## 在 Vue 中使用
+
+将以下代码保存为 `GraphView.vue`，在页面中导入并使用 `<GraphView />`。通过模板 ref 获取容器，在生命周期钩子中创建和销毁图。
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Graph } from '@antv/g6-lite';
+
+const containerRef = ref<HTMLDivElement | null>(null);
+let graph: Graph | undefined;
+
+onMounted(async () => {
+  if (!containerRef.value) return;
+
+  graph = new Graph({
+    container: containerRef.value,
+    data: {
+      nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+      edges: [
+        { source: 'Alice', target: 'Bob' },
+        { source: 'Alice', target: 'Carol' },
+      ],
+    },
+    node: {
+      style: {
+        size: 24,
+        label: (node) => node.id,
+        labelPlacement: 'bottom',
+      },
+    },
+    edge: { style: { endArrow: true } },
+    layout: { type: 'circular', radius: 120 },
+    autoFit: { padding: 32, maxZoom: 1 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+
+  const instance = graph;
+  try {
+    await instance.render();
+  } catch (error) {
+    if (!instance.destroyed) {
+      instance.destroy();
+      console.error(error);
+    }
+  }
+});
+
+onBeforeUnmount(() => {
+  graph?.destroy();
+});
+</script>
+
+<template>
+  <div ref="containerRef" style="width: 100%; height: 360px" />
+</template>
+```
+
+## 数据变化时更新图
+
+点击扩展关系得到 4 个节点 / 3 条边，切回基础关系得到 3 / 2。预览复用同一 Graph；下面用 Vue props 与 watch 同步相同数据。
+
+<QuickStartExample locale="zh" variant="framework-data" />
+
+### 准备两组数据
+
+将下面的数据保存为 `graph-data.ts`，供 React 和 Vue 示例使用。
+
+```ts
+import type { GraphData } from '@antv/g6-lite';
+
+export const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+export const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+```
+
+### Vue：用 watch 同步数据
+
+将下面代码保存为 `ReactiveGraphView.vue`。通过 `watch(() => props.data, …)` 监听数据引用变化，并更新已有实例。首次渲染期间发生的数据变化，会在渲染完成后通过最新的 `props.data` 同步。
+
+<details>
+<summary>完整数据组件 ReactiveGraphView.vue</summary>
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const props = defineProps<{ data: GraphData }>();
+const containerRef = ref<HTMLDivElement | null>(null);
+let graph: Graph | undefined;
+let ready = false;
+let disposed = false;
+
+onMounted(async () => {
+  if (!containerRef.value) return;
+
+  const instance = new Graph({
+    container: containerRef.value,
+    data: { nodes: [], edges: [] },
+    layout: { type: 'circular', radius: 120 },
+    node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
+    edge: { style: { endArrow: true } },
+    autoFit: { padding: 32, maxZoom: 1 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+  graph = instance;
+  try {
+    await instance.render();
+    if (instance.destroyed) return;
+    ready = true;
+    await instance.setData(props.data, {
+      fitView: { padding: 32, maxZoom: 1 },
+    });
+  } catch (error) {
+    if (!disposed) console.error(error);
+  }
+});
+
+watch(
+  () => props.data,
+  async (data) => {
+    const instance = graph;
+    if (!ready || !instance || instance.destroyed) return;
+    try {
+      await instance.setData(data, {
+        fitView: { padding: 32, maxZoom: 1 },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);
+
+onBeforeUnmount(() => {
+  disposed = true;
+  ready = false;
+  graph?.destroy();
+  graph = undefined;
+});
+</script>
+
+<template>
+  <div ref="containerRef" style="width: 100%; height: 360px" />
+</template>
+```
+
+</details>
+
+父组件 `GraphDataDemo.vue` 用 `shallowRef` 保存数据，点击按钮时替换整组数据：
+
+<details>
+<summary>父组件 GraphDataDemo.vue</summary>
+
+```vue
+<script setup lang="ts">
+import { shallowRef } from 'vue';
+import GraphView from './ReactiveGraphView.vue';
+import { basicData, expandedData } from './graph-data';
+
+const data = shallowRef(basicData);
+</script>
+
+<template>
+  <button @click="data = basicData">基础关系</button>
+  <button @click="data = expandedData">扩展关系</button>
+  <GraphView :data="data" />
+</template>
+```
+
+</details>
+
+父组件替换 data 对象触发 watcher；此处不深度监听原地修改。首次 render 完成前的变化，使用最新 props.data 同步。
+
+`setData()` 会执行已配置的布局并重新绘制。示例通过 `fitView` 参数适配新数据；数据自带坐标且希望保留当前视口时，可以使用 `setData(data, { fitView: false })`。参见 [setData()](/docs/api/graph/data-mutations#setdata)。
+
+
+## 异步卸载与客户端边界
+
+Graph 使用普通变量保存，避免让实例被深层响应式代理。onBeforeUnmount 使 pending 工作失效并释放实例；示例在 render 后检查 destroyed，watch 回调捕获当前实例，卸载后不继续写入。业务请求仍需自行取消。生命周期钩子在 setup 中同步注册，见 [Vue 官方生命周期说明](https://vuejs.org/guide/essentials/lifecycle.html)。
+
+Nuxt 等 SSR 工程只在客户端挂载后创建 Graph；隐藏容器应先显示并获得非零尺寸。布局切换和视野保留查[布局](/docs/guides/layout)与[视口指南](/docs/guides/viewport)。
+
+## 常见问题
+
+**为什么原地 push 没有更新？** 当前 watcher 监听 data 引用，使用新对象和数组替换。需要局部高频写入时查[增量 API](/docs/api/graph/data-mutations)。\n\n**切页后还有画布或监听？** 确认 onBeforeUnmount 销毁实例；自定义业务订阅也要退订。不要只清空容器 DOM。\n\n**KeepAlive 怎么处理？** 停用不是卸载。需要释放资源时，在 onDeactivated 销毁并在 onActivated 重建；不要只依赖卸载钩子。

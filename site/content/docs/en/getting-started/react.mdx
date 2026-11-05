@@ -5,7 +5,7 @@ description: Mount a Graph, synchronize data, handle asynchronous cleanup, and s
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-React owns DOM and business data; Graph owns the canvas. Create one instance on mount, reuse it for updates, and destroy it on unmount. Run `npm install @antv/g6-lite` in your existing project. Vue has its own integration path below.
+React owns DOM and business data; Graph owns the canvas. Create one instance on mount, reuse it for updates, and destroy it on unmount. Run `npm install @antv/g6-lite` in your existing project. For Vue projects, use [Vue integration](/en/docs/getting-started/vue).
 
 <QuickStartExample locale="en" />
 
@@ -69,53 +69,7 @@ export function GraphView() {
 
 ## Use with Vue
 
-Save this as `GraphView.vue`, then import and use `<GraphView />` in your page. A template ref provides the container, and lifecycle hooks create and destroy the graph.
-
-```vue
-<script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { Graph } from '@antv/g6-lite';
-
-const containerRef = ref<HTMLDivElement | null>(null);
-let graph: Graph | undefined;
-
-onMounted(() => {
-  if (!containerRef.value) return;
-
-  graph = new Graph({
-    container: containerRef.value,
-    data: {
-      nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-      edges: [
-        { source: 'Alice', target: 'Bob' },
-        { source: 'Alice', target: 'Carol' },
-      ],
-    },
-    node: {
-      style: {
-        size: 24,
-        label: (node) => node.id,
-        labelPlacement: 'bottom',
-      },
-    },
-    edge: { style: { endArrow: true } },
-    layout: { type: 'circular', radius: 120 },
-    autoFit: { padding: 32, maxZoom: 1 },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-  });
-
-  graph.render().catch(console.error);
-});
-
-onBeforeUnmount(() => {
-  graph?.destroy();
-});
-</script>
-
-<template>
-  <div ref="containerRef" style="width: 100%; height: 360px" />
-</template>
-```
+The complete mounting and cleanup example is now in [Vue integration](/en/docs/getting-started/vue#use-with-vue).
 
 ## Update the graph when data changes
 
@@ -174,7 +128,7 @@ function GraphView({ data }: { data: GraphData }) {
       container: containerRef.current,
       data: { nodes: [], edges: [] },
       layout: { type: 'circular', radius: 120 },
-      node: { style: { size: 24, label: (node) => node.id } },
+      node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
       edge: { style: { endArrow: true } },
       autoFit: { padding: 32, maxZoom: 1 },
       behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
@@ -233,90 +187,7 @@ export default function GraphDataDemo() {
 
 ### Vue: synchronize data with watch
 
-Save this as `ReactiveGraphView.vue`. The watcher observes the data reference through `watch(() => props.data, …)` and updates the existing instance. If data changes during the initial render, the latest `props.data` is applied when rendering finishes.
-
-```vue
-<script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Graph, type GraphData } from '@antv/g6-lite';
-
-const props = defineProps<{ data: GraphData }>();
-const containerRef = ref<HTMLDivElement | null>(null);
-let graph: Graph | undefined;
-let ready = false;
-
-onMounted(async () => {
-  if (!containerRef.value) return;
-
-  const instance = new Graph({
-    container: containerRef.value,
-    data: { nodes: [], edges: [] },
-    layout: { type: 'circular', radius: 120 },
-    node: { style: { size: 24, label: (node) => node.id } },
-    edge: { style: { endArrow: true } },
-    autoFit: { padding: 32, maxZoom: 1 },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-  });
-  graph = instance;
-  try {
-    await instance.render();
-    if (instance.destroyed) return;
-    ready = true;
-    await instance.setData(props.data, {
-      fitView: { padding: 32, maxZoom: 1 },
-    });
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-watch(
-  () => props.data,
-  async (data) => {
-    if (!ready || !graph) return;
-    try {
-      await graph.setData(data, {
-        fitView: { padding: 32, maxZoom: 1 },
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  },
-);
-
-onBeforeUnmount(() => {
-  ready = false;
-  graph?.destroy();
-  graph = undefined;
-});
-</script>
-
-<template>
-  <div ref="containerRef" style="width: 100%; height: 360px" />
-</template>
-```
-
-The parent, `GraphDataDemo.vue`, stores data in a `shallowRef` and replaces the dataset when a button is clicked:
-
-```vue
-<script setup lang="ts">
-import { shallowRef } from 'vue';
-import GraphView from './ReactiveGraphView.vue';
-import { basicData, expandedData } from './graph-data';
-
-const data = shallowRef(basicData);
-</script>
-
-<template>
-  <button @click="data = basicData">Basic network</button>
-  <button @click="data = expandedData">Extended network</button>
-  <GraphView :data="data" />
-</template>
-```
-
-Both examples replace the data object to trigger updates. Mutating an array in place does not change a React dependency reference; the Vue watcher above does not observe nested mutations either. Create a new object for updated data.
-
-`setData()` runs the configured layout and redraws the graph. The examples use its `fitView` option to fit the new data. When data already includes coordinates and you want to preserve the viewport, use `setData(data, { fitView: false })`. See [setData()](/en/docs/api/graph/data-mutations#setdata).
+For watch, the parent component, and asynchronous cleanup, see [Vue data updates](/en/docs/getting-started/vue#vue-synchronize-data-with-watch).
 
 ## StrictMode and asynchronous unmounting
 

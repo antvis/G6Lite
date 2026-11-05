@@ -1,94 +1,92 @@
 ---
 title: Events
-description: Listen to public events with GraphEventMap and graph.on, graph.off, and graph.once
+description: Connect element interactions, selection, drag results, data updates, and subscription cleanup
 ---
 
-Known events are inferred from the public `GraphEventMap`:
+import { NodeDocExample as EventDocExample } from '@/components/node-doc-example';
 
-```ts
-graph.on('node:click', ({ nodeId, data, nativeEvent }) => {
-  console.log(nodeId, data, nativeEvent.clientX, nativeEvent.clientY);
-});
-
-graph.on('canvas:wheel', ({ nativeEvent }) => {
-  console.log(nativeEvent.deltaY); // WheelEvent
-});
-
-graph.once('destroy', () => {
-  console.log('destroyed'); // zero arguments
-});
-```
-
-Element payloads expose the original `MouseEvent` or `WheelEvent` as `nativeEvent`. The compatibility field `event` still exists but is deprecated.
+Connect the canvas to business UI with events. Choose between a user interaction and a data operation first; complete names, payloads, and timing live in the [event reference](/en/docs/api/graph/events).
 
 ## Element events
 
-The interaction dispatcher performs shared picking and emits these events without requiring a separate click Behavior:
+Listening does not require click-select. Clicks below update only the readout. Listening toggles persistent subscriptions; Arm once waits for the next node click. Turning off persistent listeners leaves the independent once subscription active.
 
-- Node: `node:pointerover`, `node:pointerenter`, `node:pointermove`, `node:pointerleave`, `node:pointerdown`, `node:click`, `node:dblclick`, `node:contextmenu`, `node:wheel`.
-- Edge: `edge:pointerover`, `edge:pointerenter`, `edge:pointermove`, `edge:pointerleave`, `edge:pointerdown`, `edge:click`, `edge:dblclick`, `edge:contextmenu`, `edge:wheel`.
-- Combo: `combo:pointerdown`, `combo:click`, `combo:dblclick`, `combo:contextmenu`.
-- Canvas: `canvas:pointermove`, `canvas:pointerdown`, `canvas:pointerup`, `canvas:click`, `canvas:dblclick`, `canvas:contextmenu`, `canvas:wheel`.
+<EventDocExample id="events-listen" locale="en" />
 
-The precise payload types are `NodeGraphEvent`, `EdgeGraphEvent`, `ComboGraphEvent`, and `CanvasGraphEvent`. Their target-specific IDs and edge metadata are required in the matching handlers.
+Read business fields from data, screen positions from client, and graph positions from graph. Canvas CSS pixels are not graph coordinates. Clicking a node inside a Combo emits node:click without also emitting combo:click. See [element payloads](/en/docs/api/graph/events#element-event-payloads) for fields and picking rules.
 
 ## Selection and drag events
 
-Built-in Behaviors emit:
+Enable click-select, brush-select / lasso-select, or drag-node in Graph behaviors first; see [interaction combinations](/en/docs/guides/interactions). To synchronize business selection, query the final set from the completion events of each source:
 
-- Selection: `node:selectchange`, `edge:selectchange`, `selection:clear`.
-- Node drag: `node:dragstart`, `node:drag`, `node:dragend`.
-- Combo drag: `combo:dragstart`, `combo:drag`, `combo:dragend`.
-- Edge endpoint drag: `edge:dragstart`, `edge:drag`, `edge:dragend`.
-- Brush: `brush:select`, `brush:end`.
-- Lasso: `lasso:select`, `lasso:end`.
+```ts
+import type { Graph } from '@antv/g6-lite';
 
-Derived events are emitted only when the corresponding Behavior is active.
+export function observeSelection(
+  graph: Graph,
+  onChange: (nodes: string[], edges: string[]) => void,
+) {
+  const sync = () => onChange(
+    graph.findNodesByState('selected'), graph.findEdgesByState('selected'),
+  );
+  const events = ['node:selectchange', 'edge:selectchange', 'selection:clear', 'brush:end', 'lasso:end'] as const;
+  for (const event of events) graph.on(event, sync);
+  sync();
+  return () => { for (const event of events) graph.off(event, sync); };
+}
+```
+
+One action can invoke the callback more than once, such as clearing before selecting. Coalesce expensive UI updates in the application. Synchronize UI explicitly after programmatic state changes too; brushing does not emit node:selectchange per node.
+
+Persist drag results at dragend, reading positions for every nodeIds entry. Move-stage dx/dy is cumulative graph-coordinate displacement from gesture start. This helper returns cleanup; implement network calls and error handling in the application save function:
+
+```ts
+import type { Graph, GraphEventMap } from '@antv/g6-lite';
+
+export function observeDrag(graph: Graph, save: (positions: Array<{ id: string; x: number; y: number }>) => void) {
+  const onEnd = ({ nodeIds }: GraphEventMap['node:dragend'][0]) => {
+    save(nodeIds.flatMap((id) => {
+      const position = graph.getNodePosition(id);
+      return position ? [{ id, ...position }] : [];
+    }));
+  };
+  graph.on('node:dragend', onEnd);
+  return () => graph.off('node:dragend', onEnd);
+}
+```
+
+Combo and edge dragging have different payloads; see the [drag reference](/en/docs/api/graph/events#drag-events). Applications must validate and write back drag-edge endpoint proposals.
 
 ## Lifecycle and data events
 
-- Layout: `beforelayout`, `layout:start`, `layout:end`, `afterlayout`.
-- Render: `beforerender`, `afterrender`.
-- Container and teardown: `resize`, `destroy`.
-- Data: `datachange`, `afteradditem`, `afterremoveitem`, `afterupdateitem`.
-- Combo: `combo:collapse`, `combo:expand`.
+Subscribe before render to receive the initial layout and render events. Await graph.render() before initial incremental mutations. Compare the logs using these controls:
 
-`GraphEventMap` values are argument tuples rather than single payload types, so both ordinary events and zero-argument events are represented exactly:
+<EventDocExample id="events-lifecycle" locale="en" />
 
-```ts
-import type { GraphEventMap } from '@antv/g6-lite';
-
-type NodeClickPayload = GraphEventMap['node:click'][0];
-type DestroyArguments = GraphEventMap['destroy']; // []
-```
+Update A / Add D / Remove D emit the corresponding after*item event. Replace data emits layout events and datachange; Layout emits only layout events. None repeats afterrender. A data write and the browser's next drawn frame are separate milestones; see [lifecycle timing](/en/docs/api/graph/events#lifecycle-and-data-events) for full ordering and cancellation boundaries.
 
 ## Removing listeners
 
-Use the same handler reference when removing a listener:
+Pass the original handler reference to off, rather than a new arrow function with identical text. The observeSelection / observeDrag helpers above return cleanup functions: call them on component unmount or subscription replacement. Graph destruction removes graph listeners; separately clean up application DOM, timers, and network requests.
 
-```ts
-const handler = ({ nodeId }: GraphEventMap['node:click'][0]) => console.log(nodeId);
-
-graph.on('node:click', handler);
-graph.off('node:click', handler);
-```
-
-Use `once()` for a one-time listener:
-
-```ts
-graph.once('afterrender', ({ nodeCount, edgeCount }) => {
-  console.log(nodeCount, edgeCount);
-});
-```
+Use once for a one-time action and register before the required occurrence. Cancel a pending once subscription with off and its original handler. See [on / off / once](/en/docs/api/graph/events#on) for signatures and a live example.
 
 ## Custom event typing
 
-`graph.on/off/once` retain a generic fallback for unknown event strings:
+Typing an unknown event's handler does not create business events. Use your own channel for application messages. See [Custom Behavior](/en/docs/guides/custom-behavior) for extensions and [GraphEventMap](/en/docs/api/graph/events#grapheventmap) for subscription generics.
 
-```ts
-graph.on('business:custom', (payload: { id: string }) => {
-  console.log(payload.id);
-});
-```
+## Common questions
 
-A custom Behavior can also extend its event-map generic. This release provides consumer-side typing only and does not expose a public `emit` API; do not depend on internal `graph.eventEmitter`. See [Custom Behavior](/en/docs/guides/custom-behavior).
+### Why is nativeEvent undefined?
+
+Check the event family. Element clicks, hover, and wheel expose nativeEvent. Selection and some drag stages still expose event. node:dragend and region-selection events have no native-event field.
+
+### Why are positions still old when layout finishes?
+
+layout:end / afterlayout precede write-back. Await graph.layout() for results. Avoid unconditionally starting another layout from a completion listener.
+
+### Why does a listener fire repeatedly or never fire?
+
+Check repeated component registration, handler identity for off, whether once was already consumed, and whether the required Behavior is enabled. The unknown-string overload accepts custom names, so misspelled event names can also pass type checking.
+
+Continue with the [complete event reference](/en/docs/api/graph/events), [interaction combinations](/en/docs/guides/interactions), and [event log example](/en/docs/examples/event-log).

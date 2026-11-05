@@ -1,0 +1,41 @@
+site/content/docs/zh/guides/events.mdx
+  s_4534bc5c3d78f4::t_0035a5e3b1a0cb 2-3,8,12,14,19-22,25,27,29,31-34,36,38,40,42-43,45-51,53,55,57-61,63,69,73,77-88,90
+site/content/docs/en/guides/events/lifecycle.mdx
+  s_4534bc5c3d78f4::t_81bde412d5a7ca 1-15,17-33
+  s_4534bc5c3d78f4::t_1e46c0e9971490 16
+site/demos/docs-events-lifecycle.ts
+  s_4534bc5c3d78f4::t_b401f140f9ef82 28-32
+site/content/docs/zh/guides/events/lifecycle.mdx
+  s_4534bc5c3d78f4::t_1e46c0e9971490 16
+  s_4534bc5c3d78f4::t_81bde412d5a7ca 1-15,17-33
+site/content/docs/zh/guides/events/meta.json
+  s_4534bc5c3d78f4::t_81bde412d5a7ca 1-9
+site/content/docs/zh/guides/events/selection-drag.mdx
+  s_4534bc5c3d78f4::t_81bde412d5a7ca 1-57,59-64
+  s_4534bc5c3d78f4::t_1e46c0e9971490 58
+site/content/docs/en/guides/events/meta.json
+  s_4534bc5c3d78f4::t_81bde412d5a7ca 1-9
+site/content/docs/en/guides/events.mdx
+  s_4534bc5c3d78f4::t_0035a5e3b1a0cb 2-3,8,12,14,19-22,25,27,29,31-34,36,38,40,42-43,45-51,53,55,57-61,63,69,73,77-88,90
+site/demos/docs-events-listen.ts
+  s_4534bc5c3d78f4::t_b401f140f9ef82 1,32-38,44
+site/content/docs/en/guides/events/selection-drag.mdx
+  s_4534bc5c3d78f4::t_81bde412d5a7ca 1-57,59-64
+  s_4534bc5c3d78f4::t_1e46c0e9971490 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cdfdd1806edd01df1b35179ebd37ad31d88a61df",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

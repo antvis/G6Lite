@@ -1,50 +1,44 @@
 ---
 title: 常见问题
-description: G6Lite 的选型、性能、兼容性、SSR、TypeScript 与 Combo 高频问题
+description: 直接答复高频问题，进入唯一详细来源
 ---
 
 ## G6Lite 和 G6 v5 怎么选？
 
-G6Lite 聚焦 WebGL 渲染、高频状态更新和受控能力边界；G6 v5 提供更完整的插件、动画、元素与通用图可视化生态。请用真实数据验证目标场景，不按未经复现的绝对跑分或体积倍数选型。
-
-如果核心问题是大规模关系图的浏览器渲染和分析交互，可以优先评估 G6Lite；如果重度依赖完整插件生态、复杂动画或图论能力，应优先评估 G6 v5。
+先比较必须具备的图形、环境和交互能力，再用业务数据验证。详见[能力对比](/docs/compatibility/library-comparison)。
 
 ## 力导向布局首屏慢怎么办？
 
-首屏耗时通常由数据准备和布局计算主导。可按以下顺序排查：
-
-- 已有坐标时直接传入 `x` / `y`，省略重复布局。
-- 控制 force 系布局的迭代次数，并评估 `worker: true`。
-- 大图总览优先使用 grid、circular 等确定性布局。
-- 分别测量布局耗时与不含布局的渲染耗时，见 [性能指标](/docs/metrics/performance)。
+分开测量布局和 render；已有坐标时省略 layout，支持时评估 Worker 与迭代参数。步骤见[性能优化](/docs/metrics/performance-tuning)。
 
 ## 高亮或选中卡顿怎么办？
 
-使用 `setItemState()` 或 `batchSetState()` 表达运行时状态，不要为了高亮而替换整份数据。批量位置和业务数据更新也应优先使用批量 API，避免同一帧触发大量独立调度。
+复用 Graph，通过状态 API 更新，不为一次高亮重建或替换整图。见[状态指南](/docs/guides/states)。
 
 ## 浏览器和 WebGL 要求是什么？
 
-G6Lite 需要 WebGL 1.0、Canvas 2D 和现代 ESM/ES2020 浏览器环境，不要求 WebGL 2.0。最低版本、移动端注意事项和硬件加速边界见 [浏览器与运行环境](/docs/compatibility/browser)。
+需要真实 DOM、Canvas 2D 和可用的 WebGL1 或 WebGL2。具体模块、Worker 和 CSP 约束见[运行环境](/docs/compatibility/browser)。
 
 ## 能在 Node.js 或 SSR 阶段直接运行吗？
 
-不能。`Graph` 依赖真实 DOM、Canvas 和 WebGL 上下文。在 Next.js、Nuxt 等框架中应只在客户端生命周期创建实例，并在组件卸载时调用 `destroy()`。
+Graph 不能在普通 Node.js / SSR 阶段出图。在客户端挂载后创建并在卸载时销毁，见[框架接入](/docs/getting-started/react)。
 
 ## TypeScript 类型从哪里导入？
 
-值和类型都从包根导入：
-
-```ts
-import { Graph } from '@antv/g6-lite';
-import type { EdgeConfig, GraphData, GraphOptions, NodeConfig } from '@antv/g6-lite';
-```
-
-`src/` 深层路径不是公开 API。详细边界见 [API 稳定性](/docs/compatibility/api-stability)。
+值和类型均从 @antv/g6-lite 包根导入，以所安装包的声明为准。开发源码与 npm 归档可能不同，见[稳定性](/docs/compatibility/api-stability)。
 
 ## Combo 可以使用吗？
 
-Combo 已支持分组容器、嵌套、折叠和运行时归组，但这些能力在 `0.1.x` 仍标记为 experimental。正式使用前需要覆盖真实嵌套层级、增量更新和折叠交互回归。
+可以验证分组、嵌套和折叠，但当前仍为实验能力。使用前检查[Combo 边界](/docs/api/options/combo)。
 
 ## 示例能在线运行吗？
 
-官网示例在文档站点内直接运行，并与 `site/demos/catalog.json`、示例源码和截图共用同一份案例清单。入口见 [示例](/docs/examples)。
+可以在[示例中心](/docs/examples)运行；操作预期、数据说明和代码在各案例页面中。
+
+## 画布空白、图很小或标签消失怎么办？
+
+按[故障排查](/docs/compatibility/troubleshooting)先检查尺寸和数据，再逐项恢复布局、标签和交互。
+
+## 安装后某个字段不存在怎么办？
+
+先检查实际版本和包根类型，不复制开发分支字段。安装与 UMD 的已知发布物差异见[快速上手](/docs/getting-started/quick-start)。

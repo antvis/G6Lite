@@ -1,24 +1,44 @@
 ---
 title: FAQ
-description: Selection, performance, compatibility, SSR, TypeScript, and combo questions
+description: Direct answers to common questions with one detailed source
 ---
 
-## Should I use G6Lite or G6 v5?
+## How should I choose between G6Lite and G6 v5?
 
-Choose G6Lite when WebGL rendering, frequent state updates, and a smaller controlled capability surface match the product. Choose G6 v5 when the complete plugin, animation, and element ecosystem matters more.
+Compare required graphics, runtime, and interactions, then validate business data. See the [capability comparison](/en/docs/compatibility/library-comparison).
 
-## Why is first render slow with a force layout?
+## What if force layout makes startup slow?
 
-Layout computation often dominates first render. Reuse existing coordinates, control iterations, use a worker, or choose a deterministic layout. Measure layout time and rendering without layout separately.
+Measure layout separately from render. Omit layout for supplied positions and assess Worker/iteration options where supported. See [performance tuning](/en/docs/metrics/performance-tuning).
 
-## Can G6Lite run during SSR?
+## What if highlighting or selection stutters?
 
-No. It needs a real DOM canvas and WebGL context. Instantiate `Graph` in a client-only lifecycle such as React `useEffect`.
+Reuse Graph and update states instead of rebuilding or replacing the graph for a highlight. See the [state guide](/en/docs/guides/states).
 
-## Where do TypeScript types come from?
+## What browsers and WebGL capabilities are required?
 
-Import values and types from `@antv/g6-lite`. Deep `src/` paths are not public API.
+Real DOM, Canvas 2D, and a usable WebGL1 or WebGL2 context are required. See [runtime requirements](/en/docs/compatibility/browser) for modules, Worker, and CSP.
 
-## Are combos stable?
+## Can Graph run directly in Node.js or during SSR?
 
-Combo rendering is available, but collapse, nesting, and runtime regrouping remain experimental in `0.1.x`.
+Graph does not render in ordinary Node.js/SSR. Create it after client mounting and destroy on unmount; see [framework integration](/en/docs/getting-started/react).
+
+## Where should TypeScript types be imported from?
+
+Import values and types from @antv/g6-lite, using installed declarations. Development source and npm archives can differ; see [stability](/en/docs/compatibility/api-stability).
+
+## Can I use Combo?
+
+Grouping, nesting, and collapsing can be evaluated but remain experimental. Check [Combo boundaries](/en/docs/api/options/combo).
+
+## Can examples run online?
+
+Run the [example gallery](/en/docs/examples); each case includes code, data descriptions, and interaction expectations.
+
+## What if the canvas is blank, tiny, or missing labels?
+
+Follow [troubleshooting](/en/docs/compatibility/troubleshooting): check dimensions/data before restoring layout, labels, and behaviors individually.
+
+## What if an installed package does not contain a field?
+
+Identify the actual version and root types rather than copying development-only fields. See [installation](/en/docs/getting-started/quick-start) for known archive and UMD differences.

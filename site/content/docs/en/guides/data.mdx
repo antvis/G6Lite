@@ -1,13 +1,15 @@
 ---
-title: Data
-description: Map application data to GraphData and choose full replacement or incremental updates
+title: Data ingestion and updates
+description: Map application data, choose replacement or incremental updates, and manage async refreshes
 ---
 
-This page covers data ingestion and runtime updates. See [Data model](/en/docs/concepts/data-model) for node, edge, and Combo relationships, and [Options](/en/docs/api/options#graph-data) for complete fields.
+import { NodeDocExample } from '@/components/node-doc-example';
+
+Connect business entities and graph elements with stable IDs. Prepare input, then choose updates by scope. See the [data reference](/en/docs/api/options/data)，and [data model](/en/docs/concepts/data-model)。
 
 ## Map application data
 
-Map entities to nodes and relationships to edges. Put application fields in `data` so style callbacks, tooltips, and application logic can read them:
+Map entities to nodes and relationships to edges. Put business fields in data for styles, tooltips, and panels. Give persistent relationships stable edge IDs too.
 
 ```ts
 import type { GraphData } from '@antv/g6-lite';
@@ -26,51 +28,88 @@ const data: GraphData = {
 };
 ```
 
-Pass the result as the `data` option in `new Graph({ container, data })`. See [Quick start](/en/docs/getting-started/quick-start) for a complete creation and rendering example.
+This converts data only. Display also needs a container and render. Configure layout when positions are absent; see [quick start](/en/docs/getting-started/quick-start)。
 
 ## Validate data
 
-- Node `id` values must be unique within the graph and remain stable across updates.
-- Edge `source` and `target` must refer to existing nodes.
-- When using Combo, a node's `comboId` should refer to a declared group.
-- Without a configured layout, provide node `x` / `y` positions so nodes do not share the default coordinates.
-- Update graph data through public methods instead of directly modifying returned Models.
+- Use stable string IDs and avoid collisions across element types.
+- Edge endpoints must exist; Combo memberships and parent links must be valid and acyclic.
+- Provide finite x/y without layout; retain fixed-axis constraints in application input.
+- Validate before writing. Batches have no rollback guarantee; do not mutate models.
+
+## Choose an update path
+
+| Change | Method | What changes |
+| --- | --- | --- |
+| Dataset switch / full response | setData | Replaces data, runs configured layout, fits by default |
+| Small business-field changes | updateNodeData / updateEdgeData | Shallow-merges data without layout |
+| Add/remove elements | addNode(s) / addEdge(s) / remove… | Supply new positions; node removal removes adjacent edges |
+| Position changes | updateNodePosition(s) | Graph position changes; identity remains |
+| Selection, visibility, membership | State / Combo methods | Use the relevant APIs without full replacement |
 
 ## Replace all data
 
-Run the following operations after the first `await graph.render()` completes.
+Call setData after a valid initial render. It runs configured layout and defaults to fitView(0.9). fitView: false retains the camera. Zoom below, then compare reloads as B alternates between x=240 and 800.
 
-Use `setData()` when filters change, datasets switch, or a request returns a complete result:
+<NodeDocExample id="viewport-preserve" locale="en" focus="preserve-view" />
 
-```ts
-await graph.setData(nextData);
-```
-
-A configured layout runs again, and the viewport fits the data by default. To preserve the user's current zoom and pan:
-
-```ts
-await graph.setData(nextData, { fitView: false });
-```
-
-This `fitView` option controls fitting after this data replacement. Container resize fitting is controlled separately by [`autoFit`](/en/docs/api/options#autofit).
+Camera, states, and data have separate retention policies. Restore selected only for stable IDs still present in new input; see [preserving selection](/en/docs/guides/states)。See [viewport policies](/en/docs/guides/viewport)。
 
 ## Incremental updates
 
-For a small number of element changes, use add, update, and remove methods:
+Update A increments score and changes size. Add D creates the node and C-D; Remove D removes the adjacent edge too. Edit snapshot edits only an export, without writing back.
+
+<NodeDocExample id="data-workflow" locale="en" focus="mutation" />
+
+Incremental methods do not layout or fit; routine updates need no render. Prefer batch methods for multiple elements. Nested data updates are shallow rather than recursive.
+
+<details>
+<summary>Async requests: cancel previous loads and clean up</summary>
+
+The helper below owns cleanup of this page’s Graph. load accepts an AbortSignal. Handle refresh failures in the caller, and call dispose on exit.
 
 ```ts
-graph.addNode({ id: 'carol', x: 120, y: 80, data: { name: 'Carol' } });
-graph.addEdge({ source: 'alice', target: 'carol' });
-graph.updateNodeData('carol', { name: 'Carol Chen' });
-graph.removeNode('bob');
+import type { Graph, GraphData } from '@antv/g6-lite';
+export function createLoader(graph: Graph, load: (signal: AbortSignal) => Promise<GraphData>) {
+  let version = 0;
+  let disposed = false;
+  let controller: AbortController | undefined;
+  return {
+    async refresh() {
+      const request = ++version;
+      controller?.abort();
+      const current = new AbortController();
+      controller = current;
+      try {
+        const next = await load(current.signal);
+        if (disposed || graph.destroyed || request !== version) return;
+        await graph.setData(next, { fitView: false });
+      } catch (error) {
+        if (!current.signal.aborted && !disposed) throw error;
+      }
+    },
+    dispose() {
+      disposed = true;
+      version++;
+      controller?.abort();
+      graph.destroy();
+    },
+  };
+}
 ```
 
-New nodes require positions; incremental methods do not automatically rerun layout. To rearrange the graph, call `layout()` as described in [Runtime relayout](/en/docs/guides/layout). Batch methods reduce repeated refreshes when updating multiple elements.
+</details>
 
-Use [State and visibility APIs](/en/docs/api/graph#state-visibility-and-focus) for selection, highlighting, or hiding instead of replacing all data.
+## Common questions
+
+### Why did labels or colors not change?
+
+Check that fields are inside data and read by the style callback. Editing exports or directly mutating models does not follow the public update flow.
+
+### Why did refreshing lose the view or selection?
+
+setData fits by default and builds states from new input. fitView: false keeps the camera; preserve selection explicitly by stable IDs.
 
 ## Related references
 
-- [Graph lifecycle](/en/docs/concepts/graph-lifecycle): update after initialization and destroy on unmount.
-- [Graph data API](/en/docs/api/graph#changing-nodes-and-edges): element mutations, batch operations, and parameters.
-- [Node configuration](/en/docs/guides/node): map application fields to colors, sizes, and labels.
+[Queries](/en/docs/api/graph/data) · [Mutations](/en/docs/api/graph/data-mutations) · [States](/en/docs/api/graph/states) · [Combos](/en/docs/guides/combo) · [Layout](/en/docs/api/graph/layout)。

@@ -1,13 +1,15 @@
 ---
-title: 数据
-description: 将业务数据转换为 GraphData，并选择整份替换或增量更新
+title: 数据接入与更新
+description: 映射业务数据，选择全量或增量更新，并管理异步刷新
 ---
 
-本页介绍数据接入与运行时更新。节点、边和 Combo 的关系见[数据模型](/docs/concepts/data-model)，完整字段见[配置参考](/docs/api/options#图数据)。
+import { NodeDocExample } from '@/components/node-doc-example';
+
+用稳定 ID 连接业务实体和图元素。先准备数据，再按变化范围选更新方法；字段查[数据配置参考](/docs/api/options/data)，只读视图见[数据模型](/docs/concepts/data-model)。
 
 ## 接入业务数据
 
-将业务实体映射为节点，将实体之间的关系映射为边。业务字段放入 `data`，供样式函数、Tooltip 和业务逻辑读取：
+实体映射为节点、关系映射为边，业务字段放 data，交给样式、Tooltip 或业务面板读取。为需要跨刷新匹配的边也提供稳定 ID。
 
 ```ts
 import type { GraphData } from '@antv/g6-lite';
@@ -26,51 +28,88 @@ const data: GraphData = {
 };
 ```
 
-将转换后的数据作为 `new Graph({ container, data })` 的 `data` 选项。首次创建与渲染的完整代码见[快速上手](/docs/getting-started/quick-start)。
+这段仅转换数据；首次展示还需容器和 render。未提供坐标时配置布局，完整初始化见[快速上手](/docs/getting-started/quick-start)。
 
 ## 校验数据
 
-- 节点 `id` 在图内唯一，后续更新时保持稳定。
-- 边的 `source` 和 `target` 必须对应已有节点。
-- 使用 Combo 时，节点的 `comboId` 应对应已声明的分组。
-- 未配置布局时，应提供节点的 `x` / `y`，避免所有节点落在缺省坐标。
-- 修改图数据应通过公开方法完成，不要直接改写查询返回的 Model。
+- 节点、边、Combo 使用稳定字符串 ID，避免跨类型重名。
+- 边端点引用已存在节点，Combo 归属与父级须有效且无环。
+- 无布局时提供有限 x/y；固定轴约束由应用保留，见字段参考。
+- 先校验再写入，批量方法不保证事务回滚，不直接改 Model。
+
+## 选择更新方式
+
+| 变化 | 方法 | 保留或重算 |
+| --- | --- | --- |
+| 切换数据集 / 全量返回 | setData | 替换全图，有配置就布局；默认适配 |
+| 少量业务字段变化 | updateNodeData / updateEdgeData | 浅合并 data，不重布局 |
+| 新增或删除元素 | addNode(s) / addEdge(s) / remove… | 新增节点提供坐标，删除节点连带删除边 |
+| 位置变化 | updateNodePosition(s) | 图坐标变化，不改变身份 |
+| 选择、隐藏、归组 | 状态 / Combo 方法 | 按所属主题修改，不必全量替换 |
 
 ## 替换整份数据
 
-以下操作都应在首次 `await graph.render()` 完成后执行。
+首次有效 render 完成后调用 setData。默认重布局并 fitView(0.9)；传 fitView: false 保留相机。先缩放下面画布，再对比两种刷新，B 的坐标在 240 / 800 间切换。
 
-筛选条件变化、切换数据集或请求返回完整结果时，使用 `setData()`：
+<NodeDocExample id="viewport-preserve" locale="zh" focus="preserve-view" />
 
-```ts
-await graph.setData(nextData);
-```
-
-配置了布局时会重新计算坐标；默认会重新适配视口。如果希望保留用户当前的缩放和平移：
-
-```ts
-await graph.setData(nextData, { fitView: false });
-```
-
-这里的 `fitView` 控制本次数据替换后的适配；容器尺寸变化后的适配由 [`autoFit`](/docs/api/options#autofit) 控制。
+相机、状态与数据是不同的保留策略。需要保留选择时，按新数据中仍存在的稳定 ID 恢复 selected，见[保留选择](/docs/guides/states)。视野策略见[视口指南](/docs/guides/viewport)。
 
 ## 增量更新
 
-只修改少量元素时，使用增删改方法：
+Update A 递增 score 并更新尺寸；Add D 创建节点和 C-D；Remove D 自动删除关联边。Edit snapshot 只改导出副本，不写回。
+
+<NodeDocExample id="data-workflow" locale="zh" focus="mutation" />
+
+增量方法不重新布局或适配，常规更新不需要 render。多个元素优先批量方法；嵌套 data 是浅合并，不是递归合并。
+
+<details>
+<summary>异步请求：取消旧请求与卸载清理</summary>
+
+下面的辅助函数拥有此页面 Graph 的清理职责。load 接受 AbortSignal；调用 refresh 时处理失败提示，退出时调用 dispose。
 
 ```ts
-graph.addNode({ id: 'carol', x: 120, y: 80, data: { name: 'Carol' } });
-graph.addEdge({ source: 'alice', target: 'carol' });
-graph.updateNodeData('carol', { name: 'Carol Chen' });
-graph.removeNode('bob');
+import type { Graph, GraphData } from '@antv/g6-lite';
+export function createLoader(graph: Graph, load: (signal: AbortSignal) => Promise<GraphData>) {
+  let version = 0;
+  let disposed = false;
+  let controller: AbortController | undefined;
+  return {
+    async refresh() {
+      const request = ++version;
+      controller?.abort();
+      const current = new AbortController();
+      controller = current;
+      try {
+        const next = await load(current.signal);
+        if (disposed || graph.destroyed || request !== version) return;
+        await graph.setData(next, { fitView: false });
+      } catch (error) {
+        if (!current.signal.aborted && !disposed) throw error;
+      }
+    },
+    dispose() {
+      disposed = true;
+      version++;
+      controller?.abort();
+      graph.destroy();
+    },
+  };
+}
 ```
 
-新增节点需要提供坐标，增量方法不会自动重新布局。需要重新排列时，按[布局指南](/docs/guides/layout#运行时重新布局)调用 `layout()`；更新多个元素时，可使用批量方法减少重复刷新。
+</details>
 
-选中、高亮、隐藏等变化使用[状态与显隐 API](/docs/api/graph#状态显隐和定位)，无需替换整份数据。
+## 常见问题
+
+### 更新后标签或颜色没变？
+
+确认字段写在 data，样式回调读取同名字段；修改导出副本或直接改 Model 不会按公开流程更新。
+
+### 更新后为什么视野或选择丢了？
+
+setData 默认适配，状态按新输入建立。保留相机用 fitView: false，保留选择则按稳定 ID 显式恢复。
 
 ## 相关参考
 
-- [Graph 生命周期](/docs/concepts/graph-lifecycle)：初始化完成后更新，卸载时销毁。
-- [Graph 数据 API](/docs/api/graph#修改节点和边)：元素增删改、批量操作及参数。
-- [节点配置](/docs/guides/node)：将业务字段映射为颜色、尺寸与标签。
+[数据读取](/docs/api/graph/data) · [数据写入](/docs/api/graph/data-mutations) · [状态](/docs/api/graph/states) · [Combo 使用](/docs/guides/combo) · [布局](/docs/api/graph/layout)。

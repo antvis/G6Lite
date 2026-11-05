@@ -1,0 +1,142 @@
+---
+title: Drag events
+description: Stages, displacement, and results for nodes, Combos, and edge endpoints
+---
+
+Enable drag-node for nodes/Combos or drag-edge for edge endpoints. Persist results at dragend to avoid requests on every movement.
+
+## Read final positions
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+declare const graph: Graph;
+graph.on('node:dragend', ({ nodeIds }) => {
+  console.log(nodeIds.map((id) => ({ id, position: graph.getNodePosition(id) })));
+});
+```
+
+For multi-node dragging, nodeId is the first nodeIds entry, not necessarily the pressed node. See the [selection and drag guide](/en/docs/guides/events#selection-and-drag-events) for integration and cleanup.
+
+## node:dragstart
+
+Emitted after node movement exceeds 3 CSS pixels, before the first position write.
+
+```ts
+type Payload = {
+  nodeId: string;
+  nodeIds: string[];
+  event: MouseEvent
+};
+```
+
+## node:drag
+
+Emitted after position writes. dx/dy are cumulative graph-coordinate displacements from gesture start, not per-frame deltas.
+
+```ts
+type Payload = {
+  nodeId: string;
+  nodeIds: string[];
+  dx: number;
+  dy: number;
+  event: MouseEvent
+};
+```
+
+## node:dragend
+
+Emitted on release after a real node drag, without a native mouse event. Query final positions for every nodeIds entry.
+
+```ts
+type Payload = {
+  nodeId: string;
+  nodeIds: string[]
+};
+```
+
+## combo:dragstart
+
+Emitted when dragging a Combo background exceeds the threshold. Provided by drag-node.
+
+```ts
+type Payload = {
+  comboId: string;
+  event: MouseEvent
+};
+```
+
+## combo:drag
+
+Emitted after member position writes. dx/dy are also cumulative graph-coordinate displacements.
+
+```ts
+type Payload = {
+  comboId: string;
+  dx: number;
+  dy: number;
+  event: MouseEvent
+};
+```
+
+## combo:dragend
+
+Emitted on release after a real Combo drag, without a native mouse event.
+
+```ts
+type Payload = {
+  comboId: string
+};
+```
+
+## edge:dragstart
+
+Emitted on a left press on an edge, without the node-drag threshold. dragEnd is the nearer endpoint; a tie selects target.
+
+```ts
+type Payload = {
+  edgeId?: string;
+  edgeIndex: number;
+  source: string;
+  target: string;
+  dragEnd: 'source' | 'target';
+  event: MouseEvent;
+};
+```
+
+## edge:drag
+
+Emitted while dragging an edge endpoint. source/target remain the original endpoints; the Behavior draws no temporary edge.
+
+```ts
+type Payload = {
+  edgeId?: string;
+  edgeIndex: number;
+  source: string;
+  target: string;
+  dragEnd: 'source' | 'target';
+  event: MouseEvent;
+};
+```
+
+## edge:dragend
+
+Emitted on release. A valid drop yields proposed source/target; otherwise the originals. reconnected confirms neither data write-back nor changed endpoints.
+
+```ts
+type Payload = {
+  edgeId?: string;
+  edgeIndex: number;
+  source: string;
+  target: string;
+  originalSource: string;
+  originalTarget: string;
+  reconnected: boolean;
+  newEndpoint?: string;
+  event: MouseEvent;
+};
+```
+
+The event field in derived drag payloads is active, rather than the deprecated element-payload alias. node:dragend and combo:dragend have neither event nor nativeEvent. A valid edge drop only proposes endpoints; the application must validate and write them back. See [connection editing](/en/docs/guides/interactions#event-dispatch)。
+
+[Event API](/en/docs/api/graph/events) · [Event topic](/en/docs/guides/events)。

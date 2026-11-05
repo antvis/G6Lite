@@ -1,5 +1,5 @@
 {
   "title": "事件参考",
   "pagesIndex": "../events.mdx",
-  "pages": ["element", "selection"]
+  "pages": ["element", "selection", "drag", "lifecycle"]
 }

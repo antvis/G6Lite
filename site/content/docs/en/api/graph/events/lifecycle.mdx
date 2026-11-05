@@ -1,0 +1,187 @@
+---
+title: Lifecycle and data events
+description: Individual reference for layout, rendering, mutations, resizing, and destruction
+---
+
+Layout/render events describe computation or drawing stages; data events describe method-level data operations. Subscribe before the operation; past events are not replayed.
+
+## Receive the first render event
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+declare const graph: Graph;
+graph.once('afterrender', ({ nodeCount }) => console.log(nodeCount));
+await graph.render();
+```
+
+See the [lifecycle guide](/en/docs/guides/events#lifecycle-and-data-events) for an interactive log and common sequences. These events do not confirm the browser has drawn its next frame.
+
+## beforelayout
+
+Emitted before calculation when a layout is configured and nodes are nonempty, followed by layout:start.
+
+```ts
+type Payload = {
+  nodeCount: number
+};
+```
+
+## layout:start
+
+Emitted immediately after beforelayout, before layout calculation.
+
+```ts
+type Payload = {
+  nodeCount: number
+};
+```
+
+## layout:end
+
+Emitted after a valid layout calculation, before position write-back. duration is calculation milliseconds, excluding drawing.
+
+```ts
+type Payload = {
+  duration: number;
+  nodeCount: number
+};
+```
+
+## afterlayout
+
+Emitted immediately after layout:end, before position write-back. Await graph.layout() for final positions.
+
+```ts
+type Payload = {
+  duration: number;
+  nodeCount: number
+};
+```
+
+## beforerender
+
+Emitted during explicit render after layout/runtime preparation and before fitting and synchronous drawing.
+
+```ts
+type Payload = {
+  nodeCount: number;
+  edgeCount: number
+};
+```
+
+## afterrender
+
+Emitted after explicit render's synchronous drawing. Partial updates, setData, and layout do not emit it. The first occurrence precedes initialization completion and plugin mounting; await graph.render() before mutations.
+
+```ts
+type Payload = {
+  nodeCount: number;
+  edgeCount: number
+};
+```
+
+## resize
+
+Emitted after canvas resizing and optional auto-fit. width/height use container CSS pixels.
+
+```ts
+type Payload = {
+  width: number;
+  height: number
+};
+```
+
+## destroy
+
+Emitted once with no arguments. The instance is already marked destroyed and pending layout cancelled, before runtime/canvas cleanup. Graph listeners are then removed.
+
+The handler is `() => void`, with no payload.
+
+## datachange
+
+Emitted after a valid setData writes data, optionally fits, and requests drawing. Describes replacement rather than item-level differences.
+
+```ts
+type Payload = {
+  nodeCount: number;
+  edgeCount: number
+};
+```
+
+## afteradditem
+
+Emitted after addNode(s) / addEdge(s) schedules drawing, once per item in a batch. Edge payloads also include source/target.
+
+```ts
+type Payload = {
+  type: 'node';
+  id: string
+} | {
+  type: 'edge';
+  id: string;
+  source: string;
+  target: string
+};
+```
+
+## afterremoveitem
+
+Emitted after removeNode(s) / removeEdge(s) schedules drawing. Incident edges removed with a node do not emit separate edge events.
+
+```ts
+type Payload = {
+  type: 'node' | 'edge';
+  id: string
+};
+```
+
+## afterupdateitem
+
+Emitted per result after updateNodePosition(s), updateNodeData, or updateEdgeData schedules drawing. Node dragging also emits position updates. Avoid unconditional writes to the same data inside this callback to prevent synchronous recursion.
+
+```ts
+type Payload = | {
+  type: 'node';
+  id: string;
+  action: 'position' | 'data'
+}
+      | {
+  type: 'edge';
+  id: string;
+  action: 'data'
+};
+```
+
+## combo:collapse
+
+Emitted after collapseCombo changes state and schedules drawing; no repeated event if already collapsed.
+
+```ts
+type Payload = {
+  comboId: string
+};
+```
+
+## combo:expand
+
+Emitted after expandCombo changes state and schedules drawing; no repeated event if already expanded.
+
+```ts
+type Payload = {
+  comboId: string
+};
+```
+
+## Ordering and completion
+
+- Successful explicit render with layout and nonempty nodes: beforelayout → layout:start → layout:end → afterlayout → beforerender → afterrender. Without layout, omit the four layout events.
+- setData: optional four layout events → write-back and optional fit → request drawing → datachange. No beforerender/afterrender.
+- layout: four layout events → write-back → request drawing, without datachange. Positions queried in completion callbacks can still be old; await layout before querying.
+- Incremental after*item, datachange, and Combo events do not confirm the browser has drawn its next frame. Initial afterrender precedes the initialized flag and plugin mounting; await graph.render() before calling incremental mutation methods.
+
+Cancelled or superseded work need not emit matching end events. Standalone runLayout emits no Graph events. See the [layout method reference](/en/docs/api/graph/layout) for cancellation and calculation semantics.
+
+Incremental events do not guarantee changed field values. setData does not emit item-by-item mutation events. State, visibility, camera, and visual-option updates do not synthesize datachange or afterrender.
+
+[Event API](/en/docs/api/graph/events) · [Event topic](/en/docs/guides/events)。

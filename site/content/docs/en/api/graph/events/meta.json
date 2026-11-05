@@ -1,5 +1,5 @@
 {
   "title": "Event reference",
   "pagesIndex": "../events.mdx",
-  "pages": ["element", "selection"]
+  "pages": ["element", "selection", "drag", "lifecycle"]
 }

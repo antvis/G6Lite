@@ -1,0 +1,21 @@
+site/content/docs/en/getting-started/react.mdx
+  s_4534bc5c3d78f4::t_26276a8edc3c8d 2-3,8,19-20,30,53-58,60-63,155-157,159-160,187-190,202,208-210,232-233,319-335
+site/content/docs/zh/getting-started/react.mdx
+  s_4534bc5c3d78f4::t_26276a8edc3c8d 2-3,8,19-20,30,53-58,60-63,155-157,159-160,187-190,202,208-210,232-233,319-335
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0a1dda82f6fd64aeb2103a69b62b5f2e9d489436",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

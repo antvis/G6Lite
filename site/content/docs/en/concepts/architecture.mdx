@@ -36,7 +36,7 @@ Calling `render()` prepares input, builds the runtime, and draws the first frame
 
 <FirstRenderFlow locale="en" />
 
-When asynchronous layout or extension initialization returns, Graph checks the active render generation and destroyed state so stale results cannot replace newer data. Generations are an internal cancellation and result-commit mechanism; applications manage instances through public lifecycle methods.
+After asynchronous layout, Graph checks generation and destruction before committing stale results. The render Promise describes initialization/submission, not GPU completion; consult the [lifecycle contract](/en/docs/api/graph/lifecycle) for plugin mounting and other boundaries. Generations are an internal cancellation and result-commit mechanism; applications manage instances through public lifecycle methods.
 
 ### Frequent-update paths
 
@@ -80,3 +80,15 @@ G6Lite supports node, edge, label, decoration, layout, behavior, transform, and 
 Stateful extensions collaborate through the data, state, viewport, and `requestRender()` capabilities of `ExtensionContext`. They should not hold internal DataModel, Renderer, WebGL contexts, or GPU buffers.
 
 See [Extensions](/en/docs/guides/extensions) for registration, instance scope, and cleanup, and [API stability](/en/docs/compatibility/api-stability) for public contract stability.
+
+## Resource ownership and cleanup
+
+| Resource | Owner | Release boundary |
+| --- | --- | --- |
+| Container, application fetch, external subscriptions | Application | Unmount or obsolete request |
+| Graph canvases, scheduling, resize observation, interaction | Graph | destroy |
+| Worker / layout request | Layout runtime | Completion, cancellation, destruction |
+| Plugin DOM and subscriptions | Extension instance | Extension destroy |
+| WebGL buffers / framebuffers | Internal renderer | Runtime destruction / resource restoration |
+
+These are implementation responsibilities, not additional application APIs. See [React](/en/docs/getting-started/react), [Vue](/en/docs/getting-started/vue), and the [public extension context](/en/docs/api/extensions/registration). Context restoration depends on the browser/device and does not guarantee automatic restoration of application state or page conditions.

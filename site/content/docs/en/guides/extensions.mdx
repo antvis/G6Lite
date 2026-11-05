@@ -1,98 +1,43 @@
 ---
 title: Extension system
-description: Extend nodes, edges, labels, layouts, behaviors, transforms, decorations, and plugins
+description: Choose configuration or an extension, then follow the relevant tutorial and contract
 ---
 
-G6Lite uses **Extension** as the umbrella term. Node, Edge, Label, Decoration, Layout, Behavior, Transform, and Plugin are extension categories. A **Plugin** is only the category for peripheral DOM or stateful capabilities such as a toolbar or minimap; a custom Behavior is an extension, not a Plugin.
-
-Prefer configuration and functional style mappings first. Register an extension only when configuration cannot express the capability.
-
-```ts
-import { register } from '@antv/g6-lite';
-
-register('edge', 'business-relation', {
-  base: 'arc',
-  style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
-});
-```
-
-## Registration and activation
-
-Registration assigns an implementation to a stable name. A Graph activates it by referencing that name in its options. Register extensions before creating or rendering the Graph, and prefix third-party names to reduce global registry collisions.
-
-Stateful Layout, Behavior, Transform, and Plugin extensions should use `extensionFactory()` so each runtime scope receives a fresh instance:
-
-```ts
-import { extensionFactory, register, type ExtensionContext } from '@antv/g6-lite';
-
-register(
-  'behavior',
-  'business-click',
-  extensionFactory(() => {
-    let context: ExtensionContext | undefined;
-
-    return {
-      init(nextContext) {
-        context = nextContext;
-      },
-      getEvents() {
-        return {
-          'node:click': ({ nodeId }) => context?.state.set(nodeId, ['selected']),
-        };
-      },
-      destroy() {
-        context = undefined;
-      },
-    };
-  }),
-);
-```
-
-Objects and zero-argument constructors remain compatibility forms. Use a factory returning a new instance with private state inside it; returning a shared object or capturing module-level mutable state still shares that state.
-
-## Lifecycle by category
-
-Drawing descriptors are resolved and cached by name. Runtime scope depends on mounting, execution, or configuration position; factories are not called exactly once per Graph. See [instance scope](/en/docs/api/extensions/registration#instance-scope) and [cleanup and errors](/en/docs/api/extensions/registration#cleanup-and-errors) for the canonical lifecycle and resource rules.
-
-## Public capability boundary
-
-`ExtensionContext` groups supported capabilities under `data`, `state`, `viewport`, `requestRender()`, and `isDestroyed()`. New extensions must not depend on deprecated `context.graph`, internal `Renderer`, `DataModel`, WebGL state, GPU buffers, deep source imports, or `graph.eventEmitter`.
-
-`context.data.getNode()` and `getEdge()` return snapshots shallow-copied by layer; nested objects may be shared. They are not live Models. Update through data / state methods. See [ExtensionContext](/en/docs/api/extensions/registration#extensioncontext) for complete fields, state replacement, coordinate conventions, and compatibility entries.
-
-If a registered Behavior uses the same name as a built-in Behavior, the registered extension wins. A failing registered implementation does not fall back to the built-in implementation.
-
-See [Custom Behavior](/en/docs/guides/custom-behavior) for the complete typed extension template.
-
-## Decoration visibility
-
-See the [node decoration configuration reference](/en/docs/api/options/node#nodedecorationconfig) for all fields, defaults, stack behavior, and overflow rules.
-
-Node decorations can opt into a minimum zoom and can disable engine collision hiding:
-
-```ts
-const graph = new Graph({
-  node: {
-    decorations: [
-      {
-        renderer: 'business-badge',
-        minZoom: 0.5,
-        hideOnCollision: false,
-        data: (node) => node.data?.badge,
-      },
-    ],
-  },
-});
-```
-
-`minZoom` defaults to `0`. `hideOnCollision` defaults to `true`; when disabled, the decoration may overlap other decorations and does not reserve collision-grid space.
+Prefer configuration before developing an extension. Extension covers eight categories; Plugin means independent DOM and peripheral state, not all extension types.
 
 ## Choosing a category
 
-- Use Behavior for graph interaction driven by public events.
-- Use Transform for data preprocessing before rendering.
-- Use Plugin for independently owned DOM, observers, keyboard listeners, or peripheral state.
-- Use Node, Edge, Label, or Decoration for rendering descriptions and content.
-- Use Layout only to compute and return node coordinates; Graph owns position application and rendering.
+| Task | Tutorial | Contract |
+| --- | --- | --- |
+| Reusable nodes, overlays, decoration anchors | [Custom nodes](/en/docs/guides/custom-node) | [NodeExtension](/en/docs/api/extensions/drawing#nodeextension) |
+| Edge bases, business styles, states | [Custom edges](/en/docs/guides/custom-edge) | [EdgeExtension](/en/docs/api/extensions/drawing#edgeextension) |
+| Node or edge label content | [Label Renderer](/en/docs/guides/custom-label-renderer) | [LabelRenderer](/en/docs/api/extensions/drawing#labelrenderer) |
+| Node decoration content | [Decoration](/en/docs/guides/custom-decoration) | [DecorationRenderer](/en/docs/api/extensions/drawing#decorationrenderer) |
+| Graph event-driven interaction | [Custom Behavior](/en/docs/guides/custom-behavior) | [Behavior contract](/en/docs/api/options/behaviors#custom-behavior-contract) |
+| Position calculations | [Custom layouts](/en/docs/guides/custom-layout) | [LayoutExtension](/en/docs/api/extensions/runtime#layoutextension) |
+| Whole-input preprocessing | [Transforms](/en/docs/guides/custom-transform) | [TransformExtension](/en/docs/api/extensions/runtime#transformextension) |
+| Independent DOM, subscriptions, state | [Plugins](/en/docs/guides/custom-plugin) | [PluginExtension](/en/docs/api/extensions/runtime#pluginextension) |
 
-Custom layouts must honor their `AbortSignal`. Runtime extensions release their listeners, timers, Workers, Observers, and DOM in `destroy()`. Stateless drawing descriptors should not own Graph-lifecycle resources.
+Tutorials pair code with live canvases. See the [combined example](/en/docs/examples/extension-system), or [built-in badges](/en/docs/examples/decoration-badges) before implementing common content.
+
+## Registration and activation
+
+Registration defines a name; Graph configuration activates it. Register before first use. See [registration](/en/docs/api/extensions/registration#register) for overloads, replacement, and compatibility inputs.
+
+## Lifecycle by category
+
+Drawing descriptors are cached and stateless. Runtime factories return fresh instances by category and configuration position, not exactly once per Graph. See [instance scope](/en/docs/api/extensions/registration#instance-scope).
+
+Layout cancellation and standalone execution are in [Custom layouts](/en/docs/guides/custom-layout). To rerun an existing graph, use [layout methods](/en/docs/api/graph/layout).
+
+## Public capability boundary
+
+Use [ExtensionContext](/en/docs/api/extensions/registration#extensioncontext) for snapshots, states, coordinates, and cleanup. Avoid context.graph and internal Renderer / DataModel. Drawing extensions retain supported bases, picking, and engine positioning rather than taking over rendering.
+
+Runtime extensions release owned DOM, subscriptions, timers, and asynchronous work. Explicitly injected application capabilities can provide controlled host collaboration, as shown in the Plugin tutorial.
+
+## Decoration visibility
+
+Follow [Custom decorations](/en/docs/guides/custom-decoration) for measuring, drawing, stacking, overflow, and collisions. See [DecorationRenderer](/en/docs/api/extensions/drawing#decorationrenderer) for callbacks and [decoration configuration](/en/docs/api/options/node#nodedecorationconfig) for placement fields.
+
+For simple styles, labels, states, or Tooltip, prefer [node](/en/docs/guides/node), [edge](/en/docs/guides/edge), [label](/en/docs/guides/label), and [interaction](/en/docs/guides/interactions) configuration first. See [Transform / Plugin options](/en/docs/api/options/transforms-plugins) for constructor-option boundaries. Import public types from the package root, not source internals.

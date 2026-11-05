@@ -152,9 +152,4 @@ For choosing presets, applying brand colors, and switching at runtime, see [Them
 
 ## Plugins and transforms
 
-```ts
-plugins?: Array<{ type: string; [option: string]: unknown }>
-transforms?: Array<'process-parallel-edges' | string | { type: string; options?: object }>
-```
-
-A custom `plugins` or `transforms` `type` must be registered with `register()` first. The built-in transform name is `'process-parallel-edges'`.
+transforms preprocess whole input before layout; plugins mount independent DOM. See [Transform and Plugin options](/en/docs/api/options/transforms-plugins) for complete shapes, registration, and update rules, and [runtime contracts](/en/docs/api/extensions/runtime) for hooks.

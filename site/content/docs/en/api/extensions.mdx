@@ -1,54 +1,35 @@
 ---
 title: Extensions
-description: Extension categories and activation, with registration, factory, context, and layout-tool references
+description: Canonical registration, drawing, runtime, and configuration contract entries
 ---
 
-When configuration cannot express a difference, register it with `register()` and refer to it by name from `GraphOptions`. Tutorials are in [Extensions](/en/docs/guides/extensions), [Custom node](/en/docs/guides/custom-node), and [Custom behavior](/en/docs/guides/custom-behavior).
+Choose a contract by capability; follow [Extension system](/en/docs/guides/extensions) for implementation. Drawing and runtime categories have different lifecycles.
 
 ## `register()`
 
-`register(type, name, extension): void`. See [registration and context](/en/docs/api/extensions/registration#register) for overload types, name constraints, and instance scope.
+See [registration and context](/en/docs/api/extensions/registration#register) for overloads, naming, replacement, compatibility, and types.
 
-`type` is the extension category. `name` is the string later written into configuration, and it cannot be empty. A later registration with the same category and name replaces the previous definition.
-
-| `type` | Where the name is used | What the extension provides |
+| Category | Activation | Public contract |
 | --- | --- | --- |
-| `'node'` | `node.type` | `base?: 'circle' \| 'rect'`, default `style`, `stateStyles`, and `getStyle(node)`. Optional `drawOverlay()` draws a screen-space decoration, and `getBoundaryAnchor()` returns a point on the node boundary |
-| `'edge'` | `edge.type` | `base?: 'line' \| 'arc' \| 'polyline' \| 'cubic'`, default `style`, `stateStyles`, and `getStyle(source, target, edge)` |
-| `'label'` | `node.labelRenderer` or `edge.labelRenderer` | `measure(params)` returns width and height; `draw(params)` paints onto the canvas |
-| `'decoration'` | `node.decorations[].renderer` | The same `measure` / `draw` pair, with data from the decoration config |
-| `'layout'` | `layout.type` | `execute(data, context)` returns nodes with `x` and `y`. `context` includes `width`, `height`, `signal`, and the current `options` |
-| 'behavior' | behaviors type | [BehaviorExtension contract](/en/docs/api/options/behaviors#custom-behavior-contract): init, getEvents, destroy; complete implementation in [Custom Behavior](/en/docs/guides/custom-behavior) |
-| `'transform'` | `type` inside `transforms` | `beforeRender(data)` returns the next `GraphData`. Implement `update(options)` when options can change |
-| `'plugin'` | `type` inside `plugins` | `mount(container)` attaches independent DOM. Use `init` / `destroy` for its lifecycle |
+| node | node.type | [NodeExtension](/en/docs/api/extensions/drawing#nodeextension) |
+| edge | edge.type | [EdgeExtension](/en/docs/api/extensions/drawing#edgeextension) |
+| label | node / edge.labelRenderer | [LabelRenderer](/en/docs/api/extensions/drawing#labelrenderer) |
+| decoration | node.decorations[].renderer | [DecorationRenderer](/en/docs/api/extensions/drawing#decorationrenderer) |
+| behavior | behaviors | [BehaviorExtension](/en/docs/api/extensions/runtime#behaviorextension) |
+| layout | layout.type | [LayoutExtension](/en/docs/api/extensions/runtime#layoutextension) |
+| transform | transforms | [TransformExtension](/en/docs/api/extensions/runtime#transformextension) |
+| plugin | plugins | [PluginExtension](/en/docs/api/extensions/runtime#pluginextension) |
 
-Node and edge extensions are usually stateless style objects. Layouts, behaviors, transforms, and plugins usually keep state, so wrap them in `extensionFactory()`.
-
-```ts
-import { register } from '@antv/g6-lite';
-
-register('edge', 'dependency', {
-  base: 'arc',
-  style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
-});
-```
-
-Register before the first render. Behaviors are created on mounting; later registration or replacement does not replace mounted instances. See [Custom Behavior](/en/docs/guides/custom-behavior) for activation and cleanup.
-
-A plain object or a zero-argument class can still be registered. Objects are cloned on a best-effort basis, and classes are constructed again. For stateful extensions, return fresh instances from `extensionFactory()` according to their runtime scope.
+See [Transform / Plugin options](/en/docs/api/options/transforms-plugins) for shapes, ordering, and update boundaries.
 
 ## `extensionFactory()`
 
-Marks and returns an instance factory without creating an instance immediately. Invocation scope depends on the extension category. See [registration and context](/en/docs/api/extensions/registration#extensionfactory) for the signature, input forms, compatibility copying, and instance scope.
+Marking a factory does not create an instance immediately or imply exactly one call per Graph. See the [factory contract](/en/docs/api/extensions/registration#extensionfactory) for input forms and instance scope.
 
 ## Extension context
 
-Runtime extensions receive data, state, viewport, requestRender(), and isDestroyed() through init. data returns snapshots shallow-copied by layer; state.set / setAll replaces specified elements' states. Use controlled capabilities in new code.
-
-See [ExtensionContext](/en/docs/api/extensions/registration#extensioncontext) for complete signatures, snapshot fields, coordinate units, missing IDs, cleanup, and compatibility members.
+[ExtensionContext](/en/docs/api/extensions/registration#extensioncontext) defines snapshots, writes, state replacement, coordinates, scheduling, and destruction. See [runtime contracts](/en/docs/api/extensions/runtime) for operation inputs and timing.
 
 ## `runLayout()`
 
-Import runLayout from the package root to compute node positions independently. See the [runLayout reference](/en/docs/api/graph/layout#runlayout) for its full signature, viewport, cancellation signal, result, and rendered example.
-
-For an existing Graph, use [instance layout methods](/en/docs/api/graph/layout). Custom layout registration and execute contracts remain in this page's [extension categories](/en/docs/api/extensions#register).
+See [runLayout](/en/docs/api/graph/layout#runlayout) for standalone calculation, viewport, cancellation, and live results. Use [layout methods](/en/docs/api/graph/layout) for an existing Graph. Standalone calculation skips Layout.init; follow [Custom layouts](/en/docs/guides/custom-layout) for implementation.

@@ -152,9 +152,4 @@ behaviors 是完整行为列表，省略时启用缩放与画布平移；显式�
 
 ## 插件与转换
 
-```ts
-plugins?: Array<{ type: string; [option: string]: unknown }>
-transforms?: Array<'process-parallel-edges' | string | { type: string; options?: object }>
-```
-
-`plugins` 和自定义 `transforms` 的 `type` 必须先用 `register()` 注册。内置转换名目前是 `'process-parallel-edges'`。
+transforms 在布局前转换整份输入；plugins 挂载独立 DOM。两者的完整配置、选项位置、注册和更新边界见[Transform 与 Plugin 配置](/docs/api/options/transforms-plugins)，调用协议见[运行类契约](/docs/api/extensions/runtime)。

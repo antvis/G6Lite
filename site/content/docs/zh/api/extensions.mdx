@@ -1,54 +1,35 @@
 ---
 title: 扩展
-description: 扩展类别与激活入口，注册、工厂、上下文和布局工具的查询索引
+description: 扩展契约分类索引，注册、绘制、运行与配置的唯一查询入口
 ---
 
-配置覆盖不了的差异，用 `register()` 注册后再在 `GraphOptions` 里按名字引用。教程和示例见 [扩展体系](/docs/guides/extensions)、[自定义节点](/docs/guides/custom-node)、[自定义行为](/docs/guides/custom-behavior)。
+先按能力查契约；按步骤开发看[扩展体系](/docs/guides/extensions)。绘制类与运行类的生命周期不同，不把字段、教程和实例作用域混为一份定义。
 
 ## `register()`
 
-`register(type, name, extension): void`。重载类型、名称约束与实例作用域见[注册与上下文](/docs/api/extensions/registration#register)。
+注册重载、名称约束、覆盖、兼容形式与类型见[注册与上下文](/docs/api/extensions/registration#register)。
 
-`type` 是扩展类别，`name` 是之后写进配置的名字，不能是空字符串。同一类别下后注册的同名扩展覆盖之前的定义。
-
-| `type` | 在配置里的用法 | 扩展对象要提供的能力 |
+| 类别 | 激活位置 | 完整公共协议 |
 | --- | --- | --- |
-| `'node'` | `node.type` | `base?: 'circle' \| 'rect'`、默认 `style`、`stateStyles`、`getStyle(node)`。可选 `drawOverlay()` 画屏幕空间装饰，`getBoundaryAnchor()` 返回节点边界上的锚点 |
-| `'edge'` | `edge.type` | `base?: 'line' \| 'arc' \| 'polyline' \| 'cubic'`、默认 `style`、`stateStyles`、`getStyle(source, target, edge)` |
-| `'label'` | `node.labelRenderer` 或 `edge.labelRenderer` | `measure(params)` 返回宽高，`draw(params)` 把内容画到 canvas |
-| `'decoration'` | `node.decorations[].renderer` | 与标签相同的 `measure` / `draw`，数据来自装饰配置 |
-| `'layout'` | `layout.type` | `execute(data, context)` 返回带 `x`、`y` 的节点。`context` 含 `width`、`height`、`signal` 和本次 `options` |
-| 'behavior' | behaviors 的 type | [BehaviorExtension 契约](/docs/api/options/behaviors#自定义-behavior-契约)：init、getEvents、destroy；完整实现见[自定义 Behavior](/docs/guides/custom-behavior) |
-| `'transform'` | `transforms` 的 `type` | `beforeRender(data)` 返回新的 `GraphData`。选项变化时可以实现 `update(options)` |
-| `'plugin'` | `plugins` 的 `type` | `mount(container)` 挂载独立 DOM。用 `init` / `destroy` 管理生命周期 |
+| node | node.type | [NodeExtension](/docs/api/extensions/drawing#nodeextension) |
+| edge | edge.type | [EdgeExtension](/docs/api/extensions/drawing#edgeextension) |
+| label | node / edge.labelRenderer | [LabelRenderer](/docs/api/extensions/drawing#labelrenderer) |
+| decoration | node.decorations[].renderer | [DecorationRenderer](/docs/api/extensions/drawing#decorationrenderer) |
+| behavior | behaviors | [BehaviorExtension](/docs/api/extensions/runtime#behaviorextension) |
+| layout | layout.type | [LayoutExtension](/docs/api/extensions/runtime#layoutextension) |
+| transform | transforms | [TransformExtension](/docs/api/extensions/runtime#transformextension) |
+| plugin | plugins | [PluginExtension](/docs/api/extensions/runtime#pluginextension) |
 
-节点和边扩展适合无状态的样式对象。布局、行为、转换和插件通常带内部状态，用 `extensionFactory()` 包装。
-
-```ts
-import { register } from '@antv/g6-lite';
-
-register('edge', 'dependency', {
-  base: 'arc',
-  style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
-});
-```
-
-在首次 render 前完成注册。Behavior 在挂载时创建，后注册或覆盖不会替换已挂载实例；激活与清理见[自定义 Behavior](/docs/guides/custom-behavior)。
-
-对象和零参数 class 仍能注册。对象会被尽量克隆，class 会被重新构造。有状态扩展要可预测的实例隔离时，使用 `extensionFactory()`。
+Transform / Plugin 的配置形状、顺序与更新边界见[配置参考](/docs/api/options/transforms-plugins)。
 
 ## `extensionFactory()`
 
-标记并返回实例工厂；它不立即创建实例，调用次数取决于扩展类别。完整签名、注册形式、对象兼容限制和作用域见[注册与上下文参考](/docs/api/extensions/registration#extensionfactory)。
+标记工厂不等于立即创建实例，也不统一每个 Graph 一次。完整签名、注册形式与缓存/实例作用域见[工厂契约](/docs/api/extensions/registration#extensionfactory)。
 
 ## 扩展上下文
 
-运行类扩展通过 init 获得 data、state、viewport、requestRender() 和 isDestroyed()。data 返回分层浅复制的快照，state.set / setAll 替换指定元素状态；新代码使用受控能力。
-
-全部成员签名、快照字段、坐标单位、缺失 ID、清理和兼容成员见[ExtensionContext](/docs/api/extensions/registration#extensioncontext)。
+快照字段、数据写入、状态替换、坐标、调度和销毁状态统一定义于[ExtensionContext](/docs/api/extensions/registration#extensioncontext)。运行钩子的输入和完成时机见[运行契约](/docs/api/extensions/runtime)。
 
 ## `runLayout()`
 
-从包根导入 runLayout 可独立计算节点坐标；完整签名、viewport 与取消信号、返回值和代码效果见 [runLayout 参考](/docs/api/graph/layout#runlayout)。
-
-已有 Graph 的布局更新用[实例布局方法](/docs/api/graph/layout)。自定义布局的注册与 execute 协议仍见本页的[扩展类别](/docs/api/extensions#register)。
+独立计算的签名、视口、取消信号和示例见[runLayout](/docs/api/graph/layout#runlayout)，已有 Graph 重排用[布局方法](/docs/api/graph/layout)。独立计算不调用 Layout.init；实现步骤见[自定义布局](/docs/guides/custom-layout)。

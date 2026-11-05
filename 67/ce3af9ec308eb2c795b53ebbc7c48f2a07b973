@@ -1,0 +1,25 @@
+site/content/docs/zh/api/graph/data-mutations.mdx
+  s_4534bc5c3d78f4::t_1a752ceed938fe 1-146
+site/content/docs/en/api/graph/data-mutations.mdx
+  s_4534bc5c3d78f4::t_1a752ceed938fe 1-146
+site/content/docs/en/api/graph/meta.json
+  s_4534bc5c3d78f4::t_1a752ceed938fe 5
+site/content/docs/zh/api/graph/meta.json
+  s_4534bc5c3d78f4::t_1a752ceed938fe 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "67ce3af9ec308eb2c795b53ebbc7c48f2a07b973",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

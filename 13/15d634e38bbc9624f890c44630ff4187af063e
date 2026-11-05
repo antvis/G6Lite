@@ -1,0 +1,34 @@
+site/content/docs/zh/guides/custom-edge.mdx
+  s_4534bc5c3d78f4::t_be28cac93e3cbf 40
+site/content/docs/zh/api/options/transforms-plugins.mdx
+  s_4534bc5c3d78f4::t_cc9cc78b384a93 23
+site/content/docs/zh/api/extensions/runtime.mdx
+  s_4534bc5c3d78f4::t_3d71fc6f0e7ecf 37
+site/content/docs/en/api/extensions/runtime.mdx
+  s_4534bc5c3d78f4::t_3d71fc6f0e7ecf 37
+site/content/docs/en/guides/custom-edge.mdx
+  s_4534bc5c3d78f4::t_67c90db1c3d168 40
+site/demos/docs-extension-decoration.ts
+  s_4534bc5c3d78f4::t_f4f3fd065ca4a7 37
+  s_4534bc5c3d78f4::t_be28cac93e3cbf 36
+site/content/docs/zh/guides/custom-decoration.mdx
+  s_4534bc5c3d78f4::t_be28cac93e3cbf 22
+site/content/docs/en/guides/custom-decoration.mdx
+  s_4534bc5c3d78f4::t_be28cac93e3cbf 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "1315d634e38bbc9624f890c44630ff4187af063e",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

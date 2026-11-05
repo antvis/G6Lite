@@ -37,9 +37,10 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
 
   const ui = createDemoPanel(host, 'Worker 布局', '', '');
-  ui.setStatus(`force · worker · ${Math.round(performance.now() - started)} ms`);
+  ui.setStatus(`force · worker requested · ${Math.round(performance.now() - started)} ms\nWorker success requires a Network/Performance check; failure may fall back.`);
 
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();

@@ -660,16 +660,16 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     group: { zh: '布局运行', en: 'Layout runtime' },
     title: { zh: 'Worker 布局', en: 'Worker layout' },
     description: {
-      zh: '把力导向计算放到 Web Worker，避免挡住主线程。',
-      en: 'Run force layout in a Web Worker so the main thread stays responsive.',
+      zh: '请求 Worker 计算力导向布局，并展示返回的节点坐标。',
+      en: 'Request a worker force layout and display the returned node positions.',
     },
     interaction: {
       zh: '等待力导向布局结束后再拖拽画布。',
       en: 'Pan the canvas after the force layout finishes.',
     },
     dataDescription: {
-      zh: '80 个节点的力导向布局在 Worker 中计算。',
-      en: 'A force layout of 80 nodes runs in a worker.',
+      zh: '80 个节点、79 条边，配置 worker: true 请求后台计算；是否真正使用 Worker 需在 Network/Performance 中确认，失败可能回退。',
+      en: '80 nodes and 79 edges request background computation with worker: true. Verify actual worker execution in Network/Performance; failures may fall back.',
     },
     tags: ['layout.worker', 'layout.force'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '2' }],

@@ -24,9 +24,8 @@ const LAYOUTS = [
   { type: 'dagre', rankdir: 'TB', nodesep: 30, ranksep: 40 },
 ] as const;
 
-let currentGraph: Graph | null = null;
-
 export async function run(container: string | HTMLElement) {
+  let currentGraph: Graph | null = null;
   const wrapper = typeof container === 'string'
     ? document.querySelector<HTMLElement>(container)!
     : container;
@@ -61,6 +60,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getData: () => currentGraph?.getData(),
     fitView: () => currentGraph?.fitView({ padding: 64 }),
     destroy: () => {
       currentGraph?.destroy();

@@ -1,0 +1,21 @@
+site/content/docs/zh/compatibility/library-comparison.mdx
+  s_4534bc5c3d78f4::t_182b1dd990b666 3,6,8,12-19,23-28,30,34-37,39,43-45,49-52,56,60-62,64,68
+site/content/docs/en/compatibility/library-comparison.mdx
+  s_4534bc5c3d78f4::t_182b1dd990b666 3,6,8,10,12-19,23-28,30,34-39,41,43,45,49-52,56,60-62,64,68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3699512c926b60ffe3947b743e67625d5e5d134c",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -33,6 +33,17 @@ for (const example of definitions) {
     const prefix = locale === 'zh' ? '' : '/en';
     const html = fs.readFileSync(path.join(root, 'out', (prefix + '/docs/examples/' + example.id + '.html').slice(1)), 'utf8');
     const markdown = fs.readFileSync(path.join(root, 'out', (prefix + '/llms.mdx/docs/examples/' + example.id + '/content.md').slice(1)), 'utf8');
+    const runtimeSource = fs.readFileSync(path.join(root, 'demos', example.file), 'utf8').replace(/\r\n/g, '\n').trim();
+    const llm = fs.readFileSync(path.join(root, 'out', prefix.slice(1), 'llms-full.txt'), 'utf8');
+    const flight = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)].flatMap((match) => {
+      const payload = /^self\.__next_f\.push\((.*)\)$/.exec(match[1].trim());
+      if (!payload) return [];
+      const chunk = JSON.parse(payload[1]);
+      return typeof chunk[1] === 'string' ? [chunk[1]] : [];
+    }).join('');
+    const inlineSources = [...flight.matchAll(/"initialSource":("(?:[^"\\]|\\.)*")/g)].map((match) => JSON.parse(match[1]));
+    if (!flight.includes(runtimeSource) && !inlineSources.some((code) => code.includes(runtimeSource))) throw new Error('Editor source mismatch: ' + example.id + ' ' + locale);
+    if (!markdown.includes(runtimeSource) || !llm.includes(runtimeSource) || markdown.includes('<ExampleDetail')) throw new Error('Incomplete source export: ' + example.id + ' ' + locale);
     let reverse = false;
     for (const doc of docs) {
       const ref = doc.href.split('#')[0].replace('/docs/', '');
@@ -47,4 +58,4 @@ for (const example of definitions) {
   matrix.push({ id: example.id, file: example.file, category: example.category, bilingualFields: true, documentation: docs.map((d) => d.href), reverseLinks: true, htmlAndMarkdown: true, visualScope: 'Existing runtime; representative cases are browser-checked separately' });
 }
 if (process.argv.includes('--json')) console.log(JSON.stringify(matrix, null, 2));
-else console.log(matrix.length + ' example identities, bilingual descriptions, documentation links, reverse links and exports verified.');
+else console.log(matrix.length + ' example identities, bilingual descriptions, links and exact editor/Markdown/LLM runtime sources verified.');

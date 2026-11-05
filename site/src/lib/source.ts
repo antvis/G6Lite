@@ -5,6 +5,7 @@ import { docsContentRoute, docsImageRoute, withBasePath } from './shared';
 import { expandNodeDocExamples } from './node-doc-example-source';
 import { getSiteExample, localizedText } from './site-examples';
 import { prefixMarkdownLinks } from './markdown-links';
+import { expandSiteExamples } from './site-example-source';
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
@@ -47,6 +48,6 @@ export async function getLLMText(page: (typeof source)['$inferPage']) {
 
   const markdown = `# ${page.data.title} (${withBasePath(page.url)})
 
-${expandNodeDocExamples(processed)}${related}`;
+${expandSiteExamples(expandNodeDocExamples(processed), locale)}${related}`;
   return prefixMarkdownLinks(markdown, withBasePath('/').replace(/\/$/, ''));
 }

@@ -1,6 +1,7 @@
 import Image from 'next/image';
 
 import catalog from '../../demos/catalog.json';
+import { getSiteExample, localizedText } from '@/lib/site-examples';
 import { localizedPath, type Locale } from '@/lib/i18n';
 import { withBasePath } from '@/lib/shared';
 
@@ -41,41 +42,6 @@ const groupLabels = {
   },
 } as const;
 
-const englishExamples: Record<string, { title: string; description: string }> = {
-  basic: {
-    title: 'Minimal graph',
-    description: 'Render a zoomable and draggable graph with minimal configuration.',
-  },
-  'node-style': {
-    title: 'Node styles',
-    description: 'Map business fields to node colors, sizes, and highlight states.',
-  },
-  layouts: {
-    title: 'Layout switching',
-    description: 'Switch between circular, force, grid, and dagre layouts.',
-  },
-  tooltip: {
-    title: 'Tooltip',
-    description: 'Show custom business information while hovering nodes or edges.',
-  },
-  'edge-arrows': {
-    title: 'Edge arrows',
-    description: 'Compare no arrow, one-way, two-way, and wide edge arrows.',
-  },
-  'parallel-edges': {
-    title: 'Parallel edges',
-    description: 'Separate parallel, reverse, and self-loop edges automatically.',
-  },
-  combo: {
-    title: 'Combo containers',
-    description: 'Use nested groups, collapse, expand, and runtime regrouping.',
-  },
-  'real-dataset': {
-    title: 'Real dataset',
-    description: 'Validate large-graph rendering with the AI Papers dataset.',
-  },
-};
-
 export function ExamplesGrid({ locale = 'zh' }: { locale?: Locale }) {
   const examples = catalog.filter((demo) => demo.audiences.includes('site') && 'docsGroup' in demo);
 
@@ -94,9 +60,9 @@ export function ExamplesGrid({ locale = 'zh' }: { locale?: Locale }) {
             </div>
             <div className="example-grid">
               {grouped.map((demo) => {
-                const copy = locale === 'en' ? englishExamples[demo.id] : undefined;
-                const demoTitle = copy?.title ?? demo.title;
-                const demoDescription = copy?.description ?? demo.description;
+                const example = getSiteExample(demo.id)!;
+                const demoTitle = localizedText(example.title, locale);
+                const demoDescription = localizedText(example.description, locale);
 
                 return (
                   <a

@@ -1862,6 +1862,7 @@ body.example-workspace-resizing {
 
 .example-panel-toolbar {
   display: flex;
+  flex-shrink: 0;
   min-height: 2.75rem;
   align-items: center;
   justify-content: space-between;
@@ -2746,7 +2747,8 @@ html.dark .examples-center-card-image img {
 
   .example-preview-panel {
     min-height: 20rem;
-    max-height: 26rem;
+    height: auto;
+    max-height: none;
     border-radius: 0.8rem;
   }
 
@@ -2757,6 +2759,7 @@ html.dark .examples-center-card-image img {
   }
 
   .example-preview-stage {
+    flex: none;
     height: clamp(16rem, 70vw, 18rem);
     min-height: 16rem;
     max-height: 18rem;

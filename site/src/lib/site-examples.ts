@@ -485,8 +485,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Show node labels, edge labels, and icons, and change their placement at runtime.',
     },
     interaction: {
-      zh: '切换标签位置，或隐藏边标签。',
-      en: 'Change label placement or hide edge labels.',
+      zh: '标签菜单选 left，再从操作菜单切换节点图标和边标签；刷新恢复 bottom、图标及边标签。',
+      en: 'Choose left in the label menu, then toggle node icons and edge labels in Actions. Refresh restores bottom placement, icons and edge labels.',
     },
     dataDescription: {
       zh: '节点带图标和标签，边带可开关的标签。',
@@ -506,8 +506,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Compare fixed size, low-zoom drawing, and collision hiding.',
     },
     interaction: {
-      zh: '切换标签策略，并在不同缩放下比较结果。',
-      en: 'Switch the label policy and compare it at different zoom levels.',
+      zh: '初始为全部标签、zoom 0.4。选择默认策略和 zoom 0.2，文字隐藏；同一缩放切回全部标签，文字重新出现。刷新恢复初始设置。',
+      en: 'Starts with all labels at zoom 0.4. Choose the default policy and zoom 0.2 to hide text; switch back to all labels at the same zoom to show it again. Refresh restores the initial settings.',
     },
     dataDescription: {
       zh: '同一张图在默认策略和全部显示之间切换。',
@@ -1169,8 +1169,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Stack count, status, and text badges on a node boundary.',
     },
     interaction: {
-      zh: '悬停超出数量的徽章入口，展开被收起的徽章。',
-      en: 'Hover the overflow marker to expand hidden badges.',
+      zh: '订单节点有 5 项，初始显示两项与溢出入口；悬停 ··· 展开全部 5 项，移开恢复。刷新后仍只有一套徽章。',
+      en: 'Orders has 5 badges, initially two plus an overflow marker. Hover ··· to expand all 5; leave to collapse. Refresh keeps a single set of badges.',
     },
     dataDescription: {
       zh: '三个节点在边界上堆叠内置徽章。',

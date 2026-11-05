@@ -121,6 +121,7 @@ export async function run(container: string | HTMLElement) {
   setZoom(zoom);
 
   return {
+    getData: () => graph.getData(),
     fitView: () => setZoom(zoom),
     destroy() {
       graph.destroy();

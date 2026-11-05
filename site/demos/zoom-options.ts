@@ -49,10 +49,20 @@ export async function run(container: string | HTMLElement) {
     report();
   });
   report();
+  const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+  let reportFrame: number | undefined;
+  const onWheel = () => {
+    if (reportFrame !== undefined) cancelAnimationFrame(reportFrame);
+    reportFrame = requestAnimationFrame(() => { reportFrame = undefined; report(); });
+  };
+  host.addEventListener('wheel', onWheel, { passive: true });
 
   return {
-    fitView: () => graph.fitView(),
+    getData: () => graph.getData(),
+    fitView: () => { graph.fitView(); report(); },
     destroy() {
+      host.removeEventListener('wheel', onWheel);
+      if (reportFrame !== undefined) cancelAnimationFrame(reportFrame);
       graph.destroy();
       ui.panel.remove();
     },

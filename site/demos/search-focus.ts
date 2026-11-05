@@ -80,6 +80,7 @@ export async function run(container: string | HTMLElement) {
   status.textContent = '输入名称片段';
 
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();

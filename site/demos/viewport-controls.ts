@@ -71,6 +71,7 @@ export async function run(container: string | HTMLElement) {
 
   showCamera('ready');
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();

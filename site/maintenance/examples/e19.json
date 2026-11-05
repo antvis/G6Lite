@@ -1,0 +1,46 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E19",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "viewport-controls",
+      "file": "viewport-controls.ts",
+      "observations": [
+        "Zoom, focus C and setCamera change the displayed camera",
+        "Coordinate round-trip graph (60,80) → screen → restored (60,80) is exact to displayed precision",
+        "Refresh restores the initial camera with 3 nodes / 3 edges"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "zoom-options",
+      "file": "zoom-options.ts",
+      "observations": [
+        "At minimum 0.4, further wheel-down keeps current=0.40; at maximum 2, wheel-up keeps current=2.00",
+        "Refresh restores initial fit; live status now follows wheel updates rather than only button actions"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "search-focus",
+      "file": "search-focus.ts",
+      "observations": [
+        "Searching al yields 1 match and focuses/highlights Alice; zzzzz yields 0 matches",
+        "Refresh clears input and restores 12 nodes / 11 edges"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Added live snapshots to all three handles",
+    "Updated zoom status after wheel frames and Fit, removing the listener/frame on destroy"
+  ]
+}

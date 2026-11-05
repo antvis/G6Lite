@@ -1,0 +1,185 @@
+---
+title: 元素事件
+description: 节点、边、Combo 和画布的点击、悬停、按下与滚轮事件
+---
+
+先用元素事件响应用户操作，再按需要读取数据和坐标。首次 render 挂载分发器后即可接收，不要求启用 click-select。
+
+## 监听节点点击
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+declare const graph: Graph;
+graph.on('node:click', ({ nodeId, data, nativeEvent }) => {
+  console.log(nodeId, data, nativeEvent.clientX);
+});
+```
+
+业务数据从 data 读取，图内位置从 graph 坐标读取。点击不会自动改变样式；需要选中效果时配置 click-select，见[事件入门](/docs/guides/events)。
+
+## 读取事件参数
+
+| 字段 | 类型 / 含义 |
+| --- | --- |
+| targetType | node / edge / combo / canvas；对应 NodeGraphEvent、EdgeGraphEvent、ComboGraphEvent、CanvasGraphEvent 的字面量 |
+| targetId | 节点、边、Combo 必有的字符串；画布无目标 ID |
+| data? | 节点或边的业务 data，可不存在；不是完整 GraphNode / GraphEdge，Combo 和画布不携带业务数据 |
+| client | `{ x, y }`，浏览器视口 CSS 像素，等于原始 clientX/clientY |
+| canvas | `{ x, y }`，相对画布左上角的 CSS 像素，不是乘以 DPR 的缓冲区像素 |
+| graph | `{ x, y }`，经相机逆变换后的图坐标；视口平移、缩放后仍可用于图内定位 |
+| nativeEvent | 点击、悬停、按下/松开为 MouseEvent，wheel 为 WheelEvent；pointer 名称不表示 PointerEvent 或触摸支持 |
+| event | 与 nativeEvent 相同的原始对象；仅此类载荷中的 event 为弃用别名 |
+| nodeId | NodeGraphEvent 必有的 string |
+| edgeId / edgeIndex | EdgeGraphEvent 必有的 string / number；无显式边 ID 时分发器可回退到索引字符串，不应跨数据替换持久化 edgeIndex |
+| source / target | EdgeGraphEvent 必有的两端节点 ID，均为 string |
+| comboId | ComboGraphEvent 必有的 string |
+
+NodeGraphEvent 与 EdgeGraphEvent 可指定数据和原生事件类型两个泛型；ComboGraphEvent、CanvasGraphEvent 可指定原生事件类型。GraphEventMap 已按事件名细化原生事件类型，业务数据仍为可选 Record，应用需自行校验字段。
+
+## 节点
+
+这些事件携带 nodeId；点击与悬停的原生对象是 MouseEvent，滚轮为 WheelEvent。
+
+### node:pointerover
+
+指针移入新的目标时触发。
+
+### node:pointerenter
+
+紧随 pointerover 发出；G6Lite 将它作为独立事件通知。
+
+### node:pointermove
+
+指针在当前目标上移动时触发。
+
+### node:pointerleave
+
+指针离开当前目标时触发；坐标是离开时的指针位置。
+
+### node:pointerdown
+
+鼠标按下并命中目标时触发。
+
+### node:click
+
+单击目标时触发。
+
+### node:dblclick
+
+双击目标时触发。
+
+### node:contextmenu
+
+右键菜单手势命中目标时触发；浏览器默认菜单已被阻止。
+
+### node:wheel
+
+滚轮命中目标时触发，读取 nativeEvent.deltaY。
+
+## 边
+
+这些事件携带 edgeId、edgeIndex、source、target。需要跨数据更新保存标识时，显式设置边 id。
+
+### edge:pointerover
+
+指针移入新的目标时触发。
+
+### edge:pointerenter
+
+紧随 pointerover 发出；G6Lite 将它作为独立事件通知。
+
+### edge:pointermove
+
+指针在当前目标上移动时触发。
+
+### edge:pointerleave
+
+指针离开当前目标时触发；坐标是离开时的指针位置。
+
+### edge:pointerdown
+
+鼠标按下并命中目标时触发。
+
+### edge:click
+
+单击目标时触发。
+
+### edge:dblclick
+
+双击目标时触发。
+
+### edge:contextmenu
+
+右键菜单手势命中目标时触发；浏览器默认菜单已被阻止。
+
+### edge:wheel
+
+滚轮命中目标时触发，读取 nativeEvent.deltaY。
+
+## Combo
+
+Combo 只发送下面四种元素事件。点击内部节点时发送 node:click，不向 Combo 冒泡。
+
+### combo:pointerdown
+
+鼠标按下并命中目标时触发。
+
+### combo:click
+
+单击目标时触发。
+
+### combo:dblclick
+
+双击目标时触发。
+
+### combo:contextmenu
+
+右键菜单手势命中目标时触发；浏览器默认菜单已被阻止。
+
+## 画布
+
+画布事件不携带元素 ID。Combo 背景的移动和滚轮也按画布处理。
+
+### canvas:pointermove
+
+指针在当前目标上移动时触发。
+
+### canvas:pointerdown
+
+鼠标按下并命中目标时触发。
+
+### canvas:pointerup
+
+window 收到鼠标松开时触发，不重新命中释放目标；应用需自行记录手势开始。
+
+### canvas:click
+
+单击目标时触发。
+
+### canvas:dblclick
+
+双击目标时触发。
+
+### canvas:contextmenu
+
+右键菜单手势命中目标时触发；浏览器默认菜单已被阻止。
+
+### canvas:wheel
+
+滚轮命中目标时触发，读取 nativeEvent.deltaY。
+
+## 命中与手势
+
+<details>
+<summary>命中、悬停与手势边界</summary>
+
+命中优先级为节点 → 边 → Combo → 画布，点击和按下只发命中目标的一类事件，不向 Combo 或画布冒泡。Combo 背景的移动与滚轮按画布处理，没有 combo:pointermove/over/leave/wheel；也没有 node:pointerup 或 edge:pointerup。
+
+mousemove 命中新的节点或边时，先发旧目标 pointerleave，再发新目标 pointerover → pointerenter → pointermove；同一目标只继续 pointermove。空白或 Combo 背景发 canvas:pointermove。pointerleave 的坐标是离开时指针所在位置。已被拖拽消费的手势会暂停悬停命中；有效拖拽或按下到松开超过 3 CSS 像素会抑制下一次 click，但不承诺取消 dblclick。
+
+canvas:pointerup 来自 window 的 mouseup，不重新命中释放目标，也不要求先在本图按下，因此应用应自己记录手势开始。contextmenu 会阻止浏览器默认菜单；普通事件回调的 return false 不取消分发或其他 Behavior。
+
+</details>
+
+返回[事件 API](/docs/api/graph/events) · [使用指南](/docs/guides/events)。

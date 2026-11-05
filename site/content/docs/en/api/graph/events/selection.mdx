@@ -1,0 +1,101 @@
+---
+title: Selection events
+description: Payloads for click selection, clearing, brushing, and lasso
+---
+
+Enable click-select, brush-select, or lasso-select before subscribing. These events follow selection-state writes; programmatic selected-state updates do not synthesize them.
+
+## Read final selection
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+declare const graph: Graph;
+graph.on('brush:end', () => {
+  console.log(graph.findNodesByState('selected'));
+});
+```
+
+Brush and lasso do not emit per-node selectchange. See the [selection and drag guide](/en/docs/guides/events#selection-and-drag-events) to synchronize all sources.
+
+## node:selectchange
+
+Emitted after click-select toggles the clicked node.
+
+```ts
+type Payload = {
+  nodeId: string;
+  selected: boolean;
+  event: MouseEvent
+};
+```
+
+## edge:selectchange
+
+Emitted after click-select toggles the clicked edge.
+
+```ts
+type Payload = {
+  edgeId: string;
+  edgeIndex: number;
+  source: string;
+  target: string;
+  selected: boolean;
+  event: MouseEvent;
+};
+```
+
+## selection:clear
+
+Emitted after click-select clears a nonempty selection. IDs may mix nodes and edges; no per-item deselection event is emitted.
+
+```ts
+type Payload = {
+  ids: string[];
+  event: MouseEvent
+};
+```
+
+## brush:select
+
+Emitted for nonempty brush hits, throttled during movement with a final computation at release.
+
+```ts
+type Payload = {
+  nodeIds: string[]
+};
+```
+
+## brush:end
+
+Emitted when a brush gesture ends; nodeIds may be empty.
+
+```ts
+type Payload = {
+  nodeIds: string[]
+};
+```
+
+## lasso:select
+
+Emitted for nonempty lasso hits; nodeIds describes this gesture's set.
+
+```ts
+type Payload = {
+  nodeIds: string[]
+};
+```
+
+## lasso:end
+
+Emitted when lasso ends, possibly empty; the set can differ from global final selection.
+
+```ts
+type Payload = {
+  nodeIds: string[]
+};
+```
+
+These derived payloads do not carry element-event client, canvas, graph, or nativeEvent. Their event field is an actively used MouseEvent. Lasso can preserve selections from other sources; query findNodesByState / findEdgesByState for the final sets.
+
+[Behavior selection rules](/en/docs/api/options/behaviors#selection) · [Event API](/en/docs/api/graph/events)。

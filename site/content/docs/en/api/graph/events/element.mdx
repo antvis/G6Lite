@@ -1,0 +1,185 @@
+---
+title: Element events
+description: Click, hover, press, and wheel events for nodes, edges, Combos, and canvas
+---
+
+Use element events to respond to user input, then read data and coordinates as needed. The first render mounts the dispatcher; click-select is not required.
+
+## Listen to a node click
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+declare const graph: Graph;
+graph.on('node:click', ({ nodeId, data, nativeEvent }) => {
+  console.log(nodeId, data, nativeEvent.clientX);
+});
+```
+
+Read business fields from data and graph positions from the graph coordinate field. Listening does not change styles; enable click-select for selection. See [event basics](/en/docs/guides/events).
+
+## Read event parameters
+
+| Field | Type / meaning |
+| --- | --- |
+| targetType | node / edge / combo / canvas; the corresponding literal in NodeGraphEvent, EdgeGraphEvent, ComboGraphEvent, or CanvasGraphEvent |
+| targetId | Required string for nodes, edges, and Combos; no target ID on canvas |
+| data? | Optional business data from the node/edge, rather than a complete GraphNode/GraphEdge; not supplied for Combo or canvas |
+| client | `{ x, y }` in viewport CSS pixels, equal to native clientX/clientY |
+| canvas | `{ x, y }` in CSS pixels from the canvas top-left, not DPR-scaled buffer pixels |
+| graph | `{ x, y }` in graph coordinates after the inverse camera transform; suitable for graph positioning after pan/zoom |
+| nativeEvent | MouseEvent for clicks, hover, press/release; WheelEvent for wheel. A pointer name does not imply PointerEvent or touch support |
+| event | The same original object as nativeEvent; a deprecated alias only in this payload family |
+| nodeId | Required string in NodeGraphEvent |
+| edgeId / edgeIndex | Required string / number in EdgeGraphEvent. Without an explicit edge ID the dispatcher can fall back to an index string; do not persist edgeIndex across data replacements |
+| source / target | Required endpoint node IDs in EdgeGraphEvent, both strings |
+| comboId | Required string in ComboGraphEvent |
+
+NodeGraphEvent and EdgeGraphEvent accept data and native-event generics. ComboGraphEvent and CanvasGraphEvent accept a native-event generic. GraphEventMap already narrows the native type by event name; business data remains an optional Record whose fields the application must validate.
+
+## Nodes
+
+These events carry nodeId. Mouse input uses MouseEvent; wheel uses WheelEvent.
+
+### node:pointerover
+
+Emitted when the pointer reaches a new target.
+
+### node:pointerenter
+
+Emitted immediately after pointerover as a separate notification.
+
+### node:pointermove
+
+Emitted while the pointer moves over the current target.
+
+### node:pointerleave
+
+Emitted when leaving the target; coordinates describe the pointer at departure.
+
+### node:pointerdown
+
+Emitted on a mouse press that hits the target.
+
+### node:click
+
+Emitted when the target is clicked.
+
+### node:dblclick
+
+Emitted when the target is double-clicked.
+
+### node:contextmenu
+
+Emitted for a context-menu gesture; the browser menu is prevented.
+
+### node:wheel
+
+Emitted when wheel input hits the target; read nativeEvent.deltaY.
+
+## Edges
+
+These events carry edgeId, edgeIndex, source, and target. Assign explicit edge IDs for identities that must survive data updates.
+
+### edge:pointerover
+
+Emitted when the pointer reaches a new target.
+
+### edge:pointerenter
+
+Emitted immediately after pointerover as a separate notification.
+
+### edge:pointermove
+
+Emitted while the pointer moves over the current target.
+
+### edge:pointerleave
+
+Emitted when leaving the target; coordinates describe the pointer at departure.
+
+### edge:pointerdown
+
+Emitted on a mouse press that hits the target.
+
+### edge:click
+
+Emitted when the target is clicked.
+
+### edge:dblclick
+
+Emitted when the target is double-clicked.
+
+### edge:contextmenu
+
+Emitted for a context-menu gesture; the browser menu is prevented.
+
+### edge:wheel
+
+Emitted when wheel input hits the target; read nativeEvent.deltaY.
+
+## Combos
+
+Combos emit only the four element events below. A click on a child node emits node:click without bubbling to Combo.
+
+### combo:pointerdown
+
+Emitted on a mouse press that hits the target.
+
+### combo:click
+
+Emitted when the target is clicked.
+
+### combo:dblclick
+
+Emitted when the target is double-clicked.
+
+### combo:contextmenu
+
+Emitted for a context-menu gesture; the browser menu is prevented.
+
+## Canvas
+
+Canvas events have no element ID. Movement and wheel on a Combo background also use canvas events.
+
+### canvas:pointermove
+
+Emitted while the pointer moves over the current target.
+
+### canvas:pointerdown
+
+Emitted on a mouse press that hits the target.
+
+### canvas:pointerup
+
+Emitted on window mouseup without picking the release target; track your own gesture start.
+
+### canvas:click
+
+Emitted when the target is clicked.
+
+### canvas:dblclick
+
+Emitted when the target is double-clicked.
+
+### canvas:contextmenu
+
+Emitted for a context-menu gesture; the browser menu is prevented.
+
+### canvas:wheel
+
+Emitted when wheel input hits the target; read nativeEvent.deltaY.
+
+## Picking and gestures
+
+<details>
+<summary>Picking, hover, and gesture boundaries</summary>
+
+Picking priority is node → edge → Combo → canvas. Clicks and presses dispatch only to the picked target family, without bubbling to Combo or canvas. Movement and wheel on a Combo background use canvas events; there are no combo:pointermove/over/leave/wheel events, nor node:pointerup or edge:pointerup.
+
+When mousemove hits a new node/edge, the old target receives pointerleave, then the new target receives pointerover → pointerenter → pointermove. Further movement on the same target emits pointermove only. Empty or Combo backgrounds emit canvas:pointermove. Leave coordinates describe the pointer at departure. A consumed drag suspends hover picking. A consumed gesture or release more than 3 CSS pixels from press suppresses the next click, without promising to cancel dblclick.
+
+canvas:pointerup comes from window mouseup, does not pick the release target, and does not require a preceding press on this Graph; track your own gesture start. contextmenu prevents the browser menu. Returning false from a normal handler does not cancel dispatch or other Behaviors.
+
+</details>
+
+Back to[Event API](/en/docs/api/graph/events) · [Guide](/en/docs/guides/events)。

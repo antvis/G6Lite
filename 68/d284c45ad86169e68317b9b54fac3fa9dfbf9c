@@ -1,0 +1,24 @@
+site/maintenance/examples/e16.json
+  s_4534bc5c3d78f4::t_f8db4850c747ab 1-46
+tests/unit/behaviors/selectionGestures.test.ts
+  s_4534bc5c3d78f4::t_a2969f46744ebc 9-11,18-22,24-27,30-38,58-59,64-82,88-91
+  s_4534bc5c3d78f4::t_935603c9acd43e 1-8,12-17,23,28-29,39-57,60-63,83-87,92-95
+site/src/lib/site-examples.ts
+  s_4534bc5c3d78f4::t_8f32c4a7f6fb6c 210-211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "68d284c45ad86169e68317b9b54fac3fa9dfbf9c",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

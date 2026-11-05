@@ -1,0 +1,28 @@
+site/maintenance/examples/e20.json
+  s_4534bc5c3d78f4::t_c2c268f69808a8 1-46
+site/demos/breathing-node.ts
+  s_4534bc5c3d78f4::t_0fb76345206ffd 69
+site/demos/g6-v5-compat.ts
+  s_4534bc5c3d78f4::t_0fb76345206ffd 131
+site/demos/custom-label-renderer.ts
+  s_4534bc5c3d78f4::t_3c2b5b26d15adc 65
+site/src/lib/site-examples.ts
+  s_4534bc5c3d78f4::t_0fb76345206ffd 1071-1072
+  s_4534bc5c3d78f4::t_dfd7bab5134630 1063-1064
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f63c64d85344b062483feddc06c3c24a41c0f9ee",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

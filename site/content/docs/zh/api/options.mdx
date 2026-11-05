@@ -65,9 +65,9 @@ const graph = new Graph({
 });
 ```
 
-`padding`、`minZoom`、`maxZoom` 的含义见 [`fitView()`](/docs/api/graph#fitview)。需要保留用户手动缩放和平移时，保持默认关闭；关闭仅影响尺寸变化后的自动适配，不影响首次渲染。
+`padding`、`minZoom`、`maxZoom` 的含义见 [`fitView()`](/docs/api/graph/viewport#fitview)。需要保留用户手动缩放和平移时，保持默认关闭；关闭仅影响尺寸变化后的自动适配，不影响首次渲染。
 
-尺寸监听与事件顺序见[容器尺寸变化](/docs/api/graph#容器尺寸变化)。
+尺寸监听、事件顺序与宽度切换示例见[容器尺寸更新](/docs/api/graph/viewport#setsize)，刷新后的视野选择见[视口指南](/docs/guides/viewport)。
 
 ## 图数据
 

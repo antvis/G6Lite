@@ -65,9 +65,9 @@ const graph = new Graph({
 });
 ```
 
-See [`fitView()`](/en/docs/api/graph#fitview) for `padding`, `minZoom`, and `maxZoom`. Leave automatic fitting disabled to preserve the user's zoom and pan. Disabling it affects only resize fitting; the initial render still fits the graph.
+See [`fitView()`](/en/docs/api/graph/viewport#fitview) for `padding`, `minZoom`, and `maxZoom`. Leave automatic fitting disabled to preserve the user's zoom and pan. Disabling it affects only resize fitting; the initial render still fits the graph.
 
-See [Container resize](/en/docs/api/graph#container-resize) for observation and event ordering.
+See [container size updates](/en/docs/api/graph/viewport#setsize) for observation, event ordering, and a live width-switching example. See the [viewport guide](/en/docs/guides/viewport) for refresh policies.
 
 ## Graph data
 

@@ -209,83 +209,29 @@ graph.removeEdge(edgeId);
 
 ### `focusItem()`
 
-```ts
-graph.focusItem('n1');
-graph.focusItem(['n1', 'n2'], 24);
-```
-
-把视口中心移到一个或多个节点。目标能放进当前缩放时保持缩放；否则只缩小到留出 `padding` 屏幕像素。默认 `padding` 是 `20`。传入的 id 里没有有效节点时不做任何事。
+[focusItem](/docs/api/graph/viewport#focusitem) 定位一个或多个节点；目标范围、缩放和 padding 规则见视口方法参考。
 
 ## 视口
 
-相机用图坐标的平移 `x`、`y` 和缩放 `zoom` 描述当前视野。通过[视口与坐标](/docs/concepts/viewport)中的示例区分移动视野和移动节点。
+相机、缩放、适配、定位、尺寸与坐标转换的完整契约见[视口方法参考](/docs/api/graph/viewport)。任务步骤见[视口指南](/docs/guides/viewport)，坐标关系见[核心概念](/docs/concepts/viewport)。
 
-```ts
-const camera = graph.getCamera();
-graph.setCamera({ x: camera.x, y: camera.y, zoom: 1 });
-graph.zoomBy(1.2);
-graph.fitCenter();
-graph.resetCamera();
-```
-
-| 方法 | 说明 |
-| --- | --- |
-| `getCamera()` | 返回 `{ x, y, zoom }` 快照 |
-| `setCamera(partial)` | 合并写入相机字段 |
-| `resetCamera()` | 回到首次渲染结束时的相机；此前调用无效 |
-| `getZoom()` | 当前缩放 |
-| `setSize(width, height)` | 按 CSS 像素设置画布尺寸 |
-| `fitCenter()` | 保持缩放，把图内容移到视口中心 |
+相机查询与恢复：[getCamera](/docs/api/graph/viewport#getcamera) · [setCamera](/docs/api/graph/viewport#setcamera) · [resetCamera](/docs/api/graph/viewport#resetcamera)。
 
 ### 容器尺寸变化
 
-Graph 使用 `ResizeObserver` 自动同步容器与画布尺寸。`setSize(width, height)` 按 CSS 像素更新画布，并使用相同的视口更新流程。
-
-默认只更新画布尺寸，保留当前相机，避免覆盖用户的缩放和平移。开启 [`autoFit`](/docs/api/options#autofit) 后，尺寸变化会按配置重新适配内容。
-
-`resize` 事件在可选的自动适配完成后发出，监听器读取到的是最终相机。容器尺寸变化无需重新创建实例或调用 `render()`。
+[setSize](/docs/api/graph/viewport#setsize) 同步画布尺寸；容器 CSS 变化由 ResizeObserver 自动处理。[autoFit](/docs/api/options#autofit) 决定尺寸变化后是否适配，resize 在可选适配后发出。宽度切换效果见[实时示例](/docs/api/graph/viewport#容器变宽变窄后的适配)。
 
 ### `zoomTo()` 与 `zoomBy()`
 
-```ts
-graph.zoomTo(1.5, { center: { x: 320, y: 180 } });
-graph.zoomBy(2, { minZoom: 0.2, maxZoom: 8 });
-```
-
-`zoomTo()` 把缩放设为绝对值。`zoomBy(2)` 表示在当前缩放上乘 2。
-
-`ZoomOptions`：
-
-| 字段 | 默认 | 说明 |
-| --- | --- | --- |
-| `center` | 画布中心的客户端坐标 | 缩放时保持不动的屏幕点 |
-| `minZoom` | `0.1` | 缩放下限 |
-| `maxZoom` | `20` | 缩放上限 |
+[getZoom](/docs/api/graph/viewport#getzoom) 查询缩放；[zoomTo](/docs/api/graph/viewport#zoomto) 设置绝对值，[zoomBy](/docs/api/graph/viewport#zoomby) 乘当前值。中心和 ZoomOptions 查方法参考；滚轮范围查 [Behavior](/docs/api/options/behaviors#导航与拖拽)。
 
 ### `fitView()`
 
-```ts
-graph.fitView();
-graph.fitView(0.8);
-graph.fitView({ padding: [24, 16, 24, 16], minZoom: 0.2, maxZoom: 2 });
-```
-
-按全部节点的包围盒调整相机，使内容进入视口。
-
-- 数字是相对适配结果的缩放系数，默认 `0.9`。首次 `render()` 未通过 [`autoFit`](/docs/api/options#autofit) 指定其他策略时使用此默认值。
-- 对象使用 `padding`、`minZoom`、`maxZoom`。`padding` 可以是统一的 CSS 像素，或 `[上, 右, 下, 左]`。对象形式下缩放系数按 `1` 计算，`minZoom` 默认 `0.1`，`maxZoom` 默认 `20`。
+[fitView](/docs/api/graph/viewport#fitview) 调整缩放和平移；[fitCenter](/docs/api/graph/viewport#fitcenter) 保持缩放只居中。刷新后保留视野见[使用指南](/docs/guides/viewport#刷新数据保留或重新适配)。
 
 ### 坐标转换
 
-```ts
-graph.on('canvas:click', (event) => {
-  const point = graph.screenToGraph(event.nativeEvent.clientX, event.nativeEvent.clientY);
-  const screen = graph.graphToScreen(point.x, point.y);
-  screen.x;
-});
-```
-
-`screenToGraph()` 接收相对浏览器视口的客户端 CSS 坐标（与 `MouseEvent.clientX` / `clientY` 相同），返回图坐标；`graphToScreen()` 则接收图坐标，返回客户端 CSS 坐标。元素事件里的 `client`、`canvas`、`graph` 已经分好这三种坐标，多数点击逻辑直接读事件字段即可。
+[screenToGraph](/docs/api/graph/viewport#screentograph) 从 client CSS 坐标转到图坐标；[graphToScreen](/docs/api/graph/viewport#graphtoscreen) 反向转换。实时观察与 DOM 定位见[坐标指南](/docs/guides/viewport#转换坐标定位-dom-内容)。
 
 ## 布局
 

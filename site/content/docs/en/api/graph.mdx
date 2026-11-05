@@ -209,83 +209,29 @@ See the [state and visibility method reference](/en/docs/api/graph/states) for c
 
 ### `focusItem()`
 
-```ts
-graph.focusItem('n1');
-graph.focusItem(['n1', 'n2'], 24);
-```
-
-Centers the viewport on one or more nodes. The current zoom is kept when the targets fit. Otherwise the view zooms out just enough to leave `padding` screen pixels. The default `padding` is `20`. Nothing happens when none of the ids resolve to a node.
+[focusItem](/en/docs/api/graph/viewport#focusitem) locates one or more nodes. See the viewport reference for bounds, zoom, and padding rules.
 
 ## Viewport
 
-The camera is the current view: graph-space translation `x` and `y`, plus `zoom`. Use the [viewport and coordinates](/en/docs/concepts/viewport) example to distinguish moving the view from moving nodes.
+See the [viewport method reference](/en/docs/api/graph/viewport) for camera, zoom, fitting, focus, sizing, and conversion contracts. The [viewport guide](/en/docs/guides/viewport) covers tasks; the [concept page](/en/docs/concepts/viewport) explains coordinate spaces.
 
-```ts
-const camera = graph.getCamera();
-graph.setCamera({ x: camera.x, y: camera.y, zoom: 1 });
-graph.zoomBy(1.2);
-graph.fitCenter();
-graph.resetCamera();
-```
-
-| Method | Description |
-| --- | --- |
-| `getCamera()` | Returns a `{ x, y, zoom }` snapshot |
-| `setCamera(partial)` | Merges the provided camera fields |
-| `resetCamera()` | Returns to the camera captured at the end of the first render. Earlier calls do nothing |
-| `getZoom()` | Current zoom |
-| `setSize(width, height)` | Sets the canvas size in CSS pixels |
-| `fitCenter()` | Keeps zoom and moves the graph content to the viewport center |
+Inspect and restore cameras with [getCamera](/en/docs/api/graph/viewport#getcamera), [setCamera](/en/docs/api/graph/viewport#setcamera), and [resetCamera](/en/docs/api/graph/viewport#resetcamera).
 
 ### Container resize
 
-Graph uses `ResizeObserver` to synchronize the canvas with its container. `setSize(width, height)` updates canvas dimensions in CSS pixels through the same viewport update path.
-
-By default, resizing preserves the current camera so the user's zoom and pan remain intact. Enabling [`autoFit`](/en/docs/api/options#autofit) fits the content again according to that configuration.
-
-The `resize` event fires after optional fitting, so listeners observe the final camera. A size change does not require a new instance or another `render()`.
+[setSize](/en/docs/api/graph/viewport#setsize) synchronizes canvas dimensions. ResizeObserver handles container CSS changes. [autoFit](/en/docs/api/options#autofit) controls resize fitting, followed by resize. See the [live width-switching example](/en/docs/api/graph/viewport#fitting-after-a-container-narrows-or-widens).
 
 ### `zoomTo()` and `zoomBy()`
 
-```ts
-graph.zoomTo(1.5, { center: { x: 320, y: 180 } });
-graph.zoomBy(2, { minZoom: 0.2, maxZoom: 8 });
-```
-
-`zoomTo()` sets an absolute zoom. `zoomBy(2)` multiplies the current zoom by 2.
-
-`ZoomOptions`:
-
-| Field | Default | Description |
-| --- | --- | --- |
-| `center` | Client coordinate of the canvas center | Screen point that stays fixed while zooming |
-| `minZoom` | `0.1` | Lower zoom bound |
-| `maxZoom` | `20` | Upper zoom bound |
+[getZoom](/en/docs/api/graph/viewport#getzoom) reads zoom; [zoomTo](/en/docs/api/graph/viewport#zoomto) sets an absolute value, and [zoomBy](/en/docs/api/graph/viewport#zoomby) multiplies it. See the reference for anchors and ZoomOptions, and [Behavior configuration](/en/docs/api/options/behaviors#navigation-and-dragging) for wheel limits.
 
 ### `fitView()`
 
-```ts
-graph.fitView();
-graph.fitView(0.8);
-graph.fitView({ padding: [24, 16, 24, 16], minZoom: 0.2, maxZoom: 2 });
-```
-
-Fits the camera to the bounding box of every node.
-
-- A number is a scale applied to that fit. The default is `0.9`. The first `render()` uses it unless [`autoFit`](/en/docs/api/options#autofit) supplies another policy.
-- An object uses `padding`, `minZoom`, and `maxZoom`. `padding` is one CSS pixel value or `[top, right, bottom, left]`. The scale is `1`, `minZoom` defaults to `0.1`, and `maxZoom` defaults to `20`.
+[fitView](/en/docs/api/graph/viewport#fitview) adjusts translation and zoom; [fitCenter](/en/docs/api/graph/viewport#fitcenter) centers without changing zoom. See [preserving the view on refresh](/en/docs/guides/viewport#refresh-data-with-or-without-fitting).
 
 ### Coordinate conversion
 
-```ts
-graph.on('canvas:click', (event) => {
-  const point = graph.screenToGraph(event.nativeEvent.clientX, event.nativeEvent.clientY);
-  const screen = graph.graphToScreen(point.x, point.y);
-  screen.x;
-});
-```
-
-`screenToGraph()` takes client CSS coordinates (the same space as `MouseEvent.clientX` / `clientY`) and returns graph coordinates. `graphToScreen()` takes graph coordinates and returns client CSS coordinates. Element events already split `client`, `canvas`, and `graph`, so most click handlers can read those fields directly.
+[screenToGraph](/en/docs/api/graph/viewport#screentograph) converts client CSS positions to graph coordinates; [graphToScreen](/en/docs/api/graph/viewport#graphtoscreen) does the reverse. See the [coordinate guide](/en/docs/guides/viewport#convert-coordinates-to-position-dom-content) for a live observer and DOM positioning.
 
 ## Layout
 

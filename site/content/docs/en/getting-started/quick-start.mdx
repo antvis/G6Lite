@@ -5,7 +5,7 @@ description: Install G6Lite and create your first interactive graph
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-This small collaboration network has 6 nodes, with colors and sizes distinguishing the members. Drag nodes or hover to highlight their connections.
+Create a collaboration network with 6 nodes and 7 edges: install → prepare the container → await the first render → verify interactions → destroy when leaving.
 
 <QuickStartExample locale="en" variant="network" />
 
@@ -40,7 +40,7 @@ yarn add @antv/g6-lite
 After installation, add a container with an explicit size:
 
 ```html
-<div id="container" style="height: 360px"></div>
+<div id="container" style="width: 100%; height: 360px"></div>
 ```
 
 Then create a graph in your JavaScript or TypeScript entry after the container has mounted. Use `await` in an ES module or an `async` function.
@@ -93,7 +93,12 @@ const graph = new Graph({
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
 
-await graph.render();
+try {
+  await graph.render();
+} catch (error) {
+  graph.destroy();
+  throw error;
+}
 ```
 
 The force-directed layout positions the nodes automatically. Node data controls their colors and sizes, and `behaviors` enables zoom, pan, node dragging, and hover highlighting. TypeScript declarations are included in the package.
@@ -103,6 +108,9 @@ The force-directed layout positions the nodes automatically. Node data controls 
 The UMD build exposes the public API through `window.G6Lite`, allowing `new G6Lite.Graph()` in a plain HTML page.
 
 This complete HTML example needs no additional dependency scripts: the UMD file includes the runtime dependencies and layout algorithms.
+
+<details>
+<summary>Complete HTML; save as index.html</summary>
 
 ```html
 <!doctype html>
@@ -161,13 +169,31 @@ This complete HTML example needs no additional dependency scripts: the UMD file 
         behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
       });
 
-      graph.render().catch(console.error);
+      graph.render().catch((error) => {
+        graph.destroy();
+        console.error(error);
+      });
+      window.addEventListener('pagehide', () => graph.destroy(), { once: true });
     </script>
   </body>
 </html>
 ```
 
+</details>
+
 For production CDN use, pin an exact published version containing the UMD file. The ESM entry loads layouts on demand, while UMD bundles them, so their download sizes differ. See [bundle size](/en/docs/metrics/bundle-size).
+
+## Verify and clean up
+
+Expect 6 labeled nodes and 7 edges. Try wheel zoom, dragging the background, dragging a node, and hover highlighting. For a blank graph, check non-zero container dimensions, WebGL, and console errors; see the [FAQ](/en/docs/faq).
+
+Run the package example after the real DOM is mounted. Before unmounting a component or removing its container, call:
+
+```ts
+graph.destroy();
+```
+
+Removing DOM alone does not replace instance cleanup. The CDN single-page example uses pagehide; recreate the graph if the page returns from the browser's back/forward cache. Use the framework lifecycle below for application routes.
 
 ## Use in frontend frameworks
 

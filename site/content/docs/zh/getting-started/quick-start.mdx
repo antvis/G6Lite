@@ -5,7 +5,7 @@ description: 安装 G6Lite，创建第一个可交互的关系图
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-下面用 6 个节点展示一个简单的协作关系图，通过颜色和大小区分成员。试着拖拽节点或悬停查看关联高亮。
+用 6 个节点和 7 条边创建协作关系图。完成顺序：安装包 → 准备容器 → 等待首次渲染 → 验证交互 → 离开时销毁。
 
 <QuickStartExample locale="zh" variant="network" />
 
@@ -40,7 +40,7 @@ yarn add @antv/g6-lite
 安装后，在页面中添加一个有明确宽高的容器：
 
 ```html
-<div id="container" style="height: 360px"></div>
+<div id="container" style="width: 100%; height: 360px"></div>
 ```
 
 然后在 JavaScript 或 TypeScript 入口中创建关系图。容器需要先挂载到页面，`await` 应在 ES 模块或 `async` 函数中使用。
@@ -93,7 +93,12 @@ const graph = new Graph({
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
 
-await graph.render();
+try {
+  await graph.render();
+} catch (error) {
+  graph.destroy();
+  throw error;
+}
 ```
 
 示例使用力导向布局自动排列节点，并通过节点数据映射颜色和大小。`behaviors` 启用缩放、平移、节点拖拽和悬停高亮。包中已包含 TypeScript 类型。
@@ -103,6 +108,9 @@ await graph.render();
 UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使用 `new G6Lite.Graph()`。
 
 下面是完整的 HTML 示例。UMD 文件已包含运行时依赖和布局算法，无需再加载其他脚本：
+
+<details>
+<summary>完整 HTML，可保存为 index.html</summary>
 
 ```html
 <!doctype html>
@@ -161,13 +169,31 @@ UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使�
         behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
       });
 
-      graph.render().catch(console.error);
+      graph.render().catch((error) => {
+        graph.destroy();
+        console.error(error);
+      });
+      window.addEventListener('pagehide', () => graph.destroy(), { once: true });
     </script>
   </body>
 </html>
 ```
 
+</details>
+
 生产环境使用 CDN 时，应锁定包含 UMD 文件的确切版本号。ESM 入口按需加载布局，UMD 则包含布局算法，两者的下载体积不同，详见[包体积](/docs/metrics/bundle-size)。
+
+## 验证效果与清理
+
+看到 6 个带标签的节点和 7 条边后，尝试滚轮缩放、空白处平移、拖拽节点和悬停高亮。图没有显示时，先检查容器非零宽高、浏览器 WebGL 和控制台错误，见[常见问题](/docs/faq)。
+
+包管理器示例在真实 DOM 挂载后运行；组件卸载或移除容器前，调用：
+
+```ts
+graph.destroy();
+```
+
+不要只删除 DOM 后继续持有实例。CDN 单页示例通过 pagehide 清理；若页面从浏览器往返缓存恢复，需要重新创建图。应用路由中的挂载与清理使用下方框架方案。
 
 ## 在前端框架中使用
 

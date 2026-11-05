@@ -14,7 +14,7 @@ export async function run(container: string | HTMLElement) {
   const graphs: Graph[] = [];
   const board = document.createElement('div');
   board.style.cssText =
-    'display:grid;grid-template-columns:repeat(2,minmax(280px,1fr));gap:12px;width:100%;height:100%;padding:16px;box-sizing:border-box;';
+    'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px;width:100%;height:calc(100% - 36px);padding:8px;box-sizing:border-box;';
   root.appendChild(board);
 
   const ui = createDemoPanel(
@@ -27,7 +27,7 @@ export async function run(container: string | HTMLElement) {
   for (const [index, item] of EDGE_TYPES.entries()) {
     const panel = document.createElement('div');
     panel.className = 'demo-canvas-card';
-    panel.style.cssText = 'position:relative;min-height:210px;';
+    panel.style.cssText = 'position:relative;min-height:0;';
     const title = document.createElement('div');
     title.textContent = item.title;
     title.style.cssText =
@@ -88,6 +88,7 @@ export async function run(container: string | HTMLElement) {
 
   ui.setStatus('move near a thin edge');
   return {
+    getData: () => ({ views: graphs.map((graph) => graph.getData()) }),
     fitView: () => graphs.forEach((graph) => graph.fitView()),
     destroy: () => {
       graphs.forEach((graph) => graph.destroy());

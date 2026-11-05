@@ -7,7 +7,7 @@ import { ArchitectureDiagram } from '@/components/architecture-diagram';
 
 Start with a small graph that renders, updates, and cleans up. Add capabilities incrementally. Include the installed G6Lite version so the agent can avoid mixing in G6 v5 configuration.
 
-## Two ways to use AI
+## Two ways to use it
 
 <Cards>
   <Card title="Local agent + G6Lite Skill" href="https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph">Inspect types, edit code, and run verification in your project.</Card>
@@ -27,7 +27,7 @@ Check the installed @antv/g6-lite version and package-root types first.
 
 Run `npm ls @antv/g6-lite` in the project to identify its version. The Skill emphasizes package-root APIs, browser lifecycle, supported capabilities, and incremental verification. Query the [API overview](/en/docs/api) instead of inventing deep imports or copying v5 plugins.
 
-## Good tasks for an agent
+## Good agent tasks
 
 | Task | Inputs to provide |
 | --- | --- |
@@ -63,7 +63,7 @@ Replace the framework, data size, and interactions with your requirements. For V
 
 The template starts with 3 nodes / 2 edges and updates to 4 / 3 while preserving the viewport and dragging. Unmounting must remove the canvas; remounting must work again. Verify both type checking and browser interaction instead of judging from a code screenshot.
 
-## Engine context for agents
+## The engine an agent should understand
 
 Find fields and return values in the [package-root API](/en/docs/api). See [architecture](/en/docs/concepts/architecture) for drawing, layout, updates, and extensions.
 
@@ -72,7 +72,7 @@ Find fields and return values in the [package-root API](/en/docs/api). See [arch
   <ArchitectureDiagram locale="en" compact />
 </details>
 
-## Continue reading
+## Continue learning
 
 <Cards>
   <Card title="React integration" href="/en/docs/getting-started/react" />

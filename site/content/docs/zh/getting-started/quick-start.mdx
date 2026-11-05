@@ -16,23 +16,25 @@ import { QuickStartExample } from '@/components/quick-start-example';
 
 ## 包管理器
 
+本教程锁定 `0.1.0-beta.27`，npm 的 latest 标签可能指向较早版本；项目升级时先核对所装版本与类型。
+
 在使用 Vite、Webpack 等构建工具的项目中，选择一种包管理器安装：
 
 <div className="quick-start-install">
 
 ```bash
 # npm
-npm install @antv/g6-lite
+npm install @antv/g6-lite@0.1.0-beta.27
 ```
 
 ```bash
 # pnpm
-pnpm add @antv/g6-lite
+pnpm add @antv/g6-lite@0.1.0-beta.27
 ```
 
 ```bash
 # Yarn
-yarn add @antv/g6-lite
+yarn add @antv/g6-lite@0.1.0-beta.27
 ```
 
 </div>
@@ -122,7 +124,7 @@ UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使�
   </head>
   <body>
     <div id="container" style="height: 360px"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0-beta.27/dist/g6-lite.min.js"></script>
     <script>
       const data = {
         nodes: [

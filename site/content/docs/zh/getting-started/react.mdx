@@ -5,11 +5,9 @@ description: 挂载、数据同步、异步清理和 StrictMode 中的 Graph 实
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-React 负责 DOM 与业务数据，Graph 负责画布。挂载时创建一个实例，数据变化时复用，卸载时销毁。已安装项目先运行 `npm install @antv/g6-lite`。Vue 项目直接看 [Vue 接入](/docs/getting-started/vue)。
+React 负责 DOM 与业务数据，Graph 负责画布。挂载时创建一个实例，数据变化时复用，卸载时销毁。已安装项目先运行 `npm install @antv/g6-lite@0.1.0-beta.27`。Vue 项目直接看 [Vue 接入](/docs/getting-started/vue)。
 
 <QuickStartExample locale="zh" />
-
-在已有框架项目中运行 `npm install @antv/g6-lite`，然后使用对应的组件示例。
 
 ## 在 React 中使用
 
@@ -66,10 +64,6 @@ export function GraphView() {
   return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
 }
 ```
-
-## 在 Vue 中使用
-
-Vue 的完整挂载与清理示例已移至 [Vue 接入](/docs/getting-started/vue#在-vue-中使用)。
 
 ## 数据变化时更新图
 
@@ -185,10 +179,6 @@ export default function GraphDataDemo() {
 
 </details>
 
-### Vue：用 watch 同步数据
-
-watch、父组件和异步清理查 [Vue 数据更新](/docs/getting-started/vue#vue用-watch-同步数据)。
-
 ## StrictMode 与异步卸载
 
 开发环境的 StrictMode 会额外执行一次 setup → cleanup → setup。每次 effect 都应创建自己的 Graph，并对称销毁；不要用“已经初始化”的标记跳过第二次挂载。见 [React effect 清理规则](https://react.dev/reference/react/useEffect#my-effect-runs-twice-when-the-component-mounts)。
@@ -203,4 +193,10 @@ watch、父组件和异步清理查 [Vue 数据更新](/docs/getting-started/vue
 
 **Next.js 可以在服务端创建吗？** 在客户端组件的 effect 中创建。示例中的 'use client' 用于客户端边界，容器仍需明确高度。Graph 不负责服务端出图。
 
-**希望更新后保留视野？** 使用 setData(data, { fitView: false })，见[视口指南](/docs/guides/viewport)。
+**希望更新后保留视野？** 使用 `setData(data, { fitView: false })`，见[视口指南](/docs/guides/viewport)。
+
+<span id="在-vue-中使用" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+<span id="vue用-watch-同步数据" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+Vue 的挂载、watch、父组件和清理已移至 [Vue 接入](/docs/getting-started/vue)。

@@ -5,11 +5,9 @@ description: Mount a Graph, synchronize data, handle asynchronous cleanup, and s
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-React owns DOM and business data; Graph owns the canvas. Create one instance on mount, reuse it for updates, and destroy it on unmount. Run `npm install @antv/g6-lite` in your existing project. For Vue projects, use [Vue integration](/en/docs/getting-started/vue).
+React owns DOM and business data; Graph owns the canvas. Create one instance on mount, reuse it for updates, and destroy it on unmount. Run `npm install @antv/g6-lite@0.1.0-beta.27` in your existing project. For Vue projects, use [Vue integration](/en/docs/getting-started/vue).
 
 <QuickStartExample locale="en" />
-
-Run `npm install @antv/g6-lite` in your existing framework project, then use the matching component below.
 
 ## Use with React
 
@@ -66,10 +64,6 @@ export function GraphView() {
   return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
 }
 ```
-
-## Use with Vue
-
-The complete mounting and cleanup example is now in [Vue integration](/en/docs/getting-started/vue#use-with-vue).
 
 ## Update the graph when data changes
 
@@ -185,10 +179,6 @@ export default function GraphDataDemo() {
 
 </details>
 
-### Vue: synchronize data with watch
-
-For watch, the parent component, and asynchronous cleanup, see [Vue data updates](/en/docs/getting-started/vue#vue-synchronize-data-with-watch).
-
 ## StrictMode and asynchronous unmounting
 
 Development StrictMode performs an extra setup → cleanup → setup cycle. Each effect must create its own Graph and destroy it symmetrically. Do not skip the second setup with an “already initialized” flag. See [React's effect cleanup rules](https://react.dev/reference/react/useEffect#my-effect-runs-twice-when-the-component-mounts).
@@ -203,4 +193,10 @@ The data example awaits the first render and uses ignore to abandon writes from 
 
 **Can Next.js create the Graph on the server?** Create it in a client component's effect. The 'use client' directive establishes the client boundary; the container still needs an explicit height. Graph does not render on the server.
 
-**How do updates preserve the viewport?** Use setData(data, { fitView: false }); see the [viewport guide](/en/docs/guides/viewport).
+**How do updates preserve the viewport?** Use `setData(data, { fitView: false })`; see the [viewport guide](/en/docs/guides/viewport).
+
+<span id="use-with-vue" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+<span id="vue-synchronize-data-with-watch" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+Vue mounting, watch, parent components, and cleanup are now in [Vue integration](/en/docs/getting-started/vue).

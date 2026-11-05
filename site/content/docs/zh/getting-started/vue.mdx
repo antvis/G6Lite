@@ -75,7 +75,7 @@ onBeforeUnmount(() => {
 
 ### 准备两组数据
 
-将下面的数据保存为 `graph-data.ts`，供 React 和 Vue 示例使用。
+将下面的数据保存为 `graph-data.ts`，供下方组件使用。
 
 ```ts
 import type { GraphData } from '@antv/g6-lite';
@@ -147,7 +147,7 @@ watch(
         fitView: { padding: 32, maxZoom: 1 },
       });
     } catch (error) {
-      console.error(error);
+      if (!disposed) console.error(error);
     }
   },
 );
@@ -203,4 +203,8 @@ Nuxt 等 SSR 工程只在客户端挂载后创建 Graph；隐藏容器应先显�
 
 ## 常见问题
 
-**为什么原地 push 没有更新？** 当前 watcher 监听 data 引用，使用新对象和数组替换。需要局部高频写入时查[增量 API](/docs/api/graph/data-mutations)。\n\n**切页后还有画布或监听？** 确认 onBeforeUnmount 销毁实例；自定义业务订阅也要退订。不要只清空容器 DOM。\n\n**KeepAlive 怎么处理？** 停用不是卸载。需要释放资源时，在 onDeactivated 销毁并在 onActivated 重建；不要只依赖卸载钩子。
+**为什么原地 push 没有更新？** 当前 watcher 监听 data 引用，使用新对象和数组替换。需要局部高频写入时查[增量 API](/docs/api/graph/data-mutations)。
+
+**切页后还有画布或监听？** 确认 onBeforeUnmount 销毁实例；自定义业务订阅也要退订。不要只清空容器 DOM。
+
+**KeepAlive 怎么处理？** 停用不是卸载。需要释放资源时，在 onDeactivated 销毁并在 onActivated 重建；不要只依赖卸载钩子。

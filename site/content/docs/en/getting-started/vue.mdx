@@ -75,7 +75,7 @@ Switch to the extended network for 4 nodes / 3 edges and back for 3 / 2. The pre
 
 ### Prepare two datasets
 
-Save this as `graph-data.ts` for the React and Vue examples below.
+Save this as `graph-data.ts` for the components below.
 
 ```ts
 import type { GraphData } from '@antv/g6-lite';
@@ -147,7 +147,7 @@ watch(
         fitView: { padding: 32, maxZoom: 1 },
       });
     } catch (error) {
-      console.error(error);
+      if (!disposed) console.error(error);
     }
   },
 );
@@ -190,7 +190,7 @@ const data = shallowRef(basicData);
 
 </details>
 
-Both examples replace the data object to trigger updates. Mutating an array in place does not change a React dependency reference; the Vue watcher above does not observe nested mutations either. Create a new object for updated data.
+The watcher observes data reference replacement; create new objects and arrays for updates.
 
 `setData()` runs the configured layout and redraws the graph. The examples use its `fitView` option to fit the new data. When data already includes coordinates and you want to preserve the viewport, use `setData(data, { fitView: false })`. See [setData()](/en/docs/api/graph/data-mutations#setdata).
 
@@ -203,4 +203,8 @@ In Nuxt and other SSR applications, create Graph only after client mounting. Sho
 
 ## Common questions
 
-**Why does an in-place push not update?** This watcher observes the data reference. Replace objects and arrays; see [mutation APIs](/en/docs/api/graph/data-mutations) for frequent partial writes.\n\n**Why are canvases or subscriptions left after navigation?** Destroy in onBeforeUnmount and unsubscribe application listeners. Clearing DOM alone is insufficient.\n\n**What about KeepAlive?** Deactivation is not unmounting. If resources must be released, destroy in onDeactivated and rebuild in onActivated instead of relying only on unmount hooks.
+**Why does an in-place push not update?** This watcher observes the data reference. Replace objects and arrays; see [mutation APIs](/en/docs/api/graph/data-mutations) for frequent partial writes.
+
+**Why are canvases or subscriptions left after navigation?** Destroy in onBeforeUnmount and unsubscribe application listeners. Clearing DOM alone is insufficient.
+
+**What about KeepAlive?** Deactivation is not unmounting. If resources must be released, destroy in onDeactivated and rebuild in onActivated instead of relying only on unmount hooks.

@@ -1,0 +1,42 @@
+site/content/docs/en/guides/edge.mdx
+  s_4534bc5c3d78f4::t_35ec9b86c34575 85-86
+site/content/docs/zh/guides/edge.mdx
+  s_4534bc5c3d78f4::t_35ec9b86c34575 85-86
+site/content/docs/zh/guides/meta.json
+  s_4534bc5c3d78f4::t_2e369846de1511 19
+site/demos/docs-edge-indented.ts
+  s_4534bc5c3d78f4::t_2e369846de1511 18,25
+site/demos/docs-polyline-orth.ts
+  s_4534bc5c3d78f4::t_2e369846de1511 1-61
+site/content/docs/en/guides/polyline-routing.mdx
+  s_4534bc5c3d78f4::t_2e369846de1511 1-93
+site/src/lib/node-doc-example-source.ts
+  s_4534bc5c3d78f4::t_2e369846de1511 17
+  s_4534bc5c3d78f4::t_60c6bc52418357 4
+site/src/components/node-doc-preview.tsx
+  s_4534bc5c3d78f4::t_2e369846de1511 23,70-72
+site/content/docs/en/api/options/edge.mdx
+  s_4534bc5c3d78f4::t_35ec9b86c34575 128-129
+site/content/docs/zh/guides/polyline-routing.mdx
+  s_4534bc5c3d78f4::t_2e369846de1511 1-93
+site/content/docs/en/guides/meta.json
+  s_4534bc5c3d78f4::t_2e369846de1511 19
+site/content/docs/zh/api/options/edge.mdx
+  s_4534bc5c3d78f4::t_35ec9b86c34575 128-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f0725e28b82d34931675582a4cfeecd8e40f9d67",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

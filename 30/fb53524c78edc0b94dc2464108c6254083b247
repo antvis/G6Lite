@@ -1,0 +1,26 @@
+site/demos/large-labeled.ts
+  s_4534bc5c3d78f4::t_9d4dabde92d19d 45-47,51
+site/src/lib/site-examples.ts
+  s_4534bc5c3d78f4::t_c5009699b311ec 1242-1243
+site/maintenance/examples/e22.json
+  s_4534bc5c3d78f4::t_ec787d41ce9f25 1-44
+site/demos/real-dataset.ts
+  s_4534bc5c3d78f4::t_1ae9e87dd9bb64 24-27
+  s_4534bc5c3d78f4::t_41b96958ea2de6 30,53-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "30fb53524c78edc0b94dc2464108c6254083b247",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

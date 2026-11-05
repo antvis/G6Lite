@@ -1,15 +1,35 @@
 ---
-title: Bundle size
-description: Bundle size comparison between G6Lite and mainstream charting and graph visualization libraries
+title: Bundle size and loading
+description: Separate the ESM entry, external dependencies, layout chunks, and the full UMD bundle
 ---
 
-Bundle size comparison between G6Lite and mainstream charting and graph visualization libraries:
+State the build and included contents for every size. An ESM entry with external dependencies is not comparable to another library’s complete bundle.
 
-| Library | Minified | Minified + Gzip |
-| --- | ---: | ---: |
-| **G6Lite** ⭐ | 202.5 KB | **95.7 KB** |
-| G6 | 1,400.9 KB | 399.8 KB |
-| ECharts | 1,114.8 KB | 368.0 KB |
-| Sigma.js | 375.2 KB | 96.7 KB |
+## Build measurement
 
-As of 2026-11-03: G6Lite 0.1.0-beta.27 is measured from the built `dist/index.js` (initial entry; layouts load on demand and are not counted). G6 5.1.1, ECharts 6.1.0, and Sigma.js 4.0.4 are measured via Bundlephobia.
+Measured 2026-11-05 from source commit [6fec8e82](https://github.com/antvis/G6Lite/commit/6fec8e82), Node v22.15.1, Rollup 4.67.5, Terser 5.51.2, gzip level 9. This is a source-build sample, not the npm beta.27 archive.
+
+| Artifact | Bytes | gzip bytes | Scope |
+| --- | ---: | ---: | --- |
+| ESM index.js | 499413 | 95787 | Unminified entry; external runtime dependencies and separate layout chunks |
+| ESM entry after Terser | 202460 | 53204 | Only that entry; excludes dependencies and layouts |
+| layoutWorker.js | 1375 | 628 | Worker entry, not its complete dependency graph |
+| UMD g6-lite.min.js | 583784 | 171162 | Browser bundle with inlined runtime dependencies and layouts |
+
+Raw bytes, SHA256 values, and dependency versions are recorded in site/maintenance/b82-bundle-measurement.json. Source maps are excluded. CDN compression, caching, and application bundling affect transfer size.
+
+## ESM and layout chunks
+
+Use package-root ESM with a bundler. Loading a layout can fetch its algorithm; startup may also need regl and event dependencies. index.js size is not the page’s total download. Deploy Worker assets correctly.
+
+[Layout loading and Worker](/en/docs/guides/layout-worker) · [Runtime requirements](/en/docs/compatibility/browser)
+
+## UMD / CDN
+
+Source builds provide UMD. The checked npm beta.27 archive omits it; do not infer CDN file availability from package fields. See the complete [script setup](/en/docs/getting-started/quick-start#cdn).
+
+## Reproduce
+
+Pin source and dependencies, build, and record entry, chunks, Worker, and full bundle separately. Gzip each with the same level, then use application Network traces to record cold and cached requests.
+
+The package.json limit-size configuration is a build budget, not evidence that current CI passed or a complete download measurement. See [capabilities](/en/docs/compatibility/library-comparison) for selection and [performance measurement](/en/docs/metrics/performance) for runtime speed.

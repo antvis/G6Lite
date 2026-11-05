@@ -1,15 +1,35 @@
 ---
-title: 包体积
-description: G6Lite 与主流图表、图可视化库的包体积对比
+title: 包体积与加载
+description: 区分 ESM 初始入口、外部依赖、布局分块和 UMD 整包的测量口径
 ---
 
-G6Lite 与主流图表、图可视化库的包体积对比如下：
+体积必须注明构建版本与包含内容。本页不再把依赖外置的 ESM 入口与其他库的完整包并列成排名。
 
-| 库 | Minified | Minified + Gzip |
-| --- | ---: | ---: |
-| G6Lite | **202.5 KB** ⭐ | **95.7 KB** ⭐ |
-| G6 | 1,400.9 KB | 399.8 KB |
-| ECharts | 1,114.8 KB | 368.0 KB |
-| Sigma.js | 375.2 KB | 96.7 KB |
+## 构建测量
 
-数据截至 2026-11-03：G6Lite 0.1.0-beta.27 为 `dist/index.js` 构建产物实测（初始入口，布局按需加载，不计入初始体积）；G6 5.1.1、ECharts 6.1.0、Sigma.js 4.0.4 数据来自 Bundlephobia。
+核对日期 2026-11-05；固定源码提交 [6fec8e82](https://github.com/antvis/G6Lite/commit/6fec8e82)，Node v22.15.1，Rollup 4.67.5、Terser 5.51.2，gzip level 9。这是源码构建样本，不是 npm beta.27 归档测量。
+
+| 产物 | 字节 | gzip 字节 | 包含范围 |
+| --- | ---: | ---: | --- |
+| ESM index.js | 499413 | 95787 | 未压缩入口；运行依赖外置，布局分块另计 |
+| ESM 入口经 Terser 压缩 | 202460 | 53204 | 仅上述入口，不含依赖和布局 |
+| layoutWorker.js | 1375 | 628 | Worker 入口；不是完整 Worker 依赖体积 |
+| UMD g6-lite.min.js | 583784 | 171162 | 内联依赖与布局的浏览器整包 |
+
+原始字节、SHA256 和依赖版本保存在仓库 site/maintenance/b82-bundle-measurement.json。map 文件不在表中；实际传输还受 CDN 压缩、缓存和业务打包影响。
+
+## ESM 与布局分块
+
+包根 ESM 导入适合构建工具消费。布局按类型加载，首屏仍可能需要 regl、事件依赖和当前算法；不能把 index.js 大小当成页面总下载量。Worker 还需要正确部署对应资源。
+
+[布局加载与 Worker](/docs/guides/layout-worker) · [运行环境](/docs/compatibility/browser)
+
+## UMD / CDN
+
+源码构建提供 UMD；已核对的 npm beta.27 发布包未包含该文件，不能仅凭 package.json 字段猜测 CDN URL。script 接入的完整步骤见[快速上手](/docs/getting-started/quick-start#cdn)。
+
+## 如何复测
+
+固定源码与依赖后构建，分别记录入口、分块、Worker 与整包。对每个文件用相同 gzip 等级压缩；再在业务页面 Network 中记录首次与缓存命中的实际资源请求。
+
+package.json 中的 limit-size 是构建预算，不能证明当前 CI 已通过，也不能替代完整业务下载测量。跨库选型查[能力对比](/docs/compatibility/library-comparison)，运行速度查[性能测量](/docs/metrics/performance)。

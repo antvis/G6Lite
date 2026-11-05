@@ -1,0 +1,49 @@
+site/content/docs/zh/guides/extensions.mdx
+  s_4534bc5c3d78f4::t_3ab6dd1af7fc28 80-82
+  s_4534bc5c3d78f4::t_47d05e143e0a78 88,90,92
+site/content/docs/zh/api/extensions.mdx
+  s_4534bc5c3d78f4::t_59629e3374b41c 3,10
+  s_4534bc5c3d78f4::t_5bf44938b14efb 42,46-48
+  s_4534bc5c3d78f4::t_1bb926bc1c17f2 28-29
+site/content/docs/en/guides/extensions.mdx
+  s_4534bc5c3d78f4::t_3ab6dd1af7fc28 51,55,61,98
+site/content/docs/en/api/extensions/registration.mdx
+  s_4534bc5c3d78f4::t_303505c2e14bdb 52-53,111,113-116
+  s_4534bc5c3d78f4::t_c3d8d546f8e22b 92-93,95-96,128-129,144-145
+  s_4534bc5c3d78f4::t_d247479f646740 149-150
+  s_4534bc5c3d78f4::t_a1d834f9b994b2 1-51,54-91,94,97-110,112,117-127,130-143,146-148,151-171
+site/content/docs/zh/api/extensions/registration.mdx
+  s_4534bc5c3d78f4::t_d247479f646740 149-150
+  s_4534bc5c3d78f4::t_c3d8d546f8e22b 92-93,95-96,128-129,144-145
+  s_4534bc5c3d78f4::t_a1d834f9b994b2 1-51,54-91,94,97-110,112,117-127,130-143,146-148,151-171
+  s_4534bc5c3d78f4::t_303505c2e14bdb 52-53,111,113-116
+site/content/docs/en/api/extensions/meta.json
+  s_4534bc5c3d78f4::t_303505c2e14bdb 3-4
+  s_4534bc5c3d78f4::t_a1d834f9b994b2 1-2,5-6
+site/content/docs/en/api/extensions.mdx
+  s_4534bc5c3d78f4::t_5bf44938b14efb 42,46-48
+  s_4534bc5c3d78f4::t_59629e3374b41c 3,10
+  s_4534bc5c3d78f4::t_1bb926bc1c17f2 28-29
+  s_4534bc5c3d78f4::t_c3d8d546f8e22b 38
+site/demos/docs-behavior-custom.ts
+  s_4534bc5c3d78f4::t_a1d834f9b994b2 37,41
+site/content/docs/zh/api/extensions/meta.json
+  s_4534bc5c3d78f4::t_303505c2e14bdb 3-4
+  s_4534bc5c3d78f4::t_a1d834f9b994b2 1-2,5-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f54916518b77cef7d3591bf72756c1e58b69f6dd",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": null
+    }
+  }
+}

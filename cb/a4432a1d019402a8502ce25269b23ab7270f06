@@ -1,0 +1,21 @@
+site/content/docs/en/metrics/performance.mdx
+  s_4534bc5c3d78f4::t_e01b1cd4dc8d65 2-3,6,8,10,12,14-20,22,24-25,27-48,50-62
+site/content/docs/zh/metrics/performance.mdx
+  s_4534bc5c3d78f4::t_e01b1cd4dc8d65 2-3,6,10,14-50,54,58-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cba4432a1d019402a8502ce25269b23ab7270f06",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

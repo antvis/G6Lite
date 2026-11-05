@@ -1,0 +1,56 @@
+site/src/components/quick-start-example.tsx
+  s_00978657432ab3::t_4683e378e65d43 117
+  s_00978657432ab3::t_de8d6d466dfa77 33-35,61-63
+  s_00978657432ab3::t_31f8700569287d 136-139,141,143,145
+  s_00978657432ab3::t_bca8e1765a3df3 135,144
+  s_00978657432ab3::t_70dc975ac55a6e 9
+  s_00978657432ab3::t_d0b773430331ca 17,23-24,48-53,76-81,130-134,140,142,146-150,160-161,164-186,233-235
+site/src/components/quick-start-example.module.css
+  s_00978657432ab3::t_d0b773430331ca 5-43
+site/content/docs/zh/getting-started/react.mdx
+  s_00978657432ab3::t_6998c0fa096091 142,145,152-172,174-176,178-180,182-183,189,191,193
+  s_00978657432ab3::t_e3ee344f0d1ff9 149-151,188
+  s_00978657432ab3::t_d986e61579caa8 250-251,262
+  s_00978657432ab3::t_7015e7d25c398b 173,177,184-187
+  s_00978657432ab3::t_4683e378e65d43 50,96
+  s_00978657432ab3::t_3c08957761a2ee 108-141,143-144,146-148,181,190,192,194-222,224,226-237,248-249,263-264,266-296
+  s_00978657432ab3::t_afb91e5a909be3 223,238-247,252-261,265
+  s_00978657432ab3::t_31f8700569287d 225
+site/maintenance/b00-baseline.json
+  s_4534bc5c3d78f4::t_bde7cde8e3fdb0 1-3760
+site/src/lib/quick-start.ts
+  s_00978657432ab3::t_d0b773430331ca 1-18,70
+site/content/docs/en/getting-started/react.mdx
+  s_00978657432ab3::t_31f8700569287d 225
+  s_00978657432ab3::t_d7859320b46005 142,145,152-172,174-176,178-180,182-183,189,191,193
+  s_00978657432ab3::t_21073be6a78469 173,177,184-187
+  s_00978657432ab3::t_e3ee344f0d1ff9 149-151,188
+  s_00978657432ab3::t_d507d294e2c18c 250-251,262
+  s_00978657432ab3::t_afb91e5a909be3 223,238-247,252-261,265
+  s_00978657432ab3::t_6296bb2c3f798f 108-141,143-144,146-148,181,190,192,194-222,224,226-237,248-249,263-264,266-296
+  s_00978657432ab3::t_4683e378e65d43 50,96
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6b22ab725a3c9149f0c4683f05a942392199dec0",
+  "prompts": {},
+  "sessions": {
+    "s_00978657432ab3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a154-9931-7100-b660-978bf2dd6b1e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    },
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

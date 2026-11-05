@@ -1,0 +1,21 @@
+site/content/docs/en/concepts/architecture.mdx
+  s_4534bc5c3d78f4::t_e578dbda33c933 39,83-94
+site/content/docs/zh/concepts/architecture.mdx
+  s_4534bc5c3d78f4::t_e578dbda33c933 39,83-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f481c13cf540ae1c82b0dbf8920c236cbab26f06",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

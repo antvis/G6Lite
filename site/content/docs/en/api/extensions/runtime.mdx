@@ -1,0 +1,75 @@
+---
+title: Runtime extension contracts
+description: Behavior, Layout, Transform, and Plugin hooks, operation inputs, lifecycle, and failures
+---
+
+Register runtime extensions through extensionFactory returning fresh instances. See [registration](/en/docs/api/extensions/registration) for shared init / destroy, context, and errors; this page defines category-specific calls.
+
+## Lifecycle at a glance
+
+| Category | Order | Reuse / release |
+| --- | --- | --- |
+| Behavior | init → getEvents → handlers → destroy | New instance per mount; unmount unbinds returned handlers first |
+| Layout | init → execute → destroy | New instance per execution; standalone runLayout skips init |
+| Transform | init → beforeRender; reused update → beforeRender | Reused by position and name; release on removal, replacement, destruction |
+| Plugin | init → mount → destroy | New instance per mount; render remounts, setData does not |
+
+init, destroy, getEvents, beforeRender, update, and mount are synchronous hooks; returned Promises are not awaited. Only Layout.execute explicitly supports asynchronous results.
+
+## BehaviorExtension
+
+TOptions extends BehaviorOptions; TEventMap defaults to GraphEventMap. Required getEvents(): BehaviorEventHandlers&lt;TEventMap&gt; returns a partial event-name-to-handler mapping.
+
+After successful init, the engine calls getEvents and binds function entries. Arguments follow event-map tuples, not a universal MouseEvent. Each handler's synchronous exception is isolated. Unmount unbinds these handlers before destroy; release extension-owned DOM listeners and timers yourself.
+
+The canonical fields, options, and defaults remain in the [Behavior contract](/en/docs/api/options/behaviors#custom-behavior-contract). Follow [Custom Behavior](/en/docs/guides/custom-behavior) for implementation.
+
+## LayoutExtension
+
+Required execute(data: GraphData, runtime) returns an object containing positioned nodes, or a Promise of that object.
+
+| Input / output | Content |
+| --- | --- |
+| data | Current GraphData input; compute from it rather than committed context.data |
+| runtime.width / height | number, canvas CSS viewport; standalone defaults to configuration or 800 / 600 |
+| runtime.signal? | AbortSignal for cancellation |
+| runtime.options | Readonly&lt;TOptions&gt;, current resolved configuration including type and viewport defaults; shallow-copied and frozen |
+| Result nodes | Array of GraphData node records with finite numeric x/y; retain IDs and business fields |
+
+The result is not GraphData: return positioned nodes, not edges, DOM, or rendering objects. Do not write internal models or draw inside execute. Graph applies results and schedules updates. See [layout methods](/en/docs/api/graph/layout) for reruns, fixed axes, and cancellation.
+
+Graph-managed execution supplies ExtensionContext and calls init. Standalone runLayout has no Graph, skips init, and still calls execute / destroy. Read configuration from runtime.options rather than requiring init.
+
+Every execution reaches destroy after success, failure, or cancellation. Check signal in long loops and after asynchronous steps. Yield in chunks so cancellation can run; release owned Workers and timers. Registered layouts precede built-in/library paths and run on the main thread; worker: true does not automatically move arbitrary extension code.
+
+Creation failure may continue another layout path. Once created, init / execute failures log and return input-position fallback (missing axes become 0), without guaranteeing the same-named built-in algorithm. Graph generations discard canceled results; a fulfilled Promise does not prove application.
+
+## TransformExtension
+
+| Optional hook | Signature and call |
+| --- | --- |
+| beforeRender | (data: GraphData) → GraphData; synchronously return complete input |
+| update | (options: Readonly&lt;Partial&lt;TOptions&gt;&gt;) → void on reuse |
+| init / destroy | Inherited from Extension&lt;TOptions&gt; |
+
+Activation requires beforeRender in practice; missing methods cause release and skipping. Registered transforms run in array order, feeding each output to the next, before layout. Initial render and setData run them; incremental writes, refresh, and layout() do not rerun registered transforms.
+
+Each reused position/name receives update on every transformation, even with unchanged values. Current input is the complete entry options ({} for string form), not a computed diff; restore defaults for omitted fields from the current options.
+
+context.data contains committed data and may be empty or stale. Use the beforeRender data argument. Outputs are not fully validated: ensure valid IDs, endpoints, Combos, and fields before returning. Inputs are not recursively copied; mutating then throwing cannot roll back.
+
+beforeRender exceptions log and retain the incoming data. init / update failures release and skip that instance; a later operation may recreate it. The special process-parallel-edges entry does not use registered Transform lifecycle; see [configuration](/en/docs/api/options/transforms-plugins).
+
+## PluginExtension
+
+TOptions extends PluginOptions and includes type. Optional mount(container: HTMLElement): void receives the Graph DOM container, not a Canvas. init receives the whole configuration, including type and business fields, rather than an options child.
+
+mount runs after the graph interaction runtime is established. Own your DOM, listeners, and state; scope styles and do not replace Graph children. An instance without mount may still receive init / destroy.
+
+Repeated render destroys old plugins before creating and mounting replacements. setData, layout, and refresh do not remount. There is no Plugin.update hook, and updateOptions does not accept plugins. Recreate to change entries or constructor options; see [Plugin configuration](/en/docs/api/options/transforms-plugins#plugins).
+
+Unknown entries are skipped; creation failure skips, init failure destroys then skips, and synchronous mount errors log with cleanup retained for later unmount. Exceptions do not roll back partial DOM work. destroy should handle partial mounting, repeated cleanup, and asynchronous cancellation.
+
+## Resource and context boundaries
+
+Graph manages extension instances and handlers returned by Behavior. Extensions still release their own DOM events, requests, timers, Observers, and Workers. Use [controlled context](/en/docs/api/extensions/registration#extensioncontext), not context.graph or an internal event bus.

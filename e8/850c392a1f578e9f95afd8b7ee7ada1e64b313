@@ -1,0 +1,41 @@
+site/content/docs/zh/api/graph.mdx
+  s_4534bc5c3d78f4::t_8d0b8db2ce38ca 212,216,218,222,226,230,234
+site/content/docs/en/api/graph.mdx
+  s_4534bc5c3d78f4::t_8d0b8db2ce38ca 212,216,218,222,226,230,234
+site/content/docs/zh/concepts/graph-lifecycle.mdx
+  s_4534bc5c3d78f4::t_df4a3969583602 32
+site/content/docs/en/api/graph/states.mdx
+  s_4534bc5c3d78f4::t_d4e994d5259f33 166
+site/content/docs/zh/api/options.mdx
+  s_4534bc5c3d78f4::t_df4a3969583602 68,70
+site/content/docs/en/api/options.mdx
+  s_4534bc5c3d78f4::t_df4a3969583602 68,70
+site/content/docs/en/guides/viewport.mdx
+  s_4534bc5c3d78f4::t_d4e994d5259f33 93
+site/content/docs/en/concepts/viewport.mdx
+  s_4534bc5c3d78f4::t_d4e994d5259f33 75
+site/content/docs/en/concepts/graph-lifecycle.mdx
+  s_4534bc5c3d78f4::t_df4a3969583602 32
+site/content/docs/zh/guides/viewport.mdx
+  s_4534bc5c3d78f4::t_d4e994d5259f33 93
+site/content/docs/zh/concepts/viewport.mdx
+  s_4534bc5c3d78f4::t_d4e994d5259f33 75
+site/content/docs/zh/api/graph/states.mdx
+  s_4534bc5c3d78f4::t_d4e994d5259f33 166
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e8850c392a1f578e9f95afd8b7ee7ada1e64b313",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

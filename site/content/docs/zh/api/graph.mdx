@@ -1,147 +1,130 @@
 ---
-title: Graph 类
-description: Graph 的创建、数据、状态、视口、布局和事件方法
+title: Graph 方法
+description: 按任务查询 Graph 的公开成员，进入唯一完整方法参考
 ---
 
-`Graph` 是业务代码操作一张图的实例。从包根导入后，先传入 [配置](/docs/api/options)，再 `await graph.render()`。
+Graph 操作一张图。选择下面的任务，点击方法名查询参数、返回值、单位、调用时机和边界。创建与订阅可在 render 前完成，常规数据与状态写入等待有效 render。
 
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const graph = new Graph({ container, data });
-await graph.render();
-```
-
-数据写入、状态修改和 `layout()` 必须发生在首次 `render()` 成功之后。实例销毁后，这些方法直接返回。
+首次接入见[生命周期](/docs/concepts/graph-lifecycle)，构造参数查[GraphOptions](/docs/api/options)。旧兼容方法与内部边界查[API 稳定性](/docs/compatibility/api-stability)，不纳入推荐方法清单。
 
 ## 生命周期
 
-创建、渲染、销毁与刷新的完整契约见[生命周期方法参考](/docs/api/graph/lifecycle)。阶段选择与清理步骤见[Graph 生命周期](/docs/concepts/graph-lifecycle)。
+<span id="new-graphoptions" />
 
-### `new Graph(options)`
+<span id="render" />
 
-[创建实例](/docs/api/graph/lifecycle#new-graph)：容器、画布归属及 GraphOptions 入口。
+<span id="destroy" />
 
-### `render()`
+<span id="destroyed" />
 
-[render](/docs/api/graph/lifecycle#render)：等待有效初始化完成，了解重复渲染、事件顺序和取消边界。
+<span id="refresh" />
 
-### `destroy()`
-
-[destroy](/docs/api/graph/lifecycle#destroy)：销毁实例资源；业务请求、计时器和 DOM 监听由业务清理。
-
-### `destroyed`
-
-[destroyed](/docs/api/graph/lifecycle#destroyed)：只读销毁标记，不等于渲染成功或任务有效。
-
-### `refresh()`
-
-[refresh](/docs/api/graph/lifecycle#refresh)：重算样式并绘制，不重新初始化、布局或适配。
+| 任务 | API |
+| --- | --- |
+| 创建实例 | [new Graph](/docs/api/graph/lifecycle#new-graph) |
+| 渲染 / 刷新 | [render](/docs/api/graph/lifecycle#render) · [refresh](/docs/api/graph/lifecycle#refresh) |
+| 销毁与销毁标记 | [destroy](/docs/api/graph/lifecycle#destroy) · [destroyed](/docs/api/graph/lifecycle#destroyed) |
 
 ## 读取数据
 
-快照、只读模型、存在性、数量、位置与邻接查询统一见[数据读取参考](/docs/api/graph/data)。
+| 任务 | API |
+| --- | --- |
+| 导出快照 / 元素集合 | [getData](/docs/api/graph/data#getdata) · [getNodes](/docs/api/graph/data#getnodes) · [getEdges](/docs/api/graph/data#getedges) |
+| 按 ID 读模型 | [getNodeData](/docs/api/graph/data#getnodedata) · [getEdgeData](/docs/api/graph/data#getedgedata) · [getComboData](/docs/api/graph/data#getcombodata) · [getElementData](/docs/api/graph/data#getelementdata) |
+| 数量 / 存在性 | [getNodeCount](/docs/api/graph/data#getnodecount) · [getEdgeCount](/docs/api/graph/data#getedgecount) · [hasNode](/docs/api/graph/data#hasnode) · [hasEdge](/docs/api/graph/data#hasedge) · [hasElement](/docs/api/graph/data#haselement) |
+| 位置 / 邻接 | [getElementPosition](/docs/api/graph/data#getelementposition) · [getNeighborNodes](/docs/api/graph/data#getneighbornodes) · [getAdjacentEdges](/docs/api/graph/data#getadjacentedges) |
 
-[getData](/docs/api/graph/data#getdata) · [getNodes](/docs/api/graph/data#getnodes) · [getEdges](/docs/api/graph/data#getedges) · [getElementData](/docs/api/graph/data#getelementdata) · [getElementPosition](/docs/api/graph/data#getelementposition) · [getNeighborNodes](/docs/api/graph/data#getneighbornodes) · [getAdjacentEdges](/docs/api/graph/data#getadjacentedges)
+读取 Model 是只读类型的实时视图；getData 为分层浅复制的导出快照。区别见[查询前提](/docs/api/graph/data#查询前提与返回值)。
 
 ## 替换数据与样式
 
-### `setData()`
+<span id="setdata" />
 
-[setData](/docs/api/graph/data-mutations#setdata) 替换全图，参数、视野、取消和失败边界见写入参考；流程与代码效果见[数据指南](/docs/guides/data)。
+<span id="updateoptions" />
 
-### `updateOptions()`
-
-[updateOptions](/docs/api/graph/lifecycle#updateoptions) 更新 node、edge、label 和 theme；对象、函数和状态样式的合并规则见方法参考。它不接受布局、行为或插件配置；更换布局使用 [setLayout + layout](/docs/api/graph/layout)。
+| 任务 | API |
+| --- | --- |
+| 全量数据替换 | [setData](/docs/api/graph/data-mutations#setdata) |
+| 外观配置更新 | [updateOptions](/docs/api/graph/lifecycle#updateoptions) |
 
 ## 修改节点和边
 
-首次有效 render 后使用，完整签名和批量边界见[数据写入参考](/docs/api/graph/data-mutations)。
-
 ### 节点
 
-[addNode(s)](/docs/api/graph/data-mutations#addnode) · [updateNodeData](/docs/api/graph/data-mutations#updatenodedata) · [updateNodePosition(s)](/docs/api/graph/data-mutations#updatenodeposition) · [removeNode(s)](/docs/api/graph/data-mutations#removenode)
-
-新增提供坐标；数据浅合并；删除节点会删除关联边，不重布局或适配。
+| 任务 | API |
+| --- | --- |
+| 新增 / 删除 | [addNode](/docs/api/graph/data-mutations#addnode) · [addNodes](/docs/api/graph/data-mutations#addnodes) · [removeNode](/docs/api/graph/data-mutations#removenode) · [removeNodes](/docs/api/graph/data-mutations#removenodes) |
+| 业务字段 / 位置 | [updateNodeData](/docs/api/graph/data-mutations#updatenodedata) · [updateNodePosition](/docs/api/graph/data-mutations#updatenodeposition) · [updateNodePositions](/docs/api/graph/data-mutations#updatenodepositions) |
 
 ### 边
 
-[addEdge(s)](/docs/api/graph/data-mutations#addedge) · [updateEdgeData](/docs/api/graph/data-mutations#updateedgedata) · [removeEdge(s)](/docs/api/graph/data-mutations#removeedge)
-
-新增返回实际 ID，批量更新可改端点，删除边不会删除节点。
+| 任务 | API |
+| --- | --- |
+| 新增 / 删除 | [addEdge](/docs/api/graph/data-mutations#addedge) · [addEdges](/docs/api/graph/data-mutations#addedges) · [removeEdge](/docs/api/graph/data-mutations#removeedge) · [removeEdges](/docs/api/graph/data-mutations#removeedges) |
+| 业务字段 / 批量端点更新 | [updateEdgeData](/docs/api/graph/data-mutations#updateedgedata) |
 
 ## 状态、显隐和定位
 
-增减、替换、查询、清空与显隐的完整契约见[状态与显隐方法参考](/docs/api/graph/states)；按业务任务操作见[状态使用指南](/docs/guides/states)。
+<span id="setitemstate" />
 
-### `setItemState()`
+<span id="setelementstates" />
 
-[增减一个状态](/docs/api/graph/states#setitemstate)，保留其他标记。
+<span id="batchsetstate" />
 
-### `setElementStates()`
+<span id="查询和清空" />
 
-[替换完整状态集合](/docs/api/graph/states#setelementstates)，支持单 id 和状态映射。
+<span id="hideitem-与-showitem" />
 
-### `batchSetState()`
+<span id="focusitem" />
 
-[批量增减状态](/docs/api/graph/states#batchsetstate)，可混合节点、边和 Combo。
-
-### 查询和清空
-
-[getItemStates](/docs/api/graph/states#getitemstates) 读取快照；[findNodesByState](/docs/api/graph/states#findnodesbystate)、[findEdgesByState](/docs/api/graph/states#findedgesbystate)、[findCombosByState](/docs/api/graph/states#findcombosbystate) 查询对应 ID；[clearItemStates](/docs/api/graph/states#clearitemstates) 清空业务状态。
-
-### `hideItem()` 与 `showItem()`
-
-[hideItem](/docs/api/graph/states#hideitem) 和 [showItem](/docs/api/graph/states#showitem) 增减 hidden；关联元素与折叠隐藏的边界见新参考中的代码与效果。
-
-### `focusItem()`
-
-[focusItem](/docs/api/graph/viewport#focusitem) 定位一个或多个节点；目标范围、缩放和 padding 规则见视口方法参考。
+| 任务 | API |
+| --- | --- |
+| 增减 / 替换 / 清空 | [setItemState](/docs/api/graph/states#setitemstate) · [batchSetState](/docs/api/graph/states#batchsetstate) · [setElementStates](/docs/api/graph/states#setelementstates) · [clearItemStates](/docs/api/graph/states#clearitemstates) |
+| 状态快照 / 分类查询 | [getItemStates](/docs/api/graph/states#getitemstates) · [findNodesByState](/docs/api/graph/states#findnodesbystate) · [findEdgesByState](/docs/api/graph/states#findedgesbystate) · [findCombosByState](/docs/api/graph/states#findcombosbystate) |
+| 显隐 / 节点定位 | [hideItem](/docs/api/graph/states#hideitem) · [showItem](/docs/api/graph/states#showitem) · [focusItem](/docs/api/graph/viewport#focusitem) |
 
 ## 视口
 
-相机、缩放、适配、定位、尺寸与坐标转换的完整契约见[视口方法参考](/docs/api/graph/viewport)。任务步骤见[视口指南](/docs/guides/viewport)，坐标关系见[核心概念](/docs/concepts/viewport)。
+<span id="容器尺寸变化" />
 
-相机查询与恢复：[getCamera](/docs/api/graph/viewport#getcamera) · [setCamera](/docs/api/graph/viewport#setcamera) · [resetCamera](/docs/api/graph/viewport#resetcamera)。
+<span id="zoomto-与-zoomby" />
 
-### 容器尺寸变化
+<span id="fitview" />
 
-[setSize](/docs/api/graph/viewport#setsize) 同步画布尺寸；容器 CSS 变化由 ResizeObserver 自动处理。[autoFit](/docs/api/options#autofit) 决定尺寸变化后是否适配，resize 在可选适配后发出。宽度切换效果见[实时示例](/docs/api/graph/viewport#容器变宽变窄后的适配)。
+<span id="坐标转换" />
 
-### `zoomTo()` 与 `zoomBy()`
+| 任务 | API |
+| --- | --- |
+| 相机保存 / 恢复 | [getCamera](/docs/api/graph/viewport#getcamera) · [setCamera](/docs/api/graph/viewport#setcamera) · [resetCamera](/docs/api/graph/viewport#resetcamera) |
+| 尺寸 / 缩放 | [setSize](/docs/api/graph/viewport#setsize) · [getZoom](/docs/api/graph/viewport#getzoom) · [zoomTo](/docs/api/graph/viewport#zoomto) · [zoomBy](/docs/api/graph/viewport#zoomby) |
+| 适配 / 居中 | [fitView](/docs/api/graph/viewport#fitview) · [fitCenter](/docs/api/graph/viewport#fitcenter) |
+| 客户端与图坐标转换 | [screenToGraph](/docs/api/graph/viewport#screentograph) · [graphToScreen](/docs/api/graph/viewport#graphtoscreen) |
 
-[getZoom](/docs/api/graph/viewport#getzoom) 查询缩放；[zoomTo](/docs/api/graph/viewport#zoomto) 设置绝对值，[zoomBy](/docs/api/graph/viewport#zoomby) 乘当前值。中心和 ZoomOptions 查方法参考；滚轮范围查 [Behavior](/docs/api/options/behaviors#导航与拖拽)。
-
-### `fitView()`
-
-[fitView](/docs/api/graph/viewport#fitview) 调整缩放和平移；[fitCenter](/docs/api/graph/viewport#fitcenter) 保持缩放只居中。刷新后保留视野见[使用指南](/docs/guides/viewport#刷新数据保留或重新适配)。
-
-### 坐标转换
-
-[screenToGraph](/docs/api/graph/viewport#screentograph) 从 client CSS 坐标转到图坐标；[graphToScreen](/docs/api/graph/viewport#graphtoscreen) 反向转换。实时观察与 DOM 定位见[坐标指南](/docs/guides/viewport#转换坐标定位-dom-内容)。
+容器变化后的自动适配查[autoFit](/docs/api/options#autofit)；坐标与刷新后保留视野见[视口指南](/docs/guides/viewport)。
 
 ## 布局
 
-签名、前提、事件顺序和取消语义统一见[布局方法参考](/docs/api/graph/layout)：[setLayout](/docs/api/graph/layout#setlayout) 保存配置，[layout](/docs/api/graph/layout#layout) 重新计算，[cancelLayout](/docs/api/graph/layout#cancellayout) 放弃当前任务。
+| 任务 | API |
+| --- | --- |
+| 保存配置 / 执行 / 取消 | [setLayout](/docs/api/graph/layout#setlayout) · [layout](/docs/api/graph/layout#layout) · [cancelLayout](/docs/api/graph/layout#cancellayout) |
 
-布局字段见[配置参考](/docs/api/options/layout)，操作步骤见[布局指南](/docs/guides/layout)。不创建 Graph、只计算坐标时用 [runLayout](/docs/api/graph/layout#runlayout)。
+只计算坐标用[runLayout](/docs/api/utilities#runlayout)，不需要创建 Graph。
 
 ## Combo
 
-完整方法签名、归属、直接成员查询和折叠边界统一见[Combo 操作参考](/docs/api/graph/combo)。嵌套、折叠和运行时归组仍为实验能力；配置见[Combo 参考](/docs/api/options/combo)。
+| 任务 | API |
+| --- | --- |
+| 创建 / 移除分组 | [createCombo](/docs/api/graph/combo#createcombo) · [removeCombo](/docs/api/graph/combo#removecombo) |
+| 更改直接归属 | [addToCombo](/docs/api/graph/combo#addtocombo) · [removeFromCombo](/docs/api/graph/combo#removefromcombo) |
+| 读取直接成员 / 归属 | [getComboChildren](/docs/api/graph/combo#getcombochildren) · [getNodeCombo](/docs/api/graph/combo#getnodecombo) |
+| 折叠 / 展开 / 切换 | [collapseCombo](/docs/api/graph/combo#collapsecombo) · [expandCombo](/docs/api/graph/combo#expandcombo) · [toggleCombo](/docs/api/graph/combo#togglecombo) |
 
-[createCombo](/docs/api/graph/combo#createcombo) · [removeCombo](/docs/api/graph/combo#removecombo) · [addToCombo](/docs/api/graph/combo#addtocombo) · [removeFromCombo](/docs/api/graph/combo#removefromcombo)
-
-[getComboChildren](/docs/api/graph/combo#getcombochildren) · [getNodeCombo](/docs/api/graph/combo#getnodecombo) · [collapseCombo](/docs/api/graph/combo#collapsecombo) · [expandCombo](/docs/api/graph/combo#expandcombo) · [toggleCombo](/docs/api/graph/combo#togglecombo)
-
-状态和隐藏使用[统一状态 API](/docs/api/graph/states)，使用步骤和代码效果见[Combo 指南](/docs/guides/combo)。
+嵌套、折叠与运行时归组仍为实验能力。步骤见[Combo 指南](/docs/guides/combo)，外观查[Combo 配置](/docs/api/options/combo)。
 
 ## 事件
 
-通过 [on](/docs/api/graph/events#on)、[off](/docs/api/graph/events#off)、[once](/docs/api/graph/events#once) 注册和取消监听；可在首次 render 前订阅。
+| 任务 | API |
+| --- | --- |
+| 订阅 / 退订 / 一次性订阅 | [on](/docs/api/graph/events#on) · [off](/docs/api/graph/events#off) · [once](/docs/api/graph/events#once) |
 
-- [GraphEventMap](/docs/api/graph/events#grapheventmap)：参数元组、订阅类型和自定义名称边界。
-- [元素载荷](/docs/api/graph/events#元素事件载荷)、[选择](/docs/api/graph/events#选择事件)、[拖拽](/docs/api/graph/events#拖拽事件)：完整字段与触发条件。
-- [生命周期与数据](/docs/api/graph/events#生命周期与数据事件)：渲染、布局、数据修改、尺寸与销毁的时机。
-
-业务接入和文档内代码效果见[事件指南](/docs/guides/events)。Behavior 开关查[交互组合](/docs/guides/interactions)。
+完整事件名与参数元组查[GraphEventMap](/docs/api/graph/events#grapheventmap)；业务监听步骤见[事件指南](/docs/guides/events)。

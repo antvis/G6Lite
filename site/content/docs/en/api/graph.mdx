@@ -1,147 +1,130 @@
 ---
-title: Graph
-description: Create a graph and call its data, state, viewport, layout, and event methods
+title: Graph methods
+description: Find public Graph members by task and open their canonical contracts
 ---
 
-`Graph` is the instance application code uses to operate one graph. Import it from the package root, pass [options](/en/docs/api/options), then `await graph.render()`.
+Graph operates one graph. Choose a task and click a member for arguments, returns, units, prerequisites, and boundaries. Creation and subscription can precede render; ordinary data and state writes wait for a valid render.
 
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const graph = new Graph({ container, data });
-await graph.render();
-```
-
-Data writes, state changes, and `layout()` run after the first successful `render()`. After `destroy()`, those methods return immediately.
+Start with [lifecycle](/en/docs/concepts/graph-lifecycle), or look up [GraphOptions](/en/docs/api/options). Find compatibility members and internal boundaries in [API stability](/en/docs/compatibility/api-stability), outside the recommended index.
 
 ## Lifecycle
 
-See the [lifecycle method reference](/en/docs/api/graph/lifecycle) for construction, rendering, destruction, and refresh contracts. [Graph lifecycle](/en/docs/concepts/graph-lifecycle) explains stage selection and cleanup.
+<span id="new-graphoptions" />
 
-### `new Graph(options)`
+<span id="render" />
 
-[Construct an instance](/en/docs/api/graph/lifecycle#new-graph): container requirements, canvas ownership, and GraphOptions.
+<span id="destroy" />
 
-### `render()`
+<span id="destroyed" />
 
-[render](/en/docs/api/graph/lifecycle#render): valid initialization, repeated rendering, event order, and cancellation boundaries.
+<span id="refresh" />
 
-### `destroy()`
-
-[destroy](/en/docs/api/graph/lifecycle#destroy) releases instance resources. Application requests, timers, and DOM listeners still need application cleanup.
-
-### `destroyed`
-
-[destroyed](/en/docs/api/graph/lifecycle#destroyed) is a read-only destruction flag, not proof of successful rendering or current task validity.
-
-### `refresh()`
-
-[refresh](/en/docs/api/graph/lifecycle#refresh) reprocesses styles and draws, without reinitialization, layout, or fitting.
+| Task | API |
+| --- | --- |
+| Construct | [new Graph](/en/docs/api/graph/lifecycle#new-graph) |
+| Render / refresh | [render](/en/docs/api/graph/lifecycle#render) · [refresh](/en/docs/api/graph/lifecycle#refresh) |
+| Destroy / destruction flag | [destroy](/en/docs/api/graph/lifecycle#destroy) · [destroyed](/en/docs/api/graph/lifecycle#destroyed) |
 
 ## Reading data
 
-See the [data query reference](/en/docs/api/graph/data)。
+| Task | API |
+| --- | --- |
+| Snapshot / collections | [getData](/en/docs/api/graph/data#getdata) · [getNodes](/en/docs/api/graph/data#getnodes) · [getEdges](/en/docs/api/graph/data#getedges) |
+| Models by ID | [getNodeData](/en/docs/api/graph/data#getnodedata) · [getEdgeData](/en/docs/api/graph/data#getedgedata) · [getComboData](/en/docs/api/graph/data#getcombodata) · [getElementData](/en/docs/api/graph/data#getelementdata) |
+| Counts / existence | [getNodeCount](/en/docs/api/graph/data#getnodecount) · [getEdgeCount](/en/docs/api/graph/data#getedgecount) · [hasNode](/en/docs/api/graph/data#hasnode) · [hasEdge](/en/docs/api/graph/data#hasedge) · [hasElement](/en/docs/api/graph/data#haselement) |
+| Positions / adjacency | [getElementPosition](/en/docs/api/graph/data#getelementposition) · [getNeighborNodes](/en/docs/api/graph/data#getneighbornodes) · [getAdjacentEdges](/en/docs/api/graph/data#getadjacentedges) |
 
-[getData](/en/docs/api/graph/data#getdata) · [getNodes](/en/docs/api/graph/data#getnodes) · [getEdges](/en/docs/api/graph/data#getedges) · [getElementData](/en/docs/api/graph/data#getelementdata) · [getElementPosition](/en/docs/api/graph/data#getelementposition) · [getNeighborNodes](/en/docs/api/graph/data#getneighbornodes) · [getAdjacentEdges](/en/docs/api/graph/data#getadjacentedges)
+Models are live views with read-only types; getData returns a snapshot shallow-copied by layer. See [query timing](/en/docs/api/graph/data#query-timing-and-returned-values).
 
 ## Replacing data and styles
 
-### `setData()`
+<span id="setdata" />
 
-[setData](/en/docs/api/graph/data-mutations#setdata) replaces graph data; see the reference for arguments, fitting, cancellation, and failure. Follow the [data guide](/en/docs/guides/data)。
+<span id="updateoptions" />
 
-### `updateOptions()`
-
-[updateOptions](/en/docs/api/graph/lifecycle#updateoptions) updates node, edge, label, and theme. See the reference for object, function, and state-style merge rules. Layout, Behavior, and Plugin configuration are not accepted; use [setLayout + layout](/en/docs/api/graph/layout) to change layouts.
+| Task | API |
+| --- | --- |
+| Replace data | [setData](/en/docs/api/graph/data-mutations#setdata) |
+| Visual configuration | [updateOptions](/en/docs/api/graph/lifecycle#updateoptions) |
 
 ## Changing nodes and edges
 
-Use after a valid render. See signatures and batch boundaries in [data mutations](/en/docs/api/graph/data-mutations)。
-
 ### Nodes
 
-[addNode(s)](/en/docs/api/graph/data-mutations#addnode) · [updateNodeData](/en/docs/api/graph/data-mutations#updatenodedata) · [updateNodePosition(s)](/en/docs/api/graph/data-mutations#updatenodeposition) · [removeNode(s)](/en/docs/api/graph/data-mutations#removenode)
-
-Supply positions on addition. Data merges shallowly; node removal also removes adjacent edges, without layout or fitting.
+| Task | API |
+| --- | --- |
+| Add / remove | [addNode](/en/docs/api/graph/data-mutations#addnode) · [addNodes](/en/docs/api/graph/data-mutations#addnodes) · [removeNode](/en/docs/api/graph/data-mutations#removenode) · [removeNodes](/en/docs/api/graph/data-mutations#removenodes) |
+| Business fields / positions | [updateNodeData](/en/docs/api/graph/data-mutations#updatenodedata) · [updateNodePosition](/en/docs/api/graph/data-mutations#updatenodeposition) · [updateNodePositions](/en/docs/api/graph/data-mutations#updatenodepositions) |
 
 ### Edges
 
-[addEdge(s)](/en/docs/api/graph/data-mutations#addedge) · [updateEdgeData](/en/docs/api/graph/data-mutations#updateedgedata) · [removeEdge(s)](/en/docs/api/graph/data-mutations#removeedge)
-
-Addition returns actual IDs; batch updates can change endpoints; removing edges leaves nodes intact.
+| Task | API |
+| --- | --- |
+| Add / remove | [addEdge](/en/docs/api/graph/data-mutations#addedge) · [addEdges](/en/docs/api/graph/data-mutations#addedges) · [removeEdge](/en/docs/api/graph/data-mutations#removeedge) · [removeEdges](/en/docs/api/graph/data-mutations#removeedges) |
+| Business fields / batch reconnection | [updateEdgeData](/en/docs/api/graph/data-mutations#updateedgedata) |
 
 ## State, visibility, and focus
 
-See the [state and visibility method reference](/en/docs/api/graph/states) for complete toggle, replace, query, clear, and visibility contracts, or the [state guide](/en/docs/guides/states) for tasks.
+<span id="setitemstate" />
 
-### `setItemState()`
+<span id="setelementstates" />
 
-[Toggle one state](/en/docs/api/graph/states#setitemstate) while keeping other flags.
+<span id="batchsetstate" />
 
-### `setElementStates()`
+<span id="query-and-clear" />
 
-[Replace the complete state set](/en/docs/api/graph/states#setelementstates) by ID or state map.
+<span id="hideitem-and-showitem" />
 
-### `batchSetState()`
+<span id="focusitem" />
 
-[Batch state toggles](/en/docs/api/graph/states#batchsetstate) across nodes, edges, and Combos.
-
-### Query and clear
-
-[getItemStates](/en/docs/api/graph/states#getitemstates) reads a snapshot. [findNodesByState](/en/docs/api/graph/states#findnodesbystate), [findEdgesByState](/en/docs/api/graph/states#findedgesbystate), and [findCombosByState](/en/docs/api/graph/states#findcombosbystate) query IDs; [clearItemStates](/en/docs/api/graph/states#clearitemstates) clears business states.
-
-### `hideItem()` and `showItem()`
-
-[hideItem](/en/docs/api/graph/states#hideitem) and [showItem](/en/docs/api/graph/states#showitem) toggle hidden. See the new reference's code and effect for related elements and collapsed visibility.
-
-### `focusItem()`
-
-[focusItem](/en/docs/api/graph/viewport#focusitem) locates one or more nodes. See the viewport reference for bounds, zoom, and padding rules.
+| Task | API |
+| --- | --- |
+| Toggle / replace / clear | [setItemState](/en/docs/api/graph/states#setitemstate) · [batchSetState](/en/docs/api/graph/states#batchsetstate) · [setElementStates](/en/docs/api/graph/states#setelementstates) · [clearItemStates](/en/docs/api/graph/states#clearitemstates) |
+| Snapshot / queries | [getItemStates](/en/docs/api/graph/states#getitemstates) · [findNodesByState](/en/docs/api/graph/states#findnodesbystate) · [findEdgesByState](/en/docs/api/graph/states#findedgesbystate) · [findCombosByState](/en/docs/api/graph/states#findcombosbystate) |
+| Visibility / node focus | [hideItem](/en/docs/api/graph/states#hideitem) · [showItem](/en/docs/api/graph/states#showitem) · [focusItem](/en/docs/api/graph/viewport#focusitem) |
 
 ## Viewport
 
-See the [viewport method reference](/en/docs/api/graph/viewport) for camera, zoom, fitting, focus, sizing, and conversion contracts. The [viewport guide](/en/docs/guides/viewport) covers tasks; the [concept page](/en/docs/concepts/viewport) explains coordinate spaces.
+<span id="container-resize" />
 
-Inspect and restore cameras with [getCamera](/en/docs/api/graph/viewport#getcamera), [setCamera](/en/docs/api/graph/viewport#setcamera), and [resetCamera](/en/docs/api/graph/viewport#resetcamera).
+<span id="zoomto-and-zoomby" />
 
-### Container resize
+<span id="fitview" />
 
-[setSize](/en/docs/api/graph/viewport#setsize) synchronizes canvas dimensions. ResizeObserver handles container CSS changes. [autoFit](/en/docs/api/options#autofit) controls resize fitting, followed by resize. See the [live width-switching example](/en/docs/api/graph/viewport#fitting-after-a-container-narrows-or-widens).
+<span id="coordinate-conversion" />
 
-### `zoomTo()` and `zoomBy()`
+| Task | API |
+| --- | --- |
+| Save / restore camera | [getCamera](/en/docs/api/graph/viewport#getcamera) · [setCamera](/en/docs/api/graph/viewport#setcamera) · [resetCamera](/en/docs/api/graph/viewport#resetcamera) |
+| Size / zoom | [setSize](/en/docs/api/graph/viewport#setsize) · [getZoom](/en/docs/api/graph/viewport#getzoom) · [zoomTo](/en/docs/api/graph/viewport#zoomto) · [zoomBy](/en/docs/api/graph/viewport#zoomby) |
+| Fit / center | [fitView](/en/docs/api/graph/viewport#fitview) · [fitCenter](/en/docs/api/graph/viewport#fitcenter) |
+| Client / graph coordinates | [screenToGraph](/en/docs/api/graph/viewport#screentograph) · [graphToScreen](/en/docs/api/graph/viewport#graphtoscreen) |
 
-[getZoom](/en/docs/api/graph/viewport#getzoom) reads zoom; [zoomTo](/en/docs/api/graph/viewport#zoomto) sets an absolute value, and [zoomBy](/en/docs/api/graph/viewport#zoomby) multiplies it. See the reference for anchors and ZoomOptions, and [Behavior configuration](/en/docs/api/options/behaviors#navigation-and-dragging) for wheel limits.
-
-### `fitView()`
-
-[fitView](/en/docs/api/graph/viewport#fitview) adjusts translation and zoom; [fitCenter](/en/docs/api/graph/viewport#fitcenter) centers without changing zoom. See [preserving the view on refresh](/en/docs/guides/viewport#refresh-data-with-or-without-fitting).
-
-### Coordinate conversion
-
-[screenToGraph](/en/docs/api/graph/viewport#screentograph) converts client CSS positions to graph coordinates; [graphToScreen](/en/docs/api/graph/viewport#graphtoscreen) does the reverse. See the [coordinate guide](/en/docs/guides/viewport#convert-coordinates-to-position-dom-content) for a live observer and DOM positioning.
+See [autoFit](/en/docs/api/options#autofit) for resize behavior and the [viewport guide](/en/docs/guides/viewport) for coordinate and view preservation tasks.
 
 ## Layout
 
-Signatures, preconditions, events, and cancellation are in the [layout method reference](/en/docs/api/graph/layout): [setLayout](/en/docs/api/graph/layout#setlayout) stores configuration, [layout](/en/docs/api/graph/layout#layout) computes positions, and [cancelLayout](/en/docs/api/graph/layout#cancellayout) discards pending work.
+| Task | API |
+| --- | --- |
+| Configure / execute / cancel | [setLayout](/en/docs/api/graph/layout#setlayout) · [layout](/en/docs/api/graph/layout#layout) · [cancelLayout](/en/docs/api/graph/layout#cancellayout) |
 
-See the [configuration reference](/en/docs/api/options/layout) for fields and the [Layout guide](/en/docs/guides/layout) for steps. Use [runLayout](/en/docs/api/graph/layout#runlayout) to compute positions without Graph.
+Calculate positions without Graph using [runLayout](/en/docs/api/utilities#runlayout).
 
 ## Combo
 
-See the [Combo operation reference](/en/docs/api/graph/combo)。Nesting, collapsing, and runtime membership remain experimental; see [configuration](/en/docs/api/options/combo)。
+| Task | API |
+| --- | --- |
+| Create / remove groups | [createCombo](/en/docs/api/graph/combo#createcombo) · [removeCombo](/en/docs/api/graph/combo#removecombo) |
+| Change membership | [addToCombo](/en/docs/api/graph/combo#addtocombo) · [removeFromCombo](/en/docs/api/graph/combo#removefromcombo) |
+| Read direct children / membership | [getComboChildren](/en/docs/api/graph/combo#getcombochildren) · [getNodeCombo](/en/docs/api/graph/combo#getnodecombo) |
+| Collapse / expand / toggle | [collapseCombo](/en/docs/api/graph/combo#collapsecombo) · [expandCombo](/en/docs/api/graph/combo#expandcombo) · [toggleCombo](/en/docs/api/graph/combo#togglecombo) |
 
-[createCombo](/en/docs/api/graph/combo#createcombo) · [removeCombo](/en/docs/api/graph/combo#removecombo) · [addToCombo](/en/docs/api/graph/combo#addtocombo) · [removeFromCombo](/en/docs/api/graph/combo#removefromcombo)
-
-[getComboChildren](/en/docs/api/graph/combo#getcombochildren) · [getNodeCombo](/en/docs/api/graph/combo#getnodecombo) · [collapseCombo](/en/docs/api/graph/combo#collapsecombo) · [expandCombo](/en/docs/api/graph/combo#expandcombo) · [toggleCombo](/en/docs/api/graph/combo#togglecombo)
-
-Use [unified state APIs](/en/docs/api/graph/states)，and the [Combo guide](/en/docs/guides/combo)。
+Nesting, folding, and runtime regrouping remain experimental. See the [Combo guide](/en/docs/guides/combo) and [configuration](/en/docs/api/options/combo).
 
 ## Events
 
-Register and remove listeners with [on](/en/docs/api/graph/events#on), [off](/en/docs/api/graph/events#off), and [once](/en/docs/api/graph/events#once). Subscriptions can be registered before the first render.
+| Task | API |
+| --- | --- |
+| Subscribe / unsubscribe / once | [on](/en/docs/api/graph/events#on) · [off](/en/docs/api/graph/events#off) · [once](/en/docs/api/graph/events#once) |
 
-- [GraphEventMap](/en/docs/api/graph/events#grapheventmap): argument tuples, subscription types, and custom-name boundaries.
-- [Element payloads](/en/docs/api/graph/events#element-event-payloads), [selection](/en/docs/api/graph/events#selection-events), and [dragging](/en/docs/api/graph/events#drag-events): complete fields and trigger conditions.
-- [Lifecycle and data](/en/docs/api/graph/events#lifecycle-and-data-events): timing for rendering, layout, mutations, resizing, and destruction.
-
-For business integration and inline code with previews, see the [event guide](/en/docs/guides/events). Activate Behaviors using [interaction combinations](/en/docs/guides/interactions).
+See [GraphEventMap](/en/docs/api/graph/events#grapheventmap) for event names and argument tuples, and the [event guide](/en/docs/guides/events) for workflows.

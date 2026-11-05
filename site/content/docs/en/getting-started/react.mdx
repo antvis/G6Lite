@@ -1,11 +1,11 @@
 ---
-title: Use with React and Vue
-description: Use G6Lite in React and Vue 3
+title: React integration
+description: Mount a Graph, synchronize data, handle asynchronous cleanup, and support StrictMode
 ---
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-The React and Vue 3 examples below create the same graph. Zoom the canvas, drag nodes, and hover to highlight connections.
+React owns DOM and business data; Graph owns the canvas. Create one instance on mount, reuse it for updates, and destroy it on unmount. Run `npm install @antv/g6-lite` in your existing project. Vue has its own integration path below.
 
 <QuickStartExample locale="en" />
 
@@ -16,6 +16,8 @@ Run `npm install @antv/g6-lite` in your existing framework project, then use the
 Save this as `GraphView.tsx` and use `<GraphView />` in your page. The component creates the graph after mounting and destroys it on unmount.
 
 ```tsx
+'use client';
+
 import { useEffect, useRef } from 'react';
 import { Graph } from '@antv/g6-lite';
 
@@ -25,6 +27,7 @@ export function GraphView() {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    let disposed = false;
     const graph = new Graph({
       container: containerRef.current,
       data: {
@@ -47,9 +50,17 @@ export function GraphView() {
       behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
     });
 
-    graph.render().catch(console.error);
+    graph.render().catch((error) => {
+      if (!disposed) {
+        graph.destroy();
+        console.error(error);
+      }
+    });
 
-    return () => graph.destroy();
+    return () => {
+      disposed = true;
+      graph.destroy();
+    };
   }, []);
 
   return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
@@ -141,7 +152,12 @@ Save this as `GraphDataDemo.tsx` and use `<GraphDataDemo />` in your page. The p
 
 Following React’s [controlling a non-React widget](https://react.dev/reference/react/useEffect#controlling-a-non-react-widget) pattern, keep the graph in a ref: create it on mount, synchronize data when it changes, and destroy it on unmount. G6Lite’s first `render()` is asynchronous, so `renderedRef` stores that task and data updates wait for it to finish.
 
+<details>
+<summary>Complete React data update example: GraphDataDemo.tsx</summary>
+
 ```tsx
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import { Graph, type GraphData } from '@antv/g6-lite';
 import { basicData, expandedData } from './graph-data';
@@ -168,7 +184,10 @@ function GraphView({ data }: { data: GraphData }) {
 
     return () => {
       graph.destroy();
-      graphRef.current = null;
+      if (graphRef.current === graph) {
+        graphRef.current = null;
+        renderedRef.current = null;
+      }
     };
   }, []);
 
@@ -180,13 +199,15 @@ function GraphView({ data }: { data: GraphData }) {
       if (!graph) return;
 
       await renderedRef.current;
-      if (ignore) return;
+      if (ignore || graph.destroyed) return;
       await graph.setData(data, {
         fitView: { padding: 32, maxZoom: 1 },
       });
     }
 
-    update().catch(console.error);
+    update().catch((error) => {
+      if (!ignore) console.error(error);
+    });
     return () => {
       ignore = true;
     };
@@ -207,6 +228,8 @@ export default function GraphDataDemo() {
   );
 }
 ```
+
+</details>
 
 ### Vue: synchronize data with watch
 
@@ -293,4 +316,20 @@ const data = shallowRef(basicData);
 
 Both examples replace the data object to trigger updates. Mutating an array in place does not change a React dependency reference; the Vue watcher above does not observe nested mutations either. Create a new object for updated data.
 
-`setData()` runs the configured layout and redraws the graph. The examples use its `fitView` option to fit the new data. When data already includes coordinates and you want to preserve the viewport, use `setData(data, { fitView: false })`. See [setData()](/en/docs/api/graph#setdata).
+`setData()` runs the configured layout and redraws the graph. The examples use its `fitView` option to fit the new data. When data already includes coordinates and you want to preserve the viewport, use `setData(data, { fitView: false })`. See [setData()](/en/docs/api/graph/data-mutations#setdata).
+
+## StrictMode and asynchronous unmounting
+
+Development StrictMode performs an extra setup → cleanup → setup cycle. Each effect must create its own Graph and destroy it symmetrically. Do not skip the second setup with an “already initialized” flag. See [React's effect cleanup rules](https://react.dev/reference/react/useEffect#my-effect-runs-twice-when-the-component-mounts).
+
+The data example awaits the first render and uses ignore to abandon writes from an obsolete effect. Destroy invalidates pending layout work. Cancel application fetch requests separately; see the [data guide](/en/docs/guides/data).
+
+## Common questions
+
+**Why are there two canvases or duplicate responses?** Return destroy from the effect and pair subscriptions with cleanup. See [lifecycle](/en/docs/api/graph/lifecycle).
+
+**Why did editing an array not update the graph?** Provide a new data object. This effect compares references and does not observe in-place array changes.
+
+**Can Next.js create the Graph on the server?** Create it in a client component's effect. The 'use client' directive establishes the client boundary; the container still needs an explicit height. Graph does not render on the server.
+
+**How do updates preserve the viewport?** Use setData(data, { fitView: false }); see the [viewport guide](/en/docs/guides/viewport).

@@ -1,11 +1,11 @@
 ---
-title: 在框架中使用
-description: 在 React 和 Vue 3 中使用 G6Lite
+title: React 接入
+description: 挂载、数据同步、异步清理和 StrictMode 中的 Graph 实例管理
 ---
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-下面分别用 React 和 Vue 3 实现同一个关系图。可以缩放画布、拖拽节点，并悬停查看高亮效果。
+React 负责 DOM 与业务数据，Graph 负责画布。挂载时创建一个实例，数据变化时复用，卸载时销毁。已安装项目先运行 `npm install @antv/g6-lite`。Vue 内容将在独立入口查询。
 
 <QuickStartExample locale="zh" />
 
@@ -16,6 +16,8 @@ import { QuickStartExample } from '@/components/quick-start-example';
 将以下代码保存为 `GraphView.tsx`，在页面中使用 `<GraphView />`。组件挂载后创建图，卸载时销毁实例。
 
 ```tsx
+'use client';
+
 import { useEffect, useRef } from 'react';
 import { Graph } from '@antv/g6-lite';
 
@@ -25,6 +27,7 @@ export function GraphView() {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    let disposed = false;
     const graph = new Graph({
       container: containerRef.current,
       data: {
@@ -47,9 +50,17 @@ export function GraphView() {
       behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
     });
 
-    graph.render().catch(console.error);
+    graph.render().catch((error) => {
+      if (!disposed) {
+        graph.destroy();
+        console.error(error);
+      }
+    });
 
-    return () => graph.destroy();
+    return () => {
+      disposed = true;
+      graph.destroy();
+    };
   }, []);
 
   return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
@@ -141,7 +152,12 @@ export const expandedData: GraphData = {
 
 按照 React 官方的[控制非 React 组件](https://react.dev/reference/react/useEffect#controlling-a-non-react-widget)模式，用 ref 保存图实例：挂载时创建，数据变化时同步，卸载时销毁。G6Lite 的首次 `render()` 是异步的，`renderedRef` 保存这次渲染任务，更新数据前先等待它完成。
 
+<details>
+<summary>完整 React 数据更新示例 GraphDataDemo.tsx</summary>
+
 ```tsx
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import { Graph, type GraphData } from '@antv/g6-lite';
 import { basicData, expandedData } from './graph-data';
@@ -168,7 +184,10 @@ function GraphView({ data }: { data: GraphData }) {
 
     return () => {
       graph.destroy();
-      graphRef.current = null;
+      if (graphRef.current === graph) {
+        graphRef.current = null;
+        renderedRef.current = null;
+      }
     };
   }, []);
 
@@ -180,13 +199,15 @@ function GraphView({ data }: { data: GraphData }) {
       if (!graph) return;
 
       await renderedRef.current;
-      if (ignore) return;
+      if (ignore || graph.destroyed) return;
       await graph.setData(data, {
         fitView: { padding: 32, maxZoom: 1 },
       });
     }
 
-    update().catch(console.error);
+    update().catch((error) => {
+      if (!ignore) console.error(error);
+    });
     return () => {
       ignore = true;
     };
@@ -207,6 +228,8 @@ export default function GraphDataDemo() {
   );
 }
 ```
+
+</details>
 
 ### Vue：用 watch 同步数据
 
@@ -293,4 +316,20 @@ const data = shallowRef(basicData);
 
 两个示例都通过替换数据对象触发更新。React 中直接修改原数组不会改变依赖引用；上面的 Vue watcher 也不监听嵌套字段的原地修改，请为变化后的数据创建新对象。
 
-`setData()` 会执行已配置的布局并重新绘制。示例通过 `fitView` 参数适配新数据；数据自带坐标且希望保留当前视口时，可以使用 `setData(data, { fitView: false })`。参见 [setData()](/docs/api/graph#setdata)。
+`setData()` 会执行已配置的布局并重新绘制。示例通过 `fitView` 参数适配新数据；数据自带坐标且希望保留当前视口时，可以使用 `setData(data, { fitView: false })`。参见 [setData()](/docs/api/graph/data-mutations#setdata)。
+
+## StrictMode 与异步卸载
+
+开发环境的 StrictMode 会额外执行一次 setup → cleanup → setup。每次 effect 都应创建自己的 Graph，并对称销毁；不要用“已经初始化”的标记跳过第二次挂载。见 [React effect 清理规则](https://react.dev/reference/react/useEffect#my-effect-runs-twice-when-the-component-mounts)。
+
+数据更新示例先等待首次 render，effect 失效时用 ignore 放弃后续写入。正在执行的布局由 destroy 失效；业务 fetch 应另行取消，参考[异步数据接入](/docs/guides/data)。
+
+## 常见问题
+
+**为什么出现两个画布或多次响应？** 检查 effect 是否返回 destroy；监听也应配对退订，见[生命周期](/docs/api/graph/lifecycle)。
+
+**改了数组，图却没更新？** 用新 data 对象触发依赖变化；上面的 effect 按引用比较，不监听数组原地修改。
+
+**Next.js 可以在服务端创建吗？** 在客户端组件的 effect 中创建。示例中的 'use client' 用于客户端边界，容器仍需明确高度。Graph 不负责服务端出图。
+
+**希望更新后保留视野？** 使用 setData(data, { fitView: false })，见[视口指南](/docs/guides/viewport)。

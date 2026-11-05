@@ -1,0 +1,63 @@
+site/content/docs/en/api/graph/combo.mdx
+  s_4534bc5c3d78f4::t_dd72dd8bce5ca2 8,88,102
+site/content/docs/en/guides/interactions.mdx
+  s_4534bc5c3d78f4::t_798d89597bd256 95
+site/content/docs/zh/api/graph/data-mutations.mdx
+  s_4534bc5c3d78f4::t_e912da1b9c269b 147-148
+site/demos/combo.ts
+  s_4534bc5c3d78f4::t_ab6faaa70cb4dc 335
+site/src/lib/source.ts
+  s_4534bc5c3d78f4::t_60d007ff7b94b5 3
+  s_4534bc5c3d78f4::t_2237db5d39ac06 6,42-47,51
+site/src/app/global.css
+  s_4534bc5c3d78f4::t_998f860f76b647 1851-1852,1859-1860
+site/demos/queries-and-states.ts
+  s_4534bc5c3d78f4::t_2237db5d39ac06 95,97,106-107
+  s_4534bc5c3d78f4::t_ab6faaa70cb4dc 113
+site/demos/relationship.ts
+  s_4534bc5c3d78f4::t_ab6faaa70cb4dc 94
+site/content/docs/en/api/graph/data-mutations.mdx
+  s_4534bc5c3d78f4::t_dd72dd8bce5ca2 8,144
+  s_4534bc5c3d78f4::t_61bd08de184f91 146-148
+site/content/docs/en/api/options/data.mdx
+  s_4534bc5c3d78f4::t_dd72dd8bce5ca2 6,57,61,65,67,69
+site/content/docs/zh/api/graph/data.mdx
+  s_4534bc5c3d78f4::t_798d89597bd256 147-148
+site/content/docs/en/api/graph/data.mdx
+  s_4534bc5c3d78f4::t_dd72dd8bce5ca2 8,131,143-144
+  s_4534bc5c3d78f4::t_798d89597bd256 147-148
+site/content/docs/zh/guides/interactions.mdx
+  s_4534bc5c3d78f4::t_798d89597bd256 95
+site/src/lib/site-examples.ts
+  s_4534bc5c3d78f4::t_b2d947b0bd3219 183-184,209-210,235-236,877-878
+  s_4534bc5c3d78f4::t_2237db5d39ac06 35,114-117,142-145,170-173,195-199,221-225,547-551,720-724,863-866,885-888
+site/demos/set-data.ts
+  s_4534bc5c3d78f4::t_ab6faaa70cb4dc 145
+site/src/components/example-detail-client.tsx
+  s_4534bc5c3d78f4::t_2237db5d39ac06 894-907
+site/content/docs/en/guides/data.mdx
+  s_4534bc5c3d78f4::t_798d89597bd256 115-117
+  s_4534bc5c3d78f4::t_dd72dd8bce5ca2 8,31,56
+site/demos/data-mutations.ts
+  s_4534bc5c3d78f4::t_ab6faaa70cb4dc 123
+site/content/docs/zh/guides/data.mdx
+  s_4534bc5c3d78f4::t_798d89597bd256 115-116
+site/demos/selection-behaviors.ts
+  s_4534bc5c3d78f4::t_ab6faaa70cb4dc 49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3d5958958ec3699d6cb6abf022d60540cadb62bf",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -4,8 +4,9 @@ description: 创建、首次渲染、运行中更新与销毁的调用顺序
 ---
 
 import { GraphLifecycleFlow } from '@/components/graph-lifecycle-flow';
+import { NodeDocExample } from '@/components/node-doc-example';
 
-一张图通常只创建一次实例，在首次渲染完成后复用它处理数据和交互，离开页面时销毁。本页说明各阶段的调用顺序；方法参数见 [Graph API](/docs/api/graph)，内部处理过程见[技术架构](/docs/concepts/architecture)。
+一张图通常只创建一次实例，首次渲染后复用，退出时销毁。本页帮助选择各阶段的操作；签名和边界查[生命周期方法参考](/docs/api/graph/lifecycle)。
 
 ## 生命周期总览
 
@@ -13,57 +14,71 @@ import { GraphLifecycleFlow } from '@/components/graph-lifecycle-flow';
 
 ## 创建与首次渲染
 
-`new Graph(options)` 要求容器已经挂载且有明确宽高。构造阶段会创建画布和渲染器；调用 `render()` 后才会执行布局并绘制图形。
+使用已挂载、宽高非零的专用容器。构造只准备画布与渲染器，render 才执行布局和绘制。
 
-以 `await graph.render()` 成功完成作为初始化边界。在此之前，不要执行数据写入、状态修改或重新布局。React、Vue 的挂载与卸载写法见[在框架中使用](/docs/getting-started/react)。
+在本次未被取消、替代或销毁的正常路径中，等待 await graph.render() 完成后再写数据和状态。首次 afterrender 仍早于初始化完成，不适合作为数据写入入口。框架挂载和卸载见[在框架中使用](/docs/getting-started/react)。
 
 ## 运行中的更新
 
-首次渲染完成后，根据变化的范围选择操作：
-
-| 变化 | 使用方式 | 详细说明 |
+| 变化 | 使用方式 | 详细入口 |
 | --- | --- | --- |
-| 替换整份数据 | `await graph.setData(nextData)` | [数据更新](/docs/guides/data#替换整份数据) |
-| 修改部分元素或状态 | 元素增删改、状态 API | [修改节点和边](/docs/api/graph#修改节点和边)、[状态操作](/docs/api/graph#状态显隐和定位) |
-| 重新计算节点位置 | `graph.setLayout(options)` 后 `await graph.layout()` | [运行时重新布局](/docs/guides/layout#运行时重新布局) |
+| 替换整份数据 | await graph.setData(nextData) | [数据更新](/docs/guides/data#替换整份数据) |
+| 修改元素或状态 | 元素方法、状态方法 | [增量修改](/docs/api/graph#修改节点和边)、[状态](/docs/api/graph/states) |
+| 修改外观或主题 | graph.updateOptions(options) | [合并规则](/docs/api/graph/lifecycle#updateoptions) |
+| 外部样式输入变化 | graph.refresh() | [刷新边界](/docs/api/graph/lifecycle#refresh) |
+| 重新计算位置 | setLayout 后 await layout | [布局方法](/docs/api/graph/layout) |
+| 缩放、平移、适配 | 视口方法 | [视口与坐标](/docs/api/graph/viewport) |
 
-`setLayout()` 只保存布局配置，`layout()` 才会执行计算。常规更新会安排刷新，复用当前实例即可。
-
-缩放、平移和容器尺寸适配属于[视口操作](/docs/api/graph/viewport)，无需重新创建 Graph。
+这些操作复用当前实例。重复 render 会重建运行时并重新适配，临时状态和增量修改不保证保留；不要用它替代日常更新。
 
 ## 销毁与异步清理
 
-页面退出或组件卸载时调用 `graph.destroy()`，释放画布、事件监听和布局等实例资源。重复销毁不会产生额外效果；已销毁的实例不能重新使用。
+页面退出或组件卸载时立即 destroy，即使初始化尚未结束。已销毁实例不能复用；正常清理后重复销毁无额外效果。
 
-卸载可能早于渲染或业务请求完成。及时调用 `destroy()`，并在异步结果返回后检查 `graph.destroyed`，避免继续使用已失效的实例。业务自己创建的请求、定时器和监听器仍需由业务清理。
+异步返回后检查 graph.destroyed；多个请求并发时还需自己的请求序号或取消机制。destroyed 只表示销毁，不表示初始化成功或当前任务仍有效。
+
+Graph 负责实例自己的画布、交互、插件和监听。业务请求、计时器、DOM 监听仍由业务清理。取消和失败路径见[render 契约](/docs/api/graph/lifecycle#render)。
 
 ## 完整使用示例
 
-下面将创建、首次渲染、状态更新和销毁串联起来。返回的清理函数应交给页面或框架的卸载逻辑调用。
+日志先出现 afterrender，再出现 await render resolved，之后才选中 A。比较样式更新、刷新和再次渲染；最后销毁，观察画布移除，再用工具栏重置创建新实例。
+
+<NodeDocExample id="graph-lifecycle" locale="zh" focus="initialize" />
+
+<details>
+<summary>接入页面并返回卸载函数</summary>
 
 ```ts
-import { Graph } from '@antv/g6-lite';
+import { Graph, type GraphData } from '@antv/g6-lite';
 
-export function mountGraph(container: HTMLElement) {
-  const graph = new Graph({
-    container,
-    data: {
-      nodes: [{ id: 'alice' }, { id: 'bob' }],
-      edges: [{ source: 'alice', target: 'bob' }],
-    },
-    layout: { type: 'circular', radius: 100 },
-  });
+export function mountGraph(container: HTMLElement, data: GraphData) {
+  const graph = new Graph({ container, data });
 
   async function initialize() {
     await graph.render();
-    // 卸载可能发生在异步渲染完成之前。
     if (graph.destroyed) return;
-    graph.setItemState('alice', 'selected', true);
+    console.log(graph.getNodeCount()); // 正常初始化后的业务逻辑
   }
 
-  void initialize().catch(console.error);
+  void initialize().catch((error) => {
+    graph.destroy();
+    console.error(error);
+  });
 
-  // 将返回的函数交给页面或组件的卸载逻辑调用。
-  return () => graph.destroy();
+  return () => graph.destroy(); // 交给页面或组件卸载逻辑
 }
 ```
+
+</details>
+
+## 常见问题
+
+### afterrender 里写数据为什么会报错？
+
+首次触发时初始化标记尚未设置。先在 render 前订阅需要的事件，再在 await graph.render() 后执行写入。
+
+### render 的 Promise 返回，为什么仍不能继续操作？
+
+被取消、替代或销毁的任务也可能正常返回。不要只看 Promise 是否兑现；同时检查实例与应用自己的任务代次。销毁后应新建实例，不能再次 render 恢复它。
+
+继续阅读：[生命周期方法](/docs/api/graph/lifecycle) · [事件顺序与载荷](/docs/api/graph/events/lifecycle) · [事件使用](/docs/guides/events/lifecycle)。

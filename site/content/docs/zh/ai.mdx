@@ -1,124 +1,82 @@
 ---
 title: 用 AI 构建 G6Lite 图
-description: 使用 G6Lite Skill、本地 AI Agent 与 Sive 创建、排查和优化关系图
+description: 提供可执行输入，使用 G6Lite Skill 生成实现，并验证数据、交互与清理
 ---
 
 import { ArchitectureDiagram } from '@/components/architecture-diagram';
 
-<div className="ai-entry-hero not-prose">
-  <span>AI for graph visualization</span>
-  <h2>把意图变成可验证的关系图</h2>
-  <div className="ai-entry-description">
-    G6Lite Skill 帮助 AI Agent 识别数据规模、布局、交互和浏览器边界，再使用当前包根 API
-    生成可以继续验证和迭代的实现。
-  </div>
-  <div className="ai-entry-actions">
-    <a href="https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph">
-      查看 G6Lite Skill
-    </a>
-    <a
-      className="is-secondary"
-      href="https://sive.antv.antgroup.com/qa?message=%E4%BD%BF%E7%94%A8%20G6Lite%20%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%85%B3%E7%B3%BB%E5%9B%BE%EF%BC%8C%E5%85%88%E7%A1%AE%E8%AE%A4%E6%95%B0%E6%8D%AE%E8%A7%84%E6%A8%A1%E3%80%81%E5%B8%83%E5%B1%80%E3%80%81%E4%BA%A4%E4%BA%92%E5%92%8C%E5%85%BC%E5%AE%B9%E6%80%A7%E8%A6%81%E6%B1%82%EF%BC%8C%E5%86%8D%E7%BB%99%E5%87%BA%E5%8C%85%E6%A0%B9%20API%20%E7%A4%BA%E4%BE%8B%E3%80%82"
-    >
-      在 Sive 中开始
-    </a>
-  </div>
-</div>
+让 Agent 先生成一个能渲染、能更新、能销毁的小图，再逐步增加能力。输入中注明已安装的 G6Lite 版本，避免把 G6 v5 配置混进来。
 
 ## 两种使用方式
 
 <Cards>
-  <Card
-    title="本地 Agent + G6Lite Skill"
-    href="https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph"
-  >
-    让支持 Skill 的 Agent 按 G6Lite 的真实 API、能力边界和性能路径完成开发。
-  </Card>
-  <Card
-    title="Sive 在线问答"
-    href="https://sive.antv.antgroup.com/qa?message=%E4%BD%BF%E7%94%A8%20G6Lite%20%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%85%B3%E7%B3%BB%E5%9B%BE%EF%BC%8C%E5%85%88%E7%A1%AE%E8%AE%A4%E6%95%B0%E6%8D%AE%E8%A7%84%E6%A8%A1%E3%80%81%E5%B8%83%E5%B1%80%E3%80%81%E4%BA%A4%E4%BA%92%E5%92%8C%E5%85%BC%E5%AE%B9%E6%80%A7%E8%A6%81%E6%B1%82%EF%BC%8C%E5%86%8D%E7%BB%99%E5%87%BA%E5%8C%85%E6%A0%B9%20API%20%E7%A4%BA%E4%BE%8B%E3%80%82"
-  >
-    带着 G6Lite 上下文发起在线提问。回答能力取决于 Sive 当前知识库状态。
-  </Card>
-  <Card title="理解技术架构" href="/docs/concepts/architecture">
-    了解数据、布局、调度、WebGL 渲染、Canvas 信息层与扩展如何协作。
-  </Card>
+  <Card title="本地 Agent + G6Lite Skill" href="https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph">在项目中读取类型、修改代码并运行验证。</Card>
+  <Card title="Sive 在线问答" href="https://sive.antv.antgroup.com/qa">咨询 API 或整理实现思路，再回到项目验证。</Card>
 </Cards>
+
+Sive 的回答取决于其当前知识库。项目实现以已安装包的类型、当前文档和真实浏览器结果为准。
 
 ## 在本地使用 Skill
 
-将 GitHub 中的 [`skills/antv-g6lite-graph`](https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph)
-目录作为 Skill 源交给支持 Skill 的 Agent，然后在任务中显式调用：
+将仓库中的 [antv-g6lite-graph](https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph) 目录交给支持 Skill 的 Agent，按所用客户端的安装方式加载；Skill 本身不安装 G6Lite npm 包。支持显式调用的客户端可以在请求中写：
 
 ```text
-Use $antv-g6lite-graph to build a force-directed dependency graph
-with hover highlighting and node dragging.
+Use $antv-g6lite-graph to implement the graph described below.
+Check the installed @antv/g6-lite version and package-root types first.
 ```
 
-也可以直接让 Agent 从 GitHub 安装：
-
-```text
-Install the skill from
-https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph
-```
-
-Skill 会重点约束：
-
-- 只从 `@antv/g6-lite` 包根导入，不依赖 `src/` 或 `dist/` 深层路径。
-- 使用 ESM 和真实浏览器的 DOM、Canvas、WebGL 生命周期。
-- 只生成 G6Lite 已支持的节点、边、布局、Behavior、Combo 和扩展能力。
-- 区分 G6Lite 与 G6 v5，不机械复制插件、事件或元素配置。
-- 对大图优先检查布局、标签密度、增量更新、DPR、GPU 和真实设备。
+在项目目录用 `npm ls @antv/g6-lite` 确认版本。Skill 的主要约束是包根 API、浏览器生命周期、真实支持范围和分阶段验证；不确定的字段先查询[API 总览](/docs/api)，不要猜测深层导入或照搬 v5 插件。
 
 ## 适合交给 Agent 的任务
 
-| 任务         | 推荐提示词重点                                   |
-| ------------ | ------------------------------------------------ |
-| 创建关系图   | 数据字段、节点/边数量、布局、容器尺寸            |
-| 增加交互     | 选择、拖拽、Tooltip、高亮、框选或套索            |
-| 迁移 G6 v5   | 先列能力差异和不支持项，再修改代码               |
-| 排查空白画布 | 容器尺寸、数据端点、WebGL、生命周期和版本        |
-| 优化大图     | 首屏、布局、标签、状态 patch、内存和真实设备     |
-| 创建扩展     | 扩展类别、生命周期、公开 ExtensionContext 和清理 |
+| 任务 | 应提供的输入 |
+| --- | --- |
+| 创建或更新关系图 | 框架、数据样本、ID/端点规则、规模、容器尺寸 |
+| 增加选择、拖拽或 Tooltip | 手势、业务响应、状态保留和清理要求 |
+| 调整布局、标签或品牌效果 | 已有坐标、布局目标、标签密度、目标截图 |
+| 迁移或排障 | 当前版本、最小代码、报错与复现步骤、必须保留的行为 |
+
+### 可复制的输入模板
+
+```text
+使用 $antv-g6lite-graph 完成以下任务：
+- 项目：React + TypeScript；先读取实际依赖与 G6Lite 版本
+- 数据：3 个节点 A/B/C，边 A→B、A→C；节点 ID 稳定
+- 容器：宽度 100%，高度 360px；仅客户端创建
+- 布局：circular；显示节点 ID；支持缩放、平移、拖拽
+- 更新：新增 D 和 B→D，复用 Graph；保留视野
+- 清理：首次 render 未完成就卸载，也不能遗留画布或监听
+- 输出：完整组件、必要依赖、验证操作与预期结果
+先确认字段与方法真实存在，再实现。超出能力边界时明确说明。
+```
+
+将框架、规模和交互替换为实际需求。需要 Vue 时，改用 [Vue 接入](/docs/getting-started/vue)的生命周期。
 
 ## 推荐工作流
 
-<div className="ai-workflow not-prose">
-  <ol>
-    <li>
-      <strong>澄清输入</strong>
-      <span>确认数据、规模、坐标、布局、交互和运行环境。</span>
-    </li>
-    <li>
-      <strong>最小渲染</strong>
-      <span>先完成可见、可销毁、只使用包根 API 的最小图。</span>
-    </li>
-    <li>
-      <strong>逐层增强</strong>
-      <span>依次加入样式、布局、Behavior、状态、Combo 与扩展。</span>
-    </li>
-    <li>
-      <strong>真实验证</strong>
-      <span>在目标浏览器、DPR、GPU 和容器尺寸下检查结果。</span>
-    </li>
-  </ol>
-</div>
+1. **跑通最小图**：确认容器、数据、首次 render；对照[快速上手](/docs/getting-started/quick-start)。
+2. **增加一类能力**：样式、布局、状态或扩展逐项添加；参数查[参考](/docs/api)，步骤查[指南](/docs)。
+3. **验证变化和离开**：切换数据、快速切页、重复挂载；React 再启用 StrictMode。
+4. **用真实业务验收**：检查目标设备上的标签、拾取、布局耗时与资源清理；参考[性能测量](/docs/metrics/performance)。
 
-AI 生成的代码仍需要类型检查、浏览器验证和业务数据验收。不要把 Agent 输出直接视为生产结果。
+### 最小验收操作
+
+模板案例应先出现 3 节点 / 2 边，更新后出现 4 / 3；视野保留，拖拽仍可用。卸载后不应遗留画布；重新挂载可以再次操作。类型检查通过和浏览器可操作都要验证，不能仅根据代码截图判断成功。
 
 ## Agent 需要理解的引擎
 
-<ArchitectureDiagram locale="zh" compact />
+字段和返回值查[包根 API](/docs/api)；渲染、布局、更新和扩展分工查[技术架构](/docs/concepts/architecture)。
 
-架构图只展示稳定职责层。详细的数据流、更新路径和扩展边界见[技术架构](/docs/concepts/architecture)。
+<details>
+  <summary>查看引擎职责图</summary>
+  <ArchitectureDiagram locale="zh" compact />
+</details>
 
 ## 继续阅读
 
 <Cards>
-  <Card title="安装与第一个图" href="/docs/getting-started/quick-start" />
-  <Card title="技术架构" href="/docs/concepts/architecture" />
-  <Card title="示例中心" href="/docs/examples" />
-  <Card title="API 参考" href="/docs/api" />
-  <Card title="性能调优" href="/docs/metrics/performance-tuning" />
-  <Card title="从 G6 v5 迁移" href="/docs/compatibility/g6-v5-migration" />
+  <Card title="React 接入" href="/docs/getting-started/react" />
+  <Card title="Vue 接入" href="/docs/getting-started/vue" />
+  <Card title="运行示例" href="/docs/examples" />
+  <Card title="G6 v5 迁移" href="/docs/compatibility/g6-v5-migration" />
 </Cards>

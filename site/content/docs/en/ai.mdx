@@ -1,125 +1,82 @@
 ---
 title: Build G6Lite graphs with AI
-description: Use the G6Lite Skill, local AI agents, and Sive to create, troubleshoot, and optimize graph visualizations
+description: Give an agent actionable inputs, use the G6Lite Skill, and verify data, interaction, and cleanup
 ---
 
 import { ArchitectureDiagram } from '@/components/architecture-diagram';
 
-<div className="ai-entry-hero not-prose">
-  <span>AI for graph visualization</span>
-  <h2>Turn intent into a graph you can verify</h2>
-  <div className="ai-entry-description">
-    The G6Lite Skill helps an AI agent identify data scale, layout, interaction, and browser
-    boundaries before it generates an implementation through the current package-root API.
-  </div>
-  <div className="ai-entry-actions">
-    <a href="https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph">
-      View the G6Lite Skill
-    </a>
-    <a
-      className="is-secondary"
-      href="https://sive.antv.antgroup.com/qa?message=Use%20G6Lite%20to%20create%20a%20relationship%20graph.%20First%20confirm%20the%20data%20scale%2C%20layout%2C%20interactions%2C%20and%20compatibility%20requirements%2C%20then%20provide%20a%20package-root%20API%20example."
-    >
-      Start in Sive
-    </a>
-  </div>
-</div>
+Start with a small graph that renders, updates, and cleans up. Add capabilities incrementally. Include the installed G6Lite version so the agent can avoid mixing in G6 v5 configuration.
 
-## Two ways to use it
+## Two ways to use AI
 
 <Cards>
-  <Card
-    title="Local agent + G6Lite Skill"
-    href="https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph"
-  >
-    Keep implementation aligned with G6Lite's real API, capability boundary, and performance paths.
-  </Card>
-  <Card
-    title="Ask Sive online"
-    href="https://sive.antv.antgroup.com/qa?message=Use%20G6Lite%20to%20create%20a%20relationship%20graph.%20First%20confirm%20the%20data%20scale%2C%20layout%2C%20interactions%2C%20and%20compatibility%20requirements%2C%20then%20provide%20a%20package-root%20API%20example."
-  >
-    Start an online question with G6Lite context. Answers depend on Sive's current knowledge state.
-  </Card>
-  <Card title="Understand the architecture" href="/en/docs/concepts/architecture">
-    See how data, layout, scheduling, WebGL rendering, Canvas information layers, and extensions
-    work together.
-  </Card>
+  <Card title="Local agent + G6Lite Skill" href="https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph">Inspect types, edit code, and run verification in your project.</Card>
+  <Card title="Sive online Q&A" href="https://sive.antv.antgroup.com/qa">Discuss API usage or an approach, then verify it in your project.</Card>
 </Cards>
+
+Sive answers depend on its current knowledge base. Validate implementations against the installed package types, documentation, and real browser results.
 
 ## Use the Skill locally
 
-Provide the GitHub [`skills/antv-g6lite-graph`](https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph)
-directory as a Skill source to a compatible agent, then invoke it explicitly:
+Give the repository's [antv-g6lite-graph](https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph) directory to a Skill-capable agent and follow that client's installation process. The Skill does not install the G6Lite npm package. Clients with explicit invocation can use:
 
 ```text
-Use $antv-g6lite-graph to build a force-directed dependency graph
-with hover highlighting and node dragging.
+Use $antv-g6lite-graph to implement the graph described below.
+Check the installed @antv/g6-lite version and package-root types first.
 ```
 
-You can also ask an agent to install it directly from GitHub:
+Run `npm ls @antv/g6-lite` in the project to identify its version. The Skill emphasizes package-root APIs, browser lifecycle, supported capabilities, and incremental verification. Query the [API overview](/en/docs/api) instead of inventing deep imports or copying v5 plugins.
+
+## Good tasks for an agent
+
+| Task | Inputs to provide |
+| --- | --- |
+| Create or update a graph | Framework, sample data, ID/endpoint rules, size, container dimensions |
+| Add selection, dragging, or Tooltip | Gestures, business responses, state retention, cleanup |
+| Change layout, labels, or branding | Supplied positions, layout goals, label density, target screenshot |
+| Migrate or troubleshoot | Installed version, minimal code, errors, reproduction, behavior to preserve |
+
+### Copyable input template
 
 ```text
-Install the skill from
-https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph
+Use $antv-g6lite-graph for this task:
+- Project: React + TypeScript; inspect actual dependencies and G6Lite version
+- Data: nodes A/B/C and edges A→B, A→C; stable node IDs
+- Container: 100% width, 360px height; create only on the client
+- Layout: circular; node ID labels; zoom, pan, and node dragging
+- Update: add D and B→D; reuse Graph and preserve the viewport
+- Cleanup: unmounting before the first render finishes must release resources
+- Deliver: complete component, dependencies, verification steps and expected results
+Confirm real fields and methods before implementation. Identify unsupported needs.
 ```
 
-The Skill keeps the agent focused on these constraints:
-
-- Import only from the `@antv/g6-lite` package root, never `src/` or `dist/` internals.
-- Use ESM and a real browser lifecycle with DOM, Canvas, and WebGL.
-- Generate only the node, edge, layout, Behavior, Combo, and extension capabilities G6Lite supports.
-- Distinguish G6Lite from G6 v5 instead of copying plugin, event, or element configuration.
-- For large graphs, examine layout, label density, incremental updates, DPR, GPU, and real devices.
-
-## Good agent tasks
-
-| Task                        | Include in the prompt                                            |
-| --------------------------- | ---------------------------------------------------------------- |
-| Create a relationship graph | Data fields, node/edge count, layout, container size             |
-| Add interactions            | Selection, drag, tooltip, highlight, brush, or lasso             |
-| Migrate from G6 v5          | List capability differences and unsupported needs before editing |
-| Diagnose a blank canvas     | Container size, endpoints, WebGL, lifecycle, and version         |
-| Optimize a large graph      | First render, layout, labels, state patches, memory, and devices |
-| Create an extension         | Category, lifecycle, public ExtensionContext, and cleanup        |
+Replace the framework, data size, and interactions with your requirements. For Vue, use the lifecycle in [Vue integration](/en/docs/getting-started/vue).
 
 ## Recommended workflow
 
-<div className="ai-workflow not-prose">
-  <ol>
-    <li>
-      <strong>Clarify input</strong>
-      <span>Confirm data, scale, coordinates, layout, interactions, and runtime.</span>
-    </li>
-    <li>
-      <strong>Render the minimum</strong>
-      <span>Prove a visible, disposable graph through package-root APIs.</span>
-    </li>
-    <li>
-      <strong>Add layers</strong>
-      <span>Introduce styling, layout, behaviors, states, Combo, and extensions in sequence.</span>
-    </li>
-    <li>
-      <strong>Validate for real</strong>
-      <span>Check the target browser, DPR, GPU, and container dimensions.</span>
-    </li>
-  </ol>
-</div>
+1. **Render a minimal graph**: verify container, data, and first render against the [quick start](/en/docs/getting-started/quick-start).
+2. **Add one capability**: introduce styles, layout, states, or extensions individually. Use [API contracts](/en/docs/api) and [guides](/en/docs).
+3. **Verify updates and navigation**: change data, leave quickly, and mount repeatedly. Enable StrictMode in React.
+4. **Accept real workloads**: check labels, picking, layout time, and cleanup on target devices; see [performance measurements](/en/docs/metrics/performance).
 
-AI-generated code still needs type checking, browser validation, and product-data review. Do not treat agent output as a production result by itself.
+### Minimum acceptance steps
 
-## The engine an agent should understand
+The template starts with 3 nodes / 2 edges and updates to 4 / 3 while preserving the viewport and dragging. Unmounting must remove the canvas; remounting must work again. Verify both type checking and browser interaction instead of judging from a code screenshot.
 
-<ArchitectureDiagram locale="en" compact />
+## Engine context for agents
 
-The diagram shows stable responsibilities only. See [Technical architecture](/en/docs/concepts/architecture) for data flow, update paths, and extension boundaries.
+Find fields and return values in the [package-root API](/en/docs/api). See [architecture](/en/docs/concepts/architecture) for drawing, layout, updates, and extensions.
 
-## Continue learning
+<details>
+  <summary>View engine responsibilities</summary>
+  <ArchitectureDiagram locale="en" compact />
+</details>
+
+## Continue reading
 
 <Cards>
-  <Card title="Install and render a graph" href="/en/docs/getting-started/quick-start" />
-  <Card title="Technical architecture" href="/en/docs/concepts/architecture" />
-  <Card title="Examples" href="/en/docs/examples" />
-  <Card title="API reference" href="/en/docs/api" />
-  <Card title="Performance tuning" href="/en/docs/metrics/performance-tuning" />
+  <Card title="React integration" href="/en/docs/getting-started/react" />
+  <Card title="Vue integration" href="/en/docs/getting-started/vue" />
+  <Card title="Run examples" href="/en/docs/examples" />
   <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
 </Cards>

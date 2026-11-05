@@ -1,18 +1,36 @@
 ---
 title: Changelog
-description: Important G6Lite beta changes and migration boundaries
+description: Distinguish npm publications, GitHub Releases, and unreleased development changes
 ---
 
-G6Lite is currently in the `0.1.0-beta` series. Recent work has concentrated on package-root API boundaries, functional extensions, isolated extension lifecycle, read-only query models, layout cancellation, combo consistency, interaction dispatch, package size governance, examples, and reproducible benchmarks.
+Checked 2026-11-05. npm archives, Git tags, GitHub Releases, and source commits are distinct records. A source change is not automatically part of an identically named npm version.
 
-## Extension and Behavior contracts — 2026-07-29
+## Verified publication records
 
-- Extension is the umbrella term, while Plugin identifies only the peripheral DOM or stateful extension category.
-- The public `GraphEventMap`, precise element event types, and typed `Graph.on/off/once` overloads infer known payloads, including zero-argument events and native mouse or wheel events.
-- Custom Behaviors use a literal name, `BehaviorOptions`, `BehaviorExtension`, `extensionFactory()`, and an explicit registration function. String references are normalized to `{ type }` before `init()`.
-- Behavior handlers are error-isolated with registered-name and event diagnostics. Behavior and Plugin do not promise `update()`; Transform uses it when an instance is reused.
-- New English and Chinese Custom Behavior guides document the complete package-author pattern and public capability boundary.
+| Source | Record | Date and scope |
+| --- | --- | --- |
+| [GitHub Release](https://github.com/antvis/G6Lite/releases/tag/v0.1.0-beta.24) | v0.1.0-beta.24 | 2026-08-04；tag commit 27511ceb |
+| [npm versions](https://www.npmjs.com/package/@antv/g6-lite?activeTab=versions) | 0.1.0-beta.27 | 2026-08-13；archive differs from later source builds |
 
-Deprecated beta compatibility APIs remain documented in [API stability](/en/docs/compatibility/api-stability). Projects migrating from G6 v5 should follow the [migration guide](/en/docs/compatibility/g6-v5-migration).
+The checked GitHub Releases/tags return beta.24; npm beta.27 does not imply a matching GitHub Release. At verification, public npm latest points to beta.1 and beta to beta.27. Tags can change, so tutorials pin a version. Raw evidence is in site/maintenance/b90-release-evidence.json.
 
-Before upgrading, run type checking, tests, a package build, size-limit, release examples, and target-device validation.
+beta.27 lacks the current autoFit declaration and UMD file. Check installed types and archives; see [version boundaries](/en/docs/compatibility/api-stability)。
+
+<span id="extension-and-behavior-contracts--2026-07-29" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+## Development change records
+
+These verified source/PR records are not new published versions. Older topic entries resolve here; milestone versions and dates without release evidence are no longer presented as Releases.
+
+| Source date | Record | Upgrade concern |
+| --- | --- | --- |
+| 2026-10-30 | [#60](https://github.com/antvis/G6Lite/pull/60) · dd3c7b94 | Source UMD and autoFit changes; do not infer npm inclusion |
+| 2026-11-03 | [#62](https://github.com/antvis/G6Lite/pull/62) · 6fec8e82 | Build organization; recheck ESM, Worker, and UMD assets |
+| 2026-11-03 | [#63](https://github.com/antvis/G6Lite/pull/63) · c7d746ed | Demo changes; regress business data and output |
+| 2026-11-03 | [#64](https://github.com/antvis/G6Lite/pull/64) · fdab736b | Mobile menu and code panel |
+
+Local documentation batches are not library releases. Add future publications with their archive, tag, and notes; do not promise an unconfirmed stable-release process.
+
+## Related links
+
+[API stability and deprecations](/en/docs/compatibility/api-stability) · [Migration](/en/docs/compatibility/g6-v5-migration) · [Troubleshooting](/en/docs/compatibility/troubleshooting)

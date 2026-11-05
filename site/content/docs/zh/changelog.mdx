@@ -1,79 +1,54 @@
 ---
 title: 更新日志
-description: G6Lite 的版本与变更记录
+description: 区分 npm 发布、GitHub Release 与尚未发布的开发变更
 ---
 
-本页是 G6Lite 的变更入口。
+核对日期 2026-11-05。npm 包、Git tag、GitHub Release 和源码提交是不同记录；不把某个源码提交自动归入同名 npm 版本。
 
-> **关于发布机制**：G6Lite 当前处于 `0.1.0-beta` 阶段，发布说明暂按主题维护。正式版的版本发布与 Release Notes 自动化流程将在稳定版前单独确定。
->
-> 下方汇总 beta 阶段已落地的重要变更，便于了解能力演进脉络。
+## 已核验的发布记录
 
-## Beta 阶段变更脉络
+| 来源 | 记录 | 时间与边界 |
+| --- | --- | --- |
+| [GitHub Release](https://github.com/antvis/G6Lite/releases/tag/v0.1.0-beta.24) | v0.1.0-beta.24 | 2026-08-04；tag commit 27511ceb |
+| [npm 版本记录](https://www.npmjs.com/package/@antv/g6-lite?activeTab=versions) | 0.1.0-beta.27 | 2026-08-13；包归档不是后续源码构建 |
 
-### 扩展与 Behavior 类型契约（2026-07-29）
+本次 GitHub Releases / tags 查询仅返回 beta.24；npm beta.27 的存在不证明已创建对应 GitHub Release。公开 npm registry 的 latest 指向 beta.1、beta 指向 beta.27；标签可以改变，安装教程固定具体版本。核对原始值见仓库 site/maintenance/b90-release-evidence.json。
 
-- “Extension”统一作为扩展体系总称，“Plugin”只表示管理独立 DOM 或外围状态的具体扩展类别。
-- 新增公开 `GraphEventMap`、精确元素事件类型，以及 `Graph.on/off/once` 的已知事件推导；零参数事件和 `MouseEvent` / `WheelEvent` 可被准确表达。
-- 自定义 Behavior 统一采用字面量名称、`BehaviorOptions`、`BehaviorExtension`、`extensionFactory()` 和显式注册函数；字符串引用在 `init()` 前归一化为 `{ type }`。
-- Behavior handler 增加按扩展名和事件名定位的异常隔离；Behavior 与 Plugin 不承诺 `update()`，当前只有 Transform 在实例复用时调用 `update()`。
-- 新增中英文自定义 Behavior 指南，并同步更新扩展、交互和事件文档。
+beta.27 缺少当前源码的 autoFit 声明和 UMD 文件；安装/升级应检查实际包类型和归档，见[版本边界](/docs/compatibility/api-stability)。
 
-### API、扩展体系与公开边界重新基线（2026-07-21 ～ 2026-07-22）
+<span id="beta-阶段变更脉络" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-- `new Graph(options)` 继续作为唯一推荐且长期保留的创建入口，核心有状态模块继续使用 class。
-- 新增统一 `register()` + `extensionFactory()` 范式；Behavior、Layout、Transform、Plugin 使用独立实例，并按类别执行各自的 `init`、能力方法和 `destroy` 生命周期。
-- `ExtensionContext` 新增受控的 `data`、`state`、`viewport` 与 `requestRender()`；`context.graph` 和平铺坐标方法只保留 beta 兼容。
-- 扩展数据查询返回只读快照；旧对象实例只做尽力克隆，有状态扩展通过 `extensionFactory()` 获得确定的实例隔离。
-- 自定义 Node、Edge、Label、Decoration 和 Layout 统一采用 function / factory / config；`BaseNode`、`BreathingNode`、`registerNode()` 仅保留 beta deprecated 兼容层。
-- 查询 API 使用只读 `NodeModel`、`EdgeModel`、`ComboModel` 和 `ElementModel`；`Internal*`、`DataModel`、`RenderScheduler`、`RefreshLevel`、`RendererData` 不再属于包根公开契约。
-- `mindmap`、`indented`、`fishbone` 已改为无状态布局 executor；原有 layout 配置无需迁移，`worker: true` 也不会退化为其他布局。
-- 补齐渲染与布局重入取消、Worker 请求隔离、Combo 关系清理、Label 异步销毁及 Node/Edge 扩展错误隔离。
-- 当前包保持 ESM-only。源码相对 import 的 `.js` 后缀服务于 Node ESM 产物解析，本轮不删除。
+<span id="扩展与-behavior-类型契约2026-07-29" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-从 G6 v5 迁移的项目可参考 [G6 v5 迁移说明](/docs/compatibility/g6-v5-migration)。
+<span id="api扩展体系与公开边界重新基线2026-07-21--2026-07-22" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-### 交互事件统一调度（2026-06-10）
+<span id="交互事件统一调度2026-06-10" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-新增统一的**交互调度层**做唯一命中检测与事件分发，所有发事件的 behavior 收敛为消费者；在此基础上新增 `tooltip` behavior，开箱即用。
+<span id="combo-分组2026-05-20-起含-06-10-指针事件补齐" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-- 事件名对齐 G6 的 `pointer*` 规范（`node:pointerover` / `pointermove` / `pointerleave` 等）。
-- **破坏性**：旧事件名（`node:hover` / `node:mouseleave`）已废弃，监听方需迁移。
-- 单次 `pickAt` 全局共享，消除重复 picking 与潜在双发。
+<span id="首屏渲染与性能优化2026-05-26--06-04" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-### Combo 分组（2026-05-20 起，含 06-10 指针事件补齐）
+<span id="数据--事件-api-升级p0--p12026-05-19" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-- 节点分组容器，支持嵌套、折叠 / 展开与整体拖拽。
-- 补齐 `combo:click` / `combo:contextmenu` / `combo:dragend` 等指针事件。
-- 标注为 experimental，API 在 0.1.x 内可能微调。
+<span id="视觉升级040-里程碑2026-04-15" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-### 首屏渲染与性能优化（2026-05-26 ～ 06-04）
+<span id="治理与官网2026-06-起" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-- 分级刷新调度（`RefreshLevel`）+ GPU patch，高亮 / 状态变更走增量更新路径。
-- 静态样式优先（static style priority）路径，减少冗余样式解析。
-- 消除首屏冗余 draw call；力导向 / fa2 大图崩溃修复。
-- DataModel Array / 列存化，Float32Array 指数增长缓冲，降低 GC 压力。
+<span id="相关链接" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-### 数据 / 事件 API 升级（P0 + P1，2026-05-19）
+## 开发变更记录
 
-- 数据查询：`getNodeData` / `getEdgeData`（O(1)）、`getNeighborNodes` / `getAdjacentEdges`。
-- 数据变更：`addNode(s)` / `removeNode(s)` / `updateNodeData` / `setData`。
-- 生命周期 / 数据事件：`afterrender`、`afteradditem` / `afterremoveitem` / `afterupdateitem`。
-- 状态：`setItemState` / `batchSetState` / `getItemStates` / `findNodesByState`。
+以下是已核验的源码/PR 记录，不标记为新的已发布版本。历史主题条目已归入此入口，未经发布记录支持的里程碑版本与日期不再当作 Release 展示。
 
-### 视觉升级（0.4.0 里程碑，2026-04-15）
+| 源码日期 | 记录 | 升级关注 |
+| --- | --- | --- |
+| 2026-10-30 | [#60](https://github.com/antvis/G6Lite/pull/60) · dd3c7b94 | 源码增加 UMD 与 autoFit 命名，不能推断 npm 已包含 |
+| 2026-11-03 | [#62](https://github.com/antvis/G6Lite/pull/62) · 6fec8e82 | 构建组织改变，复核 ESM / Worker / UMD 资源 |
+| 2026-11-03 | [#63](https://github.com/antvis/G6Lite/pull/63) · c7d746ed | 示例调整，回归业务数据与展示 |
+| 2026-11-03 | [#64](https://github.com/antvis/G6Lite/pull/64) · fdab736b | 移动端菜单和代码面板 |
 
-- 边箭头改为飞镖 / 燕尾形，尖端停在目标节点边缘，边体在箭头凹口处截断避免重叠。
-- 默认节点尺寸调整为 24px，对齐设计稿。
-
-### 治理与官网（2026-06 起）
-
-- 治理文件齐备：`CONTRIBUTING` / `CODE_OF_CONDUCT` / Issue & PR 模板。
-- 官网站点（Next.js + Fumadocs）+ Benchmark、包体积与兼容性文档。
-- CI 接入覆盖率门槛与 size-limit 体积门禁。
+本地文档分批提交尚未推送，不作为库发布记录。后续发布以对应归档、tag 和说明逐项补充；不预告未确定的稳定版流程。
 
 ## 相关链接
 
-- [项目介绍](/docs)
-- [常见问题](/docs/faq)
-- [性能指标](/docs/metrics/performance)
+[API 稳定性与弃用](/docs/compatibility/api-stability) · [迁移](/docs/compatibility/g6-v5-migration) · [故障排查](/docs/compatibility/troubleshooting)

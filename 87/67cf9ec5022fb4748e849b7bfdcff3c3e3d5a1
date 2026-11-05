@@ -1,0 +1,29 @@
+site/content/docs/en/api/graph/events/drag.mdx
+  s_4534bc5c3d78f4::t_92d1157b8eac79 1-142
+site/content/docs/en/api/graph/events/lifecycle.mdx
+  s_4534bc5c3d78f4::t_92d1157b8eac79 1-187
+site/content/docs/zh/api/graph/events/lifecycle.mdx
+  s_4534bc5c3d78f4::t_92d1157b8eac79 1-187
+site/content/docs/en/api/graph/events/meta.json
+  s_4534bc5c3d78f4::t_92d1157b8eac79 4
+site/content/docs/zh/api/graph/events/drag.mdx
+  s_4534bc5c3d78f4::t_92d1157b8eac79 1-142
+site/content/docs/zh/api/graph/events/meta.json
+  s_4534bc5c3d78f4::t_92d1157b8eac79 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8767cf9ec5022fb4748e849b7bfdcff3c3e3d5a1",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

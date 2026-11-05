@@ -1,0 +1,21 @@
+site/content/docs/en/concepts/overview.mdx
+  s_4534bc5c3d78f4::t_850e76b194284d 3,6,11-14,18-22,24,28,30,34-39
+site/content/docs/zh/concepts/overview.mdx
+  s_4534bc5c3d78f4::t_850e76b194284d 3,6,10-12,14,16,18,20,22,24,28,30,34-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d9a3cab0acac80dd4d3b01ed42cd3b8576f93713",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

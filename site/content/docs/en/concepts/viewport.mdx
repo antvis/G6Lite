@@ -1,0 +1,75 @@
+---
+title: Viewport and coordinates
+description: Distinguish graph, canvas, and client coordinates, and understand zooming, panning, and fitting
+---
+
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+The viewport is the part of the graph you can currently see. Panning or zooming changes how you view it; connections and node graph coordinates stay unchanged.
+
+## Graph positions and the current view
+
+A node's x / y is its graph position, supplied by data or computed by layout. Camera x / y / zoom describes translation and scale. Dragging a node changes its position; dragging the canvas changes the camera.
+
+Relayout and fitting are separate steps: layout computes positions, while fitView adjusts the camera to bring content into view.
+
+## Observe zooming, panning, and fitting
+
+A stays at graph (0, 0), B at (240, 80). Choose Zoom ×1.5, then Pan right, and compare the readout: graph coordinates stay fixed while canvas positions change. Center only centers; Fit refits; Reset camera restores the first rendered camera.
+
+<LayoutDocExample id="viewport-concept" locale="en" focus="camera" />
+
+Wheel to zoom or drag empty canvas to pan. Node dragging is disabled to isolate view changes. The shared Reset example toolbar control recreates the whole example.
+
+## Three coordinate spaces
+
+| Coordinates | Origin | Common use |
+| --- | --- | --- |
+| graph | The graph's own coordinate system | Store node positions, run layouts, create graph elements |
+| canvas | Canvas top-left, CSS pixels | Position auxiliary content inside the canvas container |
+| client | Browser viewport top-left, CSS pixels | Match mouse clientX / clientY, place fixed menus |
+
+The readout projects A's graph position into canvas and client positions. Page scrolling can change client without changing canvas. Camera zoom or pan changes where graph points appear on canvas.
+
+Canvas coordinates are not DPR-scaled buffer pixels. Do not multiply by DPR yourself or assume one graph unit always equals one CSS pixel.
+
+## Convert coordinates
+
+screenToGraph takes client coordinates and returns graph coordinates. graphToScreen takes graph coordinates and returns client coordinates. Here screen means client, not the display-level screenX / screenY.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+declare const graph: Graph;
+graph.on('canvas:click', (event) => {
+  const point = graph.screenToGraph(event.client.x, event.client.y);
+  const client = graph.graphToScreen(point.x, point.y);
+  console.log(point, client); // point is also available as event.graph
+});
+```
+
+Element events already provide client, canvas, and graph; most click handlers can read the appropriate field directly. See [element event fields](/en/docs/api/graph/events/element#read-event-parameters).
+
+## Centering, fitting, and auto-fit
+
+- fitCenter centers node content without changing zoom; oversized content can still extend beyond the viewport.
+- fitView adjusts translation and scale to content bounds; padding and zoom limits affect the result. This example caps fitting at maxZoom: 1.
+- resetCamera restores the camera saved after the first render, without recalculating layout.
+
+The first render performs an initial fit. autoFit primarily controls refitting on container resize. layout does not automatically run fitView; call it explicitly when needed. See [setData](/en/docs/api/graph#setdata) for replacement fitting rules.
+
+## Common questions
+
+### Should I save new node positions after panning or zooming?
+
+These operations did not move nodes. Read getCamera to save the user's view, or element positions to save the layout; handle them separately.
+
+### Why does a menu drift as I zoom?
+
+Check for graph coordinates used directly as CSS positions, or canvas positions treated as client. Choose coordinates according to where the menu is mounted.
+
+### Why does centered content still not fit?
+
+fitCenter changes position only. Use fitView to adjust zoom too, and check padding and zoom bounds.
+
+Continue with [viewport methods](/en/docs/api/graph#viewport), [layout and relayout](/en/docs/guides/layout), and [wheel zoom options](/en/docs/api/options/behaviors#navigation-and-dragging).

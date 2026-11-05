@@ -249,7 +249,7 @@ graph.focusItem(['n1', 'n2'], 24);
 
 ## 视口
 
-相机用图坐标的平移 `x`、`y` 和缩放 `zoom` 描述当前视野。
+相机用图坐标的平移 `x`、`y` 和缩放 `zoom` 描述当前视野。通过[视口与坐标](/docs/concepts/viewport)中的示例区分移动视野和移动节点。
 
 ```ts
 const camera = graph.getCamera();
@@ -316,7 +316,7 @@ graph.on('canvas:click', (event) => {
 });
 ```
 
-参数和返回值都是相对浏览器视口的客户端坐标，与 `MouseEvent.clientX` / `clientY` 同一坐标系。元素事件里的 `client`、`canvas`、`graph` 已经分好这三种坐标，多数点击逻辑直接读事件字段即可。
+`screenToGraph()` 接收相对浏览器视口的客户端 CSS 坐标（与 `MouseEvent.clientX` / `clientY` 相同），返回图坐标；`graphToScreen()` 则接收图坐标，返回客户端 CSS 坐标。元素事件里的 `client`、`canvas`、`graph` 已经分好这三种坐标，多数点击逻辑直接读事件字段即可。
 
 ## 布局
 

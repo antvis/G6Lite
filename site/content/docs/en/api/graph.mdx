@@ -249,7 +249,7 @@ Centers the viewport on one or more nodes. The current zoom is kept when the tar
 
 ## Viewport
 
-The camera is the current view: graph-space translation `x` and `y`, plus `zoom`.
+The camera is the current view: graph-space translation `x` and `y`, plus `zoom`. Use the [viewport and coordinates](/en/docs/concepts/viewport) example to distinguish moving the view from moving nodes.
 
 ```ts
 const camera = graph.getCamera();
@@ -316,7 +316,7 @@ graph.on('canvas:click', (event) => {
 });
 ```
 
-Arguments and return values are client coordinates, the same space as `MouseEvent.clientX` and `clientY`. Element events already split `client`, `canvas`, and `graph`, so most click handlers can read those fields directly.
+`screenToGraph()` takes client CSS coordinates (the same space as `MouseEvent.clientX` / `clientY`) and returns graph coordinates. `graphToScreen()` takes graph coordinates and returns client CSS coordinates. Element events already split `client`, `canvas`, and `graph`, so most click handlers can read those fields directly.
 
 ## Layout
 

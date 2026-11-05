@@ -1,0 +1,75 @@
+---
+title: 视口与坐标
+description: 区分图坐标、画布位置与浏览器位置，理解缩放、平移和适配
+---
+
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+视口是当前看见图的区域。移动视口、拉近或拉远，改变的是看图方式；节点之间的连接和节点本身的图坐标保持不变。
+
+## 图的位置与当前视野
+
+节点的 x / y 表示它在图中的位置，可以由数据提供或由布局计算。相机的 x / y / zoom 表示当前平移和缩放。拖动节点会改节点位置；拖动画布会改相机。
+
+因此，“重新布局”与“适配画布”是两步：layout 计算节点位置，fitView 调整相机，让内容进入视口。
+
+## 观察缩放、平移与适配
+
+A 固定在图坐标 (0, 0)，B 固定在 (240, 80)。先点 Zoom ×1.5，再点 Pan right，比较说明区：图坐标不变，画布位置会变。Center 只居中，Fit 重新适配，Reset camera 恢复首次渲染时的相机。
+
+<LayoutDocExample id="viewport-concept" locale="zh" focus="camera" />
+
+也可以滚轮缩放、拖动空白处平移。这个示例没有启用节点拖拽，便于只观察视野变化；工具栏“重置示例”会重新创建整组示例。
+
+## 三种坐标各自做什么
+
+| 坐标 | 参考位置 | 常见用途 |
+| --- | --- | --- |
+| graph | 图自身的坐标系 | 存储节点位置、布局、在图中添加元素 |
+| canvas | 画布左上角，CSS 像素 | 在画布容器内定位辅助内容 |
+| client | 浏览器视口左上角，CSS 像素 | 与鼠标 clientX / clientY 对应，放置 fixed 菜单 |
+
+示例说明区会把 A 的图坐标投影为画布和浏览器位置。页面滚动时，client 可能改变，canvas 不一定改变；缩放或平移相机则会改变图内点在画布上的位置。
+
+canvas 不是乘以设备像素比的缓冲区坐标。不要自行乘 DPR，也不要假设一个图单位始终等于一个 CSS 像素。
+
+## 坐标怎样转换
+
+screenToGraph 接收浏览器位置，返回图坐标；graphToScreen 接收图坐标，返回浏览器位置。这里 screen 指 client 坐标，不是显示器的 screenX / screenY。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+declare const graph: Graph;
+graph.on('canvas:click', (event) => {
+  const point = graph.screenToGraph(event.client.x, event.client.y);
+  const client = graph.graphToScreen(point.x, point.y);
+  console.log(point, client); // point 也可以直接读 event.graph
+});
+```
+
+元素事件已经提供 client、canvas、graph；普通点击逻辑直接读对应字段即可。完整字段见[元素事件](/docs/api/graph/events/element#读取事件参数)。
+
+## 居中、适配和自动适配
+
+- fitCenter 保持当前缩放，将节点内容居中；已经太大的内容仍可能超出视口。
+- fitView 按内容范围调整平移和缩放；留白和缩放上下限影响结果。示例将适配的 maxZoom 设为 1。
+- resetCamera 回到首次渲染结束时记录的相机，不会重新计算布局。
+
+首次 render 会做初始适配。autoFit 主要决定容器尺寸变化后是否再次适配；layout 完成后不会自动执行 fitView，需要时显式调用。数据替换时的适配规则见 [setData](/docs/api/graph#setdata)。
+
+## 常见问题
+
+### 平移或缩放后，要保存新的节点坐标吗？
+
+这些操作没有移动节点。保存用户视野时读取 getCamera；保存节点布局时读取元素位置，二者分开处理。
+
+### 菜单为什么越缩放越偏？
+
+检查是否把 graph 坐标直接当 CSS 位置，或把 canvas 坐标当成 client。先确定菜单挂在哪个容器，再使用相应坐标。
+
+### 居中后为什么内容仍显示不全？
+
+fitCenter 只调整位置；需要同时调整缩放时使用 fitView，并检查留白和缩放限制。
+
+继续阅读：[视口方法](/docs/api/graph#视口) · [布局与重排](/docs/guides/layout) · [滚轮缩放配置](/docs/api/options/behaviors#导航与拖拽)。

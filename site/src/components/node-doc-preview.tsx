@@ -39,6 +39,7 @@ const loaders = {
   'behavior-custom': () => import('../../demos/docs-behavior-custom.ts'),
   'behavior-tooltip': () => import('../../demos/docs-behavior-tooltip.ts'),
   'behavior-tooltip-hover': () => import('../../demos/docs-behavior-tooltip-hover.ts'),
+  'events-listen': () => import('../../demos/docs-events-listen.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -55,7 +56,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'behavior-tooltip'
+  const hint = id === 'events-listen'
+    ? (zh ? '点击节点、边或空白查看三种坐标；Listening 切换持续监听，Arm once 等待下一次节点点击；监听不会自动选中元素' : 'Click a node, edge, or canvas for coordinates. Toggle Listening, or Arm once for the next node click. Listeners do not select elements')
+    : id === 'behavior-tooltip'
     ? (zh ? '单击 API、DB 或边显示；再点相同元素或空白关闭；Cache 节点被 enable 排除' : 'Click API, DB, or an edge; click again or on canvas to close. Cache is excluded by enable')
     : id === 'behavior-tooltip-hover'
     ? (zh ? '悬停 API、DB 或边显示，等待 120ms；移开隐藏，Cache 节点不显示' : 'Hover API, DB, or an edge for 120ms; leaving hides it. Cache nodes show no tooltip')

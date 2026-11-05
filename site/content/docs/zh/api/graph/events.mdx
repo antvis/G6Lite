@@ -1,0 +1,161 @@
+---
+title: 事件参考
+description: on、off、once、GraphEventMap、完整事件载荷与触发时机
+---
+
+import { NodeDocExample as EventDocExample } from '@/components/node-doc-example';
+
+通过 Graph 实例订阅事件；本页维护完整契约。操作步骤见[事件指南](/docs/guides/events)，行为开关与参数见 [Behavior 配置参考](/docs/api/options/behaviors)。
+
+## on
+
+`graph.on<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void`
+
+添加持续监听。可在首次 render 前注册，以接收初始布局和渲染事件；销毁后不再添加。重复注册同一函数会重复调用，返回值不是取消订阅函数，也不能链式调用。
+
+## off
+
+`graph.off<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void`
+
+使用同一事件名与同一函数引用移除监听，也可取消尚未触发的 once。重复注册的同一函数会一并移除；不存在时无操作。公开方法不支持省略 handler 或清空全部监听。
+
+## once
+
+`graph.once<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void`
+
+只接收注册后的第一次对应事件。注册在某次事件之后不会补发历史事件；销毁后不再添加。返回 void，取消方式同 off。
+
+### 代码与对应效果
+
+本例显式使用 behaviors: []。点击仍发送元素事件，监听只更新说明区，不会选中节点；持续监听与一次性监听可分别开关。
+
+<EventDocExample id="events-listen" locale="zh" />
+
+## GraphEventMap
+
+从包根导出 GraphEventMap、GraphElementEvent、NodeGraphEvent、EdgeGraphEvent、ComboGraphEvent、CanvasGraphEvent 和 Handler。Map 的值为参数元组：除 destroy 为 [] 外，以下事件均为单个对象参数。
+
+```ts
+import type { Graph, GraphEventMap, Handler } from '@antv/g6-lite';
+
+declare const graph: Graph;
+const onClick: Handler<GraphEventMap['node:click']> = ({ nodeId, nativeEvent }) => {
+  console.log(nodeId, nativeEvent.clientX);
+};
+graph.on('node:click', onClick);
+graph.off('node:click', onClick);
+graph.once('destroy', () => console.log('destroyed'));
+```
+
+三种订阅方法还保留 `method<Args extends unknown[]>(event: string, handler: Handler<Args>): void` 重载，兼容未知事件名与应用声明的参数。它不校验名称是否拼错，也不产生新事件；Graph 没有公开 emit。业务事件使用应用自己的事件通道，[自定义 Behavior](/docs/guides/custom-behavior#事件类型) 的扩展泛型也只是消费端类型。
+
+<details>
+<summary>调用顺序与回调异常</summary>
+
+事件按监听注册顺序同步调用，once 在执行前移除。原生事件中触发 Behavior 时，可能同步发出嵌套的派生事件；不要假设 node:click 总在 node:selectchange 之前被业务观察到。需要最终选择集合时监听派生结束事件并查询状态。
+
+普通 graph.on 回调抛出的异常会向外传播，可能中断后续监听或当前操作。业务回调自行处理异常，异步操作自行捕获拒绝；事件系统不等待 Promise。订阅名称 * 只收到载荷，不额外携带原事件名，不适合作为带名称的统一事件日志。
+
+</details>
+
+## 元素事件载荷
+
+| 字段 | 类型 / 含义 |
+| --- | --- |
+| targetType | node / edge / combo / canvas；对应 NodeGraphEvent、EdgeGraphEvent、ComboGraphEvent、CanvasGraphEvent 的字面量 |
+| targetId | 节点、边、Combo 必有的字符串；画布无目标 ID |
+| data? | 节点或边的业务 data，可不存在；不是完整 GraphNode / GraphEdge，Combo 和画布不携带业务数据 |
+| client | `{ x, y }`，浏览器视口 CSS 像素，等于原始 clientX/clientY |
+| canvas | `{ x, y }`，相对画布左上角的 CSS 像素，不是乘以 DPR 的缓冲区像素 |
+| graph | `{ x, y }`，经相机逆变换后的图坐标；视口平移、缩放后仍可用于图内定位 |
+| nativeEvent | 点击、悬停、按下/松开为 MouseEvent，wheel 为 WheelEvent；pointer 名称不表示 PointerEvent 或触摸支持 |
+| event | 与 nativeEvent 相同的原始对象；仅此类载荷中的 event 为弃用别名 |
+| nodeId | NodeGraphEvent 必有的 string |
+| edgeId / edgeIndex | EdgeGraphEvent 必有的 string / number；无显式边 ID 时分发器可回退到索引字符串，不应跨数据替换持久化 edgeIndex |
+| source / target | EdgeGraphEvent 必有的两端节点 ID，均为 string |
+| comboId | ComboGraphEvent 必有的 string |
+
+NodeGraphEvent 与 EdgeGraphEvent 可指定数据和原生事件类型两个泛型；ComboGraphEvent、CanvasGraphEvent 可指定原生事件类型。GraphEventMap 已按事件名细化原生事件类型，业务数据仍为可选 Record，应用需自行校验字段。
+
+### 元素事件清单
+
+下表每个名称均是独立公开事件，无通配展开订阅。首次 render 挂载交互分发器后可接收；无需额外 Behavior。
+
+| 事件名 | 载荷 |
+| --- | --- |
+| node:pointerover、node:pointerenter、node:pointermove、node:pointerleave、node:pointerdown、node:click、node:dblclick、node:contextmenu | NodeGraphEvent，nativeEvent 为 MouseEvent |
+| node:wheel | NodeGraphEvent，nativeEvent 为 WheelEvent |
+| edge:pointerover、edge:pointerenter、edge:pointermove、edge:pointerleave、edge:pointerdown、edge:click、edge:dblclick、edge:contextmenu | EdgeGraphEvent，nativeEvent 为 MouseEvent |
+| edge:wheel | EdgeGraphEvent，nativeEvent 为 WheelEvent |
+| combo:pointerdown、combo:click、combo:dblclick、combo:contextmenu | ComboGraphEvent |
+| canvas:pointermove、canvas:pointerdown、canvas:pointerup、canvas:click、canvas:dblclick、canvas:contextmenu | CanvasGraphEvent，nativeEvent 为 MouseEvent |
+| canvas:wheel | CanvasGraphEvent，nativeEvent 为 WheelEvent |
+
+<details>
+<summary>命中、悬停与手势边界</summary>
+
+命中优先级为节点 → 边 → Combo → 画布，点击和按下只发命中目标的一类事件，不向 Combo 或画布冒泡。Combo 背景的移动与滚轮按画布处理，没有 combo:pointermove/over/leave/wheel；也没有 node:pointerup 或 edge:pointerup。
+
+mousemove 命中新的节点或边时，先发旧目标 pointerleave，再发新目标 pointerover → pointerenter → pointermove；同一目标只继续 pointermove。空白或 Combo 背景发 canvas:pointermove。pointerleave 的坐标是离开时指针所在位置。已被拖拽消费的手势会暂停悬停命中；有效拖拽或按下到松开超过 3 CSS 像素会抑制下一次 click，但不承诺取消 dblclick。
+
+canvas:pointerup 来自 window 的 mouseup，不重新命中释放目标，也不要求先在本图按下，因此应用应自己记录手势开始。contextmenu 会阻止浏览器默认菜单；普通事件回调的 return false 不取消分发或其他 Behavior。
+
+</details>
+
+## 选择事件
+
+以下载荷是普通对象，不包含上面的 client/canvas/graph/nativeEvent；event 为仍在使用的 MouseEvent 字段。
+
+| 事件 | 完整载荷 | 触发条件 |
+| --- | --- | --- |
+| node:selectchange | `{ nodeId: string; selected: boolean; event: MouseEvent }` | click-select 切换被点击节点后 |
+| edge:selectchange | `{ edgeId: string; edgeIndex: number; source: string; target: string; selected: boolean; event: MouseEvent }` | click-select 切换被点击边后 |
+| selection:clear | `{ ids: string[]; event: MouseEvent }` | click-select 清空已有节点/边选择，非空才发；ids 可混合节点与边 |
+| brush:select、brush:end | `{ nodeIds: string[] }` | brush-select；select 在非空命中时发，end 在手势结束时发，可为空 |
+| lasso:select、lasso:end | `{ nodeIds: string[] }` | lasso-select；select 在非空命中时发，end 在手势结束时发，可为空 |
+
+框选、套索或代码设置 selected 不会逐个补发 node:selectchange，也不会触发 selection:clear。selection:clear 不逐个发取消选中事件。套索的 nodeIds 是本次套索集合，不一定是全图最终已选集合；需要最终集合用 findNodesByState('selected') / findEdgesByState('selected')。替换规则见[选择参考](/docs/api/options/behaviors#选择)。
+
+## 拖拽事件
+
+| 事件 | 完整载荷 | 时机 |
+| --- | --- | --- |
+| node:dragstart | `{ nodeId: string; nodeIds: string[]; event: MouseEvent }` | drag-node 超过 3 CSS 像素阈值；首次写回前 |
+| node:drag | `{ nodeId: string; nodeIds: string[]; dx: number; dy: number; event: MouseEvent }` | 写回本次位置后；dx/dy 为相对手势起点的图坐标位移，不是逐帧增量 |
+| node:dragend | `{ nodeId: string; nodeIds: string[] }` | 有效拖拽松开后；无原生事件参数 |
+| combo:dragstart | `{ comboId: string; event: MouseEvent }` | drag-node 拖动 Combo 背景超过阈值 |
+| combo:drag | `{ comboId: string; dx: number; dy: number; event: MouseEvent }` | 成员位置写回后，位移同上 |
+| combo:dragend | `{ comboId: string }` | 有效 Combo 拖拽松开后 |
+| edge:dragstart、edge:drag | `{ edgeId?: string; edgeIndex: number; source: string; target: string; dragEnd: 'source' 或 'target'; event: MouseEvent }` | drag-edge；按下即 start，无节点拖拽阈值；move 发 drag |
+| edge:dragend | `{ edgeId?: string; edgeIndex: number; source: string; target: string; originalSource: string; originalTarget: string; reconnected: boolean; newEndpoint?: string; event: MouseEvent }` | 松开；有效落点时 source/target 为提议的新端点，否则为原端点 |
+
+群组选中拖拽的 nodeId 为 nodeIds 的第一项，不保证是实际按下的节点。拖拽结束读取 getNodePosition 保存结果；持久化接口由应用调用。edge:dragend 的 reconnected 表示找到合法落点，不表示数据已写回，也不保证端点与原值不同；drag-edge 只发事件，写回示例见[交互组合](/docs/guides/interactions#事件分发模型)。
+
+## 生命周期与数据事件
+
+| 事件 | 完整载荷 | 触发时机 |
+| --- | --- | --- |
+| beforelayout、layout:start | `{ nodeCount: number }` | render / layout / setData 有布局且节点非空时，计算前依次发出 |
+| layout:end、afterlayout | `{ duration: number; nodeCount: number }` | 有效布局计算完成，写回前依次发出；duration 为计算毫秒，不含绘制 |
+| beforerender | `{ nodeCount: number; edgeCount: number }` | 显式 render 的布局和运行时准备完成、适配与同步绘制前 |
+| afterrender | `{ nodeCount: number; edgeCount: number }` | 显式 render 的同步绘制后；不是每个动画帧或所有局部更新的完成通知 |
+| resize | `{ width: number; height: number }` | 画布尺寸及可选自动适配完成后；尺寸单位为容器 CSS 像素 |
+| destroy | 无参数 | 首次 destroy：已标记销毁、已取消待定布局，运行时与画布清理前；随后清除图监听 |
+| datachange | `{ nodeCount: number; edgeCount: number }` | 有效 setData 写回、可选适配及请求绘制后；不是逐项数据差异 |
+| afteradditem | `{ type: 'node'; id: string }` 或 `{ type: 'edge'; id: string; source: string; target: string }` | addNode(s) / addEdge(s) 调度绘制后，批量调用逐项发 |
+| afterremoveitem | `{ type: 'node' 或 'edge'; id: string }` | removeNode(s) / removeEdge(s) 调度绘制后；删节点连带删边不另发边事件 |
+| afterupdateitem | `{ type: 'node'; id: string; action: 'position' 或 'data' }` 或 `{ type: 'edge'; id: string; action: 'data' }` | updateNodePosition(s) / updateNodeData / updateEdgeData；批量结果逐项发，节点拖拽也产生 position 事件 |
+| combo:collapse、combo:expand | `{ comboId: string }` | collapseCombo / expandCombo 更新状态并调度绘制后；已在目标状态不重复发 |
+
+增量事件描述方法执行，不承诺内容一定变化；setData 不拆成 afteradd/remove/updateitem。设置元素状态、可见性、视口或视觉选项没有专用状态/视口/change 事件，也不补发 datachange 或 afterrender。不要用 afterupdateitem → 无条件更新同一数据的方式形成同步递归。
+
+### 顺序与完成边界
+
+- 成功的显式 render（有布局且非空）：beforelayout → layout:start → layout:end → afterlayout → beforerender → afterrender。无布局时省略四个布局事件。
+- setData：可选布局四事件 → 写回与可选适配 → 请求绘制 → datachange；不产生 beforerender/afterrender。
+- layout：布局四事件 → 写回 → 请求绘制；没有 datachange。结束事件中查询位置仍可能是旧值，需 await layout 后查询。
+- 增量 after*item、datachange、Combo 事件不表示浏览器已绘制下一帧；初次 afterrender 发生在 initialized 标记和插件挂载之前。初始数据修改应等待 await graph.render() 完成，再调用增量方法。
+
+取消或过期任务不保证配对结束事件；独立 runLayout 不发 Graph 事件。完整取消与计算契约见[布局方法参考](/docs/api/graph/layout)。
+
+继续阅读：[事件指南](/docs/guides/events) · [Graph 方法总览](/docs/api/graph) · [交互组合](/docs/guides/interactions)。

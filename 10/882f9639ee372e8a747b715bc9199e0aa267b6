@@ -1,0 +1,39 @@
+site/content/docs/en/ai.mdx
+  s_4534bc5c3d78f4::t_a6cbdd3c03445a 10,30,66,75
+site/content/docs/en/getting-started/vue.mdx
+  s_4534bc5c3d78f4::t_d4da92334bea22 78,150,193,206-210
+site/content/docs/en/index.mdx
+  s_4534bc5c3d78f4::t_b652fc25a08770 18,36
+site/content/docs/zh/getting-started/vue.mdx
+  s_4534bc5c3d78f4::t_d4da92334bea22 78,150,206-210
+site/content/docs/zh/getting-started/quick-start.mdx
+  s_4534bc5c3d78f4::t_d4da92334bea22 19-20,27,32,37,127
+site/content/docs/en/getting-started/react.mdx
+  s_4534bc5c3d78f4::t_d1774a3203cb69 197-202
+  s_4534bc5c3d78f4::t_d4da92334bea22 8
+  s_4534bc5c3d78f4::t_615f3efdffbe13 196
+site/content/docs/en/getting-started/quick-start.mdx
+  s_4534bc5c3d78f4::t_d4da92334bea22 19-20,27,32,37,127
+site/content/docs/zh/getting-started/react.mdx
+  s_4534bc5c3d78f4::t_d4da92334bea22 8
+  s_4534bc5c3d78f4::t_d1774a3203cb69 197-202
+  s_4534bc5c3d78f4::t_615f3efdffbe13 196
+site/content/docs/en/compatibility/library-comparison.mdx
+  s_4534bc5c3d78f4::t_cd40db6e7d980b 10,41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "10882f9639ee372e8a747b715bc9199e0aa267b6",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

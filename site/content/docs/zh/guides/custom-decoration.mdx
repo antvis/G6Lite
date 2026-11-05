@@ -1,0 +1,45 @@
+---
+title: 自定义节点装饰
+description: 实现装饰内容的测量和绘制，配置定位、堆叠、排序、溢出与碰撞
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+已有计数、图标或文本徽章先用 builtin-badge；需要自己的内容时注册 DecorationRenderer。它只画内容，引擎负责相对节点定位、堆叠和溢出。
+
+## 测量、绘制与注册
+
+measure 返回完整的有限正数宽高；本例用 DPR 换算固定 CSS 字号并缓存到 layout.data。draw 的原点已在装饰中心，显式设置字体、颜色和对齐。
+
+<NodeDocExample id="extension-decoration" locale="zh" focus="renderer" />
+
+A 有五项，B 只有 Ready；A 默认显示两项及 +3 溢出项。悬停 A 的装饰区域展开全部，移开恢复。展开完整代码查看 items 与 placement 配置。
+
+## 定位与堆叠
+
+1. renderer 名称与注册一致；单项传 data，stack 传 items。
+2. placement 决定节点一侧，attachment 决定边界或外部附着。
+3. layout: 'stack' 开启纵向排列；sort、maxVisible 与 overflow 控制可见项。
+4. overflowData 也交给同一个 renderer，确保它能处理溢出项输入。
+
+不要在 renderer 中实现自己的节点位置、排序或溢出逻辑。偏移、跨轴比例、锚点和所有默认值查[装饰配置](/docs/api/options/node#nodedecorationconfig)。
+
+## 碰撞与更新
+
+本例为方便比较显式关闭装饰碰撞隐藏；实际业务按密度选择。hideOnCollision: false 可能重叠，也不占用装饰碰撞网格。minZoom 控制装饰自己的阈值，不等同标签策略。
+
+内容来自 items 回调时，通过公开数据方法更新业务字段；不要修改全局 renderer 的共享状态。装饰节点尺寸已经是屏幕尺寸，不再次缩放；本例内容选择固定 CSS 字号，所以只按 dpr 换算。完整单位查[DecorationRenderer](/docs/api/extensions/drawing#decorationrenderer)。
+
+## 常见问题
+
+### 为什么装饰消失而没有默认文字？
+
+未知 renderer、非法测量或异常会跳过装饰，不走 Label 的文字回退；检查诊断、minZoom、hidden 和碰撞。
+
+### 为什么测量后没有 draw？
+
+碰撞、裁剪或溢出筛选可能跳过绘制。measure 应是纯计算，不能把调用次数当业务状态。
+
+### 可以直接使用内置 Badge 吗？
+
+可以，见[节点徽章案例](/docs/examples/decoration-badges)。不要为已有外观重复实现底层内容。

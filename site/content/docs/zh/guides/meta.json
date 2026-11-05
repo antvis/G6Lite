@@ -21,5 +21,6 @@
     "custom-node",
     "custom-edge",
     "custom-label-renderer"
+    ,"custom-decoration"
   ]
 }

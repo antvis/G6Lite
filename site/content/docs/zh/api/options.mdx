@@ -1,155 +1,102 @@
 ---
-title: 配置
-description: new Graph() 可传入的数据、节点、边、Combo、布局、交互、标签和主题
+title: GraphOptions 配置
+description: 顶层字段、必填项、默认行为、autoFit 与分主题参考入口
 ---
 
-`new Graph(options)` 的参数类型是 `GraphOptions`。必填字段只有 `container` 和 `data`。节点外观、边外观、布局、交互和主题都有默认值，需要差异化时再覆盖。
+GraphOptions 是 new Graph(options) 的构造参数。container、data 必填，其余按需提供；容器宽高由 CSS 设置，运行中尺寸调整见[setSize](/docs/api/graph/viewport#setsize)。按步骤接入见[快速上手](/docs/getting-started/quick-start)。
 
 ```ts
-const graph = new Graph({
+import type { GraphOptions } from '@antv/g6-lite';
+
+export const options: GraphOptions = {
   container: '#container',
   data: {
-    nodes: [{ id: 'a' }, { id: 'b' }],
-    edges: [{ id: 'a-b', source: 'a', target: 'b' }],
+    nodes: [{ id: 'A' }, { id: 'B' }],
+    edges: [{ id: 'A-B', source: 'A', target: 'B' }],
   },
-  node: { style: { size: 28, fill: '#5366ad' } },
-  edge: { style: { endArrow: true } },
   layout: { type: 'dagre', rankdir: 'TB' },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'click-select'],
-  theme: 'light',
-});
+  autoFit: { padding: 24, maxZoom: 1 },
+};
 ```
 
-各主题的视觉效果和完整示例在配置指南里： [数据](/docs/guides/data)、[节点](/docs/guides/node)、[边](/docs/guides/edge)、[Combo](/docs/guides/combo)、[标签](/docs/guides/label)、[布局](/docs/guides/layout)、[交互](/docs/guides/interactions)、[主题](/docs/guides/theme)。
+这是构造配置；创建、render 和卸载清理见[生命周期](/docs/api/graph/lifecycle)。
 
 ## GraphOptions
 
-| 字段 | 类型 | 说明 |
+| 字段 | 类型与详细入口 | 必填 / 省略行为 |
 | --- | --- | --- |
-| `container` | `string \| HTMLElement` | 画布容器。字符串是 CSS 选择器，例如 `#container` |
-| `data` | [`GraphData`](/docs/api/options/data#graphdata) | 节点、边，以及可选的 Combo |
-| `node` | [`NodeConfig`](/docs/api/options/node#nodeconfig) | 节点形状、样式、状态、标签、图标和装饰；完整定义见节点配置参考 |
-| `edge` | [`EdgeConfig`](/docs/api/options/edge#edgeconfig) | 边类型、外观、箭头、标签、状态、路由和平行边；完整定义见边配置参考 |
-| `combo` | [`ComboConfig`](/docs/api/options/combo) | 分组外观、标签、折叠形态与状态样式；嵌套和折叠仍是实验性能力 |
-| `label` | [`LabelOptions`](/docs/api/options/label#labeloptions) | 节点和边标签共用的缩放、碰撞策略 |
-| `layout` | [`LayoutConfig`](/docs/api/options/layout#layoutconfig) | 布局类型和算法参数 |
-| `behaviors` | [`BehaviorOption[]`](/docs/api/options/behaviors#behavioroption) | 交互列表。省略时启用滚轮缩放和拖拽平移 |
-| `transforms` | `TransformOption[]` | 绘制前的数据转换，例如平行边 |
-| `plugins` | `PluginOption[]` | 已注册插件 |
-| `theme` | [`ThemeOption`](/docs/api/options/theme#themeoption) | `'light'`、`'dark'`，或在预设上覆盖 token |
-| `autoFit` | `boolean \| number \| FitViewOptions` | 容器尺寸变化后是否重新 `fitView()`。默认 `false`，保留当前相机 |
-
-首次适配与尺寸变化后的适配规则见下方 [`autoFit`](#autofit)。
-
-运行中能热更新的是 `node`、`edge`、`label` 和 `theme`，合并规则和生效边界见 [`graph.updateOptions()`](/docs/api/graph/lifecycle#updateoptions)。
+| container | string 或 HTMLElement；[容器要求](/docs/api/graph/lifecycle#new-graph) | 必填；字符串为 CSS 选择器，需指向有效容器 |
+| data | [GraphData](/docs/api/options/data#graphdata) | 必填；nodes、edges 数组可为空，combos 可选 |
+| node | [NodeConfig](/docs/api/options/node#nodeconfig) | 可选；默认 circle，外观使用主题与节点默认值 |
+| edge | [EdgeConfig](/docs/api/options/edge#edgeconfig) | 可选；默认 line，外观使用主题与边默认值 |
+| combo | [ComboConfig](/docs/api/options/combo) | 可选；使用默认外观，数据中的 combos 声明分组 |
+| label | [LabelOptions](/docs/api/options/label#labeloptions) | 可选；使用默认缩放与隐藏策略，不自动生成文字 |
+| layout | [LayoutConfig](/docs/api/options/layout#layoutconfig) | 可选；省略时使用已有 x/y，缺省轴补 0 |
+| behaviors | [BehaviorOption[]](/docs/api/options/behaviors#behavioroption) | 可选；默认 zoom-canvas、drag-canvas；显式数组替代默认，[] 不挂载行为 |
+| transforms | [TransformOption[]](/docs/api/options/transforms-plugins#transforms) | 可选；不运行注册转换；平行边特殊机制见参考 |
+| plugins | [PluginOption[]](/docs/api/options/transforms-plugins#plugins) | 可选；默认不挂载插件 |
+| theme | [ThemeOption](/docs/api/options/theme#themeoption) | 可选；默认 light |
+| autoFit | boolean、number 或 [FitViewOptions](/docs/api/graph/viewport#fitview) | 可选；默认 false；首次与尺寸变化规则见下方 |
 
 ### `autoFit`
 
-控制首次渲染的适配参数，以及容器尺寸变化后是否重新适配：
-
-| 配置 | 首次 `render()` | 尺寸变化后 |
+| 值 | 首次有效 render | 容器尺寸变化后 |
 | --- | --- | --- |
-| 未配置或 `false`（默认） | `fitView(0.9)` | 保留当前相机 |
-| `true` | `fitView(0.9)` | `fitView(0.9)` |
-| `FitViewOptions` 对象 | 按对象参数适配 | 按同一对象参数重新适配 |
+| 省略 / false | fitView(0.9) | 保留相机 |
+| true | fitView(0.9) | fitView(0.9) |
+| 数值（使用正数） | 按该相对系数适配 | 使用同一系数适配 |
+| FitViewOptions 对象 | 按对象参数适配 | 按同一对象参数适配 |
 
-也可以传入正数，作为 `fitView()` 的相对缩放系数，用于首次渲染和尺寸变化后的适配。
-
-可变分栏、侧栏展开收起等场景可以使用对象配置：
-
-```ts
-const graph = new Graph({
-  container: '#container',
-  data,
-  autoFit: { padding: 24, minZoom: 0.2, maxZoom: 1.5 },
-});
-```
-
-`padding`、`minZoom`、`maxZoom` 的含义见 [`fitView()`](/docs/api/graph/viewport#fitview)。需要保留用户手动缩放和平移时，保持默认关闭；关闭仅影响尺寸变化后的自动适配，不影响首次渲染。
-
-尺寸监听、事件顺序与宽度切换示例见[容器尺寸更新](/docs/api/graph/viewport#setsize)，刷新后的视野选择见[视口指南](/docs/guides/viewport)。
+关闭 autoFit 保留的是尺寸变化后的相机，首次仍会适配。它也不决定所有数据更新行为：setData 默认另行适配，layout 不自动适配。完整选择和对应效果见[视口指南](/docs/guides/viewport)，padding 与缩放限制查[fitView](/docs/api/graph/viewport#fitview)。
 
 ## 图数据
 
-结构与校验统一见[图数据配置参考](/docs/api/options/data)，任务流程见[数据指南](/docs/guides/data)。
+输入字段与身份规则统一查[数据配置](/docs/api/options/data)。业务映射、全量与增量更新见[数据指南](/docs/guides/data)。
 
 ### 节点 `GraphNode`
 
-[GraphNode](/docs/api/options/data#graphnode)：id、name、data、x/y、fx/fy、states、comboId。
+[GraphNode](/docs/api/options/data#graphnode) 定义节点身份、坐标、业务 data、初始状态和 Combo 归属。
 
 ### 边 `GraphEdge`
 
-[GraphEdge](/docs/api/options/data#graphedge)：id、source、target、data、states。
+[GraphEdge](/docs/api/options/data#graphedge) 定义边身份、端点、业务 data 与初始状态。
 
 ### Combo `ComboData`
 
-[ComboData](/docs/api/options/combo#combodata)：分组字段、父级、初始折叠和状态的详细来源。
+[ComboData](/docs/api/options/combo#combodata) 定义分组身份、层级与初始折叠。
 
 ## 节点
 
-`node` 的类型是 [`NodeConfig`](/docs/api/options/node#nodeconfig)，用于配置节点图形、外观、状态、标签、图标和装饰。完整字段与对应代码效果统一在[节点配置参考](/docs/api/options/node)中查阅：
-
-- [顶层选项与支持状态](/docs/api/options/node#nodeconfig)：类型选择、配置结构和未实现选项。
-- [基础外观](/docs/api/options/node#nodestyleconfig)与[样式函数](/docs/api/options/node#样式函数)：尺寸、颜色、单位、回调和优先级。
-- [节点标签](/docs/api/options/node#标签)、[`labelRenderer`](/docs/api/options/node#labelrenderer)与[图标](/docs/api/options/node#图标)：内容、定位、显示条件和注册要求。
-- [节点装饰](/docs/api/options/node#nodedecorationconfig)与[内置徽章](/docs/api/options/node#内置徽章)：定位、碰撞、堆叠和溢出。
-- [状态样式](/docs/api/options/node#状态样式)与[运行时更新](/docs/api/options/node#运行时更新)：状态覆盖及配置合并规则。
-
-按业务效果配置节点，见[节点使用指南](/docs/guides/node)。节点的 `id`、业务 `data`、坐标和初始状态属于数据结构，仍见本页的 [`GraphNode`](#节点-graphnode)。
+外观、逐字段函数、状态、文字、图标与装饰查[节点参考](/docs/api/options/node)；按效果配置见[节点指南](/docs/guides/node)。
 
 ## 边
 
-`edge` 的类型是 [`EdgeConfig`](/docs/api/options/edge#edgeconfig)，配置边类型、外观、箭头、交互热区、标签、状态和平行边。[边配置参考](/docs/api/options/edge)统一提供字段定义、默认值、限制和代码与效果对照：
-
-- [基础样式](/docs/api/options/edge#基础样式)、[箭头](/docs/api/options/edge#箭头)与[点击热区](/docs/api/options/edge#点击热区)：颜色、线宽、虚线、尺寸单位和命中范围。
-- [样式回调](/docs/api/options/edge#样式回调)与[状态样式](/docs/api/options/edge#状态样式)：三参数回调、字段优先级及状态覆盖。
-- [曲线与折线路由](/docs/api/options/edge#曲线与折线路由)：curvature、curveOffset、radius、router、indentTarget 和当前不生效的 trunkGap。
-- [边标签](/docs/api/options/edge#边标签)：文本、字号、位置、底色、显示条件与自定义渲染器。
-- [平行边与自环](/docs/api/options/edge#平行边与自环)：对象启用条件、分组、间距及 transform 优先级。
-- [运行时更新](/docs/api/options/edge#运行时更新)：样式合并与数据更新入口；路由模式限制见对应路由章节。
-
-按业务效果配置边，见[边使用指南](/docs/guides/edge)。边的 `source`、`target`、`id`、业务 `data` 与初始状态仍见本页 [`GraphEdge`](#边-graphedge)。
+类型、箭头、热区、路由、标签与平行边查[边参考](/docs/api/options/edge)；任务步骤见[边指南](/docs/guides/edge)和[折线路由](/docs/guides/polyline-routing)。
 
 ## Combo
 
-`combo` 的类型是 [`ComboConfig`](/docs/api/options/combo)，通过 `style` 设置分组外观。详细定义与代码效果见：
-
-- [基础外观与局部覆盖](/docs/api/options/combo#基础外观与局部覆盖)、[字段回调与覆盖顺序](/docs/api/options/combo#字段回调与覆盖顺序)。
-- [折叠形态](/docs/api/options/combo#折叠形态)、[状态样式](/docs/api/options/combo#状态样式)。
-
-嵌套、折叠和动态归组属于实验性能力。操作步骤见 [Combo 使用指南](/docs/guides/combo)，样式更新限制见[运行时修改边界](/docs/api/options/combo#运行时修改边界)。
+外观和覆盖查[Combo 配置](/docs/api/options/combo)，步骤见[Combo 指南](/docs/guides/combo)。嵌套、折叠与运行时归组仍为实验能力，操作方法查[Combo API](/docs/api/graph/combo)。
 
 ## 标签策略
 
-`label` 控制节点与边标签的缩放和隐藏，不决定文本内容。完整字段与默认值统一见 [`LabelOptions` 参考](/docs/api/options/label#labeloptions)。
-
-- [缩放阈值](/docs/api/options/label#缩放阈值)与[碰撞顺序](/docs/api/options/label#碰撞顺序)：何时显示、保留哪些标签。
-- [生效范围](/docs/api/options/label#生效范围)与[运行时更新](/docs/api/options/label#运行时更新)：适用对象、字段合并和更新方式。
-
-操作步骤和可切换预览见[标签与图标指南](/docs/guides/label#全局标签策略)。
+[LabelOptions](/docs/api/options/label) 统一缩放、阈值和碰撞策略；文本内容在 node / edge.style 中配置。步骤与效果见[标签指南](/docs/guides/label)。
 
 ## 布局
 
-layout 决定节点的图坐标；省略时使用已有 x/y，缺失坐标补 0。完整字段、支持算法、树布局参数与默认值见[布局配置参考](/docs/api/options/layout)。
-
-选择算法与运行时切换见[布局指南](/docs/guides/layout)；异步计算、取消与部署见 [Worker 指南](/docs/guides/layout-worker)。
+算法字段查[布局配置](/docs/api/options/layout)，选型看[布局指南](/docs/guides/layout)，独立计算看[工具索引](/docs/api/utilities#runlayout)。
 
 ## 交互
 
-behaviors 是完整行为列表，省略时启用缩放与画布平移；显式数组覆盖默认，空数组不挂载行为。完整定义统一见 [Behavior 配置参考](/docs/api/options/behaviors)。
-
-- [类型与挂载](/docs/api/options/behaviors#behavioroption)：名称、严格类型、默认列表和更新边界。
-- [导航与拖拽](/docs/api/options/behaviors#导航与拖拽)、[选择](/docs/api/options/behaviors#选择)、[高亮](/docs/api/options/behaviors#高亮)：参数、手势与实际生效范围。
-- [TooltipOptions](/docs/api/options/behaviors#tooltipoptions) 与 [TooltipContext](/docs/api/options/behaviors#tooltipcontext)：浮层参数、内容、事件与挂载。
-
-操作流程与代码效果见[交互组合](/docs/guides/interactions)、[Tooltip 指南](/docs/guides/tooltip)；业务扩展见[自定义 Behavior](/docs/guides/custom-behavior)。
+全部内置选项和 Tooltip 查[Behavior 配置](/docs/api/options/behaviors)，手势组合看[交互指南](/docs/guides/interactions)。
 
 ## 主题
 
-`theme` 省略时使用 light。类型、全部 token、预设默认值与覆盖规则见[主题配置参考](/docs/api/options/theme)；读取主题 token 的辅助函数见 [resolveTheme](/docs/api/options/theme#resolvetheme)。
-
-选择预设、设置品牌色和运行时切换见[主题指南](/docs/guides/theme)，含代码与对应画布效果。
+预设、token、覆盖与 resolveTheme 查[主题参考](/docs/api/options/theme)，品牌与切换步骤见[主题指南](/docs/guides/theme)。
 
 ## 插件与转换
 
-transforms 在布局前转换整份输入；plugins 挂载独立 DOM。两者的完整配置、选项位置、注册和更新边界见[Transform 与 Plugin 配置](/docs/api/options/transforms-plugins)，调用协议见[运行类契约](/docs/api/extensions/runtime)。
+配置位置与生命周期查[Transform / Plugin 配置](/docs/api/options/transforms-plugins)，实现入口见[扩展总览](/docs/guides/extensions)。
+
+## 运行中如何更新
+
+node、edge、label、theme 使用[updateOptions](/docs/api/graph/lifecycle#updateoptions)，合并规则以方法参考为准。数据用[写入方法](/docs/api/graph/data-mutations)，布局用[setLayout + layout](/docs/api/graph/layout)。更换行为、插件或转换的构造配置时重建 Graph，不把 setData 当成配置 setter。

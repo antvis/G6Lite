@@ -1,155 +1,102 @@
 ---
-title: Options
-description: Data, node, edge, Combo, layout, interaction, label, and theme fields accepted by new Graph()
+title: GraphOptions
+description: Top-level fields, requirements, defaults, autoFit, and topic-reference entries
 ---
 
-The argument of `new Graph(options)` is `GraphOptions`. Only `container` and `data` are required. Node appearance, edge appearance, layout, interaction, and theme all have defaults and can be overridden where the graph needs to differ.
+GraphOptions is the constructor input to new Graph(options). container and data are required; provide other fields as needed. Set container dimensions with CSS; see [setSize](/en/docs/api/graph/viewport#setsize) for runtime sizing and [quick start](/en/docs/getting-started/quick-start) for setup.
 
 ```ts
-const graph = new Graph({
+import type { GraphOptions } from '@antv/g6-lite';
+
+export const options: GraphOptions = {
   container: '#container',
   data: {
-    nodes: [{ id: 'a' }, { id: 'b' }],
-    edges: [{ id: 'a-b', source: 'a', target: 'b' }],
+    nodes: [{ id: 'A' }, { id: 'B' }],
+    edges: [{ id: 'A-B', source: 'A', target: 'B' }],
   },
-  node: { style: { size: 28, fill: '#5366ad' } },
-  edge: { style: { endArrow: true } },
   layout: { type: 'dagre', rankdir: 'TB' },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'click-select'],
-  theme: 'light',
-});
+  autoFit: { padding: 24, maxZoom: 1 },
+};
 ```
 
-Visual recipes live in the guides: [Data](/en/docs/guides/data), [Node](/en/docs/guides/node), [Edge](/en/docs/guides/edge), [Combo](/en/docs/guides/combo), [Label](/en/docs/guides/label), [Layout](/en/docs/guides/layout), [Interactions](/en/docs/guides/interactions), and [Theme](/en/docs/guides/theme).
+This declares configuration. See [lifecycle methods](/en/docs/api/graph/lifecycle) for creation, rendering, and cleanup.
 
 ## GraphOptions
 
-| Field | Type | Description |
+| Field | Type and complete reference | Requirement / omission |
 | --- | --- | --- |
-| `container` | `string \| HTMLElement` | Canvas container. A string is a CSS selector, such as `#container` |
-| `data` | [`GraphData`](/en/docs/api/options/data#graphdata) | Nodes, edges, and optional combos |
-| `node` | [`NodeConfig`](/en/docs/api/options/node#nodeconfig) | Node shapes, appearance, states, labels, icons, and decorations; see the node reference for full definitions |
-| `edge` | [`EdgeConfig`](/en/docs/api/options/edge#edgeconfig) | Edge type, appearance, arrows, labels, states, routing, and parallel edges; see the edge reference for full definitions |
-| `combo` | [`ComboConfig`](/en/docs/api/options/combo) | Group appearance, labels, collapsed shapes, and state styles; nesting and collapse remain experimental |
-| `label` | [`LabelOptions`](/en/docs/api/options/label#labeloptions) | Zoom and collision policy shared by node and edge labels |
-| `layout` | [`LayoutConfig`](/en/docs/api/options/layout#layoutconfig) | Layout type and algorithm parameters |
-| `behaviors` | [`BehaviorOption[]`](/en/docs/api/options/behaviors#behavioroption) | Interaction list. Omitted means wheel zoom and drag pan |
-| `transforms` | `TransformOption[]` | Data transforms before drawing, such as parallel edges |
-| `plugins` | `PluginOption[]` | Registered plugins |
-| `theme` | [`ThemeOption`](/en/docs/api/options/theme#themeoption) | `'light'`, `'dark'`, or a preset plus token overrides |
-| `autoFit` | `boolean \| number \| FitViewOptions` | Whether a container resize calls `fitView()` again. Default `false`, which keeps the current camera |
-
-See [`autoFit`](#autofit) below for initial fitting and resize fitting.
-
-At runtime, `node`, `edge`, `label`, and `theme` can be updated with [`graph.updateOptions()`](/en/docs/api/graph/lifecycle#updateoptions). See that reference for merge rules and update boundaries.
+| container | string or HTMLElement; [container contract](/en/docs/api/graph/lifecycle#new-graph) | Required; strings are CSS selectors targeting valid containers |
+| data | [GraphData](/en/docs/api/options/data#graphdata) | Required; nodes / edges may be empty, combos optional |
+| node | [NodeConfig](/en/docs/api/options/node#nodeconfig) | Optional; circle with theme/node defaults |
+| edge | [EdgeConfig](/en/docs/api/options/edge#edgeconfig) | Optional; line with theme/edge defaults |
+| combo | [ComboConfig](/en/docs/api/options/combo) | Optional; default appearance, groups declared by data.combos |
+| label | [LabelOptions](/en/docs/api/options/label#labeloptions) | Optional; default scale/hiding policies, without generating text |
+| layout | [LayoutConfig](/en/docs/api/options/layout#layoutconfig) | Optional; use existing x/y, filling missing axes with 0 |
+| behaviors | [BehaviorOption[]](/en/docs/api/options/behaviors#behavioroption) | Optional; zoom-canvas and drag-canvas by default; explicit arrays replace defaults, [] installs none |
+| transforms | [TransformOption[]](/en/docs/api/options/transforms-plugins#transforms) | Optional; no registered transforms; see the special parallel-edge path |
+| plugins | [PluginOption[]](/en/docs/api/options/transforms-plugins#plugins) | Optional; no plugins by default |
+| theme | [ThemeOption](/en/docs/api/options/theme#themeoption) | Optional; light by default |
+| autoFit | boolean, number, or [FitViewOptions](/en/docs/api/graph/viewport#fitview) | Optional; false by default, with initial/resize rules below |
 
 ### `autoFit`
 
-Controls initial fitting and whether a container resize fits the graph again:
-
-| Value | First `render()` | After resize |
+| Value | First valid render | Container resize |
 | --- | --- | --- |
-| Omitted or `false` (default) | `fitView(0.9)` | Preserve the current camera |
-| `true` | `fitView(0.9)` | `fitView(0.9)` |
-| `FitViewOptions` object | Fit with those options | Fit again with the same options |
+| Omitted / false | fitView(0.9) | Retain camera |
+| true | fitView(0.9) | fitView(0.9) |
+| Number (use a positive value) | Fit with that relative factor | Reuse that factor |
+| FitViewOptions object | Fit with supplied parameters | Reuse those parameters |
 
-A positive number supplies the relative scale for `fitView()`, both during the initial render and after resizing.
-
-For resizable panels or expanding sidebars, an options object can control the fit:
-
-```ts
-const graph = new Graph({
-  container: '#container',
-  data,
-  autoFit: { padding: 24, minZoom: 0.2, maxZoom: 1.5 },
-});
-```
-
-See [`fitView()`](/en/docs/api/graph/viewport#fitview) for `padding`, `minZoom`, and `maxZoom`. Leave automatic fitting disabled to preserve the user's zoom and pan. Disabling it affects only resize fitting; the initial render still fits the graph.
-
-See [container size updates](/en/docs/api/graph/viewport#setsize) for observation, event ordering, and a live width-switching example. See the [viewport guide](/en/docs/guides/viewport) for refresh policies.
+Disabling autoFit retains the camera after resizing; initial rendering still fits. Data updates have separate rules: setData fits by default, while layout does not automatically fit. See the [viewport guide](/en/docs/guides/viewport) for workflows and [fitView](/en/docs/api/graph/viewport#fitview) for padding/zoom limits.
 
 ## Graph data
 
-See the [graph data reference](/en/docs/api/options/data)，and the [data guide](/en/docs/guides/data)。
+See [data configuration](/en/docs/api/options/data) for fields and identity rules, and [data updates](/en/docs/guides/data) for mapping, replacement, and incremental operations.
 
 ### Node `GraphNode`
 
-[GraphNode](/en/docs/api/options/data#graphnode)：id、name、data、x/y、fx/fy、states、comboId。
+[GraphNode](/en/docs/api/options/data#graphnode) defines identity, coordinates, business data, initial states, and Combo membership.
 
 ### Edge `GraphEdge`
 
-[GraphEdge](/en/docs/api/options/data#graphedge)：id、source、target、data、states。
+[GraphEdge](/en/docs/api/options/data#graphedge) defines identity, endpoints, business data, and initial states.
 
 ### Combo `ComboData`
 
-[ComboData](/en/docs/api/options/combo#combodata)：the detailed source for group fields, parents, initial folding, and states.
+[ComboData](/en/docs/api/options/combo#combodata) defines group identity, hierarchy, and initial folding.
 
 ## Node
 
-`node` has type [`NodeConfig`](/en/docs/api/options/node#nodeconfig), configuring node shapes, appearance, states, labels, icons, and decorations. The [node configuration reference](/en/docs/api/options/node) is the detailed source for fields and matching code previews:
-
-- [Top-level options and support](/en/docs/api/options/node#nodeconfig): type selection, configuration structure, and unimplemented options.
-- [Body appearance](/en/docs/api/options/node#nodestyleconfig) and [style callbacks](/en/docs/api/options/node#style-callbacks): dimensions, colors, units, callbacks, and precedence.
-- [Node labels](/en/docs/api/options/node#labels), [`labelRenderer`](/en/docs/api/options/node#labelrenderer), and [icons](/en/docs/api/options/node#icons): content, placement, visibility conditions, and registration.
-- [Decorations](/en/docs/api/options/node#nodedecorationconfig) and [built-in badges](/en/docs/api/options/node#built-in-badges): placement, collision, stacks, and overflow.
-- [State styles](/en/docs/api/options/node#state-styles) and [runtime updates](/en/docs/api/options/node#runtime-updates): state precedence and configuration merging.
-
-Follow the [node guide](/en/docs/guides/node) to build an effect. Node IDs, business `data`, coordinates, and initial states are data fields; see [`GraphNode`](#node-graphnode) on this page.
+See [node configuration](/en/docs/api/options/node) for visuals, callbacks, states, text, icons, and decorations, or follow the [node guide](/en/docs/guides/node).
 
 ## Edge
 
-`edge` has type [`EdgeConfig`](/en/docs/api/options/edge#edgeconfig), configuring type, appearance, arrows, picking width, labels, states, and parallel edges. The [edge reference](/en/docs/api/options/edge) is the detailed source for fields, defaults, constraints, and matching code previews:
-
-- [Basic styles](/en/docs/api/options/edge#basic-styles), [arrows](/en/docs/api/options/edge#arrows), and [picking width](/en/docs/api/options/edge#picking-width): color, width, dashes, units, and interaction bounds.
-- [Style callbacks](/en/docs/api/options/edge#style-callbacks) and [state styles](/en/docs/api/options/edge#state-styles): three-argument callbacks, field precedence, and state overrides.
-- [Curves and polyline routing](/en/docs/api/options/edge#curves-and-polyline-routing): curvature, curveOffset, radius, router, indentTarget, and currently inactive trunkGap.
-- [Edge labels](/en/docs/api/options/edge#edge-labels): text, font, placement, backgrounds, visibility, and custom renderers.
-- [Parallel edges and self-loops](/en/docs/api/options/edge#parallel-edges-and-self-loops): object enablement, grouping, spacing, and transform precedence.
-- [Runtime updates](/en/docs/api/options/edge#runtime-updates): style merging and data mutation entries; see routing for mode-change constraints.
-
-Follow the [edge guide](/en/docs/guides/edge) to build an effect. Edge `source`, `target`, `id`, business `data`, and initial states remain on this page under [`GraphEdge`](#edge-graphedge).
+See [edge configuration](/en/docs/api/options/edge) for bases, arrows, picking, routing, labels, and parallel edges. Follow [edges](/en/docs/guides/edge) and [polyline routing](/en/docs/guides/polyline-routing) for tasks.
 
 ## Combo
 
-`combo` has type [`ComboConfig`](/en/docs/api/options/combo); its `style` sets group appearance. Find detailed definitions and matching previews here:
-
-- [Basic appearance and local overrides](/en/docs/api/options/combo#basic-appearance-and-local-overrides), [callbacks and precedence](/en/docs/api/options/combo#callbacks-and-precedence).
-- [Collapsed appearance](/en/docs/api/options/combo#collapsed-appearance), [state styles](/en/docs/api/options/combo#state-styles).
-
-Nesting, collapse, and runtime grouping remain experimental. Follow the [Combo guide](/en/docs/guides/combo) for workflows; see [runtime updates](/en/docs/api/options/combo#runtime-updates) for style-update limitations.
+See [Combo configuration](/en/docs/api/options/combo) for visuals/overrides and the [guide](/en/docs/guides/combo) for workflows. Nesting, folding, and runtime regrouping remain experimental; see [Combo methods](/en/docs/api/graph/combo).
 
 ## Label policy
 
-`label` controls node/edge label sizing and visibility without choosing their text. Find fields and defaults in the [`LabelOptions` reference](/en/docs/api/options/label#labeloptions).
-
-- [Zoom thresholds](/en/docs/api/options/label#zoom-thresholds) and [collision order](/en/docs/api/options/label#collision-order): when labels appear and which ones remain.
-- [Scope](/en/docs/api/options/label#scope) and [runtime updates](/en/docs/api/options/label#runtime-updates): applicability, field merging, and updates.
-
-See [Labels and icons](/en/docs/guides/label#global-label-policies) for steps and an interactive preview.
+[LabelOptions](/en/docs/api/options/label) defines scaling, thresholds, and collisions. Configure text through node / edge.style; follow [labels](/en/docs/guides/label) for effects.
 
 ## Layout
 
-layout determines node positions. Omit it to use existing x/y, with missing values defaulting to 0. Fields, supported algorithms, tree options, and defaults are in the [layout configuration reference](/en/docs/api/options/layout).
-
-See the [Layout guide](/en/docs/guides/layout) for selection and switching, or the [Worker guide](/en/docs/guides/layout-worker) for asynchronous computation, cancellation, and deployment.
+Find fields in [layout configuration](/en/docs/api/options/layout), algorithm choices in the [layout guide](/en/docs/guides/layout), and standalone calculation in [utilities](/en/docs/api/utilities#runlayout).
 
 ## Interactions
 
-behaviors is the complete list. Omission enables wheel zoom and canvas panning; explicit arrays replace defaults, and an empty array mounts no Behavior. Full definitions are in the [Behavior reference](/en/docs/api/options/behaviors).
-
-- [Types and mounting](/en/docs/api/options/behaviors#behavioroption): names, strict types, defaults, and update boundaries.
-- [Navigation and dragging](/en/docs/api/options/behaviors#navigation-and-dragging), [selection](/en/docs/api/options/behaviors#selection), and [highlighting](/en/docs/api/options/behaviors#highlighting): options, gestures, and runtime scope.
-- [TooltipOptions](/en/docs/api/options/behaviors#tooltipoptions) and [TooltipContext](/en/docs/api/options/behaviors#tooltipcontext): overlay options, content, events, and mounting.
-
-For workflows and rendered code examples, see [Interactions](/en/docs/guides/interactions) and [Tooltip](/en/docs/guides/tooltip). For extensions, see [Custom Behavior](/en/docs/guides/custom-behavior).
+See [Behavior configuration](/en/docs/api/options/behaviors) for built-in options/Tooltip and [interaction workflows](/en/docs/guides/interactions) for gestures.
 
 ## Theme
 
-Omitting `theme` selects light. Types, all tokens, preset defaults, and precedence are in the [Theme reference](/en/docs/api/options/theme). To read theme tokens, see [resolveTheme](/en/docs/api/options/theme#resolvetheme).
-
-For choosing presets, applying brand colors, and switching at runtime, see [Themes](/en/docs/guides/theme), with code and matching canvas previews.
+Find presets, tokens, overrides, and resolveTheme in the [theme reference](/en/docs/api/options/theme), or follow the [theme guide](/en/docs/guides/theme).
 
 ## Plugins and transforms
 
-transforms preprocess whole input before layout; plugins mount independent DOM. See [Transform and Plugin options](/en/docs/api/options/transforms-plugins) for complete shapes, registration, and update rules, and [runtime contracts](/en/docs/api/extensions/runtime) for hooks.
+See [Transform / Plugin options](/en/docs/api/options/transforms-plugins) for configuration/lifecycle and [Extensions](/en/docs/guides/extensions) for implementation entries.
+
+## Runtime changes
+
+Use [updateOptions](/en/docs/api/graph/lifecycle#updateoptions) for node, edge, label, and theme according to its merge rules. Use [data writes](/en/docs/api/graph/data-mutations) for data and [setLayout + layout](/en/docs/api/graph/layout) for layout. Recreate to change behavior/plugin/transform constructor configuration; setData is not an options setter.

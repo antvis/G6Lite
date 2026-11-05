@@ -1,0 +1,58 @@
+---
+title: Utilities
+description: Entries for standalone layout, theme resolution, and independent event dispatch
+---
+
+Utilities do not replace Graph methods. Choose by task; complete layout and theme contracts retain their existing canonical locations.
+
+| Task | Entry | Complete reference |
+| --- | --- | --- |
+| Calculate positions before creating Graph | runLayout | [Arguments, results, cancellation, example](/en/docs/api/graph/layout#runlayout) |
+| Resolve presets and brand tokens | resolveTheme | [Signature, copying, overrides](/en/docs/api/options/theme#resolvetheme) |
+| Dispatch application-owned events | EventEmitter / Handler | [Independent event utility](#eventemitter) |
+| Register extensions | register / extensionFactory | [Registration and scope](/en/docs/api/extensions/registration) |
+
+## runLayout
+
+Accepts GraphData, LayoutConfig, and optional viewport / runtime inputs. Returns Promise&lt;LayoutResult&gt; containing positioned nodes only. It does not create Graph, draw, run Graph transforms, or apply Graph's final fixed-axis overrides. Standalone calls have no ExtensionContext by default and skip Layout.init.
+
+See [runLayout](/en/docs/api/graph/layout#runlayout) for the signature, algorithm order, Worker behavior, and cancellation. Rerun an existing Graph with [setLayout + layout](/en/docs/api/graph/layout); implement algorithms through [Custom layouts](/en/docs/guides/custom-layout).
+
+## resolveTheme
+
+Accepts ThemeOption and returns ThemeTokens, without updating Graph or following page dark mode. Returned fields remain optional; resolution does not make every field required.
+
+Top-level fields and the palette array are copied; state tables may remain shared. See the [theme reference](/en/docs/api/options/theme#resolvetheme) for fields, shallow overrides, references, and examples. Update a Graph theme with [updateOptions](/en/docs/api/graph/lifecycle#updateoptions).
+
+## EventEmitter
+
+Import EventEmitter from the root and create an independent dispatcher with new EventEmitter(). It does not connect to Graph, provide DOM events, or validate GraphEventMap event names. Use [graph.on / off / once](/en/docs/api/graph/events) for graph subscriptions.
+
+Handler&lt;Args extends unknown[]&gt; maps an argument tuple to void. Each generic method below constrains Args to unknown[] for that call; it does not define a global event map across calls.
+
+| Method | Result and behavior |
+| --- | --- |
+| `on<Args>(event: string, handler: Handler<Args>): void` | Persistent listener; duplicate registration invokes the function repeatedly |
+| `off<Args>(event: string, handler: Handler<Args>): void` | Remove using the original function, including its duplicates for that event; ignore missing entries |
+| `once<Args>(event: string, handler: Handler<Args>): void` | Remove after the next matching event |
+| `emit<Args>(event: string, ...args: Args): void` | Dispatch arguments synchronously, without emitting Graph events |
+| `removeAllListeners(event?: string): void` | Clear one event, or this dispatcher's entire listener set when omitted |
+
+Methods return void and do not chain. Clear only dispatchers you own; do not access graph.eventEmitter.
+
+```ts
+import { EventEmitter, type Handler } from '@antv/g6-lite';
+
+const bus = new EventEmitter();
+const received: number[] = [];
+const onProgress: Handler<[number]> = (value) => { received.push(value); };
+
+bus.on('progress', onProgress);
+bus.emit('progress', 25);
+bus.off('progress', onProgress);
+bus.emit('progress', 50);
+console.log(received); // [25]
+bus.removeAllListeners();
+```
+
+Removing listeners does not cancel application-owned requests, timers, or DOM resources. Cancel and release those separately.

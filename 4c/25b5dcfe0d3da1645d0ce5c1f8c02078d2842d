@@ -1,0 +1,42 @@
+site/content/docs/zh/concepts/viewport.mdx
+  s_4534bc5c3d78f4::t_2f1adad26bc852 75
+site/content/docs/en/concepts/viewport.mdx
+  s_4534bc5c3d78f4::t_2f1adad26bc852 75
+site/content/docs/zh/guides/viewport.mdx
+  s_4534bc5c3d78f4::t_33441c689b56c3 17,60
+  s_4534bc5c3d78f4::t_2f1adad26bc852 1-16,18-59,61-102
+site/demos/docs-viewport-concept.ts
+  s_4534bc5c3d78f4::t_95256aed0ac906 34,39
+site/demos/docs-viewport-preserve.ts
+  s_4534bc5c3d78f4::t_95256aed0ac906 1-20,26-29,31-95
+  s_4534bc5c3d78f4::t_7bfac3926c8cb8 21-25
+  s_4534bc5c3d78f4::t_3e6333622c1cc5 30
+site/content/docs/en/guides/meta.json
+  s_4534bc5c3d78f4::t_2f1adad26bc852 13
+site/src/lib/node-doc-example-source.ts
+  s_4534bc5c3d78f4::t_2f1adad26bc852 4,41
+site/src/components/node-doc-preview.tsx
+  s_4534bc5c3d78f4::t_2f1adad26bc852 47,64-66
+site/content/docs/en/guides/viewport.mdx
+  s_4534bc5c3d78f4::t_2f1adad26bc852 1-16,18-27,29-59,61-102
+  s_4534bc5c3d78f4::t_33441c689b56c3 17,60
+  s_4534bc5c3d78f4::t_3e6333622c1cc5 28
+site/content/docs/zh/guides/meta.json
+  s_4534bc5c3d78f4::t_2f1adad26bc852 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4c25b5dcfe0d3da1645d0ce5c1f8c02078d2842d",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

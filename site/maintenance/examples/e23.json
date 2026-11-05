@@ -1,0 +1,44 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E23",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "default-theme",
+      "file": "default-theme.ts",
+      "observations": [
+        "Visible side-by-side light/dark state matrices; switched circle→rect and line→arc, then dark-only and refresh restored defaults.",
+        "Data tab now exposes both graph views; larger node bodies, fixed-size labels and smaller padding make state names readable."
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "combo",
+      "file": "combo.ts",
+      "observations": [
+        "Collapsed and expanded groups through visible controls; moved console into service-layer and created observability group.",
+        "Data snapshot confirmed 12 nodes, 5 combos and console.comboId=service-layer; refresh restored baseline. Combo collapse rendering remains experimental as documented."
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "relationship",
+      "file": "relationship.ts",
+      "observations": [
+        "Visible 8-person / 10-edge network with node and edge labels; zoom, pan, fit and refresh passed.",
+        "Refresh retained exactly one node-label overlay; initial and toolbar fitting use the same existing options."
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Expose theme graph snapshots and improve compact dual-theme matrix readability."
+  ]
+}

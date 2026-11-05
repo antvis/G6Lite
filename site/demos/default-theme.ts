@@ -106,6 +106,7 @@ export async function run(container: string | HTMLElement) {
         node: {
           type: nodeType,
           style: {
+            size: 44,
             opacity: (node) => (node.data?.sampleAnchor === true ? 0 : 1),
             label: (node) =>
               node.data?.sampleAnchor === true ? false : String(node.data?.label ?? node.id),
@@ -127,17 +128,18 @@ export async function run(container: string | HTMLElement) {
               theme === 'light' ? 'rgba(255,255,255,0.9)' : 'rgba(26,26,26,0.9)',
           },
         },
+        label: { scaleWithZoom: false, hideOnLowZoom: false },
         behaviors: ['zoom-canvas', 'drag-canvas'],
         theme,
       });
       await graph.render();
-      graph.fitView({ padding: 56 });
+      graph.fitView({ padding: 24 });
       graphs.push(graph);
     }
   };
 
   const fitGraphs = () => {
-    graphs.forEach((graph) => graph.fitView({ padding: 56 }));
+    graphs.forEach((graph) => graph.fitView({ padding: 24 }));
   };
 
   const updateView = (view: string) => {
@@ -179,6 +181,7 @@ export async function run(container: string | HTMLElement) {
   updateView('light + dark');
 
   return {
+    getData: () => ({ views: graphs.map((graph) => graph.getData()) }),
     fitView() {
       fitGraphs();
     },

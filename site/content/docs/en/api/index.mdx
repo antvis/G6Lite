@@ -1,104 +1,61 @@
 ---
-title: Usable APIs
-description: Package-root functions, classes, and types application code can call
+title: API overview
+description: Root runtime exports and type index for Graph, configuration, extensions, and utilities
 ---
 
-Application code imports only from the `@antv/g6-lite` package root. This page lists the functions, classes, and types you can call directly. Configuration recipes, interaction examples, and extension tutorials stay in the guides.
+Import application APIs from @antv/g6-lite. Use this overview to choose a reference; canonical pages own signatures, fields, and behavior. Follow [data workflows](/en/docs/guides/data) or [Extensions](/en/docs/guides/extensions) for implementation.
 
 ```ts
-import { Graph, register, extensionFactory, runLayout, resolveTheme } from '@antv/g6-lite';
-import type {
-  GraphData,
-  GraphOptions,
-  GraphEventMap,
-  NodeModel,
-  ElementState,
-} from '@antv/g6-lite';
+import { Graph, register, extensionFactory, runLayout, resolveTheme, EventEmitter } from '@antv/g6-lite';
+import type { GraphOptions, GraphData, GraphEventMap } from '@antv/g6-lite';
 ```
-
-The package is ESM-only. A CommonJS app crosses the client boundary with a dynamic import:
-
-```js
-const { Graph } = await import('@antv/g6-lite');
-```
-
-`Graph` needs a real DOM, Canvas, and WebGL context. It cannot be constructed in an environment without a canvas.
-
-## Call order
-
-```ts
-const graph = new Graph({
-  container: document.getElementById('container')!,
-  data: { nodes: [{ id: 'a' }, { id: 'b' }], edges: [{ source: 'a', target: 'b' }] },
-  layout: { type: 'force' },
-});
-
-graph.on('node:click', (event) => {
-  graph.setItemState(event.nodeId, 'selected', true);
-});
-
-await graph.render();
-
-graph.destroy();
-```
-
-`new Graph()` stores the options and prepares the canvas. Layout, drawing, and later data changes wait for `await graph.render()`. Calling `setData()`, `addNode()`, `setItemState()`, or `layout()` before that throws `Graph must be rendered before calling data operations`.
-
-Queries before the first render describe an empty graph: `getNodes()` is `[]` and `getNodeData()` is `undefined`. `graph.on()` can be registered before `render()`.
 
 ## Entries you can call
 
-| Entry | Use | Reference |
+| Entry | Purpose | Reference |
 | --- | --- | --- |
-| `Graph` | Create a graph, read and write data, set state, control the viewport, and listen to events | [Graph](/en/docs/api/graph) |
-| `GraphOptions` and the node, edge, layout, behavior, and theme types | Declare the initial configuration | [Options](/en/docs/api/options) |
-| `register()` | Register a custom node, edge, label, decoration, layout, behavior, transform, or plugin | [Extensions](/en/docs/api/extensions) |
-| `extensionFactory()` | Give a stateful extension its own instance on every Graph | [Extensions](/en/docs/api/extensions) |
-| `runLayout()` | Compute node positions without creating a Graph | [Extensions](/en/docs/api/extensions) |
-| `resolveTheme()` | Turn `'light'`, `'dark'`, or a partial token object into a complete `ThemeTokens` | [Options](/en/docs/api/options) |
+| Graph | Operate one graph | [All public members by task](/en/docs/api/graph) |
+| GraphOptions and topic option types | Declare constructor input | [Top-level fields and topics](/en/docs/api/options) |
+| register / extensionFactory | Register extensions and create isolated instances | [Registration, factories, scope](/en/docs/api/extensions/registration) |
+| runLayout | Calculate node positions independently | [Utilities](/en/docs/api/utilities#runlayout) |
+| resolveTheme | Resolve presets and tokens | [Utilities](/en/docs/api/utilities#resolvetheme) |
+| EventEmitter / Handler | Dispatch application-owned events | [Independent event utility](/en/docs/api/utilities#eventemitter) |
 
-These types are also exported from the package root: `GraphData`, `GraphNode`, `GraphEdge`, `ComboData`, `NodeModel`, `EdgeModel`, `ComboModel`, `ElementState`, `GraphEventMap`, `FitViewOptions`, `ZoomOptions`, `SetDataOptions`, `LayoutConfig`, `LabelOptions`, `ThemeOption`, and `BehaviorOption`.
+Use [Graph.on / off / once](/en/docs/api/graph/events) for graph subscriptions. Extension scope varies by category rather than exactly one factory call per Graph.
+
+## Types by domain
+
+Common entries: [input data](/en/docs/api/options/data), [live Models](/en/docs/api/graph/data#model-fields), [states](/en/docs/api/graph/states), [configuration](/en/docs/api/options), [events](/en/docs/api/graph/events#grapheventmap), and [extension contracts](/en/docs/api/extensions).
+
+<details>
+<summary>All root type names grouped by domain</summary>
+
+- **Constructor configuration** ([Top-level fields](/en/docs/api/options)): `GraphOptions`.
+- **Data, models, and states** ([Input](/en/docs/api/options/data) · [Models](/en/docs/api/graph/data) · [Writes](/en/docs/api/graph/data-mutations) · [States](/en/docs/api/graph/states)): `GraphData`, `GraphNode`, `GraphEdge`, `ComboData`, `NodeData`, `EdgeData`, `NodeModel`, `EdgeModel`, `ComboModel`, `ElementModel`, `BuiltInElementState`, `ElementState`, `NodeState`, `EdgeState`, `NodeDataUpdate`, `NodePositionUpdate`, `EdgeDataUpdate`, `SetDataOptions`.
+- **Node, edge, and Combo styles** ([Nodes](/en/docs/api/options/node) · [Edges](/en/docs/api/options/edge) · [Combos](/en/docs/api/options/combo)): `NodeConfig`, `EdgeConfig`, `ComboConfig`, `NodeStyleConfig`, `NodeStyleValue`, `NodeStateStyleOverride`, `EdgeStyleValue`, `EdgeStateStyleOverride`, `ComboStyleConfig`, `ComboStyleValue`, `ComboStateStyleOverride`, `ParallelEdgesConfig`.
+- **Label policy and decoration options** ([Label policy](/en/docs/api/options/label) · [Decorations](/en/docs/api/options/node#nodedecorationconfig)): `LabelOptions`, `LabelType`, `LabelPlacement`, `EdgeLabelPlacement`, `NodeBadgeItem`, `NodeBadgeKind`, `NodeDecorationConfig`, `NodeDecorationPlacement`, `NodeDecorationAnchor`, `NodeDecorationAttachment`.
+- **Layout, viewport, and themes** ([Layout](/en/docs/api/graph/layout) · [Viewport](/en/docs/api/graph/viewport) · [Themes](/en/docs/api/options/theme)): `LayoutConfig`, `LayoutResult`, `Camera`, `GraphPoint`, `ViewportPoint`, `FitViewOptions`, `ZoomOptions`, `ThemeOption`, `ThemeTokens`.
+- **Events and independent dispatch** ([Graph events](/en/docs/api/graph/events) · [Independent dispatch](/en/docs/api/utilities#eventemitter)): `GraphEventMap`, `GraphElementEvent`, `NodeGraphEvent`, `EdgeGraphEvent`, `ComboGraphEvent`, `CanvasGraphEvent`, `Handler`.
+- **Behaviors and Tooltip** ([Options](/en/docs/api/options/behaviors) · [Contract](/en/docs/api/extensions/runtime#behaviorextension)): `BehaviorName`, `BehaviorConfig`, `BehaviorOption`, `BehaviorOptions`, `BuiltInBehaviorConfig`, `BuiltInBehaviorOptionsMap`, `BrushSelectOptions`, `ClickSelectConfig`, `DragCanvasOptions`, `HoverHighlightConfig`, `LassoSelectOptions`, `TooltipContext`, `TooltipOptions`, `ZoomCanvasOptions`, `BehaviorExtension`, `BehaviorEventHandlers`, `EventArguments`.
+- **Drawing contracts** ([Contracts](/en/docs/api/extensions/drawing)): `NodeExtension`, `NodeExtensionInput`, `NodeBoundaryAnchorParams`, `NodeOverlayDrawParams`, `EdgeExtension`, `LabelRenderer`, `LabelMeasureParams`, `LabelDrawParams`, `NodeLabelParams`, `EdgeLabelParams`, `LabelLayout`, `ResolvedLabelStyle`, `DecorationRenderer`, `DecorationMeasureParams`, `DecorationDrawParams`.
+- **Runtime extensions and registration** ([Registration/context](/en/docs/api/extensions/registration) · [Runtime](/en/docs/api/extensions/runtime) · [Options](/en/docs/api/options/transforms-plugins)): `Extension`, `ExtensionCategory`, `ExtensionFactory`, `ExtensionInput`, `ExtensionConstructor`, `ExtensionContext`, `ExtensionDataContext`, `ExtensionStateContext`, `ExtensionViewportContext`, `ExtensionNodeData`, `ExtensionEdgeData`, `LayoutExtension`, `TransformExtension`, `PluginExtension`, `PluginOptions`, `PluginOption`, `TransformOption`.
+
+ExtensionConstructor is a compatibility type; see [deprecated entries](/en/docs/compatibility/api-stability#deprecated-compatibility-entries). This index does not authorize deep source imports.
+
+</details>
+
+## Call order
+
+Follow [Graph lifecycle](/en/docs/concepts/graph-lifecycle) for creation, subscriptions, valid rendering, and unmount cleanup. See [lifecycle methods](/en/docs/api/graph/lifecycle) for exact prerequisites. Environment, module format, and client requirements belong in [runtime environments](/en/docs/compatibility/browser) and [ESM / CommonJS boundaries](/en/docs/compatibility/api-stability#esm-and-commonjs).
 
 ## Query results are read-only
 
-`getNodeData()`, `getEdgeData()`, and `getComboData()` return read-only views. Change position, payload, and state through the write methods:
-
-```ts
-const node = graph.getNodeData('a');
-if (node) {
-  graph.updateNodeData(node.id, { ...node.data, highlighted: true });
-  graph.updateNodePosition(node.id, node.x + 20, node.y);
-  graph.setItemState(node.id, 'selected', true);
-}
-```
-
-Assigning `node.x`, or calling `node.states.add()`, does not update the canvas. The type checker rejects those writes.
+Models are live views with read-only types; getData returns a snapshot shallow-copied by layer. Write through data/state APIs. See [queries](/en/docs/api/graph/data) for copying rules and the [data guide](/en/docs/guides/data) for workflows.
 
 ## Engine-only members
 
-These `Graph` members exist for rendering and interaction dispatch. Application code uses the public entry in the right column.
-
-| Engine member | Application entry |
-| --- | --- |
-| `eventEmitter` | `graph.on()` / `graph.off()` / `graph.once()` |
-| `getCanvas()` | The canvas DOM stays inside the engine |
-| `getLayoutNodes()` / `getNodeIndex()` | `getNodes()` / `getNodeData()` |
-| `pickAt()` / `pickComboAt()` | `nodeId`, `edgeId`, and `comboId` on element events |
-| `setHighlight()` / `clearHighlight()` | `setItemState()` with the `highlight` state |
-| `updateData()` / `scheduleRender()` | The data methods and `refresh()` |
-
-`EventEmitter` and `Handler` are also exported. Subscribe to graph events with [on / off / once](/en/docs/api/graph/events#on). Find complete events and payloads in the [GraphEventMap reference](/en/docs/api/graph/events#grapheventmap), and workflows in the [event guide](/en/docs/guides/events).
+Internal class members are outside application API. Avoid renderer, picking, and internal event transport. See [public and internal boundaries](/en/docs/compatibility/api-stability#public-and-internal-boundaries) for public alternatives.
 
 ## Compatibility entries
 
-New code uses the current entry. The symbols below can still be imported and will be removed according to [API stability](/en/docs/compatibility/api-stability).
-
-| Compatibility entry | Current entry |
-| --- | --- |
-| `BaseNode`, `BreathingNode`, `registerNode()` | `register('node', name, extension)` |
-| `graph.isDestroyed()` | `graph.destroyed` |
-| `graph.toData()` | `graph.getData()` |
-| `graph.getNodePosition()` | `graph.getElementPosition()` |
-| `setComboState()` / `clearComboStates()` / `getComboStates()` | `setItemState()` / `clearItemStates()` / `getItemStates()` |
-| `event` in element payloads (excluding derived selection/drag payloads) | `nativeEvent`; see [payload distinctions](/en/docs/api/graph/events#element-event-payloads) |
-| `context.graph` and the flat coordinate methods | `context.data`, `context.state`, `context.viewport` |
+BaseNode, BreathingNode, registerNode, and deprecated methods support existing consumers. Canonical names and replacements are in [deprecated compatibility entries](/en/docs/compatibility/api-stability#deprecated-compatibility-entries), alongside upgrade and experimental-capability boundaries.

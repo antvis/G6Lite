@@ -5,7 +5,23 @@ description: Public package entry points, deprecated compatibility APIs, and exp
 
 G6Lite remains in the `0.1.x` beta. The npm package root and `package.json#exports` define the only public API boundary. Do not import deep `src/` or build-output paths.
 
+Other root utilities include resolveTheme and EventEmitter / Handler; see [Utilities](/en/docs/api/utilities).
+
 Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
+
+## Public and internal boundaries
+
+Root exports do not make every Graph member an application contract. These members carry internal annotations for rendering or interaction dispatch; use the public entries instead.
+
+| Internal member | Public alternative |
+| --- | --- |
+| eventEmitter | [on / off / once](/en/docs/api/graph/events); application dispatch can use [EventEmitter](/en/docs/api/utilities#eventemitter) |
+| getCanvas | Retain the host container reference; use public [coordinate methods](/en/docs/api/graph/viewport) |
+| getLayoutNodes / getNodeIndex | [getNodes / getNodeData](/en/docs/api/graph/data) |
+| pickAt / pickComboAt | [Element event payloads](/en/docs/api/graph/events#element-event-payloads) |
+| setHighlight / clearHighlight | [State methods](/en/docs/api/graph/states) |
+| updateData | [Data writes](/en/docs/api/graph/data-mutations) |
+| scheduleRender | [refresh](/en/docs/api/graph/lifecycle#refresh), or extension [context.requestRender](/en/docs/api/extensions/registration#requestrender-and-isdestroyed) |
 
 ## ESM and CommonJS
 
@@ -24,6 +40,25 @@ const { Graph } = await import('@antv/g6-lite');
 
 This does not change the requirement for a real DOM, Canvas, and WebGL environment.
 
-Deprecated compatibility APIs include `BaseNode`, `BreathingNode`, `registerNode()`, `context.graph`, flattened ExtensionContext coordinate methods, `Graph#getAllData()`, and the old event `originalEvent` field. New code should use functional extensions, structured context, explicit queries, and current event objects.
+## Deprecated compatibility entries
+
+These entries remain for existing consumers. Replacements follow current root exports and deprecated annotations. Use the public alternative in new code and review change records when upgrading.
+
+| Compatibility entry | Current alternative |
+| --- | --- |
+| BaseNode / registerNode | [NodeExtension + register('node', ...)](/en/docs/api/extensions/drawing#nodeextension) |
+| BreathingNode | Built-in node.type: 'breathing-node', or a stateless NodeExtension |
+| ExtensionConstructor | [extensionFactory](/en/docs/api/extensions/registration#extensionfactory) returning fresh instances |
+| graph.isDestroyed() | [graph.destroyed](/en/docs/api/graph/lifecycle#destroyed) |
+| graph.toData() | [getData](/en/docs/api/graph/data#getdata) |
+| graph.getNodePosition() | [getElementPosition](/en/docs/api/graph/data#getelementposition) |
+| setComboState / clearComboStates / getComboStates | [setItemState / clearItemStates / getItemStates](/en/docs/api/graph/states) |
+| Element payload event in GraphElementEvent, NodeGraphEvent, EdgeGraphEvent, ComboGraphEvent, CanvasGraphEvent | nativeEvent; see [element payloads](/en/docs/api/graph/events#element-event-payloads) |
+| ExtensionContext.graph | [Controlled data / state / viewport capabilities](/en/docs/api/extensions/registration#extensioncontext) |
+| Flat ExtensionContext screenToGraph / graphToScreen / getZoom | Corresponding viewport methods |
+
+Deprecating event on element payloads does not deprecate event on derived selection/drag payloads. See [event contracts](/en/docs/api/graph/events) for fields. Removal is communicated through change records and migration notes; beta entries are not promised indefinitely across minor versions.
+
+## Experimental capabilities
 
 Combo collapse, nesting, and runtime regrouping remain experimental. The calls, methods, and option fields application code can use are documented in [Usable APIs](/en/docs/api), [Graph](/en/docs/api/graph), and [Options](/en/docs/api/options). Read the [Changelog](/en/docs/changelog) before upgrades and run type, build, and critical example checks.

@@ -10,6 +10,7 @@ G6Lite 仍处于 `0.1.x` beta 阶段。公开 API 以 npm 包根入口和 `packa
 - `Graph`：创建、渲染、更新和销毁图实例。
 - `register()` 与 `extensionFactory()`：注册受控扩展。
 - `runLayout()`：独立运行布局。
+- resolveTheme、EventEmitter / Handler：见[工具函数](/docs/api/utilities)。
 - 从包根导出的配置、数据、行为和扩展类型。
 
 ```ts
@@ -18,6 +19,20 @@ import type { GraphData, GraphOptions } from '@antv/g6-lite';
 ```
 
 不要从 `@antv/g6-lite/src/...` 或构建产物内部路径导入。发布包虽然包含 `src/`，但它不是额外的公开 API 面。
+
+## 公开与内部边界
+
+从包根导出不代表 Graph 上每个成员都是业务契约。以下成员带 internal 标记，供引擎渲染或交互分发使用；业务选择右侧公开入口。
+
+| 内部成员 | 公开替代入口 |
+| --- | --- |
+| eventEmitter | [on / off / once](/docs/api/graph/events)；独立业务分发用 [EventEmitter](/docs/api/utilities#eventemitter) |
+| getCanvas | 宿主保留自己的容器引用，位置转换用[坐标方法](/docs/api/graph/viewport) |
+| getLayoutNodes / getNodeIndex | [getNodes / getNodeData](/docs/api/graph/data) |
+| pickAt / pickComboAt | [元素事件载荷](/docs/api/graph/events#元素事件载荷) |
+| setHighlight / clearHighlight | [统一状态方法](/docs/api/graph/states) |
+| updateData | [数据写入方法](/docs/api/graph/data-mutations) |
+| scheduleRender | [refresh](/docs/api/graph/lifecycle#refresh)，扩展用 [context.requestRender](/docs/api/extensions/registration#requestrender-与-isdestroyed) |
 
 ## ESM 与 CommonJS
 
@@ -38,15 +53,24 @@ const { Graph } = await import('@antv/g6-lite');
 
 ## 弃用兼容层
 
-以下能力为现有项目保留，但新代码应迁移到推荐入口：
+以下入口仍为已有项目保留。替代关系以当前包根和源码 deprecated 标记为准；新代码使用右侧入口，升级时核对变更记录。
 
-- `BaseNode`、`BreathingNode`、`registerNode()`：改用 `register()` 和函数式节点扩展。
-- `context.graph`：扩展优先使用结构化的 data、state、viewport 上下文。
-- ExtensionContext 平铺坐标方法：改用 `context.viewport`。
-- `Graph#getAllData()`：改用明确的数据查询与更新 API。
-- 旧事件字段 `originalEvent`：改用当前事件对象定义。
+| 兼容入口 | 当前替代 |
+| --- | --- |
+| BaseNode / registerNode | [NodeExtension + register('node', ...)](/docs/api/extensions/drawing#nodeextension) |
+| BreathingNode | 内置 node.type: 'breathing-node'，或无状态 NodeExtension |
+| ExtensionConstructor | [extensionFactory](/docs/api/extensions/registration#extensionfactory)，返回新实例 |
+| graph.isDestroyed() | [graph.destroyed](/docs/api/graph/lifecycle#destroyed) |
+| graph.toData() | [getData](/docs/api/graph/data#getdata) |
+| graph.getNodePosition() | [getElementPosition](/docs/api/graph/data#getelementposition) |
+| setComboState / clearComboStates / getComboStates | [setItemState / clearItemStates / getItemStates](/docs/api/graph/states) |
+| 元素载荷的 event：GraphElementEvent、NodeGraphEvent、EdgeGraphEvent、ComboGraphEvent、CanvasGraphEvent | nativeEvent；[元素载荷](/docs/api/graph/events#元素事件载荷) |
+| ExtensionContext.graph | [data / state / viewport 等受控能力](/docs/api/extensions/registration#extensioncontext) |
+| ExtensionContext 的平铺 screenToGraph / graphToScreen / getZoom | viewport 下的同名方法 |
 
-弃用能力会在移除前通过 Changelog 给出迁移说明；beta 阶段不承诺跨 minor 永久保留。
+元素载荷的 event 弃用不扩大到选择、拖拽等派生载荷中的 event 字段。完整事件字段见[事件参考](/docs/api/graph/events)。
+
+弃用能力的移除通过更新记录和迁移说明公布；beta 阶段不承诺跨 minor 永久保留。
 
 ## 实验性能力
 

@@ -1,0 +1,34 @@
+site/content/docs/en/guides/parallel-edges.mdx
+  s_4534bc5c3d78f4::t_26e1f7410455ef 72
+  s_4534bc5c3d78f4::t_c42e8f9047035e 3,6,8,10,12-16,18,20,23-25,29-42,44,48-68,70,74
+  s_4534bc5c3d78f4::t_fa71858466b197 28
+site/src/lib/node-doc-example-source.ts
+  s_4534bc5c3d78f4::t_db3d437bc3f10c 4,6-7
+site/demos/docs-self-loops.ts
+  s_4534bc5c3d78f4::t_4c7747afd3081e 1-37
+site/src/components/node-doc-preview.tsx
+  s_4534bc5c3d78f4::t_bc1aa2d3de25ab 12-13,79-83
+site/demos/docs-parallel-workflow.ts
+  s_4534bc5c3d78f4::t_4c7747afd3081e 1-81
+site/content/docs/zh/guides/parallel-edges.mdx
+  s_4534bc5c3d78f4::t_c42e8f9047035e 3,6,8,10,12-14,16,18,20,23-25,28-42,44,48-50,52-58,60,62,64-70,74
+  s_4534bc5c3d78f4::t_26e1f7410455ef 72
+site/maintenance/b55-acceptance.json
+  s_4534bc5c3d78f4::t_418166bfc47e18 1-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8a674c2be06ab26995e38eee9fcc2ce13e217036",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

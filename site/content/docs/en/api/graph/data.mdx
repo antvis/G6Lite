@@ -5,7 +5,7 @@ description: Data snapshots, readonly models, existence, positions, and adjacenc
 
 import { NodeDocExample } from '@/components/node-doc-example';
 
-Use query methods for the working graph and getData for an editable export. Update through public methods rather than mutating models. See the [data guide](/en/docs/guides/data)。
+Use query methods for the working graph and getData for an editable export. Update through public methods rather than mutating models. See the [data guide](/en/docs/guides/data).
 
 ## Query timing and returned values
 
@@ -128,7 +128,7 @@ Returns new records for incoming and outgoing edges, with id/source/target only.
 | EdgeModel | readonly id, source, target, data?, states |
 | ElementModel | NodeModel \| EdgeModel \| ComboModel |
 
-x/y are graph-coordinate numbers; data is optional `Readonly<Record<string, unknown>>`, and states is `ReadonlySet<ElementState>`, read using has or iteration. See [ComboModel](/en/docs/api/options/combo#read-only-query-model)。
+x/y are graph-coordinate numbers; data is optional `Readonly<Record<string, unknown>>`, and states is `ReadonlySet<ElementState>`, read using has or iteration. See [ComboModel](/en/docs/api/options/combo#read-only-query-model).
 
 ```ts
 import type { Graph } from '@antv/g6-lite';
@@ -140,7 +140,9 @@ console.log(graph.getNodeData('A')?.states.has('selected'));
 
 ## Compatibility methods
 
-- `graph.toData(): GraphData`：deprecated; equivalent to getData.
-- `graph.getNodePosition(id: string): { x: number; y: number } | null`：deprecated; nodes only. Use getElementPosition.
+- `graph.toData(): GraphData`: deprecated; equivalent to getData.
+- `graph.getNodePosition(id: string): { x: number; y: number } | null`: deprecated; nodes only. Use getElementPosition.
 
 Continue with [mutations](/en/docs/api/graph/data-mutations) · [State queries](/en/docs/api/graph/states) · [Data fields](/en/docs/api/options/data).
+
+Complete example: [Queries, states, and visibility](/en/docs/examples/queries-and-states).

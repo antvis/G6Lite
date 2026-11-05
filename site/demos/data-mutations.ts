@@ -120,6 +120,7 @@ export async function run(container: string | HTMLElement) {
 
   renderStatus();
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();

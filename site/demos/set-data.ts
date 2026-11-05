@@ -142,6 +142,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();

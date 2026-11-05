@@ -5,7 +5,7 @@ description: Map application data, choose replacement or incremental updates, an
 
 import { NodeDocExample } from '@/components/node-doc-example';
 
-Connect business entities and graph elements with stable IDs. Prepare input, then choose updates by scope. See the [data reference](/en/docs/api/options/data)，and [data model](/en/docs/concepts/data-model)。
+Connect business entities and graph elements with stable IDs. Prepare input, then choose updates by scope. See the [data reference](/en/docs/api/options/data), and [data model](/en/docs/concepts/data-model).
 
 ## Map application data
 
@@ -28,7 +28,7 @@ const data: GraphData = {
 };
 ```
 
-This converts data only. Display also needs a container and render. Configure layout when positions are absent; see [quick start](/en/docs/getting-started/quick-start)。
+This converts data only. Display also needs a container and render. Configure layout when positions are absent; see [quick start](/en/docs/getting-started/quick-start).
 
 ## Validate data
 
@@ -53,7 +53,7 @@ Call setData after a valid initial render. It runs configured layout and default
 
 <NodeDocExample id="viewport-preserve" locale="en" focus="preserve-view" />
 
-Camera, states, and data have separate retention policies. Restore selected only for stable IDs still present in new input; see [preserving selection](/en/docs/guides/states)。See [viewport policies](/en/docs/guides/viewport)。
+Camera, states, and data have separate retention policies. Restore selected only for stable IDs still present in new input; see [preserving selection](/en/docs/guides/states). See [viewport policies](/en/docs/guides/viewport).
 
 ## Incremental updates
 
@@ -112,4 +112,6 @@ setData fits by default and builds states from new input. fitView: false keeps t
 
 ## Related references
 
-[Queries](/en/docs/api/graph/data) · [Mutations](/en/docs/api/graph/data-mutations) · [States](/en/docs/api/graph/states) · [Combos](/en/docs/guides/combo) · [Layout](/en/docs/api/graph/layout)。
+[Runnable examples](/en/docs/examples/basic): [Full replacement](/en/docs/examples/set-data) · [Incremental mutations](/en/docs/examples/data-mutations) · [Business relationships](/en/docs/examples/relationship).
+
+[Queries](/en/docs/api/graph/data) · [Mutations](/en/docs/api/graph/data-mutations) · [States](/en/docs/api/graph/states) · [Combos](/en/docs/guides/combo) · [Layout](/en/docs/api/graph/layout).

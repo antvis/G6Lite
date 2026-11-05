@@ -92,9 +92,9 @@ export async function run(container: string | HTMLElement) {
       graph.setElementStates({ root: ['highlight'], n1: ['selected'], 'e-root-n2': ['active'] });
       showStateSummary('setElementStates');
     } else if (action === 'combo') {
-      graph.setComboState('right', 'highlight', true);
+      graph.setItemState('right', 'highlight', true);
       const children = graph.getComboChildren('right');
-      ui.setStatus(`combo=${graph.getComboData('right')?.id}\nchildren=${children.nodes.join(', ')}\nstates=${graph.getComboStates('right').join(', ')}`);
+      ui.setStatus(`combo=${graph.getComboData('right')?.id}\nchildren=${children.nodes.join(', ')}\nstates=${graph.getItemStates('right').join(', ')}`);
     } else if (action === 'hide') {
       const hidden = graph.getItemStates('n2').includes('hidden');
       if (hidden) graph.showItem('n2');
@@ -103,13 +103,14 @@ export async function run(container: string | HTMLElement) {
     } else if (action === 'clear') {
       for (const node of graph.getNodes()) graph.clearItemStates(node.id);
       for (const edge of graph.getEdges()) graph.clearItemStates(edge.id);
-      for (const comboId of ['left', 'right']) graph.clearComboStates(comboId);
-      showStateSummary('clearItemStates / clearComboStates');
+      for (const comboId of ['left', 'right']) graph.clearItemStates(comboId);
+      showStateSummary('clearItemStates');
     }
   });
 
   showStateSummary('ready');
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();

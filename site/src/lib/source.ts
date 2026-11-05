@@ -1,8 +1,9 @@
 import { docs } from 'collections/server';
 import { loader } from 'fumadocs-core/source';
-import { i18n, localizedDocsPath, type Locale } from './i18n';
+import { i18n, localizedDocsPath, localizedPath, type Locale } from './i18n';
 import { docsContentRoute, docsImageRoute, withBasePath } from './shared';
 import { expandNodeDocExamples } from './node-doc-example-source';
+import { getSiteExample, localizedText } from './site-examples';
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
@@ -38,8 +39,14 @@ export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
 
 export async function getLLMText(page: (typeof source)['$inferPage']) {
   const processed = await page.data.getText('processed');
+  const locale = (page.locale ?? 'zh') as Locale;
+  const example = page.slugs[0] === 'examples' ? getSiteExample(page.slugs[1] ?? '') : undefined;
+  const links = example?.documentation?.map((link) =>
+    `- [${localizedText(link.title, locale)}](${withBasePath(localizedPath(link.href, locale))})`,
+  ).join('\n');
+  const related = links ? `\n\n## ${locale === 'zh' ? '继续阅读' : 'Related documentation'}\n\n${links}` : '';
 
   return `# ${page.data.title} (${page.url})
 
-${expandNodeDocExamples(processed)}`;
+${expandNodeDocExamples(processed)}${related}`;
 }

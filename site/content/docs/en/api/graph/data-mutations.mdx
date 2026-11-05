@@ -5,7 +5,7 @@ description: Replacement, node and edge mutations, batch writes, and event bound
 
 import { NodeDocExample } from '@/components/node-doc-example';
 
-Read models in the [query reference](/en/docs/api/graph/data)，and follow tasks in the [data guide](/en/docs/guides/data)。
+Read models in the [query reference](/en/docs/api/graph/data), and follow tasks in the [data guide](/en/docs/guides/data).
 
 ## Common prerequisites and type shorthand
 
@@ -141,6 +141,8 @@ graph.removeNodes(['D', 'E']); // Adjacent edges are removed too
 
 Add/remove calls emit afteradditem / afterremoveitem; data and position updates emit afterupdateitem. Batches emit per-entry events, not transaction commits or afterrender. Adjacent edges removed with a node do not each emit afterremoveitem.
 
-Some single-item calls emit method-level events for missing IDs or unchanged data; addNodes / removeNodes can also emit for skipped input IDs. Events do not replace hasNode / hasEdge or model queries. See [data events](/en/docs/api/graph/events/lifecycle)。
+Some single-item calls emit method-level events for missing IDs or unchanged data; addNodes / removeNodes can also emit for skipped input IDs. Events do not replace hasNode / hasEdge or model queries. See [data events](/en/docs/api/graph/events/lifecycle).
 
-Continue with [queries and snapshots](/en/docs/api/graph/data) · [Preserve selection](/en/docs/guides/states) · [View policies](/en/docs/guides/viewport)。
+Continue with [queries and snapshots](/en/docs/api/graph/data) · [Preserve selection](/en/docs/guides/states) · [View policies](/en/docs/guides/viewport).
+
+Complete example: [Node and edge mutations](/en/docs/examples/data-mutations).

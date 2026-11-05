@@ -32,6 +32,7 @@ export interface SiteExampleDefinition {
   dataDescription: LocalizedText;
   tags: string[];
   metrics: SiteExampleMetric[];
+  documentation?: Array<{ title: LocalizedText; href: string }>;
 }
 
 export interface SiteExampleCategory {
@@ -110,6 +111,10 @@ export const siteExampleCategories: readonly SiteExampleCategory[] = [
 export const siteExamples: readonly SiteExampleDefinition[] = [
   {
     id: 'basic',
+    documentation: [
+      { title: { zh: '数据接入与更新', en: 'Data guide' }, href: '/docs/guides/data' },
+      { title: { zh: '图数据字段', en: 'Data fields' }, href: '/docs/api/options/data' },
+    ],
     file: 'basic.ts',
     category: 'getting-started',
     group: { zh: '基础图', en: 'Basic graph' },
@@ -134,6 +139,10 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'default-theme',
+    documentation: [
+      { title: { zh: '主题指南', en: 'Theme guide' }, href: '/docs/guides/theme' },
+      { title: { zh: '状态方法', en: 'State methods' }, href: '/docs/api/graph/states' },
+    ],
     file: 'default-theme.ts',
     category: 'getting-started',
     group: { zh: '默认体验', en: 'Default experience' },
@@ -158,6 +167,10 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'data-mutations',
+    documentation: [
+      { title: { zh: '写入方法', en: 'Mutation methods' }, href: '/docs/api/graph/data-mutations' },
+      { title: { zh: '查询模型', en: 'Query models' }, href: '/docs/api/graph/data' },
+    ],
     file: 'data-mutations.ts',
     category: 'data-and-state',
     group: { zh: '数据生命周期', en: 'Data lifecycle' },
@@ -167,8 +180,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Demonstrate individual and batch node and edge additions, updates, and removals.',
     },
     interaction: {
-      zh: '使用预览区工具条执行不同的数据变更并观察事件结果。',
-      en: 'Use the preview toolbar to perform data mutations and observe event results.',
+      zh: '先 addNode 再 addEdge；节点数由 3 变为 4，边数由 2 变为 3。removeNode 同时移除关联边，重置恢复初始数据。',
+      en: 'Choose addNode then addEdge: counts change from 3/2 to 4/3. removeNode also removes its adjacent edge; reset restores initial data.',
     },
     dataDescription: {
       zh: '在一份小型业务关系数据上持续执行增量更新。',
@@ -179,6 +192,11 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'queries-and-states',
+    documentation: [
+      { title: { zh: '读取与邻接查询', en: 'Queries and adjacency' }, href: '/docs/api/graph/data' },
+      { title: { zh: '状态与显隐', en: 'States and visibility' }, href: '/docs/api/graph/states' },
+      { title: { zh: 'Combo 操作', en: 'Combo operations' }, href: '/docs/api/graph/combo' },
+    ],
     file: 'queries-and-states.ts',
     category: 'data-and-state',
     group: { zh: '查询与状态', en: 'Queries and states' },
@@ -188,8 +206,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Inspect elements, adjacency, and states while controlling batch states and visibility.',
     },
     interaction: {
-      zh: '通过工具条运行查询、设置状态、隐藏元素并清理结果。',
-      en: 'Run queries, set states, hide elements, and clear results from the toolbar.',
+      zh: '查询 root 应得到 n1、n2 两个邻居和两条关联边。再对比批量增减、整份状态替换、Combo 高亮与隐藏；全部清理恢复空状态。',
+      en: 'Query root for neighbors n1/n2 and two adjacent edges. Compare batch toggles, full state replacement, Combo highlighting, and hiding; clear restores empty states.',
     },
     dataDescription: {
       zh: '使用带邻接关系的数据验证 Graph 查询模型。',
@@ -200,6 +218,11 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'set-data',
+    documentation: [
+      { title: { zh: '数据更新流程', en: 'Data updates' }, href: '/docs/guides/data' },
+      { title: { zh: 'setData 契约', en: 'setData contract' }, href: '/docs/api/graph/data-mutations#setdata' },
+      { title: { zh: '视野保留', en: 'View preservation' }, href: '/docs/guides/viewport' },
+    ],
     file: 'set-data.ts',
     category: 'data-and-state',
     group: { zh: '数据替换', en: 'Data replacement' },
@@ -209,8 +232,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Replace the whole graph with setData, then switch layouts.',
     },
     interaction: {
-      zh: '使用工具条替换数据、切换布局、隐藏节点并聚焦。',
-      en: 'Replace data, switch layouts, hide a node, and focus it from the toolbar.',
+      zh: '数据 A/B 分别显示 5/8 个节点。切换后再尝试布局、隐藏与聚焦；这是全量替换，不保留旧数据集的元素。',
+      en: 'Data A/B show 5/8 nodes. Then try layout, hiding, and focus. Replacement does not retain elements from the previous dataset.',
     },
     dataDescription: {
       zh: '工具条会替换整份节点和边，再重新布局。',
@@ -521,6 +544,11 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'combo',
+    documentation: [
+      { title: { zh: 'Combo 指南', en: 'Combo guide' }, href: '/docs/guides/combo' },
+      { title: { zh: 'Combo 方法', en: 'Combo methods' }, href: '/docs/api/graph/combo' },
+      { title: { zh: 'Combo 配置', en: 'Combo options' }, href: '/docs/api/options/combo' },
+    ],
     file: 'combo.ts',
     category: 'elements',
     group: { zh: 'Combo', en: 'Combos' },
@@ -689,6 +717,11 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'relationship',
+    documentation: [
+      { title: { zh: '业务数据映射', en: 'Business data mapping' }, href: '/docs/guides/data' },
+      { title: { zh: '节点映射', en: 'Node mapping' }, href: '/docs/guides/node' },
+      { title: { zh: '边配置', en: 'Edge configuration' }, href: '/docs/guides/edge' },
+    ],
     file: 'relationship.ts',
     category: 'scenarios-and-performance',
     group: { zh: '关系网络', en: 'Relationship networks' },
@@ -827,6 +860,10 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'neighbor-highlight',
+    documentation: [
+      { title: { zh: '邻居查询', en: 'Neighbor queries' }, href: '/docs/api/graph/data#getneighbornodes' },
+      { title: { zh: '高亮交互', en: 'Highlight interactions' }, href: '/docs/guides/interactions' },
+    ],
     file: 'neighbor-highlight.ts',
     category: 'interactions',
     group: { zh: '悬停', en: 'Hover' },
@@ -837,14 +874,18 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     },
     interaction: { zh: '悬停节点或边。', en: 'Hover a node or an edge.' },
     dataDescription: {
-      zh: '中心节点和一层分支用于观察邻居高亮。',
-      en: 'A center node and one ring of branches show neighbor highlighting.',
+      zh: 'hub 与两级分支共 7 个节点、7 条边，用于观察一度邻接高亮。',
+      en: 'Seven nodes and seven edges form a hub with two branch levels for one-hop highlighting.',
     },
     tags: ['behavior.highlight-node', 'behavior.highlight-edge'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '2' }],
   },
   {
     id: 'selection-behaviors',
+    documentation: [
+      { title: { zh: '状态使用', en: 'Using states' }, href: '/docs/guides/states' },
+      { title: { zh: '交互组合', en: 'Combine interactions' }, href: '/docs/guides/interactions' },
+    ],
     file: 'selection-behaviors.ts',
     category: 'interactions',
     group: { zh: '选择', en: 'Selection' },

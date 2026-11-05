@@ -891,6 +891,20 @@ export function ExampleDetailClient({
                       ))}
                     </div>
                   </section>
+                  {example.documentation?.length ? (
+                    <section>
+                      <h3>{locale === 'zh' ? '继续阅读' : 'Related documentation'}</h3>
+                      <ul>
+                        {example.documentation.map((link) => (
+                          <li key={link.href}>
+                            <a href={withBasePath(localizedPath(link.href, locale))}>
+                              {localizedText(link.title, locale)}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
                 </article>
               ) : activeTab === 'source' ? (
                 source ? (

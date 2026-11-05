@@ -1848,16 +1848,16 @@ body.example-workspace-resizing {
 }
 
 .example-code-panel .example-panel-toolbar {
-  flex-wrap: nowrap;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0 1rem;
   border-bottom: 0;
   background: #eef1f8;
   padding: 0 1rem;
 }
 
 .example-code-toolbar-main {
-  flex: 1;
-  min-width: 0;
+  flex: 1 0 auto;
+  min-width: max-content;
   gap: 1rem;
   overflow: hidden;
 }

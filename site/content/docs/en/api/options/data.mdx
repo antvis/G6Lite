@@ -3,7 +3,7 @@ title: Graph data reference
 description: GraphData, GraphNode, and GraphEdge fields, identifiers, positions, and initial states
 ---
 
-Pass input to new Graph or setData. Query models are distinct from input objects; see [query models](/en/docs/api/graph/data#model-fields)。Follow the [data guide](/en/docs/guides/data)。
+Pass input to new Graph or setData. Query models are distinct from input objects; see [query models](/en/docs/api/graph/data#model-fields). Follow the [data guide](/en/docs/guides/data).
 
 ## GraphData
 
@@ -54,16 +54,16 @@ Runtime can retain input data references, and direct external edits do not sched
 | data | Record&lt;string, unknown&gt; | Optional business record |
 | states | ElementState[] | Optional initial flags, empty by default |
 
-Equal source and target creates a loop. Multiple distinct edge IDs can share endpoints; see [parallel edges and loops](/en/docs/api/options/edge#parallel-edges-and-self-loops)。
+Equal source and target creates a loop. Multiple distinct edge IDs can share endpoints; see [parallel edges and loops](/en/docs/api/options/edge#parallel-edges-and-self-loops).
 
 ## ComboData
 
-Declare groups in combos, join nodes through comboId, and nest groups through parentId. The six fields, initial folding, and states are defined in [ComboData](/en/docs/api/options/combo#combodata)。See the [Combo guide](/en/docs/guides/combo)。
+Declare groups in combos, join nodes through comboId, and nest groups through parentId. The six fields, initial folding, and states are defined in [ComboData](/en/docs/api/options/combo#combodata). See the [Combo guide](/en/docs/guides/combo).
 
 ## Initial states and export
 
-Input states are name arrays; model states are ReadonlySet views. selected is not a registered click behavior, and disabled does not automatically block interaction. setData does not copy old states into new elements; explicitly carry required business states. See [using states](/en/docs/guides/states)。
+Input states are name arrays; model states are ReadonlySet views. selected is not a registered click behavior, and disabled does not automatically block interaction. setData does not copy old states into new elements; explicitly carry required business states. See [using states](/en/docs/guides/states).
 
-getData exports current positions, IDs, and business states rather than all original configuration. Collapse-derived hidden is excluded. Copying is shallow by layer; see [getData](/en/docs/api/graph/data#getdata)。
+getData exports current positions, IDs, and business states rather than all original configuration. Collapse-derived hidden is excluded. Copying is shallow by layer; see [getData](/en/docs/api/graph/data#getdata).
 
-Continue with [data writes](/en/docs/api/graph/data-mutations) · [Node configuration](/en/docs/api/options/node) · [Edge configuration](/en/docs/api/options/edge)。
+Continue with [data writes](/en/docs/api/graph/data-mutations) · [Node configuration](/en/docs/api/options/node) · [Edge configuration](/en/docs/api/options/edge).

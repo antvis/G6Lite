@@ -5,7 +5,7 @@ description: Creation, removal, membership, direct-child queries, and collapse/e
 
 import { NodeDocExample } from '@/components/node-doc-example';
 
-See [Combo configuration](/en/docs/api/options/combo)，and the [Combo guide](/en/docs/guides/combo)。
+See [Combo configuration](/en/docs/api/options/combo), and the [Combo guide](/en/docs/guides/combo).
 
 ## Prerequisites and boundaries
 
@@ -85,7 +85,7 @@ const combo = graph.getComboData('base');
 console.log(parent, direct, combo?.collapsed);
 ```
 
-getComboData returns a readonly-typed ComboModel. See [model fields](/en/docs/api/options/combo#read-only-query-model)。getData exports current membership, parentId, and collapsed, excluding collapse-derived hidden.
+getComboData returns a readonly-typed ComboModel. See [model fields](/en/docs/api/options/combo#read-only-query-model). getData exports current membership, parentId, and collapsed, excluding collapse-derived hidden.
 
 ## States, visibility, and compatibility
 
@@ -99,4 +99,4 @@ Use setItemState, clearItemStates, getItemStates, and findCombosByState for Comb
 
 Compatibility methods still target Combos only. Use unified state APIs in new code and avoid cross-type ID collisions.
 
-Continue with [group data](/en/docs/api/options/combo#combodata) · [State methods](/en/docs/api/graph/states) · [Data export](/en/docs/api/graph/data#getdata)。
+Continue with [group data](/en/docs/api/options/combo#combodata) · [State methods](/en/docs/api/graph/states) · [Data export](/en/docs/api/graph/data#getdata).

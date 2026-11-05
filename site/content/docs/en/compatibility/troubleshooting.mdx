@@ -1,6 +1,61 @@
 ---
 title: Troubleshooting
-description: Start with a minimal graph to isolate runtime, data, and lifecycle failures
+description: Diagnose observable container, data, layout, label, interaction, and cleanup failures
 ---
 
-Reproduce with the [quick start](/en/docs/getting-started/quick-start). Check container dimensions, endpoints, WebGL, and console output. Restore layout, labels, and behaviors individually; consult the [FAQ](/en/docs/faq) and [runtime requirements](/en/docs/compatibility/browser).
+Keep a minimal reproduction and console errors, then change one condition at a time. Verify the environment with the [quick start](/en/docs/getting-started/quick-start) instead of changing data, layout, and styling together.
+
+## Blank canvas
+
+Check mounted/non-zero container dimensions, initialization errors, unique node IDs, and endpoints. Start with two nodes and an edge, without optional styling or extensions.
+
+```ts
+const container = document.querySelector<HTMLElement>('#container');
+console.table({
+  exists: Boolean(container),
+  width: container?.clientWidth ?? 0,
+  height: container?.clientHeight ?? 0,
+  visibility: document.visibilityState,
+});
+```
+
+If dimensions are valid but WebGL fails, check GPU/host/CSP instead of repeatedly constructing Graph.
+[Runtime requirements](/en/docs/compatibility/browser) · [Data identity rules](/en/docs/api/options/data)
+
+## Tiny graph or unexpected position
+
+Check coordinates, outliers, and dimensions before changing fitView padding/maxZoom. First render, resize, setData, and layout fit differently. Do not force fitting after every user zoom.
+[Fitting and preserving the viewport](/en/docs/guides/viewport)
+
+## Missing or overlapping labels
+
+Confirm node/edge.style.label produces text; then check zoom thresholds, collisions, colors, and clipping. Disable policies for a comparison, then restore them individually.
+[Label guide](/en/docs/guides/label) · [Policy fields](/en/docs/api/options/label)
+
+## Clicking, dragging, or edge events do not respond
+
+Check behaviors, required Behavior types, and modifiers; [] disables defaults. Inspect DOM overlays, edge hit areas, and event types. Subscribing to a derived event does not enable its Behavior.
+[Interaction composition](/en/docs/guides/interactions) · [Event reference](/en/docs/api/graph/events)
+
+## Worker does not run or falls back
+
+Inspect Worker requests, execution threads, clone errors, and server responses. Function/cyclic configuration may not clone; worker: true is not evidence of success.
+[Worker deployment and cancellation](/en/docs/guides/layout-worker)
+
+## Leftovers or duplicate responses after unmount
+
+Pair creation/destroy, on/off, and requests/cancellation. Handle StrictMode’s extra mounting with cleanup instead of skipping setup.
+[React](/en/docs/getting-started/react) · [Vue](/en/docs/getting-started/vue) · [Extension cleanup](/en/docs/api/extensions/registration)
+
+## Provide reproducible information
+
+```text
+Package version / source commit:
+Framework / bundler / deployment base path:
+Browser / OS / GPU / DPR / container CSS size:
+Minimal GraphData and options:
+Steps:
+Expected / actual:
+First console error and failed network request:
+Does the minimal quick-start graph work?
+```

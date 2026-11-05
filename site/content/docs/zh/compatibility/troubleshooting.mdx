@@ -1,6 +1,61 @@
 ---
 title: 故障排查
-description: 先用最小图定位环境、数据与生命周期问题
+description: 按可观察症状检查容器、数据、布局、标签、交互和卸载
 ---
 
-先用[快速上手](/docs/getting-started/quick-start)复现，核对容器尺寸、数据端点、WebGL 和控制台。布局、标签、交互按单项恢复；常见原因见[FAQ](/docs/faq)，运行前提见[环境要求](/docs/compatibility/browser)。
+先保留最小复现和控制台错误，再一次只改变一个条件。用[快速上手](/docs/getting-started/quick-start)验证环境，不同时改数据、布局和样式。
+
+## 空白画布
+
+检查容器是否已挂载且非零宽高、初始化是否报错、节点 ID 和端点是否有效。先只保留两个节点与一条边，移除可选样式和扩展。
+
+```ts
+const container = document.querySelector<HTMLElement>('#container');
+console.table({
+  exists: Boolean(container),
+  width: container?.clientWidth ?? 0,
+  height: container?.clientHeight ?? 0,
+  visibility: document.visibilityState,
+});
+```
+
+尺寸正常仍报 WebGL 错误时，核对 GPU、宿主环境与 CSP；不要反复创建 Graph。
+[环境要求](/docs/compatibility/browser) · [数据身份规则](/docs/api/options/data)
+
+## 图特别小或位置不对
+
+先检查异常坐标、离群节点和容器尺寸，再决定 fitView 的 padding / maxZoom。首次 render、容器 resize、setData 和 layout 的适配语义不同，不要在每次用户缩放后强制适配。
+[适配与保留视野](/docs/guides/viewport)
+
+## 标签消失或重叠
+
+确认 node / edge.style.label 产生了文本，再检查缩放阈值、碰撞、颜色与容器裁剪。先关闭策略做对照，再逐项恢复。
+[标签指南](/docs/guides/label) · [策略字段](/docs/api/options/label)
+
+## 点击、拖拽或边事件无响应
+
+确认 behaviors 列表、所需 Behavior 与组合键；[] 会关闭默认。再检查覆盖画布的 DOM、边热区和事件类型。只监听派生事件不会自动启用行为。
+[交互组合](/docs/guides/interactions) · [事件参考](/docs/api/graph/events)
+
+## Worker 没运行或回退
+
+在 Network/Performance 检查模块 Worker 请求、执行线程、克隆错误和服务器响应。普通函数与循环引用配置不能直接克隆；worker: true 不是成功证据。
+[Worker 部署与取消](/docs/guides/layout-worker)
+
+## 卸载后残留或重复响应
+
+逐个匹配创建与 destroy、on 与 off、业务请求与取消。StrictMode 的额外挂载应正常清理，不通过跳过 setup 隐藏问题。
+[React](/docs/getting-started/react) · [Vue](/docs/getting-started/vue) · [扩展清理](/docs/api/extensions/registration)
+
+## 提供可复现信息
+
+```text
+Package version / source commit:
+Framework / bundler / deployment base path:
+Browser / OS / GPU / DPR / container CSS size:
+Minimal GraphData and options:
+Steps:
+Expected / actual:
+First console error and failed network request:
+Does the minimal quick-start graph work?
+```

@@ -1,0 +1,119 @@
+---
+title: Drawing extension contracts
+description: Public Node, Edge, Label, and Decoration fields, callback inputs, coordinates, caching, and failures
+---
+
+Drawing extensions are stateless descriptors cached by name and potentially shared across Graphs. They have no init / destroy lifecycle. See [registration](/en/docs/api/extensions/registration) for caching. Prefer configuration for style differences and renderers for custom content.
+
+## NodeExtension
+
+Register with register('node', name, descriptor); activate with node.type.
+
+| Field / callback | Type and behavior |
+| --- | --- |
+| base? | 'circle' or 'rect'; defaults to circle, reusing the WebGL base and picking |
+| style? | Partial&lt;NodeStyleConfig&gt;, default styles |
+| stateStyles? | Partial&lt;Record&lt;string, NodeStateStyleOverride&gt;&gt;, default state styles |
+| getStyle?(node) | GraphNode → Partial&lt;NodeStyleConfig&gt;; synchronous, pure, potentially evaluated repeatedly |
+| drawOverlay?(ctx, params) | CanvasRenderingContext2D, NodeOverlayDrawParams → boolean or void |
+| getBoundaryAnchor?(params) | NodeBoundaryAnchorParams → x/y point, a screen-space offset from the node center |
+
+Base style precedence is descriptor style → descriptor getStyle → configured fields. State precedence is theme → extension → configuration. A whole-object node.style function has a separate resolution path; do not assume it merges descriptor defaults or state layers. See [node configuration](/en/docs/api/options/node).
+
+### NodeOverlayDrawParams
+
+| Field | Type and units |
+| --- | --- |
+| node | GraphNode with numeric x/y; its coordinates remain in graph space |
+| x / y | number, node center in overlay backing-store pixels |
+| nodeSize | number, size in graph units, not an already scaled screen diameter |
+| dpr / zoom | number, supplied DPR and camera scale |
+| camera | Camera with x/y/zoom; read the current transform only |
+| time | number, milliseconds from performance.now() |
+
+Overlay drawing runs on visible nodes in the Canvas2D overlay. The origin is not translated to the node center; use x/y. Pair ctx.save() / restore(), do not retain ctx or mutate camera. Scale graph dimensions by zoom and fixed CSS dimensions by dpr; do not scale x/y again.
+
+Returning true requests continued redraw for animation. Static content returns void / false. Overlay graphics do not extend WebGL picking or create an arbitrary interactive scene graph. Hidden or culled nodes may not invoke the callback; this is not a business event.
+
+### NodeBoundaryAnchorParams
+
+| Field | Type and meaning |
+| --- | --- |
+| node | GraphNode |
+| placement | 'left' / 'right' / 'top' / 'bottom' |
+| crossOffsetRatio | number, decoration cross-axis offset ratio |
+| width / height | number, final screen dimensions in backing-store pixels |
+| borderRadius | number, screen corner radius |
+
+Return a screen offset from the center, not client coordinates, and do not multiply by dpr / zoom again. This hook positions decoration boundary anchors; it does not change edge connection ports, the node shape, or picking geometry. Exceptions use the built-in base anchor. See [Custom nodes](/en/docs/guides/custom-node).
+
+## EdgeExtension
+
+Register with register('edge', name, descriptor); activate with edge.type.
+
+| Field / callback | Type and behavior |
+| --- | --- |
+| base? | 'line' / 'arc' / 'polyline' / 'cubic'; defaults to line |
+| style? | Partial&lt;NonNullable&lt;EdgeConfig['style']&gt;&gt; |
+| stateStyles? | Partial&lt;Record&lt;string, EdgeStateStyleOverride&gt;&gt; |
+| getStyle?(source, target, edge) | GraphNode, GraphNode, GraphEdge → partial EdgeConfig.style |
+
+Return styles synchronously, not a path, DOM, or Canvas content. Endpoints are node input views; edge is the edge record, not an array index. Reuse base batching, arrows, and picking. There is no arbitrary custom WebGL shader / draw hook.
+
+Object-form configured fields override descriptor getStyle and style; state styles then apply. See [edge callbacks](/en/docs/api/options/edge#style-callbacks) for the whole-object function path. Routing, curvature, hit widths, and units follow [edge configuration](/en/docs/api/options/edge); getStyle is not a layout operation.
+
+## LabelRenderer
+
+Register with register('label', name, renderer); activate with node.labelRenderer / edge.labelRenderer. One renderer can handle both.
+
+- measure(params: LabelMeasureParams): LabelLayout&lt;T&gt;
+- draw(params: LabelDrawParams&lt;T&gt;): void
+
+### Input and output
+
+| Input | Content |
+| --- | --- |
+| ctx | CanvasRenderingContext2D |
+| text | string, resolved nonempty text; data containing text alone does not activate labels |
+| style | Readonly&lt;ResolvedLabelStyle&gt;, functions resolved and dimensions converted to backing-store pixels |
+| dpr / zoom | number, current DPR and zoom; do not rescale resolved style dimensions |
+| type / item | 'node' + GraphNode, or 'edge' + GraphEdge |
+| node | GraphNode for type='node' only |
+| edge / source / target | GraphEdge and endpoint GraphNodes for type='edge' only |
+| layout | draw only; Readonly&lt;LabelLayout&lt;T&gt;&gt;, from this measurement |
+
+LabelMeasureParams is the NodeLabelParams / EdgeLabelParams discriminated union. Narrow type before accessing category-specific fields.
+
+LabelLayout&lt;T&gt; contains width, height, and optional data. Dimensions must be finite positive numbers representing the full visual bounds. data carries calculations from measure to draw. Measurement does not guarantee a draw: collision, low zoom, or viewport culling can skip it.
+
+<details>
+<summary>Complete ResolvedLabelStyle fields</summary>
+
+labelFontSize, labelOffsetX/Y, labelBackgroundPadding, and labelMaxWidth are numbers in backing-store pixels; labelMaxWidth=0 means unlimited. labelFontFamily, labelFontWeight, and labelColor are strings; labelBackground is string or false; labelPlacement is LabelPlacement / EdgeLabelPlacement; labelAutoRotate is boolean.
+
+These are final inputs to the renderer. Implement backgrounds, wrapping, and truncation yourself; labelMaxWidth does not automatically clip custom text.
+
+</details>
+
+draw is centered on the label, with edge rotation already applied. Stay inside declared bounds; out-of-bounds content can invalidate collisions, and automatic hard clipping is not promised. The engine owns traversal, positioning, policy, collisions, and refresh. See current [edge label geometry limitations](/en/docs/api/options/edge#edge-labels).
+
+Missing registration, measure / draw exceptions, or invalid dimensions fall back to the default single-line renderer for that label with diagnostics. Suppression by collision or culling is not an error fallback. See [Custom Label Renderer](/en/docs/guides/custom-label-renderer).
+
+## DecorationRenderer
+
+Register with register('decoration', name, renderer); activate with node.decorations[].renderer for node content only.
+
+- measure(params: DecorationMeasureParams&lt;T&gt;): LabelLayout
+- draw(params: DecorationDrawParams&lt;T&gt;): void
+
+| Input | Content |
+| --- | --- |
+| ctx / node | CanvasRenderingContext2D / GraphNode |
+| data | T, from single data, the current stack item, or overflowData; not automatically the entire node.data |
+| dpr / zoom | number, DPR and camera zoom |
+| nodeWidth / nodeHeight | number, final node dimensions in backing-store pixels |
+| layout | draw only; Readonly&lt;LabelLayout&gt; |
+
+Use the LabelLayout dimension rules; draw is centered on the current decoration content. There is no ResolvedLabelStyle: the renderer defines fonts, colors, and business values. DecorationRenderer&lt;T&gt; uses T for input data; layout.data remains unknown and requires validation.
+
+The engine owns placement, attachment, stacking, sorting, overflow, collisions, and scheduling. See [decoration configuration](/en/docs/api/options/node#nodedecorationconfig). Missing names, invalid measurements, or exceptions skip the current decoration/group with diagnostics rather than falling back to a text label.

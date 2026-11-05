@@ -2,5 +2,5 @@
   "title": "Extension contracts",
   "pagesIndex": "../extensions.mdx",
   "defaultOpen": true,
-  "pages": ["registration"]
+  "pages": ["registration", "drawing"]
 }

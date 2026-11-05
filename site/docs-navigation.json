@@ -157,6 +157,65 @@
         "faq",
         "changelog"
       ]
+    },
+    "start": {
+      "id": "start",
+      "title": {
+        "zh": "开始使用",
+        "en": "Getting started"
+      },
+      "children": [
+        "concepts/overview",
+        "compatibility/library-comparison",
+        "getting-started/quick-start",
+        "getting-started/react",
+        "getting-started/vue",
+        "ai"
+      ]
+    },
+    "concepts": {
+      "id": "concepts",
+      "title": {
+        "zh": "核心概念",
+        "en": "Core concepts"
+      },
+      "children": [
+        "concepts/data-model",
+        "concepts/graph-lifecycle",
+        "concepts/states",
+        "concepts/viewport"
+      ]
     }
-  }
+  },
+  "overview": "index",
+  "order": [
+    "start",
+    "concepts",
+    "guides",
+    "extensions",
+    "api",
+    "performance",
+    "help"
+  ],
+  "rootTitle": {
+    "zh": "文档",
+    "en": "Documentation"
+  },
+  "physicalSections": {
+    "getting-started": "start",
+    "concepts": "concepts",
+    "guides": "guides",
+    "api": "api",
+    "metrics": "performance",
+    "compatibility": "help"
+  },
+  "externalCollections": [
+    {
+      "directory": "examples",
+      "title": {
+        "zh": "示例",
+        "en": "Examples"
+      }
+    }
+  ]
 }

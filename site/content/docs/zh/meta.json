@@ -2,15 +2,15 @@
   "title": "文档",
   "pages": [
     "index",
-    "ai",
-    "getting-started",
     "concepts",
+    "compatibility",
+    "getting-started",
+    "ai",
     "guides",
     "api",
-    "examples",
     "metrics",
-    "compatibility",
     "faq",
-    "changelog"
+    "changelog",
+    "examples"
   ]
 }

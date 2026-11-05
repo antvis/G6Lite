@@ -1,6 +1,13 @@
 {
   "title": "Graph 方法",
-  "pagesIndex": "../graph.mdx",
-  "defaultOpen": true,
-  "pages": ["lifecycle", "data", "data-mutations", "states", "viewport", "layout", "combo", "events"]
+  "pages": [
+    "lifecycle",
+    "data",
+    "data-mutations",
+    "states",
+    "viewport",
+    "layout",
+    "combo",
+    "events"
+  ]
 }

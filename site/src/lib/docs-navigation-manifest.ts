@@ -42,3 +42,13 @@ export function getManifestSection(id: string, tree: PageTree.Root, locale: Loca
     children: section.children.map((item) => entry(tree, item, locale)),
   };
 }
+
+export function getManifestTree(tree: PageTree.Root, locale: Locale): PageTree.Root {
+  return {
+    ...tree, $id: 'docs-navigation-root-' + locale,
+    children: [
+      page(tree, manifest.overview, locale),
+      ...manifest.order.map((id) => getManifestSection(id, tree, locale)),
+    ],
+  };
+}

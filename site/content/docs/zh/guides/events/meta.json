@@ -1,9 +1,7 @@
 {
-  "title": "事件",
-  "pagesIndex": "../events.mdx",
+  "title": "事件入门",
   "pages": [
     "selection-drag",
     "lifecycle"
-  ],
-  "defaultOpen": true
+  ]
 }

@@ -3,12 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "fumadocs-mdx && _FUMADOCS_MDX=1 next build",
+    "build": "npm run docs:nav:check && fumadocs-mdx && _FUMADOCS_MDX=1 next build",
     "dev": "next dev",
     "start": "serve out",
     "types:check": "fumadocs-mdx && _FUMADOCS_MDX=1 next typegen && tsc --noEmit",
     "postinstall": "fumadocs-mdx",
-    "lint": "eslint"
+    "lint": "eslint",
+    "docs:nav": "node scripts/sync-docs-navigation.mjs",
+    "docs:nav:check": "node scripts/sync-docs-navigation.mjs --check"
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.5",

@@ -1,4 +1,10 @@
 {
   "title": "API 参考",
-  "pages": ["index", "graph", "options", "extensions", "utilities"]
+  "pages": [
+    "index",
+    "graph",
+    "options",
+    "extensions",
+    "utilities"
+  ]
 }

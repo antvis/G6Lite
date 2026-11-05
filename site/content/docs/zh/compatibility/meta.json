@@ -1,4 +1,11 @@
 {
-  "title": "兼容性",
-  "pages": ["index", "browser", "api-stability", "library-comparison", "g6-v5-migration"]
+  "title": "帮助与升级",
+  "pages": [
+    "library-comparison",
+    "index",
+    "browser",
+    "api-stability",
+    "g6-v5-migration",
+    "troubleshooting"
+  ]
 }

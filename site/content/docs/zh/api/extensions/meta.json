@@ -1,6 +1,8 @@
 {
-  "title": "扩展契约",
-  "pagesIndex": "../extensions.mdx",
-  "defaultOpen": true,
-  "pages": ["registration", "drawing", "runtime"]
+  "title": "扩展",
+  "pages": [
+    "registration",
+    "drawing",
+    "runtime"
+  ]
 }

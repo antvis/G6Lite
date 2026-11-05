@@ -1,6 +1,14 @@
 {
   "title": "GraphOptions",
-  "pagesIndex": "../options.mdx",
-  "defaultOpen": true,
-  "pages": ["data", "node", "edge", "combo", "label", "theme", "layout", "behaviors", "transforms-plugins"]
+  "pages": [
+    "data",
+    "node",
+    "edge",
+    "combo",
+    "label",
+    "theme",
+    "layout",
+    "behaviors",
+    "transforms-plugins"
+  ]
 }

@@ -1,5 +1,9 @@
 {
   "title": "事件 API",
-  "pagesIndex": "../events.mdx",
-  "pages": ["element", "selection", "drag", "lifecycle"]
+  "pages": [
+    "element",
+    "selection",
+    "drag",
+    "lifecycle"
+  ]
 }

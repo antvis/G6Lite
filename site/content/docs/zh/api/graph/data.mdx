@@ -1,0 +1,146 @@
+---
+title: 数据读取与查询方法参考
+description: 数据快照、只读模型、元素存在性、位置与邻接查询
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+读取当前工作图用查询方法；需要可编辑导出时用 getData。更新请用公开写入方法，不直接改 Model。 操作流程见[数据指南](/docs/guides/data)。
+
+## 查询前提与返回值
+
+首次 render 前，getData 返回构造数据的浅快照；其他查询按空模型返回 []、undefined、null、0 或 false。正常 render 后查询当前模型。查询方法不检查 destroyed，销毁后残留值不能作为可操作实例的依据。
+
+Model 和数组的 readonly 是公开类型约束，不保证运行时冻结。返回值由 Graph 持有，不能直接写入或保存为永久快照；经过 setData、render 或删除后应重新查询。
+
+## getData
+
+`graph.getData(): GraphData`
+
+返回新的节点、边、可选 Combo 数组和记录，复制顶层 data、style 对象及 states 数组；嵌套对象、函数仍可能共享，不是递归深拷贝或保证可 JSON 序列化的结果。改导出值不会自动更新图。
+
+渲染后包含当前坐标、实际边 ID、归属和状态；不导出折叠派生的 hidden，不等于原配置备份（例如 fx/fy 与布局配置需另存）。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+const snapshot = graph.getData();
+snapshot.nodes[0].data = { ...snapshot.nodes[0].data, score: 999 };
+console.log(graph.getNodeData(snapshot.nodes[0].id)?.data); // 图中数据没有通过此次赋值写回
+```
+
+### 快照与查询的代码和效果
+
+Inspect A 显示邻居和关联边；Edit snapshot 只把导出副本的 score 改成 999，图中 A 仍为 1。Update A 才会更新图；Add D / Remove D 对比节点与边计数。
+
+<NodeDocExample id="data-workflow" locale="zh" focus="query" />
+
+## getNodes
+
+`graph.getNodes(): readonly NodeModel[]`
+
+返回当前节点数组的只读类型视图，不复制数组或节点；删除可能改变顺序，整体替换后应重新查询。
+
+## getNodeData
+
+`graph.getNodeData(id: string): NodeModel | undefined`
+
+按节点 ID 查询；不存在时为 undefined。Model 不包含 comboId、fx/fy；归属查 getNodeCombo，约束应由应用保存。
+
+## getEdges
+
+`graph.getEdges(): readonly EdgeModel[]`
+
+返回当前边数组的只读类型视图，不承诺按创建时间排序。
+
+## getEdgeData
+
+`graph.getEdgeData(id: string): EdgeModel | undefined`
+
+使用边的实际 ID 查询；省略输入 ID 时可从新增返回值或 getEdges 取得。缺失返回 undefined。
+
+## getComboData
+
+`graph.getComboData(id: string): ComboModel | undefined`
+
+返回当前分组模型，缺失为 undefined；成员、包围框和状态字段见 ComboModel。
+
+## getElementData
+
+`graph.getElementData(id: string): ElementModel | undefined`
+
+按节点 → 边 → Combo 查找，缺失为 undefined。ElementModel 是三种模型的联合，先做字段判断再使用专属字段。
+
+## getNodeCount
+
+`graph.getNodeCount(): number`
+
+当前节点总数，包含隐藏节点；不是屏幕可见数量。
+
+## getEdgeCount
+
+`graph.getEdgeCount(): number`
+
+当前边总数，包含隐藏边。
+
+## hasNode
+
+`graph.hasNode(id: string): boolean`
+
+是否存在该节点，不受视口与 hidden 影响。
+
+## hasEdge
+
+`graph.hasEdge(id: string): boolean`
+
+是否存在该边；节点同名不代表存在这条边。
+
+## hasElement
+
+`graph.hasElement(id: string): boolean`
+
+是否存在同 ID 的节点、边或 Combo。推荐跨类型也保持 ID 唯一。
+
+## getElementPosition
+
+`graph.getElementPosition(id: string): { x: number; y: number } | null`
+
+返回节点或 Combo 的图坐标新对象，优先节点；边和缺失 ID 返回 null。Combo 包围框随绘制重算，归属变更后不保证立刻得到最终几何。
+
+## getNeighborNodes
+
+`graph.getNeighborNodes(nodeId: string): string[]`
+
+扫描边，返回双向邻接节点 ID 新数组并去重；不区分出入边，不按 hidden 过滤。自环会包含自身，平行边不重复邻居。
+
+## getAdjacentEdges
+
+`graph.getAdjacentEdges(nodeId: string): Array<{ id: string; source: string; target: string }>`
+
+返回所有入边、出边的新记录数组，只含 id/source/target，不含 data 或状态。自环返回一次；并行边各有一条记录。不检查节点是否存在，按边端点匹配。
+
+
+## 模型字段
+
+| 模型 | 字段 |
+| --- | --- |
+| NodeModel | readonly id, name?, x, y, data?, states |
+| EdgeModel | readonly id, source, target, data?, states |
+| ElementModel | NodeModel \| EdgeModel \| ComboModel |
+
+x/y 为图坐标 number；data 为可选 `Readonly<Record<string, unknown>>`；states 为 `ReadonlySet<ElementState>`，使用 has / 迭代读取。完整 ComboModel 继续见[分组只读模型](/docs/api/options/combo#只读查询模型)。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+const element = graph.getElementData('A');
+if (element && 'source' in element) console.log(element.source, element.target);
+console.log(graph.getNodeData('A')?.states.has('selected'));
+```
+
+## 兼容方法
+
+- `graph.toData(): GraphData`：已弃用，等同 getData。
+- `graph.getNodePosition(id: string): { x: number; y: number } | null`：已弃用，只查询节点；使用 getElementPosition。
+
+继续阅读：[增量修改](/docs/api/graph#修改节点和边) · [状态查询](/docs/api/graph/states) · [数据字段](/docs/api/options#图数据)。

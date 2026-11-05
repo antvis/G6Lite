@@ -1,0 +1,69 @@
+---
+title: 状态使用
+description: 组合选中、高亮与业务标记，并在数据替换时保留需要的状态
+---
+
+import { NodeDocExample as StateDocExample } from '@/components/node-doc-example';
+
+给元素加业务标记时改状态；响应点击、悬停时让 Behavior 改状态。先定义对应的 stateStyles，再选择何时更新；基本关系见[元素状态](/docs/concepts/states)。
+
+## 增减业务标记，保留已有选择
+
+A 初始选中。Toggle review 添加“待复核”标记并显示橙色；再次点击只移除 review，选中描边仍保留。Replace 和 Clear 用来对比整份替换、全部清除的效果。
+
+<StateDocExample id="state-concept" locale="zh" focus="states" />
+
+移除自己的标记用 setItemState(id, 'review', false)。清理整个集合用 clearItemStates，会同时清掉 selected；更新整份集合才用 setElementStates。
+
+## 点击选择与悬停高亮一起使用
+
+点击多选使用 click-select 的 multiple: true 和 trigger: 'shift'；悬停关联使用 hover-highlight。下面的画布已启用这两种行为：选中用紫色描边，高亮用绿色。
+
+长期业务标记用 review 等自定义状态，避免与 Behavior 管理的 highlight / inactive 共用同一名称。需要同步业务面板时见[选择结果监听](/docs/guides/events/selection-drag#同步选择结果)。
+
+## 替换数据时保留选择
+
+先点 A，Shift+单击 B，再 Shift+单击横向的 A–C 边，然后点 Keep selected。新数据保留 A、C，删除 B 并加入 D：A 与 A–C 的选择留下，B 被移除，D 不会自动选中。点 Reload data 可对比不保留选择；工具栏重置恢复初始数据。
+
+<StateDocExample id="state-preserve" locale="zh" focus="preserve-selection" />
+
+关键步骤是：更新前读取已选 ID，只遍历新数据恢复仍存在的选择，再交给 setData。示例只保留 selected，不复制悬停等临时状态；节点与边分别匹配，边应显式提供稳定 id。
+
+fitView: false 仅保留相机；状态是否保留由新数据的 states 决定。更新后主动同步业务选择面板，不要等待程序写入补发 node:selectchange。
+
+<details>
+<summary>接入异步刷新</summary>
+
+示例在一次更新期间禁用刷新按钮；应用有并发请求时，还应由请求序号或取消机制确保只有最新结果被应用。异步返回后检查 graph.destroyed。如果需要保留 review 等其他业务状态，明确列出需要保留的名称，不要直接复制全部临时状态。
+
+</details>
+
+## 批量更新与 Combo
+
+首次 await graph.render() 完成后，多个元素使用 batchSetState，避免在应用里重复调用 render。以下示例要求已经配置节点 review 的外观：
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+export function markForReview(graph: Graph, nodeIds: string[]) {
+  graph.batchSetState(nodeIds.map((id) => ({ id, state: 'review', value: true })));
+}
+```
+
+Combo 的 selected 可通过同一状态方法设置，外观配置在 combo.style.stateStyles。折叠与隐藏的关系、实验性限制见 [Combo 指南](/docs/guides/combo)；不要把节点自定义状态的支持范围直接套到 Combo。
+
+## 常见问题
+
+### 清理高亮后，为什么选中也没了？
+
+检查是否调用了 clearItemStates 或用不含 selected 的集合替换全部状态。只移除自己负责的状态，其他状态会保留。
+
+### 保留选择后，为什么有的元素没恢复？
+
+先检查新数据是否仍有对应 ID，边 ID 是否稳定。示例刻意丢弃已删除的元素，并且只保留 selected。
+
+### 修改状态后还要重新 render 吗？
+
+不用。初始化完成后的状态方法会安排绘制；业务 UI 通过查询或自己的同步逻辑更新。
+
+继续查询：[状态方法](/docs/api/graph#状态显隐和定位) · [节点状态样式](/docs/api/options/node#状态样式) · [边状态样式](/docs/api/options/edge#状态样式) · [交互组合](/docs/guides/interactions)。

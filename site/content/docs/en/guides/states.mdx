@@ -1,0 +1,69 @@
+---
+title: Using states
+description: Combine selection, highlighting, and business flags, and preserve needed states across data replacement
+---
+
+import { NodeDocExample as StateDocExample } from '@/components/node-doc-example';
+
+Use state methods for business flags and Behaviors for click/hover updates. Define the corresponding stateStyles, then decide when they change. See [element states](/en/docs/concepts/states) for the basic model.
+
+## Add business flags without losing selection
+
+A starts selected. Toggle review adds an orange review flag; clicking again removes only review while preserving the selection outline. Compare Replace and Clear for full replacement and clearing.
+
+<StateDocExample id="state-concept" locale="en" focus="states" />
+
+Remove your flag with setItemState(id, 'review', false). clearItemStates clears the entire collection, including selected; use setElementStates only when replacing the complete collection.
+
+## Combine click selection and hover highlighting
+
+Use click-select with multiple: true and trigger: 'shift' for additive selection, and hover-highlight for related elements. Both are enabled in the next canvas: purple outlines indicate selection, green indicates highlighting.
+
+Use a custom name such as review for persistent business flags, rather than sharing Behavior-managed highlight / inactive names. See [selection synchronization](/en/docs/guides/events/selection-drag#synchronize-selection) to connect application panels.
+
+## Preserve selection when replacing data
+
+Click A, Shift-click B, then Shift-click the horizontal A–C edge. Choose Keep selected. The new data keeps A/C, removes B, and adds D: A and A–C remain selected, B is removed, and D is not automatically selected. Reload data discards selection; the toolbar reset restores the original dataset.
+
+<StateDocExample id="state-preserve" locale="en" focus="preserve-selection" />
+
+Read selected IDs before updating, restore only matching elements while mapping the new data, then call setData. This example preserves only selected, not transient hover states. Match nodes and edges separately and assign explicit stable edge IDs.
+
+fitView: false preserves only the camera; incoming states controls state retention. Synchronize the application panel after replacement; programmatic writes do not synthesize node:selectchange.
+
+<details>
+<summary>Asynchronous refresh</summary>
+
+The example disables refresh buttons during an update. For concurrent application requests, use a request sequence or cancellation mechanism so only the latest result is applied. Check graph.destroyed after asynchronous work. Explicitly list additional business states such as review to preserve, rather than copying every temporary state.
+
+</details>
+
+## Batch changes and Combos
+
+After awaiting the first graph.render(), update multiple elements with batchSetState instead of calling render repeatedly. This helper assumes the node review style is already configured:
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+export function markForReview(graph: Graph, nodeIds: string[]) {
+  graph.batchSetState(nodeIds.map((id) => ({ id, state: 'review', value: true })));
+}
+```
+
+Set a Combo's selected flag through the same state methods, with appearance in combo.style.stateStyles. See the [Combo guide](/en/docs/guides/combo) for collapse/visibility and experimental limits; custom node-state support does not imply identical Combo support.
+
+## Common questions
+
+### Why did clearing highlighting also remove selection?
+
+Check for clearItemStates or full replacement without selected. Remove only the state your code owns to preserve others.
+
+### Why were some selected elements not restored?
+
+Check whether the new dataset still contains their IDs and whether edge IDs are stable. The example deliberately drops removed elements and preserves only selected.
+
+### Do state updates need another render?
+
+No. State methods schedule drawing after initialization; update application UI through queries or your own synchronization logic.
+
+Continue with [state methods](/en/docs/api/graph#state-visibility-and-focus), [node styles](/en/docs/api/options/node#state-styles), [edge styles](/en/docs/api/options/edge#state-styles), and [interaction combinations](/en/docs/guides/interactions).

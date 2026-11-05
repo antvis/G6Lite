@@ -42,6 +42,7 @@ const loaders = {
   'events-listen': () => import('../../demos/docs-events-listen.ts'),
   'events-lifecycle': () => import('../../demos/docs-events-lifecycle.ts'),
   'state-concept': () => import('../../demos/docs-state-concept.ts'),
+  'state-preserve': () => import('../../demos/docs-state-preserve.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -58,7 +59,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'state-concept'
+  const hint = id === 'state-preserve'
+    ? (zh ? '单击或 Shift+单击追加选择，悬停查看高亮；Reload 清空选择，Keep selected 只保留新数据中仍存在的已选 ID；重置恢复 A/B/C' : 'Click or Shift-click to select; hover to highlight. Reload clears selection; Keep selected preserves only selected IDs still present. Reset restores A/B/C')
+    : id === 'state-concept'
     ? (zh ? 'A 初始 selected；Toggle review 叠加橙色；Replace 只保留 highlight；Clear 清空 A，B 始终作为基础外观对照' : 'A starts selected. Toggle review adds orange; Replace keeps only highlight; Clear removes A’s states. B remains the base-style comparison')
     : id === 'events-lifecycle'
     ? (zh ? 'Update A 修改数据；Add/Remove D 增删节点；Replace data 整体替换；Layout 重排。日志按发生顺序保留最近六行，重置恢复初始渲染事件' : 'Update A, add/remove D, replace data, or run Layout. The log keeps the last six lines in occurrence order; reset restores initial render events')

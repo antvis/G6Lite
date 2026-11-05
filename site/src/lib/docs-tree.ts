@@ -32,7 +32,6 @@ export function getDocsNavigationTree(tree: PageTree.Root, locale: Locale): Page
 
   const gettingStarted = findFolderByPath(tree, 'getting-started');
   const concepts = findFolderByPath(tree, 'concepts');
-  const api = findFolderByPath(tree, 'api');
   const metrics = findFolderByPath(tree, 'metrics');
   const compatibility = findFolderByPath(tree, 'compatibility');
 
@@ -45,7 +44,7 @@ export function getDocsNavigationTree(tree: PageTree.Root, locale: Locale): Page
     createSection('concepts', text.concepts, sectionPages(concepts)),
     getManifestSection('guides', tree, locale),
     getManifestSection('extensions', tree, locale),
-    createSection('api', text.api, sectionPages(api)),
+    getManifestSection('api', tree, locale),
     createSection('metrics', text.metrics, sectionPages(metrics)),
     createSection(
       'compatibility',

@@ -74,6 +74,60 @@
         "guides/custom-transform",
         "guides/custom-plugin"
       ]
+    },
+    "api": {
+      "id": "api",
+      "title": {
+        "zh": "API 参考",
+        "en": "API reference"
+      },
+      "children": [
+        "api/index",
+        {
+          "page": "api/graph",
+          "children": [
+            "api/graph/lifecycle",
+            "api/graph/data",
+            "api/graph/data-mutations",
+            "api/graph/states",
+            "api/graph/viewport",
+            "api/graph/layout",
+            "api/graph/combo",
+            {
+              "page": "api/graph/events",
+              "children": [
+                "api/graph/events/element",
+                "api/graph/events/selection",
+                "api/graph/events/drag",
+                "api/graph/events/lifecycle"
+              ]
+            }
+          ]
+        },
+        {
+          "page": "api/options",
+          "children": [
+            "api/options/data",
+            "api/options/node",
+            "api/options/edge",
+            "api/options/combo",
+            "api/options/label",
+            "api/options/theme",
+            "api/options/layout",
+            "api/options/behaviors",
+            "api/options/transforms-plugins"
+          ]
+        },
+        {
+          "page": "api/extensions",
+          "children": [
+            "api/extensions/registration",
+            "api/extensions/drawing",
+            "api/extensions/runtime"
+          ]
+        },
+        "api/utilities"
+      ]
     }
   }
 }

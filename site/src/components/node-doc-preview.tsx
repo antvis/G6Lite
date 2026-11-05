@@ -45,6 +45,7 @@ const loaders = {
   'state-preserve': () => import('../../demos/docs-state-preserve.ts'),
   'viewport-concept': () => import('../../demos/docs-viewport-concept.ts'),
   'viewport-preserve': () => import('../../demos/docs-viewport-preserve.ts'),
+  'state-visibility': () => import('../../demos/docs-state-visibility.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -61,7 +62,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'viewport-preserve'
+  const hint = id === 'state-visibility'
+    ? (zh ? 'Hide A 保留 selected，Show A 只清除 hidden；Hide A + edge 一起隐藏；Clear A 清空 A；Select 同时设置节点、边和 B 所在的 Combo' : 'Hide A keeps selected; Show A removes only hidden. Hide A + edge hides both. Clear A clears A. Select sets states on the node, edge, and B’s Combo')
+    : id === 'viewport-preserve'
     ? (zh ? '先缩放或拖动，再对比两种刷新；B 在 x=240 / 800 间切换，Keep view 保留相机，Fit 重新适配；重置恢复初始数据' : 'Zoom or pan, then compare reloads. B alternates between x=240 / 800. Keep view preserves the camera; Fit refits. Reset restores the initial data')
     : id === 'viewport-concept'
     ? (zh ? 'A 的图坐标始终为 (0, 0)；缩放、平移、居中与适配后，比较 A 的画布和浏览器位置；滚轮缩放、空白拖动也可操作' : 'A stays at graph (0, 0). Compare its canvas and client positions after zoom, pan, center, and fit. Wheel zoom and canvas dragging also work')

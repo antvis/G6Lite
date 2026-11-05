@@ -185,58 +185,27 @@ The batch form of `updateEdgeData()` can also change an edge's endpoints.
 
 ## State, visibility, and focus
 
-Built-in state names are `default`, `active`, `selected`, `disabled`, `highlight`, `inactive`, and `hidden`. Application-defined names are accepted and can be styled with `node.stateStyles` or `edge.stateStyles`.
+See the [state and visibility method reference](/en/docs/api/graph/states) for complete toggle, replace, query, clear, and visibility contracts, or the [state guide](/en/docs/guides/states) for tasks.
 
 ### `setItemState()`
 
-```ts
-graph.setItemState('n1', 'selected', true);
-graph.setItemState('n1', 'selected', false);
-```
-
-Turns one state on or off for a node, edge, or combo. `value: false` removes only that state.
+[Toggle one state](/en/docs/api/graph/states#setitemstate) while keeping other flags.
 
 ### `setElementStates()`
 
-```ts
-graph.setElementStates('n1', ['selected', 'highlight']);
-graph.setElementStates({
-  n1: ['selected'],
-  'a-b': ['active'],
-});
-```
-
-Replaces the complete state list of an element. The object form updates many elements and draws once.
+[Replace the complete state set](/en/docs/api/graph/states#setelementstates) by ID or state map.
 
 ### `batchSetState()`
 
-```ts
-graph.batchSetState([
-  { id: 'n1', state: 'highlight', value: true },
-  { id: 'n2', state: 'inactive', value: true },
-]);
-```
-
-Turns individual states on or off in one batch. Use it when one interaction, such as hover highlight, touches many elements.
+[Batch state toggles](/en/docs/api/graph/states#batchsetstate) across nodes, edges, and Combos.
 
 ### Query and clear
 
-```ts
-const states = graph.getItemStates('n1');
-const selected = graph.findNodesByState('selected');
-graph.clearItemStates('n1');
-```
-
-`clearItemStates()` removes every state on that element. The `find*ByState()` methods return ids that currently have the state.
+[getItemStates](/en/docs/api/graph/states#getitemstates) reads a snapshot. [findNodesByState](/en/docs/api/graph/states#findnodesbystate), [findEdgesByState](/en/docs/api/graph/states#findedgesbystate), and [findCombosByState](/en/docs/api/graph/states#findcombosbystate) query IDs; [clearItemStates](/en/docs/api/graph/states#clearitemstates) clears business states.
 
 ### `hideItem()` and `showItem()`
 
-```ts
-graph.hideItem('n2');
-graph.showItem('n2');
-```
-
-Hide or show a node, edge, or combo through the `hidden` state. `showItem()` clears only `hidden` and leaves other states in place.
+[hideItem](/en/docs/api/graph/states#hideitem) and [showItem](/en/docs/api/graph/states#showitem) toggle hidden. See the new reference's code and effect for related elements and collapsed visibility.
 
 ### `focusItem()`
 

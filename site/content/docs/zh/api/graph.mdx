@@ -185,58 +185,27 @@ graph.removeEdge(edgeId);
 
 ## 状态、显隐和定位
 
-内置状态名是 `default`、`active`、`selected`、`disabled`、`highlight`、`inactive` 和 `hidden`。也可以传入业务自己的状态名，并在 `node.stateStyles` 或 `edge.stateStyles` 里定义外观。
+增减、替换、查询、清空与显隐的完整契约见[状态与显隐方法参考](/docs/api/graph/states)；按业务任务操作见[状态使用指南](/docs/guides/states)。
 
 ### `setItemState()`
 
-```ts
-graph.setItemState('n1', 'selected', true);
-graph.setItemState('n1', 'selected', false);
-```
-
-给一个节点、边或 Combo 打开或关闭一个状态。`value: false` 只移除这一个状态。
+[增减一个状态](/docs/api/graph/states#setitemstate)，保留其他标记。
 
 ### `setElementStates()`
 
-```ts
-graph.setElementStates('n1', ['selected', 'highlight']);
-graph.setElementStates({
-  n1: ['selected'],
-  'a-b': ['active'],
-});
-```
-
-用一份新的状态列表替换元素当前的全部状态。对象形式可以一次替换多个元素，并只绘制一次。
+[替换完整状态集合](/docs/api/graph/states#setelementstates)，支持单 id 和状态映射。
 
 ### `batchSetState()`
 
-```ts
-graph.batchSetState([
-  { id: 'n1', state: 'highlight', value: true },
-  { id: 'n2', state: 'inactive', value: true },
-]);
-```
-
-按布尔值批量开关状态，适合悬停高亮这类同时改很多元素的场景。
+[批量增减状态](/docs/api/graph/states#batchsetstate)，可混合节点、边和 Combo。
 
 ### 查询和清空
 
-```ts
-const states = graph.getItemStates('n1');
-const selected = graph.findNodesByState('selected');
-graph.clearItemStates('n1');
-```
-
-`clearItemStates()` 清掉该元素上的全部状态。三个 `find*ByState()` 返回当前带有该状态的 id。
+[getItemStates](/docs/api/graph/states#getitemstates) 读取快照；[findNodesByState](/docs/api/graph/states#findnodesbystate)、[findEdgesByState](/docs/api/graph/states#findedgesbystate)、[findCombosByState](/docs/api/graph/states#findcombosbystate) 查询对应 ID；[clearItemStates](/docs/api/graph/states#clearitemstates) 清空业务状态。
 
 ### `hideItem()` 与 `showItem()`
 
-```ts
-graph.hideItem('n2');
-graph.showItem('n2');
-```
-
-通过 `hidden` 状态隐藏或显示节点、边、Combo。`showItem()` 只清除 `hidden`，其他状态保留。
+[hideItem](/docs/api/graph/states#hideitem) 和 [showItem](/docs/api/graph/states#showitem) 增减 hidden；关联元素与折叠隐藏的边界见新参考中的代码与效果。
 
 ### `focusItem()`
 

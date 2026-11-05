@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-export type NodeDocExampleId = 'body' | 'style' | 'labels' | 'label-options' | 'badges' | 'edge-style' | 'edge-hit-area' | 'edge-parallel' | 'edge-curves' | 'edge-cubic' | 'edge-orth' | 'edge-indented' | 'edge-labels' | 'combo-data' | 'combo-style' | 'combo-collapsed' | 'combo-states' | 'combo-membership' | 'label-policy' | 'theme-switch' | 'theme-precedence' | 'layout-switch' | 'layout-tree' | 'layout-worker' | 'layout-result' | 'behavior-selection' | 'behavior-highlight' | 'behavior-custom' | 'behavior-tooltip' | 'behavior-tooltip-hover' | 'events-listen' | 'events-lifecycle' | 'state-concept' | 'state-preserve' | 'viewport-concept' | 'viewport-preserve';
+export type NodeDocExampleId = 'body' | 'style' | 'labels' | 'label-options' | 'badges' | 'edge-style' | 'edge-hit-area' | 'edge-parallel' | 'edge-curves' | 'edge-cubic' | 'edge-orth' | 'edge-indented' | 'edge-labels' | 'combo-data' | 'combo-style' | 'combo-collapsed' | 'combo-states' | 'combo-membership' | 'label-policy' | 'theme-switch' | 'theme-precedence' | 'layout-switch' | 'layout-tree' | 'layout-worker' | 'layout-result' | 'behavior-selection' | 'behavior-highlight' | 'behavior-custom' | 'behavior-tooltip' | 'behavior-tooltip-hover' | 'events-listen' | 'events-lifecycle' | 'state-concept' | 'state-preserve' | 'viewport-concept' | 'viewport-preserve' | 'state-visibility';
 const files: Record<NodeDocExampleId, string> = {
   body: 'docs-node-body.ts',
   style: 'docs-node-style.ts',
@@ -39,6 +39,7 @@ const files: Record<NodeDocExampleId, string> = {
   'state-preserve': 'docs-state-preserve.ts',
   'viewport-concept': 'docs-viewport-concept.ts',
   'viewport-preserve': 'docs-viewport-preserve.ts',
+  'state-visibility': 'docs-state-visibility.ts',
 };
 
 export function readNodeDocExample(id: NodeDocExampleId) {

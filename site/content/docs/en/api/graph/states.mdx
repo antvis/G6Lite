@@ -1,0 +1,166 @@
+---
+title: State and visibility method reference
+description: Contracts for toggling, replacing, querying, clearing, hiding, and showing element states
+---
+
+import { NodeDocExample as StateDocExample } from '@/components/node-doc-example';
+
+Use setItemState to toggle one flag, setElementStates to replace a set, and batchSetState to update multiple elements. See the [state guide](/en/docs/guides/states) for tasks and [element states](/en/docs/concepts/states) for the model.
+
+## Prerequisites
+
+Mutation methods return void and require the first await graph.render() to have completed. Earlier calls throw; calls after destruction do nothing. State writes are synchronous; drawing is scheduled for a later frame. No extra render is needed.
+
+An id can identify a node, edge, or Combo. Missing IDs are ignored without throwing for their absence. Use distinct IDs across element types; a collision resolves node → edge → Combo.
+
+ElementState accepts custom strings and built-in names: default, active, selected, disabled, highlight, inactive, hidden. Appearance is defined in the [node](/en/docs/api/options/node#state-styles), [edge](/en/docs/api/options/edge#state-styles), and [Combo](/en/docs/api/options/combo#state-styles) references. disabled does not automatically prevent interaction. Programmatic writes do not emit Behavior selection events such as node:selectchange.
+
+## setItemState
+
+`graph.setItemState(id: string, state: ElementState, value: boolean): void`
+
+true adds one state; false removes only that state. Other states remain. Adding an existing flag does not duplicate it; removing an absent flag leaves the set unchanged.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph; // Rendered, with node A
+graph.setItemState('A', 'selected', true);
+graph.setItemState('A', 'review', true);
+graph.setItemState('A', 'review', false); // selected remains
+```
+
+### Toggle, replace, and clear
+
+A starts selected. Toggle review adds orange; Replace with highlight leaves only highlighting; Clear A empties the set. The readout calls getItemStates directly.
+
+<StateDocExample id="state-concept" locale="en" focus="states" />
+
+## setElementStates
+
+`graph.setElementStates(id: string, states: ElementState[]): void`
+
+`graph.setElementStates(stateMap: Record<string, ElementState[]>): void`
+
+```ts
+import type { ElementState, Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+declare const states: ElementState[];
+graph.setElementStates('A', states);
+graph.setElementStates({ A: ['selected'], 'A-B': ['highlight'] });
+```
+
+Both overloads return void: an ID plus an array, or a `Record<string, ElementState[]>`. They replace the complete state set of specified elements only. Unlisted elements remain unchanged; an empty array clears one element, and an empty map changes nothing.
+
+Duplicate names are stored as a set. default is filtered out and is not a separate effective style. Use an empty array or clearItemStates to restore base appearance; setItemState(id, 'default', true) does not clear existing flags.
+
+The node and edge implementation compares membership: reordering the same names alone does not reliably update override order. Clear then write if order must change. Combo styles follow their supported fixed order instead; see [override rules](/en/docs/api/options/combo#state-styles).
+
+## batchSetState
+
+`graph.batchSetState(items: Array<{ id: string; state: ElementState; value: boolean }>): void`
+
+Toggles individual states in array order, preserving other flags. Repeated entries for the same ID and state execute in order, so the last entry wins. Nodes, edges, and Combos can share a batch; drawing is requested for the batch rather than separately per element.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.batchSetState([
+  { id: 'A', state: 'review', value: true },
+  { id: 'A-B', state: 'highlight', value: false },
+  { id: 'group', state: 'selected', value: true },
+]);
+```
+
+## getItemStates
+
+`graph.getItemStates(id: string): ElementState[]`
+
+Returns a new array of current states; changing that array does not write back. Returns [] for missing elements, no data model, or an empty state set. This method does not check destruction; do not treat remaining query results after destroy as a usable graph.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+const states = graph.getItemStates('A');
+const selected = states.includes('selected');
+console.log(selected);
+```
+
+## findNodesByState
+
+`graph.findNodesByState(state: ElementState): string[]`
+
+Returns a new array of matching node IDs, or [] with no model or matches. Hidden nodes that still have selected are included; this is not a query for nodes currently visible on screen.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+const nodeIds = graph.findNodesByState('selected');
+console.log(nodeIds);
+```
+
+## findEdgesByState
+
+`graph.findEdgesByState(state: ElementState): string[]`
+
+Returns a new array of matching edge IDs, or []. Nodes and edges are queried separately; selected endpoints do not automatically make an edge selected.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+const edgeIds = graph.findEdgesByState('selected');
+console.log(edgeIds);
+```
+
+## findCombosByState
+
+`graph.findCombosByState(state: ElementState): string[]`
+
+Returns a new array of matching Combo IDs, or []. Child node states do not imply a parent Combo state. All three find methods scan their current collection; selection-time order is not promised, and destruction is not checked.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+const comboIds = graph.findCombosByState('selected');
+console.log(comboIds);
+```
+
+## clearItemStates
+
+`graph.clearItemStates(id: string): void`
+
+Clears every business state on the element, including selected and explicit hidden. Use setItemState(id, state, false) to remove only your flag. Structural hidden from a collapsed Combo remains; clearing states cannot bypass collapsing.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.clearItemStates('A');
+```
+
+## hideItem
+
+`graph.hideItem(id: string): void`
+
+Equivalent to setItemState(id, 'hidden', true). Other states, data, and positions remain. It does not delete, relayout, or fit. Only the specified ID changes; connected edges, child nodes, and child Combos do not automatically receive hidden. List targets explicitly to hide them together.
+
+### Visibility and state queries
+
+A starts selected; B belongs to group. Hide A hides A while its states and selected nodes query still include A. Show A restores A with its purple selection outline. Hide A + edge hides both; Show A afterward leaves the edge hidden. Clear A also removes selected. The Select button replaces states on a node, edge, and Combo; compare the three query results.
+
+<StateDocExample id="state-visibility" locale="en" focus="visibility" />
+
+## showItem
+
+`graph.showItem(id: string): void`
+
+Equivalent to setItemState(id, 'hidden', false). Removes explicit business hidden only, keeping selected and other flags. It does not restore deleted elements or expand collapsed Combos.
+
+<details>
+<summary>Collapsed groups and custom styles</summary>
+
+While a node or edge remains under a collapsed Combo, showItem, clearItemStates, and setElementStates(id, []) cannot remove structural hiding. Expand the group using [Combo operations](/en/docs/guides/combo). Explicit business hidden is tracked separately from collapsed visibility; expansion does not remove explicit business hiding.
+
+The current node whole-object style function bypasses state style resolution, including hidden opacity for the node body. Use per-field style configuration for consistent state and visibility appearance. A recorded hidden flag does not imply that every custom drawing path handles it automatically. See [style callbacks](/en/docs/api/options/node#style-callbacks).
+
+</details>
+
+Continue with the [state guide](/en/docs/guides/states), [state concept](/en/docs/concepts/states), [selection events](/en/docs/api/graph/events/selection), and [focusItem](/en/docs/api/graph#focusitem).

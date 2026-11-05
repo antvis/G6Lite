@@ -1,0 +1,21 @@
+site/content/docs/en/api/graph/events/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 3-8
+site/content/docs/zh/api/graph/events/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 3-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "af82fbb52af4e24be83a593bc009abf505445ac2",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

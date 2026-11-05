@@ -1,28 +1,42 @@
 ---
-title: Custom label renderers
-description: Customize label measurement and drawing while reusing G6Lite placement and scheduling
+title: Custom Label Renderer
+description: Render multiline node and edge content while retaining engine positioning, rotation, collision, and scheduling
 ---
 
-Register a label renderer through the package-root API when standard text labels are not enough:
+import { NodeDocExample } from '@/components/node-doc-example';
 
-```ts
-import { register, type LabelRenderer } from '@antv/g6-lite';
+Use LabelRenderer for multiline, rich, or custom-truncated content; prefer [label configuration](/en/docs/guides/label) for ordinary text. One renderer below draws node names/cities and edge protocols/types.
 
-const multiline: LabelRenderer<string[]> = {
-  measure({ ctx, text }) {
-    const lines = text.split('\n');
-    return {
-      width: Math.max(...lines.map((line) => ctx.measureText(line).width)),
-      height: lines.length * 18,
-      data: lines,
-    };
-  },
-  draw({ ctx, layout }) {
-    layout.data?.forEach((line, index) => ctx.fillText(line, 0, index * 18));
-  },
-};
+## Register and activate
 
-register('label', 'multiline', multiline);
-```
+1. measure sets its font and calculates full bounds including background padding; cache lines in layout.data.
+2. draw explicitly sets fonts and colors and paints near the origin, without relying on Canvas state left by measure.
+3. Register a label name, set node.labelRenderer / edge.labelRenderer, and provide nonempty label text.
 
-The renderer owns content measurement and drawing. G6Lite continues to handle node and edge traversal, functional style resolution, placement, path sampling, rotation, DPR/zoom conversion, collision, and refresh scheduling. Release any renderer-owned resources during cleanup.
+<NodeDocExample id="extension-label" locale="en" focus="renderer" />
+
+Drag nodes or zoom to inspect both lines and backgrounds. Expand the complete source for both activation configurations. The engine handles position, rotation, scale policy, and collisions.
+
+## Protocol
+
+Inputs include text, resolved style, ctx, dpr, and zoom. type='node' provides node; type='edge' provides edge / source / target. Narrow type before using category-specific fields. See [LabelRenderer](/en/docs/api/extensions/drawing#labelrenderer).
+
+Font sizes, offsets, and padding in style already use backing-store pixels; do not multiply by DPR or zoom. The draw origin is the label center and edge rotation is already applied.
+
+Return finite positive dimensions covering all content. layout.data caches only this measurement. Culling or collisions may skip drawing; measure should not change business state. Implement backgrounds and truncation yourself; labelMaxWidth does not automatically clip custom text.
+
+## Common questions
+
+### Why was text skipped?
+
+Check nonempty label, hidden states, low-zoom thresholds, and collisions before assuming failure. Temporarily disable policies for diagnosis, then restore useful density limits.
+
+### What happens for invalid dimensions or drawing errors?
+
+The current label falls back to default single-line rendering with diagnostics. Do not return 0, NaN, or infinite dimensions. Decoration failures behave differently; see [drawing contracts](/en/docs/api/extensions/drawing).
+
+### Do edge labels always follow the rendered path?
+
+Current polyline / cubic positions and rotations use the endpoint chord and may not follow routed paths. See [edge labels](/en/docs/api/options/edge#edge-labels).
+
+See the complete [custom label example](/en/docs/examples/custom-label-renderer) and [registration](/en/docs/api/extensions/registration) for shared caching.

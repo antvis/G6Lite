@@ -10,6 +10,7 @@ interface MultilineLayoutData {
   contentWidth: number;
 }
 
+// #region renderer
 const multilineRenderer: LabelRenderer<MultilineLayoutData> = {
   measure({ ctx, text, style }) {
     ctx.font = `${style.labelFontWeight} ${style.labelFontSize}px ${style.labelFontFamily}`;
@@ -42,6 +43,7 @@ const multilineRenderer: LabelRenderer<MultilineLayoutData> = {
 };
 
 register('label', 'demo-multiline', multilineRenderer);
+// #endregion renderer
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({

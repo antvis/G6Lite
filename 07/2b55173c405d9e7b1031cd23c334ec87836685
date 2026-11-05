@@ -1,0 +1,23 @@
+site/content/docs/en/changelog.mdx
+  s_4534bc5c3d78f4::t_c8d674fd2264a6 3,6,8,10-13,15,17-36
+site/content/docs/zh/changelog.mdx
+  s_4534bc5c3d78f4::t_c8d674fd2264a6 3,6,8,10-13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43-48,50,54
+site/maintenance/b90-release-evidence.json
+  s_4534bc5c3d78f4::t_c8d674fd2264a6 1-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "072b55173c405d9e7b1031cd23c334ec87836685",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

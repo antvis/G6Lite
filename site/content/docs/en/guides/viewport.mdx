@@ -42,18 +42,9 @@ To restore a view across pages, save the getCamera() snapshot and call setCamera
 
 Configure autoFit at initialization to keep all content visible after panel resizing. Keep false (the default) to retain the user's zoom and pan during exploration. Graph uses ResizeObserver to synchronize container dimensions; neither policy requires recreating the instance.
 
-```ts
-import { Graph, type GraphData } from '@antv/g6-lite';
+Zoom first, then switch Width 65% / 100% below. Only container CSS width changes. Inspect the final zoom and camera after resize; the complete source includes the listener and cleanup.
 
-export async function createGraph(container: HTMLElement, data: GraphData) {
-  const graph = new Graph({
-    container, data,
-    autoFit: { padding: 32, maxZoom: 1 },
-  });
-  await graph.render();
-  return graph; // Call graph.destroy() on unmount
-}
-```
+<LayoutDocExample id="viewport-resize" locale="en" focus="auto-fit" />
 
 The container needs nonzero width and height. To reset the view when revealing a hidden tab, explicitly fitView after the container reaches its final size. The resize event follows any automatic fitting.
 

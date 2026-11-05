@@ -42,18 +42,9 @@ import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-exampl
 
 分栏调整后要继续看全图，在初始化时配置 autoFit；用户正在探索时要保留缩放和平移，则保持 false（默认）。Graph 会通过 ResizeObserver 同步容器尺寸，两种情况下都不需要重建实例。
 
-```ts
-import { Graph, type GraphData } from '@antv/g6-lite';
+先放大，再切换下面的 Width 65% / 100%。示例只改容器 CSS 宽度，观察 resize 后的最终缩放和相机；完整代码中包含尺寸监听与清理。
 
-export async function createGraph(container: HTMLElement, data: GraphData) {
-  const graph = new Graph({
-    container, data,
-    autoFit: { padding: 32, maxZoom: 1 },
-  });
-  await graph.render();
-  return graph; // 卸载时 graph.destroy()
-}
-```
+<LayoutDocExample id="viewport-resize" locale="zh" focus="auto-fit" />
 
 容器需要有非零宽高。从隐藏页签切换到可见时，若要重设视野，在容器获得最终尺寸后显式 fitView。resize 事件在可选的自动适配后发出。
 

@@ -2,5 +2,5 @@
   "title": "Graph 方法",
   "pagesIndex": "../graph.mdx",
   "defaultOpen": true,
-  "pages": ["states", "layout", "events"]
+  "pages": ["states", "viewport", "layout", "events"]
 }

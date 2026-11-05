@@ -1,0 +1,203 @@
+---
+title: 视口与坐标方法参考
+description: 相机、缩放、适配、节点定位、尺寸和坐标转换的调用契约
+---
+
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+查询和保存视野用 getCamera；拉近拉远用 zoomTo / zoomBy；看全内容用 fitView；坐标转换用 screenToGraph / graphToScreen。按任务接入见[视口指南](/docs/guides/viewport)，坐标关系见[概念页](/docs/concepts/viewport)。
+
+## 调用时机与单位
+
+先 await graph.render()，再按已渲染内容适配、定位或恢复视野。初始 render 会适配，提前写入相机可能被覆盖。坐标转换需要已挂载、可见且宽高非零的画布。
+
+Camera 的 x / y 是图坐标平移量，zoom 是引擎缩放值；不是节点位置，也不要把 zoom: 1 理解为任意设备上一个图单位等于一个 CSS 像素。padding、容器尺寸和 client 坐标使用 CSS 像素，无需自行乘 DPR。
+
+下列修改方法均返回 void，不返回绘制完成的 Promise。相机更新不会计算布局或发出 resize；resize 用于尺寸更新。销毁后修改方法不执行；坐标转换返回 `{ x: 0, y: 0 }`，不能用该值判断图仍可使用。getCamera / getZoom 不检查销毁状态。
+
+## getCamera
+
+`graph.getCamera(): Camera`
+
+Camera 为 `{ x: number; y: number; zoom: number }`。返回新对象；直接修改该对象不会改变图。构造后即可查询，但要保存已展示视野，应在首次 render 完成后读取。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph; // 已完成 render
+const saved = graph.getCamera();
+graph.zoomBy(1.5);
+graph.setCamera(saved);
+```
+
+## setCamera
+
+`graph.setCamera(partial: Partial<Camera>): void`
+
+合并指定字段，其余字段保留。x / y 按图坐标写入，zoom 最终限制在 0.1–20；使用有限数值和正的缩放。此方法也按当前容器尺寸同步画布，不执行 autoFit，也不发送 resize。
+
+### 保存、恢复与定位的代码和效果
+
+先缩放或平移，点 Save view，再点 Focus B，最后 Restore view：恢复刚保存的相机。Reset camera 则回到首次渲染时的相机；工具栏“重置示例”会重建实例。
+
+<LayoutDocExample id="viewport-concept" locale="zh" focus="saved-view" />
+
+## resetCamera
+
+`graph.resetCamera(): void`
+
+恢复首次 render 结束后记录的相机，不是最近一次 fitView、setData 或保存按钮的结果。首次相机尚未记录时不执行；容器已变大变小时，旧快照不保证看全当前内容，需要重新适配则用 fitView。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.resetCamera();
+```
+
+## getZoom
+
+`graph.getZoom(): number`
+
+返回当前引擎 zoom，与 getCamera().zoom 相同。构造后可查询；不要把它当 CSS 尺寸或百分比。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+console.log(graph.getZoom());
+```
+
+## zoomTo
+
+`graph.zoomTo(zoom: number, options?: ZoomOptions): void`
+
+设定绝对缩放，默认保持画布中心对应的图点不动。指定 center 时，围绕该客户端位置缩放；它不是图坐标或画布内 offset。
+
+| ZoomOptions | 默认值 | 含义 |
+| --- | --- | --- |
+| center | 画布中心的 client 坐标 | `{ x, y }`，浏览器视口 CSS 像素 |
+| minZoom | 0.1 | 本次调用的缩放下限 |
+| maxZoom | 20 | 本次调用的缩放上限 |
+
+使用正的有限 zoom 和有效范围（minZoom ≤ maxZoom）。方法选项不修改滚轮配置，底层相机仍限制在 0.1–20。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.on('node:click', (event) => {
+  graph.zoomTo(2, { center: event.client, minZoom: 0.2, maxZoom: 4 });
+});
+```
+
+## zoomBy
+
+`graph.zoomBy(ratio: number, options?: ZoomOptions): void`
+
+将当前 zoom 乘以正的有限 ratio，再走 zoomTo 的中心和限幅规则。1.5 表示放大到当前的 1.5 倍，0.5 表示缩小到一半，不是加减固定值。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.zoomBy(1.5, { minZoom: 0.2, maxZoom: 4 });
+```
+
+## fitView
+
+`graph.fitView(options?: number | FitViewOptions): void`
+
+按内容范围调整平移和缩放。范围包含节点主体尺寸、边路径和 Combo 包围盒，不保证所有外部标签和 DOM 装饰都在视口内。当前节点范围不排除 hidden 节点；远离主体的隐藏节点也可能让适配结果变小。无节点时不执行。
+
+| 入口 | 默认行为 |
+| --- | --- |
+| 不传参数 | 相当于 fitView(0.9) |
+| 正数 | 在无 padding 的适配结果上乘该系数，不是绝对 zoom |
+| 对象 | 系数按 1 计算；使用下列留白和缩放限制 |
+
+| FitViewOptions | 默认值 | 含义 |
+| --- | --- | --- |
+| padding | 0 | 统一 CSS 像素或 `[上, 右, 下, 左]` |
+| minZoom | 0.1 | 适配缩放下限；设得过大可能无法看全 |
+| maxZoom | 20 | 适配缩放上限；设得较小可避免过度放大 |
+
+底层相机仍限制在 0.1–20。留白应非负、范围应有效；过大的留白或缩放限制都可能使内容无法完整容纳。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.fitView(0.8);
+graph.fitView({ padding: [32, 24, 48, 24], maxZoom: 1 });
+```
+
+首次 render 使用 autoFit 对象或数值；未配置、false 或 true 时采用 0.9。setData 默认另用 0.9，不继承 autoFit 对象；layout 不自动适配。完整时机对照见[使用指南](/docs/guides/viewport#选择适配时机)。
+
+## fitCenter
+
+`graph.fitCenter(): void`
+
+保持 zoom，只把节点中心点的范围移到画布中央。它不按节点尺寸、边路径、Combo 或标签重新计算缩放；无节点时不执行。需要看全图用 fitView。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.fitCenter();
+```
+
+## focusItem
+
+`graph.focusItem(id: string | string[], padding?: number): void`
+
+只定位节点，忽略边 ID、Combo ID 和不存在的 ID；没有有效节点时不执行。将目标节点中心点范围居中，能放下时保持 zoom，否则只缩小，不自动放大。padding 默认 20 CSS 像素，负值按 0 处理。
+
+范围以节点中心点计算，不包含主体尺寸或标签；实际缩放还受底层相机限制。它不改变状态、节点位置或布局，也不展开折叠 Combo。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.focusItem('A');
+graph.focusItem(['A', 'B'], 32);
+```
+
+## setSize
+
+`graph.setSize(width: number, height: number): void`
+
+按 CSS 像素同步画布尺寸；传入有限正数。它不设置容器元素的 CSS 宽高。后续容器变化仍由 ResizeObserver 同步，可能覆盖手动设置的画布尺寸；通常应直接设置容器 CSS。
+
+尺寸更新时，autoFit 未配置或为 false 则保留相机；开启时按配置重新适配，之后发出 resize。即使手动传入相同尺寸，该 Graph 更新流程仍会执行；容器变化无需重复调用 setSize 或 render。
+
+### 容器变宽、变窄后的适配
+
+先点 Zoom ×1.5，再切换 Width 65% / 100%。示例只改容器 CSS 宽度；ResizeObserver 同步尺寸并自动适配，resize 读数记录适配后的最终 zoom。工具栏重置会恢复初始宽度。
+
+<LayoutDocExample id="viewport-resize" locale="zh" focus="auto-fit" />
+
+## screenToGraph
+
+`graph.screenToGraph(screenX: number, screenY: number): { x: number; y: number }`
+
+输入客户端 CSS 坐标，与 MouseEvent.clientX / clientY 相同；返回当前相机下的图坐标。不是显示器 screenX / screenY，也不是 offsetX / offsetY。方法内部处理画布位置和缓冲区比例，无需乘 DPR。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.on('canvas:click', (event) => {
+  const point = graph.screenToGraph(event.client.x, event.client.y);
+  console.log(point, event.graph); // 同一图坐标
+});
+```
+
+## graphToScreen
+
+`graph.graphToScreen(graphX: number, graphY: number): { x: number; y: number }`
+
+输入图坐标，返回客户端 CSS 坐标，适合定位 fixed DOM 内容。滚动页面、改变容器位置或修改相机后需重新计算；返回值不是固定的全页 page 坐标。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+const client = graph.graphToScreen(0, 0);
+const point = graph.screenToGraph(client.x, client.y);
+console.log(client, point);
+```
+
+实时坐标观察与 DOM 定位步骤见[坐标指南](/docs/guides/viewport#转换坐标定位-dom-内容)。元素事件已提供 client、canvas、graph，普通事件处理直接读取相应字段即可。
+
+继续查询：[autoFit 配置](/docs/api/options#autofit) · [滚轮配置](/docs/api/options/behaviors#导航与拖拽) · [布局方法](/docs/api/graph/layout) · [Graph 方法](/docs/api/graph)。

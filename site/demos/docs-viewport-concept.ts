@@ -1,4 +1,4 @@
-import { Graph } from '@antv/g6-lite';
+import { Graph, type Camera } from '@antv/g6-lite';
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -21,6 +21,12 @@ export async function run(container: HTMLElement) {
   const fit = () => graph.fitView({ padding: [70, 50, 110, 50], maxZoom: 1 });
   const reset = () => graph.resetCamera();
   // #endregion camera
+  let saved: Camera;
+  // #region saved-view
+  const save = () => { saved = graph.getCamera(); };
+  const restore = () => graph.setCamera(saved);
+  const focus = () => graph.focusItem('B', 32);
+  // #endregion saved-view
   const controls = document.createElement('div');
   controls.style.cssText = 'position:absolute;left:12px;top:12px;right:150px;display:flex;flex-wrap:wrap;gap:6px;z-index:20;';
   const status = document.createElement('div');
@@ -49,6 +55,7 @@ export async function run(container: HTMLElement) {
   };
   const actions: Array<[string, () => void]> = [
     ['Zoom ×1.5', zoom], ['Pan right', pan], ['Center', center], ['Fit', fit], ['Reset camera', reset],
+    ['Save view', save], ['Restore view', restore], ['Focus B', focus],
   ];
   const buttons = actions.map(([label, action]) => {
     const button = document.createElement('button');
@@ -75,6 +82,8 @@ export async function run(container: HTMLElement) {
   };
   try {
     await graph.render();
+    if (graph.destroyed) return graph;
+    save();
     for (const event of events) graph.on(event, schedule);
     // Refresh after interaction and page scrolling, including the shared toolbar.
     window.addEventListener('click', schedule);

@@ -46,6 +46,7 @@ const loaders = {
   'viewport-concept': () => import('../../demos/docs-viewport-concept.ts'),
   'viewport-preserve': () => import('../../demos/docs-viewport-preserve.ts'),
   'state-visibility': () => import('../../demos/docs-state-visibility.ts'),
+  'viewport-resize': () => import('../../demos/docs-viewport-resize.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -62,7 +63,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'state-visibility'
+  const hint = id === 'viewport-resize'
+    ? (zh ? '先放大，再点 Width 65% / 100%；虚线框是容器边界，ResizeObserver 同步尺寸并按 autoFit 重新适配；重置恢复原宽度' : 'Zoom first, then choose Width 65% / 100%. The dashed outline marks the container. ResizeObserver updates its size and autoFit refits. Reset restores the original width')
+    : id === 'state-visibility'
     ? (zh ? 'Hide A 保留 selected，Show A 只清除 hidden；Hide A + edge 一起隐藏；Clear A 清空 A；Select 同时设置节点、边和 B 所在的 Combo' : 'Hide A keeps selected; Show A removes only hidden. Hide A + edge hides both. Clear A clears A. Select sets states on the node, edge, and B’s Combo')
     : id === 'viewport-preserve'
     ? (zh ? '先缩放或拖动，再对比两种刷新；B 在 x=240 / 800 间切换，Keep view 保留相机，Fit 重新适配；重置恢复初始数据' : 'Zoom or pan, then compare reloads. B alternates between x=240 / 800. Keep view preserves the camera; Fit refits. Reset restores the initial data')

@@ -1,0 +1,203 @@
+---
+title: Viewport and coordinate method reference
+description: Contracts for camera, zoom, fitting, node focus, sizing, and coordinate conversion
+---
+
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+Use getCamera to inspect or save a view, zoomTo / zoomBy to zoom, fitView to fit content, and screenToGraph / graphToScreen to convert positions. See the [viewport guide](/en/docs/guides/viewport) for tasks and the [concept page](/en/docs/concepts/viewport) for coordinate spaces.
+
+## Timing and units
+
+Await graph.render() before fitting rendered content, focusing, or restoring a view. Initial rendering fits the graph and can overwrite an earlier camera write. Coordinate conversion requires a mounted, visible canvas with nonzero dimensions.
+
+Camera x / y is translation in graph units; zoom is the engine scale. These are not node positions. Do not assume zoom: 1 means one graph unit equals one CSS pixel on every device. Padding, container dimensions, and client positions use CSS pixels; do not multiply by DPR.
+
+The mutation methods below return void, not a drawing-completion Promise. Camera updates do not run layout or emit resize; resize describes size updates. Mutations after destruction do nothing, and conversions return `{ x: 0, y: 0 }`, which is not evidence of a usable graph. getCamera / getZoom do not check destruction.
+
+## getCamera
+
+`graph.getCamera(): Camera`
+
+Camera is `{ x: number; y: number; zoom: number }`. Returns a new object; editing it does not update the graph. Available after construction, but save a displayed view after the first render completes.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph; // Rendered
+const saved = graph.getCamera();
+graph.zoomBy(1.5);
+graph.setCamera(saved);
+```
+
+## setCamera
+
+`graph.setCamera(partial: Partial<Camera>): void`
+
+Merges supplied fields while preserving others. x / y use graph units; zoom is ultimately clamped to 0.1–20. Supply finite values and positive zoom. This method also synchronizes the canvas to current container dimensions, without autoFit or a resize event.
+
+### Save, restore, and focus
+
+Zoom or pan, choose Save view, then Focus B, then Restore view to recover the saved camera. Reset camera restores the first rendered camera instead. The shared Reset example toolbar control recreates the instance.
+
+<LayoutDocExample id="viewport-concept" locale="en" focus="saved-view" />
+
+## resetCamera
+
+`graph.resetCamera(): void`
+
+Restores the camera recorded after the first render, not the latest fitView, setData, or Save view action. Does nothing until that snapshot exists. After container resizing, the old snapshot need not fit current content; use fitView for a fresh fit.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.resetCamera();
+```
+
+## getZoom
+
+`graph.getZoom(): number`
+
+Returns the current engine zoom, equal to getCamera().zoom. Available after construction; this is not a CSS dimension or percentage.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+console.log(graph.getZoom());
+```
+
+## zoomTo
+
+`graph.zoomTo(zoom: number, options?: ZoomOptions): void`
+
+Sets absolute zoom, keeping the graph point under the canvas center fixed by default. A supplied center anchors zoom at that client position, not at graph coordinates or a canvas offset.
+
+| ZoomOptions | Default | Meaning |
+| --- | --- | --- |
+| center | Canvas center in client coordinates | `{ x, y }` in browser viewport CSS pixels |
+| minZoom | 0.1 | Lower bound for this call |
+| maxZoom | 20 | Upper bound for this call |
+
+Use positive finite zoom and a valid range (minZoom ≤ maxZoom). These options do not change wheel configuration. The underlying camera still clamps to 0.1–20.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.on('node:click', (event) => {
+  graph.zoomTo(2, { center: event.client, minZoom: 0.2, maxZoom: 4 });
+});
+```
+
+## zoomBy
+
+`graph.zoomBy(ratio: number, options?: ZoomOptions): void`
+
+Multiplies current zoom by a positive finite ratio, then applies zoomTo's anchor and limits. 1.5 enlarges to 1.5 times the current zoom; 0.5 halves it. It does not add a fixed increment.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.zoomBy(1.5, { minZoom: 0.2, maxZoom: 4 });
+```
+
+## fitView
+
+`graph.fitView(options?: number | FitViewOptions): void`
+
+Adjusts translation and zoom to content bounds, including node bodies, edge paths, and Combo boxes. It does not guarantee room for all external labels or DOM decorations. Current node bounds do not exclude hidden nodes; a distant hidden node can still reduce the fit scale. Does nothing with no nodes.
+
+| Input | Behavior |
+| --- | --- |
+| Omitted | Equivalent to fitView(0.9) |
+| Positive number | Multiplies the fit result without padding; not an absolute zoom |
+| Object | Uses a factor of 1 and the padding / limits below |
+
+| FitViewOptions | Default | Meaning |
+| --- | --- | --- |
+| padding | 0 | CSS pixels, uniform or `[top, right, bottom, left]` |
+| minZoom | 0.1 | Lower bound; too high can prevent a complete fit |
+| maxZoom | 20 | Upper bound; a smaller value avoids over-enlarging content |
+
+The underlying camera still clamps to 0.1–20. Use nonnegative padding and a valid range; excessive padding or restrictive limits can prevent a complete fit.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.fitView(0.8);
+graph.fitView({ padding: [32, 24, 48, 24], maxZoom: 1 });
+```
+
+Initial render uses an autoFit object or numeric value; omitted, false, or true uses 0.9. setData defaults separately to 0.9, without inheriting the autoFit object. layout does not fit automatically. See [fitting timing](/en/docs/guides/viewport#choose-when-to-fit).
+
+## fitCenter
+
+`graph.fitCenter(): void`
+
+Preserves zoom and centers the bounds of node center points. It does not recompute zoom from node dimensions, edge paths, Combos, or labels. Does nothing with no nodes. Use fitView to fit content.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.fitCenter();
+```
+
+## focusItem
+
+`graph.focusItem(id: string | string[], padding?: number): void`
+
+Focuses nodes only. Edge IDs, Combo IDs, and missing IDs are ignored; no valid nodes means no action. Centers target node points, keeping zoom if they fit and otherwise zooming out. It never zooms in automatically. padding defaults to 20 CSS pixels; negatives become 0.
+
+Bounds use node centers, excluding body size and labels; the underlying camera limits still apply. This method does not alter states, positions, or layout, or expand collapsed Combos.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.focusItem('A');
+graph.focusItem(['A', 'B'], 32);
+```
+
+## setSize
+
+`graph.setSize(width: number, height: number): void`
+
+Synchronizes canvas dimensions in CSS pixels; supply finite positive values. It does not set the container's CSS width or height. Later container changes still run ResizeObserver and can replace manual canvas dimensions. Usually set container CSS directly.
+
+Size updates preserve the camera when autoFit is omitted or false; otherwise they refit according to its configuration, then emit resize. Manually passing identical dimensions still runs this Graph update flow. Container changes need no additional setSize or render call.
+
+### Fitting after a container narrows or widens
+
+Choose Zoom ×1.5, then Width 65% / 100%. The example changes container CSS width only. ResizeObserver synchronizes dimensions and autoFit refits; the resize readout shows the final zoom. Reset restores the initial width.
+
+<LayoutDocExample id="viewport-resize" locale="en" focus="auto-fit" />
+
+## screenToGraph
+
+`graph.screenToGraph(screenX: number, screenY: number): { x: number; y: number }`
+
+Takes client CSS coordinates, matching MouseEvent.clientX / clientY, and returns graph coordinates under the current camera. Do not pass display screenX / screenY or offsetX / offsetY. Canvas position and backing-buffer scale are handled internally; do not multiply by DPR.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+graph.on('canvas:click', (event) => {
+  const point = graph.screenToGraph(event.client.x, event.client.y);
+  console.log(point, event.graph); // Same graph position
+});
+```
+
+## graphToScreen
+
+`graph.graphToScreen(graphX: number, graphY: number): { x: number; y: number }`
+
+Takes graph coordinates and returns client CSS coordinates, suitable for fixed DOM positioning. Recompute after page scrolling, container movement, or camera changes; the result is not a fixed page coordinate.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+const client = graph.graphToScreen(0, 0);
+const point = graph.screenToGraph(client.x, client.y);
+console.log(client, point);
+```
+
+See the [coordinate guide](/en/docs/guides/viewport#convert-coordinates-to-position-dom-content) for a live observer and DOM positioning. Element events already provide client, canvas, and graph; most handlers can use those fields directly.
+
+Continue with [autoFit](/en/docs/api/options#autofit), [wheel options](/en/docs/api/options/behaviors#navigation-and-dragging), [layout methods](/en/docs/api/graph/layout), and [Graph methods](/en/docs/api/graph).

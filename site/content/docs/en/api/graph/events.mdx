@@ -1,53 +1,141 @@
 ---
-title: Event reference
-description: on, off, once, GraphEventMap, complete payloads, and dispatch timing
+title: Event API
+description: Subscribe, unsubscribe, listen once, and find events by purpose
 ---
 
-import { NodeDocExample as EventDocExample } from '@/components/node-doc-example';
-
-Subscribe through a Graph instance. This page defines the complete contract; see the [event guide](/en/docs/guides/events) for workflows and the [Behavior reference](/en/docs/api/options/behaviors) for activation and options.
+Use on to subscribe, off to unsubscribe, and once for a one-time listener. Start with [event basics](/en/docs/guides/events), or look up [element](/en/docs/api/graph/events/element), [selection](/en/docs/api/graph/events/selection), [drag](/en/docs/api/graph/events/drag), and [lifecycle/data](/en/docs/api/graph/events/lifecycle) events.
 
 ## on
 
-`graph.on<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void`
+Receive events until unsubscribed or the instance is destroyed.
 
-Add a persistent listener. Register before the first render to receive initial layout/render events. Adding after destruction does nothing. Duplicate registrations invoke the function multiple times. The return value is neither an unsubscribe function nor a chainable Graph.
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+declare const graph: Graph;
+graph.on('node:click', ({ nodeId }) => {
+  console.log('clicked', nodeId);
+});
+```
+
+**Parameters**: event is the name; handler receives arguments inferred from that name. **Returns**: void.
+
+Register before render to receive initial events. Duplicate registrations invoke the function multiple times. Adding after destruction does nothing.
 
 ## off
 
-`graph.off<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void`
+Unsubscribe using the original function. Also cancels a pending once listener.
 
-Remove listeners with the same event name and function reference, including a pending once listener. All duplicate registrations of that function are removed. Missing registrations are a no-op. The public method requires a handler and has no remove-all overload.
+```ts
+import type { Graph, GraphEventMap } from '@antv/g6-lite';
+
+declare const graph: Graph;
+const onClick = ({ nodeId }: GraphEventMap['node:click'][0]) => console.log(nodeId);
+graph.on('node:click', onClick);
+graph.off('node:click', onClick);
+```
+
+**Parameters**: original event name and handler reference, both required. **Returns**: void.
+
+All duplicate registrations of the function are removed. Missing listeners are a no-op. See [cleanup](/en/docs/guides/events#removing-listeners) for page integration.
 
 ## once
 
-`graph.once<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void`
+Receive only the next occurrence after registration, then automatically unsubscribe. Past events are not replayed.
 
-Receive only the next occurrence after registration; previous events are not replayed. Adding after destruction does nothing. Returns void; cancel with off.
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+declare const graph: Graph;
+graph.once('afterrender', ({ nodeCount }) => console.log(nodeCount));
+await graph.render();
+```
+
+**Parameters** are the same as on. **Returns**: void. Adding after destruction does nothing.
 
 ### Code and rendered result
 
-This example explicitly uses behaviors: []. Element clicks still dispatch events. Listeners update the readout without selecting nodes; persistent and one-time subscriptions are independent.
+The [listener example](/en/docs/guides/events#element-events) toggles persistent and one-time listeners and displays target information and coordinates.
 
-<EventDocExample id="events-listen" locale="en" />
+## Element event payloads
+
+Element events describe what was hit. Common fields are nodeId / edgeId / comboId, business data, and client, canvas, and graph coordinates. Read the original mouse/wheel object from nativeEvent.
+
+See [event parameters](/en/docs/api/graph/events/element#read-event-parameters) for field definitions and coordinate spaces.
+
+### Element event inventory
+
+| Operation | Event and details |
+| --- | --- |
+| Click a node | [node:click](/en/docs/api/graph/events/element#nodeclick) |
+| Hover a node | [node:pointerover](/en/docs/api/graph/events/element#nodepointerover) |
+| Click an edge | [edge:click](/en/docs/api/graph/events/element#edgeclick) |
+| Click a group background | [combo:click](/en/docs/api/graph/events/element#comboclick) |
+| Click empty space | [canvas:click](/en/docs/api/graph/events/element#canvasclick) |
+
+Find press, release, movement, leave, double-click, context-menu, and wheel events in the [full element reference](/en/docs/api/graph/events/element).
+
+## Selection events
+
+Selection events describe selection results and require a corresponding Behavior. Their payloads differ from element clicks.
+
+- [node:selectchange](/en/docs/api/graph/events/selection#nodeselectchange): the clicked node's selected state toggles.
+- [selection:clear](/en/docs/api/graph/events/selection#selectionclear): an existing selection is cleared.
+- [brush:end](/en/docs/api/graph/events/selection#brushend), [lasso:end](/en/docs/api/graph/events/selection#lassoend): region selection finishes.
+
+Find all fields in the [selection reference](/en/docs/api/graph/events/selection) and integration in [selection and dragging](/en/docs/guides/events#selection-and-drag-events).
+
+## Drag events
+
+A drag follows start → drag → end. Persist positions from [node:dragend](/en/docs/api/graph/events/drag#nodedragend); read edge drop proposals from [edge:dragend](/en/docs/api/graph/events/drag#edgedragend).
+
+The [drag reference](/en/docs/api/graph/events/drag) separates node, Combo, and edge-endpoint payloads and write-back responsibilities.
+
+## Lifecycle and data events
+
+- [afterrender](/en/docs/api/graph/events/lifecycle#afterrender): explicit render finishes synchronous drawing.
+- [datachange](/en/docs/api/graph/events/lifecycle#datachange): setData completes replacement.
+- [afterupdateitem](/en/docs/api/graph/events/lifecycle#afterupdateitem): incremental update results.
+- [destroy](/en/docs/api/graph/events/lifecycle#destroy): first destruction, no arguments.
+
+Find layout, resize, and Combo collapse events in the [full reference](/en/docs/api/graph/events/lifecycle). Explore timing with the [lifecycle guide](/en/docs/guides/events#lifecycle-and-data-events).
+
+### Ordering and completion boundaries
+
+Subscribe before render, await graph.render(), then mutate data or states. setData, layout, and partial updates do not repeat afterrender.
+
+Layout completion events precede position write-back; await graph.layout() before reading final positions. See [ordering and completion](/en/docs/api/graph/events/lifecycle#ordering-and-completion).
 
 ## GraphEventMap
 
-The package root exports GraphEventMap, GraphElementEvent, NodeGraphEvent, EdgeGraphEvent, ComboGraphEvent, CanvasGraphEvent, and Handler. Map values are argument tuples: destroy is [], and every other event below has one object argument.
+To type a reusable handler, extract the first argument of its public GraphEventMap entry:
 
 ```ts
-import type { Graph, GraphEventMap, Handler } from '@antv/g6-lite';
+import type { GraphEventMap } from '@antv/g6-lite';
 
-declare const graph: Graph;
-const onClick: Handler<GraphEventMap['node:click']> = ({ nodeId, nativeEvent }) => {
-  console.log(nodeId, nativeEvent.clientX);
-};
-graph.on('node:click', onClick);
-graph.off('node:click', onClick);
-graph.once('destroy', () => console.log('destroyed'));
+type NodeClick = GraphEventMap['node:click'][0];
+type DestroyArguments = GraphEventMap['destroy']; // []
 ```
 
-All three subscription methods retain the `method<Args extends unknown[]>(event: string, handler: Handler<Args>): void` overload for unknown names and application-declared arguments. It neither rejects misspelled names nor creates events. Graph has no public emit. Use an application event channel for business events; the [custom Behavior](/en/docs/guides/custom-behavior#event-typing) event-map generic provides consumer-side typing only.
+<details>
+<summary>Full subscription signatures and typing boundaries</summary>
+
+on, off, and once share these public signatures:
+
+```ts
+import type { GraphEventMap, Handler } from '@antv/g6-lite';
+
+declare function subscribe<K extends keyof GraphEventMap>(
+  event: K, handler: Handler<GraphEventMap[K]>,
+): void;
+declare function subscribe<Args extends unknown[]>(
+  event: string, handler: Handler<Args>,
+): void;
+```
+
+Map entries are argument tuples: [] for destroy, one object argument otherwise. The unknown-string overload accepts application types and can also accept misspelled names. Graph has no public emit; custom typing does not create business events. Element parameter types are exported from the package root; see [element fields](/en/docs/api/graph/events/element#read-event-parameters).
+
+</details>
 
 <details>
 <summary>Listener ordering and exceptions</summary>
@@ -57,105 +145,3 @@ Listeners run synchronously in registration order, with once removed before invo
 Exceptions from ordinary graph.on handlers propagate and may interrupt subsequent listeners or the operation. Handle errors in application callbacks and rejected asynchronous work yourself; dispatch does not await Promises. A * subscription receives payloads without an additional event-name argument, so it cannot provide a named universal event log.
 
 </details>
-
-## Element event payloads
-
-| Field | Type / meaning |
-| --- | --- |
-| targetType | node / edge / combo / canvas; the corresponding literal in NodeGraphEvent, EdgeGraphEvent, ComboGraphEvent, or CanvasGraphEvent |
-| targetId | Required string for nodes, edges, and Combos; no target ID on canvas |
-| data? | Optional business data from the node/edge, rather than a complete GraphNode/GraphEdge; not supplied for Combo or canvas |
-| client | `{ x, y }` in viewport CSS pixels, equal to native clientX/clientY |
-| canvas | `{ x, y }` in CSS pixels from the canvas top-left, not DPR-scaled buffer pixels |
-| graph | `{ x, y }` in graph coordinates after the inverse camera transform; suitable for graph positioning after pan/zoom |
-| nativeEvent | MouseEvent for clicks, hover, press/release; WheelEvent for wheel. A pointer name does not imply PointerEvent or touch support |
-| event | The same original object as nativeEvent; a deprecated alias only in this payload family |
-| nodeId | Required string in NodeGraphEvent |
-| edgeId / edgeIndex | Required string / number in EdgeGraphEvent. Without an explicit edge ID the dispatcher can fall back to an index string; do not persist edgeIndex across data replacements |
-| source / target | Required endpoint node IDs in EdgeGraphEvent, both strings |
-| comboId | Required string in ComboGraphEvent |
-
-NodeGraphEvent and EdgeGraphEvent accept data and native-event generics. ComboGraphEvent and CanvasGraphEvent accept a native-event generic. GraphEventMap already narrows the native type by event name; business data remains an optional Record whose fields the application must validate.
-
-### Element event inventory
-
-Every name below is an individual event, not a wildcard expansion. The dispatcher is mounted by the first render; no additional Behavior is required.
-
-| Event names | Payload |
-| --- | --- |
-| node:pointerover, node:pointerenter, node:pointermove, node:pointerleave, node:pointerdown, node:click, node:dblclick, node:contextmenu | NodeGraphEvent with MouseEvent |
-| node:wheel | NodeGraphEvent with WheelEvent |
-| edge:pointerover, edge:pointerenter, edge:pointermove, edge:pointerleave, edge:pointerdown, edge:click, edge:dblclick, edge:contextmenu | EdgeGraphEvent with MouseEvent |
-| edge:wheel | EdgeGraphEvent with WheelEvent |
-| combo:pointerdown, combo:click, combo:dblclick, combo:contextmenu | ComboGraphEvent |
-| canvas:pointermove, canvas:pointerdown, canvas:pointerup, canvas:click, canvas:dblclick, canvas:contextmenu | CanvasGraphEvent with MouseEvent |
-| canvas:wheel | CanvasGraphEvent with WheelEvent |
-
-<details>
-<summary>Picking, hover, and gesture boundaries</summary>
-
-Picking priority is node → edge → Combo → canvas. Clicks and presses dispatch only to the picked target family, without bubbling to Combo or canvas. Movement and wheel on a Combo background use canvas events; there are no combo:pointermove/over/leave/wheel events, nor node:pointerup or edge:pointerup.
-
-When mousemove hits a new node/edge, the old target receives pointerleave, then the new target receives pointerover → pointerenter → pointermove. Further movement on the same target emits pointermove only. Empty or Combo backgrounds emit canvas:pointermove. Leave coordinates describe the pointer at departure. A consumed drag suspends hover picking. A consumed gesture or release more than 3 CSS pixels from press suppresses the next click, without promising to cancel dblclick.
-
-canvas:pointerup comes from window mouseup, does not pick the release target, and does not require a preceding press on this Graph; track your own gesture start. contextmenu prevents the browser menu. Returning false from a normal handler does not cancel dispatch or other Behaviors.
-
-</details>
-
-## Selection events
-
-These are plain payload objects without client/canvas/graph/nativeEvent. Their event field remains an actively used MouseEvent field.
-
-| Event | Complete payload | When emitted |
-| --- | --- | --- |
-| node:selectchange | `{ nodeId: string; selected: boolean; event: MouseEvent }` | After click-select toggles the clicked node |
-| edge:selectchange | `{ edgeId: string; edgeIndex: number; source: string; target: string; selected: boolean; event: MouseEvent }` | After click-select toggles the clicked edge |
-| selection:clear | `{ ids: string[]; event: MouseEvent }` | click-select clears a nonempty selection; ids can mix nodes and edges |
-| brush:select, brush:end | `{ nodeIds: string[] }` | brush-select: select for nonempty hits; end at gesture completion, possibly empty |
-| lasso:select, lasso:end | `{ nodeIds: string[] }` | lasso-select: select for nonempty hits; end at gesture completion, possibly empty |
-
-Brush, lasso, and programmatic selected-state updates do not emit per-node selectchange or selection:clear. Clearing selection does not emit per-item deselection events. Lasso nodeIds describes this gesture's set, which can differ from the final global selection; query findNodesByState('selected') / findEdgesByState('selected') for the latter. Replacement rules are in the [selection reference](/en/docs/api/options/behaviors#selection).
-
-## Drag events
-
-| Event | Complete payload | Timing |
-| --- | --- | --- |
-| node:dragstart | `{ nodeId: string; nodeIds: string[]; event: MouseEvent }` | drag-node exceeds 3 CSS pixels, before the first position write |
-| node:drag | `{ nodeId: string; nodeIds: string[]; dx: number; dy: number; event: MouseEvent }` | After position updates; dx/dy are graph-coordinate displacements from gesture start, not per-frame deltas |
-| node:dragend | `{ nodeId: string; nodeIds: string[] }` | Release after a real drag; no native-event argument |
-| combo:dragstart | `{ comboId: string; event: MouseEvent }` | drag-node moves a Combo background beyond the threshold |
-| combo:drag | `{ comboId: string; dx: number; dy: number; event: MouseEvent }` | After member positions are updated; same displacement units |
-| combo:dragend | `{ comboId: string }` | Release after a real Combo drag |
-| edge:dragstart, edge:drag | `{ edgeId?: string; edgeIndex: number; source: string; target: string; dragEnd: 'source' or 'target'; event: MouseEvent }` | drag-edge starts at press without the node-drag threshold; movement emits drag |
-| edge:dragend | `{ edgeId?: string; edgeIndex: number; source: string; target: string; originalSource: string; originalTarget: string; reconnected: boolean; newEndpoint?: string; event: MouseEvent }` | At release; source/target are proposed endpoints for a valid drop, original endpoints otherwise |
-
-During multi-node dragging, nodeId is the first nodeIds entry, not necessarily the pressed node. Read getNodePosition at dragend to persist results through your own API. reconnected means a valid drop target was found; it neither confirms a data write nor guarantees different endpoints. drag-edge emits events only; the write-back example is in [interaction combinations](/en/docs/guides/interactions#event-dispatch).
-
-## Lifecycle and data events
-
-| Event | Complete payload | Timing |
-| --- | --- | --- |
-| beforelayout, layout:start | `{ nodeCount: number }` | In order before calculation for render / layout / setData with a configured layout and nonempty nodes |
-| layout:end, afterlayout | `{ duration: number; nodeCount: number }` | In order after valid computation, before write-back; duration is calculation milliseconds, excluding drawing |
-| beforerender | `{ nodeCount: number; edgeCount: number }` | Explicit render, after layout/runtime preparation and before fitting and synchronous drawing |
-| afterrender | `{ nodeCount: number; edgeCount: number }` | After explicit render's synchronous draw; not a completion event for every animation frame or partial update |
-| resize | `{ width: number; height: number }` | After resizing and optional auto-fit; dimensions are container CSS pixels |
-| destroy | No arguments | First destroy, after marking destroyed and cancelling pending layout, before runtime/canvas cleanup; graph listeners are then removed |
-| datachange | `{ nodeCount: number; edgeCount: number }` | After a valid setData writes data, optionally fits, and requests drawing; not an item diff |
-| afteradditem | `{ type: 'node'; id: string }` or `{ type: 'edge'; id: string; source: string; target: string }` | addNode(s) / addEdge(s) after scheduling drawing, once per item in batch calls |
-| afterremoveitem | `{ type: 'node' or 'edge'; id: string }` | removeNode(s) / removeEdge(s) after scheduling; incident edges removed with a node do not emit separate edge events |
-| afterupdateitem | `{ type: 'node'; id: string; action: 'position' or 'data' }` or `{ type: 'edge'; id: string; action: 'data' }` | updateNodePosition(s) / updateNodeData / updateEdgeData, once per batch result; node dragging also emits position updates |
-| combo:collapse, combo:expand | `{ comboId: string }` | After collapseCombo / expandCombo changes state and schedules; no repeated event if already in that state |
-
-Incremental events describe method execution, not a guarantee that values changed. setData does not emit item-by-item add/remove/update events. State, visibility, viewport, and visual-option updates have no dedicated state/viewport/change event, and do not synthesize datachange or afterrender. Avoid synchronous recursion by unconditionally updating the same data inside afterupdateitem.
-
-### Ordering and completion boundaries
-
-- Successful explicit render with layout and nonempty nodes: beforelayout → layout:start → layout:end → afterlayout → beforerender → afterrender. Without layout, omit the four layout events.
-- setData: optional four layout events → write-back and optional fit → request drawing → datachange. No beforerender/afterrender.
-- layout: four layout events → write-back → request drawing, without datachange. Positions queried in completion callbacks can still be old; await layout before querying.
-- Incremental after*item, datachange, and Combo events do not confirm the browser has drawn its next frame. Initial afterrender precedes the initialized flag and plugin mounting; await graph.render() before calling incremental mutation methods.
-
-Cancelled or superseded work need not emit matching end events. Standalone runLayout emits no Graph events. See the [layout method reference](/en/docs/api/graph/layout) for cancellation and calculation semantics.
-
-Continue with the [event guide](/en/docs/guides/events), [Graph overview](/en/docs/api/graph), and [interaction combinations](/en/docs/guides/interactions).

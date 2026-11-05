@@ -19,6 +19,7 @@
     "polyline-routing",
     "extensions",
     "custom-node",
+    "custom-edge",
     "custom-label-renderer"
   ]
 }

@@ -1,0 +1,42 @@
+---
+title: Custom edges
+description: Reuse built-in edge bases with business styles, callbacks, states, and data updates
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+Use EdgeExtension to reuse business relationship visuals; prefer [edge configuration](/en/docs/api/options/edge) for simple style differences. Descriptors select a built-in base, not arbitrary paths.
+
+## Register and activate
+
+1. Choose line / arc / polyline / cubic as base.
+2. Register a stateless descriptor whose getStyle reads source, target, and edge.
+3. Activate edge.type before render.
+
+<NodeDocExample id="extension-edge" locale="en" focus="descriptor" />
+
+light has weight 1, heavy weight 4. Click an edge for purple selection. Toggle heavy weight changes business data; click empty space to clear selection before comparing base widths and colors.
+
+## Overrides and updates
+
+The button uses updateEdgeData; later style resolution reevaluates getStyle. Do not mutate query Models or modify Graph inside callbacks.
+
+Configured style fields override defaults, then state styles apply. The selected width of 4 is independent of weight. See [style callbacks](/en/docs/api/options/edge#style-callbacks) for whole-object function limitations.
+
+Arrows, picking, and batching come from the base. polyline routing and direction restrictions still apply; see [routing](/en/docs/guides/polyline-routing).
+
+## Common questions
+
+### Can I implement arbitrary drawing or shaders?
+
+EdgeExtension provides base, style, getStyle, and stateStyles, without arbitrary draw / shader hooks. See [EdgeExtension](/en/docs/api/extensions/drawing#edgeextension).
+
+### Why is a label missing?
+
+Descriptor defaults do not replace label activation. This example explicitly provides edge.style.label; data or descriptor text alone does not guarantee label traversal.
+
+### Why is an edge difficult to select?
+
+Set hitAreaWidth and enable interaction. The example uses 14 without increasing visual width; see [hit areas](/en/docs/api/options/edge#hit-area).
+
+See [registration](/en/docs/api/extensions/registration) for caching and errors.

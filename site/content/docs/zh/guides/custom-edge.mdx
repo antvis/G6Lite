@@ -1,0 +1,42 @@
+---
+title: 自定义边
+description: 复用内置边基型，注册业务样式、函数映射与状态，并验证数据更新
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+需要复用业务关系外观时定义 EdgeExtension；只有颜色或线宽差异时先用[边配置](/docs/api/options/edge)。扩展选择内置基型并提供样式，不直接绘制任意路径。
+
+## 注册与启用
+
+1. 从 line / arc / polyline / cubic 选择 base。
+2. 注册无状态描述，getStyle 根据 source、target、edge 返回样式。
+3. 在 Graph 的 edge.type 使用注册名，注册必须先于 render。
+
+<NodeDocExample id="extension-edge" locale="zh" focus="descriptor" />
+
+light 权重为 1，heavy 为 4；单击边看到紫色选中样式。Toggle heavy weight 切换业务权重；如果边仍选中，先点击空白清理选择，再比较基础颜色与线宽。
+
+## 覆盖与更新
+
+本例使用 updateEdgeData 写入业务字段，getStyle 在后续样式解析时重新求值。不要直接修改查询 Model，也不在回调中修改 Graph 或保存当前边。
+
+edge.style 的逐字段配置可覆盖扩展默认值，状态层可继续覆盖；例如选中时的 4 像素线宽独立于权重。整对象函数的特殊路径查[样式回调](/docs/api/options/edge#样式回调)。
+
+箭头、拾取热区和批处理沿用基型。polyline 的 router、布局方向和几何更新限制仍然有效，见[折线路由](/docs/guides/polyline-routing)。
+
+## 常见问题
+
+### 能实现任意自定义 draw 或 WebGL shader 吗？
+
+当前 EdgeExtension 只有基型、默认样式、getStyle 与状态样式，没有任意 draw / shader 钩子。完整签名查[EdgeExtension](/docs/api/extensions/drawing#edgeextension)。
+
+### 为什么标签没有显示？
+
+扩展默认边样式不替代标签启用配置。本例在 edge.style 显式提供 label；只把文字放入 data 或扩展描述不保证激活标签遍历。
+
+### 为什么边难以选中？
+
+配置 hitAreaWidth 并启用交互。本例热区为 14；它不会把可见线条画粗，完整规则见[边热区](/docs/api/options/edge#命中热区)。
+
+注册、缓存和错误边界查[公共契约](/docs/api/extensions/registration)。

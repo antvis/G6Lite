@@ -1,0 +1,26 @@
+site/maintenance/examples/e19.json
+  s_4534bc5c3d78f4::t_84b213bac63c5e 1-46
+site/demos/zoom-options.ts
+  s_4534bc5c3d78f4::t_d819bf9e82871f 61
+  s_4534bc5c3d78f4::t_6f096eb8921d1b 52-58,62,64-65
+site/demos/viewport-controls.ts
+  s_4534bc5c3d78f4::t_d819bf9e82871f 74
+site/demos/search-focus.ts
+  s_4534bc5c3d78f4::t_d819bf9e82871f 83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "679a152911838f975ab1c9068d381162770e3ae0",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

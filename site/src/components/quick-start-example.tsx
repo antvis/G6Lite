@@ -6,7 +6,7 @@ import { Minus, Plus, RotateCcw, Scan } from 'lucide-react';
 import type { Graph } from '../../../src/index.ts';
 import type { Locale } from '@/lib/i18n';
 import { dataModelExampleOptions } from '@/lib/data-model-example';
-import { quickStartNetworkOptions, quickStartOptions } from '@/lib/quick-start';
+import { frameworkGraphData, quickStartNetworkOptions, quickStartOptions } from '@/lib/quick-start';
 import styles from './quick-start-example.module.css';
 
 export function QuickStartExample({
@@ -14,12 +14,14 @@ export function QuickStartExample({
   variant = 'framework',
 }: {
   locale: Locale;
-  variant?: 'framework' | 'network' | 'data-model';
+  variant?: 'framework' | 'framework-data' | 'network' | 'data-model';
 }) {
   const mountRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [expanded, setExpanded] = useState(false);
+  const [counts, setCounts] = useState<{ nodes: number; edges: number } | null>(null);
   const copy =
     locale === 'zh'
       ? {
@@ -28,7 +30,9 @@ export function QuickStartExample({
               ? '团队协作关系图'
               : variant === 'data-model'
                 ? '节点、边与分组'
-                : '第一个关系图',
+                : variant === 'framework-data'
+                  ? '随数据变化更新的关系图'
+                  : '第一个关系图',
           hint:
             variant === 'data-model'
               ? '圆点是节点，连线是边，浅色区域是 Combo'
@@ -41,6 +45,12 @@ export function QuickStartExample({
           fit: '适配画布',
           zoomIn: '放大关系图',
           zoomOut: '缩小关系图',
+          basic: '基础关系',
+          expanded: '扩展关系',
+          dataControls: '切换关系图数据',
+          updateHint: '切换数据后，可继续缩放、拖拽和悬停高亮。',
+          nodes: '个节点',
+          edges: '条关系',
         }
       : {
           title:
@@ -48,7 +58,9 @@ export function QuickStartExample({
               ? 'Team collaboration network'
               : variant === 'data-model'
                 ? 'Nodes, edges, and a group'
-                : 'Your first graph',
+                : variant === 'framework-data'
+                  ? 'Graph data updates'
+                  : 'Your first graph',
           hint:
             variant === 'data-model'
               ? 'Dots: nodes · Lines: edges · Shading: Combo'
@@ -61,6 +73,12 @@ export function QuickStartExample({
           fit: 'Fit graph',
           zoomIn: 'Zoom in on graph',
           zoomOut: 'Zoom out of graph',
+          basic: 'Basic network',
+          expanded: 'Extended network',
+          dataControls: 'Switch graph data',
+          updateHint: 'Switch data, then keep zooming, dragging, and highlighting.',
+          nodes: 'nodes',
+          edges: 'edges',
         };
 
   useEffect(() => {
@@ -96,7 +114,7 @@ export function QuickStartExample({
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
-        void start();
+        start();
       },
       { rootMargin: '160px' },
     );
@@ -109,6 +127,27 @@ export function QuickStartExample({
     };
   }, [attempt, variant]);
 
+  useEffect(() => {
+    if (variant !== 'framework-data' || status !== 'ready') return;
+    const graph = graphRef.current;
+    if (!graph) return;
+    let active = true;
+    const update = async () => {
+      try {
+        await graph.setData(frameworkGraphData(expanded), {
+          fitView: { padding: 32, maxZoom: 1 },
+        });
+        if (active) setCounts({ nodes: graph.getNodeCount(), edges: graph.getEdgeCount() });
+      } catch {
+        if (active) setStatus('error');
+      }
+    };
+    update();
+    return () => {
+      active = false;
+    };
+  }, [expanded, status, variant]);
+
   function reset() {
     setStatus('loading');
     setAttempt((value) => value + 1);
@@ -118,8 +157,33 @@ export function QuickStartExample({
     <figure
       className={`${styles.preview} docs-example-card not-prose`}
       data-quick-start-preview={status}
+      data-framework-nodes={variant === 'framework-data' ? counts?.nodes : undefined}
+      data-framework-edges={variant === 'framework-data' ? counts?.edges : undefined}
       aria-label={copy.title}
     >
+      {variant === 'framework-data' && (
+        <div className={styles.dataControls} role="group" aria-label={copy.dataControls}>
+          <button
+            type="button"
+            aria-pressed={!expanded}
+            disabled={status !== 'ready'}
+            onClick={() => setExpanded(false)}
+          >
+            {copy.basic}
+          </button>
+          <button
+            type="button"
+            aria-pressed={expanded}
+            disabled={status !== 'ready'}
+            onClick={() => setExpanded(true)}
+          >
+            {copy.expanded}
+          </button>
+          <span role="status">
+            {counts && `${counts.nodes} ${copy.nodes} · ${counts.edges} ${copy.edges}`}
+          </span>
+        </div>
+      )}
       <div className={`${styles.viewport} docs-example-card-body`}>
         <div className={styles.canvas} ref={mountRef} role="img" aria-label={copy.title} />
         {status !== 'ready' && (
@@ -166,7 +230,9 @@ export function QuickStartExample({
           </button>
         </div>
       </div>
-      <figcaption className="docs-example-card-caption">{copy.hint}</figcaption>
+      <figcaption className="docs-example-card-caption">
+        {variant === 'framework-data' ? copy.updateHint : copy.hint}
+      </figcaption>
     </figure>
   );
 }

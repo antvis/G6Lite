@@ -47,7 +47,7 @@ export function GraphView() {
       behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
     });
 
-    void graph.render().catch(console.error);
+    graph.render().catch(console.error);
 
     return () => graph.destroy();
   }, []);
@@ -93,7 +93,7 @@ onMounted(() => {
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
   });
 
-  void graph.render().catch(console.error);
+  graph.render().catch(console.error);
 });
 
 onBeforeUnmount(() => {
@@ -105,3 +105,192 @@ onBeforeUnmount(() => {
   <div ref="containerRef" style="width: 100%; height: 360px" />
 </template>
 ```
+
+## Update the graph when data changes
+
+The earlier examples cover mounting and unmounting. When application data changes, call `setData()` on the existing instance to update the graph.
+
+Select “Extended network” to add David and the Bob → David edge, then select “Basic network” to remove them. Both actions reuse the same Graph instance.
+
+<QuickStartExample locale="en" variant="framework-data" />
+
+### Prepare two datasets
+
+Save this as `graph-data.ts` for the React and Vue examples below.
+
+```ts
+import type { GraphData } from '@antv/g6-lite';
+
+export const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+export const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+```
+
+### React: respond to data dependency changes
+
+Save this as `GraphDataDemo.tsx` and use `<GraphDataDemo />` in your page. The parent switches data through state. A separate effect in the child watches `data` and calls `setData()` on the existing instance.
+
+Following React’s [controlling a non-React widget](https://react.dev/reference/react/useEffect#controlling-a-non-react-widget) pattern, keep the graph in a ref: create it on mount, synchronize data when it changes, and destroy it on unmount. G6Lite’s first `render()` is asynchronous, so `renderedRef` stores that task and data updates wait for it to finish.
+
+```tsx
+import { useEffect, useRef, useState } from 'react';
+import { Graph, type GraphData } from '@antv/g6-lite';
+import { basicData, expandedData } from './graph-data';
+
+function GraphView({ data }: { data: GraphData }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const graphRef = useRef<Graph | null>(null);
+  const renderedRef = useRef<Promise<void> | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: { nodes: [], edges: [] },
+      layout: { type: 'circular', radius: 120 },
+      node: { style: { size: 24, label: (node) => node.id } },
+      edge: { style: { endArrow: true } },
+      autoFit: { padding: 32, maxZoom: 1 },
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+    });
+    graphRef.current = graph;
+    renderedRef.current = graph.render();
+
+    return () => {
+      graph.destroy();
+      graphRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function update() {
+      const graph = graphRef.current;
+      if (!graph) return;
+
+      await renderedRef.current;
+      if (ignore) return;
+      await graph.setData(data, {
+        fitView: { padding: 32, maxZoom: 1 },
+      });
+    }
+
+    update().catch(console.error);
+    return () => {
+      ignore = true;
+    };
+  }, [data]);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
+}
+
+export default function GraphDataDemo() {
+  const [data, setData] = useState(basicData);
+
+  return (
+    <div>
+      <button onClick={() => setData(basicData)}>Basic network</button>
+      <button onClick={() => setData(expandedData)}>Extended network</button>
+      <GraphView data={data} />
+    </div>
+  );
+}
+```
+
+### Vue: synchronize data with watch
+
+Save this as `ReactiveGraphView.vue`. The watcher observes the data reference through `watch(() => props.data, …)` and updates the existing instance. If data changes during the initial render, the latest `props.data` is applied when rendering finishes.
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const props = defineProps<{ data: GraphData }>();
+const containerRef = ref<HTMLDivElement | null>(null);
+let graph: Graph | undefined;
+let ready = false;
+
+onMounted(async () => {
+  if (!containerRef.value) return;
+
+  const instance = new Graph({
+    container: containerRef.value,
+    data: { nodes: [], edges: [] },
+    layout: { type: 'circular', radius: 120 },
+    node: { style: { size: 24, label: (node) => node.id } },
+    edge: { style: { endArrow: true } },
+    autoFit: { padding: 32, maxZoom: 1 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+  graph = instance;
+  try {
+    await instance.render();
+    if (instance.destroyed) return;
+    ready = true;
+    await instance.setData(props.data, {
+      fitView: { padding: 32, maxZoom: 1 },
+    });
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+watch(
+  () => props.data,
+  async (data) => {
+    if (!ready || !graph) return;
+    try {
+      await graph.setData(data, {
+        fitView: { padding: 32, maxZoom: 1 },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);
+
+onBeforeUnmount(() => {
+  ready = false;
+  graph?.destroy();
+  graph = undefined;
+});
+</script>
+
+<template>
+  <div ref="containerRef" style="width: 100%; height: 360px" />
+</template>
+```
+
+The parent, `GraphDataDemo.vue`, stores data in a `shallowRef` and replaces the dataset when a button is clicked:
+
+```vue
+<script setup lang="ts">
+import { shallowRef } from 'vue';
+import GraphView from './ReactiveGraphView.vue';
+import { basicData, expandedData } from './graph-data';
+
+const data = shallowRef(basicData);
+</script>
+
+<template>
+  <button @click="data = basicData">Basic network</button>
+  <button @click="data = expandedData">Extended network</button>
+  <GraphView :data="data" />
+</template>
+```
+
+Both examples replace the data object to trigger updates. Mutating an array in place does not change a React dependency reference; the Vue watcher above does not observe nested mutations either. Create a new object for updated data.
+
+`setData()` runs the configured layout and redraws the graph. The examples use its `fitView` option to fit the new data. When data already includes coordinates and you want to preserve the viewport, use `setData(data, { fitView: false })`. See [setData()](/en/docs/api/graph#setdata).

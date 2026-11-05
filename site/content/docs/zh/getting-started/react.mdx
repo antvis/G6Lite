@@ -47,7 +47,7 @@ export function GraphView() {
       behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
     });
 
-    void graph.render().catch(console.error);
+    graph.render().catch(console.error);
 
     return () => graph.destroy();
   }, []);
@@ -93,7 +93,7 @@ onMounted(() => {
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
   });
 
-  void graph.render().catch(console.error);
+  graph.render().catch(console.error);
 });
 
 onBeforeUnmount(() => {
@@ -105,3 +105,192 @@ onBeforeUnmount(() => {
   <div ref="containerRef" style="width: 100%; height: 360px" />
 </template>
 ```
+
+## 数据变化时更新图
+
+前面的示例展示组件挂载与卸载。业务数据变化时，在已有实例上调用 `setData()` 即可更新图。
+
+点击“扩展关系”会增加 David 节点和 Bob → David 连线；切回“基础关系”会移除它们。切换数据时复用同一个 Graph 实例。
+
+<QuickStartExample locale="zh" variant="framework-data" />
+
+### 准备两组数据
+
+将下面的数据保存为 `graph-data.ts`，供 React 和 Vue 示例使用。
+
+```ts
+import type { GraphData } from '@antv/g6-lite';
+
+export const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+export const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+```
+
+### React：响应数据依赖变化
+
+将下面代码保存为 `GraphDataDemo.tsx`，在页面中使用 `<GraphDataDemo />`。父组件用 state 切换数据，子组件用独立的 effect 监听 `data`，调用已有实例的 `setData()`。
+
+按照 React 官方的[控制非 React 组件](https://react.dev/reference/react/useEffect#controlling-a-non-react-widget)模式，用 ref 保存图实例：挂载时创建，数据变化时同步，卸载时销毁。G6Lite 的首次 `render()` 是异步的，`renderedRef` 保存这次渲染任务，更新数据前先等待它完成。
+
+```tsx
+import { useEffect, useRef, useState } from 'react';
+import { Graph, type GraphData } from '@antv/g6-lite';
+import { basicData, expandedData } from './graph-data';
+
+function GraphView({ data }: { data: GraphData }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const graphRef = useRef<Graph | null>(null);
+  const renderedRef = useRef<Promise<void> | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: { nodes: [], edges: [] },
+      layout: { type: 'circular', radius: 120 },
+      node: { style: { size: 24, label: (node) => node.id } },
+      edge: { style: { endArrow: true } },
+      autoFit: { padding: 32, maxZoom: 1 },
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+    });
+    graphRef.current = graph;
+    renderedRef.current = graph.render();
+
+    return () => {
+      graph.destroy();
+      graphRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function update() {
+      const graph = graphRef.current;
+      if (!graph) return;
+
+      await renderedRef.current;
+      if (ignore) return;
+      await graph.setData(data, {
+        fitView: { padding: 32, maxZoom: 1 },
+      });
+    }
+
+    update().catch(console.error);
+    return () => {
+      ignore = true;
+    };
+  }, [data]);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
+}
+
+export default function GraphDataDemo() {
+  const [data, setData] = useState(basicData);
+
+  return (
+    <div>
+      <button onClick={() => setData(basicData)}>基础关系</button>
+      <button onClick={() => setData(expandedData)}>扩展关系</button>
+      <GraphView data={data} />
+    </div>
+  );
+}
+```
+
+### Vue：用 watch 同步数据
+
+将下面代码保存为 `ReactiveGraphView.vue`。通过 `watch(() => props.data, …)` 监听数据引用变化，并更新已有实例。首次渲染期间发生的数据变化，会在渲染完成后通过最新的 `props.data` 同步。
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const props = defineProps<{ data: GraphData }>();
+const containerRef = ref<HTMLDivElement | null>(null);
+let graph: Graph | undefined;
+let ready = false;
+
+onMounted(async () => {
+  if (!containerRef.value) return;
+
+  const instance = new Graph({
+    container: containerRef.value,
+    data: { nodes: [], edges: [] },
+    layout: { type: 'circular', radius: 120 },
+    node: { style: { size: 24, label: (node) => node.id } },
+    edge: { style: { endArrow: true } },
+    autoFit: { padding: 32, maxZoom: 1 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+  graph = instance;
+  try {
+    await instance.render();
+    if (instance.destroyed) return;
+    ready = true;
+    await instance.setData(props.data, {
+      fitView: { padding: 32, maxZoom: 1 },
+    });
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+watch(
+  () => props.data,
+  async (data) => {
+    if (!ready || !graph) return;
+    try {
+      await graph.setData(data, {
+        fitView: { padding: 32, maxZoom: 1 },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+);
+
+onBeforeUnmount(() => {
+  ready = false;
+  graph?.destroy();
+  graph = undefined;
+});
+</script>
+
+<template>
+  <div ref="containerRef" style="width: 100%; height: 360px" />
+</template>
+```
+
+父组件 `GraphDataDemo.vue` 用 `shallowRef` 保存数据，点击按钮时替换整组数据：
+
+```vue
+<script setup lang="ts">
+import { shallowRef } from 'vue';
+import GraphView from './ReactiveGraphView.vue';
+import { basicData, expandedData } from './graph-data';
+
+const data = shallowRef(basicData);
+</script>
+
+<template>
+  <button @click="data = basicData">基础关系</button>
+  <button @click="data = expandedData">扩展关系</button>
+  <GraphView :data="data" />
+</template>
+```
+
+两个示例都通过替换数据对象触发更新。React 中直接修改原数组不会改变依赖引用；上面的 Vue watcher 也不监听嵌套字段的原地修改，请为变化后的数据创建新对象。
+
+`setData()` 会执行已配置的布局并重新绘制。示例通过 `fitView` 参数适配新数据；数据自带坐标且希望保留当前视口时，可以使用 `setData(data, { fitView: false })`。参见 [setData()](/docs/api/graph#setdata)。

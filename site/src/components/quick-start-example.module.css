@@ -2,6 +2,45 @@
   margin-block: 24px;
 }
 
+.dataControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-fd-border);
+  font-size: 13px;
+}
+
+.dataControls button {
+  padding: 7px 12px;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 6px;
+  color: var(--color-fd-foreground);
+  background: var(--color-fd-background);
+  cursor: pointer;
+}
+
+.dataControls button[aria-pressed='true'] {
+  border-color: var(--color-fd-primary);
+  color: var(--color-fd-primary);
+  background: var(--color-fd-muted);
+}
+
+.dataControls button:focus-visible {
+  outline: 2px solid var(--color-fd-primary);
+  outline-offset: 2px;
+}
+
+.dataControls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.dataControls span {
+  color: var(--color-fd-muted-foreground);
+}
+
 :global(.docs-brand-layout) :global(#nd-page) .preview {
   max-width: none;
 }

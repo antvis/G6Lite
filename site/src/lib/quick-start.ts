@@ -1,4 +1,21 @@
-import type { GraphOptions } from '../../../src/index.ts';
+import type { GraphData, GraphOptions } from '../../../src/index.ts';
+
+/** Immutable data replacements for the framework update example. */
+export function frameworkGraphData(expanded: boolean): GraphData {
+  return {
+    nodes: [
+      { id: 'Alice' },
+      { id: 'Bob' },
+      { id: 'Carol' },
+      ...(expanded ? [{ id: 'David' }] : []),
+    ],
+    edges: [
+      { source: 'Alice', target: 'Bob' },
+      { source: 'Alice', target: 'Carol' },
+      ...(expanded ? [{ source: 'Bob', target: 'David' }] : []),
+    ],
+  };
+}
 
 /** The six-node network used by the quick-start guide and its code samples. */
 export function quickStartNetworkOptions(): Omit<GraphOptions, 'container'> {
@@ -50,13 +67,7 @@ export function quickStartNetworkOptions(): Omit<GraphOptions, 'container'> {
 /** The smaller graph used by the React and Vue integration examples. */
 export function quickStartOptions(): Omit<GraphOptions, 'container'> {
   return {
-    data: {
-      nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-      edges: [
-        { source: 'Alice', target: 'Bob' },
-        { source: 'Alice', target: 'Carol' },
-      ],
-    },
+    data: frameworkGraphData(false),
     node: {
       style: {
         size: 24,

@@ -1,0 +1,9 @@
+{
+  "title": "Events",
+  "pagesIndex": "../events.mdx",
+  "pages": [
+    "selection-drag",
+    "lifecycle"
+  ],
+  "defaultOpen": true
+}

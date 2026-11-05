@@ -1,0 +1,33 @@
+---
+title: 生命周期与数据
+description: 比较首次渲染、增量修改、整体替换与重排的事件
+---
+
+import { NodeDocExample as EventDocExample } from '@/components/node-doc-example';
+
+更新数据不等于重新执行 render，计算布局不等于浏览器已绘制下一帧。先观察日志，再选择需要的完成时机。
+
+## 观察事件顺序
+
+在 render 前订阅，才能接收首次布局与渲染事件。初始数据修改等 await graph.render() 完成后执行。操作下面的按钮，比较日志：
+
+<EventDocExample id="events-lifecycle" locale="zh" focus="lifecycle" />
+
+Update A / Add D / Remove D 产生对应 after*item；Replace data 产生布局事件和 datachange；Layout 只有布局事件。它们不会重复触发 afterrender；数据已写回与下一帧已绘制是不同的时机。完整顺序与取消边界见[生命周期参考](/docs/api/graph/events/lifecycle)。
+
+## 选择正确的完成时机
+
+首次初始化：render 前注册 once('afterrender', handler)，等待 await graph.render() 后再修改数据或状态。
+
+整体替换：使用 await graph.setData(nextData)，需要替换通知时监听 datachange。
+
+重新布局：await graph.layout() 后查询坐标。layout:end / afterlayout 在写回之前，不适合直接读取最终位置。
+
+<details>
+<summary>取消、过期任务和卸载</summary>
+
+取消或过期布局不保证配对结束事件。退出时销毁 Graph，另行清理请求、计时器和业务监听；异步返回后检查 graph.destroyed。完整语义见 [布局方法](/docs/api/graph/layout)。
+
+</details>
+
+[返回事件入门](/docs/guides/events) · [逐项事件与载荷](/docs/api/graph/events/lifecycle)。

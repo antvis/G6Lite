@@ -1,0 +1,33 @@
+---
+title: Lifecycle and data
+description: Compare initial rendering, incremental changes, replacement, and layout
+---
+
+import { NodeDocExample as EventDocExample } from '@/components/node-doc-example';
+
+Updating data does not rerun render, and calculating layout does not confirm the next browser frame. Observe the log, then choose the completion point.
+
+## Observe the sequence
+
+Subscribe before render to receive the initial layout and render events. Await graph.render() before initial incremental mutations. Compare the logs using these controls:
+
+<EventDocExample id="events-lifecycle" locale="en" focus="lifecycle" />
+
+Update A / Add D / Remove D emit the corresponding after*item event. Replace data emits layout events and datachange; Layout emits only layout events. None repeats afterrender. A data write and the browser's next drawn frame are separate milestones; see [lifecycle timing](/en/docs/api/graph/events/lifecycle) for full ordering and cancellation boundaries.
+
+## Choose the right completion point
+
+Initialization: register once('afterrender', handler) before render, then await graph.render() before mutations.
+
+Replacement: await graph.setData(nextData); subscribe to datachange for replacement notifications.
+
+Relayout: await graph.layout() before reading final positions; layout:end / afterlayout precede write-back.
+
+<details>
+<summary>Cancellation, stale work, and unmounting</summary>
+
+Cancelled or stale layouts need not emit matching end events. Destroy Graph on exit, clean up application requests, timers, and listeners, and check graph.destroyed before applying asynchronous results. See [layout methods](/en/docs/api/graph/layout)。
+
+</details>
+
+[Back to event basics](/en/docs/guides/events) · [Individual events and payloads](/en/docs/api/graph/events/lifecycle)。

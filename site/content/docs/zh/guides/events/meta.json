@@ -1,0 +1,9 @@
+{
+  "title": "事件",
+  "pagesIndex": "../events.mdx",
+  "pages": [
+    "selection-drag",
+    "lifecycle"
+  ],
+  "defaultOpen": true
+}

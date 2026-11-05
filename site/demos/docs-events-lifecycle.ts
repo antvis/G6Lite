@@ -25,7 +25,11 @@ export async function run(container: HTMLElement) {
     status.textContent = lines.slice(-6).join('\n');
   };
   // #region lifecycle
-  const events = ['beforelayout', 'layout:start', 'layout:end', 'afterlayout', 'beforerender', 'afterrender', 'datachange', 'afteradditem', 'afterremoveitem', 'afterupdateitem'] as const;
+  const events = [
+    'beforelayout', 'layout:start', 'layout:end', 'afterlayout',
+    'beforerender', 'afterrender', 'datachange',
+    'afteradditem', 'afterremoveitem', 'afterupdateitem',
+  ] as const;
   const cleanups: Array<() => void> = [];
   const watch = <K extends keyof GraphEventMap>(name: K) => {
     const handler = () => push(name);

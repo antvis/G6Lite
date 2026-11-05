@@ -1,4 +1,4 @@
-import { Graph, type GraphEventMap } from '@antv/g6-lite';
+import { Graph, type GraphElementEvent, type GraphEventMap } from '@antv/g6-lite';
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -29,14 +29,19 @@ export async function run(container: HTMLElement) {
   const update = () => { status.textContent = `${latest}\n${onceResult}`; };
   const point = ({ x, y }: { x: number; y: number }) => `${Math.round(x)}, ${Math.round(y)}`;
   // #region listeners
-  const onClick = (event: GraphEventMap['node:click'][0] | GraphEventMap['edge:click'][0] | GraphEventMap['canvas:click'][0]) => {
-    latest = `${event.targetType}: ${event.targetId ?? 'empty'} | client (${point(event.client)}) | canvas (${point(event.canvas)}) | graph (${point(event.graph)})`;
+  const onClick = (event: GraphElementEvent) => {
+    latest = [
+      `${event.targetType}: ${event.targetId ?? 'empty'}`,
+      `client (${point(event.client)})`,
+      `canvas (${point(event.canvas)})`,
+      `graph (${point(event.graph)})`,
+    ].join(' | ');
     update();
   };
   const clickEvents = ['node:click', 'edge:click', 'canvas:click'] as const;
-  let listening = true;
   for (const event of clickEvents) graph.on(event, onClick);
   // #endregion listeners
+  let listening = true;
   toggle.onclick = () => {
     listening = !listening;
     for (const event of clickEvents) {

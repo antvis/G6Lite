@@ -1,0 +1,21 @@
+site/content/docs/en/compatibility/troubleshooting.mdx
+  s_4534bc5c3d78f4::t_f4e22428852dbf 3,6-61
+site/content/docs/zh/compatibility/troubleshooting.mdx
+  s_4534bc5c3d78f4::t_f4e22428852dbf 3,6-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "adbdd408cd2f54f85076221162c24142987f0098",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

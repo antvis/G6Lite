@@ -1,70 +1,74 @@
 ---
 title: 平行边与自环处理
-description: 处理多条同源同目标边和自环边的展示
+description: 分离同向与反向边，调整间距，在增删边后保持身份，并展示自环标签
 ---
 
-同一对节点之间存在多条边时，默认直线会重叠。可以启用 `process-parallel-edges` transform 让平行边自动错开。完整字段、分组公式和优先级见[平行边配置参考](/docs/api/options/edge#平行边与自环)。
+import { NodeDocExample } from '@/components/node-doc-example';
 
-处理前后与自环的效果示意：多条边从重叠变为可区分的路径，自环连接同一个节点。
+同一对节点有多条关系时，用平行边分离；source 与 target 相同的边则是自环，由渲染器独立处理。先保留每条边的稳定 id，再调整路径。完整字段与优先级见[平行边参考](/docs/api/options/edge#平行边与自环)。
 
-![三条平行边处理前重叠、处理后错开及多个自环的示意](/examples/docs-guide-parallel-edges.svg '平行边与自环')
+## 分离同向与反向边
 
-可运行示例：[平行边](/docs/examples/parallel-edges)、[自环](/docs/examples/edge-loops)。
+1. 使用默认 line 或 arc，设置 `edge.parallelEdges: { enabled: true, offset: 48, includeReverse: true }`。
+2. 有向关系开启 endArrow；反向边默认与正向边归为同组，无需手动翻转偏移。
+3. 从较小间距开始，结合标签密度和实际缩放调整。offset 使用图坐标，不是屏幕像素间距。
 
-```ts
-const graph = new Graph({
-  container: '#container',
-  data,
-  edge: {
-    type: 'arc',
-    style: {
-      endArrow: true,
-      lineWidth: 2,
-    },
-  },
-  transforms: [
-    {
-      type: 'process-parallel-edges',
-      options: { offset: 18 },
-    },
-  ],
-});
-```
+下面上排为三条 A→B，下排为 C→D 与橙色 D→C。点击 **Toggle separation** 对比重叠与分离，再用 **Spacing 24 / 64** 比较间距。**Toggle reverse group** 关闭反向合组后，下排各自成为单边组，会重新重叠。
 
-`offset` 是平行边在图坐标中的偏移步长，默认 `20`。transform 的参数放在 `options` 中；例如，将 `offset` 从 `18` 改为 `36`，会增大同组平行边的间距。`distance` 不是这里的配置项。
+<NodeDocExample id="parallel-workflow" locale="zh" focus="separation" />
 
-也可以直接配置 `edge.parallelEdges`，无需再添加 transform：
+已有配置使用 transform 时，可以沿用：
 
 ```ts
-edge: {
-  type: 'arc',
-  parallelEdges: { enabled: true, offset: 18 },
-}
+transforms: [
+  { type: 'process-parallel-edges', options: { offset: 48, includeReverse: true } },
+]
 ```
 
-仅使用对象形式的 `edge.parallelEdges` 启用分离时，需要设置 `enabled: true`；使用默认参数可直接写 `parallelEdges: true`。两种入口选一种即可；同时配置时，`edge.parallelEdges` 对象中的字段覆盖 transform 的对应选项，显式设置 `parallelEdges: false` 或 `enabled: false` 会关闭分离。
+两种入口选择一种即可；参数放在 options 中，distance 不是此处配置。需要显式关闭时使用 `edge.parallelEdges: false`。同时存在两种入口的覆盖规则查[配置优先级](/docs/api/options/edge#两种入口与优先级)。
 
-自环边的 `source` 和 `target` 相同，由内置渲染器单独绘制，无需启用此 transform。`offset` 控制平行边分离，不控制自环大小。更新边时建议保留稳定的边 `id`。
+## 增删边后更新
+
+在上方点 **Add ab4**，A→B 从三条变为四条，原来的边也会重新分配路径；**Remove ab4** 恢复三条。重复添加不会创建同 ID 的重复边。
+
+用 addEdge / removeEdge 增删，或在首次 render 后用 updateOptions 更新平行边选项，无需重新布局。新的 parallelEdges 对象会替换旧对象；示例每次提交 enabled、offset、includeReverse 和 maxOffset，避免调整间距时丢失其他设置。
+
+保持 id 与边数组顺序可减少不必要的变化，但增删或重排同组边仍可能移动已有路径。不要用“第几条弧线”作为业务身份。参数和更新边界见[数据写入](/docs/api/graph/data-mutations) · [样式与配置更新](/docs/api/graph/lifecycle)。
+
+## 自环与标签
+
+让边的 source 与 target 指向同一个节点即可。下方 A 有一个自环、B 有三个，边标签使用各自 id；即使 `parallelEdges: false`，自环仍然分层显示。拖动节点，观察环和标签跟随。
+
+<NodeDocExample id="self-loops" locale="zh" focus="loops" />
+
+自环大小和层级由内置渲染器决定，offset / minOffset / maxOffset 不控制它们。用 edge.style.label 生成文字，颜色、箭头与状态沿用普通边配置；更多定位与碰撞设置见[边标签参考](/docs/api/options/edge#边标签)。
 
 ## 使用建议
 
-- 自动分离使用默认 `line` 或 `arc`；`cubic`、`polyline` 的专用路径不使用平行边偏移。
-- 有方向语义时开启 `endArrow`。
-- 标签较多时，避免所有平行边同时显示标签。
-- 若业务侧有边分组语义，可以把分组信息放在 `edge.data` 中，用颜色或标签区分。
+- 自动分离使用 line 或 arc；cubic / polyline 的专用路径不使用平行边偏移。
+- 先用颜色、箭头区分方向，再添加必要的标签，避免所有关系同时挤满文字。
+- 业务分组放在 edge.data，用样式回调映射颜色或标签；mergeBy 不支持任意业务字段分组。
+
+## 常见问题
+
+### 配了 offset，为什么还是重叠？
+
+对象入口须带 enabled: true，并确认边使用 line / arc。若仅一对反向边，保留 includeReverse: true；关闭后它们会各自成为零偏移的单边组。
+
+### 增大 offset，为什么有些边没有继续分开？
+
+检查 maxOffset 是否限制了外层偏移。多条边达到相同上限时可能重叠；偏移也不是曲线中点的等距像素间隔。分组与限幅规则查[间距参考](/docs/api/options/edge#分组与间距)。
+
+### 为什么自环不受平行边开关或间距影响？
+
+自环不参与平行边分组，也不需要 process-parallel-edges。不要通过复制节点或给反向边手动取负偏移来制造自环。
+
+### 为什么删了一条边，其他边的位置也变了？
+
+同组按当前边数组重新居中分配路径。稳定 id 用于保留关系身份，不保证某条边一直在同一侧。
 
 ## 示例入口
 
-- `site/demos/parallel-edges.ts`
-- `site/demos/edge-loops.ts`
-- `site/demos/edge-arrows.ts`
+[平行边与反向边](/docs/examples/parallel-edges) · [自环边](/docs/examples/edge-loops)
 
-见 [示例总览](/docs/examples)。
-
-<details data-related-examples>
-<summary>相关可运行示例</summary>
-
-- [平行边与反向边](/docs/examples/parallel-edges)
-- [自环边](/docs/examples/edge-loops)
-
-</details>
+[边使用指南](/docs/guides/edge) · [平行边完整参考](/docs/api/options/edge#平行边与自环) · [折线路由](/docs/guides/polyline-routing)

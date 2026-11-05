@@ -9,6 +9,8 @@ import styles from './node-doc-preview.module.css';
 import canvasStyles from './quick-start-example.module.css';
 
 const loaders = {
+  'parallel-workflow': () => import('../../demos/docs-parallel-workflow.ts'),
+  'self-loops': () => import('../../demos/docs-self-loops.ts'),
   'extension-plugin': () => import('../../demos/docs-extension-plugin.ts'),
   'extension-transform': () => import('../../demos/docs-extension-transform.ts'),
   'extension-layout': () => import('../../demos/docs-extension-layout.ts'),
@@ -74,7 +76,11 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'extension-plugin'
+  const hint = id === 'parallel-workflow'
+    ? (zh ? '上排三条同向边，下排一对反向边；切换分离、间距与反向分组；Add / Remove ab4 改变上排边数，重置恢复初始配置' : 'Three same-direction edges above, one reverse pair below. Toggle separation, spacing and reverse grouping. Add / Remove ab4 changes the upper group; reset restores input')
+    : id === 'self-loops'
+    ? (zh ? 'A 为单自环，B 为三个自环；平行边分离已关闭，自环仍分层；拖动节点观察环与标签跟随' : 'One self-loop on A, three on B. Loops remain nested with parallel separation disabled. Drag nodes to see loops and labels follow')
+    : id === 'extension-plugin'
     ? (zh ? "按钮或节点点击加一；Render again 重挂载并归零，重复后一次节点点击仍只加一" : "Button or node clicks increment once. Render again remounts at zero; repeated remounts must not duplicate subscriptions")
     : id === 'extension-transform'
     ? (zh ? "Reload data 增加 update/run 但不增加 init；Update name 不重跑 Transform，也不重新生成 label；重置清零" : "Reload data increments update/run without another init. Update name does not rerun the transform or regenerate labels. Reset clears counters")

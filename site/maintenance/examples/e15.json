@@ -1,0 +1,45 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E15",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "org-chart",
+      "file": "org-chart.ts",
+      "observations": [
+        "6 nodes / 5 hierarchy edges and paired role labels match the snapshot",
+        "Pan, Fit and Refresh restore the full organization with a single label layer"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "fishbone",
+      "file": "fishbone.ts",
+      "observations": [
+        "20 nodes / 19 edges show six colored cause categories and the problem head",
+        "Pan, Fit and Refresh preserve labels and colors; snapshot matches"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "dependency-graph",
+      "file": "dependency-graph.ts",
+      "observations": [
+        "9 nodes / 8 service edges run left-to-right",
+        "Pointer on Order highlights its direct upstream Auth and downstream Inventory/Payment, dimming unrelated services",
+        "Refresh clears highlighting and restores the full graph"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Added live snapshots to organization and fishbone custom handles"
+  ]
+}

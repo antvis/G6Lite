@@ -141,6 +141,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => { cleanupLabels(); graph.destroy(); },
   };

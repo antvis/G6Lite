@@ -151,10 +151,16 @@ export async function run(container: string | HTMLElement) {
       : container;
   wrapper.style.position = 'relative';
 
-  let currentGraph: any = null;
+  let currentGraph: Graph | null = null;
+  let cleanupLabels: (() => void) | undefined;
+  let generation = 0;
+  let disposed = false;
   let currentMode = 'styled';
 
   async function renderMode(mode: string) {
+    const token = ++generation;
+    cleanupLabels?.();
+    cleanupLabels = undefined;
     if (currentGraph) {
       currentGraph.destroy();
       // Remove old label canvas
@@ -176,13 +182,15 @@ export async function run(container: string | HTMLElement) {
       theme: 'light',
     });
 
+    currentGraph = graph;
     await graph.render();
+    if (disposed || token !== generation) { graph.destroy(); return; }
 
     const g = graph as unknown as GraphInstanceWithTools;
     const labelColorFn = cfg.labelColor;
     const labelPosition = cfg.labelPosition;
     const isMinimal = currentMode === 'minimal';
-    attachLabelsCanvas(wrapper, g, {
+    cleanupLabels = attachLabelsCanvas(wrapper, g, {
       nodeLabel: (n) => n.name ?? n.id,
       position: labelPosition,
       nodeSize: (n: any) => {
@@ -213,8 +221,12 @@ export async function run(container: string | HTMLElement) {
   await renderMode('styled');
 
   return {
+    getData: () => currentGraph?.getData(),
     fitView: () => currentGraph?.fitView(),
     destroy: () => {
+      disposed = true;
+      generation++;
+      cleanupLabels?.();
       if (currentGraph) currentGraph.destroy();
       wrapper.querySelector(':scope > [data-canvas-controls]')?.remove();
     },

@@ -18,7 +18,7 @@ const TREE: Array<[string, string, string?]> = [
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFit: false,
+    autoFit: { padding: 32 },
     container,
     data: {
       nodes: TREE.map(([id, label]) => ({ id, data: { label, root: id === 'root' } })),
@@ -37,6 +37,5 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas'],
   });
   await graph.render();
-  graph.fitView({ padding: [72, 72, 120, 72] });
   return graph;
 }

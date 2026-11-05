@@ -1,0 +1,27 @@
+site/demos/flowchart.ts
+  s_4534bc5c3d78f4::t_c1885734985fc5 108
+site/src/lib/site-examples.ts
+  s_4534bc5c3d78f4::t_6a2d26dbc2f283 536-537
+site/src/components/example-detail-client.tsx
+  s_4534bc5c3d78f4::t_b790151fc0e5ae 99-100,171,259,457
+site/maintenance/examples/e12.json
+  s_4534bc5c3d78f4::t_287449b84f86ab 1-47
+site/demos/parallel-edges.ts
+  s_4534bc5c3d78f4::t_6a2d26dbc2f283 84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0381b7e956aa93f884130373e8fa73b17670255b",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

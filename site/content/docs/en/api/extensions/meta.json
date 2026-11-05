@@ -1,5 +1,6 @@
 {
   "title": "Extensions",
+  "pagesIndex": "../extensions.mdx",
   "pages": [
     "registration",
     "drawing",

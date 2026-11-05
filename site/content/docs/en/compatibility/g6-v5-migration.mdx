@@ -17,6 +17,8 @@ npm install @antv/g6-lite@0.1.0-beta.27
 
 Import values and types from @antv/g6-lite only; do not migrate to deep src/dist paths.
 
+<span id="minimal-configuration-side-by-side" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
 ## Minimal configuration comparison
 
 G6 v5 commonly uses a container ID, labelText, and drag-element; see the [official example](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start). This standalone G6Lite starting point needs a mounted, non-zero-size container:
@@ -67,7 +69,7 @@ Provide nodes/edges arrays, unique node IDs, and valid endpoints. Keep stable ed
 
 Runtime node additions require positions; full replacement and incremental writes differ. See [input data](/en/docs/api/options/data) · [data updates](/en/docs/guides/data)。
 
-## Node、Edge and Combo configuration
+## Node, Edge and Combo configuration
 
 Built-in circle/rect and common edges reuse WebGL primitives; they do not replace arbitrary scene-graph shapes. State styles live in node.stateStyles, edge.stateStyles, and combo.style.stateStyles. Nested/collapsed/runtime-grouped Combo remains experimental.
 
@@ -109,7 +111,9 @@ Use string names and GraphEventMap instead of G6 event enums. Element native eve
 
 Use the [method index](/en/docs/api/graph) for full arguments, returns, and missing-ID behavior. New code should avoid toData, isDestroyed, and internal getCanvas/updateData.
 
-## Extension、Transform and Plugin
+<span id="extension-transform-and-plugin-migration" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+## Extension, Transform and Plugin
 
 G6 base classes do not migrate unchanged. Select the category and follow [tutorials](/en/docs/guides/extensions) and [contracts](/en/docs/api/extensions). The controlled context is not a full Graph. Hosts can explicitly inject plugin subscriptions, with cleanup in destroy.
 

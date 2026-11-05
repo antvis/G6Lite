@@ -1,0 +1,377 @@
+{
+  "topics": {
+    "node": {
+      "title": {
+        "zh": "节点配置",
+        "en": "Node configuration"
+      },
+      "href": "/docs/guides/node"
+    },
+    "nodeApi": {
+      "title": {
+        "zh": "节点参考",
+        "en": "Node reference"
+      },
+      "href": "/docs/api/options/node"
+    },
+    "edge": {
+      "title": {
+        "zh": "边配置",
+        "en": "Edge configuration"
+      },
+      "href": "/docs/guides/edge"
+    },
+    "edgeApi": {
+      "title": {
+        "zh": "边参考",
+        "en": "Edge reference"
+      },
+      "href": "/docs/api/options/edge"
+    },
+    "parallel": {
+      "title": {
+        "zh": "平行边与自环",
+        "en": "Parallel edges and loops"
+      },
+      "href": "/docs/guides/parallel-edges"
+    },
+    "polyline": {
+      "title": {
+        "zh": "折线路由",
+        "en": "Polyline routing"
+      },
+      "href": "/docs/guides/polyline-routing"
+    },
+    "label": {
+      "title": {
+        "zh": "标签与图标",
+        "en": "Labels and icons"
+      },
+      "href": "/docs/guides/label"
+    },
+    "labelApi": {
+      "title": {
+        "zh": "标签策略",
+        "en": "Label policy"
+      },
+      "href": "/docs/api/options/label"
+    },
+    "layout": {
+      "title": {
+        "zh": "布局选择",
+        "en": "Layout selection"
+      },
+      "href": "/docs/guides/layout"
+    },
+    "layoutApi": {
+      "title": {
+        "zh": "布局参考",
+        "en": "Layout reference"
+      },
+      "href": "/docs/api/options/layout"
+    },
+    "worker": {
+      "title": {
+        "zh": "Worker 指南",
+        "en": "Worker guide"
+      },
+      "href": "/docs/guides/layout-worker"
+    },
+    "layoutMethods": {
+      "title": {
+        "zh": "布局方法",
+        "en": "Layout methods"
+      },
+      "href": "/docs/api/graph/layout"
+    },
+    "interactions": {
+      "title": {
+        "zh": "交互组合",
+        "en": "Interactions"
+      },
+      "href": "/docs/guides/interactions"
+    },
+    "behaviors": {
+      "title": {
+        "zh": "Behavior 参考",
+        "en": "Behavior reference"
+      },
+      "href": "/docs/api/options/behaviors"
+    },
+    "tooltip": {
+      "title": {
+        "zh": "Tooltip 指南",
+        "en": "Tooltip guide"
+      },
+      "href": "/docs/guides/tooltip"
+    },
+    "events": {
+      "title": {
+        "zh": "事件指南",
+        "en": "Event guide"
+      },
+      "href": "/docs/guides/events"
+    },
+    "eventsApi": {
+      "title": {
+        "zh": "事件参考",
+        "en": "Event reference"
+      },
+      "href": "/docs/api/graph/events"
+    },
+    "viewport": {
+      "title": {
+        "zh": "视口指南",
+        "en": "Viewport guide"
+      },
+      "href": "/docs/guides/viewport"
+    },
+    "viewportApi": {
+      "title": {
+        "zh": "视口方法",
+        "en": "Viewport methods"
+      },
+      "href": "/docs/api/graph/viewport"
+    },
+    "extensions": {
+      "title": {
+        "zh": "扩展选择",
+        "en": "Extension selection"
+      },
+      "href": "/docs/guides/extensions"
+    },
+    "drawing": {
+      "title": {
+        "zh": "绘制契约",
+        "en": "Drawing contracts"
+      },
+      "href": "/docs/api/extensions/drawing"
+    },
+    "runtime": {
+      "title": {
+        "zh": "运行契约",
+        "en": "Runtime contracts"
+      },
+      "href": "/docs/api/extensions/runtime"
+    },
+    "customNode": {
+      "title": {
+        "zh": "自定义节点",
+        "en": "Custom nodes"
+      },
+      "href": "/docs/guides/custom-node"
+    },
+    "customLabel": {
+      "title": {
+        "zh": "自定义标签",
+        "en": "Custom labels"
+      },
+      "href": "/docs/guides/custom-label-renderer"
+    },
+    "customBehavior": {
+      "title": {
+        "zh": "自定义 Behavior",
+        "en": "Custom Behavior"
+      },
+      "href": "/docs/guides/custom-behavior"
+    },
+    "customLayout": {
+      "title": {
+        "zh": "自定义布局",
+        "en": "Custom layouts"
+      },
+      "href": "/docs/guides/custom-layout"
+    },
+    "decoration": {
+      "title": {
+        "zh": "节点装饰",
+        "en": "Node decorations"
+      },
+      "href": "/docs/guides/custom-decoration"
+    },
+    "measurement": {
+      "title": {
+        "zh": "性能测量",
+        "en": "Performance measurement"
+      },
+      "href": "/docs/metrics/performance"
+    },
+    "tuning": {
+      "title": {
+        "zh": "性能优化",
+        "en": "Performance tuning"
+      },
+      "href": "/docs/metrics/performance-tuning"
+    }
+  },
+  "examples": {
+    "search-focus": [
+      "viewport",
+      "viewportApi"
+    ],
+    "node-style": [
+      "node",
+      "nodeApi"
+    ],
+    "shapes": [
+      "node",
+      "nodeApi"
+    ],
+    "node-border": [
+      "node",
+      "nodeApi"
+    ],
+    "edge-arrows": [
+      "edge",
+      "edgeApi"
+    ],
+    "edge-types": [
+      "edge",
+      "edgeApi"
+    ],
+    "edge-colors": [
+      "edge",
+      "edgeApi"
+    ],
+    "edge-states": [
+      "edge",
+      "edgeApi"
+    ],
+    "edge-hit-area": [
+      "edge",
+      "edgeApi"
+    ],
+    "parallel-edges": [
+      "parallel",
+      "edgeApi"
+    ],
+    "edge-loops": [
+      "parallel",
+      "edgeApi"
+    ],
+    "labels": [
+      "label",
+      "nodeApi"
+    ],
+    "label-rendering-options": [
+      "label",
+      "labelApi"
+    ],
+    "polyline-routing": [
+      "polyline",
+      "edgeApi"
+    ],
+    "layouts": [
+      "layout",
+      "layoutApi"
+    ],
+    "layout-gallery": [
+      "layout",
+      "layoutApi"
+    ],
+    "flowchart": [
+      "layout",
+      "layoutApi"
+    ],
+    "indented-tree": [
+      "layout",
+      "layoutApi"
+    ],
+    "radial-tree": [
+      "layout",
+      "layoutApi"
+    ],
+    "dependency-graph": [
+      "layout",
+      "layoutApi"
+    ],
+    "org-chart": [
+      "layout",
+      "layoutApi"
+    ],
+    "mindmap": [
+      "layout",
+      "layoutApi"
+    ],
+    "fishbone": [
+      "layout",
+      "layoutApi"
+    ],
+    "layout-worker": [
+      "worker",
+      "layoutMethods"
+    ],
+    "tooltip": [
+      "tooltip",
+      "behaviors"
+    ],
+    "hover": [
+      "interactions",
+      "behaviors"
+    ],
+    "drag-node": [
+      "interactions",
+      "behaviors"
+    ],
+    "drag-edge": [
+      "interactions",
+      "behaviors"
+    ],
+    "event-log": [
+      "events",
+      "eventsApi"
+    ],
+    "context-menu": [
+      "events",
+      "eventsApi"
+    ],
+    "viewport-controls": [
+      "viewport",
+      "viewportApi"
+    ],
+    "zoom-options": [
+      "viewport",
+      "viewportApi"
+    ],
+    "extension-system": [
+      "extensions",
+      "runtime"
+    ],
+    "breathing-node": [
+      "customNode",
+      "drawing"
+    ],
+    "custom-node-extension": [
+      "customNode",
+      "drawing"
+    ],
+    "custom-label-renderer": [
+      "customLabel",
+      "drawing"
+    ],
+    "custom-behavior": [
+      "customBehavior",
+      "behaviors"
+    ],
+    "custom-layout": [
+      "customLayout",
+      "runtime"
+    ],
+    "decoration-badges": [
+      "decoration",
+      "nodeApi"
+    ],
+    "real-dataset": [
+      "measurement",
+      "tuning"
+    ],
+    "large": [
+      "measurement",
+      "tuning"
+    ],
+    "large-labeled": [
+      "measurement",
+      "tuning"
+    ]
+  }
+}

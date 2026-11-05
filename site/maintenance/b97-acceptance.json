@@ -1,0 +1,865 @@
+{
+  "recorded": "2026-11-05",
+  "baseline": "0944e70c",
+  "scope": "B80–B97: content calibration, navigation regrouping and current-site regression acceptance",
+  "batches": [
+    {
+      "batch": "B80 性能测量方法",
+      "delivery": "拆开数据、布局、构造渲染、交互与资源测量",
+      "compatibility": "固定版本、环境、样本与统计边界；提供可运行测量函数",
+      "commit": "cba4432a"
+    },
+    {
+      "batch": "B81 性能优化",
+      "delivery": "按首屏、高频更新、标签和资源症状定位瓶颈",
+      "compatibility": "采用诊断、单变量修改、同口径复测；精确链接完整契约",
+      "commit": "8e38f1f1"
+    },
+    {
+      "batch": "B82 包体积与加载",
+      "delivery": "区分 ESM、最小化入口、Worker 与完整 UMD",
+      "compatibility": "保存固定源码构建与压缩测量，明确依赖和异步资源的计费边界",
+      "commit": "cf0b06fe"
+    },
+    {
+      "batch": "B83 技术架构",
+      "delivery": "校准生命周期边界与各模块资源职责",
+      "compatibility": "保留架构图，内部实现不作为公开 API 承诺",
+      "commit": "f481c13c"
+    },
+    {
+      "batch": "B84 帮助总览",
+      "delivery": "按环境、异常、版本和迁移提供入口",
+      "compatibility": "沿用 compatibility URL；新建排障主题，不复制详细定义",
+      "commit": "e1a475dd"
+    },
+    {
+      "batch": "B85 运行环境",
+      "delivery": "浏览器能力、ESM、Worker、CSP 和 SSR",
+      "compatibility": "移除无证据的最低版本及覆盖率承诺，明确设备验收边界",
+      "commit": "a3927dd4"
+    },
+    {
+      "batch": "B86 稳定性与弃用",
+      "delivery": "区分发布包、开发源码、弃用与内部能力",
+      "compatibility": "按真实归档核验包根导出，保留弃用与内部成员查询",
+      "commit": "5db05f60"
+    },
+    {
+      "batch": "B87 G6 v5 迁移",
+      "delivery": "按配置、数据、交互、事件及扩展逐项迁移",
+      "compatibility": "提供独立 G6Lite 起点与迁移验收，避免兼容替换承诺",
+      "commit": "91f1f716"
+    },
+    {
+      "batch": "B88 常见问题",
+      "delivery": "短答案配合唯一详细入口",
+      "compatibility": "双语 FAQ 使用问答段落，保留旧章节锚点，不使用表格",
+      "commit": "620724ed"
+    },
+    {
+      "batch": "B89 故障排查",
+      "delivery": "按六类症状给出检查路径",
+      "compatibility": "容器诊断、详细契约链接及最小复现模板",
+      "commit": "adbdd408"
+    },
+    {
+      "batch": "B90 更新日志",
+      "delivery": "区分 npm 版本、GitHub Release 和源码变化",
+      "compatibility": "保存版本与时间证据，不把未发布源码写成包能力",
+      "commit": "072b5517"
+    },
+    {
+      "batch": "B91 使用指南分组",
+      "delivery": "数据与元素、布局与视口、状态与交互",
+      "compatibility": "按开发任务重组，所有原指南 URL 不变",
+      "commit": "f20d8bcb"
+    },
+    {
+      "batch": "B92 扩展开发栏目",
+      "delivery": "八类扩展教程独立呈现",
+      "compatibility": "教程保留 guides 路径与旧入口；修复分组匹配",
+      "commit": "f8e7757d"
+    },
+    {
+      "batch": "B93 API 参考分组",
+      "delivery": "Graph 方法、GraphOptions、扩展与工具",
+      "compatibility": "当前主题自动展开，参考与指南职责独立",
+      "commit": "755cd92d"
+    },
+    {
+      "batch": "B94 性能与原理栏目",
+      "delivery": "测量、优化、加载与架构集中查询",
+      "compatibility": "技术架构仍沿用原 concepts URL",
+      "commit": "3ffc2959"
+    },
+    {
+      "batch": "B95 帮助与升级栏目",
+      "delivery": "环境、稳定性、迁移、排障、FAQ 与日志",
+      "compatibility": "沿用已有页面身份，补充显式目录入口",
+      "commit": "fc0c183f"
+    },
+    {
+      "batch": "B96 统一导航来源",
+      "delivery": "单一 manifest 生成侧栏及物理 metadata",
+      "compatibility": "双语覆盖与页面归属检查进入 build；事件子目录投影补全",
+      "commit": "d96e80f8"
+    }
+  ],
+  "build": {
+    "root": 789,
+    "subpath": 789,
+    "basePaths": [
+      "",
+      "/G6Lite"
+    ]
+  },
+  "checks": {
+    "siteTypes": true,
+    "siteLint": {
+      "errors": 0,
+      "existingWarnings": 1,
+      "warning": "antv-logo.tsx existing no-img-element"
+    },
+    "relatedUnitTests": 107,
+    "deploymentUrlUnitTests": 5,
+    "standaloneSnippets": {
+      "count": 8,
+      "sourceTypes": true,
+      "publishedBeta27Types": true
+    },
+    "runtimeSourceExports": {
+      "previews": 160,
+      "focused": 62,
+      "formats": [
+        "HTML",
+        "Markdown",
+        "LLM"
+      ]
+    },
+    "originalRuntimeAndStyleSha256Preserved": 3,
+    "engineFilesChanged": 0
+  },
+  "routes": {
+    "default": {
+      "basePath": "",
+      "routes": 258,
+      "links": 15451,
+      "assets": 10724,
+      "sitemapEntries": 262,
+      "legacyRoutes": 254,
+      "legacyFragmentScope": "Public article fragments; excludes generated React useId control IDs",
+      "legacyMissing": {},
+      "duplicateArticleIds": {},
+      "errors": []
+    },
+    "subpath": {
+      "basePath": "/G6Lite",
+      "routes": 258,
+      "links": 15451,
+      "assets": 10724,
+      "sitemapEntries": 262,
+      "legacyRoutes": 254,
+      "legacyFragmentScope": "Public article fragments; excludes generated React useId control IDs",
+      "legacyMissing": {},
+      "duplicateArticleIds": {},
+      "errors": []
+    }
+  },
+  "browser": {
+    "surface": "ChatGPT in-app Chromium browser; local source dev and exported subpath build",
+    "representativeCases": [
+      "basic",
+      "queries-and-states",
+      "node-style",
+      "layouts",
+      "selection-behaviors",
+      "viewport-controls",
+      "extension-system",
+      "real-dataset"
+    ],
+    "results": "All 8 reached running status; no console errors in inspected runs",
+    "navigation": [
+      "extension group and old URL",
+      "active API event ancestry",
+      "English help",
+      "390×844 directory open, FAQ navigation and drawer close; no horizontal overflow",
+      "exported /G6Lite language switch",
+      "exported /G6Lite basic preview, fit canvas and documentation tab"
+    ],
+    "scope": "Representative desktop and emulated narrow viewport checks; not real-device or cross-browser certification"
+  },
+  "examples": [
+    {
+      "id": "basic",
+      "file": "basic.ts",
+      "category": "getting-started",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/data",
+        "/docs/api/options/data"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "default-theme",
+      "file": "default-theme.ts",
+      "category": "getting-started",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/theme",
+        "/docs/api/graph/states"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "data-mutations",
+      "file": "data-mutations.ts",
+      "category": "data-and-state",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/api/graph/data-mutations",
+        "/docs/api/graph/data"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "queries-and-states",
+      "file": "queries-and-states.ts",
+      "category": "data-and-state",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/api/graph/data",
+        "/docs/api/graph/states",
+        "/docs/api/graph/combo"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "set-data",
+      "file": "set-data.ts",
+      "category": "data-and-state",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/data",
+        "/docs/api/graph/data-mutations#setdata",
+        "/docs/guides/viewport"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "search-focus",
+      "file": "search-focus.ts",
+      "category": "data-and-state",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/viewport",
+        "/docs/api/graph/viewport"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "node-style",
+      "file": "node-style.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/node",
+        "/docs/api/options/node"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "shapes",
+      "file": "shapes.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/node",
+        "/docs/api/options/node"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "node-border",
+      "file": "node-border.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/node",
+        "/docs/api/options/node"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "edge-arrows",
+      "file": "edge-arrows.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/edge",
+        "/docs/api/options/edge"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "edge-types",
+      "file": "edge-types.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/edge",
+        "/docs/api/options/edge"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "edge-colors",
+      "file": "edge-colors.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/edge",
+        "/docs/api/options/edge"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "edge-states",
+      "file": "edge-states.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/edge",
+        "/docs/api/options/edge"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "edge-hit-area",
+      "file": "edge-hit-area.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/edge",
+        "/docs/api/options/edge"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "parallel-edges",
+      "file": "parallel-edges.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/parallel-edges",
+        "/docs/api/options/edge"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "edge-loops",
+      "file": "edge-loops.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/parallel-edges",
+        "/docs/api/options/edge"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "labels",
+      "file": "labels.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/label",
+        "/docs/api/options/node"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "label-rendering-options",
+      "file": "label-rendering-options.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/label",
+        "/docs/api/options/label"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "polyline-routing",
+      "file": "polyline-routing.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/polyline-routing",
+        "/docs/api/options/edge"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "combo",
+      "file": "combo.ts",
+      "category": "elements",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/combo",
+        "/docs/api/graph/combo",
+        "/docs/api/options/combo"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "layouts",
+      "file": "layouts.ts",
+      "category": "layouts",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "layout-gallery",
+      "file": "layout-gallery.ts",
+      "category": "layouts",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "flowchart",
+      "file": "flowchart.ts",
+      "category": "layouts",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "indented-tree",
+      "file": "indented-tree.ts",
+      "category": "layouts",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "layout-worker",
+      "file": "layout-worker.ts",
+      "category": "layouts",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/layout-worker",
+        "/docs/api/graph/layout"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "radial-tree",
+      "file": "radial-tree.ts",
+      "category": "layouts",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "dependency-graph",
+      "file": "dependency-graph.ts",
+      "category": "layouts",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "relationship",
+      "file": "relationship.ts",
+      "category": "scenarios-and-performance",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/data",
+        "/docs/guides/node",
+        "/docs/guides/edge"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "org-chart",
+      "file": "org-chart.ts",
+      "category": "scenarios-and-performance",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "mindmap",
+      "file": "mindmap.ts",
+      "category": "layouts",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "fishbone",
+      "file": "fishbone.ts",
+      "category": "layouts",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "tooltip",
+      "file": "tooltip.ts",
+      "category": "interactions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/tooltip",
+        "/docs/api/options/behaviors"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "hover",
+      "file": "hover.ts",
+      "category": "interactions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/interactions",
+        "/docs/api/options/behaviors"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "neighbor-highlight",
+      "file": "neighbor-highlight.ts",
+      "category": "interactions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/api/graph/data#getneighbornodes",
+        "/docs/guides/interactions"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "selection-behaviors",
+      "file": "selection-behaviors.ts",
+      "category": "interactions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/states",
+        "/docs/guides/interactions"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "drag-node",
+      "file": "drag-node.ts",
+      "category": "interactions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/interactions",
+        "/docs/api/options/behaviors"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "drag-edge",
+      "file": "drag-edge.ts",
+      "category": "interactions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/interactions",
+        "/docs/api/options/behaviors"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "event-log",
+      "file": "event-log.ts",
+      "category": "interactions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/events",
+        "/docs/api/graph/events"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "context-menu",
+      "file": "context-menu.ts",
+      "category": "interactions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/events",
+        "/docs/api/graph/events"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "viewport-controls",
+      "file": "viewport-controls.ts",
+      "category": "viewport",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/viewport",
+        "/docs/api/graph/viewport"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "zoom-options",
+      "file": "zoom-options.ts",
+      "category": "viewport",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/viewport",
+        "/docs/api/graph/viewport"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "extension-system",
+      "file": "extension-system.ts",
+      "category": "extensions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/extensions",
+        "/docs/api/extensions/runtime"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "breathing-node",
+      "file": "breathing-node.ts",
+      "category": "extensions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/custom-node",
+        "/docs/api/extensions/drawing"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "custom-label-renderer",
+      "file": "custom-label-renderer.ts",
+      "category": "extensions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/custom-label-renderer",
+        "/docs/api/extensions/drawing"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "custom-node-extension",
+      "file": "g6-v5-compat.ts",
+      "category": "extensions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/custom-node",
+        "/docs/api/extensions/drawing"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "custom-behavior",
+      "file": "custom-behavior.ts",
+      "category": "extensions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/custom-behavior",
+        "/docs/api/options/behaviors"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "custom-layout",
+      "file": "custom-layout.ts",
+      "category": "extensions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/custom-layout",
+        "/docs/api/extensions/runtime"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "decoration-badges",
+      "file": "decoration-badges.ts",
+      "category": "extensions",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/guides/custom-decoration",
+        "/docs/api/options/node"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "real-dataset",
+      "file": "real-dataset.ts",
+      "category": "scenarios-and-performance",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/metrics/performance",
+        "/docs/metrics/performance-tuning"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "large",
+      "file": "large.ts",
+      "category": "scenarios-and-performance",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/metrics/performance",
+        "/docs/metrics/performance-tuning"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    },
+    {
+      "id": "large-labeled",
+      "file": "large-labeled.ts",
+      "category": "scenarios-and-performance",
+      "bilingualFields": true,
+      "documentation": [
+        "/docs/metrics/performance",
+        "/docs/metrics/performance-tuning"
+      ],
+      "reverseLinks": true,
+      "htmlAndMarkdown": true,
+      "visualScope": "Existing runtime; representative cases are browser-checked separately"
+    }
+  ],
+  "outOfScope": [
+    "B55 parallel-edge/self-loop guide rewrite remains pending",
+    "Dedicated E-series full visual walkthroughs remain independently tracked"
+  ]
+}

@@ -14,6 +14,8 @@ Graph runs in a real browser DOM container. It prefers WebGL2 and then tries Web
 | ResizeObserver / requestAnimationFrame | Resize observation and scheduling; required browser APIs |
 | ESM / dynamic import / AbortController | Modules, lazy layouts, cancellation; check actual artifacts and application build targets |
 
+<span id="minimum-versions" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
 ## Minimum browser versions
 
 ES2020 syntax support alone is not a complete compatibility promise. Browser/WebView, GPU drivers, and bundles determine usability. Validate creation, rendering, zoom, Worker, resizing, and cleanup on each target version. Legacy IE/EdgeHTML are not current targets.
@@ -21,6 +23,8 @@ ES2020 syntax support alone is not a complete compatibility promise. Browser/Web
 ## Coverage reference
 
 Usage-share percentages are not G6Lite device pass rates. This page does not maintain an unreproducible global coverage figure. Record the project’s browser, OS, GPU, DPR, and verification date.
+
+<span id="comparison-with-sigmajs" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
 ## Browser comparison with sigma.js
 
@@ -30,7 +34,7 @@ Requirements differ by library and major version. Use the [comparison page](/en/
 
 WebGL1 is the fallback; WebGL2 is not mandatory. Acceleration, optional extensions, and resource limits affect output and throughput. A WebGL version does not determine a supported node count.
 
-## Worker、CSP and deployment
+## Worker, CSP and deployment
 
 The ESM package uses a module Worker URL for layouts. Verify base paths, files, Content-Type, cross-origin rules, and host CSP. worker: true does not prove execution; clone or loading failures may fall back. See the [Worker guide](/en/docs/guides/layout-worker).
 

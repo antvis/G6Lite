@@ -1,5 +1,6 @@
 {
   "title": "GraphOptions",
+  "pagesIndex": "../options.mdx",
   "pages": [
     "data",
     "node",

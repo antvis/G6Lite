@@ -10,7 +10,8 @@
     "postinstall": "fumadocs-mdx",
     "lint": "eslint",
     "docs:nav": "node scripts/sync-docs-navigation.mjs",
-    "docs:nav:check": "node scripts/sync-docs-navigation.mjs --check"
+    "docs:nav:check": "node scripts/sync-docs-navigation.mjs --check",
+    "docs:output:check": "python3 scripts/check-docs-output.py && node scripts/check-example-documentation.mjs"
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.5",

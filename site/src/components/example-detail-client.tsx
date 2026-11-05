@@ -868,7 +868,7 @@ export function ExampleDetailClient({
               ) : null}
             </div>
             <div className="example-code-content">
-              {activeTab === 'guide' ? (
+              <div hidden={activeTab !== 'guide'}>
                 <article className="example-guide-panel">
                   <header>
                     <span>{localizedText(example.group, locale)}</span>
@@ -906,13 +906,14 @@ export function ExampleDetailClient({
                     </section>
                   ) : null}
                 </article>
-              ) : activeTab === 'source' ? (
+              </div>
+              {activeTab === 'source' ? (
                 source ? (
                   <CodeEditor value={draft} onChange={setDraft} wrap={wrapSource} />
                 ) : (
                   <div className="example-panel-message">{copy.sourceError}</div>
                 )
-              ) : (
+              ) : activeTab === 'data' ? (
                 <div className="example-data-panel">
                   <div>
                     <h2>{copy.dataTitle}</h2>
@@ -932,7 +933,7 @@ export function ExampleDetailClient({
                     </pre>
                   )}
                 </div>
-              )}
+              ) : null}
             </div>
             {activeTab === 'guide' ? null : (
               <footer className="example-code-footer">

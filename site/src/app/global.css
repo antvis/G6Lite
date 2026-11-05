@@ -181,6 +181,29 @@ html.dark #nd-nav {
   }
 }
 
+.docs-mobile-directory {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .docs-mobile-directory {
+    position: fixed;
+    right: 16px;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--color-fd-border);
+    border-radius: 999px;
+    padding: 10px 14px;
+    background: var(--color-fd-background);
+    color: var(--color-fd-foreground);
+    box-shadow: 0 4px 18px #0002;
+    font-size: 14px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   #nd-nav a,
   #nd-nav button,

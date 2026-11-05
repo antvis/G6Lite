@@ -3,9 +3,13 @@ title: FAQ
 description: Direct answers to common questions with one detailed source
 ---
 
+<span id="should-i-use-g6lite-or-g6-v5" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
 ## How should I choose between G6Lite and G6 v5?
 
 Compare required graphics, runtime, and interactions, then validate business data. See the [capability comparison](/en/docs/compatibility/library-comparison).
+
+<span id="why-is-first-render-slow-with-a-force-layout" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
 ## What if force layout makes startup slow?
 
@@ -19,13 +23,19 @@ Reuse Graph and update states instead of rebuilding or replacing the graph for a
 
 Real DOM, Canvas 2D, and a usable WebGL1 or WebGL2 context are required. See [runtime requirements](/en/docs/compatibility/browser) for modules, Worker, and CSP.
 
+<span id="can-g6lite-run-during-ssr" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
 ## Can Graph run directly in Node.js or during SSR?
 
 Graph does not render in ordinary Node.js/SSR. Create it after client mounting and destroy on unmount; see [framework integration](/en/docs/getting-started/react).
 
+<span id="where-do-typescript-types-come-from" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
 ## Where should TypeScript types be imported from?
 
 Import values and types from @antv/g6-lite, using installed declarations. Development source and npm archives can differ; see [stability](/en/docs/compatibility/api-stability).
+
+<span id="are-combos-stable" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
 ## Can I use Combo?
 

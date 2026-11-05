@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import type { Locale } from './i18n';
 import { localizedDocsPath, localizedPath } from './i18n';
 import { siteConfig } from './site-config';
+import { withBasePath } from './shared';
 
 export type JsonLd = Record<string, unknown>;
 
@@ -38,7 +39,10 @@ const localeTags: Record<Locale, { html: string; openGraph: string }> = {
 
 export function absoluteSiteUrl(path = '/'): string {
   const base = siteConfig.url.replace(/\/+$/, '');
-  const suffix = path === '/' ? '' : path.startsWith('/') ? path : `/${path}`;
+  let suffix = withBasePath(path);
+  const configured = (process.env.NEXT_PUBLIC_BASE_PATH ?? '').replace(/\/+$/, '');
+  if (configured && new URL(base).pathname.replace(/\/+$/, '').endsWith(configured) && suffix.startsWith(configured)) suffix = suffix.slice(configured.length);
+  if (suffix === '/') suffix = '';
   return `${base}${suffix}`;
 }
 

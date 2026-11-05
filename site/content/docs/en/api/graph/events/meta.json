@@ -1,5 +1,6 @@
 {
   "title": "Event API",
+  "pagesIndex": "../events.mdx",
   "pages": [
     "element",
     "selection",

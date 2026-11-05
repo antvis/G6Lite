@@ -50,9 +50,13 @@ export async function measureOnce(container: HTMLElement, data: GraphData) {
 
 Use the monotonic [performance.now clock](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now). Two [requestAnimationFrame callbacks](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame) do not prove GPU completion or presentation to the user. Background tabs affect this measurement.
 
+<span id="selecting-a-graph-library" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
 ## Library selection comparison
 
 Use the [capability comparison](/en/docs/compatibility/library-comparison) to select candidates. Match positions, labels, edges, and interactions. Do not compare one renderer without layout against another startup that includes force computation.
+
+<span id="rules-for-numerical-comparisons" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
 ## How to compare numbers
 
@@ -60,4 +64,13 @@ Use the [capability comparison](/en/docs/compatibility/library-comparison) to se
 2. Keep all samples; report median, P95, and range. Explain outliers instead of silently deleting them.
 3. Progress through 200/5000-node and realistic datasets, then verify dragging, labels, and cleanup on target devices.
 
-Runnable workloads: [200 nodes](/en/docs/examples/large) · [5000 nodes](/en/docs/examples/large-labeled) · [AI Papers](/en/docs/examples/ai-papers)。Read each example’s dataset description. For tuning see [performance tuning](/en/docs/metrics/performance-tuning)。
+Runnable workloads: [200 nodes](/en/docs/examples/large) · [5000 nodes](/en/docs/examples/large-labeled) · [AI Papers](/en/docs/examples/real-dataset)。Read each example’s dataset description. For tuning see [performance tuning](/en/docs/metrics/performance-tuning)。
+
+<details data-related-examples>
+<summary>Related runnable examples</summary>
+
+- [AI Papers large relationship graph](/en/docs/examples/real-dataset)
+- [200 nodes](/en/docs/examples/large)
+- [5,000 labeled nodes](/en/docs/examples/large-labeled)
+
+</details>

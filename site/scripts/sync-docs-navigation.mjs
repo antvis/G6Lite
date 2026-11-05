@@ -57,7 +57,7 @@ for (const locale of ['zh', 'en']) {
       if (!title) throw new Error('Missing folder title: ' + directory);
     }
     const target = path.join(base, directory, 'meta.json');
-    output[path.relative(path.dirname(root), target)] = JSON.stringify({ title, pages }, null, 2) + '\n';
+    output[path.relative(path.dirname(root), target)] = JSON.stringify({ title, ...(refs.includes(directory) ? { pagesIndex: '../' + path.basename(directory) + '.mdx' } : {}), pages }, null, 2) + '\n';
   }
 }
 if (process.argv.includes('--print')) {

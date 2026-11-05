@@ -1,3 +1,4 @@
+import exampleDocumentation from '../../example-documentation.json';
 import type { Locale } from './i18n';
 import { localizedPath } from './i18n';
 
@@ -108,7 +109,7 @@ export const siteExampleCategories: readonly SiteExampleCategory[] = [
   },
 ];
 
-export const siteExamples: readonly SiteExampleDefinition[] = [
+const exampleDefinitions: readonly SiteExampleDefinition[] = [
   {
     id: 'basic',
     documentation: [
@@ -1245,6 +1246,12 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '2' }],
   },
 ];
+const topicIndex: Record<string, { title: LocalizedText; href: string }> = exampleDocumentation.topics;
+const exampleLinks: Record<string, string[]> = exampleDocumentation.examples;
+export const siteExamples: readonly SiteExampleDefinition[] = exampleDefinitions.map((example) => ({
+  ...example,
+  documentation: example.documentation ?? exampleLinks[example.id]?.map((id) => topicIndex[id]),
+}));
 const exampleById = new Map(siteExamples.map((example) => [example.id, example]));
 
 export function localizedText(text: LocalizedText, locale: Locale): string {

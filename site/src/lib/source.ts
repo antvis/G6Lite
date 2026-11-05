@@ -4,6 +4,7 @@ import { i18n, localizedDocsPath, localizedPath, type Locale } from './i18n';
 import { docsContentRoute, docsImageRoute, withBasePath } from './shared';
 import { expandNodeDocExamples } from './node-doc-example-source';
 import { getSiteExample, localizedText } from './site-examples';
+import { prefixMarkdownLinks } from './markdown-links';
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
@@ -20,9 +21,7 @@ export function getPageImage(page: (typeof source)['$inferPage']) {
 
   return {
     segments,
-    // metadataBase already includes the deployed site subpath (for example
-    // https://antvis.github.io/G6Lite). Prefixing NEXT_PUBLIC_BASE_PATH here as
-    // well would produce /G6Lite/G6Lite in the generated absolute OG URL.
+    // The SEO layer applies the deployment prefix once to canonical and image URLs.
     url: `${docsImageRoute(locale)}/${segments.join('/')}`,
   };
 }
@@ -46,7 +45,8 @@ export async function getLLMText(page: (typeof source)['$inferPage']) {
   ).join('\n');
   const related = links ? `\n\n## ${locale === 'zh' ? '继续阅读' : 'Related documentation'}\n\n${links}` : '';
 
-  return `# ${page.data.title} (${page.url})
+  const markdown = `# ${page.data.title} (${withBasePath(page.url)})
 
 ${expandNodeDocExamples(processed)}${related}`;
+  return prefixMarkdownLinks(markdown, withBasePath('/').replace(/\/$/, ''));
 }

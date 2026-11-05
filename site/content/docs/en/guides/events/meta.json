@@ -1,5 +1,6 @@
 {
   "title": "Event basics",
+  "pagesIndex": "../events.mdx",
   "pages": [
     "selection-drag",
     "lifecycle"

@@ -23,6 +23,7 @@
     "custom-label-renderer",
     "custom-decoration",
     "custom-layout",
-    "custom-transform"
+    "custom-transform",
+    "custom-plugin"
   ]
 }

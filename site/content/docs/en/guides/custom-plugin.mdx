@@ -1,0 +1,42 @@
+---
+title: Custom Plugins
+description: Mount independent DOM, manage subscriptions and instance state, and verify remount cleanup
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+Use Plugin for independent DOM tools, statistics, or peripheral state. Use Behavior for in-graph interaction. Each mount owns a fresh instance and its resources.
+
+## Implement, register, and mount
+
+init receives the whole configuration; mount receives the Graph container, not Canvas. This counter appends only its own DOM without replacing graph children.
+
+<NodeDocExample id="extension-plugin" locale="en" focus="plugin" />
+
+Plugin +1 or clicking a node increments the count. Render again destroys the old plugin and remounts at 0. After repeated remounts, one node click still adds only one. Expand full source for host subscription and activation.
+
+## Events and instance scope
+
+The plugin listens to its own button and retains the callback for removeEventListener. The host wraps public Graph on / off into a subscribe option returning an unsubscribe function. The plugin avoids deprecated context.graph and internal event buses.
+
+subscribe is an application option, not engine injection. The host owns Graph and subscription runs during mount, after creation. Do not access an uninitialized Graph while evaluating constructor arguments.
+
+Count, DOM, and unsubscribe references live inside the factory. Register the factory globally, not the current graph's DOM instance. Two Graphs can share the registration name with independent options and counts.
+
+## Options and cleanup
+
+A Plugin entry is an object containing type; caption and subscribe are top-level fields, not nested options. There is no Plugin.update; setData does not remount. Recreate to change constructor options; see [configuration](/en/docs/api/options/transforms-plugins#plugins).
+
+destroy unsubscribes, removes DOM listeners/nodes, and clears references, tolerating partial mounting and repeated cleanup. Cancel owned requests/timers and release Observers/Workers. Guard asynchronous callbacks and handle failures; mount Promises are not awaited.
+
+## Common questions
+
+### Why do clicks increment multiple times after render?
+
+Retain and call unsubscribe, remove DOM listeners using the original callback, and keep state/listeners out of module globals.
+
+### Why did setData not reset the counter?
+
+setData replaces data, not Plugins. render demonstrates remount lifecycle here; do not recreate the whole graph merely to reset business counts.
+
+See [PluginExtension](/en/docs/api/extensions/runtime#pluginextension) for failures and the [combined example](/en/docs/examples/extension-system).

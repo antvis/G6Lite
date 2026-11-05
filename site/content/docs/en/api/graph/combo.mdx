@@ -1,0 +1,102 @@
+---
+title: Combo operation method reference
+description: Creation, removal, membership, direct-child queries, and collapse/expand contracts
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+See [Combo configuration](/en/docs/api/options/combo)，and the [Combo guide](/en/docs/guides/combo)。
+
+## Prerequisites and boundaries
+
+Nesting, collapsing, and runtime membership remain experimental. Use after a valid first render. Structural mutations return without work when no model exists or after destruction. Queries do not check destruction; retained values do not make the instance usable.
+
+Writes return void, update the model, and request drawing without automatic layout or fitting. Bounds update during drawing, so immediate geometry queries can be stale. Use distinct valid IDs and acyclic parent hierarchies.
+
+## Code and effect
+
+Create temp assigns B to a new group. Collapse temp hides B and its adjacent edge; Expand temp restores them. Move B changes membership without moving the node. Remove temp leaves nodes and edges while releasing membership.
+
+<NodeDocExample id="combo-operations" locale="en" focus="operations" />
+
+## createCombo
+
+`graph.createCombo(combo: ComboData, childNodeIds?: string[]): void`
+
+Adds a group and assigns existing nodes, without creating or moving them. parentId should name an existing parent. Validate hierarchy and IDs. A duplicate ID does not create a group, but member assignment can still run. Initial collapsed can affect assigned-node visibility.
+
+## removeCombo
+
+`graph.removeCombo(comboId: string): void`
+
+Removes only the group, leaving nodes and edges. Direct nodes lose membership; direct child Combos become parentless rather than moving to the grandparent. Releases removed hierarchy hiding while preserving explicit business hidden.
+
+## addToCombo
+
+`graph.addToCombo(nodeId: string, comboId: string): void`
+
+Moves an existing node from its previous group to the target without repositioning or layout. Collapsed targets apply structural hiding. Validate both IDs first: an invalid target can currently clear old membership rather than reject the operation.
+
+## removeFromCombo
+
+`graph.removeFromCombo(nodeId: string): void`
+
+Removes direct membership without deleting the node. Releases hierarchy-derived hiding while preserving business hidden.
+
+## getComboChildren
+
+`graph.getComboChildren(id: string): { nodes: string[]; combos: string[] }`
+
+Returns new arrays of direct node and child Combo IDs, without recursive traversal. Missing groups or no model return empty arrays. Ordering is not guaranteed.
+
+## getNodeCombo
+
+`graph.getNodeCombo(nodeId: string): string | undefined`
+
+Returns direct membership, or undefined for ungrouped/missing nodes or no model.
+
+## collapseCombo
+
+`graph.collapseCombo(comboId: string): void`
+
+Sets collapsed=true, hides descendant nodes and adjacent edges, without virtual edges. Descendant Combo borders are not automatically hidden. Emits combo:collapse for an actual transition, not missing or already collapsed groups.
+
+## expandCombo
+
+`graph.expandCombo(comboId: string): void`
+
+Expands and releases this level’s structural hiding. Other collapsed ancestors and business hidden still apply. Emits combo:expand for an actual transition only.
+
+## toggleCombo
+
+`graph.toggleCombo(comboId: string): void`
+
+Delegates to expand or collapse according to current state. Missing groups do nothing; the corresponding transition event is emitted.
+
+
+## Membership and models
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+const parent = graph.getNodeCombo('B');
+const direct = graph.getComboChildren('base');
+const combo = graph.getComboData('base');
+console.log(parent, direct, combo?.collapsed);
+```
+
+getComboData returns a readonly-typed ComboModel. See [model fields](/en/docs/api/options/combo#read-only-query-model)。getData exports current membership, parentId, and collapsed, excluding collapse-derived hidden.
+
+## States, visibility, and compatibility
+
+Use setItemState, clearItemStates, getItemStates, and findCombosByState for Combo states. hidden hides the group itself without collapsing members; built-in click-select does not automatically select Combos.
+
+| Deprecated method | Replacement |
+| --- | --- |
+| setComboState(comboId, state, value): void | setItemState(comboId, state, value) |
+| clearComboStates(comboId): void | clearItemStates(comboId) |
+| getComboStates(comboId): ElementState[] | getItemStates(comboId) |
+
+Compatibility methods still target Combos only. Use unified state APIs in new code and avoid cross-type ID collisions.
+
+Continue with [group data](/en/docs/api/options/combo#combodata) · [State methods](/en/docs/api/graph/states) · [Data export](/en/docs/api/graph/data#getdata)。

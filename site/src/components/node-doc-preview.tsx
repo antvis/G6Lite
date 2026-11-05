@@ -49,6 +49,7 @@ const loaders = {
   'viewport-resize': () => import('../../demos/docs-viewport-resize.ts'),
   'graph-lifecycle': () => import('../../demos/docs-graph-lifecycle.ts'),
   'data-workflow': () => import('../../demos/docs-data-workflow.ts'),
+  'combo-operations': () => import('../../demos/docs-combo-operations.ts'),
 };
 
 export function NodeDocPreview({ id, locale, children }: {
@@ -65,7 +66,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'data-workflow'
+  const hint = id === 'combo-operations'
+    ? (zh ? 'Create → Collapse → Expand 比较成员显隐；Move B 只改归属，Remove temp 不删除节点和边；重置恢复初始状态' : 'Create → Collapse → Expand compares member visibility. Move B only changes membership; Remove temp keeps nodes and edges. Reset restores initial data')
+    : id === 'data-workflow'
     ? (zh ? 'Edit snapshot 不写回；Update A 更新 score；Add D 新增节点和 C-D，Remove D 同时删除关联边；重置恢复初始数据' : 'Edit snapshot does not write back. Update A changes score. Add D adds D and C-D; Remove D removes both. Reset restores initial data')
     : id === 'graph-lifecycle'
     ? (zh ? '样式更新和 refresh 不增加 render 事件；Render again 重建状态并重新适配；Destroy graph 移除画布，工具栏重置会新建实例' : 'Style updates and refresh do not add render events. Render again rebuilds states and refits. Destroy graph removes the canvas; Reset example creates a new instance')

@@ -1,0 +1,79 @@
+{
+  "sections": {
+    "guides": {
+      "id": "guides",
+      "title": {
+        "zh": "使用指南",
+        "en": "Usage guides"
+      },
+      "children": [
+        {
+          "id": "elements",
+          "title": {
+            "zh": "数据与元素",
+            "en": "Data and elements"
+          },
+          "children": [
+            "guides/data",
+            "guides/node",
+            "guides/edge",
+            "guides/label",
+            "guides/combo",
+            "guides/theme"
+          ]
+        },
+        {
+          "id": "layout-viewport",
+          "title": {
+            "zh": "布局与视口",
+            "en": "Layout and viewport"
+          },
+          "children": [
+            "guides/layout",
+            "guides/layout-worker",
+            "guides/viewport",
+            "guides/parallel-edges",
+            "guides/polyline-routing"
+          ]
+        },
+        {
+          "id": "interaction",
+          "title": {
+            "zh": "状态与交互",
+            "en": "States and interaction"
+          },
+          "children": [
+            "guides/states",
+            "guides/interactions",
+            {
+              "page": "guides/events",
+              "children": [
+                "guides/events/selection-drag",
+                "guides/events/lifecycle"
+              ]
+            },
+            "guides/tooltip"
+          ]
+        },
+        {
+          "id": "legacy-extensions",
+          "title": {
+            "zh": "扩展教程",
+            "en": "Extension tutorials"
+          },
+          "children": [
+            "guides/extensions",
+            "guides/custom-node",
+            "guides/custom-edge",
+            "guides/custom-label-renderer",
+            "guides/custom-decoration",
+            "guides/custom-behavior",
+            "guides/custom-layout",
+            "guides/custom-transform",
+            "guides/custom-plugin"
+          ]
+        }
+      ]
+    }
+  }
+}

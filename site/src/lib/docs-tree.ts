@@ -1,3 +1,4 @@
+import { getManifestSection } from './docs-navigation-manifest';
 import type * as PageTree from 'fumadocs-core/page-tree';
 
 import type { Locale } from './i18n';
@@ -31,7 +32,6 @@ export function getDocsNavigationTree(tree: PageTree.Root, locale: Locale): Page
 
   const gettingStarted = findFolderByPath(tree, 'getting-started');
   const concepts = findFolderByPath(tree, 'concepts');
-  const guides = findFolderByPath(tree, 'guides');
   const api = findFolderByPath(tree, 'api');
   const metrics = findFolderByPath(tree, 'metrics');
   const compatibility = findFolderByPath(tree, 'compatibility');
@@ -43,7 +43,7 @@ export function getDocsNavigationTree(tree: PageTree.Root, locale: Locale): Page
       sectionPages(gettingStarted, [docsOverview]),
     ),
     createSection('concepts', text.concepts, sectionPages(concepts)),
-    createSection('guides', text.guides, sectionPages(guides)),
+    getManifestSection('guides', tree, locale),
     createSection('api', text.api, sectionPages(api)),
     createSection('metrics', text.metrics, sectionPages(metrics)),
     createSection(

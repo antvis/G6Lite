@@ -1,0 +1,43 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E21",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "custom-behavior",
+      "file": "custom-behavior.ts",
+      "observations": [
+        "Clicking Inbox selects it; blank-canvas click clears selection",
+        "Refresh restores four unselected workflow nodes"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "custom-layout",
+      "file": "custom-layout.ts",
+      "observations": [
+        "6 nodes / 5 edges render as two rows of three; exported coordinates match two-row.execute",
+        "Fit and Refresh preserve the custom layout"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "extension-system",
+      "file": "extension-system.ts",
+      "observations": [
+        "Clicking Customer changes normalized data.size to 68 and shows selected styling",
+        "Transform output and 3-node / 2-edge snapshot match the integrated graph",
+        "Two refreshes leave exactly one plugin hint; initial size/state is restored"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": []
+}

@@ -46,6 +46,7 @@ export async function run(container: string | HTMLElement) {
   ui.setStatus(lines[0]);
 
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();

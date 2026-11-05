@@ -6,7 +6,7 @@ type Entry = string | { id?: string; page?: string; title?: { zh: string; en: st
 type Section = { id: string; title: { zh: string; en: string }; children: Entry[] };
 
 function page(tree: PageTree.Root, ref: string, locale: Locale): PageTree.Item {
-  const slug = ref === 'index' ? '' : ref.replace(/\\/index$/, '');
+  const slug = ref === 'index' ? '' : ref.endsWith('/index') ? ref.slice(0, -6) : ref;
   const url = localizedPath('/docs' + (slug ? '/' + slug : ''), locale);
   const visit = (nodes: PageTree.Node[]): PageTree.Item | undefined => {
     for (const node of nodes) {

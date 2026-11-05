@@ -54,25 +54,25 @@
             },
             "guides/tooltip"
           ]
-        },
-        {
-          "id": "legacy-extensions",
-          "title": {
-            "zh": "扩展教程",
-            "en": "Extension tutorials"
-          },
-          "children": [
-            "guides/extensions",
-            "guides/custom-node",
-            "guides/custom-edge",
-            "guides/custom-label-renderer",
-            "guides/custom-decoration",
-            "guides/custom-behavior",
-            "guides/custom-layout",
-            "guides/custom-transform",
-            "guides/custom-plugin"
-          ]
         }
+      ]
+    },
+    "extensions": {
+      "id": "extensions",
+      "title": {
+        "zh": "扩展开发",
+        "en": "Extension development"
+      },
+      "children": [
+        "guides/extensions",
+        "guides/custom-node",
+        "guides/custom-edge",
+        "guides/custom-label-renderer",
+        "guides/custom-decoration",
+        "guides/custom-behavior",
+        "guides/custom-layout",
+        "guides/custom-transform",
+        "guides/custom-plugin"
       ]
     }
   }

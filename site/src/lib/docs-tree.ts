@@ -44,6 +44,7 @@ export function getDocsNavigationTree(tree: PageTree.Root, locale: Locale): Page
     ),
     createSection('concepts', text.concepts, sectionPages(concepts)),
     getManifestSection('guides', tree, locale),
+    getManifestSection('extensions', tree, locale),
     createSection('api', text.api, sectionPages(api)),
     createSection('metrics', text.metrics, sectionPages(metrics)),
     createSection(

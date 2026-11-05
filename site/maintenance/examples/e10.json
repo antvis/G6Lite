@@ -1,0 +1,45 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E10",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "edge-types",
+      "file": "edge-types.ts",
+      "observations": [
+        "Two live views each contain 4 nodes / 2 edges; upper solid/dashed and lower arc curvature 0.3/0.6 match source",
+        "Fit and Refresh preserve both comparisons"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "edge-arrows",
+      "file": "edge-arrows.ts",
+      "observations": [
+        "8 nodes / 4 edges show no arrow, forward, bidirectional and thick forward arrow in a 2×2 arrangement",
+        "Fit and Refresh preserve direction and width; rendered snapshot agrees"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "edge-colors",
+      "file": "edge-colors.ts",
+      "observations": [
+        "20 nodes / 10 edges show ten palette colors with forward arrows matching edge.data.idx",
+        "Fit and Refresh preserve all ten colors; no console errors"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Removed incorrect cubic/four-view claims from bilingual text and tags",
+    "Added live snapshots for all three custom handles, preserving separate view identities"
+  ]
+}

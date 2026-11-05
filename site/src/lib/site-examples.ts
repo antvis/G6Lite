@@ -355,18 +355,18 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     group: { zh: '边', en: 'Edges' },
     title: { zh: '边类型', en: 'Edge types' },
     description: {
-      zh: '展示直线、虚线、弧线和曲线。',
-      en: 'Show line, dashed, arc, and cubic edges.',
+      zh: '对比实线、虚线和两种弧线曲率。',
+      en: 'Compare solid lines, dashed lines and two arc curvatures.',
     },
     interaction: {
-      zh: '对比直线、虚线、弧线和曲线。',
-      en: 'Compare line, dashed, arc, and cubic edges.',
+      zh: '上排对比实线与虚线，下排对比 curvature 0.3 与 0.6；适应画布或刷新后保留这两组对照。',
+      en: 'Compare solid and dashed lines above, then curvature 0.3 and 0.6 below. Fit or refresh retains both comparisons.',
     },
     dataDescription: {
-      zh: '四张小图分别展示一种边。',
-      en: 'Four small graphs each show one edge type.',
+      zh: '两个视图各有 4 个节点、2 条边；下排两条边均为 arc，不是 cubic。',
+      en: 'Two views each have 4 nodes and 2 edges. Both lower edges use arc, not cubic.',
     },
-    tags: ['edge.line', 'edge.arc', 'edge.cubic', 'edge.dash'],
+    tags: ['edge.line', 'edge.arc', 'edge.curvature', 'edge.dash'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '4' }],
   },
   {

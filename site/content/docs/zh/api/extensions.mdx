@@ -1,19 +1,13 @@
 ---
 title: 扩展
-description: register、extensionFactory、runLayout，以及扩展里可以调用的上下文
+description: 扩展类别与激活入口，注册、工厂、上下文和布局工具的查询索引
 ---
 
 配置覆盖不了的差异，用 `register()` 注册后再在 `GraphOptions` 里按名字引用。教程和示例见 [扩展体系](/docs/guides/extensions)、[自定义节点](/docs/guides/custom-node)、[自定义行为](/docs/guides/custom-behavior)。
 
-```ts
-import { extensionFactory, register } from '@antv/g6-lite';
-```
-
 ## `register()`
 
-```ts
-register(type, name, extension): void
-```
+`register(type, name, extension): void`。重载类型、名称约束与实例作用域见[注册与上下文](/docs/api/extensions/registration#register)。
 
 `type` 是扩展类别，`name` 是之后写进配置的名字，不能是空字符串。同一类别下后注册的同名扩展覆盖之前的定义。
 
@@ -31,6 +25,8 @@ register(type, name, extension): void
 节点和边扩展适合无状态的样式对象。布局、行为、转换和插件通常带内部状态，用 `extensionFactory()` 包装。
 
 ```ts
+import { register } from '@antv/g6-lite';
+
 register('edge', 'dependency', {
   base: 'arc',
   style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
@@ -43,33 +39,13 @@ register('edge', 'dependency', {
 
 ## `extensionFactory()`
 
-```ts
-extensionFactory(factory: () => Extension): () => Extension
-```
-
-标记这个函数是扩展工厂。引擎为每个 Graph 调用一次，避免多个图共享同一份闭包状态。
+标记并返回实例工厂；它不立即创建实例，调用次数取决于扩展类别。完整签名、注册形式、对象兼容限制和作用域见[注册与上下文参考](/docs/api/extensions/registration#extensionfactory)。
 
 ## 扩展上下文
 
-行为、插件和部分布局在 `init(context, options)` 里收到 `ExtensionContext`。`options` 是只读配置。
+运行类扩展通过 init 获得 data、state、viewport、requestRender() 和 isDestroyed()。data 返回分层浅复制的快照，state.set / setAll 替换指定元素状态；新代码使用受控能力。
 
-| 成员 | 作用 |
-| --- | --- |
-| `context.data.getNode(id)` / `getEdge(id)` | 读取只读快照 |
-| `context.data.getNodeIds()` / `getEdgeIds()` | 当前 id 列表 |
-| `context.data.updateNode(id, data)` / `updateEdge(id, data)` | 合并业务字段 |
-| `context.state.set(id, states)` | 替换一个元素的状态列表 |
-| `context.state.setAll(stateMap)` | 一次替换多个元素 |
-| `context.state.get(id)` / `clear(id)` | 读取或清空状态 |
-| `context.viewport.screenToGraph(point)` | 客户端坐标转图坐标 |
-| `context.viewport.graphToScreen(point)` | 图坐标转客户端坐标 |
-| `context.viewport.getZoom()` | 当前缩放 |
-| `context.requestRender()` | 请求下一帧绘制 |
-| `context.isDestroyed()` | 所属 Graph 是否已销毁 |
-
-`data` 返回的节点和边快照不能改字段。写入走 `updateNode`、`updateEdge` 和 `state`。
-
-`context.graph`，以及上下文上平铺的 `screenToGraph()`、`graphToScreen()`、`getZoom()`，保留给已有扩展。新扩展使用 `data`、`state`、`viewport` 和 `requestRender()`。
+全部成员签名、快照字段、坐标单位、缺失 ID、清理和兼容成员见[ExtensionContext](/docs/api/extensions/registration#extensioncontext)。
 
 ## `runLayout()`
 

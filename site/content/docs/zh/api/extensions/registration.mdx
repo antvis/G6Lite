@@ -1,0 +1,171 @@
+---
+title: 注册与上下文
+description: register、extensionFactory、实例作用域、ExtensionContext 的完整公共契约与清理边界
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+用 register 注册定义，再在 Graph 配置中按名称启用。无状态绘制扩展用描述对象；有状态扩展用返回新实例的工厂。各类别入口见[扩展总览](/docs/api/extensions)。
+
+## 最小注册与激活
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+
+register('edge', 'app-dependency', {
+  base: 'arc',
+  style: { stroke: '#5366ad', curvature: 0.2, endArrow: true },
+});
+
+export async function createGraph(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'B', x: 200, y: 0 }],
+      edges: [{ id: 'A-B', source: 'A', target: 'B' }],
+    },
+    edge: { type: 'app-dependency' },
+    autoFit: true,
+  });
+  try { await graph.render(); return graph; }
+  catch (error) { graph.destroy(); throw error; }
+}
+```
+
+调用方负责在卸载时销毁返回的 Graph。注册本身不会创建图、挂载扩展或触发绘制。
+
+## register
+
+`register(type, name, extension): void` 按类别提供重载；所有类型均从包根导入。
+
+| type | extension 的公共类型 | 激活位置 |
+| --- | --- | --- |
+| node | NodeExtensionInput | node.type |
+| edge | ExtensionInput&lt;EdgeExtension&gt; | edge.type |
+| label | ExtensionInput&lt;LabelRenderer&lt;T&gt;&gt; | node.labelRenderer / edge.labelRenderer |
+| decoration | ExtensionInput&lt;DecorationRenderer&gt; | node.decorations[].renderer |
+| layout | ExtensionInput&lt;LayoutExtension&lt;TOptions&gt;&gt; | layout.type |
+| behavior | ExtensionInput&lt;BehaviorExtension&lt;TOptions, TEventMap&gt;&gt; | behaviors 中的 type |
+| transform | ExtensionInput&lt;TransformExtension&lt;TOptions&gt;&gt; | transforms 中的 type |
+| plugin | ExtensionInput&lt;PluginExtension&lt;TOptions&gt;&gt; | plugins 中的 type |
+
+ExtensionInput&lt;T&gt; 是 T、ExtensionFactory&lt;T&gt; 或 ExtensionConstructor&lt;T&gt; 的联合；NodeExtensionInput 对应 ExtensionInput&lt;NodeExtension&gt;。工厂为 () => T，兼容 constructor 为 new () => T。
+
+Behavior 的 TOptions 继承 BehaviorOptions&lt;TType&gt;，Plugin 的 TOptions 继承 PluginOptions&lt;TType&gt;；TType 对应注册名称。Behavior 的事件参数由 TEventMap 推导，默认 GraphEventMap。
+
+注册表在同一模块实例中共享，不属于某个 Graph。name 必须为非空白字符串，否则抛错；名称不会自动 trim。不同类别允许同名，同类别后注册覆盖定义。公开入口没有 unregister。
+
+在首次使用前注册。覆盖不会替换已挂载的运行实例；Node / Edge / Label / Decoration 的同名解析缓存会失效，但不自动刷新现有图。避免占用内置名称；注册与已存在实例的生命周期不是同一件事。
+
+## extensionFactory
+
+`extensionFactory<T>(factory: ExtensionFactory<T>): ExtensionFactory<T>`，其中 `ExtensionFactory<T> = () => T`。
+
+它标记并返回原函数，不会调用函数，也不会自动注册。工厂每次应返回新的实例，实例私有状态放在工厂函数内部；返回同一个全局对象仍会共享状态。
+
+| 注册形式 | 行为与适用情况 |
+| --- | --- |
+| extensionFactory(() => instance) | 显式工厂；有状态扩展的推荐入口 |
+| 普通对象 | 兼容性尽力复制；函数闭包、部分特殊对象不能保证隔离，适合无状态描述 |
+| 零参数 constructor | 兼容入口，重新构造；ExtensionConstructor 已弃用，不用于新扩展 |
+
+未标记的函数仍会按工厂或旧 constructor 兼容规则识别；使用显式工厂避免依赖识别规则。不要在模块级别保存当前 Graph 的上下文。
+
+### 实例作用域
+
+| 类别 | 实例何时创建 | 生命周期与释放 |
+| --- | --- | --- |
+| Node / Edge / Label / Decoration | 按名称解析并缓存，可跨 Graph 共用 | 不走运行类 init / destroy；绘制描述应无状态，不持有某个 Graph 的资源 |
+| Behavior | 每个 Graph 每次挂载的每个配置项 | init → getEvents；卸载时解绑返回的事件并 destroy |
+| Layout | 每次布局执行 | Graph 路径 init → execute → destroy；独立 runLayout 没有 Graph，不调用 init |
+| Transform | 每个 Graph 的配置位置与名称 | init 后复用，后续转换调用 update；移除、替换或销毁时释放 |
+| Plugin | 每个 Graph 每次挂载的每个配置项 | init → mount；重新挂载或 Graph 销毁时 destroy |
+
+因此不能把工厂理解为“每个 Graph 固定调用一次”。只有 Transform 提供当前的 update 钩子，不存在适用于所有扩展的 update 生命周期。布局执行细节见[布局参考](/docs/api/graph/layout#runlayout)，Behavior 的激活规则见[Behavior 契约](/docs/api/options/behaviors#自定义-behavior-契约)。
+
+## ExtensionContext
+
+运行类扩展在 init 中获得上下文。它提供 data、state、viewport、requestRender() 和 isDestroyed()；不提供通用的增删元素、Combo 数据查询或事件订阅入口。不要为补足这些能力直接依赖内部 DataModel、Renderer 或 context.graph。
+
+`Extension<TOptions>` 的两个可选钩子为 `init(context: ExtensionContext, options: Readonly<TOptions>): void` 与 `destroy(): void`。Readonly 是类型约束，不代表所有传入对象都已冻结或递归复制；按只读数据使用选项。
+
+init / destroy 按同步钩子调用，引擎不等待它们返回的 Promise。异步工作自行管理完成、失败与取消。
+
+### data：读取快照与更新业务字段
+
+公共类型为 ExtensionDataContext。
+
+| 调用 | 返回值与行为 |
+| --- | --- |
+| getNode(id: string) | ExtensionNodeData 或 undefined |
+| getEdge(id: string) | ExtensionEdgeData 或 undefined |
+| getNodeIds() / getEdgeIds() | string[] 新数组，缺失模型时为空，不保证稳定顺序 |
+| updateNode(id: string, data: Record&lt;string, unknown&gt;) | void；浅合并节点业务 data，不改身份、坐标或归属 |
+| updateEdge(id: string, data: Record&lt;string, unknown&gt;) | void；浅合并边业务 data，不改端点 |
+
+参数 id 是元素 ID。缺失元素读取返回 undefined，更新跳过。写入沿用[Graph 数据方法](/docs/api/graph/data-mutations)的前提：首次有效 render 后使用；销毁后不写入。
+
+<details>
+<summary>ExtensionNodeData / ExtensionEdgeData 的完整字段与复制规则</summary>
+
+| 字段 | 类型（字段均只读） | 所属快照 |
+| --- | --- | --- |
+| id | string | 节点与边 |
+| name? | string | 仅节点 |
+| x / y | number，图坐标 | 仅节点 |
+| source / target | string，端点节点 ID | 仅边 |
+| data? | Readonly&lt;Record&lt;string, unknown&gt;&gt; | 节点与边，可选 |
+| states | readonly ElementState[] | 节点与边，注意是数组，不是 Model 的 Set |
+
+每次读取复制元素记录、状态数组和顶层 data；深层业务对象不保证复制。只读是类型约束，未承诺运行时冻结。修改副本的顶层字段不会写回；深层引用可能共享，应由业务管理所有权。它们不是 [Graph 的实时只读 Model](/docs/api/graph/data#模型字段)，也不包含 Combo 归属、分组模型或渲染器内部字段。
+
+首次 render 的布局和 Transform 中，context.data 可能为空；替换数据时可能仍是上一版已提交数据。计算本次输入必须使用 execute(data, runtime) / beforeRender(data) 的 data 参数。
+
+</details>
+
+### state：替换状态成员
+
+公共类型为 ExtensionStateContext。
+
+| 调用 | 返回值与行为 |
+| --- | --- |
+| set(id: string, states: ElementState[]) | void；替换该元素的整份状态列表，不是增量添加 |
+| setAll(stateMap: Record&lt;string, ElementState[]&gt;) | void；替换列出 ID 的状态，未列出的元素保留原状 |
+| get(id: string) | ElementState[] 新数组；缺失元素为空 |
+| clear(id: string) | void；清空指定元素状态 |
+
+支持节点、边和 Combo，跨类型 ID 应唯一。需要叠加标记时先 get，再保留其他状态；显隐与折叠的限制、缺失 ID 行为及状态更新时机统一见[状态方法](/docs/api/graph/states)。
+
+下面的注册调用来自实际运行代码。单击 B，再单击空白：active 被设置、清理，而 A 原有 selected 保留。展开完整代码可查看工厂内部的上下文操作和 destroy。
+
+<NodeDocExample id="behavior-custom" locale="zh" focus="registration" />
+
+### viewport：坐标与缩放
+
+公共类型为 ExtensionViewportContext。
+
+| 调用 | 返回值与单位 |
+| --- | --- |
+| `screenToGraph(point: { x: number; y: number })` | `{ x: number; y: number }`，客户端 CSS 坐标转图坐标 |
+| `graphToScreen(point: { x: number; y: number })` | `{ x: number; y: number }`，图坐标转客户端 CSS 坐标 |
+| getZoom() | number，相机缩放比例 |
+
+这里的 point 是对象参数；不要传 offsetX/Y 或乘以 DPR。容器偏移、坐标示例及前提见[坐标方法](/docs/api/graph/viewport#screentograph)。
+
+### requestRender 与 isDestroyed
+
+`requestRender(): void` 请求调度绘制，不执行布局、不重新挂载扩展，也不是同步绘制完成信号。普通 data / state 写入已经安排更新。
+
+`isDestroyed(): boolean` 反映所属 Graph 是否已销毁。异步回调写入前检查，同时取消扩展自己的异步任务；这个检查不会代替取消。
+
+## 清理与异常
+
+Behavior 从 getEvents 返回的监听由引擎解绑；扩展自己创建的 DOM 监听、计时器、Observer、请求和 Worker 由 destroy 释放。init 部分成功后也可能进入 destroy，清理应可重复，并先检查资源是否存在。
+
+扩展创建、init、destroy、Behavior 事件等调用会捕获同步异常并输出类别、名称与阶段。异常隔离不提供状态或 DOM 回滚，也不能代替业务异步任务的 catch / 取消；布局异步执行的规则见[布局方法](/docs/api/graph/layout)。同名注册的 Behavior 优先于内置实现，失败时不会自动回退到内置行为。
+
+## 兼容成员
+
+context.graph 和平铺的 screenToGraph、graphToScreen、getZoom 已弃用，保留兼容；后面三个对应 viewport 下的同名方法。新扩展使用本页的受控能力，不新增对 Graph 内部实现的依赖。
+
+完整开发步骤见[自定义 Behavior](/docs/guides/custom-behavior)；绘制、布局和装饰的现有教程仍从[扩展体系](/docs/guides/extensions)进入。

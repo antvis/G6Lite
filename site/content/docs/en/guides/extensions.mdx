@@ -48,25 +48,17 @@ register(
 );
 ```
 
-Object and zero-argument class registrations remain beta compatibility forms. Only `extensionFactory()` guarantees isolated mutable state for new stateful extensions.
+Objects and zero-argument constructors remain compatibility forms. Use a factory returning a new instance with private state inside it; returning a shared object or capturing module-level mutable state still shares that state.
 
 ## Lifecycle by category
 
-- Node, Edge, Label, and Decoration are stateless descriptions resolved and cached by the engine.
-- Behavior uses `create → init → getEvents → destroy` for each Graph mount.
-- Layout uses `create → init → execute → destroy` for each managed execution.
-- Transform uses `create → init`, receives `update` when the instance is reused, and is destroyed when removed or when the Graph is destroyed.
-- Plugin uses `create → init → mount → destroy` for each Graph mount.
-
-`update()` is not a common lifecycle hook. Behavior and Plugin are recreated when remounted, and Layout receives a new instance for every execution.
-
-Extension creation, lifecycle hooks, category methods, and each custom Behavior event handler are error-isolated. Diagnostics identify the category, registered name, and failing phase or event without stopping unrelated handlers.
+Drawing descriptors are resolved and cached by name. Runtime scope depends on mounting, execution, or configuration position; factories are not called exactly once per Graph. See [instance scope](/en/docs/api/extensions/registration#instance-scope) and [cleanup and errors](/en/docs/api/extensions/registration#cleanup-and-errors) for the canonical lifecycle and resource rules.
 
 ## Public capability boundary
 
 `ExtensionContext` groups supported capabilities under `data`, `state`, `viewport`, `requestRender()`, and `isDestroyed()`. New extensions must not depend on deprecated `context.graph`, internal `Renderer`, `DataModel`, WebGL state, GPU buffers, deep source imports, or `graph.eventEmitter`.
 
-`context.data.getNode()` and `getEdge()` return read-only snapshots. Update data through `context.data.updateNode()` or `updateEdge()`, and update states through `context.state`.
+`context.data.getNode()` and `getEdge()` return snapshots shallow-copied by layer; nested objects may be shared. They are not live Models. Update through data / state methods. See [ExtensionContext](/en/docs/api/extensions/registration#extensioncontext) for complete fields, state replacement, coordinate conventions, and compatibility entries.
 
 If a registered Behavior uses the same name as a built-in Behavior, the registered extension wins. A failing registered implementation does not fall back to the built-in implementation.
 
@@ -103,4 +95,4 @@ const graph = new Graph({
 - Use Node, Edge, Label, or Decoration for rendering descriptions and content.
 - Use Layout only to compute and return node coordinates; Graph owns position application and rendering.
 
-Custom layouts must honor their `AbortSignal`. Every extension must release the listeners, timers, workers, observers, and DOM nodes it owns in `destroy()`.
+Custom layouts must honor their `AbortSignal`. Runtime extensions release their listeners, timers, Workers, Observers, and DOM in `destroy()`. Stateless drawing descriptors should not own Graph-lifecycle resources.

@@ -77,32 +77,19 @@ register(
           },
         };
       },
+      destroy() {
+        context = undefined;
+      },
     };
   }),
 );
 ```
 
-对象和 class constructor 注册在 beta 阶段仍然兼容。对象实例会进行尽力克隆，零参数 class 会重新构造，但只有 `extensionFactory()` 保证有状态实例隔离；新增有状态扩展应使用 factory，新增无状态扩展可直接使用配置对象。
+有状态扩展用返回新实例的 extensionFactory；闭包状态放在工厂函数内部。对象和零参数 constructor 仅作兼容，不能依赖对象复制来隔离闭包。
 
-不同类别的实例作用域如下：
+绘制类描述按名称解析并缓存，运行类按挂载、执行或配置位置创建与释放，不能统一理解为“每个 Graph 一次”。完整规则见[实例作用域](/docs/api/extensions/registration#实例作用域)，钩子与资源归属见[清理与异常](/docs/api/extensions/registration#清理与异常)。
 
-| 类别                             | 实例作用域                 | 生命周期                                         |
-| -------------------------------- | -------------------------- | ------------------------------------------------ |
-| Node / Edge / Label / Decoration | 全局无状态描述，解析后缓存 | create；重复注册使缓存失效                       |
-| Behavior                         | 每个 Graph、每次挂载       | create → init → getEvents → destroy              |
-| Layout                           | 每次执行                   | create → init → execute → destroy                |
-| Transform                        | 每个 Graph、每个配置位置   | create → init；后续 update；Graph 销毁时 destroy |
-| Plugin                           | 每个 Graph、每次挂载       | create → init → mount → destroy                  |
-
-`update()` 不是所有扩展的共同生命周期：当前只有 Transform 会在复用实例时收到 `update()`；Behavior 和 Plugin 在重新挂载时销毁旧实例并创建新实例，Layout 每次执行也使用新实例。
-
-扩展的 create、init、destroy 以及类别能力调用都会隔离业务异常。Behavior 的单个事件 handler 也会独立隔离；错误信息包含类别、扩展名和事件名，不会中断其他 handler 或导致主图层白屏。
-
-`ExtensionContext` 将能力分为 `data`、`state`、`viewport` 和 `requestRender()`。新增扩展不应直接依赖 `context.graph`；该字段只在 beta 迁移期保留。
-
-`context.data.getNode()` / `getEdge()` 返回只读快照：元素记录、状态数组和顶层 `data` 对象都会复制，修改返回值不会反向修改 Graph。快照中的更深层业务对象不承诺递归克隆，数据变更仍应通过 `context.data.updateNode()` / `updateEdge()` 完成。
-
-如果注册 Behavior 与内置 Behavior 同名，显式注册的版本优先。注册版本失败时不会自动回退到内置实现，避免配置与实际行为不一致。
+ExtensionContext 提供 data、state、viewport、requestRender() 和 isDestroyed()。data 是分层浅复制快照，不是实时 Model；嵌套业务对象可能共享。字段、状态替换与坐标约定统一查[上下文契约](/docs/api/extensions/registration#extensioncontext)，新代码不使用已弃用 context.graph。
 
 完整的名称常量、options 类型、factory、显式注册函数与 Graph 激活模板见[自定义 Behavior](/docs/guides/custom-behavior)。
 

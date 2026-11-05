@@ -34,9 +34,11 @@ export function createBusinessSelect(): BehaviorExtension<BusinessSelectOptions>
   };
 }
 
+// #region registration
 export function registerBusinessSelect() {
   register('behavior', BUSINESS_SELECT, extensionFactory(createBusinessSelect));
 }
+// #endregion registration
 
 export async function run(container: HTMLElement) {
   registerBusinessSelect();

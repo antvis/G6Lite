@@ -1,0 +1,171 @@
+---
+title: Registration and context
+description: Public contracts for register, extensionFactory, instance scope, ExtensionContext, and cleanup
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+Register a definition, then activate its name in Graph configuration. Use descriptors for stateless drawing extensions and factories returning fresh instances for stateful extensions. See the [extension overview](/en/docs/api/extensions) for category entries.
+
+## Minimal registration and activation
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+
+register('edge', 'app-dependency', {
+  base: 'arc',
+  style: { stroke: '#5366ad', curvature: 0.2, endArrow: true },
+});
+
+export async function createGraph(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'B', x: 200, y: 0 }],
+      edges: [{ id: 'A-B', source: 'A', target: 'B' }],
+    },
+    edge: { type: 'app-dependency' },
+    autoFit: true,
+  });
+  try { await graph.render(); return graph; }
+  catch (error) { graph.destroy(); throw error; }
+}
+```
+
+The caller destroys the returned Graph on unmount. Registration alone does not create a graph, mount an extension, or request a draw.
+
+## register
+
+`register(type, name, extension): void` has category-specific overloads. Import all types from the package root.
+
+| type | Public extension type | Activation |
+| --- | --- | --- |
+| node | NodeExtensionInput | node.type |
+| edge | ExtensionInput&lt;EdgeExtension&gt; | edge.type |
+| label | ExtensionInput&lt;LabelRenderer&lt;T&gt;&gt; | node.labelRenderer / edge.labelRenderer |
+| decoration | ExtensionInput&lt;DecorationRenderer&gt; | node.decorations[].renderer |
+| layout | ExtensionInput&lt;LayoutExtension&lt;TOptions&gt;&gt; | layout.type |
+| behavior | ExtensionInput&lt;BehaviorExtension&lt;TOptions, TEventMap&gt;&gt; | type in behaviors |
+| transform | ExtensionInput&lt;TransformExtension&lt;TOptions&gt;&gt; | type in transforms |
+| plugin | ExtensionInput&lt;PluginExtension&lt;TOptions&gt;&gt; | type in plugins |
+
+ExtensionInput&lt;T&gt; is the union of T, ExtensionFactory&lt;T&gt;, and ExtensionConstructor&lt;T&gt;; NodeExtensionInput is ExtensionInput&lt;NodeExtension&gt;. Factories are () => T; compatibility constructors are new () => T.
+
+Behavior TOptions extends BehaviorOptions&lt;TType&gt;; Plugin TOptions extends PluginOptions&lt;TType&gt;. TType is the registration name. Behavior event arguments come from TEventMap, defaulting to GraphEventMap.
+
+The registry is shared within one module instance, rather than owned by a Graph. A blank or whitespace-only name throws; names are not automatically trimmed. Categories can share names; a later registration in the same category replaces the definition. There is no public unregister entry.
+
+Register before first use. Overwriting a definition does not replace mounted runtime instances. Node / Edge / Label / Decoration resolution caches are invalidated for that name, but existing graphs are not automatically refreshed. Avoid built-in names; registration and the lifecycle of an existing instance are separate operations.
+
+## extensionFactory
+
+`extensionFactory<T>(factory: ExtensionFactory<T>): ExtensionFactory<T>`, where `ExtensionFactory<T> = () => T`.
+
+It marks and returns the original function without invoking or registering it. Return a new instance on every call and place instance state inside the factory. Returning a shared global object still shares state.
+
+| Form | Behavior and use |
+| --- | --- |
+| extensionFactory(() => instance) | Explicit factory; recommended for stateful extensions |
+| Plain object | Best-effort compatibility copying; closures and some special objects cannot be isolated reliably. Suitable for stateless descriptors |
+| Zero-argument constructor | Compatibility entry that constructs again; ExtensionConstructor is deprecated and should not be used for new extensions |
+
+Unmarked functions still use factory / legacy-constructor detection. Use an explicit factory rather than depending on detection rules. Do not keep the current Graph's context in module-level state.
+
+### Instance scope
+
+| Category | Creation scope | Lifecycle and release |
+| --- | --- | --- |
+| Node / Edge / Label / Decoration | Resolved and cached by name; may be shared across Graphs | No runtime init / destroy lifecycle. Keep descriptors stateless and free of Graph-owned resources |
+| Behavior | Each configured entry on every mount in each Graph | init → getEvents; unmount unbinds returned handlers and calls destroy |
+| Layout | Every layout execution | Graph-managed init → execute → destroy; standalone runLayout has no Graph and does not call init |
+| Transform | Each configuration position and name in each Graph | init, then reuse with update on later transformations; release on removal, replacement, or destruction |
+| Plugin | Each configured entry on every mount in each Graph | init → mount; destroy on remount or Graph destruction |
+
+A factory is therefore not called exactly once per Graph. Only Transform currently has an update hook; there is no update lifecycle shared by every category. See [layout execution](/en/docs/api/graph/layout#runlayout) and the [Behavior contract](/en/docs/api/options/behaviors#custom-behavior-contract).
+
+## ExtensionContext
+
+Runtime extensions receive context in init. It provides data, state, viewport, requestRender(), and isDestroyed(). There is no general element insertion/removal, Combo data query, or event-subscription entry. Do not fill these gaps by depending on internal DataModel, Renderer, or context.graph.
+
+`Extension<TOptions>` has two optional hooks: `init(context: ExtensionContext, options: Readonly<TOptions>): void` and `destroy(): void`. Readonly is a type constraint, not a promise that every options object is frozen or recursively copied. Treat options as immutable.
+
+init / destroy are invoked synchronously; the engine does not await Promises returned from them. Own the completion, failures, and cancellation of asynchronous work.
+
+### data: snapshots and business-field updates
+
+The public type is ExtensionDataContext.
+
+| Call | Result and behavior |
+| --- | --- |
+| getNode(id: string) | ExtensionNodeData or undefined |
+| getEdge(id: string) | ExtensionEdgeData or undefined |
+| getNodeIds() / getEdgeIds() | New string[] arrays, empty without a model; order is not guaranteed |
+| updateNode(id: string, data: Record&lt;string, unknown&gt;) | void; shallow-merge node data, without changing identity, position, or membership |
+| updateEdge(id: string, data: Record&lt;string, unknown&gt;) | void; shallow-merge edge data, without changing endpoints |
+
+id is an element ID. Missing elements read as undefined and are skipped by updates. Writes follow [Graph data-method prerequisites](/en/docs/api/graph/data-mutations): use after the first valid render; destruction prevents writes.
+
+<details>
+<summary>Complete ExtensionNodeData / ExtensionEdgeData fields and copying rules</summary>
+
+| Field | Type (all fields readonly) | Snapshot |
+| --- | --- | --- |
+| id | string | Nodes and edges |
+| name? | string | Nodes only |
+| x / y | number, graph coordinates | Nodes only |
+| source / target | string, endpoint node IDs | Edges only |
+| data? | Readonly&lt;Record&lt;string, unknown&gt;&gt; | Optional on nodes and edges |
+| states | readonly ElementState[] | Nodes and edges; an array, unlike a Model's Set |
+
+Each read copies the element record, state array, and top-level data. Deeper business objects may be shared. Readonly is a type constraint; runtime freezing is not promised. Editing top-level snapshot fields does not write back; applications manage ownership of nested references. These are not [live Graph query models](/en/docs/api/graph/data#model-fields) and omit Combo membership, group models, and renderer internals.
+
+During initial layout or Transform execution, context.data may be empty; during replacement, it may contain previously committed data. Use the data argument of execute(data, runtime) / beforeRender(data) as the current operation's input.
+
+</details>
+
+### state: replace state members
+
+The public type is ExtensionStateContext.
+
+| Call | Result and behavior |
+| --- | --- |
+| set(id: string, states: ElementState[]) | void; replaces that element's complete list, rather than adding states |
+| setAll(stateMap: Record&lt;string, ElementState[]&gt;) | void; replaces listed IDs only, retaining unlisted elements |
+| get(id: string) | New ElementState[] array; empty for a missing element |
+| clear(id: string) | void; clears the specified element's states |
+
+Nodes, edges, and Combos are supported; IDs should be unique across categories. To add a marker, read first and retain other states. See [state methods](/en/docs/api/graph/states) for visibility/folding restrictions, missing IDs, and update timing.
+
+This registration call comes from the running source. Click B, then empty space: active is set and cleared while A keeps its original selected state. Expand the complete source to inspect context operations inside the factory and its destroy hook.
+
+<NodeDocExample id="behavior-custom" locale="en" focus="registration" />
+
+### viewport: coordinates and zoom
+
+The public type is ExtensionViewportContext.
+
+| Call | Result and units |
+| --- | --- |
+| `screenToGraph(point: { x: number; y: number })` | `{ x: number; y: number }`, client CSS coordinates to graph coordinates |
+| `graphToScreen(point: { x: number; y: number })` | `{ x: number; y: number }`, graph coordinates to client CSS coordinates |
+| getZoom() | number, camera zoom ratio |
+
+point is an object argument. Do not pass offsetX/Y or multiply by DPR. See [coordinate methods](/en/docs/api/graph/viewport#screentograph) for container offsets, examples, and prerequisites.
+
+### requestRender and isDestroyed
+
+`requestRender(): void` schedules drawing. It does not execute layout, remount extensions, or signal synchronous draw completion. Normal data / state writes already schedule updates.
+
+`isDestroyed(): boolean` reflects destruction of the owning Graph. Check before asynchronous writes and also cancel extension-owned work; checking alone does not cancel it.
+
+## Cleanup and errors
+
+The engine unbinds handlers returned by Behavior getEvents. Release extension-owned DOM listeners, timers, Observers, requests, and Workers in destroy. Destruction can follow partially completed init; make cleanup repeatable and check resource existence.
+
+Extension creation, init, destroy, Behavior handlers, and similar calls catch synchronous exceptions and log category, name, and phase. Isolation does not roll back state or DOM mutations and does not handle application-owned asynchronous work; provide catch / cancellation. See [layout methods](/en/docs/api/graph/layout) for asynchronous layout execution. Explicitly registered Behaviors take priority over built-ins; failure does not automatically fall back to the built-in implementation.
+
+## Compatibility members
+
+context.graph and the flat screenToGraph, graphToScreen, and getZoom members are deprecated compatibility entries. The latter three correspond to viewport methods. New extensions should use controlled capabilities rather than depending on Graph internals.
+
+For a complete development workflow, see [Custom Behavior](/en/docs/guides/custom-behavior). Existing drawing, layout, and decoration tutorials remain available from [Extensions](/en/docs/guides/extensions).

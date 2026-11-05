@@ -62,7 +62,7 @@ graph.on('node:click', onNodeClick);
 graph.off('node:click', onNodeClick);
 ```
 
-选中联动同时关注 node:selectchange、edge:selectchange、brush:end、lasso:end；需要最终集合时主动查询状态，不能假定所有选择来源都逐个发出 node:selectchange。事件入参见[事件指南](/docs/guides/events)。
+选中联动同时关注 node:selectchange、edge:selectchange、brush:end、lasso:end；需要最终集合时主动查询状态，不能假定所有选择来源都逐个发出 node:selectchange。接入与清理代码见[事件指南](/docs/guides/events#选择与拖拽事件)，完整入参查[事件参考](/docs/api/graph/events#选择事件)。
 
 <details>
 <summary>连线编辑与底层分发</summary>

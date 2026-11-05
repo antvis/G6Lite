@@ -62,7 +62,7 @@ graph.on('node:click', onNodeClick);
 graph.off('node:click', onNodeClick);
 ```
 
-Selection integration should account for node:selectchange, edge:selectchange, brush:end, and lasso:end. Query state for the final set; not every selection source emits a per-node selectchange. See the [event guide](/en/docs/guides/events).
+Selection integration should account for node:selectchange, edge:selectchange, brush:end, and lasso:end. Query state for the final set; not every selection source emits a per-node selectchange. See the [event guide](/en/docs/guides/events#selection-and-drag-events) for integration and cleanup, and the [event reference](/en/docs/api/graph/events#selection-events) for complete payloads.
 
 <details>
 <summary>Connection editing and dispatch internals</summary>

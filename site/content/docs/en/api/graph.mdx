@@ -345,56 +345,10 @@ Select and hide combos with `setItemState()` and `hideItem()`. The older `setCom
 
 ## Events
 
-```ts
-graph.once('afterrender', () => {
-  graph.fitView(0.9);
-});
-```
+Register and remove listeners with [on](/en/docs/api/graph/events#on), [off](/en/docs/api/graph/events#off), and [once](/en/docs/api/graph/events#once). Subscriptions can be registered before the first render.
 
-Names in `GraphEventMap` infer the handler argument. Custom event names can be subscribed too; the handler declares that payload.
+- [GraphEventMap](/en/docs/api/graph/events#grapheventmap): argument tuples, subscription types, and custom-name boundaries.
+- [Element payloads](/en/docs/api/graph/events#element-event-payloads), [selection](/en/docs/api/graph/events#selection-events), and [dragging](/en/docs/api/graph/events#drag-events): complete fields and trigger conditions.
+- [Lifecycle and data](/en/docs/api/graph/events#lifecycle-and-data-events): timing for rendering, layout, mutations, resizing, and destruction.
 
-```ts
-graph.on('node:click', (event) => {
-  event.nodeId;
-  event.nativeEvent.clientX;
-});
-
-const onRender = (payload: { nodeCount: number; edgeCount: number }) => {
-  console.log(payload.nodeCount);
-};
-graph.on('afterrender', onRender);
-graph.off('afterrender', onRender);
-```
-
-`off()` needs the same function that was passed to `on()`. `once()` removes the listener after the first emit. `destroy` has no arguments.
-
-Element click, hover, and wheel events are emitted by the engine and do not require an extra behavior. Selection, drag, brush, and lasso events appear only when that behavior is enabled. Field notes are in [Events](/en/docs/guides/events).
-
-| Event | Main fields |
-| --- | --- |
-| `node:*` | `nodeId`, `nativeEvent`, `data`, `graph` |
-| `edge:*` | `edgeId`, `edgeIndex`, `source`, `target`, `nativeEvent` |
-| `combo:pointerdown` / `click` / `dblclick` / `contextmenu` | `comboId`, `nativeEvent` |
-| `canvas:*` | `nativeEvent`, and no target element id |
-| `node:selectchange` | `nodeId`, `selected`, `event` |
-| `edge:selectchange` | `edgeId`, `edgeIndex`, `source`, `target`, `selected` |
-| `selection:clear` | `ids` |
-| `node:dragstart` / `node:drag` / `node:dragend` | `nodeId`, `nodeIds`; drag also has `dx`, `dy` |
-| `combo:dragstart` / `combo:drag` / `combo:dragend` | `comboId`; drag also has `dx`, `dy` |
-| `edge:dragstart` / `edge:drag` / `edge:dragend` | `source`, `target`, `dragEnd`; end also has `reconnected` |
-| `brush:select` / `brush:end` | `nodeIds` |
-| `lasso:select` / `lasso:end` | `nodeIds` |
-| `beforelayout` / `layout:start` | `nodeCount` |
-| `layout:end` / `afterlayout` | `duration`, `nodeCount` |
-| `beforerender` / `afterrender` | `nodeCount`, `edgeCount` |
-| `resize` | `width`, `height` |
-| `datachange` | `nodeCount`, `edgeCount` |
-| `afteradditem` | `type`, `id`; edges also include `source`, `target` |
-| `afterremoveitem` | `type`, `id` |
-| `afterupdateitem` | `type`, `id`, `action` |
-| `combo:collapse` / `combo:expand` | `comboId` |
-| `destroy` | No arguments |
-
-`node:*` and `edge:*` each include `pointerover`, `pointerenter`, `pointermove`, `pointerleave`, `pointerdown`, `click`, `dblclick`, `contextmenu`, and `wheel`. `canvas:*` includes `pointermove`, `pointerdown`, `pointerup`, `click`, `dblclick`, `contextmenu`, and `wheel`.
-
-The native input is `nativeEvent`. The older `event` field remains for existing listeners.
+For business integration and inline code with previews, see the [event guide](/en/docs/guides/events). Activate Behaviors using [interaction combinations](/en/docs/guides/interactions).

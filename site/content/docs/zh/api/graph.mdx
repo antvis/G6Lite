@@ -345,56 +345,10 @@ Combo 的选中和隐藏使用前面的 `setItemState()`、`hideItem()`，不要
 
 ## 事件
 
-```ts
-graph.once('afterrender', () => {
-  graph.fitView(0.9);
-});
-```
+通过 [on](/docs/api/graph/events#on)、[off](/docs/api/graph/events#off)、[once](/docs/api/graph/events#once) 注册和取消监听；可在首次 render 前订阅。
 
-`GraphEventMap` 里的事件名会自动推导参数。自定义事件名也可以订阅，参数类型由 handler 自己声明。
+- [GraphEventMap](/docs/api/graph/events#grapheventmap)：参数元组、订阅类型和自定义名称边界。
+- [元素载荷](/docs/api/graph/events#元素事件载荷)、[选择](/docs/api/graph/events#选择事件)、[拖拽](/docs/api/graph/events#拖拽事件)：完整字段与触发条件。
+- [生命周期与数据](/docs/api/graph/events#生命周期与数据事件)：渲染、布局、数据修改、尺寸与销毁的时机。
 
-```ts
-graph.on('node:click', (event) => {
-  event.nodeId;
-  event.nativeEvent.clientX;
-});
-
-const onRender = (payload: { nodeCount: number; edgeCount: number }) => {
-  console.log(payload.nodeCount);
-};
-graph.on('afterrender', onRender);
-graph.off('afterrender', onRender);
-```
-
-`off()` 必须传入当初传给 `on()` 的同一个函数。`once()` 在第一次触发后移除监听。`destroy` 没有参数。
-
-元素点击、悬停和滚轮由引擎直接发出，不需要额外打开某个 behavior。选择、拖拽、框选和套索事件只在对应 behavior 启用后出现。字段说明见 [事件](/docs/guides/events)。
-
-| 事件 | 主要字段 |
-| --- | --- |
-| `node:*` | `nodeId`、`nativeEvent`、`data`、`graph` |
-| `edge:*` | `edgeId`、`edgeIndex`、`source`、`target`、`nativeEvent` |
-| `combo:pointerdown` / `click` / `dblclick` / `contextmenu` | `comboId`、`nativeEvent` |
-| `canvas:*` | `nativeEvent`；没有目标元素 id |
-| `node:selectchange` | `nodeId`、`selected`、`event` |
-| `edge:selectchange` | `edgeId`、`edgeIndex`、`source`、`target`、`selected` |
-| `selection:clear` | `ids` |
-| `node:dragstart` / `node:drag` / `node:dragend` | `nodeId`、`nodeIds`；拖拽中还有 `dx`、`dy` |
-| `combo:dragstart` / `combo:drag` / `combo:dragend` | `comboId`；拖拽中还有 `dx`、`dy` |
-| `edge:dragstart` / `edge:drag` / `edge:dragend` | `source`、`target`、`dragEnd`；结束时有 `reconnected` |
-| `brush:select` / `brush:end` | `nodeIds` |
-| `lasso:select` / `lasso:end` | `nodeIds` |
-| `beforelayout` / `layout:start` | `nodeCount` |
-| `layout:end` / `afterlayout` | `duration`、`nodeCount` |
-| `beforerender` / `afterrender` | `nodeCount`、`edgeCount` |
-| `resize` | `width`、`height` |
-| `datachange` | `nodeCount`、`edgeCount` |
-| `afteradditem` | `type`、`id`；边还包括 `source`、`target` |
-| `afterremoveitem` | `type`、`id` |
-| `afterupdateitem` | `type`、`id`、`action` |
-| `combo:collapse` / `combo:expand` | `comboId` |
-| `destroy` | 无参数 |
-
-`node:*` 和 `edge:*` 各自包含 `pointerover`、`pointerenter`、`pointermove`、`pointerleave`、`pointerdown`、`click`、`dblclick`、`contextmenu`、`wheel`。`canvas:*` 包含 `pointermove`、`pointerdown`、`pointerup`、`click`、`dblclick`、`contextmenu`、`wheel`。
-
-原生输入在 `nativeEvent` 上。旧字段 `event` 仍保留给已有监听代码。
+业务接入和文档内代码效果见[事件指南](/docs/guides/events)。Behavior 开关查[交互组合](/docs/guides/interactions)。

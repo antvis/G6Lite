@@ -87,7 +87,7 @@ These `Graph` members exist for rendering and interaction dispatch. Application 
 | `setHighlight()` / `clearHighlight()` | `setItemState()` with the `highlight` state |
 | `updateData()` / `scheduleRender()` | The data methods and `refresh()` |
 
-`EventEmitter` and `Handler` are exported as the event-transport types. Subscribe to graph events with `graph.on()`.
+`EventEmitter` and `Handler` are also exported. Subscribe to graph events with [on / off / once](/en/docs/api/graph/events#on). Find complete events and payloads in the [GraphEventMap reference](/en/docs/api/graph/events#grapheventmap), and workflows in the [event guide](/en/docs/guides/events).
 
 ## Compatibility entries
 
@@ -100,5 +100,5 @@ New code uses the current entry. The symbols below can still be imported and wil
 | `graph.toData()` | `graph.getData()` |
 | `graph.getNodePosition()` | `graph.getElementPosition()` |
 | `setComboState()` / `clearComboStates()` / `getComboStates()` | `setItemState()` / `clearItemStates()` / `getItemStates()` |
-| Event field `event` | `nativeEvent` |
+| `event` in element payloads (excluding derived selection/drag payloads) | `nativeEvent`; see [payload distinctions](/en/docs/api/graph/events#element-event-payloads) |
 | `context.graph` and the flat coordinate methods | `context.data`, `context.state`, `context.viewport` |

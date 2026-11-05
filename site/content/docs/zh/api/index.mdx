@@ -87,7 +87,7 @@ if (node) {
 | `setHighlight()` / `clearHighlight()` | `setItemState()` 与 `highlight` 状态 |
 | `updateData()` / `scheduleRender()` | 数据方法和 `refresh()` |
 
-`EventEmitter` 和 `Handler` 也从包根导出，它们是事件传输类型。订阅图事件时使用 `graph.on()`。
+`EventEmitter` 和 `Handler` 也从包根导出；订阅图事件使用 [on / off / once](/docs/api/graph/events#on)。完整事件与载荷查 [GraphEventMap 参考](/docs/api/graph/events#grapheventmap)，业务接入见[事件指南](/docs/guides/events)。
 
 ## 已有项目里的兼容入口
 
@@ -100,5 +100,5 @@ if (node) {
 | `graph.toData()` | `graph.getData()` |
 | `graph.getNodePosition()` | `graph.getElementPosition()` |
 | `setComboState()` / `clearComboStates()` / `getComboStates()` | `setItemState()` / `clearItemStates()` / `getItemStates()` |
-| 事件字段 `event` | `nativeEvent` |
+| 元素事件载荷中的 `event`（不含选择、拖拽派生载荷） | `nativeEvent`；区别见[事件参考](/docs/api/graph/events#元素事件载荷) |
 | 扩展里的 `context.graph` 和平铺坐标方法 | `context.data`、`context.state`、`context.viewport` |

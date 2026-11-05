@@ -1,0 +1,21 @@
+site/content/docs/en/ai.mdx
+  s_4534bc5c3d78f4::t_afe21e58e2eb77 3,8-10,13-14,17-18,21,24-25,28-39,42-50,53,55,57-60,62,64-73,75,78-80
+site/content/docs/zh/ai.mdx
+  s_4534bc5c3d78f4::t_afe21e58e2eb77 3,8,13-14,17-18,21,24-25,28,30,32-37,39,41-51,53,57-64,68,70-73,78-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "79fca48be9d4e82d4722e162f4c50c85f91c7f48",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

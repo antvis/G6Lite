@@ -1,51 +1,39 @@
 ---
 title: G6Lite 是什么
-description: G6Lite 的定位、适用场景和与 G6 v5 的关系
+description: 面向浏览器关系探索的图引擎：用途、使用模型和能力边界
 ---
 
-**G6Lite · 轻量图可视化，为大规模关系数据而生**
-
-丰富的布局与交互，配合轻量高效的 WebGL 渲染，让大规模关系清晰呈现，让数据探索流畅自如。
-
-它保留 G6 用户熟悉的图配置心智：数据、节点、边、布局、交互和主题，但实现重点放在 WebGL 渲染、增量刷新和高频交互上。
+G6Lite 是浏览器中的图可视化引擎。用节点和边表达关系，通过布局、缩放、拖拽、选择和高亮完成探索。节点与边使用 WebGL，标签和 Combo 使用 Canvas 2D。
 
 ## 适合的场景
 
-- 万级节点的关系探索、资产拓扑、知识图谱、依赖分析。
-- 频繁高亮、选中、邻居聚焦、状态切换的分析型交互。
-- 需要轻量包体，同时希望接入 AntV 布局能力的项目。
-- 对首屏可接受布局耗时，但要求渲染后交互开销稳定的场景。
+- 关系探索、资产拓扑、知识图谱和依赖分析。
+- 需要频繁选择、高亮、查询邻居和增量更新的分析界面。
+- 常用点线图形和受控扩展能满足业务表达的产品。
+
+数据规模不是单独的选型门槛：布局、标签密度、交互、DPR 和设备都会影响结果。用[性能测量入口](/docs/metrics/performance)验证真实工作负载。
 
 ## 需要评估的场景
 
-- 10 万级以上超大图且首屏速度是唯一核心指标。
-- 强依赖完整插件生态、动画系统、图论分析算法的场景。
-- 需要 SVG / Canvas 细粒度 DOM 级定制的场景。
-- 服务端渲染输出图片或 SVG 的场景。
+任意 HTML / React 节点树、多渲染器、完整动画编排、成熟内置插件生态、图论算法或服务端出图，均不属于当前 G6Lite 的完整能力面。[Combo 的嵌套与折叠](/docs/api/options/combo)仍为实验能力。
+
+渲染需要真实 DOM、Canvas 和 WebGL；SSR 框架应在客户端挂载后创建图。[运行环境](/docs/compatibility/browser)列出工程限制，[API 稳定性](/docs/compatibility/api-stability)说明实验及兼容边界。
 
 ## 与 G6 v5 的关系
 
-G6 v5 是功能完整的图可视化框架，插件、元素、动画、交互和生态能力更全面。G6Lite 更像是一个性能优先的轻量内核：
-
-| 维度     | G6Lite                   | G6 v5            |
-| -------- | ------------------------ | ---------------- |
-| 渲染技术 | WebGL + Canvas 2D 标签层 | Canvas           |
-| 主要目标 | 大规模渲染和高频交互     | 完整图可视化能力 |
-| 包体     | 更轻                     | 更完整           |
-| 扩展生态 | 有限，聚焦核心能力       | 更丰富           |
-| 适用重点 | 分析型大图               | 通用图可视化     |
-
-如果你的应用需要完整插件生态，优先评估 G6 v5。如果你的核心瓶颈是大图渲染、高亮和状态切换，优先评估 G6Lite。
+G6Lite 与 G6 v5 使用不同的包和实现。相似的概念不代表配置、插件、事件或扩展协议可以直接互换。需要更广的图形、动画和插件能力时，比较 [G6 v5 等候选方案](/docs/compatibility/library-comparison)；迁移现有项目时逐项对照[迁移指南](/docs/compatibility/g6-v5-migration)。
 
 ## 使用模型
 
-一张图由 `Graph` 实例管理：`data` 描述关系，`node` 和 `edge` 定义外观，`layout` 计算位置，`behaviors` 添加交互，`theme` 统一视觉风格。
+一个 `Graph` 管理一张图：`data` 描述关系，`node / edge` 定义外观，`layout` 计算位置，`behaviors` 处理交互，`theme` 统一样式。
 
-先理解[数据模型](/docs/concepts/data-model)，再按照 [Graph 生命周期](/docs/concepts/graph-lifecycle)组织创建、更新与销毁。渲染图层、调度和扩展的内部协作见[技术架构](/docs/concepts/architecture)。
+先准备[有效数据](/docs/concepts/data-model)和有尺寸的容器，再 `new Graph(options)`、`await graph.render()`。运行时更新复用实例，离开页面时 `destroy()`。步骤见[快速上手](/docs/getting-started/quick-start)，时序见[生命周期](/docs/concepts/graph-lifecycle)，字段查[GraphOptions](/docs/api/options)。
 
 ## 下一步
 
-- [数据模型](/docs/concepts/data-model)
-- [Graph 生命周期](/docs/concepts/graph-lifecycle)
-- [技术架构](/docs/concepts/architecture)
-- [安装与第一个图](/docs/getting-started/quick-start)
+<Cards>
+  <Card title="创建第一个图" href="/docs/getting-started/quick-start" />
+  <Card title="按效果配置" href="/docs/guides/node" />
+  <Card title="运行现成案例" href="/docs/examples" />
+  <Card title="理解技术架构" href="/docs/concepts/architecture" />
+</Cards>

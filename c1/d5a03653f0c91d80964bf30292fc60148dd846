@@ -1,0 +1,27 @@
+site/src/components/node-doc-preview.module.css
+  s_4534bc5c3d78f4::t_188619203b45ff 34-50
+site/src/lib/node-doc-example-source.ts
+  s_4534bc5c3d78f4::t_188619203b45ff 44-57,64-68
+site/demos/docs-events-listen.ts
+  s_4534bc5c3d78f4::t_188619203b45ff 31,39
+site/src/components/node-doc-example.tsx
+  s_4534bc5c3d78f4::t_188619203b45ff 3,8,10,13-19
+site/demos/docs-events-lifecycle.ts
+  s_4534bc5c3d78f4::t_188619203b45ff 27,36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c1d5a03653f0c91d80964bf30292fc60148dd846",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+---
+title: Custom Transforms
+description: Normalize rendering input synchronously, handle reuse/options/cleanup, and compare full versus incremental updates
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+Transforms normalize whole input before layout, not reactive fields on every mutation. Use them to derive display fields, filter, or convert data; validate IDs and endpoints first.
+
+## Implement and activate
+
+1. Keep current options inside the factory. Both init and update restore defaults from complete current options.
+2. Build new GraphData from the beforeRender argument, retaining unchanged edges, Combos, and fields.
+3. Register transform and activate through transforms type / options.
+
+<NodeDocExample id="extension-transform" locale="en" focus="transform" />
+
+Initial labels are Svc: API / DB, with init=1, update=0, run=1. Reload data changes A's input name, reuses the instance, and increases update / run without another init. Expand full source for configuration and lifecycle reporting.
+
+## Full versus incremental updates
+
+Update name only patches A.data.name. Stored label is not regenerated and run does not increase. Reload data performs another full transformation. For incremental derived values, update related fields together in the application or read business values directly in style callbacks.
+
+Transforms compose in array order. Repeated names at different positions have independent instances. beforeRender must synchronously return GraphData, not a Promise. context.data may be empty or stale; use the current data argument.
+
+## Configuration and cleanup
+
+Transform options belong inside options, unlike flat Plugin options. There is no public transforms setter; recreate for constructor-option changes rather than mutating private options or caller-owned references. See [configuration](/en/docs/api/options/transforms-plugins#transforms).
+
+The example owns no timers or DOM; destroy releases its callback reference. Release your own resources. Exceptions do not roll back in-place input mutations: validate first and return new records. Applications own nested object references.
+
+## Common questions
+
+### Why did refresh or layout not run the transform?
+
+refresh, layout, and incremental methods do not rerun registered transforms. render / setData process whole input.
+
+### Is update a patch?
+
+The signature permits Partial, but the runtime currently sends complete options on each reuse, even unchanged. Restore defaults for omitted fields.
+
+See [TransformExtension](/en/docs/api/extensions/runtime#transformextension) for failures and the [combined example](/en/docs/examples/extension-system).

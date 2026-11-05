@@ -9,6 +9,7 @@ import styles from './node-doc-preview.module.css';
 import canvasStyles from './quick-start-example.module.css';
 
 const loaders = {
+  'extension-transform': () => import('../../demos/docs-extension-transform.ts'),
   'extension-layout': () => import('../../demos/docs-extension-layout.ts'),
   'extension-decoration': () => import('../../demos/docs-extension-decoration.ts'),
   'extension-label': () => import('../../demos/custom-label-renderer.ts'),
@@ -72,7 +73,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'extension-layout'
+  const hint = id === 'extension-transform'
+    ? (zh ? "Reload data 增加 update/run 但不增加 init；Update name 不重跑 Transform，也不重新生成 label；重置清零" : "Reload data increments update/run without another init. Update name does not rerun the transform or regenerate labels. Reset clears counters")
+    : id === 'extension-layout'
     ? (zh ? "先启动 Slow layout，再立即 Cancel + grid；旧结果不会覆盖网格；Layout again 恢复列布局" : "Start Slow layout then immediately Cancel + grid. Old results cannot replace the grid. Layout again restores the column")
     : id === 'extension-decoration'
     ? (zh ? "A 有五项，默认两项及 +3；悬停装饰区域展开，移开恢复；B 为单项对照" : "A has five items, initially two plus +3. Hover decorations to expand; leave to collapse. B is a single-item comparison")

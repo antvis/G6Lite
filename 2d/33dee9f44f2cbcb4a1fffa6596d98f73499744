@@ -1,0 +1,21 @@
+site/content/docs/en/concepts/graph-lifecycle.mdx
+  s_4534bc5c3d78f4::t_0d87cd37d471cf 7,9,17,19,25-30,32,36,38-40,44-49,52-55,60,63-66,68,71-84
+site/content/docs/zh/concepts/graph-lifecycle.mdx
+  s_4534bc5c3d78f4::t_0d87cd37d471cf 7,9,17,19,23,25-30,32,36,38-40,44-49,52-55,60,63-66,68,71-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2d33dee9f44f2cbcb4a1fffa6596d98f73499744",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

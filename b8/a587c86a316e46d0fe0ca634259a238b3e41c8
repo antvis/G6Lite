@@ -1,0 +1,187 @@
+site/content/docs/en/compatibility/g6-v5-migration.mdx
+  s_4534bc5c3d78f4::t_3d305c5cae3768 72,116
+  s_4534bc5c3d78f4::t_7306468b82c942 20-21,114
+  s_4534bc5c3d78f4::t_b9f665df142197 115
+site/content/docs/zh/guides/custom-behavior.mdx
+  s_4534bc5c3d78f4::t_55cd83cb22cb84 71-77
+site/content/docs/zh/guides/states.mdx
+  s_4534bc5c3d78f4::t_c0ed8d797f4a0b 70-76
+site/content/docs/en/guides/theme.mdx
+  s_4534bc5c3d78f4::t_65376a7f634c96 80-86
+site/content/docs/en/guides/tooltip.mdx
+  s_4534bc5c3d78f4::t_ae184cb3ef8fce 62-68
+site/content/docs/en/compatibility/browser.mdx
+  s_4534bc5c3d78f4::t_7306468b82c942 17-18,27
+  s_4534bc5c3d78f4::t_3d305c5cae3768 37
+  s_4534bc5c3d78f4::t_a66ccc2ebcf0e1 28
+site/content/docs/en/api/options/meta.json
+  s_4534bc5c3d78f4::t_7e5f2467828035 3
+site/content/docs/en/guides/interactions.mdx
+  s_4534bc5c3d78f4::t_38e69c7f1f7ecc 96-105
+site/content/docs/zh/guides/viewport.mdx
+  s_4534bc5c3d78f4::t_800b135d37a7b4 94-102
+site/content/docs/zh/guides/custom-node.mdx
+  s_4534bc5c3d78f4::t_46db78171556f9 47-54
+site/content/docs/en/guides/custom-label-renderer.mdx
+  s_4534bc5c3d78f4::t_8f7bd1b2612e0f 43-49
+site/content/docs/en/metrics/performance.mdx
+  s_4534bc5c3d78f4::t_745277203fe3d6 68-76
+  s_4534bc5c3d78f4::t_7306468b82c942 53-54,59-60,67
+site/content/docs/en/guides/node.mdx
+  s_4534bc5c3d78f4::t_890ac3bcd9acb4 168-176
+site/scripts/sync-docs-navigation.mjs
+  s_4534bc5c3d78f4::t_e3ea3126c256db 60
+site/src/components/docs-route-layout.tsx
+  s_4534bc5c3d78f4::t_28898d1bff73c7 5-6,36-41
+site/content/docs/en/guides/states.mdx
+  s_4534bc5c3d78f4::t_4b03a2681cb3bc 70-76
+site/content/docs/en/guides/polyline-routing.mdx
+  s_4534bc5c3d78f4::t_f17a7a9dd8c916 94-100
+site/content/docs/zh/api/graph/events/meta.json
+  s_4534bc5c3d78f4::t_7e5f2467828035 3
+site/content/docs/zh/guides/combo.mdx
+  s_4534bc5c3d78f4::t_46c0094e90721d 123-129
+site/content/docs/zh/guides/extensions.mdx
+  s_4534bc5c3d78f4::t_dfd8d165a09cc2 50-56
+site/content/docs/en/api/graph/data-mutations.mdx
+  s_4534bc5c3d78f4::t_8ebe3a93962c6c 149-155
+site/content/docs/en/api/graph/meta.json
+  s_4534bc5c3d78f4::t_7e5f2467828035 3
+site/src/app/global.css
+  s_4534bc5c3d78f4::t_5159075e3776fe 184-206
+site/content/docs/en/guides/events.mdx
+  s_4534bc5c3d78f4::t_d7a97d52e7c3e4 91-98
+site/content/docs/zh/guides/interactions.mdx
+  s_4534bc5c3d78f4::t_ac7903fb28ec76 96-105
+tests/unit/site/seo-base-path.test.ts
+  s_4534bc5c3d78f4::t_87905e070413b1 1-20,22-30
+  s_4534bc5c3d78f4::t_25edd049725ff1 21
+site/content/docs/zh/guides/events.mdx
+  s_4534bc5c3d78f4::t_da78949f329eba 91-98
+site/content/docs/zh/guides/custom-layout.mdx
+  s_4534bc5c3d78f4::t_bf953fca6ce73d 49-55
+site/content/docs/en/guides/data.mdx
+  s_4534bc5c3d78f4::t_78e557a4475d16 118-126
+site/content/docs/zh/guides/layout.mdx
+  s_4534bc5c3d78f4::t_1a3a3952aa6423 75-89
+site/content/docs/zh/api/extensions/meta.json
+  s_4534bc5c3d78f4::t_7e5f2467828035 3
+site/content/docs/zh/api/graph/meta.json
+  s_4534bc5c3d78f4::t_7e5f2467828035 3
+site/content/docs/zh/guides/layout-worker.mdx
+  s_4534bc5c3d78f4::t_56fc59010719fc 64-70
+site/content/docs/en/api/graph/events/meta.json
+  s_4534bc5c3d78f4::t_7e5f2467828035 3
+site/content/docs/en/guides/custom-node.mdx
+  s_4534bc5c3d78f4::t_a2af6c54a106e9 47-54
+site/content/docs/en/api/extensions/meta.json
+  s_4534bc5c3d78f4::t_7e5f2467828035 3
+site/content/docs/zh/guides/theme.mdx
+  s_4534bc5c3d78f4::t_c005a7f3075e4f 80-86
+site/content/docs/en/guides/viewport.mdx
+  s_4534bc5c3d78f4::t_e8a6813c8014ec 94-102
+site/scripts/check-docs-output.py
+  s_4534bc5c3d78f4::t_60bff7388ca67c 6,11,22-23,62-66,74-78
+  s_4534bc5c3d78f4::t_87580c306e528c 1-5,7-8,10,12-21,24-60,67-69,73,79-80
+  s_4534bc5c3d78f4::t_2aa7aa2934325d 70-72
+  s_4534bc5c3d78f4::t_34e58b7dc9f858 9,61
+site/content/docs/zh/guides/node.mdx
+  s_4534bc5c3d78f4::t_d1cde706fbde69 168-176
+site/content/docs/en/guides/custom-layout.mdx
+  s_4534bc5c3d78f4::t_2d1b0c7162bbe5 49-55
+site/content/docs/zh/guides/events/meta.json
+  s_4534bc5c3d78f4::t_7e5f2467828035 3
+site/src/lib/markdown-links.ts
+  s_4534bc5c3d78f4::t_7609b0230ae39d 1-30
+site/content/docs/zh/api/options/meta.json
+  s_4534bc5c3d78f4::t_7e5f2467828035 3
+site/content/docs/en/guides/parallel-edges.mdx
+  s_4534bc5c3d78f4::t_9d204fa75a735b 47-54
+site/content/docs/en/guides/edge.mdx
+  s_4534bc5c3d78f4::t_947226e3dcdfe5 155-165
+site/content/docs/en/guides/layout.mdx
+  s_4534bc5c3d78f4::t_d31928719889da 75-89
+site/content/docs/en/guides/events/meta.json
+  s_4534bc5c3d78f4::t_7e5f2467828035 3
+site/content/docs/en/guides/label.mdx
+  s_4534bc5c3d78f4::t_f336419488dab4 99-106
+site/content/docs/zh/guides/label.mdx
+  s_4534bc5c3d78f4::t_606acd0e0b8b8c 99-106
+site/content/docs/en/guides/combo.mdx
+  s_4534bc5c3d78f4::t_c48597d88a70fc 123-129
+site/content/docs/en/guides/custom-behavior.mdx
+  s_4534bc5c3d78f4::t_b7ef56defc0d2b 71-77
+tests/unit/site/markdown-links.test.ts
+  s_4534bc5c3d78f4::t_7609b0230ae39d 1,3-8,10-20,22-29
+  s_4534bc5c3d78f4::t_7897d0c63b3971 2
+  s_4534bc5c3d78f4::t_e1021fdd62ec10 9,21
+site/src/lib/shared.ts
+  s_4534bc5c3d78f4::t_3d305c5cae3768 12
+site/content/docs/zh/guides/polyline-routing.mdx
+  s_4534bc5c3d78f4::t_92a9dd9979c843 94-100
+site/content/docs/en/api/graph/data.mdx
+  s_4534bc5c3d78f4::t_b29c03c67aba55 149-155
+site/content/docs/en/faq.mdx
+  s_4534bc5c3d78f4::t_7306468b82c942 6-7,12-13,26-27,32-33,38
+  s_4534bc5c3d78f4::t_8c2f8f55e8277b 39
+site/content/docs/zh/guides/tooltip.mdx
+  s_4534bc5c3d78f4::t_4ea25fb9273263 62-68
+site/content/docs/en/guides/extensions.mdx
+  s_4534bc5c3d78f4::t_4b3d81385e4c37 44-50
+site/content/docs/zh/guides/data.mdx
+  s_4534bc5c3d78f4::t_7bdcd68f053b65 118-126
+site/content/docs/zh/guides/custom-decoration.mdx
+  s_4534bc5c3d78f4::t_3c5c7f992edd93 46-52
+site/content/docs/zh/guides/parallel-edges.mdx
+  s_4534bc5c3d78f4::t_2d2debb4251f51 63-70
+site/content/docs/en/guides/custom-decoration.mdx
+  s_4534bc5c3d78f4::t_d999e83ee42e81 46-52
+site/content/docs/zh/api/graph/data.mdx
+  s_4534bc5c3d78f4::t_bbbf36704f4a8e 149-155
+site/content/docs/zh/guides/edge.mdx
+  s_4534bc5c3d78f4::t_066fbb75b5a763 155-165
+site/src/lib/source.ts
+  s_4534bc5c3d78f4::t_3d305c5cae3768 7,48,51
+  s_4534bc5c3d78f4::t_7897d0c63b3971 24
+site/src/lib/site-examples.ts
+  s_4534bc5c3d78f4::t_f07b5f939a0d7c 1,112,1249-1254
+site/src/lib/seo.ts
+  s_4534bc5c3d78f4::t_3d305c5cae3768 6,42-45
+site/src/components/example-detail-client.tsx
+  s_4534bc5c3d78f4::t_f940d5a852001b 871,909-910,916,936
+site/scripts/check-example-documentation.mjs
+  s_4534bc5c3d78f4::t_cbe84a3ec054a3 1-50
+site/content/docs/zh/metrics/performance.mdx
+  s_4534bc5c3d78f4::t_7306468b82c942 63
+  s_4534bc5c3d78f4::t_c1fa693beb30a4 64-72
+site/content/docs/zh/guides/custom-label-renderer.mdx
+  s_4534bc5c3d78f4::t_951a75c3aedd5f 43-49
+site/example-documentation.json
+  s_4534bc5c3d78f4::t_f07b5f939a0d7c 1-377
+site/package.json
+  s_4534bc5c3d78f4::t_819f84bea564e2 13-14
+site/maintenance/b97-acceptance.json
+  s_4534bc5c3d78f4::t_a109b495abb7e9 1-865
+site/content/docs/en/guides/layout-worker.mdx
+  s_4534bc5c3d78f4::t_f05787d889302e 64-70
+site/content/docs/zh/api/graph/data-mutations.mdx
+  s_4534bc5c3d78f4::t_cc74924dc52f0f 149-155
+site/src/components/docs-example-image.tsx
+  s_4534bc5c3d78f4::t_3d305c5cae3768 3,15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b8a587c86a316e46d0fe0ca634259a238b3e41c8",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

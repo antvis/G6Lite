@@ -1,0 +1,25 @@
+site/demos/edge-states.ts
+  s_4534bc5c3d78f4::t_b93d0e54a1fd96 30,51-52,71
+site/demos/edge-loops.ts
+  s_4534bc5c3d78f4::t_b93d0e54a1fd96 46
+site/maintenance/examples/e11.json
+  s_4534bc5c3d78f4::t_3d916976f18b55 1-47
+site/demos/edge-hit-area.ts
+  s_4534bc5c3d78f4::t_b93d0e54a1fd96 17,30,91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8bd0b60301f0052d880e2e0237b06a9d820274d2",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

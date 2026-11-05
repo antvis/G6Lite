@@ -1,0 +1,27 @@
+site/demos/edge-arrows.ts
+  s_4534bc5c3d78f4::t_e9ba8b7ca29ec1 43
+site/demos/edge-types.ts
+  s_4534bc5c3d78f4::t_e9ba8b7ca29ec1 82,84-87
+site/src/lib/site-examples.ts
+  s_4534bc5c3d78f4::t_47b9df5acf9b21 358-359,362-363,366-367,369
+site/demos/edge-colors.ts
+  s_4534bc5c3d78f4::t_e9ba8b7ca29ec1 37
+site/maintenance/examples/e10.json
+  s_4534bc5c3d78f4::t_5dd0ab862f35da 1-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "efb1c6112bb110eb3ba3b8612eb1907eff27570e",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

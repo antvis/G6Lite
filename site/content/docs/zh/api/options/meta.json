@@ -2,5 +2,5 @@
   "title": "配置",
   "pagesIndex": "../options.mdx",
   "defaultOpen": true,
-  "pages": ["data", "node", "edge", "combo", "label", "theme", "layout", "behaviors"]
+  "pages": ["data", "node", "edge", "combo", "label", "theme", "layout", "behaviors", "transforms-plugins"]
 }

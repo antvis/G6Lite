@@ -1,0 +1,54 @@
+---
+title: Transform 与 Plugin 配置
+description: 两种扩展配置的形状、注册、选项传递、顺序、复用和更新边界
+---
+
+transforms 修改进入布局的数据，plugins 挂载独立 DOM。两者不是 Behavior；名称必须先通过 register 注册。完整钩子查[运行类契约](/docs/api/extensions/runtime)。
+
+## transforms
+
+GraphOptions.transforms?: TransformOption[]，缺省不运行注册转换。每项为字符串，或包含 type 与可选 options 的对象；options 为 Record&lt;string, unknown&gt;，特殊平行边项也接受 ParallelEdgesConfig。
+
+```ts
+import type { TransformOption } from '@antv/g6-lite';
+export const transforms: TransformOption[] = [
+  { type: 'app-normalize', options: { prefix: 'Service' } },
+];
+```
+
+这只是配置；app-normalize 需注册 TransformExtension，并提供 beforeRender，才能生效。字符串形式向 init / update 传 {}，对象形式只传 options，不传外层 type；不要把 prefix 直接放在外层。
+
+数组按顺序执行，输出进入下一项，再进行布局。相同名称出现在两个位置时有两个实例；同位置同名在后续 render / setData 中复用并调用 update，update 会收到完整选项而非差量。移除或换名会清理旧实例。
+
+process-parallel-edges 是内置特殊项，不调用注册 Transform；字段、显式关闭与 edge.parallelEdges 的优先级见[平行边参考](/docs/api/options/edge#入口与优先级)。
+
+## plugins
+
+GraphOptions.plugins?: PluginOption[]，缺省为空。每项必须是对象，包含 type: string；其他顶层字段为业务选项，PluginOptions&lt;TType&gt; 可约束名称与字段。没有字符串简写。
+
+```ts
+import type { PluginOption } from '@antv/g6-lite';
+export const plugins: PluginOption[] = [
+  { type: 'app-counter', caption: 'Visits' },
+];
+```
+
+app-counter 需注册 PluginExtension。init 收到整个对象，包括 type 与 caption；将 caption 放入 options 子对象不会自动展开。mount 收到当前 Graph 的 DOM 容器，多次出现同名项会分别实例化，不按名称去重。
+
+## 调用与变更
+
+| 操作 | 注册 Transform | Plugin |
+| --- | --- | --- |
+| 首次 render | 创建、init、转换输入 | 创建、init、mount |
+| 重复 render | 同位置同名可复用，update 后再转换 | 旧实例 destroy，重新创建挂载 |
+| setData | 转换新输入，再布局 | 不重新挂载 |
+| layout / refresh / 增量修改 | 不重新运行注册转换 | 不重新挂载 |
+| Graph.destroy | destroy 当前实例 | destroy 并由插件释放自建资源 |
+
+updateOptions 的公开范围只有 node、edge、label、theme；不接受 transforms 或 plugins。当前没有公开的动态列表/选项设置方法；需要切换配置时重建 Graph，不依赖修改调用方原对象的引用或引擎私有 options。setData 用于更新数据，不是选项 setter。
+
+## 选项与支持边界
+
+自定义选项由扩展校验，不会因写入 GraphOptions 就自动获得引擎含义。init / update 中用当前值与默认值构造实例状态；不修改收到的只读对象。
+
+注册 Transform 同步返回 GraphData，不支持异步 Promise；插件异步工作要自己管理完成、取消和错误。未知名称会跳过，不代表功能已启用。错误和资源清理查[运行契约](/docs/api/extensions/runtime)；注册与隔离查[注册契约](/docs/api/extensions/registration)。

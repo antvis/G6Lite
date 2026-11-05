@@ -1,0 +1,54 @@
+---
+title: Transform and Plugin options
+description: Configuration shapes, registration, option delivery, ordering, reuse, and update boundaries
+---
+
+transforms change input before layout; plugins mount independent DOM. Neither is a Behavior. Register names before use. See [runtime contracts](/en/docs/api/extensions/runtime) for hooks.
+
+## transforms
+
+GraphOptions.transforms?: TransformOption[] defaults to no registered transformations. Each entry is a string or an object with type and optional options. options is Record&lt;string, unknown&gt;; the special parallel-edge entry also accepts ParallelEdgesConfig.
+
+```ts
+import type { TransformOption } from '@antv/g6-lite';
+export const transforms: TransformOption[] = [
+  { type: 'app-normalize', options: { prefix: 'Service' } },
+];
+```
+
+This is configuration only. Register app-normalize as TransformExtension with beforeRender. String form sends {} to init / update; object form sends only options, excluding the outer type. Do not put prefix on the outer object.
+
+Entries execute in order before layout. The same name at two positions has two instances. A later render / setData reuses the same position/name and calls update with complete options, not a diff. Removal or name changes release old instances.
+
+process-parallel-edges is a built-in special case that does not invoke a registered Transform. See [parallel-edge options](/en/docs/api/options/edge#entries-and-precedence) for fields, disabling, and precedence over the transform entry.
+
+## plugins
+
+GraphOptions.plugins?: PluginOption[] defaults to empty. Every entry is an object with type: string; other top-level fields are business options. PluginOptions&lt;TType&gt; can constrain names and fields. There is no string shorthand.
+
+```ts
+import type { PluginOption } from '@antv/g6-lite';
+export const plugins: PluginOption[] = [
+  { type: 'app-counter', caption: 'Visits' },
+];
+```
+
+Register app-counter as PluginExtension. init receives the whole object, including type and caption. A nested options object is not automatically flattened. mount receives the Graph DOM container. Repeated same-named entries instantiate separately; names are not deduplicated.
+
+## Calls and changes
+
+| Operation | Registered Transform | Plugin |
+| --- | --- | --- |
+| First render | Create, init, transform input | Create, init, mount |
+| Repeated render | Reuse matching position/name; update then transform | Destroy old instance; create and mount again |
+| setData | Transform new input, then layout | Does not remount |
+| layout / refresh / incremental writes | Do not rerun registered transforms | Does not remount |
+| Graph.destroy | Destroy current instances | Destroy; release plugin-owned resources |
+
+Public updateOptions accepts node, edge, label, and theme only, excluding transforms / plugins. There is no public dynamic list/options setter. Recreate to change configuration rather than mutating caller-owned object references or private engine options. setData updates data, not configuration.
+
+## Options and support boundaries
+
+Extensions validate their own options; fields do not acquire engine meaning merely by appearing in GraphOptions. Build instance state from current values and defaults in init / update. Do not mutate received read-only options.
+
+Registered Transforms return GraphData synchronously, not a Promise. Plugins own asynchronous completion, cancellation, and errors. Unknown names are skipped rather than activated. See [runtime contracts](/en/docs/api/extensions/runtime) for errors/cleanup and [registration](/en/docs/api/extensions/registration) for isolation.

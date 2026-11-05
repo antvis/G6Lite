@@ -1,0 +1,23 @@
+site/content/docs/zh/metrics/bundle-size.mdx
+  s_4534bc5c3d78f4::t_5653771feff7c3 2-3,6,8,10-35
+site/content/docs/en/metrics/bundle-size.mdx
+  s_4534bc5c3d78f4::t_5653771feff7c3 2-3,6,8,10-35
+site/maintenance/b82-bundle-measurement.json
+  s_4534bc5c3d78f4::t_5653771feff7c3 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cf0b06fe864baa6f241058e50f1637decd1b0e58",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -16,54 +16,27 @@ await graph.render();
 
 ## 生命周期
 
+创建、渲染、销毁与刷新的完整契约见[生命周期方法参考](/docs/api/graph/lifecycle)。阶段选择与清理步骤见[Graph 生命周期](/docs/concepts/graph-lifecycle)。
+
 ### `new Graph(options)`
 
-```ts
-const graph = new Graph({
-  container: document.getElementById('container')!,
-  data: { nodes: [{ id: 'a' }, { id: 'b' }], edges: [{ source: 'a', target: 'b' }] },
-});
-```
-
-保存 `container`、`data` 和其余配置，并在容器内创建 canvas。此时还没有布局结果，也没有可查询的元素。
-
-`container` 接受 CSS 选择器（例如 `#container`）或 `HTMLElement`。容器在构造时必须已经存在于文档中。
+[创建实例](/docs/api/graph/lifecycle#new-graph)：容器、画布归属及 GraphOptions 入口。
 
 ### `render()`
 
-```ts
-await graph.render();
-```
-
-按当前配置执行数据转换和布局，初始化运行时并绘制首帧。等待首次渲染完成，再调用数据和状态方法。初始化与异步清理的顺序见 [Graph 生命周期](/docs/concepts/graph-lifecycle)。
-
-同一实例重复调用会取消仍在进行的布局，并按最新数据和配置重新绘制。
-
-渲染过程会发出 `beforerender` 和 `afterrender`。
+[render](/docs/api/graph/lifecycle#render)：等待有效初始化完成，了解重复渲染、事件顺序和取消边界。
 
 ### `destroy()`
 
-```ts
-graph.destroy();
-```
-
-终止进行中的布局，发出 `destroy`，拆除交互、插件和渲染器，并移除 canvas。重复调用没有额外效果。`destroyed` 随后为 `true`。
+[destroy](/docs/api/graph/lifecycle#destroy)：销毁实例资源；业务请求、计时器和 DOM 监听由业务清理。
 
 ### `destroyed`
 
-```ts
-if (graph.destroyed) return;
-```
-
-实例是否已经销毁。
+[destroyed](/docs/api/graph/lifecycle#destroyed)：只读销毁标记，不等于渲染成功或任务有效。
 
 ### `refresh()`
 
-```ts
-graph.refresh();
-```
-
-强制做一次完整样式重算和绘制。常规的数据、状态和视口修改会自己安排下一帧更新，只有外部改了引擎无法观察到的输入时才需要调用。
+[refresh](/docs/api/graph/lifecycle#refresh)：重算样式并绘制，不重新初始化、布局或适配。
 
 ## 读取数据
 
@@ -134,16 +107,7 @@ await graph.setData(
 
 ### `updateOptions()`
 
-```ts
-graph.updateOptions({
-  node: { style: { fill: '#5366ad', size: 32 } },
-  theme: { type: 'light' },
-});
-```
-
-合并节点、边、标签和主题配置，并完整重算样式。节点和边的 `style` 对象会与原配置合并；传入函数样式时，函数整体替换旧样式。
-
-布局、行为和插件不在这个方法的参数里。更换布局使用 `setLayout()` 加 `layout()`。
+[updateOptions](/docs/api/graph/lifecycle#updateoptions) 更新 node、edge、label 和 theme；对象、函数和状态样式的合并规则见方法参考。它不接受布局、行为或插件配置；更换布局使用 [setLayout + layout](/docs/api/graph/layout)。
 
 ## 修改节点和边
 

@@ -15,7 +15,7 @@ graph.once('afterrender', ({ nodeCount }) => console.log(nodeCount));
 await graph.render();
 ```
 
-操作日志与常用顺序见[生命周期指南](/docs/guides/events#生命周期与数据事件)。这些事件不表示浏览器已经绘制下一帧。
+操作日志与常用顺序见[生命周期事件使用](/docs/guides/events/lifecycle)，方法调用与资源清理见[生命周期方法参考](/docs/api/graph/lifecycle)。这些事件不表示浏览器已经绘制下一帧。
 
 ## beforelayout
 

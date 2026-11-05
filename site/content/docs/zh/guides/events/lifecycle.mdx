@@ -5,7 +5,7 @@ description: 比较首次渲染、增量修改、整体替换与重排的事件
 
 import { NodeDocExample as EventDocExample } from '@/components/node-doc-example';
 
-更新数据不等于重新执行 render，计算布局不等于浏览器已绘制下一帧。先观察日志，再选择需要的完成时机。
+更新数据不等于重新执行 render，计算布局不等于浏览器已绘制下一帧。先观察日志，再选择需要的完成时机。实例阶段与资源清理见[Graph 生命周期](/docs/concepts/graph-lifecycle)，调用契约见[生命周期方法参考](/docs/api/graph/lifecycle)。
 
 ## 观察事件顺序
 

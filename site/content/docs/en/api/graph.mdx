@@ -16,54 +16,27 @@ Data writes, state changes, and `layout()` run after the first successful `rende
 
 ## Lifecycle
 
+See the [lifecycle method reference](/en/docs/api/graph/lifecycle) for construction, rendering, destruction, and refresh contracts. [Graph lifecycle](/en/docs/concepts/graph-lifecycle) explains stage selection and cleanup.
+
 ### `new Graph(options)`
 
-```ts
-const graph = new Graph({
-  container: document.getElementById('container')!,
-  data: { nodes: [{ id: 'a' }, { id: 'b' }], edges: [{ source: 'a', target: 'b' }] },
-});
-```
-
-Stores `container`, `data`, and the rest of the configuration, then creates a canvas inside the container. There is no layout result yet, and element queries are empty.
-
-`container` accepts a CSS selector (such as `#container`) or an `HTMLElement`. The element must already be in the document.
+[Construct an instance](/en/docs/api/graph/lifecycle#new-graph): container requirements, canvas ownership, and GraphOptions.
 
 ### `render()`
 
-```ts
-await graph.render();
-```
-
-Runs the configured transforms and layout, initializes the runtime, and draws the first frame. Wait for the first render before calling data and state methods. See [Graph lifecycle](/en/docs/concepts/graph-lifecycle) for initialization and asynchronous cleanup.
-
-Calling it again on the same instance cancels an in-flight layout and redraws from the latest data and options.
-
-The render emits `beforerender` and `afterrender`.
+[render](/en/docs/api/graph/lifecycle#render): valid initialization, repeated rendering, event order, and cancellation boundaries.
 
 ### `destroy()`
 
-```ts
-graph.destroy();
-```
-
-Aborts an in-flight layout, emits `destroy`, tears down interactions, plugins, and the renderer, and removes the canvas. A second call has no further effect. `destroyed` is then `true`.
+[destroy](/en/docs/api/graph/lifecycle#destroy) releases instance resources. Application requests, timers, and DOM listeners still need application cleanup.
 
 ### `destroyed`
 
-```ts
-if (graph.destroyed) return;
-```
-
-Whether the instance has been destroyed.
+[destroyed](/en/docs/api/graph/lifecycle#destroyed) is a read-only destruction flag, not proof of successful rendering or current task validity.
 
 ### `refresh()`
 
-```ts
-graph.refresh();
-```
-
-Forces one full style pass and draw. Data, state, and viewport changes already schedule their own frame. Call this only when an input changed outside the methods the engine observes.
+[refresh](/en/docs/api/graph/lifecycle#refresh) reprocesses styles and draws, without reinitialization, layout, or fitting.
 
 ## Reading data
 
@@ -134,16 +107,7 @@ Use the incremental methods below for local additions and edits so the whole gra
 
 ### `updateOptions()`
 
-```ts
-graph.updateOptions({
-  node: { style: { fill: '#5366ad', size: 32 } },
-  theme: { type: 'light' },
-});
-```
-
-Merges node, edge, label, and theme options, then recomputes styles. Object `style` values merge with the previous style. A function style replaces the previous style entirely.
-
-Layout, behaviors, and plugins are outside this argument. Change layout with `setLayout()` followed by `layout()`.
+[updateOptions](/en/docs/api/graph/lifecycle#updateoptions) updates node, edge, label, and theme. See the reference for object, function, and state-style merge rules. Layout, Behavior, and Plugin configuration are not accepted; use [setLayout + layout](/en/docs/api/graph/layout) to change layouts.
 
 ## Changing nodes and edges
 

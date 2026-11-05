@@ -34,7 +34,7 @@ execute(data: GraphData, runtime) 为必需方法，返回带坐标的 nodes 对
 | runtime.width / height | number，画布 CSS 视口尺寸；独立计算未给视口时取配置或 800 / 600 |
 | runtime.signal? | AbortSignal，取消标记 |
 | runtime.options | Readonly&lt;TOptions&gt;，本次解析后的完整配置，含 type 与视口补齐；顶层复制并冻结 |
-| 结果 nodes | Array&lt;GraphData['nodes'][number] &amp; 坐标&gt;；每项必须有有限 number 的 x/y，并保留节点 id 与业务字段 |
+| 结果 nodes | `Array<GraphData['nodes'][number] & { x: number; y: number }>`；x/y 为有限图坐标，保留节点 id 与业务字段 |
 
 结果不是新的 GraphData：布局只返回节点坐标，不返回边、DOM 或渲染对象。不要在 execute 中写入内部模型或发起绘制；Graph 负责结果应用与更新。重排、固定轴与取消见[布局方法](/docs/api/graph/layout)。
 

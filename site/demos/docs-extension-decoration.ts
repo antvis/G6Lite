@@ -33,8 +33,8 @@ export async function run(container: HTMLElement) {
       // #region placement
       decorations: [{
         renderer: 'docs-pill', placement: 'right', attachment: 'outside',
-        layout: 'stack', sort: 'width-desc', itemGap: 4, maxVisible: 2,
-        overflow: 'hover-expand', overflowData: (count) => '+' + count,
+        layout: 'stack', sort: 'width-desc', itemGap: 4, maxVisible: 3,
+        overflow: 'hover-expand', overflowData: (count: number) => '+' + count,
         items: (node) => node.id === 'A' ? ['CPU 42%', 'API', 'DB', 'Cache', 'Queue'] : ['Ready'],
         hideOnCollision: false,
       }],

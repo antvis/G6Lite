@@ -20,7 +20,7 @@ export const transforms: TransformOption[] = [
 
 数组按顺序执行，输出进入下一项，再进行布局。相同名称出现在两个位置时有两个实例；同位置同名在后续 render / setData 中复用并调用 update，update 会收到完整选项而非差量。移除或换名会清理旧实例。
 
-process-parallel-edges 是内置特殊项，不调用注册 Transform；字段、显式关闭与 edge.parallelEdges 的优先级见[平行边参考](/docs/api/options/edge#入口与优先级)。
+process-parallel-edges 是内置特殊项，不调用注册 Transform；字段、显式关闭与 edge.parallelEdges 的优先级见[平行边参考](/docs/api/options/edge#两种入口与优先级)。
 
 ## plugins
 

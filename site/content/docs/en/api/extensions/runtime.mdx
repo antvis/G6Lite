@@ -34,7 +34,7 @@ Required execute(data: GraphData, runtime) returns an object containing position
 | runtime.width / height | number, canvas CSS viewport; standalone defaults to configuration or 800 / 600 |
 | runtime.signal? | AbortSignal for cancellation |
 | runtime.options | Readonly&lt;TOptions&gt;, current resolved configuration including type and viewport defaults; shallow-copied and frozen |
-| Result nodes | Array of GraphData node records with finite numeric x/y; retain IDs and business fields |
+| Result nodes | `Array<GraphData['nodes'][number] & { x: number; y: number }>`; finite graph coordinates, retaining IDs and business fields |
 
 The result is not GraphData: return positioned nodes, not edges, DOM, or rendering objects. Do not write internal models or draw inside execute. Graph applies results and schedules updates. See [layout methods](/en/docs/api/graph/layout) for reruns, fixed axes, and cancellation.
 

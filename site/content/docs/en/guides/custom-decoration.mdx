@@ -19,7 +19,7 @@ A has five items, B only Ready. A initially shows two items and +3. Hover its de
 
 1. Match renderer to its registration. Use data for one item and items for a stack.
 2. placement chooses the side; attachment chooses boundary or outside positioning.
-3. layout: 'stack' enables vertical items; sort, maxVisible, and overflow control visibility.
+3. layout: 'stack' enables vertical items; sort, maxVisible, and overflow control visibility. maxVisible includes the overflow item: 3 shows two items plus +3 here.
 4. overflowData goes to the same renderer, which must also support that input.
 
 Do not reimplement node positioning, sorting, or overflow inside the renderer. See [decoration configuration](/en/docs/api/options/node#nodedecorationconfig) for offsets, anchors, ratios, and defaults.

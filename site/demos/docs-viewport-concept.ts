@@ -31,10 +31,12 @@ export async function run(container: HTMLElement) {
   let disposed = false;
   const update = () => {
     const camera = graph.getCamera();
+    // #region coordinates
     const rect = container.getBoundingClientRect();
     const client = graph.graphToScreen(0, 0);
     const canvas = { x: client.x - rect.left, y: client.y - rect.top };
     const back = graph.screenToGraph(client.x, client.y);
+    // #endregion coordinates
     status.textContent = [
       `A graph (0, 0) | camera (${point(camera)}) | zoom ${camera.zoom.toFixed(2)}`,
       `A canvas (${point(canvas)}) | A client (${point(client)})`,

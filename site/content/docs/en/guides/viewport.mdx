@@ -1,0 +1,102 @@
+---
+title: Viewport fitting and coordinates
+description: Choose when to fit, convert pointer coordinates, and preserve the user's view during data updates
+---
+
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+Decide when the view may change before choosing a fitting method. See [viewport and coordinates](/en/docs/concepts/viewport) for graph positions versus the camera.
+
+## Choose when to fit
+
+| Task | Approach |
+| --- | --- |
+| Show all content | fitView, with padding and zoom limits as needed |
+| Center without changing scale | fitCenter |
+| Locate a node from a list | focusItem(id), shrinking when necessary to contain the target |
+| Refresh data while keeping the view | `setData(next, { fitView: false })` |
+| Keep all content visible after a panel narrows | Configure autoFit at initialization |
+
+The first await graph.render() performs an initial fit even with autoFit: false. Data replacement, relayout, and container resizing have separate policies. Do not call render again just to refresh the viewport.
+
+## Refresh data with or without fitting
+
+Zoom with the toolbar or drag empty canvas, then choose Reload + keep view. B moves from x=240 to x=800 while the camera stays unchanged; B may leave the viewport. Use Reset example, then Reload + fit to compare: the updated content fits into view.
+
+<LayoutDocExample id="viewport-preserve" locale="en" focus="preserve-view" />
+
+Use fitView: false to keep the view; no camera save-and-restore is needed. New coordinates, layouts, and states still apply. Keeping the camera does not guarantee that a node stays at the same screen position. See [preserving selection](/en/docs/guides/states#preserve-selection-when-replacing-data) separately.
+
+Omitting the second setData argument uses fitView(0.9); it does not inherit the initial autoFit padding. Pass a fit options object to this setData call, as in the example, to reuse your padding.
+
+<details>
+<summary>Asynchronous refresh and saved views</summary>
+
+The example disables buttons during an update. For concurrent application requests, use a request sequence or cancellation to apply only the latest result. Check graph.destroyed after asynchronous work.
+
+To restore a view across pages, save the getCamera() snapshot and call setCamera(saved) after the new instance's await render(). The camera records translation and zoom only; a different container size or different graph positions may show a different area. Calling fitView immediately afterward overwrites the restored camera.
+
+</details>
+
+## Handle resizing and completed layouts
+
+Configure autoFit at initialization to keep all content visible after panel resizing. Keep false (the default) to retain the user's zoom and pan during exploration. Graph uses ResizeObserver to synchronize container dimensions; neither policy requires recreating the instance.
+
+```ts
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+export async function createGraph(container: HTMLElement, data: GraphData) {
+  const graph = new Graph({
+    container, data,
+    autoFit: { padding: 32, maxZoom: 1 },
+  });
+  await graph.render();
+  return graph; // Call graph.destroy() on unmount
+}
+```
+
+The container needs nonzero width and height. To reset the view when revealing a hidden tab, explicitly fitView after the container reaches its final size. The resize event follows any automatic fitting.
+
+After await graph.layout(), either call `graph.fitView({ padding: 32, maxZoom: 1 })` or retain the current camera. Layout computes node positions; fitting is explicit. See [layout methods](/en/docs/api/graph/layout) for asynchronous cancellation.
+
+## Convert coordinates to position DOM content
+
+Reuse the concept page's A-point observer below. Zoom and pan to compare canvas and client positions. Page scrolling changes client while keeping canvas unchanged. The key code projects graph coordinates into client coordinates and converts them back.
+
+<LayoutDocExample id="viewport-concept" locale="en" focus="coordinates" />
+
+Convert DOM mouse events using clientX / clientY. Element events already supply event.graph, event.canvas, and event.client. Fixed menus use client coordinates. Absolutely positioned content inside a canvas container without borders or padding uses CSS coordinates relative to that container.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+export function pointAtMouse(graph: Graph, event: MouseEvent) {
+  return graph.screenToGraph(event.clientX, event.clientY);
+}
+
+// marker is mounted on document.body; point is in graph coordinates
+export function placeMarker(graph: Graph, marker: HTMLElement, point: { x: number; y: number }) {
+  const client = graph.graphToScreen(point.x, point.y);
+  Object.assign(marker.style, {
+    position: 'fixed', left: `${client.x}px`, top: `${client.y}px`,
+  });
+}
+```
+
+Reproject the anchor after zooming, panning, or page scrolling; close menus that should not follow. Do not multiply by DPR. screenToGraph does not take offsetX / offsetY or screenX / screenY. See [the three coordinate spaces](/en/docs/concepts/viewport#three-coordinate-spaces).
+
+## Common questions
+
+### Why is the graph still small after fitting?
+
+Check for distant nodes, far-reaching edges or Combos, then inspect padding and maxZoom. The example caps maxZoom at 1 to avoid over-enlarging a small graph. fitCenter only centers; use zoomTo or zoomBy to zoom in explicitly.
+
+### Why does refreshing move the view with autoFit disabled?
+
+Check that setData receives fitView: false and that application code does not call fitView afterward. Disabling autoFit prevents automatic fitting on container resize; data replacement has its own fitting policy.
+
+### Why do method and wheel zoom limits differ?
+
+minZoom and maxZoom on zoomTo / zoomBy constrain that call only. Wheel limits belong to the zoom-canvas Behavior, and fitView limits are separate again. Set each when consistent limits are required. See [wheel zoom options](/en/docs/api/options/behaviors#navigation-and-dragging).
+
+Continue with [viewport methods](/en/docs/api/graph#viewport), [autoFit](/en/docs/api/options#autofit), [setData](/en/docs/api/graph#setdata), and [element event coordinates](/en/docs/api/graph/events/element#read-event-parameters).

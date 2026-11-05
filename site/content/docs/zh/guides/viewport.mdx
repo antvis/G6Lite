@@ -1,0 +1,102 @@
+---
+title: 视口适配与坐标
+description: 选择适配时机、转换鼠标与图坐标，并在数据刷新后保留用户视野
+---
+
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
+
+先决定何时允许视野变化，再选择适配方法。图的位置与相机的区别见[视口与坐标](/docs/concepts/viewport)。
+
+## 选择适配时机
+
+| 任务 | 做法 |
+| --- | --- |
+| 展示完整内容 | fitView，按需指定留白和缩放限制 |
+| 只把内容移到中央 | fitCenter，保留当前缩放 |
+| 从列表定位节点 | focusItem(id)，必要时缩小以容纳目标 |
+| 刷新数据但保留用户视野 | `setData(next, { fitView: false })` |
+| 容器变窄后仍展示完整内容 | 初始化时配置 autoFit |
+
+首次 await graph.render() 会做初始适配，即使 autoFit 为 false。运行中的数据替换、布局重排和容器变化各有独立策略；不用再次 render 来“刷新视口”。
+
+## 刷新数据，保留或重新适配
+
+先用工具栏放大或拖动空白处，再点 Reload + keep view：B 从 x=240 移到 x=800，相机不变，B 可能离开视口。点工具栏“重置示例”，再用 Reload + fit 对比：更新后的内容会重新进入视口。
+
+<LayoutDocExample id="viewport-preserve" locale="zh" focus="preserve-view" />
+
+保留视野只需 fitView: false，不必保存后再写回相机。新数据里的坐标、布局和状态仍按数据更新；保留相机不保证某个节点停在原来的屏幕位置。选择状态的保留另见[状态使用](/docs/guides/states#替换数据时保留选择)。
+
+省略 setData 的第二个参数会使用 fitView(0.9)，不会继承初始化 autoFit 的留白。刷新后需要同一留白时，像示例一样给本次 setData 传入适配对象。
+
+<details>
+<summary>异步刷新和保存视野</summary>
+
+示例在更新期间禁用按钮。应用有并发请求时，用请求序号或取消机制确保只应用最新结果；异步返回后检查 graph.destroyed。
+
+跨页面恢复时，可以保存 getCamera() 返回的快照，在新实例 await render() 后调用 setCamera(saved)。相机只记录平移和缩放；恢复到不同尺寸的容器、不同坐标的图时，不保证呈现同一范围。不要紧接着调用 fitView，否则会覆盖恢复结果。
+
+</details>
+
+## 容器变化与布局完成后怎么办
+
+分栏调整后要继续看全图，在初始化时配置 autoFit；用户正在探索时要保留缩放和平移，则保持 false（默认）。Graph 会通过 ResizeObserver 同步容器尺寸，两种情况下都不需要重建实例。
+
+```ts
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+export async function createGraph(container: HTMLElement, data: GraphData) {
+  const graph = new Graph({
+    container, data,
+    autoFit: { padding: 32, maxZoom: 1 },
+  });
+  await graph.render();
+  return graph; // 卸载时 graph.destroy()
+}
+```
+
+容器需要有非零宽高。从隐藏页签切换到可见时，若要重设视野，在容器获得最终尺寸后显式 fitView。resize 事件在可选的自动适配后发出。
+
+await graph.layout() 完成后，按任务选择 `graph.fitView({ padding: 32, maxZoom: 1 })` 或保留当前相机。布局只计算节点位置，适配需要显式调用；异步取消规则见[布局方法](/docs/api/graph/layout)。
+
+## 转换坐标，定位 DOM 内容
+
+下面复用概念页的 A 点观察器。缩放、平移后看 canvas 和 client 如何变化；滚动网页时，canvas 不变而 client 会更新。关键代码把图坐标转换为浏览器位置，再转回图坐标。
+
+<LayoutDocExample id="viewport-concept" locale="zh" focus="coordinates" />
+
+DOM 鼠标事件用 clientX / clientY 转换；元素事件已经提供 event.graph、event.canvas 和 event.client，可以直接读取。固定定位的菜单使用 client；挂在无边框、无内边距画布容器内的绝对定位内容，使用相对该容器的 CSS 坐标。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+export function pointAtMouse(graph: Graph, event: MouseEvent) {
+  return graph.screenToGraph(event.clientX, event.clientY);
+}
+
+// marker 挂在 document.body，point 是图坐标
+export function placeMarker(graph: Graph, marker: HTMLElement, point: { x: number; y: number }) {
+  const client = graph.graphToScreen(point.x, point.y);
+  Object.assign(marker.style, {
+    position: 'fixed', left: `${client.x}px`, top: `${client.y}px`,
+  });
+}
+```
+
+缩放、平移或滚动页面后，重新投影锚点；不需要跟随时直接关闭菜单。不要额外乘 DPR，screenToGraph 也不接收 offsetX / offsetY 或 screenX / screenY。三种坐标的完整定义见[概念页](/docs/concepts/viewport#三种坐标各自做什么)。
+
+## 常见问题
+
+### 适配后为什么图仍然很小？
+
+先检查数据里是否有远离主体的节点、延伸很远的边或 Combo；再检查留白和 maxZoom。示例把 maxZoom 设为 1，避免少量节点被无限放大。fitCenter 只居中，不会放大；主动拉近用 zoomTo 或 zoomBy。
+
+### 关了 autoFit，刷新后为什么还会跳？
+
+检查 setData 是否传了 fitView: false，以及业务代码是否又调用 fitView。autoFit 关闭的是容器变化后的自动适配，不能关闭数据替换自己的适配策略。
+
+### 手动缩放范围和滚轮范围为什么不同？
+
+zoomTo / zoomBy 的 minZoom、maxZoom 只约束本次方法调用；滚轮范围配置在 zoom-canvas Behavior，fitView 的范围又是独立的。需要一致时分别设置，见[滚轮缩放配置](/docs/api/options/behaviors#导航与拖拽)。
+
+继续查询：[视口方法](/docs/api/graph#视口) · [autoFit](/docs/api/options#autofit) · [setData](/docs/api/graph#setdata) · [元素事件坐标](/docs/api/graph/events/element#读取事件参数)。

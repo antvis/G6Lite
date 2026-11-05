@@ -1,42 +1,62 @@
 ---
-title: 性能指标
-description: G6Lite 的性能指标口径、环境记录与结果使用边界
+title: 性能测量方法
+description: 分开测量数据、布局、渲染与交互，记录可复现的环境和结果
 ---
 
-性能结果只在运行环境、数据规模与配置一致时具有可比性；官网不使用缺少环境信息的绝对跑分或跨机器营销对比。
-
-本页记录的是测量方法和选型边界，不表示 G6Lite 在所有数据、布局和设备上都快于其他图库。布局、纯渲染和交互更新必须分别比较。
+先固定业务数据和环境，再比较相同工作。已有坐标的绘制、重新布局的首屏和渲染后的交互应分别记录。
 
 ## 环境要求
 
-公开或比较结果时至少记录：
-
-- G6Lite 版本、Git commit 与工作区是否干净。
-- Node、Chromium、操作系统和架构。
-- CPU 型号；浏览器结果还需记录 user agent、视口和 DPR。
-- 数据节点/边数量、布局与迭代次数。
-- 样本量与误差。
-
-不同环境的结果不应直接计算“提升百分比”。
+记录包版本和源码 commit、依赖版本、浏览器/系统、CPU/GPU、视口 CSS 尺寸、DPR、节点/边数量、标签与样式、布局参数、缓存和 Worker 是否实际运行。保存输入数据、随机种子（如算法支持）、完整代码和原始样本。
 
 ## 当前公开口径
 
-- 首页只展示 WebGL 1.0、内置布局能力与包体积预算等稳定事实。
-- 包体积由 `limit-size` 独立校验，详见 [包体积](/docs/metrics/bundle-size)。
-- 具体业务选型应使用真实数据和目标设备完整测量，再结合 [性能调优](/docs/metrics/performance-tuning) 分析瓶颈。
+| 指标 | 测量边界 |
+| --- | --- |
+| 数据准备 | 业务原始输入 → GraphData，不计入纯渲染 |
+| 布局 | runLayout 开始到坐标返回；冷/热加载分别记录 |
+| 构造与 render 完成 | new Graph → await render；包含 CPU 初始化与 draw 提交，不是 GPU 完成时间 |
+| 交互 | 连续缩放/拖拽、状态和批量位置更新；观察帧时间与主线程长任务 |
+| 资源 | 反复挂载/销毁后比较实例、画布、监听与内存趋势 |
+
+以下函数每次释放图实例，用于拆分布局与 render 的测量；容器必须可见且有非零尺寸。为说明边界使用 grid，不代表其他算法的耗时。
+
+```ts
+import { Graph, runLayout, type GraphData } from '@antv/g6-lite';
+
+export async function measureOnce(container: HTMLElement, data: GraphData) {
+  if (document.visibilityState !== 'visible') throw new Error('Keep the tab visible');
+  const start = performance.now();
+  const positions = await runLayout(data, { type: 'grid' });
+  const layoutMs = performance.now() - start;
+  const positioned = { ...data, nodes: data.nodes.map((node) => ({
+    ...node, ...positions.nodes.find((point) => point.id === node.id),
+  })) };
+  const createStart = performance.now();
+  const graph = new Graph({ container, data: positioned, behaviors: [] });
+  try {
+    await graph.render();
+    const renderResolvedMs = performance.now() - createStart;
+    await new Promise<void>((resolve) => requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    }));
+    return { layoutMs, renderResolvedMs, throughTwoFramesMs: performance.now() - createStart };
+  } finally {
+    graph.destroy();
+  }
+}
+```
+
+计时使用单调时钟 [performance.now](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now)。两次 [requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame) 只跨过帧回调，不证明 GPU 已完成或像素已被用户看到；后台标签页会影响此测量。
 
 ## 常用图库选型对比
 
-产品定位摘要：G6Lite 聚焦轻量 WebGL 与渲染后的增量交互；G6 v5 提供更完整的元素、动画、插件和多环境能力；sigma.js 聚焦 Graphology 数据上的 WebGL 网络渲染；Cytoscape.js 同时提供图论模型、算法和交互式可视化。
-
-逐项的渲染、布局、元素、Combo、交互、扩展、动画、算法、SSR 与 TypeScript 对比已集中到[常用图库能力对比](/docs/compatibility/library-comparison)。本页只维护测量方法，避免两处能力矩阵随版本漂移。
-
-选择时应先列出必须能力，再使用同一份业务数据验证候选方案。例如，sigma.js 使用已有坐标而 G6Lite 重新运行 force 布局时，首屏总耗时不能直接归因于渲染器；应分别记录布局时间和不含布局的渲染时间。
+先用[能力对比](/docs/compatibility/library-comparison)筛选可行方案。统一坐标、标签、边和交互；不要把某方案不做布局的时间与另一方案含 force 计算的首屏放在同一列。
 
 ## 如何进行数值对比
 
-- 固定数据、坐标、节点/边样式、标签策略、视口、DPR、浏览器和硬件。
-- 预置坐标与重新布局分成两组结果，不能混在同一列。
-- 同时记录中位数、P95、样本量和误差，不用一次运行结果得出结论。
-- 除首屏外，至少验证拖拽、缩放、拾取、高亮、批量更新和销毁后的内存趋势。
-- 将候选库版本、适配代码和完整配置与报告一起留档，避免后续无法复现。
+1. 冷启动单独记录；热路径先预热，再至少收集 30 次独立样本，明确样本量。
+2. 保留全部样本，给出中位数、P95 和范围；异常样本说明原因，不静默删除。
+3. 用 200 / 5000 节点及真实拓扑逐级验证，最后在目标设备检查拖拽、标签与销毁。
+
+可运行入口：[200 节点](/docs/examples/large) · [5000 节点](/docs/examples/large-labels) · [AI Papers](/docs/examples/ai-papers)。先看各示例的数据规模说明；调优步骤见[性能优化](/docs/metrics/performance-tuning)。

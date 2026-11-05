@@ -1,26 +1,62 @@
 ---
-title: Performance metrics
-description: Measurement boundaries and rules for keeping G6Lite performance comparisons reproducible
+title: Performance measurement
+description: Measure data, layout, rendering, and interactions separately with reproducible conditions
 ---
 
-Results are comparable only when version, commit, hardware, runtime, data, and configuration match.
+Fix data and environment before comparing equivalent work. Record drawing with supplied coordinates, layout-inclusive startup, and later interactions separately.
 
-This page documents measurement and selection boundaries. It does not claim that G6Lite is faster for every graph, layout, and device. Layout, rendering without layout, and post-render interaction updates must be evaluated separately.
+## Environment requirements
 
-Public comparisons must record the G6Lite version and Git state, Node version, operating system, CPU, data scale, and layout configuration. Use realistic data and target devices before making a product decision. See [performance tuning](/en/docs/metrics/performance-tuning).
+Record package/source and dependency versions, browser/OS, CPU/GPU, CSS viewport, DPR, node/edge counts, labels/styles, layout options, cache state, and actual Worker execution. Save data, a seed where supported, runnable code, and raw samples.
 
-## Selecting a graph library
+## Current public measurement scope
 
-In short, G6Lite focuses on a compact WebGL runtime and post-render incremental interaction; G6 v5 provides a broader element, animation, plugin, and multi-environment surface; sigma.js focuses on WebGL network rendering over Graphology; and Cytoscape.js combines a graph-theory model, algorithms, and interactive visualization.
+| Metric | Boundary |
+| --- | --- |
+| Data preparation | Business input → GraphData; separate from rendering |
+| Layout | runLayout start → positions returned; separate cold/warm loads |
+| Construction and render resolution | new Graph → await render; CPU setup and draw submission, not GPU completion |
+| Interactions | Continuous zoom/drag, state and bulk position updates; frame times and main-thread tasks |
+| Resources | Compare instances, canvases, subscriptions, and memory after repeated mount/destroy |
 
-The detailed rendering, layout, element, combo, interaction, extension, animation, algorithm, SSR, and TypeScript matrix now lives in [graph library comparison](/en/docs/compatibility/library-comparison). This page keeps measurement guidance only, avoiding two capability matrices that drift across releases.
+This function separates layout and render work and releases each instance. Use a visible, non-zero-size container. Grid illustrates the boundaries; its time does not represent other algorithms.
 
-For example, a first-render comparison is invalid when sigma.js reuses existing coordinates while G6Lite recomputes a force layout. Record layout time and rendering without layout independently.
+```ts
+import { Graph, runLayout, type GraphData } from '@antv/g6-lite';
 
-## Rules for numerical comparisons
+export async function measureOnce(container: HTMLElement, data: GraphData) {
+  if (document.visibilityState !== 'visible') throw new Error('Keep the tab visible');
+  const start = performance.now();
+  const positions = await runLayout(data, { type: 'grid' });
+  const layoutMs = performance.now() - start;
+  const positioned = { ...data, nodes: data.nodes.map((node) => ({
+    ...node, ...positions.nodes.find((point) => point.id === node.id),
+  })) };
+  const createStart = performance.now();
+  const graph = new Graph({ container, data: positioned, behaviors: [] });
+  try {
+    await graph.render();
+    const renderResolvedMs = performance.now() - createStart;
+    await new Promise<void>((resolve) => requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    }));
+    return { layoutMs, renderResolvedMs, throughTwoFramesMs: performance.now() - createStart };
+  } finally {
+    graph.destroy();
+  }
+}
+```
 
-- Keep data, coordinates, styles, label policy, viewport, DPR, browser, and hardware fixed.
-- Report preset-coordinate and relayout scenarios separately.
-- Record median, P95, samples, and error instead of drawing conclusions from one run.
-- Measure drag, zoom, picking, highlighting, batch updates, and post-destroy memory trends in addition to first render.
-- Archive candidate versions, adapters, full configuration, and reports together.
+Use the monotonic [performance.now clock](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now). Two [requestAnimationFrame callbacks](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame) do not prove GPU completion or presentation to the user. Background tabs affect this measurement.
+
+## Library selection comparison
+
+Use the [capability comparison](/en/docs/compatibility/library-comparison) to select candidates. Match positions, labels, edges, and interactions. Do not compare one renderer without layout against another startup that includes force computation.
+
+## How to compare numbers
+
+1. Record cold startup separately. Warm up hot paths and collect at least 30 independent samples; report the count.
+2. Keep all samples; report median, P95, and range. Explain outliers instead of silently deleting them.
+3. Progress through 200/5000-node and realistic datasets, then verify dragging, labels, and cleanup on target devices.
+
+Runnable workloads: [200 nodes](/en/docs/examples/large) · [5000 nodes](/en/docs/examples/large-labels) · [AI Papers](/en/docs/examples/ai-papers)。Read each example’s dataset description. For tuning see [performance tuning](/en/docs/metrics/performance-tuning)。

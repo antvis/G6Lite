@@ -62,7 +62,7 @@ export async function run(container: string | HTMLElement) {
         { source: 'gateway', target: 'target', data: { label: 'RPC\nresponse' } },
       ],
     },
-    layout: { type: 'circular', radius: 150 },
+    layout: { type: 'dagre', rankdir: 'LR', nodeSize: 32, ranksep: 180 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
     node: {
       labelRenderer: 'demo-multiline',

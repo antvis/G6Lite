@@ -1060,16 +1060,16 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     group: { zh: '节点扩展', en: 'Node extensions' },
     title: { zh: '呼吸节点', en: 'Breathing node' },
     description: {
-      zh: '用自定义节点动画表现选中和高亮状态。',
-      en: 'Show selected and highlight states with a custom node animation.',
+      zh: '用内置 breathing-node 的呼吸效果对比选中、高亮和普通状态。',
+      en: 'Compare selected, highlight and normal states with the built-in breathing-node effect.',
     },
     interaction: {
       zh: '切换选中和高亮，观察节点动画。',
       en: 'Toggle selected and highlight to see the node animation.',
     },
     dataDescription: {
-      zh: '一个自定义节点响应选中和高亮。',
-      en: 'One custom node responds to selected and highlight.',
+      zh: '3 个内置 breathing-node 节点、2 条边，对比初始 selected、highlight 和普通状态。',
+      en: '3 built-in breathing-node nodes and 2 edges compare initial selected, highlight and normal states.',
     },
     tags: ['extension.node', 'state.selected', 'state.highlight'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '3' }],

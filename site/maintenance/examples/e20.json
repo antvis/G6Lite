@@ -1,0 +1,46 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E20",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "custom-node-extension",
+      "file": "g6-v5-compat.ts",
+      "observations": [
+        "Selecting the explicit edge reports edge-worker-a-store; toggling Combo selection updates its status",
+        "Refresh restores initially selected Gateway/Combo; snapshot has 5 nodes / 4 edges"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "custom-label-renderer",
+      "file": "custom-label-renderer.ts",
+      "observations": [
+        "All three two-line node labels and both HTTPS/request and RPC/response edge labels are visible with the LR layout",
+        "Node drag/Fit and Refresh work; the shared custom renderer source remains the code displayed in guides"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "breathing-node",
+      "file": "breathing-node.ts",
+      "observations": [
+        "Three nodes compare selected/highlight/normal; both action toggles remove the visible halos",
+        "Refresh restores selected and highlight states; snapshot has 3 nodes / 2 edges"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Corrected bilingual breathing-node claims from one custom node to three built-in nodes",
+    "Spaced custom-label nodes left-to-right so both multiline edge labels are visible",
+    "Added snapshots to node-extension and breathing handles"
+  ]
+}

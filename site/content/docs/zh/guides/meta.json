@@ -20,7 +20,8 @@
     "extensions",
     "custom-node",
     "custom-edge",
-    "custom-label-renderer"
-    ,"custom-decoration"
+    "custom-label-renderer",
+    "custom-decoration",
+    "custom-layout"
   ]
 }

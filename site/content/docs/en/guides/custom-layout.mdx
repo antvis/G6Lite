@@ -1,0 +1,48 @@
+---
+title: Custom layouts
+description: Register position calculations, handle options and cancellation, and distinguish Graph execution from standalone calculation
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+A layout takes data and returns positioned nodes, without drawing or writing internal models. Try [built-in layouts](/en/docs/guides/layout) first.
+
+## Implement and execute
+
+Read current data and runtime.options, retain node IDs/business fields, and return finite x/y. Reading options from runtime also supports standalone execution without init.
+
+<NodeDocExample id="extension-layout" locale="en" focus="layout" />
+
+Six nodes start in a row. Layout again recalculates. Start Slow layout and immediately choose Cancel + grid to invalidate the old run and restore a grid. Run the column layout again to verify recovery.
+
+## Cancellation and resources
+
+The wait helper clears its timer on abort and removes its listener on completion. Each step checks signal / isDestroyed. Chunk expensive work and yield so cancellation can run.
+
+Graph calls destroy after success, failure, or cancellation. Cleanup must tolerate partial initialization. Layout fallback may absorb failures; fulfilled await alone does not prove application. The buttons use their own generation check before status updates and fitting.
+
+## Graph versus standalone execution
+
+Graph.render / layout / setData use init → execute → destroy. Standalone runLayout skips init but still calls execute / destroy. This example reads options from runtime so both paths work.
+
+```ts
+import { runLayout, type GraphData } from '@antv/g6-lite';
+export async function calculate(data: GraphData) {
+  // Register docs-column above first. This calculates positions, without updating Graph.
+  return runLayout(data, { type: 'docs-column', gap: 100 }, { width: 640, height: 320 });
+}
+```
+
+See the [runLayout example](/en/docs/api/graph/layout#runlayout) for displaying calculated results. Do not request rendering from execute; Graph applies results. context.data can be the old graph, not this execution's input.
+
+## Common questions
+
+### Does worker: true move a custom layout to a Worker?
+
+No. Registered extensions currently take the main-thread path. Own messages, cancellation, and cleanup if implementing your own Worker; see [Worker guidance](/en/docs/guides/layout-worker).
+
+### Why can cancellation still fulfill the Promise?
+
+Cancellation invalidates old results rather than promising rejection. Keep an application generation check to prevent stale UI updates.
+
+See [LayoutExtension](/en/docs/api/extensions/runtime#layoutextension) for runtime fields and fallback, and the [two-row example](/en/docs/examples/custom-layout).

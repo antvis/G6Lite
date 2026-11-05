@@ -40,70 +40,15 @@ See the [lifecycle method reference](/en/docs/api/graph/lifecycle) for construct
 
 ## Reading data
 
-Queries return the current read-only view. Use the write methods below to change what is drawn.
+See the [data query reference](/en/docs/api/graph/data)。
 
-```ts
-const snapshot = graph.getData();
-const nodes = graph.getNodes();
-const node = graph.getNodeData('n1');
-const neighbors = graph.getNeighborNodes('n1');
-const edges = graph.getAdjacentEdges('n1');
-
-if (graph.hasNode('n1') && node) {
-  node.x;
-  node.y;
-  node.data;
-  neighbors.length;
-  edges[0]?.source;
-  snapshot.nodes.length;
-}
-```
-
-| Method | Returns | Description |
-| --- | --- | --- |
-| `getData()` | `GraphData` | Snapshot of the current nodes, edges, and combos |
-| `getNodes()` | `readonly NodeModel[]` | Every node |
-| `getNodeData(id)` | `NodeModel \| undefined` | Node by id |
-| `getEdges()` | `readonly EdgeModel[]` | Every edge |
-| `getEdgeData(id)` | `EdgeModel \| undefined` | Edge by id |
-| `getComboData(id)` | `ComboModel \| undefined` | Combo by id |
-| `getElementData(id)` | `ElementModel \| undefined` | Node, edge, or combo by id |
-| `getNodeCount()` | `number` | Node count |
-| `getEdgeCount()` | `number` | Edge count |
-| `hasNode(id)` | `boolean` | Whether the node exists |
-| `hasEdge(id)` | `boolean` | Whether the edge exists |
-| `hasElement(id)` | `boolean` | Whether that node, edge, or combo exists |
-| `getElementPosition(id)` | `{ x, y } \| null` | Graph position of a node or combo. An edge has no single position |
-| `getNeighborNodes(nodeId)` | `string[]` | Ids of neighboring nodes |
-| `getAdjacentEdges(nodeId)` | `{ id, source, target }[]` | Edges connected to the node |
-
-`NodeModel` has `id`, `name`, `x`, `y`, `data`, and `states`. `EdgeModel` has `id`, `source`, `target`, `data`, and `states`. `states` is a read-only set.
-
-Before the first `render()`, `getData()` returns a copy of the data passed to the constructor. The other queries behave as an empty graph.
+[getData](/en/docs/api/graph/data#getdata) · [getNodes](/en/docs/api/graph/data#getnodes) · [getEdges](/en/docs/api/graph/data#getedges) · [getElementData](/en/docs/api/graph/data#getelementdata) · [getElementPosition](/en/docs/api/graph/data#getelementposition) · [getNeighborNodes](/en/docs/api/graph/data#getneighbornodes) · [getAdjacentEdges](/en/docs/api/graph/data#getadjacentedges)
 
 ## Replacing data and styles
 
 ### `setData()`
 
-```ts
-await graph.setData(
-  {
-    nodes: [{ id: 'a' }, { id: 'b' }],
-    edges: [{ id: 'a-b', source: 'a', target: 'b' }],
-  },
-  { fitView: false },
-);
-```
-
-Replaces the whole graph with a new set of nodes, edges, and combos. A configured `layout` runs again, the graph redraws, and `datachange` is emitted.
-
-`options.fitView` controls the viewport after replacement:
-
-- Omitted or `true`: calls `fitView()` with `0.9`.
-- `false`: keeps the current camera.
-- A number or `FitViewOptions`: forwards that value to `fitView()`.
-
-Use the incremental methods below for local additions and edits so the whole graph is not laid out again.
+[setData](/en/docs/api/graph/data-mutations#setdata) replaces graph data; see the reference for arguments, fitting, cancellation, and failure. Follow the [data guide](/en/docs/guides/data)。
 
 ### `updateOptions()`
 
@@ -111,41 +56,19 @@ Use the incremental methods below for local additions and edits so the whole gra
 
 ## Changing nodes and edges
 
-These methods require a completed first `render()`. Batch methods draw once.
+Use after a valid render. See signatures and batch boundaries in [data mutations](/en/docs/api/graph/data-mutations)。
 
 ### Nodes
 
-```ts
-graph.addNode({ id: 'n4', x: 240, y: 80, data: { label: 'N4' } });
-graph.updateNodeData('n4', { label: 'Updated' });
-graph.updateNodePosition('n4', 260, 100);
-graph.updateNodePositions([
-  { id: 'n1', x: 40, y: 40 },
-  { id: 'n4', x: 280, y: 120 },
-]);
-graph.removeNode('n4');
-```
+[addNode(s)](/en/docs/api/graph/data-mutations#addnode) · [updateNodeData](/en/docs/api/graph/data-mutations#updatenodedata) · [updateNodePosition(s)](/en/docs/api/graph/data-mutations#updatenodeposition) · [removeNode(s)](/en/docs/api/graph/data-mutations#removenode)
 
-`addNode()` requires a unique `id` and graph coordinates. It does not run layout again.
-
-`updateNodeData()` merges the business payload. Style functions that read those fields are recomputed on the next frame.
-
-`removeNode()` also removes edges connected to that node.
-
-A successful change emits `afteradditem`, `afterupdateitem`, or `afterremoveitem`.
+Supply positions on addition. Data merges shallowly; node removal also removes adjacent edges, without layout or fitting.
 
 ### Edges
 
-```ts
-const edgeId = graph.addEdge({ source: 'n1', target: 'n4', data: { weight: 1 } });
-graph.updateEdgeData(edgeId, { weight: 2 });
-graph.updateEdgeData([{ id: edgeId, source: 'n2', target: 'n4' }]);
-graph.removeEdge(edgeId);
-```
+[addEdge(s)](/en/docs/api/graph/data-mutations#addedge) · [updateEdgeData](/en/docs/api/graph/data-mutations#updateedgedata) · [removeEdge(s)](/en/docs/api/graph/data-mutations#removeedge)
 
-`source` and `target` must already exist. When `id` is omitted the engine generates one, and the return value is that id. Later queries and removal use it.
-
-The batch form of `updateEdgeData()` can also change an edge's endpoints.
+Addition returns actual IDs; batch updates can change endpoints; removing edges leaves nodes intact.
 
 ## State, visibility, and focus
 

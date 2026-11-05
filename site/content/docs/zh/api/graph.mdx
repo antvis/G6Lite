@@ -40,70 +40,15 @@ await graph.render();
 
 ## 读取数据
 
-查询返回当前图中的只读视图。修改画面请使用后面的写入方法。
+快照、只读模型、存在性、数量、位置与邻接查询统一见[数据读取参考](/docs/api/graph/data)。
 
-```ts
-const snapshot = graph.getData();
-const nodes = graph.getNodes();
-const node = graph.getNodeData('n1');
-const neighbors = graph.getNeighborNodes('n1');
-const edges = graph.getAdjacentEdges('n1');
-
-if (graph.hasNode('n1') && node) {
-  node.x;
-  node.y;
-  node.data;
-  neighbors.length;
-  edges[0]?.source;
-  snapshot.nodes.length;
-}
-```
-
-| 方法 | 返回值 | 说明 |
-| --- | --- | --- |
-| `getData()` | `GraphData` | 当前节点、边和 Combo 的数据快照 |
-| `getNodes()` | `readonly NodeModel[]` | 全部节点 |
-| `getNodeData(id)` | `NodeModel \| undefined` | 按 id 取节点 |
-| `getEdges()` | `readonly EdgeModel[]` | 全部边 |
-| `getEdgeData(id)` | `EdgeModel \| undefined` | 按 id 取边 |
-| `getComboData(id)` | `ComboModel \| undefined` | 按 id 取 Combo |
-| `getElementData(id)` | `ElementModel \| undefined` | 按 id 取节点、边或 Combo |
-| `getNodeCount()` | `number` | 节点数量 |
-| `getEdgeCount()` | `number` | 边数量 |
-| `hasNode(id)` | `boolean` | 是否存在该节点 |
-| `hasEdge(id)` | `boolean` | 是否存在该边 |
-| `hasElement(id)` | `boolean` | 是否存在该节点、边或 Combo |
-| `getElementPosition(id)` | `{ x, y } \| null` | 节点或 Combo 的图坐标；边没有单一位置 |
-| `getNeighborNodes(nodeId)` | `string[]` | 相邻节点 id |
-| `getAdjacentEdges(nodeId)` | `{ id, source, target }[]` | 与节点相连的边 |
-
-`NodeModel` 包含 `id`、`name`、`x`、`y`、`data` 和 `states`。`EdgeModel` 包含 `id`、`source`、`target`、`data` 和 `states`。`states` 是只读集合。
-
-首次 `render()` 之前，`getData()` 返回构造时传入的数据副本；其余查询按空图处理。
+[getData](/docs/api/graph/data#getdata) · [getNodes](/docs/api/graph/data#getnodes) · [getEdges](/docs/api/graph/data#getedges) · [getElementData](/docs/api/graph/data#getelementdata) · [getElementPosition](/docs/api/graph/data#getelementposition) · [getNeighborNodes](/docs/api/graph/data#getneighbornodes) · [getAdjacentEdges](/docs/api/graph/data#getadjacentedges)
 
 ## 替换数据与样式
 
 ### `setData()`
 
-```ts
-await graph.setData(
-  {
-    nodes: [{ id: 'a' }, { id: 'b' }],
-    edges: [{ id: 'a-b', source: 'a', target: 'b' }],
-  },
-  { fitView: false },
-);
-```
-
-用一份新的节点、边和 Combo 替换整张图。配置了 `layout` 时会重新布局，然后完整重绘，并发出 `datachange`。
-
-`options.fitView` 决定替换后的视口：
-
-- 省略或 `true`：按 `0.9` 调用 `fitView()`。
-- `false`：保留当前相机。
-- 数字或 `FitViewOptions`：按该参数调用 `fitView()`。
-
-局部增删改使用下面的增量方法，避免整图重布局。
+[setData](/docs/api/graph/data-mutations#setdata) 替换全图，参数、视野、取消和失败边界见写入参考；流程与代码效果见[数据指南](/docs/guides/data)。
 
 ### `updateOptions()`
 
@@ -111,41 +56,19 @@ await graph.setData(
 
 ## 修改节点和边
 
-这些方法都要求首次 `render()` 已经完成。批量方法只触发一次绘制。
+首次有效 render 后使用，完整签名和批量边界见[数据写入参考](/docs/api/graph/data-mutations)。
 
 ### 节点
 
-```ts
-graph.addNode({ id: 'n4', x: 240, y: 80, data: { label: 'N4' } });
-graph.updateNodeData('n4', { label: '已更新' });
-graph.updateNodePosition('n4', 260, 100);
-graph.updateNodePositions([
-  { id: 'n1', x: 40, y: 40 },
-  { id: 'n4', x: 280, y: 120 },
-]);
-graph.removeNode('n4');
-```
+[addNode(s)](/docs/api/graph/data-mutations#addnode) · [updateNodeData](/docs/api/graph/data-mutations#updatenodedata) · [updateNodePosition(s)](/docs/api/graph/data-mutations#updatenodeposition) · [removeNode(s)](/docs/api/graph/data-mutations#removenode)
 
-`addNode()` 的 `id` 必须唯一，并带上图坐标。它不会重新跑布局。
-
-`updateNodeData()` 合并业务字段。样式函数读取了这些字段时，下一帧会按新字段重算样式。
-
-`removeNode()` 同时删除与该节点相连的边。
-
-成功修改后会发出 `afteradditem`、`afterupdateitem` 或 `afterremoveitem`。
+新增提供坐标；数据浅合并；删除节点会删除关联边，不重布局或适配。
 
 ### 边
 
-```ts
-const edgeId = graph.addEdge({ source: 'n1', target: 'n4', data: { weight: 1 } });
-graph.updateEdgeData(edgeId, { weight: 2 });
-graph.updateEdgeData([{ id: edgeId, source: 'n2', target: 'n4' }]);
-graph.removeEdge(edgeId);
-```
+[addEdge(s)](/docs/api/graph/data-mutations#addedge) · [updateEdgeData](/docs/api/graph/data-mutations#updateedgedata) · [removeEdge(s)](/docs/api/graph/data-mutations#removeedge)
 
-`source` 和 `target` 必须是已经存在的节点。省略 `id` 时由引擎生成，返回值就是这条边的 id，之后的查询和删除都使用它。
-
-批量 `updateEdgeData()` 还可以修改边的两端节点。
+新增返回实际 ID，批量更新可改端点，删除边不会删除节点。
 
 ## 状态、显隐和定位
 

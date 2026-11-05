@@ -19,7 +19,7 @@ import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-exampl
 
 首次 render 完成后，用当前节点、边和布局配置重新计算。调用前未完成 render 会拒绝 Promise；销毁后直接返回。没有布局配置或节点为空时不计算，也不发出布局事件。
 
-结果有效时写回节点坐标，Graph 再按 fx/fy 覆盖对应轴，并请求一次绘制。Promise 完成不表示浏览器已经绘制该帧；本方法不调用 fitView，不重新挂载交互或插件。
+结果有效时按本次输入中的 fx/fy 覆盖对应轴，再写回坐标并请求绘制。当前 getData 不保留 fx/fy，而 layout 使用当前快照，因此不会自动延续首次输入的固定轴；需由应用保存约束，见[固定坐标字段](/docs/api/options/data#graphnode)。Promise 完成不表示浏览器已经绘制该帧；本方法不调用 fitView，不重新挂载交互或插件。
 
 ### 代码与对应效果
 

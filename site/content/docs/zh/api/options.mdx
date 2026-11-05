@@ -27,7 +27,7 @@ const graph = new Graph({
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `container` | `string \| HTMLElement` | 画布容器。字符串是 CSS 选择器，例如 `#container` |
-| `data` | `GraphData` | 节点、边，以及可选的 Combo |
+| `data` | [`GraphData`](/docs/api/options/data#graphdata) | 节点、边，以及可选的 Combo |
 | `node` | [`NodeConfig`](/docs/api/options/node#nodeconfig) | 节点形状、样式、状态、标签、图标和装饰；完整定义见节点配置参考 |
 | `edge` | [`EdgeConfig`](/docs/api/options/edge#edgeconfig) | 边类型、外观、箭头、标签、状态、路由和平行边；完整定义见边配置参考 |
 | `combo` | [`ComboConfig`](/docs/api/options/combo) | 分组外观、标签、折叠形态与状态样式；嵌套和折叠仍是实验性能力 |
@@ -71,39 +71,19 @@ const graph = new Graph({
 
 ## 图数据
 
-```ts
-const data: GraphData = {
-  nodes: [{ id: 'a', data: { cluster: 'svc' } }, { id: 'b' }],
-  edges: [{ source: 'a', target: 'b', data: { weight: 1 } }],
-  combos: [{ id: 'group', collapsed: false }],
-};
-```
+结构与校验统一见[图数据配置参考](/docs/api/options/data)，任务流程见[数据指南](/docs/guides/data)。
 
 ### 节点 `GraphNode`
 
-| 字段 | 必填 | 说明 |
-| --- | --- | --- |
-| `id` | 是 | 图内唯一 |
-| `name` | 否 | 节点名称 |
-| `data` | 否 | 业务字段。样式函数和 Tooltip 从这里读取 |
-| `x` / `y` | 否 | 已有坐标。无布局或作为布局初始位置时使用 |
-| `fx` / `fy` | 否 | 布局时固定的坐标 |
-| `states` | 否 | 初始状态，如 `['selected']` |
-| `comboId` | 否 | 所属 Combo 的 id |
+[GraphNode](/docs/api/options/data#graphnode)：id、name、data、x/y、fx/fy、states、comboId。
 
 ### 边 `GraphEdge`
 
-| 字段 | 必填 | 说明 |
-| --- | --- | --- |
-| `source` | 是 | 起点节点 id |
-| `target` | 是 | 终点节点 id |
-| `id` | 否 | 省略时由引擎生成 |
-| `data` | 否 | 业务字段 |
-| `states` | 否 | 初始状态 |
+[GraphEdge](/docs/api/options/data#graphedge)：id、source、target、data、states。
 
 ### Combo `ComboData`
 
-用 `GraphData.combos` 声明分组，节点通过 `comboId` 加入；完整字段、初始状态与嵌套规则统一见 [`ComboData` 参考](/docs/api/options/combo#combodata)。
+[ComboData](/docs/api/options/combo#combodata)：分组字段、父级、初始折叠和状态的详细来源。
 
 ## 节点
 

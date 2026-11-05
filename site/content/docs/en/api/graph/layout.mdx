@@ -19,7 +19,7 @@ Replaces the entire configuration without deeply merging previous options, start
 
 After the first render completes, computes positions from current nodes, edges, and configuration. Before rendering, its Promise rejects; after destruction, it returns. Missing configuration or empty nodes skip computation and layout events.
 
-Valid results update node positions, Graph overrides axes with fx/fy, then requests drawing. Promise completion does not establish that the browser has drawn the frame. The method does not call fitView or remount interactions/plugins.
+Valid results apply fx/fy from this input, write positions, then request drawing. Current getData omits fx/fy, and layout uses that snapshot, so original fixed axes do not automatically persist; retain constraints in the application. See [fixed-axis fields](/en/docs/api/options/data#graphnode). Promise completion does not establish a painted frame. The method does not fit or remount interactions/plugins.
 
 ### Code and rendered result
 

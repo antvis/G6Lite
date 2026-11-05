@@ -1,0 +1,28 @@
+site/demos/layout-gallery.ts
+  s_4534bc5c3d78f4::t_38652f7e5ea129 48
+site/maintenance/examples/e13.json
+  s_4534bc5c3d78f4::t_9372e37738b46c 1-46
+site/demos/layouts.ts
+  s_4534bc5c3d78f4::t_38652f7e5ea129 28,63
+site/demos/layout-worker.ts
+  s_4534bc5c3d78f4::t_38652f7e5ea129 40,43
+site/src/lib/site-examples.ts
+  s_4534bc5c3d78f4::t_a769ab7a39d155 663-664
+  s_4534bc5c3d78f4::t_9b819249ec6ea8 671-672
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5c740f68bb91f12f72b94b0effb8a4b0f8635d45",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

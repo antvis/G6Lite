@@ -1,0 +1,47 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E12",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "parallel-edges",
+      "file": "parallel-edges.ts",
+      "observations": [
+        "4 nodes / 7 edges include six parallel/reverse paths and a single-edge comparison; direction colors and labels visible",
+        "Dragging Source changes its exported coordinates; selecting the lower edge turns it orange and displays the correct tooltip",
+        "Refresh restores original coordinates; three consecutive refreshes with Data open keep a valid snapshot"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "polyline-routing",
+      "file": "polyline-routing.ts",
+      "observations": [
+        "5 nodes / 5 edges render rounded orthogonal endpoint connections",
+        "Pan, Fit and Refresh restore the initial view"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "flowchart",
+      "file": "flowchart.ts",
+      "observations": [
+        "18 nodes / 17 edges display the decision tree, role colors and true/false labels",
+        "Fit and Refresh restore the labeled graph without duplicate overlays"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Corrected bilingual orthogonal-route wording to avoid promising global obstacle avoidance",
+    "Added snapshots for parallel and flowchart handles; used a single parallel-edge configuration entry",
+    "Fixed the Data-tab restart race by keying snapshots to installation of the new live handle"
+  ]
+}

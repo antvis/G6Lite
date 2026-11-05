@@ -533,8 +533,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Connect a left-to-right flow with rounded orthogonal polylines.',
     },
     interaction: {
-      zh: '缩放和平移，查看正交折线如何绕开节点。',
-      en: 'Zoom and pan to see how orthogonal routes pass around nodes.',
+      zh: '缩放和平移，观察正交圆角折线连接端点边界；该路由不是全图避障算法，刷新恢复初始视野。',
+      en: 'Zoom and pan to inspect rounded orthogonal routes at endpoint boundaries. This is not a global obstacle-avoidance algorithm. Refresh restores the initial view.',
     },
     dataDescription: {
       zh: '5 个矩形节点用正交圆角折线连接。',

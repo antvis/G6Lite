@@ -96,6 +96,8 @@ export function ExampleDetailClient({
   const resizeFrameRef = useRef<number | null>(null);
   const splitRatioRef = useRef(DEFAULT_WORKSPACE_SPLIT);
   const [revision, setRevision] = useState(0);
+  // Snapshot effects follow the installed handle, not the restart request.
+  const [handleRevision, setHandleRevision] = useState(0);
   const [status, setStatus] = useState<PreviewStatus>('loading');
   const [error, setError] = useState('');
   const [renderDuration, setRenderDuration] = useState<number | null>(null);
@@ -166,6 +168,7 @@ export function ExampleDetailClient({
           return;
         }
         activeHandleRef.current = nextHandle;
+        setHandleRevision((value) => value + 1);
         setRenderDuration(performance.now() - startedAt);
         setStatus('ready');
       })
@@ -253,7 +256,7 @@ export function ExampleDetailClient({
       full: json,
       unavailable: false,
     });
-  }, [activeTab, status, revision, locale]);
+  }, [activeTab, status, handleRevision, locale]);
 
   // Highlights the live JSON on demand with shiki; the source tab renders
   // through the editor instead, so this only serves the data tab.
@@ -451,6 +454,7 @@ export function ExampleDetailClient({
         return;
       }
       activeHandleRef.current = handle;
+      setHandleRevision((value) => value + 1);
       setRenderDuration(performance.now() - startedAt);
       setStatus('ready');
     } catch (reason: unknown) {

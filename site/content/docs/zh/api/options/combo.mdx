@@ -49,7 +49,7 @@ import { NodeDocExample as ComboDocExample } from '@/components/node-doc-example
 
 ## 只读查询模型
 
-首次 `await graph.render()` 后，`getComboData(id)` 返回 `ComboModel | undefined`。返回值只读，更新请用[Combo 方法](/docs/api/graph#combo)或[状态方法](/docs/api/graph#状态显隐和定位)。
+首次 `await graph.render()` 后，`getComboData(id)` 返回 `ComboModel | undefined`。返回值只读，更新请用[Combo 方法](/docs/api/graph/combo)或[状态方法](/docs/api/graph/states)。
 
 | 字段 | 类型 | 含义 |
 | --- | --- | --- |
@@ -136,7 +136,7 @@ if (group) {
 }
 ```
 
-这会替换全部数据并重跑已配置的布局；`fitView: false` 只保留视口。全局样式需重建实例；临时高亮用[状态 API](/docs/api/graph#状态显隐和定位)。
+这会替换全部数据并重跑已配置的布局；`fitView: false` 只保留视口。全局样式需重建实例；临时高亮用[状态 API](/docs/api/graph/states)。
 
 ## 折叠形态
 

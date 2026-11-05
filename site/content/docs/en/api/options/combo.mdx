@@ -49,7 +49,7 @@ Child Combo outlines are not automatically hidden by ancestor collapse. Expandin
 
 ## Read-only query model
 
-After the first `await graph.render()`, `getComboData(id)` returns `ComboModel | undefined`. Results are read-only; use [Combo methods](/en/docs/api/graph#combo) or [state methods](/en/docs/api/graph#state-visibility-and-focus) for updates.
+After the first `await graph.render()`, `getComboData(id)` returns `ComboModel | undefined`. Results are read-only; use [Combo methods](/en/docs/api/graph/combo) or [state methods](/en/docs/api/graph/states) for updates.
 
 | Field | Type | Meaning |
 | --- | --- | --- |
@@ -136,7 +136,7 @@ if (group) {
 }
 ```
 
-This replaces all data and reruns configured layout; `fitView: false` only preserves the view. Recreate the instance for global style changes. Use [state APIs](/en/docs/api/graph#state-visibility-and-focus) for temporary highlights.
+This replaces all data and reruns configured layout; `fitView: false` only preserves the view. Recreate the instance for global style changes. Use [state APIs](/en/docs/api/graph/states) for temporary highlights.
 
 ## Collapsed appearance
 

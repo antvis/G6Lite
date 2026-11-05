@@ -128,22 +128,13 @@ await graph.render();
 
 ## Combo
 
-Combo 的折叠、嵌套和运行时重新归组仍是实验能力，配置细节可能在 `0.1.x` 内调整。外观见 [Combo](/docs/guides/combo)。这些方法同样要在首次 `render()` 之后调用；渲染前调用会直接返回，不会创建或修改 Combo。
+完整方法签名、归属、直接成员查询和折叠边界统一见[Combo 操作参考](/docs/api/graph/combo)。嵌套、折叠和运行时归组仍为实验能力；配置见[Combo 参考](/docs/api/options/combo)。
 
-```ts
-graph.createCombo({ id: 'group', data: { label: '分组' } }, ['n1', 'n2']);
-graph.addToCombo('n3', 'group');
-const children = graph.getComboChildren('group');
-graph.collapseCombo('group');
-graph.expandCombo('group');
-graph.removeFromCombo('n3');
-graph.removeCombo('group');
-children.nodes;
-```
+[createCombo](/docs/api/graph/combo#createcombo) · [removeCombo](/docs/api/graph/combo#removecombo) · [addToCombo](/docs/api/graph/combo#addtocombo) · [removeFromCombo](/docs/api/graph/combo#removefromcombo)
 
-`createCombo()` 可以在第二个参数里把已有节点放进新 Combo。`collapseCombo()` 隐藏其下节点并发出 `combo:collapse`；`expandCombo()` 恢复它们并发出 `combo:expand`。对已经处于目标状态的 Combo 再次折叠或展开不会重复发事件。
+[getComboChildren](/docs/api/graph/combo#getcombochildren) · [getNodeCombo](/docs/api/graph/combo#getnodecombo) · [collapseCombo](/docs/api/graph/combo#collapsecombo) · [expandCombo](/docs/api/graph/combo#expandcombo) · [toggleCombo](/docs/api/graph/combo#togglecombo)
 
-Combo 的选中和隐藏使用前面的 `setItemState()`、`hideItem()`，不要再调用旧的 `setComboState()`。
+状态和隐藏使用[统一状态 API](/docs/api/graph/states)，使用步骤和代码效果见[Combo 指南](/docs/guides/combo)。
 
 ## 事件
 

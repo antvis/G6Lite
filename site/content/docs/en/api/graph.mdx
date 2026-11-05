@@ -128,22 +128,13 @@ See the [configuration reference](/en/docs/api/options/layout) for fields and th
 
 ## Combo
 
-Combo collapse, nesting, and runtime regrouping are experimental. Their configuration may change within `0.1.x`. Visual options are in [Combo](/en/docs/guides/combo). Call these methods after the first `render()`. A call before that returns immediately and does not create or change a combo.
+See the [Combo operation reference](/en/docs/api/graph/combo)。Nesting, collapsing, and runtime membership remain experimental; see [configuration](/en/docs/api/options/combo)。
 
-```ts
-graph.createCombo({ id: 'group', data: { label: 'Group' } }, ['n1', 'n2']);
-graph.addToCombo('n3', 'group');
-const children = graph.getComboChildren('group');
-graph.collapseCombo('group');
-graph.expandCombo('group');
-graph.removeFromCombo('n3');
-graph.removeCombo('group');
-children.nodes;
-```
+[createCombo](/en/docs/api/graph/combo#createcombo) · [removeCombo](/en/docs/api/graph/combo#removecombo) · [addToCombo](/en/docs/api/graph/combo#addtocombo) · [removeFromCombo](/en/docs/api/graph/combo#removefromcombo)
 
-The second argument of `createCombo()` places existing nodes into the new combo. `collapseCombo()` hides the nodes under it and emits `combo:collapse`. `expandCombo()` restores them and emits `combo:expand`. Collapsing or expanding a combo that is already in the target state does not emit again.
+[getComboChildren](/en/docs/api/graph/combo#getcombochildren) · [getNodeCombo](/en/docs/api/graph/combo#getnodecombo) · [collapseCombo](/en/docs/api/graph/combo#collapsecombo) · [expandCombo](/en/docs/api/graph/combo#expandcombo) · [toggleCombo](/en/docs/api/graph/combo#togglecombo)
 
-Select and hide combos with `setItemState()` and `hideItem()`. The older `setComboState()` remains only for existing code.
+Use [unified state APIs](/en/docs/api/graph/states)，and the [Combo guide](/en/docs/guides/combo)。
 
 ## Events
 

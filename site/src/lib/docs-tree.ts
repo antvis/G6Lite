@@ -32,7 +32,6 @@ export function getDocsNavigationTree(tree: PageTree.Root, locale: Locale): Page
 
   const gettingStarted = findFolderByPath(tree, 'getting-started');
   const concepts = findFolderByPath(tree, 'concepts');
-  const metrics = findFolderByPath(tree, 'metrics');
   const compatibility = findFolderByPath(tree, 'compatibility');
 
   const children: PageTree.Node[] = [
@@ -41,11 +40,11 @@ export function getDocsNavigationTree(tree: PageTree.Root, locale: Locale): Page
       text.gettingStarted,
       sectionPages(gettingStarted, [docsOverview]),
     ),
-    createSection('concepts', text.concepts, sectionPages(concepts)),
+    createSection('concepts', text.concepts, sectionPages(concepts).filter((node) => node.type !== 'page' || !node.url.endsWith('/concepts/architecture'))),
     getManifestSection('guides', tree, locale),
     getManifestSection('extensions', tree, locale),
     getManifestSection('api', tree, locale),
-    createSection('metrics', text.metrics, sectionPages(metrics)),
+    getManifestSection('performance', tree, locale),
     createSection(
       'compatibility',
       text.compatibility,

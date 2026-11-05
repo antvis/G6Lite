@@ -128,6 +128,19 @@
         },
         "api/utilities"
       ]
+    },
+    "performance": {
+      "id": "performance",
+      "title": {
+        "zh": "性能与原理",
+        "en": "Performance and internals"
+      },
+      "children": [
+        "metrics/performance",
+        "metrics/performance-tuning",
+        "metrics/bundle-size",
+        "concepts/architecture"
+      ]
     }
   }
 }

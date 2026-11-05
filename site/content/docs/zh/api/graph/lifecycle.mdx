@@ -1,0 +1,146 @@
+---
+title: 生命周期与样式更新方法参考
+description: Graph 创建、渲染、销毁、刷新和运行时样式配置的完整契约
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+创建后先 await render，运行中按变化选择数据、状态或样式更新，离开时 destroy。完整使用顺序见[Graph 生命周期](/docs/concepts/graph-lifecycle)，事件载荷见[生命周期事件](/docs/api/graph/events/lifecycle)。
+
+## new Graph
+
+`new Graph(options: GraphOptions): Graph`
+
+必填 container 和 data；其余字段及默认值见[GraphOptions](/docs/api/options)。container 接受匹配 HTMLElement 的 CSS 选择器或 HTMLElement 实例；无效时抛出 `Invalid container`。应使用已挂载、宽高非零的专用容器。
+
+构造阶段保存配置、准备画布和 WebGL 渲染器，不运行布局或绘制元素。若容器已有 canvas，会复用其中第一个；destroy 也会移除该画布，因此不要让多个实例共享容器或借用业务画布。运行环境要求见[浏览器与运行环境](/docs/compatibility/browser)。
+
+```ts
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+export function createGraph(container: HTMLElement, data: GraphData) {
+  return new Graph({ container, data });
+}
+```
+
+## render
+
+`graph.render(): Promise<void>`
+
+使用当前保存的数据与配置执行转换和布局，建立数据模型、交互和标签运行时，适配并同步绘制，再完成初始化和插件挂载。正常有效路径中，await 返回后才使用数据、状态和 updateOptions 等方法；首次 afterrender 仍早于这个边界。
+
+```ts
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+export async function initialize(container: HTMLElement, data: GraphData) {
+  const graph = new Graph({ container, data });
+  try {
+    await graph.render();
+    if (graph.destroyed) return graph;
+    graph.setItemState('A', 'selected', true); // data 中存在 A
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+```
+
+重复 render 会重新执行转换、布局、运行时建立和适配。输入来自构造配置或最近一次 setData 保存的数据，不保证保留增量添加的元素、运行中状态或用户视野。日常更新不需要再次 render；改样式用 updateOptions，外部样式输入变化才用 refresh。
+
+<details>
+<summary>事件、过期任务与失败</summary>
+
+有布局且非空时，布局事件先发生；随后 beforerender → 适配与同步绘制 → afterrender → 初始化完成与插件挂载。这里的同步绘制不等于浏览器已经完成屏幕合成。render 不以 datachange 代替完成通知；updateOptions、refresh、setData 和 layout 也不会补发 afterrender。
+
+新的 render、setData、layout 或 cancelLayout，以及 destroy，会使旧布局结果过期。旧 Promise 仍可能正常返回，取消路径不保证结束事件或初始化成功；业务自己的后续副作用还需代次保护。取消细节见[布局方法](/docs/api/graph/layout)。销毁后 render 直接正常返回，不能用 Promise 是否兑现判断实例可用。
+
+布局加载或执行、绘制、事件回调等错误可能拒绝 Promise；部分扩展或布局错误由内部回退处理。调用方仍需捕获异常并清理自己创建的实例。事件回调的异常会沿调用链传播，应在业务回调内部处理，避免打断初始化或清理。
+
+</details>
+
+## updateOptions
+
+`graph.updateOptions(opts: Partial<Pick<GraphOptions, 'node' | 'edge' | 'label' | 'theme'>>): void`
+
+首次有效 render 完成后使用；此前会抛错，销毁后不执行。合并配置并同步执行完整样式处理和绘制，不返回绘制 Promise，也不重跑布局、重挂 Behavior / Plugin、改变节点位置或重新适配视野。
+
+| 输入 | 合并规则 |
+| --- | --- |
+| node / edge | 顶层浅合并；未传字段保留 |
+| node.style | 两次都是对象时逐字段合并；新旧任一为整对象函数时，使用本次 style 整体替换 |
+| edge.style | 对象按字段合并 |
+| node.stateStyles / edge.stateStyles | 作为顶层字段整体替换，不深合并状态名称 |
+| label | 顶层浅合并 |
+| theme | 整份替换，再按预设解析；不与上次主题对象深合并 |
+
+不接受 data、layout、behaviors、plugins、transforms、combo、container 或 autoFit。数据使用[数据方法](/docs/api/graph#setdata)，布局使用[布局方法](/docs/api/graph/layout)；其余能力按相应初始化或扩展契约处理。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph; // 已完成 render
+graph.updateOptions({
+  node: { style: { fill: '#F59E0B' } },
+  edge: { style: { lineWidth: 2 } },
+  label: { hideOnCollision: false },
+});
+```
+
+### 样式更新、刷新和重建的代码与效果
+
+A 初始选中。Update style 变为橙色，External + refresh 切换外部 size 回调输入；二者不增加 render events。Render again 再次触发渲染事件并重建状态，A 的临时选中消失；Select A 可再选中。Destroy graph 删除画布并显示销毁结果，工具栏重置新建实例。
+
+<NodeDocExample id="graph-lifecycle" locale="zh" focus="updates" />
+
+## refresh
+
+`graph.refresh(): void`
+
+有渲染运行时后，强制同步完整样式处理和绘制；尚无调度器或已销毁时直接返回。不会重新执行注册 Transform 的 beforeRender、布局、初始化或视口适配，不触发 beforerender / afterrender。
+
+常规数据、状态和相机方法已安排更新，不必再调用。适合样式回调读取的外部变量变化；应优先通过数据或配置方法表达可追踪的更新。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph; // 样式回调读取应用维护的外部输入
+graph.refresh();
+```
+
+## destroy
+
+`graph.destroy(): void`
+
+首次调用先将 destroyed 设为 true，使布局代次失效并取消待定布局，再发送 destroy；此时运行时与画布尚未完成清理。随后拆除交互、插件、标签等资源，销毁转换实例与渲染器，移除画布并清除 Graph 监听。正常清理完成后再次调用无额外效果；已销毁实例不能重新 render 复用，应创建新实例。
+
+应用自己的 fetch、计时器、DOM 监听和订阅不属于 Graph 资源，要由应用取消或移除。卸载早于 await render 返回时，也应立即 destroy；不要等异步操作结束才清理。
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+export function dispose(graph: Graph, controller: AbortController) {
+  controller.abort(); // 应用自己的请求
+  graph.destroy();
+}
+```
+
+## destroyed
+
+`graph.destroyed: boolean`（只读）
+
+构造后为 false，开始销毁时变为 true。它只表示是否已销毁，不表示渲染成功、数据已准备好或旧任务仍有效。异步返回后检查它，同时按需检查应用自己的请求代次。
+
+```ts
+import type { Graph, GraphData } from '@antv/g6-lite';
+
+export async function reload(graph: Graph, load: () => Promise<GraphData>) {
+  const data = await load();
+  if (graph.destroyed) return;
+  await graph.setData(data, { fitView: false });
+}
+```
+
+## isDestroyed
+
+`graph.isDestroyed(): boolean`，已弃用，返回值与 destroyed 相同。新代码读取属性，不调用此兼容方法。
+
+继续阅读：[生命周期概念](/docs/concepts/graph-lifecycle) · [事件使用](/docs/guides/events/lifecycle) · [事件时序](/docs/api/graph/events/lifecycle) · [状态方法](/docs/api/graph/states) · [视口方法](/docs/api/graph/viewport)。

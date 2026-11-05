@@ -2,5 +2,5 @@
   "title": "Graph methods",
   "pagesIndex": "../graph.mdx",
   "defaultOpen": true,
-  "pages": ["states", "viewport", "layout", "events"]
+  "pages": ["lifecycle", "states", "viewport", "layout", "events"]
 }

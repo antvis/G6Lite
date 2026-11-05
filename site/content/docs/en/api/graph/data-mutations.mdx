@@ -1,0 +1,146 @@
+---
+title: Data mutation method reference
+description: Replacement, node and edge mutations, batch writes, and event boundaries
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+Read models in the [query reference](/en/docs/api/graph/data)，and follow tasks in the [data guide](/en/docs/guides/data)。
+
+## Common prerequisites and type shorthand
+
+Wait for the first valid render; earlier calls throw, and mutations after destruction do nothing. setData returns a Promise and addEdge(s) return actual IDs; other methods return void. Data changes do not mean the browser has painted. Incremental operations schedule updates without another render.
+
+NewNode / NewEdge below are documentation shorthand. Supply stable unique IDs, finite coordinates, and valid endpoints. Batch methods provide no atomicity or rollback guarantee; validate inputs first.
+
+```ts
+import type { ElementState } from '@antv/g6-lite';
+type NewNode = { id: string; x: number; y: number; data?: Record<string, unknown> };
+type NewEdge = {
+  id?: string; source: string; target: string;
+  data?: Record<string, unknown>; states?: ElementState[];
+};
+```
+
+## setData
+
+`graph.setData(data: GraphData, options?: SetDataOptions): Promise<void>`
+
+Replaces nodes, edges, and Combos, runs registered transforms and the configured layout, then writes data and emits datachange. Old elements, memberships, and states omitted from input are not retained. Generated edge ID allocation restarts; use explicit stable IDs to preserve edge selection across updates.
+
+| options.fitView | Behavior |
+| --- | --- |
+| Omitted / true | fitView(0.9) |
+| false | Preserve current camera |
+| number / FitViewOptions | Use these fit arguments, without inheriting the autoFit object |
+
+```ts
+import type { Graph, GraphData } from '@antv/g6-lite';
+export async function replace(graph: Graph, next: GraphData) {
+  await graph.setData(next, { fitView: false });
+  if (graph.destroyed) return;
+  console.log(graph.getNodeCount());
+}
+```
+
+A valid completion follows data write-back and a draw request, allowing new model queries but not guaranteeing a painted frame. New operations, cancellation, or destruction can invalidate old work while its Promise still fulfills. Guard application side effects with your own generation. Errors can reject the Promise without guaranteeing preservation of old data.
+
+### Incremental updates in code and canvas
+
+Update A merges score and changes size. Add D creates D and C-D; Remove D removes both node and adjacent edge. These operations do not rerun layout or alter the camera.
+
+<NodeDocExample id="data-workflow" locale="en" focus="mutation" />
+
+## addNode
+
+`graph.addNode(node: NewNode): void`
+
+Adds a node with id and graph x/y. Duplicate node IDs are currently ignored. Initial states, comboId, and fx/fy are not parameters; use the corresponding APIs afterward. Does not run layout.
+
+## addNodes
+
+`graph.addNodes(nodes: NewNode[]): void`
+
+Batch addition; duplicate IDs are skipped. Schedules drawing together, without a transaction guarantee.
+
+## updateNodeData
+
+`graph.updateNodeData(id: string, data: Record<string, unknown>): void`
+
+Also accepts graph.updateNodeData(updates: NodeDataUpdate[]): void, where each entry has id and data. Shallow-merges business fields; nested objects replace rather than deep-merge. Does not change identity, position, or membership. Missing nodes are skipped.
+
+## updateNodePosition
+
+`graph.updateNodePosition(id: string, x: number, y: number): void`
+
+Changes graph coordinates; missing nodes leave data unchanged. These are not client CSS pixels. No layout or fit is run.
+
+## updateNodePositions
+
+`graph.updateNodePositions(updates: NodePositionUpdate[]): void`
+
+NodePositionUpdate contains id/x/y. Updates valid changed positions in order and schedules together. Missing or unchanged entries emit no corresponding update event.
+
+## removeNode
+
+`graph.removeNode(id: string): void`
+
+Removes a node and all incoming/outgoing edges, releasing its membership without deleting the Combo. Missing nodes leave data unchanged.
+
+## removeNodes
+
+`graph.removeNodes(ids: string[]): void`
+
+Batch-removes nodes and adjacent edges, ignoring missing IDs. Query order can change.
+
+## addEdge
+
+`graph.addEdge(edge: NewEdge): string`
+
+Returns the actual edge ID. Omission generates e0, e1, etc., skipping existing IDs. Duplicate explicit edge IDs throw. Validate endpoints yourself; the add path does not guarantee rejection of missing endpoints. Returns an empty string after destruction.
+
+## addEdges
+
+`graph.addEdges(edges: NewEdge[]): string[]`
+
+Returns actual IDs in input order, or [] after destruction. A duplicate explicit ID can throw after earlier entries were written; no rollback is provided.
+
+## updateEdgeData
+
+`graph.updateEdgeData(id: string, data: Record<string, unknown>): void`
+
+The single-edge form shallow-merges data only. The overload graph.updateEdgeData(updates: EdgeDataUpdate[]): void also changes source/target. Entries have id and optional data/source/target; IDs are not changed. The batch path validates new endpoints for existing edges before writes; missing endpoints throw, while missing edges are skipped.
+
+## removeEdge
+
+`graph.removeEdge(id: string): void`
+
+Removes the edge without removing endpoints. Missing edges leave data unchanged.
+
+## removeEdges
+
+`graph.removeEdges(ids: string[]): void`
+
+Batch-removes edges, ignores missing IDs, and schedules updates together.
+
+
+## Batch usage
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+declare const graph: Graph; // Rendered; A exists
+graph.addNodes([{ id: 'D', x: 300, y: 40 }, { id: 'E', x: 300, y: 120 }]);
+graph.addEdges([{ id: 'A-D', source: 'A', target: 'D' }]);
+graph.updateNodeData([{ id: 'D', data: { score: 2 } }]);
+graph.updateNodePositions([{ id: 'D', x: 320, y: 60 }]);
+graph.updateEdgeData([{ id: 'A-D', target: 'E', data: { weight: 3 } }]);
+graph.removeNodes(['D', 'E']); // Adjacent edges are removed too
+```
+
+## Events and missing IDs
+
+Add/remove calls emit afteradditem / afterremoveitem; data and position updates emit afterupdateitem. Batches emit per-entry events, not transaction commits or afterrender. Adjacent edges removed with a node do not each emit afterremoveitem.
+
+Some single-item calls emit method-level events for missing IDs or unchanged data; addNodes / removeNodes can also emit for skipped input IDs. Events do not replace hasNode / hasEdge or model queries. See [data events](/en/docs/api/graph/events/lifecycle)。
+
+Continue with [queries and snapshots](/en/docs/api/graph/data) · [Preserve selection](/en/docs/guides/states) · [View policies](/en/docs/guides/viewport)。

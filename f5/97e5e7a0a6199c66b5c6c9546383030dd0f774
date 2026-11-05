@@ -1,0 +1,37 @@
+site/src/app/global.css
+  s_4534bc5c3d78f4::t_e595dfa91b86ea 1865,2750-2751,2762
+site/src/lib/source.ts
+  s_4534bc5c3d78f4::t_2abd11af9e8bb9 8,51
+site/src/components/example-detail-client.tsx
+  s_4534bc5c3d78f4::t_0ce50830ad8197 190-191,619
+site/scripts/check-example-audit.mjs
+  s_4534bc5c3d78f4::t_a9fa739b0586c4 1-22
+site/maintenance/examples/e24.json
+  s_4534bc5c3d78f4::t_c62efff8a06403 1-97
+site/src/components/example-detail.tsx
+  s_4534bc5c3d78f4::t_79e4cdd24271c4 2,5,7
+site/scripts/check-example-documentation.mjs
+  s_4534bc5c3d78f4::t_dfc14caa51f60c 36-46,61
+site/package.json
+  s_4534bc5c3d78f4::t_dfc14caa51f60c 14
+site/src/lib/site-example-source.ts
+  s_4534bc5c3d78f4::t_79e4cdd24271c4 1-34
+site/src/components/examples-grid.tsx
+  s_4534bc5c3d78f4::t_0ce50830ad8197 4,63-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f597e5e7a0a6199c66b5c6c9546383030dd0f774",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

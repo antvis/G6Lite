@@ -1,0 +1,75 @@
+site/content/docs/en/api/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 3-9
+site/content/docs/zh/api/graph/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 3-12
+site/content/docs/en/compatibility/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 2-10
+site/content/docs/zh/concepts/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 3-10
+site/content/docs/zh/compatibility/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 2-10
+site/content/docs/zh/getting-started/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 2
+site/content/docs/zh/guides/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 13-15,24
+site/content/docs/en/concepts/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 3-10
+site/content/docs/en/api/extensions/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 2-7
+site/content/docs/en/metrics/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 2-7
+site/src/lib/docs-navigation-manifest.ts
+  s_4534bc5c3d78f4::t_5ece16ad34dc0d 45-54
+site/content/docs/zh/api/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 3-9
+site/content/docs/en/api/graph/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 3-12
+site/content/docs/en/guides/events/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 2,6
+site/content/docs/en/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 6-8,13-14
+site/scripts/sync-docs-navigation.mjs
+  s_4534bc5c3d78f4::t_5ece16ad34dc0d 1-76
+site/content/docs/en/guides/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 13-15,24
+site/content/docs/zh/api/options/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 3-13
+site/content/docs/zh/examples/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 8-10,12-14,17-18,21-29,32,34-39,41-44,49,55
+site/content/docs/zh/api/extensions/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 2-7
+site/content/docs/en/api/options/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 3-13
+site/content/docs/zh/metrics/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 2-7
+site/content/docs/zh/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 6-8,13-14
+site/src/lib/docs-tree.ts
+  s_4534bc5c3d78f4::t_5ece16ad34dc0d 3,5,7
+site/docs-navigation.json
+  s_4534bc5c3d78f4::t_5ece16ad34dc0d 160-218,220
+site/content/docs/zh/guides/events/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 2,6
+site/content/docs/en/getting-started/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 2
+site/package.json
+  s_4534bc5c3d78f4::t_5ece16ad34dc0d 6,11-13
+site/content/docs/en/examples/meta.json
+  s_4534bc5c3d78f4::t_94f933bae5c619 8-10,12-14,17-18,21-29,32,34-39,41-44,49,55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d96e80f8a191854c5504cab73dbfde95c5aadd6e",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

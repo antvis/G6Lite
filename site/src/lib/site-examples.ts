@@ -207,8 +207,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Inspect elements, adjacency, and states while controlling batch states and visibility.',
     },
     interaction: {
-      zh: '查询 root 应得到 n1、n2 两个邻居和两条关联边。再对比批量增减、整份状态替换、Combo 高亮与隐藏；全部清理恢复空状态。',
-      en: 'Query root for neighbors n1/n2 and two adjacent edges. Compare batch toggles, full state replacement, Combo highlighting, and hiding; clear restores empty states.',
+      zh: '查询 root 应得到 n1、n2 两个邻居和两条关联边。再对比批量增减、按指定 ID 替换状态、Combo 高亮与隐藏；未指定的 ID 保留原状态，全部清理恢复空状态。',
+      en: 'Query root for neighbors n1/n2 and two adjacent edges. Compare batch toggles, replacing states for specified IDs, Combo highlighting and hiding. Unspecified IDs retain their states; clear restores empty states.',
     },
     dataDescription: {
       zh: '使用带邻接关系的数据验证 Graph 查询模型。',

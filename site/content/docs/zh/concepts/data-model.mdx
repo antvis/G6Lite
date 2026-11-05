@@ -4,6 +4,7 @@ description: 节点、边与可选分组，以及数据与显示的关系
 ---
 
 import { GraphDataModelDiagram } from '@/components/graph-data-model-diagram';
+import { NodeDocExample } from '@/components/node-doc-example';
 
 一张图由节点和连接节点的边组成，也可以使用 Combo 对节点分组。G6Lite 通过 `GraphData` 接收这些数据，节点代表什么、连线表示什么，由使用场景决定。
 
@@ -29,8 +30,34 @@ import { GraphDataModelDiagram } from '@/components/graph-data-model-diagram';
 
 **状态**用于表达选中、高亮等当前交互情况。同一个节点可以同时具有多个状态，对应的视觉效果通过 `stateStyles` 配置。通过[元素状态](/docs/concepts/states)中的交互示例观察叠加、替换与清除。
 
+## 输入、模型与快照
+
+| 形式 | 用途 | 修改方式 |
+| --- | --- | --- |
+| GraphData 输入 | 声明节点、边和 Combo | 交给 new Graph / setData |
+| 查询 Model | 读取当前工作图，states 是集合 | 通过 Graph 方法修改 |
+| getData 快照 | 导出当前坐标、归属与状态 | 修改后显式 setData；嵌套对象可能共享 |
+
+稳定 ID 表示业务身份，数组顺序和坐标都不表示身份。相同端点可以有多条不同 ID 的边；跨刷新保留边选择时显式提供稳定 ID。
+
+Edit snapshot 将导出副本的 score 改成 999，A 不变；Update A 才写入工作图。Add D / Remove D 对比元素计数和关联边。
+
+<NodeDocExample id="data-workflow" locale="zh" focus="query" />
+
+Model 是 Graph 持有的实时视图，只读类型不等于深冻结。替换或删除后重新查询；快照也不是原始配置的递归备份，见[读取与复制边界](/docs/api/graph/data)。
+
+## 常见问题
+
+### 修改导出数据为什么没生效？
+
+getData 不自动写回；少量变化用增量方法，整图替换才显式 setData，并选择视野策略。
+
+### 删除后为什么原来的下标指向其他元素？
+
+数组顺序可能变化。用 ID 查询，分别匹配节点和边，不保存数组下标作为身份。
+
 ## 继续阅读
 
 - [数据接入与更新](/docs/guides/data)：准备数据，选择整份替换或增量更新。
-- [图数据字段参考](/docs/api/options#图数据)：字段类型、必填项与约束。
+- [图数据字段参考](/docs/api/options/data)：字段类型、必填项与约束。
 - [Combo 配置](/docs/guides/combo)：分组的外观和使用方式。

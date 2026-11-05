@@ -4,6 +4,7 @@ description: Nodes, edges, optional groups, and the relationship between data an
 ---
 
 import { GraphDataModelDiagram } from '@/components/graph-data-model-diagram';
+import { NodeDocExample } from '@/components/node-doc-example';
 
 A graph consists of nodes and edges connecting them, with optional Combo groups. G6Lite receives these through `GraphData`. Your use case determines what the nodes and connections mean.
 
@@ -29,8 +30,34 @@ Appearance options such as `node` and `edge` control colors, sizes, and labels. 
 
 **States** express current interactions such as selection or highlighting. A node can have several states at once, with visual effects configured through `stateStyles`. Explore adding, replacing, and clearing them in [element states](/en/docs/concepts/states).
 
+## Input, models, and snapshots
+
+| Form | Purpose | Updating it |
+| --- | --- | --- |
+| GraphData input | Declare nodes, edges, and Combos | Pass to new Graph / setData |
+| Query models | Read the working graph; states is a set | Use Graph mutation APIs |
+| getData snapshot | Export positions, memberships, and states | Explicitly setData; nested objects can remain shared |
+
+Stable IDs represent business identity; array order and coordinates do not. Equal endpoints can have distinct edge IDs. Supply stable edge IDs to preserve selection across refreshes.
+
+Edit snapshot changes the exported score to 999 while A stays unchanged. Update A writes to the graph. Add D / Remove D change counts and adjacent edges.
+
+<NodeDocExample id="data-workflow" locale="en" focus="query" />
+
+Models are Graph-owned live views. Readonly types do not imply deep freezing. Query again after replacement or deletion; exports are not recursive backups of input options. See [query and copy boundaries](/en/docs/api/graph/data).
+
+## Common questions
+
+### Why did editing exported data not update the graph?
+
+getData does not write back automatically. Use incremental methods for small changes, or explicitly setData for replacement and choose the view policy.
+
+### Why does an old index identify another element after removal?
+
+Array order can change. Query by ID and match nodes and edges separately; do not use saved indices as identity.
+
 ## Read next
 
 - [Data ingestion and updates](/en/docs/guides/data): prepare data and choose full replacement or incremental updates.
-- [Graph data fields](/en/docs/api/options#graph-data): field types, required values, and constraints.
+- [Graph data fields](/en/docs/api/options/data): field types, required values, and constraints.
 - [Combo configuration](/en/docs/guides/combo): group appearance and usage.

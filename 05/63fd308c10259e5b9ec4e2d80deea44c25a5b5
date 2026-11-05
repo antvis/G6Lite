@@ -1,0 +1,23 @@
+site/content/docs/zh/getting-started/quick-start.mdx
+  s_4534bc5c3d78f4::t_22a1b8af865811 8,43,96-101,112-114,172-176,182-183,186-196
+  s_4534bc5c3d78f4::t_c5c2224bf8d458 197
+site/content/docs/en/getting-started/quick-start.mdx
+  s_4534bc5c3d78f4::t_22a1b8af865811 8,43,96-101,112-114,172-176,182-183,186-196
+  s_4534bc5c3d78f4::t_7611c4e20bb463 197
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0563fd308c10259e5b9ec4e2d80deea44c25a5b5",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -1,15 +1,46 @@
 ---
 title: Custom nodes
-description: Register functional NodeExtension implementations through the public package API
+description: Register business nodes, add lightweight overlays and decoration anchors, and verify updates
 ---
 
-```ts
-import { register } from '@antv/g6-lite';
+import { NodeDocExample } from '@/components/node-doc-example';
 
-register('node', 'status-node', {
-  type: 'rect',
-  style: { width: 96, height: 34, borderRadius: 8 },
-});
-```
+Package recurring visuals as a stateless NodeExtension. Prefer [node configuration](/en/docs/api/options/node) for color or size differences alone. Blue means normal, red means error; the stripe is an overlay and the count uses a decoration boundary anchor.
 
-Prefer `node.style` and `stateStyles` when only color, size, stroke, label, or state appearance changes. `BaseNode` and `registerNode()` remain beta compatibility APIs; new extensions should use `register('node', ...)`.
+## Use cases
+
+1. Choose circle / rect to retain built-in rendering and picking.
+2. Define default style and pure getStyle; register before first render.
+3. Activate node.type and use public data methods for business updates.
+
+<NodeDocExample id="extension-node" locale="en" focus="descriptor" />
+
+Click a node for a purple selection outline. Toggle B status changes its business appearance independently of selected. Expand the full source for activation and button cleanup.
+
+## Overlays and boundary anchors
+
+drawOverlay uses supplied screen x/y, scales graph dimensions by zoom, and pairs save / restore. Only animation returns true for continued redraw. Overlays do not add picking regions or independent interactive elements.
+
+getBoundaryAnchor moves the right badge up by a quarter of node height. Return a screen offset from the center; this affects decorations, not edge ports or rectangular picking. Dimensions are already converted, so do not multiply by DPR. See [NodeExtension](/en/docs/api/extensions/drawing#nodeextension).
+
+Configured fields override defaults. Whole-object node.style functions have a separate resolution path; do not assume they inherit descriptor defaults and state layers.
+
+## Built-in extension
+
+breathing-node is registered by default; use it as node.type and inspect the [example](/en/docs/examples/breathing-node). BaseNode and registerNode are compatibility entries. New code uses register('node', ...) rather than internal renderers or caches.
+
+## Common questions
+
+### Why did registration have no effect?
+
+Check the name, node.type, registration order, and configured overrides. Descriptors are cached by name, not owned mutable state for each Graph.
+
+### Why did the badge move without changing edge endpoints?
+
+The anchor hook positions decorations. Arbitrary shapes and picking outlines are outside the current contract.
+
+### Why does the animation redraw continuously?
+
+Check whether drawOverlay always returns true. Static content returns void / false; avoid continuous per-node drawing on large graphs.
+
+See [custom nodes and explicit edge IDs](/en/docs/examples/custom-node-extension) and [registration](/en/docs/api/extensions/registration).

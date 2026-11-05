@@ -9,6 +9,7 @@ import styles from './node-doc-preview.module.css';
 import canvasStyles from './quick-start-example.module.css';
 
 const loaders = {
+  'extension-node': () => import('../../demos/docs-extension-node.ts'),
   body: () => import('../../demos/docs-node-body.ts'),
   style: () => import('../../demos/docs-node-style.ts'),
   labels: () => import('../../demos/docs-node-labels.ts'),
@@ -67,7 +68,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'polyline-orth'
+  const hint = id === 'extension-node'
+    ? (zh ? "切换 B 业务状态，单击节点选中；短条为覆盖绘制，右上徽章使用自定义装饰锚点；重置恢复" : "Toggle B status; click to select. Stripes are overlays; upper-right badges use custom decoration anchors. Reset restores input")
+    : id === 'polyline-orth'
     ? (zh ? '切换 radius 0 / 16 比较直角与圆角，节点位置不变；拖动空白平移，滚轮缩放，重置恢复 radius 16' : 'Switch radius 0 / 16 to compare corners without moving nodes. Drag to pan, wheel to zoom; reset restores radius 16')
     : id === 'combo-operations'
     ? (zh ? 'Create → Collapse → Expand 比较成员显隐；Move B 只改归属，Remove temp 不删除节点和边；重置恢复初始状态' : 'Create → Collapse → Expand compares member visibility. Move B only changes membership; Remove temp keeps nodes and edges. Reset restores initial data')

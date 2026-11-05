@@ -1,0 +1,23 @@
+site/maintenance/examples/e17.json
+  s_4534bc5c3d78f4::t_0dc62cf62a661e 1-45
+site/demos/hover.ts
+  s_4534bc5c3d78f4::t_8fd03c31b3ab06 85
+site/demos/drag-edge.ts
+  s_4534bc5c3d78f4::t_8fd03c31b3ab06 51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d2096b069690bb908233a988f456667a3fdb266e",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -1,0 +1,922 @@
+{
+  "recorded": "2026-11-05",
+  "baseline": "8a674c2b",
+  "scope": "E06–E24: audit all 51 existing site cases in 17 independent three-case packages; repair only demonstrated gaps",
+  "groups": [
+    {
+      "batch": "E07",
+      "cases": [
+        "basic",
+        "set-data",
+        "data-mutations"
+      ]
+    },
+    {
+      "batch": "E08",
+      "cases": [
+        "shapes",
+        "node-style",
+        "node-border"
+      ]
+    },
+    {
+      "batch": "E09",
+      "cases": [
+        "decoration-badges",
+        "labels",
+        "label-rendering-options"
+      ]
+    },
+    {
+      "batch": "E10",
+      "cases": [
+        "edge-types",
+        "edge-arrows",
+        "edge-colors"
+      ]
+    },
+    {
+      "batch": "E11",
+      "cases": [
+        "edge-hit-area",
+        "edge-states",
+        "edge-loops"
+      ]
+    },
+    {
+      "batch": "E12",
+      "cases": [
+        "parallel-edges",
+        "polyline-routing",
+        "flowchart"
+      ]
+    },
+    {
+      "batch": "E13",
+      "cases": [
+        "layouts",
+        "layout-gallery",
+        "layout-worker"
+      ]
+    },
+    {
+      "batch": "E14",
+      "cases": [
+        "indented-tree",
+        "radial-tree",
+        "mindmap"
+      ]
+    },
+    {
+      "batch": "E15",
+      "cases": [
+        "org-chart",
+        "fishbone",
+        "dependency-graph"
+      ]
+    },
+    {
+      "batch": "E16",
+      "cases": [
+        "selection-behaviors",
+        "queries-and-states",
+        "neighbor-highlight"
+      ]
+    },
+    {
+      "batch": "E17",
+      "cases": [
+        "drag-node",
+        "drag-edge",
+        "hover"
+      ]
+    },
+    {
+      "batch": "E18",
+      "cases": [
+        "tooltip",
+        "context-menu",
+        "event-log"
+      ]
+    },
+    {
+      "batch": "E19",
+      "cases": [
+        "viewport-controls",
+        "zoom-options",
+        "search-focus"
+      ]
+    },
+    {
+      "batch": "E20",
+      "cases": [
+        "custom-node-extension",
+        "custom-label-renderer",
+        "breathing-node"
+      ]
+    },
+    {
+      "batch": "E21",
+      "cases": [
+        "custom-behavior",
+        "custom-layout",
+        "extension-system"
+      ]
+    },
+    {
+      "batch": "E22",
+      "cases": [
+        "large",
+        "large-labeled",
+        "real-dataset"
+      ]
+    },
+    {
+      "batch": "E23",
+      "cases": [
+        "default-theme",
+        "combo",
+        "relationship"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "basic",
+      "file": "basic.ts",
+      "batch": "E07",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/data",
+        "/docs/api/options/data"
+      ]
+    },
+    {
+      "id": "default-theme",
+      "file": "default-theme.ts",
+      "batch": "E23",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/theme",
+        "/docs/api/graph/states"
+      ]
+    },
+    {
+      "id": "data-mutations",
+      "file": "data-mutations.ts",
+      "batch": "E07",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/api/graph/data-mutations",
+        "/docs/api/graph/data"
+      ]
+    },
+    {
+      "id": "queries-and-states",
+      "file": "queries-and-states.ts",
+      "batch": "E16",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/api/graph/data",
+        "/docs/api/graph/states",
+        "/docs/api/graph/combo"
+      ]
+    },
+    {
+      "id": "set-data",
+      "file": "set-data.ts",
+      "batch": "E07",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/data",
+        "/docs/api/graph/data-mutations#setdata",
+        "/docs/guides/viewport"
+      ]
+    },
+    {
+      "id": "search-focus",
+      "file": "search-focus.ts",
+      "batch": "E19",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/viewport",
+        "/docs/api/graph/viewport"
+      ]
+    },
+    {
+      "id": "node-style",
+      "file": "node-style.ts",
+      "batch": "E08",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/node",
+        "/docs/api/options/node"
+      ]
+    },
+    {
+      "id": "shapes",
+      "file": "shapes.ts",
+      "batch": "E08",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/node",
+        "/docs/api/options/node"
+      ]
+    },
+    {
+      "id": "node-border",
+      "file": "node-border.ts",
+      "batch": "E08",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/node",
+        "/docs/api/options/node"
+      ]
+    },
+    {
+      "id": "edge-arrows",
+      "file": "edge-arrows.ts",
+      "batch": "E10",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/edge",
+        "/docs/api/options/edge"
+      ]
+    },
+    {
+      "id": "edge-types",
+      "file": "edge-types.ts",
+      "batch": "E10",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/edge",
+        "/docs/api/options/edge"
+      ]
+    },
+    {
+      "id": "edge-colors",
+      "file": "edge-colors.ts",
+      "batch": "E10",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/edge",
+        "/docs/api/options/edge"
+      ]
+    },
+    {
+      "id": "edge-states",
+      "file": "edge-states.ts",
+      "batch": "E11",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/edge",
+        "/docs/api/options/edge"
+      ]
+    },
+    {
+      "id": "edge-hit-area",
+      "file": "edge-hit-area.ts",
+      "batch": "E11",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/edge",
+        "/docs/api/options/edge"
+      ]
+    },
+    {
+      "id": "parallel-edges",
+      "file": "parallel-edges.ts",
+      "batch": "E12",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/parallel-edges",
+        "/docs/api/options/edge"
+      ]
+    },
+    {
+      "id": "edge-loops",
+      "file": "edge-loops.ts",
+      "batch": "E11",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/parallel-edges",
+        "/docs/api/options/edge"
+      ]
+    },
+    {
+      "id": "labels",
+      "file": "labels.ts",
+      "batch": "E09",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/label",
+        "/docs/api/options/node"
+      ]
+    },
+    {
+      "id": "label-rendering-options",
+      "file": "label-rendering-options.ts",
+      "batch": "E09",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/label",
+        "/docs/api/options/label"
+      ]
+    },
+    {
+      "id": "polyline-routing",
+      "file": "polyline-routing.ts",
+      "batch": "E12",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/polyline-routing",
+        "/docs/api/options/edge"
+      ]
+    },
+    {
+      "id": "combo",
+      "file": "combo.ts",
+      "batch": "E23",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/combo",
+        "/docs/api/graph/combo",
+        "/docs/api/options/combo"
+      ]
+    },
+    {
+      "id": "layouts",
+      "file": "layouts.ts",
+      "batch": "E13",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ]
+    },
+    {
+      "id": "layout-gallery",
+      "file": "layout-gallery.ts",
+      "batch": "E13",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ]
+    },
+    {
+      "id": "flowchart",
+      "file": "flowchart.ts",
+      "batch": "E12",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ]
+    },
+    {
+      "id": "indented-tree",
+      "file": "indented-tree.ts",
+      "batch": "E14",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ]
+    },
+    {
+      "id": "layout-worker",
+      "file": "layout-worker.ts",
+      "batch": "E13",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/layout-worker",
+        "/docs/api/graph/layout"
+      ]
+    },
+    {
+      "id": "radial-tree",
+      "file": "radial-tree.ts",
+      "batch": "E14",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ]
+    },
+    {
+      "id": "dependency-graph",
+      "file": "dependency-graph.ts",
+      "batch": "E15",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ]
+    },
+    {
+      "id": "relationship",
+      "file": "relationship.ts",
+      "batch": "E23",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/data",
+        "/docs/guides/node",
+        "/docs/guides/edge"
+      ]
+    },
+    {
+      "id": "org-chart",
+      "file": "org-chart.ts",
+      "batch": "E15",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ]
+    },
+    {
+      "id": "mindmap",
+      "file": "mindmap.ts",
+      "batch": "E14",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ]
+    },
+    {
+      "id": "fishbone",
+      "file": "fishbone.ts",
+      "batch": "E15",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/layout",
+        "/docs/api/options/layout"
+      ]
+    },
+    {
+      "id": "tooltip",
+      "file": "tooltip.ts",
+      "batch": "E18",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/tooltip",
+        "/docs/api/options/behaviors"
+      ]
+    },
+    {
+      "id": "hover",
+      "file": "hover.ts",
+      "batch": "E17",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/interactions",
+        "/docs/api/options/behaviors"
+      ]
+    },
+    {
+      "id": "neighbor-highlight",
+      "file": "neighbor-highlight.ts",
+      "batch": "E16",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/api/graph/data#getneighbornodes",
+        "/docs/guides/interactions"
+      ]
+    },
+    {
+      "id": "selection-behaviors",
+      "file": "selection-behaviors.ts",
+      "batch": "E16",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/states",
+        "/docs/guides/interactions"
+      ]
+    },
+    {
+      "id": "drag-node",
+      "file": "drag-node.ts",
+      "batch": "E17",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/interactions",
+        "/docs/api/options/behaviors"
+      ]
+    },
+    {
+      "id": "drag-edge",
+      "file": "drag-edge.ts",
+      "batch": "E17",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/interactions",
+        "/docs/api/options/behaviors"
+      ]
+    },
+    {
+      "id": "event-log",
+      "file": "event-log.ts",
+      "batch": "E18",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/events",
+        "/docs/api/graph/events"
+      ]
+    },
+    {
+      "id": "context-menu",
+      "file": "context-menu.ts",
+      "batch": "E18",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/events",
+        "/docs/api/graph/events"
+      ]
+    },
+    {
+      "id": "viewport-controls",
+      "file": "viewport-controls.ts",
+      "batch": "E19",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/viewport",
+        "/docs/api/graph/viewport"
+      ]
+    },
+    {
+      "id": "zoom-options",
+      "file": "zoom-options.ts",
+      "batch": "E19",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/viewport",
+        "/docs/api/graph/viewport"
+      ]
+    },
+    {
+      "id": "extension-system",
+      "file": "extension-system.ts",
+      "batch": "E21",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/extensions",
+        "/docs/api/extensions/runtime"
+      ]
+    },
+    {
+      "id": "breathing-node",
+      "file": "breathing-node.ts",
+      "batch": "E20",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/custom-node",
+        "/docs/api/extensions/drawing"
+      ]
+    },
+    {
+      "id": "custom-label-renderer",
+      "file": "custom-label-renderer.ts",
+      "batch": "E20",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/custom-label-renderer",
+        "/docs/api/extensions/drawing"
+      ]
+    },
+    {
+      "id": "custom-node-extension",
+      "file": "g6-v5-compat.ts",
+      "batch": "E20",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/custom-node",
+        "/docs/api/extensions/drawing"
+      ]
+    },
+    {
+      "id": "custom-behavior",
+      "file": "custom-behavior.ts",
+      "batch": "E21",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/custom-behavior",
+        "/docs/api/options/behaviors"
+      ]
+    },
+    {
+      "id": "custom-layout",
+      "file": "custom-layout.ts",
+      "batch": "E21",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/custom-layout",
+        "/docs/api/extensions/runtime"
+      ]
+    },
+    {
+      "id": "decoration-badges",
+      "file": "decoration-badges.ts",
+      "batch": "E09",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/guides/custom-decoration",
+        "/docs/api/options/node"
+      ]
+    },
+    {
+      "id": "real-dataset",
+      "file": "real-dataset.ts",
+      "batch": "E22",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/metrics/performance",
+        "/docs/metrics/performance-tuning"
+      ]
+    },
+    {
+      "id": "large",
+      "file": "large.ts",
+      "batch": "E22",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/metrics/performance",
+        "/docs/metrics/performance-tuning"
+      ]
+    },
+    {
+      "id": "large-labeled",
+      "file": "large-labeled.ts",
+      "batch": "E22",
+      "bilingual": {
+        "title": true,
+        "description": true,
+        "interaction": true,
+        "dataDescription": true
+      },
+      "documentation": [
+        "/docs/metrics/performance",
+        "/docs/metrics/performance-tuning"
+      ]
+    }
+  ],
+  "acceptance": [
+    "Live preview ready and visually inspected",
+    "Perform the case-specific action and verify its observable result",
+    "Refresh restores the expected initial state without duplicate overlays/listeners",
+    "Displayed source and data agree with the live result; bilingual instructions and exact guide/reference links",
+    "Record each package separately; full-site exports, links, catalog and build in E24"
+  ],
+  "baselineStatus": "All 51 identities and bilingual metadata/documentation associations exist after B97; runtime and interaction completion is recorded in e07–e23 receipts."
+}

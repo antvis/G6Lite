@@ -1,0 +1,24 @@
+site/src/lib/docs-navigation-manifest.ts
+  s_4534bc5c3d78f4::t_ecde9d04a5e54b 9
+site/src/lib/docs-tree.ts
+  s_4534bc5c3d78f4::t_ecde9d04a5e54b 47
+site/docs-navigation.json
+  s_4534bc5c3d78f4::t_ecde9d04a5e54b 59-75
+  s_4534bc5c3d78f4::t_97e238a736925f 76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f8e7757d5f6f86fa211202f70268c23d5a3ed004",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

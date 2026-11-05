@@ -1,0 +1,25 @@
+site/demos/mindmap.ts
+  s_4534bc5c3d78f4::t_a9cd364ec7fc71 182
+site/maintenance/examples/e14.json
+  s_4534bc5c3d78f4::t_0279c92efef265 1-47
+site/demos/radial-tree.ts
+  s_4534bc5c3d78f4::t_2963c8f2d2abb9 21
+site/demos/indented-tree.ts
+  s_4534bc5c3d78f4::t_a9cd364ec7fc71 154-157,161-163,185,187,193,224,227-229
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b3eec3db9eb405db81ca47dd9e55faf4e3bdb1a8",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

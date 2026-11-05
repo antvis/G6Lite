@@ -1,0 +1,37 @@
+site/content/docs/zh/getting-started/react.mdx
+  s_4534bc5c3d78f4::t_aab0eea9f5691e 8,72,131,190
+site/content/docs/zh/getting-started/meta.json
+  s_4534bc5c3d78f4::t_aab0eea9f5691e 3-7
+site/content/docs/en/getting-started/vue.mdx
+  s_4534bc5c3d78f4::t_aab0eea9f5691e 1-206
+site/content/docs/en/getting-started/meta.json
+  s_4534bc5c3d78f4::t_aab0eea9f5691e 3-7
+site/content/docs/zh/getting-started/quick-start.mdx
+  s_4534bc5c3d78f4::t_aab0eea9f5691e 206
+site/content/docs/en/getting-started/react.mdx
+  s_4534bc5c3d78f4::t_aab0eea9f5691e 8,72,131,190
+site/content/docs/zh/index.mdx
+  s_4534bc5c3d78f4::t_aab0eea9f5691e 16
+site/content/docs/zh/getting-started/vue.mdx
+  s_4534bc5c3d78f4::t_aab0eea9f5691e 1-206
+site/content/docs/en/getting-started/quick-start.mdx
+  s_4534bc5c3d78f4::t_aab0eea9f5691e 206
+site/content/docs/en/index.mdx
+  s_4534bc5c3d78f4::t_aab0eea9f5691e 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a3ac43f6f52f97f0f0fc75fd9b068be49386533f",
+  "prompts": {},
+  "sessions": {
+    "s_4534bc5c3d78f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a068-d751-7ff2-b1cb-b0d028550b97",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

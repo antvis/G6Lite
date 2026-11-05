@@ -1,15 +1,19 @@
 ---
-title: Compatibility overview
-description: Browser, runtime, public API stability, and G6 v5 migration boundaries
+title: Help and upgrades
+description: Find the detailed entry for integration, failures, upgrades, and migration
 ---
 
-Review these boundaries before adopting or upgrading G6Lite:
+Identify runtime, usage, or version differences first. Each topic below points to its detailed source.
 
 <Cards>
-  <Card title="Browsers and runtime" href="/en/docs/compatibility/browser" />
-  <Card title="API stability" href="/en/docs/compatibility/api-stability" />
-  <Card title="Graph library comparison" href="/en/docs/compatibility/library-comparison" />
-  <Card title="Migrate from G6 v5" href="/en/docs/compatibility/g6-v5-migration" />
+  <Card title="Runtime and deployment" href="/en/docs/compatibility/browser" />
+  <Card title="API stability and deprecations" href="/en/docs/compatibility/api-stability" />
+  <Card title="Troubleshooting" href="/en/docs/compatibility/troubleshooting" />
+  <Card title="FAQ" href="/en/docs/faq" />
+  <Card title="G6 v5 migration" href="/en/docs/compatibility/g6-v5-migration" />
+  <Card title="Changelog" href="/en/docs/changelog" />
 </Cards>
 
-G6Lite needs a modern ESM browser, real DOM/Canvas, and WebGL 1.0. The package remains in `0.1.x` beta, and combo collapse, nesting, and runtime regrouping are experimental. Compare capability boundaries before selecting a library, then validate configuration, events, and runtime APIs during a G6 v5 migration.
+Start integration with [installation](/en/docs/getting-started/quick-start). For upgrades, identify the package version, read [changes](/en/docs/changelog), then check types, builds, business data, and cleanup. Development-source capabilities do not imply inclusion in a particular npm archive.
+
+Still selecting a library? See [capabilities](/en/docs/compatibility/library-comparison). For performance, use [measurement](/en/docs/metrics/performance) and [tuning](/en/docs/metrics/performance-tuning).

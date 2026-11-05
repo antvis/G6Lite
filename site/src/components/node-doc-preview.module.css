@@ -31,3 +31,20 @@
   max-height: 300px;
   overflow: auto;
 }
+
+.code > details {
+  border-top: 1px solid var(--color-fd-border);
+}
+
+.code > details > summary {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-fd-muted-foreground);
+}
+
+.code > details > figure {
+  margin: 0 !important;
+  border: 0;
+  border-radius: 0;
+}

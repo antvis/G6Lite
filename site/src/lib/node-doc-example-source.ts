@@ -41,12 +41,30 @@ export function readNodeDocExample(id: NodeDocExampleId) {
   return readFileSync(path.join(process.cwd(), 'demos', files[id]), 'utf8');
 }
 
+// Excerpts are selected from the executable source, never maintained as a copy.
+export function getNodeDocExampleSnippet(source: string, focus: string) {
+  if (!/^[a-z-]+$/.test(focus)) throw new Error('Invalid example excerpt');
+  const start = `// #region ${focus}`;
+  const end = `// #endregion ${focus}`;
+  if (source.split(start).length !== 2 || source.split(end).length !== 2) {
+    throw new Error(`Unknown or repeated example excerpt: ${focus}`);
+  }
+  const excerpt = source.slice(source.indexOf(start) + start.length, source.indexOf(end)).replace(/^\n/, '').trimEnd();
+  if (!excerpt.trim()) throw new Error(`Empty example excerpt: ${focus}`);
+  const indent = Math.min(...excerpt.split('\n').filter((line) => line.trim()).map((line) => /^ */.exec(line)![0].length));
+  return excerpt.split('\n').map((line) => line.slice(indent)).join('\n');
+}
+
 // Copy Markdown and LLM text need the same runnable code as the HTML page,
 // rather than an MDX component placeholder.
 export function expandNodeDocExamples(markdown: string) {
   return markdown.replace(/<(?:NodeDocExample|EdgeDocExample|ComboDocExample|LabelDocExample|ThemeDocExample|LayoutDocExample|BehaviorDocExample|EventDocExample)\b([^>]*)\/>/g, (_match, attributes: string) => {
     const id = /\bid="([a-z-]+)"/.exec(attributes)?.[1] as NodeDocExampleId | undefined;
     if (!id || !Object.hasOwn(files, id)) throw new Error('Unknown inline configuration example in Markdown');
-    return `\n\n\`\`\`ts\n${readNodeDocExample(id).trimEnd()}\n\`\`\`\n\n`;
+    const source = readNodeDocExample(id).trimEnd();
+    const focus = /\bfocus="([a-z-]+)"/.exec(attributes)?.[1];
+    if (!focus) return `\n\n\`\`\`ts\n${source}\n\`\`\`\n\n`;
+    const zh = /\blocale="zh"/.test(attributes);
+    return `\n\n\`\`\`ts\n${getNodeDocExampleSnippet(source, focus)}\n\`\`\`\n\n<details>\n<summary>${zh ? '完整运行代码' : 'Complete runnable code'}</summary>\n\n\`\`\`ts\n${source}\n\`\`\`\n\n</details>\n\n`;
   });
 }

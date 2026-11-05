@@ -28,6 +28,7 @@ export async function run(container: HTMLElement) {
   let onceResult = 'once: not armed';
   const update = () => { status.textContent = `${latest}\n${onceResult}`; };
   const point = ({ x, y }: { x: number; y: number }) => `${Math.round(x)}, ${Math.round(y)}`;
+  // #region listeners
   const onClick = (event: GraphEventMap['node:click'][0] | GraphEventMap['edge:click'][0] | GraphEventMap['canvas:click'][0]) => {
     latest = `${event.targetType}: ${event.targetId ?? 'empty'} | client (${point(event.client)}) | canvas (${point(event.canvas)}) | graph (${point(event.graph)})`;
     update();
@@ -35,6 +36,7 @@ export async function run(container: HTMLElement) {
   const clickEvents = ['node:click', 'edge:click', 'canvas:click'] as const;
   let listening = true;
   for (const event of clickEvents) graph.on(event, onClick);
+  // #endregion listeners
   toggle.onclick = () => {
     listening = !listening;
     for (const event of clickEvents) {

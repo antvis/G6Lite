@@ -24,6 +24,7 @@ export async function run(container: HTMLElement) {
     lines.push(line);
     status.textContent = lines.slice(-6).join('\n');
   };
+  // #region lifecycle
   const events = ['beforelayout', 'layout:start', 'layout:end', 'afterlayout', 'beforerender', 'afterrender', 'datachange', 'afteradditem', 'afterremoveitem', 'afterupdateitem'] as const;
   const cleanups: Array<() => void> = [];
   const watch = <K extends keyof GraphEventMap>(name: K) => {
@@ -32,6 +33,7 @@ export async function run(container: HTMLElement) {
     cleanups.push(() => graph.off(name, handler));
   };
   for (const event of events) watch(event); // Before render: capture initial events.
+  // #endregion lifecycle
   const buttons: HTMLButtonElement[] = [];
   let disposed = false;
   const addButton = (label: string, action: () => void | Promise<void>) => {

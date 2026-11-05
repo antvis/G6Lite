@@ -1239,8 +1239,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Zoom out for the whole graph, then zoom in to read labels.',
     },
     dataDescription: {
-      zh: '合成网络包含 5000 个节点，并绘制节点标签。',
-      en: 'The synthetic network has 5,000 nodes and draws node labels.',
+      zh: '合成网络包含 5000 个节点、15000 条边；内置 Canvas 标签在低缩放隐藏并避让碰撞，放大后逐步阅读。',
+      en: 'The synthetic network has 5,000 nodes and 15,000 edges. Built-in Canvas labels hide at low zoom and avoid collisions; zoom in to read them.',
     },
     tags: ['scale.synthetic-large', 'label.canvas'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '2' }],

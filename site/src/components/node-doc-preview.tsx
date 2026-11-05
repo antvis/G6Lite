@@ -20,6 +20,7 @@ const loaders = {
   'edge-curves': () => import('../../demos/docs-edge-curves.ts'),
   'edge-cubic': () => import('../../demos/docs-edge-cubic.ts'),
   'edge-orth': () => import('../../demos/polyline-routing.ts'),
+  'polyline-orth': () => import('../../demos/docs-polyline-orth.ts'),
   'edge-indented': () => import('../../demos/docs-edge-indented.ts'),
   'edge-labels': () => import('../../demos/docs-edge-labels.ts'),
   'combo-data': () => import('../../demos/docs-combo-data.ts'),
@@ -66,7 +67,9 @@ export function NodeDocPreview({ id, locale, children }: {
   const copy = zh
     ? { title: '配置效果预览', toolbar: '示例画布控制', fit: '适配画布', zoomIn: '放大', zoomOut: '缩小', reset: '重置示例', loading: '正在加载示例…', running: '运行正常', error: '加载失败，请检查浏览器 WebGL 支持后重试。' }
     : { title: 'Configuration preview', toolbar: 'Example canvas controls', fit: 'Fit graph', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset example', loading: 'Loading example…', running: 'Running', error: 'Unable to load. Check browser WebGL support and retry.' };
-  const hint = id === 'combo-operations'
+  const hint = id === 'polyline-orth'
+    ? (zh ? '切换 radius 0 / 16 比较直角与圆角，节点位置不变；拖动空白平移，滚轮缩放，重置恢复 radius 16' : 'Switch radius 0 / 16 to compare corners without moving nodes. Drag to pan, wheel to zoom; reset restores radius 16')
+    : id === 'combo-operations'
     ? (zh ? 'Create → Collapse → Expand 比较成员显隐；Move B 只改归属，Remove temp 不删除节点和边；重置恢复初始状态' : 'Create → Collapse → Expand compares member visibility. Move B only changes membership; Remove temp keeps nodes and edges. Reset restores initial data')
     : id === 'data-workflow'
     ? (zh ? 'Edit snapshot 不写回；Update A 更新 score；Add D 新增节点和 C-D，Remove D 同时删除关联边；重置恢复初始数据' : 'Edit snapshot does not write back. Update A changes score. Add D adds D and C-D; Remove D removes both. Reset restores initial data')

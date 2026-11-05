@@ -16,6 +16,7 @@
     "events",
     "tooltip",
     "parallel-edges",
+    "polyline-routing",
     "extensions",
     "custom-node",
     "custom-label-renderer"

@@ -1,0 +1,93 @@
+---
+title: 折线路由
+description: 选择正交或缩进连接，配置方向与圆角，并排查路径和更新问题
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+布局决定节点位置，路由决定边如何连接这些位置。流程关系从 orth 开始，目录树选择 indented；两者都使用 `edge.type: 'polyline'`。字段类型和默认值查[边配置参考](/docs/api/options/edge#曲线与折线路由)。
+
+## 选择路由
+
+| 任务 | 组合 | 观察重点 |
+| --- | --- | --- |
+| 流程或依赖关系 | dagre 布局 + orth | 横纵线段连接端点边界，可用圆角 |
+| 目录或层级列表 | indented 布局 + indented | 父节点主干连接各子项，布局控制缩进与行距 |
+
+orth 只考虑当前边的两个端点，不保证绕过其他节点或消除交叉。tree 是平滑树形连接，fishbone 配合鱼骨布局；它们的差异见[路由选择参考](/docs/api/options/edge#路由选择)。
+
+## 正交连接与圆角
+
+1. 为矩形节点设置尺寸，布局的 nodeSize 与实际尺寸保持一致。
+2. 在 layout 上设置方向；下面用 dagre 的 rankdir: 'LR' 从左向右排布。
+3. 使用 polyline + orth，再用 radius 处理拐角。
+
+切换 **radius 0 / 16**：节点位置不变，比较直角与圆角。拖动空白可平移，滚轮可缩放。
+
+<NodeDocExample id="polyline-orth" locale="zh" focus="routing" />
+
+radius 使用图坐标单位，缩放后视觉半径随之变化；线段较短时会限制实际圆角。它不是节点间距，也不会重排节点。完整流程案例见[折线与正交路由](/docs/examples/polyline-routing)。
+
+## 目录树的缩进连接
+
+先准备树形数据，再同时设置布局与路由。显式写 direction: 'LR'，避免布局的默认方向与路由默认值不一致。
+
+下面父节点主干向下连接各行，子项从近侧边缘接入。对比上面的 orth：节点排序由缩进布局决定，连接则保留目录树的主干形态。
+
+<NodeDocExample id="edge-indented" locale="zh" focus="routing" />
+
+调整层级间距用 layout.indent，行距用 layout.rowHeight。trunkGap 虽在类型中，当前计算不读取它，不能用它移动主干。更完整的树形效果见[缩进树案例](/docs/examples/indented-tree)。
+
+### 如何选择 indentTarget
+
+普通居中矩形使用 `'left'`：LR 接到子节点左边界，RL 接到右边界。名称表示缩进目标约定，不是任意方向都固定选择左端口。
+
+`'right'` 用于无背景文本的坐标约定：从父节点中心出发，到 target.x ± target.width；这不是居中矩形的远侧边界。不要靠它把矩形连线改接到右侧。TB/BT 路由不读取此选项；几何规则见[缩进目标与主干](/docs/api/options/edge#缩进目标与主干)。
+
+## 方向与更新
+
+方向在 layout 上配置：路由读取 `layout.rankdir ?? layout.direction ?? 'TB'`，不是 edge.style.direction。orth 支持 TB、BT、LR、RL；选择布局时还要确认该算法自身支持对应方向。
+
+| 变化 | 操作 |
+| --- | --- |
+| 圆角、颜色、线宽 | 首次 render 后用 updateOptions，不必重跑布局 |
+| 节点间距或位置 | 调整布局并执行 layout，或用位置更新方法；随后按需要适配视野 |
+| router、布局方向 | 销毁旧实例，用新配置创建；当前样式更新或重排不会更新模型保存的路由模式和方向 |
+
+圆角按钮使用的实际更新调用如下；radius 来自按钮值：
+
+<details>
+<summary>查看更新调用</summary>
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+export function setRadius(graph: Graph, radius: number) {
+  graph.updateOptions({ edge: { style: { radius } } });
+}
+```
+
+</details>
+
+重建与清理见[生命周期](/docs/api/graph/lifecycle)，执行与取消布局见[布局方法](/docs/api/graph/layout)。
+
+## 常见问题
+
+### 为什么边穿过了其他节点？
+
+orth 不是全图避障算法。增大布局层级间距、调整节点位置或换一种布局后重新检查；增大 radius 只改变拐角。
+
+### 为什么修改方向或 router 后没有变化？
+
+这些值在创建数据模型时保存。用新配置重建实例，业务选择和视野需要时显式保留；不要把 updateOptions 当作路由切换。
+
+### 为什么线没有贴合节点边界？
+
+检查节点实际宽高、布局 nodeSize 和方向是否匹配。目录树的矩形使用 indentTarget: 'left'；'right' 不代表通用的右边界端口。
+
+### 为什么标签看起来没有沿折线排列？
+
+当前 polyline 标签按端点连线计算位置与旋转，不保证贴合实际折线路径。排查时先确认文字可见，再查[边标签限制](/docs/api/options/edge#边标签)。
+
+## 继续阅读
+
+[边使用指南](/docs/guides/edge) · [路由字段与几何边界](/docs/api/options/edge#曲线与折线路由) · [布局选择](/docs/guides/layout) · [视野适配](/docs/guides/viewport)。

@@ -15,12 +15,14 @@ export async function run(container: HTMLElement) {
       type: 'rect',
       style: { width: 80, height: 28, borderRadius: 5, label: (node) => node.id, labelPlacement: 'center', labelColor: '#fff' },
     },
+    // #region routing
     layout: { type: 'indented', direction: 'LR', indent: 160, rowHeight: 70 },
     edge: {
       type: 'polyline',
       style: { router: 'indented', indentTarget: 'left', radius: 10, lineWidth: 2, hitAreaWidth: 12 },
       stateStyles: { selected: { stroke: '#873bf4' } },
     },
+    // #endregion routing
     behaviors: ['click-select'],
     autoFit: { padding: 48, maxZoom: 1 },
   });

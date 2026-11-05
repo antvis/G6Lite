@@ -1,0 +1,93 @@
+---
+title: Polyline routing
+description: Choose orthogonal or indented connections, set direction and rounding, and diagnose routing updates
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+Layout positions nodes; routing connects those positions. Start with orth for process relationships and indented for directories. Both use `edge.type: 'polyline'`. See the [edge reference](/en/docs/api/options/edge#curves-and-polyline-routing) for field types and defaults.
+
+## Choose a router
+
+| Task | Combination | What to observe |
+| --- | --- | --- |
+| Processes or dependencies | dagre layout + orth | Horizontal and vertical segments connect endpoint boundaries; corners can be rounded |
+| Directories or hierarchical lists | indented layout + indented | A parent trunk connects child rows; layout controls indentation and row spacing |
+
+orth considers only the current edge's two endpoints. It does not guarantee avoidance of other nodes or removal of crossings. tree makes smooth tree connections; fishbone pairs with fishbone layout. Compare them in the [router reference](/en/docs/api/options/edge#choosing-a-router).
+
+## Orthogonal connections and rounding
+
+1. Set rectangle dimensions and match the layout's nodeSize to them.
+2. Set direction on layout. This example uses dagre rankdir: 'LR' for left-to-right positioning.
+3. Choose polyline + orth, then use radius to round corners.
+
+Switch **radius 0 / 16** to compare square and rounded corners without moving nodes. Drag empty space to pan or use the wheel to zoom.
+
+<NodeDocExample id="polyline-orth" locale="en" focus="routing" />
+
+radius uses graph-coordinate units, so its visible size changes with zoom. Short segments limit the actual rounding. It does not set node spacing or rerun layout. See the complete [polyline example](/en/docs/examples/polyline-routing).
+
+## Indented directory connections
+
+Prepare tree data, then configure both layout and routing. Set direction: 'LR' explicitly to avoid different layout and routing defaults.
+
+The parent trunk below runs down to child rows, which connect at their near boundary. Compare this with orth above: indentation determines node positions, while routing retains a directory-style trunk.
+
+<NodeDocExample id="edge-indented" locale="en" focus="routing" />
+
+Use layout.indent for depth spacing and layout.rowHeight for row spacing. trunkGap exists in the type but is not read by the current calculation, so it cannot move the trunk. See the larger [indented tree example](/en/docs/examples/indented-tree).
+
+### Choose indentTarget
+
+Use `'left'` for ordinary centered rectangles: LR connects to the child's left boundary, RL to its right boundary. The name describes the indentation convention; it does not select a fixed left port in every direction.
+
+`'right'` follows a background-free text convention: start at the parent center and end at target.x ± target.width. This is not the far boundary of a centered rectangle. Do not use it to select a rectangle's right port. TB/BT routing ignores it. See [indented targets and trunks](/en/docs/api/options/edge#indented-targets-and-trunks).
+
+## Direction and updates
+
+Set direction on layout: routing reads `layout.rankdir ?? layout.direction ?? 'TB'`, not edge.style.direction. orth supports TB, BT, LR, and RL; the chosen layout algorithm must also support the intended direction.
+
+| Change | Operation |
+| --- | --- |
+| Rounding, color, or line width | Use updateOptions after the first render; no layout run is needed |
+| Node spacing or positions | Configure and run layout, or use position updates; fit the view afterward if needed |
+| router or layout direction | Destroy and recreate with new configuration; style updates and layout runs do not replace routing mode and direction stored on the model |
+
+The rounding buttons use this update call, with radius supplied by the button:
+
+<details>
+<summary>Show the update call</summary>
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+export function setRadius(graph: Graph, radius: number) {
+  graph.updateOptions({ edge: { style: { radius } } });
+}
+```
+
+</details>
+
+See [lifecycle methods](/en/docs/api/graph/lifecycle) for recreation and cleanup, and [layout methods](/en/docs/api/graph/layout) for execution and cancellation.
+
+## Common questions
+
+### Why does an edge cross another node?
+
+orth is not a graph-wide obstacle router. Increase rank spacing, change node positions, or try another layout, then inspect again. Increasing radius only changes corners.
+
+### Why did changing direction or router have no effect?
+
+These values are captured when the data model is created. Recreate with new configuration and explicitly retain business selection or the view if needed. updateOptions does not switch routing modes.
+
+### Why does a line miss the node boundary?
+
+Check actual node dimensions, layout nodeSize, and direction. Use indentTarget: 'left' for directory rectangles; 'right' is not a general right-boundary port.
+
+### Why does the label not follow the polyline?
+
+Current polyline label positions and rotation use the endpoint chord and may not follow the routed path. Check text visibility first, then the [edge label limitations](/en/docs/api/options/edge#edge-labels).
+
+## Continue reading
+
+[Edge guide](/en/docs/guides/edge) · [Routing fields and geometry](/en/docs/api/options/edge#curves-and-polyline-routing) · [Layout selection](/en/docs/guides/layout) · [View fitting](/en/docs/guides/viewport).

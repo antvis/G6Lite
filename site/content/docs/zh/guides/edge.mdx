@@ -82,6 +82,8 @@ graph.setItemState('Plain', 'selected', false);
 
 ## 折线路由
 
+完整步骤、圆角切换与 orth / indented 对比见[折线路由指南](/docs/guides/polyline-routing)。
+
 先用布局确定节点位置和方向，再选择 `edge.type: 'polyline'` 与 router。流程图通常从 orth 开始；缩进目录用 indented 并显式设置 layout.direction；tree 当前为平滑树形连接，fishbone 配合鱼骨布局。
 
 下面 Dagre 用 LR 方向排列节点，orth 连接两端边界，radius 处理圆角。可以拖动画布、缩放或重置；这是端点路由，不保证避开其他所有节点。

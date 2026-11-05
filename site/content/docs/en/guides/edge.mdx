@@ -82,6 +82,8 @@ Self-loops only require matching source and target. They do not depend on separa
 
 ## Polyline routing
 
+See the [polyline routing guide](/en/docs/guides/polyline-routing) for the complete workflow, rounding controls, and an orth / indented comparison.
+
 Let layout determine positions and direction before choosing edge.type: 'polyline' and a router. Start with orth for process graphs; choose indented for directories and explicitly set layout.direction. Tree currently makes smooth tree connections, while fishbone pairs with fishbone layout.
 
 Dagre below positions nodes left to right, orth connects their boundaries, and radius rounds corners. Pan, zoom, or reset the preview. Endpoint routing does not guarantee avoidance of every other node.

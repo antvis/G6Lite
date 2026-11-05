@@ -5,6 +5,12 @@ description: G6Lite 的公开入口、稳定能力、弃用兼容层与实验性
 
 G6Lite 仍处于 `0.1.x` beta 阶段。公开 API 以 npm 包根入口和 `package.json#exports` 为唯一边界；`src/` 中未从包根导出的模块属于内部实现，不承诺深层路径兼容性。
 
+## 发布包与开发源码
+
+当前参考页描述本仓库源码；安装教程按 npm beta.27 已发布声明校验。两者版本字符串相同也不保证构建内容相同：核验的 beta.27 归档没有当前 autoFit 字段和 UMD 文件。升级前读取实际包的 types / exports，锁定版本、commit 或文件哈希；不要仅看网站示例就认定 npm 已包含。
+
+[安装与发布物核验](/docs/getting-started/quick-start) · [包体积范围](/docs/metrics/bundle-size) · [变更记录](/docs/changelog)
+
 ## 推荐公开入口
 
 - `Graph`：创建、渲染、更新和销毁图实例。
@@ -36,20 +42,13 @@ import type { GraphData, GraphOptions } from '@antv/g6-lite';
 
 ## ESM 与 CommonJS
 
-当前包根只提供 ESM，不提供 `require('@antv/g6-lite')` 条件。CommonJS 可行性验证表明，同步 `require` 入口和类型声明本身可以生成，但双产物还必须同时保证两项运行时契约：
-
-- ESM 与 CommonJS 入口共享同一套扩展注册状态，避免同一应用混用两种入口时出现重复或不可见的注册项。
-- `layout.worker: true` 经业务打包器处理后仍能定位并加载包内的模块 Worker，不能因 Worker 资源丢失而静默回退主线程。
-
-当前 CommonJS 消费构建无法可靠保留 Worker 的静态资源关联，验证中会请求不存在的 Worker 文件；独立双构建也会产生两份模块级注册表。因此本版本不发布“只能同步加载、但 Worker 或扩展边界不完整”的 CommonJS 产物。
-
-仍使用 CommonJS 工具链的应用可以在客户端边界使用动态导入：
+当前 package.json 的包根 exports 仅提供 import 与 types；没有同步 require 条件。不要通过深层构建文件绕过此边界。有异步边界的宿主可在客户端使用：
 
 ```js
 const { Graph } = await import('@antv/g6-lite');
 ```
 
-这不会改变 `Graph` 依赖真实 DOM、Canvas 和 WebGL 的运行环境要求。
+这仍要求真实 DOM、Canvas 和 WebGL。模块格式、Worker 部署和 CSP 查[运行环境](/docs/compatibility/browser)。
 
 ## 弃用兼容层
 
@@ -79,7 +78,7 @@ Combo 的折叠、嵌套和运行时归组仍为实验性能力。可以用于�
 ## 版本兼容预期
 
 - beta 阶段：公开入口保持集中，但 API 仍可能根据契约测试和案例反馈调整。
-- 稳定版后：遵循语义化版本；破坏性变更进入 major 版本。
+- 不能把未来稳定版政策视为当前 beta 的跨版本兼容承诺。
 - 每次升级前：查看 [Changelog](/docs/changelog)，并执行类型检查、构建和关键案例回归。
 
 业务可调用的入口、方法和配置字段见 [可用 API](/docs/api)、[Graph](/docs/api/graph) 和 [配置](/docs/api/options)。

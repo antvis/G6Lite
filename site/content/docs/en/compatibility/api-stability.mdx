@@ -9,6 +9,12 @@ Other root utilities include resolveTheme and EventEmitter / Handler; see [Utili
 
 Recommended public entries include `Graph`, `register()`, `extensionFactory()`, `runLayout()`, and the configuration/data/extension types exported from the package root.
 
+## Published package and development source
+
+Reference pages describe this repository’s source; introductory examples are checked against the published npm beta.27 declarations. Matching version strings do not guarantee matching artifacts: the checked beta.27 archive lacks the current autoFit field and UMD file. Read installed types/exports and pin versions, commits, or hashes before upgrading.
+
+[Installation and artifact verification](/en/docs/getting-started/quick-start) · [Bundle scope](/en/docs/metrics/bundle-size) · [Change records](/en/docs/changelog)
+
 ## Public and internal boundaries
 
 Root exports do not make every Graph member an application contract. These members carry internal annotations for rendering or interaction dispatch; use the public entries instead.
@@ -25,20 +31,13 @@ Root exports do not make every Graph member an application contract. These membe
 
 ## ESM and CommonJS
 
-The package root is ESM-only and does not provide a `require('@antv/g6-lite')` condition. A CommonJS feasibility test confirmed that a synchronous entry and declarations can be emitted, but a dual package must also preserve two runtime contracts:
-
-- ESM and CommonJS consumers must share one extension registry when both formats are loaded by the same application.
-- After application bundling, `layout.worker: true` must still resolve and load the package's module Worker instead of silently falling back to the main thread.
-
-The current CommonJS consumer build cannot reliably preserve that Worker asset relationship and requests a missing Worker file; independent dual builds also create separate module-scoped registries. This release therefore does not publish a partial CommonJS build whose synchronous import works while Worker or extension behavior differs.
-
-Applications that still use a CommonJS toolchain can cross the client boundary with dynamic import:
+The current package-root exports provide import and types, without a synchronous require condition. Do not bypass that boundary through deep build paths. Hosts with an asynchronous client boundary can use:
 
 ```js
 const { Graph } = await import('@antv/g6-lite');
 ```
 
-This does not change the requirement for a real DOM, Canvas, and WebGL environment.
+This still requires real DOM, Canvas, and WebGL. See [runtime requirements](/en/docs/compatibility/browser) for modules, Worker deployment, and CSP.
 
 ## Deprecated compatibility entries
 

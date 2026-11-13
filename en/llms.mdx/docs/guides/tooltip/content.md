@@ -1,15 +1,15 @@
-# Tooltip configuration (/en/docs/guides/tooltip)
+# Previous Tooltip guide (/en/docs/guides/tooltip)
 
 
 
-```ts
-behaviors: [
-  {
-    type: 'tooltip',
-    getContent: ({ itemType, data }) =>
-      `<strong>${itemType}</strong><br />${String(data?.label ?? '')}`,
-  },
-];
-```
+Continue to [Tooltip](/en/docs/guides/behaviors#tooltip), or jump to the corresponding section below.
 
-Use application-safe rendering when content contains user input. Tooltip positioning follows the shared pointer and picking pipeline. Style the generated surface through the documented tooltip class names or your own controlled content.
+* <span id="custom-content" style="{ scrollMarginTop: '8rem' }" />[Custom content](/en/docs/guides/behaviors#custom-content)
+* <span id="click-to-show" style="{ scrollMarginTop: '8rem' }" />[Click to show](/en/docs/guides/behaviors#click-to-show)
+* <span id="options" style="{ scrollMarginTop: '8rem' }" />[Options](/en/docs/guides/behaviors#options)
+* <span id="styling" style="{ scrollMarginTop: '8rem' }" />[Styling](/en/docs/guides/behaviors#styling)
+* <span id="common-questions" style="{ scrollMarginTop: '8rem' }" />[Common questions](/en/docs/guides/behaviors#tooltip-questions)
+* <span id="why-is-the-card-unstyled-or-unclickable" style="{ scrollMarginTop: '8rem' }" />[Why is the card unstyled or unclickable?](/en/docs/guides/behaviors#why-is-the-card-unstyled-or-unclickable)
+* <span id="why-does-a-combo-show-no-tooltip" style="{ scrollMarginTop: '8rem' }" />[Why does a Combo show no Tooltip?](/en/docs/guides/behaviors#why-does-a-combo-show-no-tooltip)
+* <span id="does-an-open-card-update-immediately-after-data-changes" style="{ scrollMarginTop: '8rem' }" />[Does an open card update immediately after data changes?](/en/docs/guides/behaviors#does-an-open-card-update-immediately-after-data-changes)
+* <span id="related" style="{ scrollMarginTop: '8rem' }" />[Related](/en/docs/guides/behaviors#related)

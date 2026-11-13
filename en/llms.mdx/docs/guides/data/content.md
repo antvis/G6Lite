@@ -2,74 +2,449 @@
 
 
 
-This page covers data ingestion and runtime updates. See [Data model](/en/docs/concepts/data-model) for node, edge, and Combo relationships, and [Options](/en/docs/api/options#graph-data) for complete fields.
 
-## Map application data [#map-application-data]
 
-Map entities to nodes and relationships to edges. Put application fields in `data` so style callbacks, tooltips, and application logic can read them:
+## Overview [#overview]
+
+A graph contains nodes, edges, and optional Combo groups. Map application objects to nodes and relationships to edges, then pass the data to `Graph`. Once the graph is rendered, replace the whole dataset or update the elements that changed.
+
+## Data structure [#data-structure]
+
+### Graph data (GraphData) [#nodes-edges-and-groups]
+
+A, B, and C belong to the same Combo in this diagram. Each edge connects two nodes by ID.
+
+<GraphDataModelDiagram locale="en" />
+
+| Field    | Type                        | Required | Default   | Description                                                 |
+| -------- | --------------------------- | -------- | --------- | ----------------------------------------------------------- |
+| `nodes`  | [`GraphNode[]`](#graphnode) | Yes      | —         | Node list. Pass `[]` to create an empty graph.              |
+| `edges`  | [`GraphEdge[]`](#graphedge) | Yes      | —         | Edge list. Pass `[]` if the graph has no edges.             |
+| `combos` | [`ComboData[]`](#combodata) | No       | No groups | Group list. Nodes reference these groups through `comboId`. |
+
+<span id="positions-and-states" />
+
+### Node data (GraphNode) [#graphnode]
+
+| Field     | Type                                                       | Required | Default                          | Description                                                                                                                         |
+| --------- | ---------------------------------------------------------- | -------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `id`      | `string`                                                   | Yes      | —                                | Unique node ID. Edges use it to specify endpoints, and you can use it to query or update the node.                                  |
+| `name`    | `string`                                                   | No       | —                                | Node name. Read and display it in a `node.style.label` callback.                                                                    |
+| `data`    | [`NodeData`](/en/docs/api/options#config-node-data-fields) | No       | —                                | Application data such as `{ score: 80 }`. If supplied, `cluster` must be a string.                                                  |
+| `x`       | `number`                                                   | No       | `0` without layout               | Horizontal graph coordinate. With a layout, the algorithm determines the final position. Use `fx` to fix the horizontal coordinate. |
+| `y`       | `number`                                                   | No       | `0` without layout               | Vertical graph coordinate. With a layout, the algorithm determines the final position. Use `fy` to fix the vertical coordinate.     |
+| `fx`      | `number`                                                   | No       | Horizontal coordinate is unfixed | Sets the node's horizontal coordinate after layout.                                                                                 |
+| `fy`      | `number`                                                   | No       | Vertical coordinate is unfixed   | Sets the node's vertical coordinate after layout.                                                                                   |
+| `comboId` | `string`                                                   | No       | No group membership              | ID of the containing Combo. It must reference a group declared in `combos`.                                                         |
+| `states`  | `NodeState[]`                                              | No       | `[]`                             | Initial node states such as `['selected']`. Use `node.stateStyles` to configure their appearance.                                   |
+
+### Edge data (GraphEdge) [#graphedge]
+
+| Field    | Type          | Required | Default                 | Description                                                                                          |
+| -------- | ------------- | -------- | ----------------------- | ---------------------------------------------------------------------------------------------------- |
+| `id`     | `string`      | No       | Generated automatically | Unique edge ID. Supply a stable ID to identify the same edge after replacing the dataset.            |
+| `source` | `string`      | Yes      | —                       | Start node ID. It must reference a node in `nodes`.                                                  |
+| `target` | `string`      | Yes      | —                       | End node ID. It must reference a node in `nodes`. Using the same ID as `source` creates a self-loop. |
+| `data`   | `EdgeData`    | No       | —                       | Application data of type `Record<string, unknown>`, such as `{ weight: 2 }`.                         |
+| `states` | `EdgeState[]` | No       | `[]`                    | Initial edge states such as `['selected']`. Use `edge.stateStyles` to configure their appearance.    |
+
+### Group data (ComboData) [#combodata]
+
+| Field       | Type                        | Required | Default                 | Description                                                                                                                                  |
+| ----------- | --------------------------- | -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`        | `string`                    | Yes      | —                       | Unique group ID. Nodes reference it through `comboId` and child groups through `parentId`.                                                   |
+| `parentId`  | `string`                    | No       | No parent group         | Parent group ID. It must reference a group in the same `combos` list. Parent links must be acyclic.                                          |
+| `collapsed` | `boolean`                   | No       | `false`                 | Set to `true` to start collapsed and hide descendant nodes and their incident edges.                                                         |
+| `style`     | `Partial<ComboStyleConfig>` | No       | Graph-level group style | Overrides specific style fields for this group, for example `{ fill: '#e6f4ff' }`. [Group style options](/en/docs/api/options#options-combo) |
+| `data`      | `Record<string, unknown>`   | No       | —                       | Application data such as `{ department: 'engineering' }`.                                                                                    |
+| `states`    | `ElementState[]`            | No       | `[]`                    | Initial group states such as `['selected']`. Use `combo.stateStyles` to configure their appearance.                                          |
+
+## Data operations [#data-operations]
+
+### Initialize data [#initialize-data]
+
+Pass `data` to `new Graph()` and await the initial `render()` before calling data mutation methods. The `#container` element must be mounted and have a nonzero width and height.
 
 ```ts
-import type { GraphData } from '@antv/g6-lite';
+import { Graph } from '@antv/g6-lite';
 
-const users = [
-  { id: 'alice', name: 'Alice', team: 'design' },
-  { id: 'bob', name: 'Bob', team: 'engineering' },
-];
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'B', x: 120, y: 0 }],
+    edges: [{ id: 'A-B', source: 'A', target: 'B' }],
+  },
+});
 
-const data: GraphData = {
-  nodes: users.map((user) => ({
-    id: user.id,
-    data: { name: user.name, team: user.team },
-  })),
-  edges: [{ source: 'alice', target: 'bob' }],
-};
+await graph.render();
 ```
 
-Pass the result as the `data` option in `new Graph({ container, data })`. See [Quick start](/en/docs/getting-started/quick-start) for a complete creation and rendering example.
+### Choose an update path [#choose-an-update-path]
 
-## Validate data [#validate-data]
+| Change                            | Method                            | What changes                                              |
+| --------------------------------- | --------------------------------- | --------------------------------------------------------- |
+| Dataset switch / full response    | setData                           | Replaces data, runs configured layout, fits by default    |
+| Small business-field changes      | updateNodeData / updateEdgeData   | Shallow-merges data without layout                        |
+| Add/remove elements               | addNode(s) / addEdge(s) / remove… | Supply new positions; node removal removes adjacent edges |
+| Position changes                  | updateNodePosition(s)             | Graph position changes; identity remains                  |
+| Selection, visibility, membership | State / Combo methods             | Use the relevant APIs without full replacement            |
 
-* Node `id` values must be unique within the graph and remain stable across updates.
-* Edge `source` and `target` must refer to existing nodes.
-* When using Combo, a node's `comboId` should refer to a declared group.
-* Without a configured layout, provide node `x` / `y` positions so nodes do not share the default coordinates.
-* Update graph data through public methods instead of directly modifying returned Models.
+### Replace all data [#replace-all-data]
 
-## Replace all data [#replace-all-data]
-
-Run the following operations after the first `await graph.render()` completes.
-
-Use `setData()` when filters change, datasets switch, or a request returns a complete result:
-
-```ts
-await graph.setData(nextData);
-```
-
-A configured layout runs again, and the viewport fits the data by default. To preserve the user's current zoom and pan:
+Pass a complete `GraphData` object to `setData()`. It runs the configured layout and fits the graph by default. Use `fitView: false` to keep the current zoom and pan.
 
 ```ts
 await graph.setData(nextData, { fitView: false });
 ```
 
-This `fitView` option controls fitting after this data replacement. Container resize fitting is controlled separately by [`autoFit`](/en/docs/api/options#autofit).
+The incoming data defines the initial selection. To preserve selection, restore it for stable IDs still present in the new dataset. [Preserve selection](/en/docs/guides/states) · [Viewport example](/en/docs/guides/viewport)
 
-## Incremental updates [#incremental-updates]
+### Incremental updates [#incremental-updates]
 
-For a small number of element changes, use add, update, and remove methods:
+Continue with the graph from the initialization example. Add node C and edge B-C, then update their application data.
 
 ```ts
-graph.addNode({ id: 'carol', x: 120, y: 80, data: { name: 'Carol' } });
-graph.addEdge({ source: 'alice', target: 'carol' });
-graph.updateNodeData('carol', { name: 'Carol Chen' });
-graph.removeNode('bob');
+graph.addNode({ id: 'C', x: 240, y: 0 });
+graph.addEdge({ id: 'B-C', source: 'B', target: 'C' });
+
+graph.updateNodeData('C', { score: 80 });
+graph.updateEdgeData('B-C', { weight: 2 });
 ```
 
-New nodes require positions; incremental methods do not automatically rerun layout. To rearrange the graph, call `layout()` as described in [Runtime relayout](/en/docs/guides/layout). Batch methods reduce repeated refreshes when updating multiple elements.
+Removing an edge keeps its endpoints. Removing a node also removes all its incident edges.
 
-Use [State and visibility APIs](/en/docs/api/graph#state-visibility-and-focus) for selection, highlighting, or hiding instead of replacing all data.
+```ts
+graph.removeEdge('B-C');
+graph.removeNode('C');
+```
 
-## Related references [#related-references]
+In the example below, inspect A, change its score, or add and remove node D.
 
-* [Graph lifecycle](/en/docs/concepts/graph-lifecycle): update after initialization and destroy on unmount.
-* [Graph data API](/en/docs/api/graph#changing-nodes-and-edges): element mutations, batch operations, and parameters.
-* [Node configuration](/en/docs/guides/node): map application fields to colors, sizes, and labels.
+
+
+```ts
+const update = () => graph.updateNodeData('A', {
+  score: Number(graph.getNodeData('A')?.data?.score ?? 0) + 1,
+});
+const add = () => {
+  if (graph.hasNode('D')) return;
+  graph.addNode({ id: 'D', x: 360, y: 70 });
+  graph.addEdge({ id: 'C-D', source: 'C', target: 'D' });
+};
+const remove = () => graph.removeNode('D'); // Also removes C-D.
+```
+
+**Complete runnable code**
+
+```ts
+import { Graph } from '@antv/g6-lite';
+import GUI from 'lil-gui';
+
+export async function run(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'A', x: 0, y: 0, data: { score: 1 } },
+        { id: 'B', x: 200, y: -50 }, { id: 'C', x: 200, y: 70 },
+      ],
+      edges: [{ id: 'A-B', source: 'A', target: 'B' }, { id: 'A-C', source: 'A', target: 'C' }],
+    },
+    node: { style: {
+      size: (node) => node.id === 'A' ? 28 + Number(node.data?.score ?? 1) * 2 : 28,
+      label: (node) => node.id === 'A' ? `A: ${node.data?.score}` : node.id, labelOffsetY: 10,
+    } },
+    behaviors: ['zoom-canvas', 'drag-canvas'],
+    autoFit: { padding: [76, 48, 120, 48], maxZoom: 1 },
+  });
+  // #region query
+  const inspect = () => ({
+    node: graph.getNodeData('A'),
+    neighbors: graph.getNeighborNodes('A'),
+    edges: graph.getAdjacentEdges('A'),
+    snapshot: graph.getData(),
+  });
+  // #endregion query
+  // #region mutation
+  const update = () => graph.updateNodeData('A', {
+    score: Number(graph.getNodeData('A')?.data?.score ?? 0) + 1,
+  });
+  const add = () => {
+    if (graph.hasNode('D')) return;
+    graph.addNode({ id: 'D', x: 360, y: 70 });
+    graph.addEdge({ id: 'C-D', source: 'C', target: 'D' });
+  };
+  const remove = () => graph.removeNode('D'); // Also removes C-D.
+  // #endregion mutation
+  const ui = createDemoPanel(container);
+  const status = document.createElement('div');
+  status.setAttribute('role', 'status');
+  status.style.cssText = 'position:absolute;left:12px;bottom:12px;right:12px;padding:8px;background:white;color:#334155;font:12px/1.5 system-ui;white-space:pre-line;pointer-events:none;z-index:20;';
+  let last = 'Ready';
+  const report = () => {
+    const result = inspect();
+    status.textContent = [
+      `${last} | nodes=${graph.getNodeCount()}, edges=${graph.getEdgeCount()}`,
+      `A score=${result.node?.data?.score} | neighbors=${result.neighbors.join(', ')}`,
+      `adjacent=${result.edges.map((edge) => edge.id).join(', ')}`,
+    ].join('\n');
+  };
+  const copy = () => {
+    const snapshot = graph.getData();
+    snapshot.nodes[0].data = { ...snapshot.nodes[0].data, score: 999 };
+    last = `snapshot score=999; graph score=${graph.getNodeData('A')?.data?.score}`;
+  };
+  const actions: Array<[string, () => void]> = [
+    ['Inspect A', () => { last = 'Inspected'; }], ['Edit snapshot', copy],
+    ['Update A', () => { update(); last = 'Updated A'; }],
+    ['Add D', () => { add(); last = 'Added D'; }],
+    ['Remove D', () => { remove(); last = 'Removed D'; }],
+  ];
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => {
+    ui.destroy(); status.remove(); destroy();
+  };
+  try {
+    await graph.render();
+    if (graph.destroyed) return graph;
+    for (const [label, action] of actions) {
+      ui.addAction(label, () => { action(); report(); });
+    }
+    container.append(status); report(); return graph;
+  } catch (error) { graph.destroy(); throw error; }
+}
+
+
+export function createDemoPanel(container: string | HTMLElement, description = '') {
+  const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+  if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+
+  let gui: GUI | undefined;
+  const getGui = () => {
+    if (!gui) {
+      gui = new GUI({ container: host, width: 160 });
+      gui.domElement.classList.add('g6lite-demo-controls');
+      gui.domElement.dataset.captureIgnore = '';
+      Object.assign(gui.domElement.style, {
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        zIndex: '30',
+        maxWidth: 'calc(100% - 20px)',
+        maxHeight: 'calc(100% - 20px)',
+      });
+    }
+    return gui;
+  };
+
+  let status: HTMLDivElement | undefined;
+  const setStatus = (message: string) => {
+    if (!status) {
+      status = document.createElement('div');
+      status.setAttribute('role', 'status');
+      status.dataset.role = 'status';
+      status.dataset.captureIgnore = '';
+      status.style.cssText =
+        'position:absolute;left:12px;bottom:10px;z-index:20;max-width:min(28rem,calc(100% - 24px));color:#64748b;font:12px/1.45 system-ui,sans-serif;pointer-events:none;white-space:pre-wrap;';
+      host.append(status);
+    }
+    status.textContent = message;
+  };
+  if (description) setStatus(description);
+
+  return {
+    get gui() {
+      return getGui();
+    },
+    addAction(label: string, action: () => void, folder = getGui()) {
+      return folder.add({ [label]: action }, label);
+    },
+    addChoice<T extends string>(
+      label: string,
+      choices: readonly T[] | Record<string, T>,
+      value: T,
+      onChange: (value: T) => void,
+    ) {
+      const options = Array.isArray(choices) ? [...choices] : choices;
+      return getGui().add({ value }, 'value', options).name(label).onChange(onChange);
+    },
+    setStatus,
+    destroy() {
+      gui?.destroy();
+      status?.remove();
+    },
+  };
+}
+```
+
+
+
+Incremental methods schedule a redraw. Use batch methods for multiple elements. Application data is shallow-merged by top-level key, so a nested object is replaced as a whole.
+
+### Query data [#query-data]
+
+Use `getNodes()` and `getEdges()` for lists, or `getNodeData(id)` and `getEdgeData(id)` to look up one element by ID.
+
+```ts
+const nodes = graph.getNodes();
+const edges = graph.getEdges();
+const node = graph.getNodeData('B');
+const edge = graph.getEdgeData('A-B');
+```
+
+#### Input, models, and snapshots [#input-models-and-snapshots]
+
+| Form             | Purpose                                   | Updating it                                          |
+| ---------------- | ----------------------------------------- | ---------------------------------------------------- |
+| GraphData input  | Declare nodes, edges, and Combos          | Pass to new Graph / setData                          |
+| Query models     | Read the working graph; states is a set   | Use Graph mutation APIs                              |
+| getData snapshot | Export positions, memberships, and states | Explicitly setData; nested objects can remain shared |
+
+Stable IDs represent business identity; array order and coordinates do not. Equal endpoints can have distinct edge IDs. Supply stable edge IDs to preserve selection across refreshes.
+
+Models are Graph-owned live views. Query again after replacing or removing data. Before the first render, queries return their respective empty values, while `getData()` returns a snapshot of the constructor data. Queries may still return values after destruction. Check [destroyed](/en/docs/api/graph#graph-lifecycle-destroyed) for the instance state.
+
+After rendering, `getData()` exports the current positions, actual edge IDs, memberships, and states. The snapshot omits collapse-derived `hidden`. Save fixed axes `fx` and `fy` and layout options separately.
+
+##### Query return types [#model-fields]
+
+| Return type                                               | Fields                                                  |
+| --------------------------------------------------------- | ------------------------------------------------------- |
+| `NodeModel`                                               | `id`, `name?`, `x`, `y`, `data?`, `states`              |
+| `EdgeModel`                                               | `id`, `source`, `target`, `data?`, `states`             |
+| [ComboModel](/en/docs/guides/combo#read-only-query-model) | Group position, size, members, collapse state, and more |
+| `ElementModel`                                            | `NodeModel \| EdgeModel \| ComboModel`                  |
+
+Fields are read-only. A `?` marks an optional field. Node `x` and `y` use graph coordinates, `data` is a `Readonly<Record<string, unknown>>`, and `states` is a `ReadonlySet<ElementState>`.
+
+```ts
+const element = graph.getElementData('A-B');
+if (element && 'source' in element) {
+  console.log(element.source, element.target);
+}
+const selected = graph.getNodeData('A')?.states.has('selected');
+```
+
+### Complex data structures [#complex-data-structures]
+
+**Nested groups.** In initial data, use `parentId` for the parent group and `comboId` for each node's membership. At runtime, you can create groups, move existing nodes, and change the collapsed state. The example adds the existing B node to Storage and then collapses Storage.
+
+```ts
+graph.createCombo({ id: 'platform' });
+graph.createCombo({ id: 'storage', parentId: 'platform' }, ['B']);
+graph.collapseCombo('storage');
+```
+
+**Trees.** Flatten the tree into `nodes` and `edges`. Each edge points from parent to child, for example `{ source: 'root', target: 'child' }`. Pass the result to a tree layout such as `mindmap` or `indented`. [Combo guide](/en/docs/guides/combo) · [Tree layout examples](/en/docs/api/options#config-tree-layout-fields)
+
+<span id="map-application-data" />
+
+<span id="validate-data" />
+
+## Load remote data [#load-remote-data]
+
+If the endpoint returns a complete dataset, render an empty graph first, then load the JSON. The example assumes the endpoint returns valid `GraphData`. If it returns application records, map them to graph data and validate IDs, edge endpoints, and group membership before applying them.
+
+```ts
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: '#container',
+  data: { nodes: [], edges: [] },
+  layout: { type: 'grid' },
+});
+await graph.render();
+
+const response = await fetch('/data/graph.json');
+if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+const data: GraphData = await response.json();
+if (!graph.destroyed) await graph.setData(data);
+```
+
+### Cancel stale requests and clean up [#cancel-stale-requests-and-clean-up]
+
+The helper below owns cleanup of this page’s Graph. load accepts an AbortSignal. Handle refresh failures in the caller, and call dispose on exit.
+
+```ts
+import type { Graph, GraphData } from '@antv/g6-lite';
+export function createLoader(graph: Graph, load: (signal: AbortSignal) => Promise<GraphData>) {
+  let version = 0;
+  let disposed = false;
+  let controller: AbortController | undefined;
+  return {
+    async refresh() {
+      const request = ++version;
+      controller?.abort();
+      const current = new AbortController();
+      controller = current;
+      try {
+        const next = await load(current.signal);
+        if (disposed || graph.destroyed || request !== version) return;
+        await graph.setData(next, { fitView: false });
+      } catch (error) {
+        if (!current.signal.aborted && !disposed) throw error;
+      }
+    },
+    dispose() {
+      disposed = true;
+      version++;
+      controller?.abort();
+      graph.destroy();
+    },
+  };
+}
+```
+
+## API and examples [#related-references]
+
+**Read data**
+
+* [`getData()`](/en/docs/api/graph#getdata)
+* [`getNodes()`](/en/docs/api/graph#getnodes)
+* [`getNodeData()`](/en/docs/api/graph#getnodedata)
+* [`getEdges()`](/en/docs/api/graph#getedges)
+* [`getEdgeData()`](/en/docs/api/graph#getedgedata)
+* [`getComboData()`](/en/docs/api/graph#getcombodata)
+
+**Replace and update**
+
+* [`setData()`](/en/docs/api/graph#graph-data-mutations-setdata)
+* [`updateNodeData()`](/en/docs/api/graph#updatenodedata)
+* [`updateEdgeData()`](/en/docs/api/graph#updateedgedata)
+
+**Add and remove**
+
+* [`addNode()`](/en/docs/api/graph#addnode)
+* [`addEdge()`](/en/docs/api/graph#addedge)
+* [`createCombo()`](/en/docs/api/graph#createcombo)
+* [`removeNode()`](/en/docs/api/graph#removenode)
+* [`removeEdge()`](/en/docs/api/graph#removeedge)
+* [`removeCombo()`](/en/docs/api/graph#removecombo)
+
+**Runnable examples**
+
+* [Minimal graph](/en/docs/examples/basic)
+* [Full replacement](/en/docs/examples/set-data)
+* [Data mutations](/en/docs/examples/data-mutations)
+* [Character relationships](/en/docs/examples/relationship)
+
+## Common questions [#common-questions]
+
+### Why did editing exported data not update the graph? [#why-did-editing-exported-data-not-update-the-graph]
+
+getData does not write back automatically. Use incremental methods for small changes, or explicitly setData for replacement and choose the view policy.
+
+### Why does an old index identify another element after removal? [#why-does-an-old-index-identify-another-element-after-removal]
+
+Array order can change. Query by ID and match nodes and edges separately; do not use saved indices as identity.
+
+<span id="data-and-appearance" />
+
+### Why did labels or colors not change? [#why-did-labels-or-colors-not-change]
+
+Check that fields are inside data and read by the style function. Editing exports or directly mutating models does not follow the public update flow.
+
+### Why did refreshing lose the view or selection? [#why-did-refreshing-lose-the-view-or-selection]
+
+setData fits by default and builds states from new input. fitView: false keeps the camera; preserve selection explicitly by stable IDs.

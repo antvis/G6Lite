@@ -1,68 +1,14 @@
-# Graph 生命周期 (/docs/concepts/graph-lifecycle)
+# Graph 生命周期（旧入口） (/docs/concepts/graph-lifecycle)
 
 
 
+生命周期说明已并入 [Graph 方法](/docs/api/graph#graph-lifecycle)。
 
-
-一张图通常只创建一次实例，在首次渲染完成后复用它处理数据和交互，离开页面时销毁。本页说明各阶段的调用顺序；方法参数见 [Graph API](/docs/api/graph)，内部处理过程见[技术架构](/docs/concepts/architecture)。
-
-## 生命周期总览 [#生命周期总览]
-
-<GraphLifecycleFlow locale="zh" />
-
-## 创建与首次渲染 [#创建与首次渲染]
-
-`new Graph(options)` 要求容器已经挂载且有明确宽高。构造阶段会创建画布和渲染器；调用 `render()` 后才会执行布局并绘制图形。
-
-以 `await graph.render()` 成功完成作为初始化边界。在此之前，不要执行数据写入、状态修改或重新布局。React、Vue 的挂载与卸载写法见[在框架中使用](/docs/getting-started/react)。
-
-## 运行中的更新 [#运行中的更新]
-
-首次渲染完成后，根据变化的范围选择操作：
-
-| 变化        | 使用方式                                                | 详细说明                                                             |
-| --------- | --------------------------------------------------- | ---------------------------------------------------------------- |
-| 替换整份数据    | `await graph.setData(nextData)`                     | [数据更新](/docs/guides/data#替换整份数据)                                 |
-| 修改部分元素或状态 | 元素增删改、状态 API                                        | [修改节点和边](/docs/api/graph#修改节点和边)、[状态操作](/docs/api/graph#状态显隐和定位) |
-| 重新计算节点位置  | `graph.setLayout(options)` 后 `await graph.layout()` | [运行时重新布局](/docs/guides/layout#运行时重新布局)                           |
-
-`setLayout()` 只保存布局配置，`layout()` 才会执行计算。常规更新会安排刷新，复用当前实例即可。
-
-缩放、平移和容器尺寸适配属于[视口操作](/docs/api/graph#视口)，无需重新创建 Graph。
-
-## 销毁与异步清理 [#销毁与异步清理]
-
-页面退出或组件卸载时调用 `graph.destroy()`，释放画布、事件监听和布局等实例资源。重复销毁不会产生额外效果；已销毁的实例不能重新使用。
-
-卸载可能早于渲染或业务请求完成。及时调用 `destroy()`，并在异步结果返回后检查 `graph.destroyed`，避免继续使用已失效的实例。业务自己创建的请求、定时器和监听器仍需由业务清理。
-
-## 完整使用示例 [#完整使用示例]
-
-下面将创建、首次渲染、状态更新和销毁串联起来。返回的清理函数应交给页面或框架的卸载逻辑调用。
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-export function mountGraph(container: HTMLElement) {
-  const graph = new Graph({
-    container,
-    data: {
-      nodes: [{ id: 'alice' }, { id: 'bob' }],
-      edges: [{ source: 'alice', target: 'bob' }],
-    },
-    layout: { type: 'circular', radius: 100 },
-  });
-
-  async function initialize() {
-    await graph.render();
-    // 卸载可能发生在异步渲染完成之前。
-    if (graph.destroyed) return;
-    graph.setItemState('alice', 'selected', true);
-  }
-
-  void initialize().catch(console.error);
-
-  // 将返回的函数交给页面或组件的卸载逻辑调用。
-  return () => graph.destroy();
-}
-```
+* <span id="生命周期总览" style="{ display: 'block', scrollMarginTop: '8rem' }" />[生命周期与样式更新](/docs/api/graph#graph-lifecycle)
+* <span id="创建与首次渲染" style="{ display: 'block', scrollMarginTop: '8rem' }" />[创建与首次渲染](/docs/api/graph#graph-lifecycle-render)
+* <span id="运行中的更新" style="{ display: 'block', scrollMarginTop: '8rem' }" />[更新数据](/docs/api/graph#graph-data-mutations)
+* <span id="销毁与异步清理" style="{ display: 'block', scrollMarginTop: '8rem' }" />[销毁与异步清理](/docs/api/graph#graph-lifecycle-destroy)
+* <span id="完整使用示例" style="{ display: 'block', scrollMarginTop: '8rem' }" />[样式更新示例](/docs/api/graph#graph-lifecycle-updateoptions)
+* <span id="常见问题" style="{ display: 'block', scrollMarginTop: '8rem' }" />[渲染时机与取消](/docs/api/graph#graph-lifecycle-render)
+* <span id="afterrender-里写数据为什么会报错" style="{ display: 'block', scrollMarginTop: '8rem' }" />[首次渲染与 afterrender](/docs/api/graph#graph-lifecycle-render)
+* <span id="render-的-promise-返回为什么仍不能继续操作" style="{ display: 'block', scrollMarginTop: '8rem' }" />[渲染取消与过期任务](/docs/api/graph#graph-lifecycle-render)

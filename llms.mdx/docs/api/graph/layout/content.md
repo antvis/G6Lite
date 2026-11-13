@@ -1,0 +1,13 @@
+# 布局方法参考（旧入口） (/docs/api/graph/layout)
+
+
+
+内容已并入 [布局](/docs/api/graph#graph-layout)。
+
+* <span id="setlayout" style="{ display: 'block', scrollMarginTop: '8rem' }" />[setLayout](/docs/api/graph#setlayout)
+* <span id="layout" style="{ display: 'block', scrollMarginTop: '8rem' }" />[layout](/docs/api/graph#graph-layout-layout)
+* <span id="代码与对应效果" style="{ display: 'block', scrollMarginTop: '8rem' }" />[代码与对应效果](/docs/api/graph#graph-layout-代码与对应效果)
+* <span id="执行与适配时机" style="{ display: 'block', scrollMarginTop: '8rem' }" />[执行与适配时机](/docs/api/graph#执行与适配时机)
+* <span id="cancellayout" style="{ display: 'block', scrollMarginTop: '8rem' }" />[cancelLayout](/docs/api/graph#cancellayout)
+* <span id="runlayout" style="{ display: 'block', scrollMarginTop: '8rem' }" />[runLayout](/docs/api/graph#graph-layout-runlayout)
+* <span id="坐标计算与展示" style="{ display: 'block', scrollMarginTop: '8rem' }" />[坐标计算与展示](/docs/api/graph#坐标计算与展示)

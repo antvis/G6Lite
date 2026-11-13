@@ -1,0 +1,42 @@
+# Custom events (/en/docs/guides/events/custom)
+
+
+
+## Dispatch an event from a button [#dispatch-an-event-from-a-button]
+
+Suppose the toolbar has a Reset view button. Call `bindResetButton(graph, resetButton)` after the first render. It uses `graph.on()` to register the reset action, then binds the button's click handler.
+
+```ts
+import type { Graph } from '@antv/g6-lite';
+
+export function bindResetButton(graph: Graph, resetButton: HTMLButtonElement) {
+  const resetView = () => graph.resetCamera();
+  const onClick = () => graph.emit('business:reset', { source: 'toolbar' });
+
+  graph.on('business:reset', resetView);
+  resetButton.addEventListener('click', onClick);
+
+  return () => {
+    resetButton.removeEventListener('click', onClick);
+    graph.off('business:reset', resetView);
+  };
+}
+```
+
+After panning or zooming, the user clicks the button. The click handler calls `graph.emit()`, which runs the registered listeners synchronously. Here, `resetCamera()` restores the position and zoom recorded at the first render. A listener registered after that click starts receiving events on the next dispatch. Call the returned cleanup function when the page unmounts.
+
+## Add TypeScript types [#add-typescript-types]
+
+Augment `GraphEventMap` in your application's `.d.ts` file. TypeScript checks the arguments passed to `emit()` and infers the parameter types for `on()` listeners.
+
+```ts
+import '@antv/g6-lite';
+
+declare module '@antv/g6-lite' {
+  interface GraphEventMap {
+    'business:reset': [payload: { source: 'toolbar' | 'shortcut' }];
+  }
+}
+```
+
+See the [emit signature](/en/docs/api/graph#emit) or [Custom interactions](/en/docs/guides/custom-behavior) for Behavior listeners.

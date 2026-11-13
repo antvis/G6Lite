@@ -1,44 +1,8 @@
-# Overview (/en/docs)
+# What is G6Lite? (/en/docs)
 
 
 
-**G6Lite · Lightweight graph visualization, built for large-scale relationship data**
-
-Flexible layouts and interactions, paired with lightweight, efficient WebGL rendering, bring large-scale relationships into focus and make data exploration feel fluid.
-
-Follow the documentation from the first graph to concepts, configuration, examples, reproducible metrics, and compatibility boundaries.
-
-## Start here [#start-here]
-
-<Cards>
-  <Card title="Install and render your first graph" href="/en/docs/getting-started/quick-start" />
-
-  <Card title="Build G6Lite graphs with AI" href="/en/docs/ai" />
-
-  <Card title="Use with React and Vue" href="/en/docs/getting-started/react" />
-
-  <Card title="Browse examples" href="/en/docs/examples" />
-
-  <Card title="Open the API reference" href="/en/docs/api" />
-</Cards>
-
-## Documentation structure [#documentation-structure]
-
-<Cards>
-  <Card title="Core concepts" href="/en/docs/concepts/overview" />
-
-  <Card title="Technical architecture" href="/en/docs/concepts/architecture" />
-
-  <Card title="Configuration" href="/en/docs/guides/data" />
-
-  <Card title="API" href="/en/docs/api" />
-
-  <Card title="Examples" href="/en/docs/examples" />
-
-  <Card title="Technical metrics" href="/en/docs/metrics/performance" />
-
-  <Card title="Compatibility" href="/en/docs/compatibility/browser" />
-</Cards>
+G6Lite is a browser-based graph visualization engine built for large-scale relationship data. Use it for service and device topologies, relationship networks, and knowledge graphs to understand connections and explore regions of interest in large graphs.
 
 ## Core capabilities [#core-capabilities]
 
@@ -48,6 +12,22 @@ Follow the documentation from the first graph to concepts, configuration, exampl
 * **Customization and extensions** — Map business data to visual styles and extend graph elements, layouts, and interactions as needed.
 * **AI-assisted development** — Use the G6Lite Skill to help an agent create graphs, refine styles, and configure interactions.
 
-## Choosing G6Lite [#choosing-g6lite]
+## Start here [#start-here]
 
-Use G6Lite when WebGL rendering, refresh by change level, built-in layouts, and a controlled extension boundary match your product. If you need the complete G6 plugin and animation ecosystem, evaluate G6 v5 first.
+<Cards>
+  <Card title="Install and render your first graph" href="/en/docs/getting-started/quick-start">
+    Prepare a container, render, try interactions, and clean up.
+  </Card>
+
+  <Card title="React integration" href="/en/docs/getting-started/react">
+    Handle mounting, data updates, and unmounting.
+  </Card>
+
+  <Card title="Develop with AI" href="/en/docs/ai">
+    Give an agent data and constraints to produce verifiable code.
+  </Card>
+
+  <Card title="Vue integration" href="/en/docs/getting-started/vue">
+    Mount a graph with a template ref, sync data, and clean up on unmount.
+  </Card>
+</Cards>

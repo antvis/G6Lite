@@ -1,0 +1,13 @@
+# 绘制类扩展契约（旧入口） (/docs/api/extensions/drawing)
+
+
+
+内容已并入 [绘制扩展](/docs/api/extensions#extension-drawing)。
+
+* <span id="nodeextension" style="{ display: 'block', scrollMarginTop: '8rem' }" />[NodeExtension](/docs/api/extensions#nodeextension)
+* <span id="nodeoverlaydrawparams" style="{ display: 'block', scrollMarginTop: '8rem' }" />[NodeOverlayDrawParams](/docs/api/extensions#nodeoverlaydrawparams)
+* <span id="nodeboundaryanchorparams" style="{ display: 'block', scrollMarginTop: '8rem' }" />[NodeBoundaryAnchorParams](/docs/api/extensions#nodeboundaryanchorparams)
+* <span id="edgeextension" style="{ display: 'block', scrollMarginTop: '8rem' }" />[EdgeExtension](/docs/api/extensions#edgeextension)
+* <span id="labelrenderer" style="{ display: 'block', scrollMarginTop: '8rem' }" />[LabelRenderer](/docs/api/extensions#labelrenderer)
+* <span id="输入与输出" style="{ display: 'block', scrollMarginTop: '8rem' }" />[输入与输出](/docs/api/extensions#输入与输出)
+* <span id="decorationrenderer" style="{ display: 'block', scrollMarginTop: '8rem' }" />[DecorationRenderer](/docs/api/extensions#decorationrenderer)

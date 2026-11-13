@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" width="160" height="96">
+  <path d="M84.4 42L67.5 56.6 M84.4 42L62.5 27.6 M84.4 42L94.5 17.6 M84.4 42L105.8 56.7 M67.5 56.6L43 62 M67.5 56.6L70.5 85.1 M62.5 27.6L56 10 M62.5 27.6L35.1 36.1 M94.5 17.6L124.9 11.5 M94.5 17.6L71.1 28.5 M105.8 56.7L109.8 86 M105.8 56.7L108.6 40.4 M43 62L35.1 36.1 M56 10L71.1 28.5 M124.9 11.5L108.6 40.4 M109.8 86L70.5 85.1 M67.5 56.6L71.1 28.5 M84.4 42L108.6 40.4" fill="none" stroke="#8a9db7" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#4c78db">
+    <circle cx="84.4" cy="42" r="4" fill="#9860cf"/>
+    <circle cx="67.5" cy="56.6" r="2.8"/>
+    <circle cx="62.5" cy="27.6" r="2.8"/>
+    <circle cx="94.5" cy="17.6" r="2.8"/>
+    <circle cx="105.8" cy="56.7" r="2.8"/>
+    <circle cx="43" cy="62" r="2.8"/>
+    <circle cx="70.5" cy="85.1" r="2.8"/>
+    <circle cx="56" cy="10" r="2.8"/>
+    <circle cx="35.1" cy="36.1" r="2.8"/>
+    <circle cx="124.9" cy="11.5" r="2.8"/>
+    <circle cx="71.1" cy="28.5" r="2.8"/>
+    <circle cx="109.8" cy="86" r="2.8"/>
+    <circle cx="108.6" cy="40.4" r="2.8"/>
+  </g>
+</svg>

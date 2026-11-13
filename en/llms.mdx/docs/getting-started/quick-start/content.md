@@ -4,40 +4,40 @@
 
 
 
-This small collaboration network has 6 nodes, with colors and sizes distinguishing the members. Drag nodes or hover to highlight their connections.
+Choose an integration method. Both create the same team collaboration graph with 6 nodes and 7 edges.
 
-<QuickStartExample locale="en" variant="network" />
-
-There are two ways to run this example:
-
-* [Package manager](#package-manager)
-* [CDN](#cdn)
+* [Package manager](#package-manager) works with projects that use a bundler such as Vite or Webpack. Install the package and import `Graph` from `@antv/g6-lite`.
+* [CDN](#cdn) works directly in HTML. Import `Graph` with a `<script type="module">` tag.
 
 ## Package manager [#package-manager]
+
+### Install [#install]
 
 For projects using a bundler such as Vite or Webpack, install G6Lite with one of the following package managers:
 
 <div className="quick-start-install">
   ```bash
   # npm
-  npm install @antv/g6-lite
+  npm install @antv/g6-lite@0.1.0
   ```
 
   ```bash
   # pnpm
-  pnpm add @antv/g6-lite
+  pnpm add @antv/g6-lite@0.1.0
   ```
 
   ```bash
   # Yarn
-  yarn add @antv/g6-lite
+  yarn add @antv/g6-lite@0.1.0
   ```
 </div>
+
+### Create the graph [#create-the-graph]
 
 After installation, add a container with an explicit size:
 
 ```html
-<div id="container" style="height: 360px"></div>
+<div id="container" style="width: 100%; height: 360px"></div>
 ```
 
 Then create a graph in your JavaScript or TypeScript entry after the container has mounted. Use `await` in an ES module or an `async` function.
@@ -86,20 +86,31 @@ const graph = new Graph({
     nodeStrength: -400,
     collideRadius: 32,
   },
-  autoFit: { padding: 48, maxZoom: 1.2 },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
 
-await graph.render();
+try {
+  await graph.render();
+  graph.fitView({ padding: 48, maxZoom: 1.2 });
+} catch (error) {
+  graph.destroy();
+  throw error;
+}
 ```
 
-The force-directed layout positions the nodes automatically. Node data controls their colors and sizes, and `behaviors` enables zoom, pan, node dragging, and hover highlighting. TypeScript declarations are included in the package.
+TypeScript declarations are included in the package.
+
+Call `graph.destroy()` before removing the container or unmounting the component.
 
 ## CDN [#cdn]
 
-The UMD build exposes the public API through `window.G6Lite`, allowing `new G6Lite.Graph()` in a plain HTML page.
+```js
+import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
+```
 
-This complete HTML example needs no additional dependency scripts: the UMD file includes the runtime dependencies and layout algorithms.
+### Create the graph [#create-the-graph-1]
+
+Save the HTML below as `index.html` and open it in your browser.
 
 ```html
 <!doctype html>
@@ -111,8 +122,9 @@ This complete HTML example needs no additional dependency scripts: the UMD file 
   </head>
   <body>
     <div id="container" style="height: 360px"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"></script>
-    <script>
+    <script type="module">
+      import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
+
       const data = {
         nodes: [
           { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
@@ -133,7 +145,7 @@ This complete HTML example needs no additional dependency scripts: the UMD file 
         ],
       };
 
-      const graph = new G6Lite.Graph({
+      const graph = new Graph({
         container: '#container',
         data,
         node: {
@@ -154,17 +166,32 @@ This complete HTML example needs no additional dependency scripts: the UMD file 
           nodeStrength: -400,
           collideRadius: 32,
         },
-        autoFit: { padding: 48, maxZoom: 1.2 },
         behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
       });
 
-      graph.render().catch(console.error);
+      graph.render().then(() => {
+        graph.fitView({ padding: 48, maxZoom: 1.2 });
+      }).catch((error) => {
+        graph.destroy();
+        console.error(error);
+      });
+      window.addEventListener('pagehide', () => graph.destroy(), { once: true });
     </script>
   </body>
 </html>
 ```
 
-For production CDN use, pin an exact published version containing the UMD file. The ESM entry loads layouts on demand, while UMD bundles them, so their download sizes differ. See [bundle size](/en/docs/metrics/bundle-size).
+The single-page example destroys the instance on `pagehide`. Recreate it if the browser restores the page from its back/forward cache.
+
+<span id="verify-and-clean-up" style="{ scrollMarginTop: '8rem' }" />
+
+## Result [#result]
+
+Both methods render the team collaboration graph below, with 6 labeled nodes and 7 edges. Drag the background to pan the canvas.
+
+<QuickStartExample locale="en" variant="network" />
+
+For a blank graph, check the container dimensions, WebGL support, and browser console.
 
 ## Use in frontend frameworks [#use-in-frontend-frameworks]
 
@@ -175,9 +202,7 @@ In React and Vue, obtain the DOM element through a ref, create the graph after c
     Mount a graph in an effect, update its data, and clean up on unmount.
   </Card>
 
-  <Card title="Use with Vue" href="/en/docs/getting-started/react#use-with-vue">
+  <Card title="Use with Vue" href="/en/docs/getting-started/vue">
     Manage a graph with template refs and lifecycle hooks.
   </Card>
 </Cards>
-
-In frameworks such as Next.js and Nuxt, create `Graph` only on the client, after the DOM is available.

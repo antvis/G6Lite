@@ -1,0 +1,16 @@
+# 注册与上下文（旧入口） (/docs/api/extensions/registration)
+
+
+
+内容已并入 [注册与上下文](/docs/api/extensions#extension-types)。
+
+* <span id="最小注册与激活" style="{ display: 'block', scrollMarginTop: '8rem' }" />[最小注册与激活](/docs/api/graph#最小注册与激活)
+* <span id="register" style="{ display: 'block', scrollMarginTop: '8rem' }" />[register](/docs/api/graph#extension-registration-register)
+* <span id="extensionfactory" style="{ display: 'block', scrollMarginTop: '8rem' }" />[工厂函数](/docs/api/extensions#extension-registration-extensionfactory)
+* <span id="实例作用域" style="{ display: 'block', scrollMarginTop: '8rem' }" />[实例作用域](/docs/api/extensions#实例作用域)
+* <span id="extensioncontext" style="{ display: 'block', scrollMarginTop: '8rem' }" /><span id="兼容成员" style="{ display: 'block', scrollMarginTop: '8rem' }" />[ExtensionContext](/docs/api/extensions#extensioncontext)
+* <span id="data读取快照与更新业务字段" style="{ display: 'block', scrollMarginTop: '8rem' }" />[data：读取快照与更新业务字段](/docs/api/extensions#data读取快照与更新业务字段)
+* <span id="state替换状态成员" style="{ display: 'block', scrollMarginTop: '8rem' }" />[state：替换状态成员](/docs/api/extensions#state替换状态成员)
+* <span id="viewport坐标与缩放" style="{ display: 'block', scrollMarginTop: '8rem' }" />[viewport：坐标与缩放](/docs/api/extensions#viewport坐标与缩放)
+* <span id="requestrender-与-isdestroyed" style="{ display: 'block', scrollMarginTop: '8rem' }" />[requestRender 与 isDestroyed](/docs/api/extensions#requestrender-与-isdestroyed)
+* <span id="清理与异常" style="{ display: 'block', scrollMarginTop: '8rem' }" />[清理与异常](/docs/api/extensions#清理与异常)

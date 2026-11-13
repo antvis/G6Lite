@@ -1,106 +1,118 @@
-# 在框架中使用 (/docs/getting-started/react)
+# React 接入 (/docs/getting-started/react)
 
 
 
 
-
-下面分别用 React 和 Vue 3 实现同一个关系图。可以缩放画布、拖拽节点，并悬停查看高亮效果。
-
-<QuickStartExample locale="zh" />
-
-在已有框架项目中运行 `npm install @antv/g6-lite`，然后使用对应的组件示例。
 
 ## 在 React 中使用 [#在-react-中使用]
 
-将以下代码保存为 `GraphView.tsx`，在页面中使用 `<GraphView />`。组件挂载后创建图，卸载时销毁实例。
+在页面中引入 `GraphView` 组件。
 
 ```tsx
-import { useEffect, useRef } from 'react';
-import { Graph } from '@antv/g6-lite';
+import GraphView from './GraphView';
 
-export function GraphView() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+export default function App() {
+  return <GraphView />;
+}
+```
+
+<span id="准备两组数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="react响应数据依赖变化" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### 定义 GraphView [#定义-graphview]
+
+将下面的代码保存为 `GraphView.tsx`。组件挂载后创建图，切换数据时调用 `setData()`，卸载时销毁实例。
+
+```tsx
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+
+const fitView = { padding: 32, maxZoom: 1 };
+
+export default function GraphView() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const graphRef = useRef<Graph | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const graph = new Graph({
       container: containerRef.current,
-      data: {
-        nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-        edges: [
-          { source: 'Alice', target: 'Bob' },
-          { source: 'Alice', target: 'Carol' },
-        ],
-      },
-      node: {
-        style: {
-          size: 24,
-          label: (node) => node.id,
-          labelPlacement: 'bottom',
-        },
-      },
-      edge: { style: { endArrow: true } },
+      data: basicData,
       layout: { type: 'circular', radius: 120 },
-      autoFit: { padding: 32, maxZoom: 1 },
+      node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
+      edge: { style: { endArrow: true } },
+      autoFit: fitView,
       behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
     });
 
-    void graph.render().catch(console.error);
+    graph.render().then(() => {
+      if (graph.destroyed) return;
+      graphRef.current = graph;
+      setReady(true);
+    }).catch((error) => {
+      if (!graph.destroyed) {
+        graph.destroy();
+        console.error(error);
+      }
+    });
 
-    return () => graph.destroy();
+    return () => {
+      graphRef.current = null;
+      graph.destroy();
+    };
   }, []);
 
-  return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
+  async function changeData(data: GraphData) {
+    const graph = graphRef.current;
+    if (!graph) return;
+    try {
+      await graph.setData(data, { fitView });
+    } catch (error) {
+      if (!graph.destroyed) console.error(error);
+    }
+  }
+
+  return (
+    <div>
+      <select
+        aria-label="关系图数据"
+        defaultValue="basic"
+        disabled={!ready}
+        onChange={(event) => void changeData(event.target.value === 'expanded' ? expandedData : basicData)}
+      >
+        <option value="basic">基础关系</option>
+        <option value="expanded">扩展关系</option>
+      </select>
+      <div ref={containerRef} style={{ width: '100%', height: 360 }} />
+    </div>
+  );
 }
 ```
 
-## 在 Vue 中使用 [#在-vue-中使用]
+## 运行效果 [#数据变化时更新图]
 
-将以下代码保存为 `GraphView.vue`，在页面中导入并使用 `<GraphView />`。通过模板 ref 获取容器，在生命周期钩子中创建和销毁图。
+选择「扩展关系」会添加 David 节点和 Bob → David 连线。切回「基础关系」即可恢复。
 
-```vue
-<script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { Graph } from '@antv/g6-lite';
+<QuickStartExample locale="zh" variant="framework-data" />
 
-const containerRef = ref<HTMLDivElement | null>(null);
-let graph: Graph | undefined;
+<span id="在-vue-中使用" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-onMounted(() => {
-  if (!containerRef.value) return;
-
-  graph = new Graph({
-    container: containerRef.value,
-    data: {
-      nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-      edges: [
-        { source: 'Alice', target: 'Bob' },
-        { source: 'Alice', target: 'Carol' },
-      ],
-    },
-    node: {
-      style: {
-        size: 24,
-        label: (node) => node.id,
-        labelPlacement: 'bottom',
-      },
-    },
-    edge: { style: { endArrow: true } },
-    layout: { type: 'circular', radius: 120 },
-    autoFit: { padding: 32, maxZoom: 1 },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-  });
-
-  void graph.render().catch(console.error);
-});
-
-onBeforeUnmount(() => {
-  graph?.destroy();
-});
-</script>
-
-<template>
-  <div ref="containerRef" style="width: 100%; height: 360px" />
-</template>
-```
+<span id="vue用-watch-同步数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />

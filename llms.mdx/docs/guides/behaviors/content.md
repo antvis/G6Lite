@@ -1,0 +1,493 @@
+# 交互通用配置项 (/docs/guides/behaviors)
+
+
+
+
+
+交互列表写在 `new Graph()` 的 `behaviors` 里。各项用途见[交互总览](/docs/guides/behavior-overview)。
+
+## BehaviorOption [#内置-behaviors]
+
+默认参数可直接用交互名称，例如 `'drag-canvas'`。需要调整参数时，写成对象，交互名称放在 `type`，参数放在同一层。
+
+查看 [11 个内置行为的逐项效果](/docs/api/options#内置行为索引)。
+
+## 配置平移、框选和套索 [#常用组合]
+
+空白处拖动用于平移。按住 Shift 拖动用于框选，按住 Ctrl 或 Meta 拖动用于套索。
+
+```ts
+import type { BehaviorName, BuiltInBehaviorConfig } from '@antv/g6-lite';
+
+const behaviors = [
+  'zoom-canvas',
+  { type: 'drag-canvas', ignoreModifierKeys: true },
+  'drag-node',
+  { type: 'click-select', multiple: true, trigger: 'shift' },
+  { type: 'brush-select', key: 'shift' },
+  { type: 'lasso-select', key: 'ctrl' },
+] satisfies Array<BehaviorName | BuiltInBehaviorConfig>;
+```
+
+可在[选择交互示例](/docs/examples/selection-behaviors)中试用这三种操作。点击多选的 `ctrl` 和 `meta` 可分别设置，区域选择设为 `ctrl` 时接受两者。完整规则见[选择参考](/docs/api/options#选择)。
+
+## 运行中切换交互 [#switch-behaviors]
+
+选择 Browse 拖动空白处平移。选择 Select 在空白处拖动框选，也可单击节点选中。切回 Browse 或选 Off 后，已选节点和当前视野保留。
+
+
+
+```ts
+if (mode === 'select') {
+  graph.updateOptions({ behaviors: ['zoom-canvas', 'click-select', 'brush-select'] });
+} else if (mode === 'browse') {
+  graph.setBehaviors(['zoom-canvas', 'drag-canvas']);
+} else {
+  graph.setBehaviors([]);
+}
+```
+
+**完整运行代码**
+
+```ts
+import { Graph } from '@antv/g6-lite';
+import GUI from 'lil-gui';
+
+export async function run(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'A', x: 0, y: 0 },
+        { id: 'B', x: 150, y: -65 },
+        { id: 'C', x: 150, y: 65 },
+      ],
+      edges: [{ source: 'A', target: 'B' }, { source: 'A', target: 'C' }],
+    },
+    node: {
+      style: { size: 28, label: (node) => node.id, labelOffsetY: 8 },
+      stateStyles: { selected: { fill: '#8050d2', haloWidth: 10 } },
+    },
+    behaviors: ['zoom-canvas', 'drag-canvas'],
+    autoFit: { padding: 55, maxZoom: 1 },
+  });
+
+  const ui = createDemoPanel(container);
+  const switchMode = (mode: string) => {
+    // #region switch
+    if (mode === 'select') {
+      graph.updateOptions({ behaviors: ['zoom-canvas', 'click-select', 'brush-select'] });
+    } else if (mode === 'browse') {
+      graph.setBehaviors(['zoom-canvas', 'drag-canvas']);
+    } else {
+      graph.setBehaviors([]);
+    }
+    // #endregion switch
+  };
+  const showSelection = () => {
+    ui.setStatus(`Selected: ${graph.findNodesByState('selected').join(', ') || 'none'}`);
+  };
+  graph.on('node:selectchange', showSelection);
+  graph.on('selection:clear', showSelection);
+  graph.on('brush:end', showSelection);
+
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => {
+    ui.destroy();
+    destroy();
+  };
+  try {
+    await graph.render();
+    showSelection();
+    ui.addChoice('Mode', { Browse: 'browse', Select: 'select', Off: 'off' }, 'browse', switchMode);
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+
+
+export function createDemoPanel(container: string | HTMLElement, description = '') {
+  const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+  if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+
+  let gui: GUI | undefined;
+  const getGui = () => {
+    if (!gui) {
+      gui = new GUI({ container: host, width: 160 });
+      gui.domElement.classList.add('g6lite-demo-controls');
+      gui.domElement.dataset.captureIgnore = '';
+      Object.assign(gui.domElement.style, {
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        zIndex: '30',
+        maxWidth: 'calc(100% - 20px)',
+        maxHeight: 'calc(100% - 20px)',
+      });
+    }
+    return gui;
+  };
+
+  let status: HTMLDivElement | undefined;
+  const setStatus = (message: string) => {
+    if (!status) {
+      status = document.createElement('div');
+      status.setAttribute('role', 'status');
+      status.dataset.role = 'status';
+      status.dataset.captureIgnore = '';
+      status.style.cssText =
+        'position:absolute;left:12px;bottom:10px;z-index:20;max-width:min(28rem,calc(100% - 24px));color:#64748b;font:12px/1.45 system-ui,sans-serif;pointer-events:none;white-space:pre-wrap;';
+      host.append(status);
+    }
+    status.textContent = message;
+  };
+  if (description) setStatus(description);
+
+  return {
+    get gui() {
+      return getGui();
+    },
+    addAction(label: string, action: () => void, folder = getGui()) {
+      return folder.add({ [label]: action }, label);
+    },
+    addChoice<T extends string>(
+      label: string,
+      choices: readonly T[] | Record<string, T>,
+      value: T,
+      onChange: (value: T) => void,
+    ) {
+      const options = Array.isArray(choices) ? [...choices] : choices;
+      return getGui().add({ value }, 'value', options).name(label).onChange(onChange);
+    },
+    setStatus,
+    destroy() {
+      gui?.destroy();
+      status?.remove();
+    },
+  };
+}
+```
+
+
+
+提交完整列表。`setBehaviors([])` 关闭全部行为，`setBehaviors()` 恢复默认缩放和平移。完整规则见 [`setBehaviors()`](/docs/api/graph#setbehaviors)。
+
+## 设置滚轮缩放 [#缩放手感与范围]
+
+滚轮缩放速度用 `sensitivity` 设置，最小和最大缩放倍数通过 `minZoom` 和 `maxZoom` 限定。完整默认值见[导航参考](/docs/api/options#导航与拖拽)。
+
+```ts
+behaviors: ['drag-canvas', { type: 'zoom-canvas', sensitivity: 0.5, minZoom: 0.5, maxZoom: 3 }],
+```
+
+## 邻域高亮 [#邻域高亮]
+
+高亮范围用 `degree` 设置。示例设为 `1`，鼠标移到 B 上时，B 和与它直接相连的节点、边会高亮。高亮颜色通过 `stateStyles.highlight` 设置。
+
+
+
+```ts
+behaviors: ['zoom-canvas', 'drag-canvas', { type: 'hover-highlight', degree: 1, inactiveState: 'inactive' }],
+```
+
+**完整运行代码**
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+export async function run(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'A', x: 0, y: 0 }, { id: 'B', x: 120, y: 0 },
+        { id: 'C', x: 240, y: 0 }, { id: 'D', x: 360, y: 0 },
+        { id: 'E', x: 120, y: 100 }, { id: 'Isolated', x: 360, y: 100 },
+      ],
+      edges: [
+        { source: 'A', target: 'B' }, { source: 'B', target: 'C' },
+        { source: 'C', target: 'D' }, { source: 'B', target: 'E' },
+      ],
+    },
+    node: {
+      style: { size: 30, label: (node) => node.id, labelOffsetY: 8 },
+      stateStyles: { highlight: { fill: '#00A876', stroke: '#005C41', strokeWidth: 2 } },
+    },
+    edge: { style: { hitAreaWidth: 12 }, stateStyles: { highlight: { stroke: '#00A876', lineWidth: 2 } } },
+    // #region highlight
+    behaviors: ['zoom-canvas', 'drag-canvas', { type: 'hover-highlight', degree: 1, inactiveState: 'inactive' }],
+    // #endregion highlight
+    autoFit: { padding: 60, maxZoom: 1 },
+  });
+  const status = document.createElement('div');
+  status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';
+  status.setAttribute('role', 'status');
+  const updateStatus = () => {
+    status.textContent = `highlight: ${graph.findNodesByState('highlight').join(', ') || 'none'}`;
+  };
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => { status.remove(); destroy(); };
+  try {
+    await graph.render();
+    graph.on('node:pointerover', updateStatus);
+    graph.on('node:pointerleave', updateStatus);
+    graph.on('edge:pointerover', updateStatus);
+    graph.on('edge:pointerleave', updateStatus);
+    updateStatus();
+    container.append(status);
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+```
+
+
+
+## Tooltip [#tooltip]
+
+在 `behaviors` 中启用 `tooltip`，为节点和边显示信息。根据场景选择悬停预览或点击查看详情。
+
+### 自定义内容 [#自定义内容]
+
+悬停延迟通过 `delay` 设置，显示范围通过 `enable` 控制。示例悬停 120 毫秒后显示 API、DB 或边的信息，Cache 不显示提示框。
+
+
+
+```ts
+const tooltip: BuiltInBehaviorOptionsMap['tooltip'] = {
+  type: 'tooltip', trigger: 'hover', delay: 120, className: 'docs-hover-tooltip',
+  enable: (ctx) => ctx.nodeId !== 'Cache',
+  getContent: (ctx) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'padding:10px 14px;border-radius:8px;background:#163B65;color:white;font:12px system-ui;box-shadow:0 4px 16px #163b6533;';
+    const title = document.createElement('strong');
+    title.textContent = String(ctx.data?.label ?? ctx.nodeId ?? ctx.edgeId ?? '');
+    const detail = document.createElement('div');
+    detail.textContent = ctx.itemType === 'node'
+      ? `Requests: ${Number(ctx.data?.requests ?? 0)}`
+      : `${ctx.source} → ${ctx.target}`;
+    card.append(title, detail);
+    return card;
+  },
+};
+```
+
+**完整运行代码**
+
+```ts
+import { Graph, type BuiltInBehaviorOptionsMap } from '@antv/g6-lite';
+
+export async function run(container: HTMLElement) {
+  // #region tooltip
+  const tooltip: BuiltInBehaviorOptionsMap['tooltip'] = {
+    type: 'tooltip', trigger: 'hover', delay: 120, className: 'docs-hover-tooltip',
+    enable: (ctx) => ctx.nodeId !== 'Cache',
+    getContent: (ctx) => {
+      const card = document.createElement('div');
+      card.style.cssText = 'padding:10px 14px;border-radius:8px;background:#163B65;color:white;font:12px system-ui;box-shadow:0 4px 16px #163b6533;';
+      const title = document.createElement('strong');
+      title.textContent = String(ctx.data?.label ?? ctx.nodeId ?? ctx.edgeId ?? '');
+      const detail = document.createElement('div');
+      detail.textContent = ctx.itemType === 'node'
+        ? `Requests: ${Number(ctx.data?.requests ?? 0)}`
+        : `${ctx.source} → ${ctx.target}`;
+      card.append(title, detail);
+      return card;
+    },
+  };
+  // #endregion tooltip
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'API', x: 0, y: 0, data: { label: '<API Gateway>', requests: 1280 } },
+        { id: 'DB', x: 180, y: 0, data: { label: 'Database', requests: 960 } },
+        { id: 'Cache', x: 360, y: 0 },
+      ],
+      edges: [
+        { id: 'request', source: 'API', target: 'DB', data: { label: 'Request' } },
+        { id: 'warm', source: 'DB', target: 'Cache', data: { label: 'Warm cache' } },
+      ],
+    },
+    node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 8 } },
+    edge: { style: { hitAreaWidth: 12 } },
+    behaviors: [tooltip],
+    autoFit: { padding: 56, maxZoom: 1 },
+  });
+  try {
+    await graph.render();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+```
+
+
+
+### 点击显示 [#点击显示]
+
+触发方式设为 `trigger: 'click'` 后，点击元素显示提示框。再次点击同一个元素或点击空白处即可关闭。
+
+
+
+```ts
+const tooltip: BuiltInBehaviorOptionsMap['tooltip'] = {
+  type: 'tooltip', trigger: 'click', className: 'docs-click-tooltip',
+  enable: (ctx) => ctx.nodeId !== 'Cache',
+  getContent: (ctx) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'padding:10px 14px;border-radius:8px;background:#163B65;color:white;font:12px system-ui;box-shadow:0 4px 16px #163b6533;';
+    const title = document.createElement('strong');
+    title.textContent = String(ctx.data?.label ?? ctx.nodeId ?? ctx.edgeId ?? '');
+    const detail = document.createElement('div');
+    detail.textContent = ctx.itemType === 'node'
+      ? `Requests: ${Number(ctx.data?.requests ?? 0)}`
+      : `${ctx.source} → ${ctx.target}`;
+    card.append(title, detail);
+    return card;
+  },
+};
+```
+
+**完整运行代码**
+
+```ts
+import { Graph, type BuiltInBehaviorOptionsMap } from '@antv/g6-lite';
+
+export async function run(container: HTMLElement) {
+  // #region tooltip
+  const tooltip: BuiltInBehaviorOptionsMap['tooltip'] = {
+    type: 'tooltip', trigger: 'click', className: 'docs-click-tooltip',
+    enable: (ctx) => ctx.nodeId !== 'Cache',
+    getContent: (ctx) => {
+      const card = document.createElement('div');
+      card.style.cssText = 'padding:10px 14px;border-radius:8px;background:#163B65;color:white;font:12px system-ui;box-shadow:0 4px 16px #163b6533;';
+      const title = document.createElement('strong');
+      title.textContent = String(ctx.data?.label ?? ctx.nodeId ?? ctx.edgeId ?? '');
+      const detail = document.createElement('div');
+      detail.textContent = ctx.itemType === 'node'
+        ? `Requests: ${Number(ctx.data?.requests ?? 0)}`
+        : `${ctx.source} → ${ctx.target}`;
+      card.append(title, detail);
+      return card;
+    },
+  };
+  // #endregion tooltip
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'API', x: 0, y: 0, data: { label: '<API Gateway>', requests: 1280 } },
+        { id: 'DB', x: 180, y: 0, data: { label: 'Database', requests: 960 } },
+        { id: 'Cache', x: 360, y: 0 },
+      ],
+      edges: [
+        { id: 'request', source: 'API', target: 'DB', data: { label: 'Request' } },
+        { id: 'warm', source: 'DB', target: 'Cache', data: { label: 'Warm cache' } },
+      ],
+    },
+    node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 8 } },
+    edge: { style: { hitAreaWidth: 12 } },
+    behaviors: [tooltip],
+    autoFit: { padding: 56, maxZoom: 1 },
+  });
+  try {
+    await graph.render();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+```
+
+
+
+### 配置项 [#配置项]
+
+完整默认值、函数签名、container 和 TooltipContext 字段统一查 [TooltipOptions](/docs/api/options#tooltipoptions) 与 [TooltipContext](/docs/api/options#tooltipcontext)。ctx.event 是原始鼠标事件；它与普通 Graph 事件的 nativeEvent 命名不同。
+
+默认内容取节点的 `data.label` 或 ID，边取 `data.label` 或两端名称。内容通过 `getContent` 自定义。业务值可通过元素的 `textContent` 填入，返回 HTML 字符串时需要转义其中的动态内容。
+
+### 样式 [#样式]
+
+库只负责定位与显隐，不附带视觉皮肤。两个示例直接在返回元素上设置样式；也可给浮层 className 配置样式，例如默认类名：
+
+```css
+.g6lite-tooltip {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #163b65;
+  color: white;
+  font-size: 12px;
+}
+```
+
+默认挂载 document.body，按视口定位并在边缘翻转。自定义 container 同时改变挂载与碰撞边界，需检查定位祖先、滚动和裁剪；不要假定祖先的 transform 不影响 fixed 定位。
+
+### Tooltip 常见问题 [#tooltip-常见问题]
+
+#### 为什么卡片没有背景，或者点击不了？ [#为什么卡片没有背景或者点击不了]
+
+库没有内置视觉皮肤，需要业务 CSS。浮层默认 pointer-events: none；需要按钮、表单或可交互卡片时，用应用自己的浮层承接。
+
+#### 为什么 Combo 上没有 Tooltip？ [#为什么-combo-上没有-tooltip]
+
+内置 tooltip 只处理 node/edge。Combo 说明可用公开事件结合业务浮层实现，不使用内部拾取接口。
+
+#### 更新数据后，已打开的内容会立即更新吗？ [#更新数据后已打开的内容会立即更新吗]
+
+不会因 setData 自动重建 Tooltip；在后续指针事件中重新读取内容。用 setBehaviors 替换列表可切换 Tooltip 配置，旧 Tooltip 的监听、计时器和浮层会被清理。
+
+## 监听交互事件 [#事件分发模型]
+
+节点点击通过 `node:click` 监听。需要让点击同时切换选中状态时，再启用 `click-select`。
+
+```ts
+const onNodeClick = ({ nodeId }: { nodeId: string }) => console.log(nodeId);
+graph.on('node:click', onNodeClick);
+// 组件卸载时：
+graph.off('node:click', onNodeClick);
+```
+
+选中联动同时关注 node:selectchange、edge:selectchange、brush:end、lasso:end；需要最终集合时主动查询状态，不能假定所有选择来源都逐个发出 node:selectchange。接入与清理代码见[事件指南](/docs/guides/events#选择与拖拽事件)，完整入参查[事件参考](/docs/api/graph/events#选择事件)。
+
+**连线编辑与底层分发**
+
+drag-edge 发出重连建议，不自动修改 source/target，也没有跟随鼠标的临时连线。业务接收 edge:dragend，验证 reconnected 后更新自己的边数据，再通过 setData 等公开入口写回。若配置了 layout，setData 仍会重新计算布局；fitView: false 只保留相机。
+
+命中优先级依次是节点、边、分组和画布。
+
+## 常见问题 [#常见问题]
+
+### 加上 tooltip 后为什么不能缩放了？ [#加上-tooltip-后为什么不能缩放了]
+
+显式 behaviors 替换默认列表，把 zoom-canvas 和 drag-canvas 一并写入。
+
+### 框选时为什么画布也在动？ [#框选时为什么画布也在动]
+
+将框选绑定 Shift，保留 drag-canvas 的 ignoreModifierKeys: true；不要让框选和套索使用相同手势。
+
+### 可以用 updateOptions 动态切换 Behavior 吗？ [#可以用-updateoptions-动态切换-behavior-吗]
+
+可以。仅切换交互时用 `setBehaviors()`。同时更新样式时，可在 `updateOptions()` 里传入 `behaviors`。
+
+## 相关 [#相关]
+
+* [Behavior 配置参考](/docs/api/options#options-behaviors)：全部参数、默认值和边界。
+* [自定义交互](/docs/guides/custom-behavior) · [独立 Tooltip 示例](/docs/examples/tooltip)。
+* [事件指南](/docs/guides/events) · [选择行为示例](/docs/examples/selection-behaviors)。
+* [邻居高亮示例](/docs/examples/neighbor-highlight)：悬停后观察一度邻接范围。
+
+**相关可运行示例**
+
+* [悬停高亮](/docs/examples/hover)
+* [一度邻居高亮](/docs/examples/neighbor-highlight)
+* [拖拽节点与 Combo](/docs/examples/drag-node)
+* [拖拽边端点](/docs/examples/drag-edge)

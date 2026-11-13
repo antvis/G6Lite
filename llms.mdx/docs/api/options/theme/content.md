@@ -1,0 +1,13 @@
+# 主题配置参考（旧入口） (/docs/api/options/theme)
+
+
+
+内容已并入 [主题](/docs/api/options#options-theme)。
+
+* <span id="themeoption" style="{ display: 'block', scrollMarginTop: '8rem' }" />[ThemeOption](/docs/api/options#themeoption)
+* <span id="themetokens" style="{ display: 'block', scrollMarginTop: '8rem' }" />[ThemeTokens](/docs/api/options#themetokens)
+* <span id="代码与对应效果" style="{ display: 'block', scrollMarginTop: '8rem' }" />[代码与对应效果](/docs/api/options#options-theme-代码与对应效果)
+* <span id="状态预设" style="{ display: 'block', scrollMarginTop: '8rem' }" />[状态预设](/docs/api/options#状态预设)
+* <span id="覆盖规则" style="{ display: 'block', scrollMarginTop: '8rem' }" />[覆盖规则](/docs/api/options#覆盖规则)
+* <span id="resolvetheme" style="{ display: 'block', scrollMarginTop: '8rem' }" />[resolveTheme](/docs/api/options#resolvetheme)
+* <span id="运行时更新" style="{ display: 'block', scrollMarginTop: '8rem' }" />[运行时更新](/docs/api/options#options-theme-运行时更新)

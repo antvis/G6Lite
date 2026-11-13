@@ -4,7 +4,7 @@
 
 
 
-This page explains module responsibilities and collaboration for readers exploring rendering, performance paths, or extension boundaries. See [Graph lifecycle](/en/docs/concepts/graph-lifecycle) for the application calling sequence.
+This page explains module responsibilities and collaboration for readers exploring rendering, performance paths, or extension boundaries. See [Graph lifecycle methods](/en/docs/api/graph#graph-lifecycle) for the application calling sequence.
 
 ## Architecture layers [#architecture-layers]
 
@@ -34,7 +34,7 @@ Calling `render()` prepares input, builds the runtime, and draws the first frame
 
 <FirstRenderFlow locale="en" />
 
-When asynchronous layout or extension initialization returns, Graph checks the active render generation and destroyed state so stale results cannot replace newer data. Generations are an internal cancellation and result-commit mechanism; applications manage instances through public lifecycle methods.
+After asynchronous layout, Graph checks generation and destruction before committing stale results. The render Promise describes initialization/submission, not GPU completion; consult the [lifecycle contract](/en/docs/api/graph#graph-lifecycle) for plugin mounting and other boundaries. Generations are an internal cancellation and result-commit mechanism; applications manage instances through public lifecycle methods.
 
 ### Frequent-update paths [#frequent-update-paths]
 
@@ -49,7 +49,7 @@ RenderScheduler selects processing based on the change level:
 | Camera pan and zoom                   | Update uniforms and draw without rebuilding graph-data buffers               |
 | Full replacement or structural change | Update DataModel and fully or partially process render data and buffers      |
 
-Selection, highlighting, and dragging should update the existing instance through state, position, and batch APIs. See [Data](/en/docs/guides/data) for choosing update methods and [Performance tuning](/en/docs/metrics/performance-tuning) for practical guidance.
+Selection, highlighting, and dragging should update the existing instance through state, position, and batch APIs. See [Data](/en/docs/guides/data) for choosing update methods and [Performance tuning](/en/docs/metrics/performance#performance-tuning) for practical guidance.
 
 ## Layout and interaction collaboration [#layout-and-interaction-collaboration]
 
@@ -69,7 +69,7 @@ Native event → Hit detection → Graph event → Behavior → Public data or s
 
 Nodes and edges prefer GPU Picking and fall back to CPU detection when the picking buffer is unavailable. Combo uses its own geometric hit path. Picking buffers are maintained on demand; drawing does not always require a picking pass.
 
-Interaction changes return through the update scheduler, so Behaviors do not need to manipulate framebuffers. See [Interactions](/en/docs/guides/interactions) and [Events](/en/docs/guides/events) for application usage.
+Interaction changes return through the update scheduler, so Behaviors do not need to manipulate framebuffers. See [Interactions](/en/docs/guides/behaviors) and [Events](/en/docs/guides/events) for application usage.
 
 ## Extension boundary [#extension-boundary]
 
@@ -77,4 +77,16 @@ G6Lite supports node, edge, label, decoration, layout, behavior, transform, and 
 
 Stateful extensions collaborate through the data, state, viewport, and `requestRender()` capabilities of `ExtensionContext`. They should not hold internal DataModel, Renderer, WebGL contexts, or GPU buffers.
 
-See [Extensions](/en/docs/guides/extensions) for registration, instance scope, and cleanup, and [API stability](/en/docs/compatibility/api-stability) for public contract stability.
+See [Extensions](/en/docs/guides/extensions) for registration, instance scope, and cleanup. See the [Extension API](/en/docs/api/graph#graph-extensions) for signatures and types.
+
+## Resource ownership and cleanup [#resource-ownership-and-cleanup]
+
+| Resource                                                    | Owner              | Release boundary                           |
+| ----------------------------------------------------------- | ------------------ | ------------------------------------------ |
+| Container, application fetch, external subscriptions        | Application        | Unmount or obsolete request                |
+| Graph canvases, scheduling, resize observation, interaction | Graph              | destroy                                    |
+| Worker / layout request                                     | Layout runtime     | Completion, cancellation, destruction      |
+| Plugin DOM and subscriptions                                | Extension instance | Extension destroy                          |
+| WebGL buffers / framebuffers                                | Internal renderer  | Runtime destruction / resource restoration |
+
+These are implementation responsibilities, not additional application APIs. See [React](/en/docs/getting-started/react), [Vue](/en/docs/getting-started/vue), and the [public extension context](/en/docs/api/graph#extension-registration). Context restoration depends on the browser/device and does not guarantee automatic restoration of application state or page conditions.

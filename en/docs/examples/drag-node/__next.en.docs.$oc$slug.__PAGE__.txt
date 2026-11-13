@@ -1,10 +1,10 @@
 1:"$Sreact.fragment"
-2:I[17787,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-3:I[17787,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-4:I[66110,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
-6:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+2:I[917787,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"DocsPage"]
+3:I[917787,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"DocsBody"]
+4:I[266110,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"ExampleDetailClient"]
+6:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
 7:"$Sreact.suspense"
-5:T5eb,/**
+5:T70f,/**
  * Demo: drag individual nodes, and drag a combo by its background.
  */
 import { Graph } from '@antv/g6-lite';
@@ -40,6 +40,7 @@ export async function run(container: string | HTMLElement) {
         labelPlacement: 'center',
         labelColor: '#fff',
       },
+      stateStyles: { selected: { fill: '#8050d2' } },
     },
     combo: {
       style: {
@@ -48,11 +49,23 @@ export async function run(container: string | HTMLElement) {
       },
     },
     edge: { style: { endArrow: true, stroke: '#99ADD1' } },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+    // #region drag-options
+    behaviors: [
+      'zoom-canvas',
+      'drag-canvas',
+      { type: 'click-select', multiple: true, trigger: 'shift' },
+      'drag-node',
+    ],
+    // #endregion drag-options
   });
-  await graph.render();
-  graph.fitView({ padding: 48 });
-  return graph;
+  try {
+    await graph.render();
+    graph.fitView({ padding: 48, maxZoom: 1 });
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
 }
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Drag nodes and combos\",\"description\":\"Drag a node, or drag a combo background to move its nodes.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/drag-node\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/drag-node\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/drag-node/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Drag nodes and combos\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/drag-node\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"drag-node","locale":"en","initialSource":"$5"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"EOJTM9qFS6tmmrEoiTa9o"}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Drag nodes and combos\",\"description\":\"Drag a node, or drag a combo background to move its nodes.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/drag-node\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/drag-node\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/drag-node/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Drag nodes and combos\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/drag-node\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"drag-node","locale":"en","initialSource":"$5"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/2g8onjn9ry2iz.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/2g7dmqvv2erk4.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"nBQ24oSAOgYQp4j9GWoSR"}
 8:null

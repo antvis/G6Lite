@@ -1,0 +1,16 @@
+# Registration and context (previous URL) (/en/docs/api/extensions/registration)
+
+
+
+This section has moved to [Registration and context](/en/docs/api/extensions#extension-types).
+
+* <span id="minimal-registration-and-activation" style="{ display: 'block', scrollMarginTop: '8rem' }" />[Minimal registration and activation](/en/docs/api/graph#minimal-registration-and-activation)
+* <span id="register" style="{ display: 'block', scrollMarginTop: '8rem' }" />[register](/en/docs/api/graph#extension-registration-register)
+* <span id="extensionfactory" style="{ display: 'block', scrollMarginTop: '8rem' }" />[Factory functions](/en/docs/api/extensions#extension-registration-extensionfactory)
+* <span id="instance-scope" style="{ display: 'block', scrollMarginTop: '8rem' }" />[Instance scope](/en/docs/api/extensions#instance-scope)
+* <span id="extensioncontext" style="{ display: 'block', scrollMarginTop: '8rem' }" /><span id="compatibility-members" style="{ display: 'block', scrollMarginTop: '8rem' }" />[ExtensionContext](/en/docs/api/extensions#extensioncontext)
+* <span id="data-snapshots-and-business-field-updates" style="{ display: 'block', scrollMarginTop: '8rem' }" />[data: snapshots and business-field updates](/en/docs/api/extensions#data-snapshots-and-business-field-updates)
+* <span id="state-replace-state-members" style="{ display: 'block', scrollMarginTop: '8rem' }" />[state: replace state members](/en/docs/api/extensions#state-replace-state-members)
+* <span id="viewport-coordinates-and-zoom" style="{ display: 'block', scrollMarginTop: '8rem' }" />[viewport: coordinates and zoom](/en/docs/api/extensions#viewport-coordinates-and-zoom)
+* <span id="requestrender-and-isdestroyed" style="{ display: 'block', scrollMarginTop: '8rem' }" />[requestRender and isDestroyed](/en/docs/api/extensions#requestrender-and-isdestroyed)
+* <span id="cleanup-and-errors" style="{ display: 'block', scrollMarginTop: '8rem' }" />[Cleanup and errors](/en/docs/api/extensions#cleanup-and-errors)

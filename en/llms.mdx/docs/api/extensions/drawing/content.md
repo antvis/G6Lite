@@ -1,0 +1,13 @@
+# Drawing extension contracts (previous URL) (/en/docs/api/extensions/drawing)
+
+
+
+This section has moved to [Drawing extensions](/en/docs/api/extensions#extension-drawing).
+
+* <span id="nodeextension" style="{ display: 'block', scrollMarginTop: '8rem' }" />[NodeExtension](/en/docs/api/extensions#nodeextension)
+* <span id="nodeoverlaydrawparams" style="{ display: 'block', scrollMarginTop: '8rem' }" />[NodeOverlayDrawParams](/en/docs/api/extensions#nodeoverlaydrawparams)
+* <span id="nodeboundaryanchorparams" style="{ display: 'block', scrollMarginTop: '8rem' }" />[NodeBoundaryAnchorParams](/en/docs/api/extensions#nodeboundaryanchorparams)
+* <span id="edgeextension" style="{ display: 'block', scrollMarginTop: '8rem' }" />[EdgeExtension](/en/docs/api/extensions#edgeextension)
+* <span id="labelrenderer" style="{ display: 'block', scrollMarginTop: '8rem' }" />[LabelRenderer](/en/docs/api/extensions#labelrenderer)
+* <span id="input-and-output" style="{ display: 'block', scrollMarginTop: '8rem' }" />[Input and output](/en/docs/api/extensions#input-and-output)
+* <span id="decorationrenderer" style="{ display: 'block', scrollMarginTop: '8rem' }" />[DecorationRenderer](/en/docs/api/extensions#decorationrenderer)

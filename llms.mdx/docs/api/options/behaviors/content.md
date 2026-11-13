@@ -1,0 +1,17 @@
+# Behavior 配置参考（旧入口） (/docs/api/options/behaviors)
+
+
+
+内容已并入 [交互与 Tooltip](/docs/api/options#options-behaviors)。
+
+* <span id="behavioroption" style="{ display: 'block', scrollMarginTop: '8rem' }" />[BehaviorOption](/docs/api/options#behavioroption)
+* <span id="挂载与更新" style="{ display: 'block', scrollMarginTop: '8rem' }" />[挂载与更新](/docs/api/options#挂载与更新)
+* <span id="内置行为索引" style="{ display: 'block', scrollMarginTop: '8rem' }" />[内置行为索引](/docs/api/options#内置行为索引)
+* <span id="导航与拖拽" style="{ display: 'block', scrollMarginTop: '8rem' }" />[导航与拖拽](/docs/api/options#导航与拖拽)
+* <span id="选择" style="{ display: 'block', scrollMarginTop: '8rem' }" />[选择](/docs/api/options#选择)
+* <span id="代码与对应效果" style="{ display: 'block', scrollMarginTop: '8rem' }" />[代码与对应效果](/docs/api/options#options-behaviors-代码与对应效果)
+* <span id="高亮" style="{ display: 'block', scrollMarginTop: '8rem' }" />[高亮](/docs/api/options#高亮)
+* <span id="tooltipoptions" style="{ display: 'block', scrollMarginTop: '8rem' }" />[TooltipOptions](/docs/api/options#tooltipoptions)
+* <span id="tooltipcontext" style="{ display: 'block', scrollMarginTop: '8rem' }" />[TooltipContext](/docs/api/options#tooltipcontext)
+* <span id="自定义交互契约" style="{ display: 'block', scrollMarginTop: '8rem' }" />[自定义交互契约](/docs/api/options#自定义交互契约)
+* <span id="自定义-behavior-契约" style="{ display: 'block', scrollMarginTop: '8rem' }" />[`自定义-behavior-契约`](/docs/api/options#自定义-behavior-契约)

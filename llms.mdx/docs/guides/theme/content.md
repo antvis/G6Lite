@@ -4,78 +4,234 @@
 
 
 
-`theme` 可以传字符串，也可以传覆盖 token 的对象。
-
-相同结构的配色示意：light 使用白色画布，dark 使用深色画布，右侧演示覆盖 `nodeFill`。仅 dark 预览保留深色底，以便对比主题效果。
-
-<img alt="light、dark 和自定义节点填充色的主题对比示意" src="__img0" title="主题配色对比" />
-
-可运行示例：[默认主题与交互状态](/docs/examples/default-theme)。
+通过 `theme` 统一节点、边和画布的默认配色。先选 light / dark，再覆盖品牌 token；按数据着色时在 `node.style` 或 `edge.style` 的对应字段中配置样式函数。全部字段和默认值见[主题配置参考](/docs/api/options#options-theme)。
 
 ## 使用预设 [#使用预设]
 
-```ts
-theme: 'light';
-```
+下面的完整代码直接渲染上方画布。选择 light、dark、brand，比较背景、节点尺寸与选中状态；重置恢复 light。切换调用 updateOptions，沿用现有图实例。
+
+
 
 ```ts
-theme: 'dark';
-```
+import { Graph, resolveTheme, type ThemeOption } from '@antv/g6-lite';
+import GUI from 'lil-gui';
 
-## 覆盖 token [#覆盖-token]
+export async function run(container: HTMLElement) {
+  // #region theme-options
+  const themes: Record<string, ThemeOption> = {
+    light: 'light',
+    dark: 'dark',
+    brand: {
+      type: 'light', nodeFill: '#00A876', nodeSize: 36,
+      edgeStroke: '#00A876', edgeLineWidth: 2, canvasBackground: '#F1F8F5',
+      nodeStateStyles: {
+        ...resolveTheme('light').nodeStateStyles,
+        selected: { stroke: '#005C41', strokeWidth: 3, haloWidth: 12 },
+      },
+    },
+  };
+  // #endregion theme-options
+  const graph = new Graph({
+    container,
+    theme: themes.light,
+    data: {
+      nodes: [
+        { id: 'Default', x: 0, y: 0 },
+        { id: 'Selected', x: 160, y: 0, states: ['selected'] },
+        { id: 'Disabled', x: 320, y: 0, states: ['disabled'] },
+      ],
+      edges: [{ source: 'Default', target: 'Selected' }, { source: 'Selected', target: 'Disabled' }],
+    },
+    node: { style: { label: (node) => node.id, labelColor: '#334155', labelOffsetY: 8 } },
+    behaviors: [],
+    autoFit: { padding: 56, maxZoom: 1 },
+  });
+  const ui = createDemoPanel(container);
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => { ui.destroy(); destroy(); };
+  try {
+    await graph.render();
+    ui.addChoice('Theme', Object.keys(themes), 'light', (value) => {
+      graph.updateOptions({
+        theme: themes[value],
+        node: { style: { labelColor: value === 'dark' ? '#E2E8F0' : '#334155' } },
+      });
+      // Keep non-white theme backgrounds accurate inside the dotted docs canvas.
+      graph.getCanvas().style.mixBlendMode = value === 'light' ? 'multiply' : 'normal';
+    });
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
 
-```ts
-theme: {
-  type: 'light',
-  canvasBackground: '#f7f8fa',
-  nodeFill: '#1783FF',
-  edgeStroke: '#d9d9d9',
-  edgeLineWidth: 2,
+
+export function createDemoPanel(container: string | HTMLElement, description = '') {
+  const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+  if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+
+  let gui: GUI | undefined;
+  const getGui = () => {
+    if (!gui) {
+      gui = new GUI({ container: host, width: 160 });
+      gui.domElement.classList.add('g6lite-demo-controls');
+      gui.domElement.dataset.captureIgnore = '';
+      Object.assign(gui.domElement.style, {
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        zIndex: '30',
+        maxWidth: 'calc(100% - 20px)',
+        maxHeight: 'calc(100% - 20px)',
+      });
+    }
+    return gui;
+  };
+
+  let status: HTMLDivElement | undefined;
+  const setStatus = (message: string) => {
+    if (!status) {
+      status = document.createElement('div');
+      status.setAttribute('role', 'status');
+      status.dataset.role = 'status';
+      status.dataset.captureIgnore = '';
+      status.style.cssText =
+        'position:absolute;left:12px;bottom:10px;z-index:20;max-width:min(28rem,calc(100% - 24px));color:#64748b;font:12px/1.45 system-ui,sans-serif;pointer-events:none;white-space:pre-wrap;';
+      host.append(status);
+    }
+    status.textContent = message;
+  };
+  if (description) setStatus(description);
+
+  return {
+    get gui() {
+      return getGui();
+    },
+    addAction(label: string, action: () => void, folder = getGui()) {
+      return folder.add({ [label]: action }, label);
+    },
+    addChoice<T extends string>(
+      label: string,
+      choices: readonly T[] | Record<string, T>,
+      value: T,
+      onChange: (value: T) => void,
+    ) {
+      const options = Array.isArray(choices) ? [...choices] : choices;
+      return getGui().add({ value }, 'value', options).name(label).onChange(onChange);
+    },
+    setStatus,
+    destroy() {
+      gui?.destroy();
+      status?.remove();
+    },
+  };
 }
 ```
 
-常用 token：
 
-| token                            | 说明     |
-| -------------------------------- | ------ |
-| `canvasBackground`               | 画布背景   |
-| `nodeFill`                       | 默认节点填充 |
-| `nodeSize`                       | 默认节点尺寸 |
-| `nodeStroke` / `nodeStrokeWidth` | 默认节点描边 |
-| `edgeStroke` / `edgeLineWidth`   | 默认边样式  |
-| `edgeArrow`                      | 默认箭头样式 |
-| `nodeStateStyles`                | 节点状态样式 |
-| `edgeStateStyles`                | 边状态样式  |
+
+## 覆盖 token [#覆盖-token]
+
+将业务品牌色集中映射到 ThemeOption，再传给 new Graph 的 theme。只传需要修改的 token：
+
+```ts
+import type { ThemeOption } from '@antv/g6-lite';
+
+const brandTheme: ThemeOption = {
+  type: 'light',
+  nodeFill: '#00A876',
+  nodeSize: 36,
+  edgeStroke: '#00A876',
+  edgeLineWidth: 2,
+  canvasBackground: '#F1F8F5',
+};
+```
+
+状态表是整表替换。需要保留 disabled 等预设状态时，按参考中的[展开写法](/docs/api/options#覆盖规则)构造新表。
 
 ## 优先级 [#优先级]
 
-元素配置优先级高于主题 token：
+两节点的显式绿色填充覆盖主题蓝色。Selected 使用 node.stateStyles.selected 的橙色描边；该状态对象被整项选中，不会补上主题 selected 中的紫色填充，因此节点仍是绿色。
+
+
 
 ```ts
-new Graph({
-  theme: { type: 'light', nodeFill: '#1783FF' },
-  node: {
-    style: { fill: '#61DDAA' },
-  },
+import { Graph } from '@antv/g6-lite';
+
+export async function run(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'Base style', x: 0, y: 0 },
+        { id: 'Selected', x: 180, y: 0, states: ['selected'] },
+      ],
+      edges: [{ source: 'Base style', target: 'Selected' }],
+    },
+    theme: {
+      type: 'light', nodeFill: '#1783FF',
+      nodeStateStyles: { selected: { fill: '#873BF4', stroke: '#873BF4' } },
+    },
+    node: {
+      style: { fill: '#00A876', size: 36, label: (node) => node.id, labelOffsetY: 8 },
+      stateStyles: { selected: { stroke: '#F08F56', strokeWidth: 3 } },
+    },
+    behaviors: [],
+    autoFit: { padding: 56, maxZoom: 1 },
+  });
+  try {
+    await graph.render();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+```
+
+
+
+## 切换主题 [#切换主题]
+
+已有图实例可同时更新主题和标签颜色：
+
+```ts
+graph.updateOptions({
+  theme: 'dark',
+  node: { style: { labelColor: '#E2E8F0' } },
+  edge: { style: { labelColor: '#E2E8F0' } },
 });
 ```
 
-上例中节点会使用 `node.style.fill`。
+每次传入的 theme 都替换上一份主题选项。保留品牌配置时，传 `{ ...brandTheme, type: 'dark', canvasBackground: '#1a1a1a' }`；其中显式品牌 token 也会继续覆盖 dark 预设。
+
+切换刷新样式，保留图数据、状态与相机，不重新运行布局或适配画布。系统深色模式、页面 CSS 和 Combo 外观由应用同步；若用了标签背景、图标或装饰，也需检查其对比度。
 
 ## 默认视觉 [#默认视觉]
 
-未传 `theme` 时使用 light 预设。当前预设遵循以下语义：
+省略 theme 使用 light，默认节点尺寸为 24。标签需配置文本后才绘制，颜色不随主题自动切换。预设字段值与状态表现查[主题参考](/docs/api/options#状态预设)；全部内置状态可在[默认主题与交互状态](/docs/examples/default-theme)中并排查看。
 
-* 默认节点尺寸为 `24`，主色为 AntV `#1783FF`。
-* light 画布为白色，边使用低对比度蓝灰色；dark 画布为 `#1a1a1a`，边使用更亮的蓝灰色。
-* `active`、`selected`、`highlight` 使用强调色、描边或 halo 表达，不改变节点尺寸和基础边宽。
-* `inactive`、`disabled` 通过透明度弱化，仍保留上下文关系。
-* 标签属于按需配置能力；设置 `node.style.label` 或 `edge.style.label` 后才会绘制。
+## 常见问题 [#常见问题]
 
-可在 [默认主题与交互状态](/docs/examples/default-theme) 中并排检查 light、dark 和六种内置状态。
+### 改了 nodeFill，节点为什么没变色？ [#改了-nodefill节点为什么没变色]
+
+先检查 node.style.fill 或自定义扩展是否设置了填充；它们优先于主题默认值。节点处于选中等状态时，还要检查该状态的 fill。
+
+### 切到 dark 后文字为什么看不清？ [#切到-dark-后文字为什么看不清]
+
+主题没有标签颜色 token。同步更新 node/edge.style.labelColor；自定义标签和背景也需使用适合深色画布的配色。
+
+### 只改 selected，为什么 disabled 的淡化效果没了？ [#只改-selected为什么-disabled-的淡化效果没了]
+
+直接传 nodeStateStyles 会替换预设整张表。展开原状态表，再修改 selected；不要原地修改 resolveTheme 返回值中的共享状态对象。
 
 ## 相关 [#相关]
 
-* [节点](/docs/guides/node)
-* [边](/docs/guides/edge)
-* [示例总览](/docs/examples)
+* [主题配置参考](/docs/api/options#options-theme)：token、预设、覆盖规则与 resolveTheme。
+* [节点指南](/docs/guides/node) · [边指南](/docs/guides/edge)：按数据设置外观。
+* [标签与图标](/docs/guides/label) · [Combo](/docs/guides/combo)：同步其他视觉元素。
+
+**相关可运行示例**
+
+* [默认主题与交互状态](/docs/examples/default-theme)

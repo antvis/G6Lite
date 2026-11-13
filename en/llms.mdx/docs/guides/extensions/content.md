@@ -2,102 +2,45 @@
 
 
 
-G6Lite uses **Extension** as the umbrella term. Node, Edge, Label, Decoration, Layout, Behavior, Transform, and Plugin are extension categories. A **Plugin** is only the category for peripheral DOM or stateful capabilities such as a toolbar or minimap; a custom Behavior is an extension, not a Plugin.
-
-Prefer configuration and functional style mappings first. Register an extension only when configuration cannot express the capability.
-
-```ts
-import { register } from '@antv/g6-lite';
-
-register('edge', 'business-relation', {
-  base: 'arc',
-  style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
-});
-```
-
-## Registration and activation [#registration-and-activation]
-
-Registration assigns an implementation to a stable name. A Graph activates it by referencing that name in its options. Register extensions before creating or rendering the Graph, and prefix third-party names to reduce global registry collisions.
-
-Stateful Layout, Behavior, Transform, and Plugin extensions should use `extensionFactory()` so each runtime scope receives a fresh instance:
-
-```ts
-import { extensionFactory, register, type ExtensionContext } from '@antv/g6-lite';
-
-register(
-  'behavior',
-  'business-click',
-  extensionFactory(() => {
-    let context: ExtensionContext | undefined;
-
-    return {
-      init(nextContext) {
-        context = nextContext;
-      },
-      getEvents() {
-        return {
-          'node:click': ({ nodeId }) => context?.state.set(nodeId, ['selected']),
-        };
-      },
-      destroy() {
-        context = undefined;
-      },
-    };
-  }),
-);
-```
-
-Object and zero-argument class registrations remain beta compatibility forms. Only `extensionFactory()` guarantees isolated mutable state for new stateful extensions.
-
-## Lifecycle by category [#lifecycle-by-category]
-
-* Node, Edge, Label, and Decoration are stateless descriptions resolved and cached by the engine.
-* Behavior uses `create → init → getEvents → destroy` for each Graph mount.
-* Layout uses `create → init → execute → destroy` for each managed execution.
-* Transform uses `create → init`, receives `update` when the instance is reused, and is destroyed when removed or when the Graph is destroyed.
-* Plugin uses `create → init → mount → destroy` for each Graph mount.
-
-`update()` is not a common lifecycle hook. Behavior and Plugin are recreated when remounted, and Layout receives a new instance for every execution.
-
-Extension creation, lifecycle hooks, category methods, and each custom Behavior event handler are error-isolated. Diagnostics identify the category, registered name, and failing phase or event without stopping unrelated handlers.
-
-## Public capability boundary [#public-capability-boundary]
-
-`ExtensionContext` groups supported capabilities under `data`, `state`, `viewport`, `requestRender()`, and `isDestroyed()`. New extensions must not depend on deprecated `context.graph`, internal `Renderer`, `DataModel`, WebGL state, GPU buffers, deep source imports, or `graph.eventEmitter`.
-
-`context.data.getNode()` and `getEdge()` return read-only snapshots. Update data through `context.data.updateNode()` or `updateEdge()`, and update states through `context.state`.
-
-If a registered Behavior uses the same name as a built-in Behavior, the registered extension wins. A failing registered implementation does not fall back to the built-in implementation.
-
-See [Custom Behavior](/en/docs/guides/custom-behavior) for the complete typed extension template.
-
-## Decoration visibility [#decoration-visibility]
-
-Node decorations can opt into a minimum zoom and can disable engine collision hiding:
-
-```ts
-const graph = new Graph({
-  node: {
-    decorations: [
-      {
-        renderer: 'business-badge',
-        minZoom: 0.5,
-        hideOnCollision: false,
-        data: (node) => node.data?.badge,
-      },
-    ],
-  },
-});
-```
-
-`minZoom` defaults to `0`. `hideOnCollision` defaults to `true`; when disabled, the decoration may overlap other decorations and does not reserve collision-grid space.
+Prefer configuration before developing an extension. Extension covers eight categories; Plugin means independent DOM and peripheral state, not all extension types.
 
 ## Choosing a category [#choosing-a-category]
 
-* Use Behavior for graph interaction driven by public events.
-* Use Transform for data preprocessing before rendering.
-* Use Plugin for independently owned DOM, observers, keyboard listeners, or peripheral state.
-* Use Node, Edge, Label, or Decoration for rendering descriptions and content.
-* Use Layout only to compute and return node coordinates; Graph owns position application and rendering.
+| Task                                         | Tutorial                                                | Contract                                                              |
+| -------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------- |
+| Reusable nodes, overlays, decoration anchors | [Custom nodes](/en/docs/guides/custom-node)             | [NodeExtension](/en/docs/api/extensions#nodeextension)                |
+| Edge bases, business styles, states          | [Custom edges](/en/docs/guides/custom-edge)             | [EdgeExtension](/en/docs/api/extensions#edgeextension)                |
+| Node or edge label content                   | [Label Renderer](/en/docs/guides/custom-label-renderer) | [LabelRenderer](/en/docs/api/extensions#labelrenderer)                |
+| Node decoration content                      | [Decoration](/en/docs/guides/custom-decoration)         | [DecorationRenderer](/en/docs/api/extensions#decorationrenderer)      |
+| Graph event-driven interaction               | [Custom interactions](/en/docs/guides/custom-behavior)  | [Behavior contract](/en/docs/api/options#custom-interaction-contract) |
+| Position calculations                        | [Custom layouts](/en/docs/guides/custom-layout)         | [LayoutExtension](/en/docs/api/extensions#layoutextension)            |
+| Whole-input preprocessing                    | [Transforms](/en/docs/guides/transform-overview)        | [TransformExtension](/en/docs/api/extensions#transformextension)      |
+| Independent DOM, subscriptions, state        | [Plugins](/en/docs/guides/custom-plugin)                | [PluginExtension](/en/docs/api/extensions#pluginextension)            |
 
-Custom layouts must honor their `AbortSignal`. Every extension must release the listeners, timers, workers, observers, and DOM nodes it owns in `destroy()`.
+Tutorials pair code with live canvases. See the [combined example](/en/docs/examples/extension-system), or [built-in badges](/en/docs/examples/decoration-badges) before implementing common content.
+
+## Registration and activation [#registration-and-activation]
+
+Registration defines a name; Graph configuration activates it. Register before first use. See [registration](/en/docs/api/extensions#extension-types) for overloads, replacement, and compatibility inputs.
+
+## Lifecycle by category [#lifecycle-by-category]
+
+Drawing descriptors are cached and stateless. Runtime factories return fresh instances by category and configuration position, not exactly once per Graph. See [instance scope](/en/docs/api/extensions#instance-scope).
+
+Layout cancellation and standalone execution are in [Custom layouts](/en/docs/guides/custom-layout). To rerun an existing graph, use [layout methods](/en/docs/api/graph#graph-layout).
+
+## Public capability boundary [#public-capability-boundary]
+
+Use [ExtensionContext](/en/docs/api/extensions#extensioncontext) for snapshots, states, coordinates, and cleanup. Avoid context.graph and internal Renderer / DataModel. Drawing extensions retain supported bases, picking, and engine positioning rather than taking over rendering.
+
+Runtime extensions release owned DOM, subscriptions, timers, and asynchronous work. Explicitly injected application capabilities can provide controlled host collaboration, as shown in the Plugin tutorial.
+
+## Decoration visibility [#decoration-visibility]
+
+Follow [Custom decorations](/en/docs/guides/custom-decoration) for measuring, drawing, stacking, overflow, and collisions. See [DecorationRenderer](/en/docs/api/extensions#decorationrenderer) for callbacks and [decoration configuration](/en/docs/api/options#config-node-decoration) for placement fields.
+
+For simple styles, labels, states, or Tooltip, prefer [node](/en/docs/guides/node), [edge](/en/docs/guides/edge), [label](/en/docs/guides/label), and [interaction](/en/docs/guides/behaviors) configuration first. See [Transform / Plugin options](/en/docs/api/options#options-transforms-plugins) for constructor-option boundaries. Import public types from the package root, not source internals.
+
+**Related runnable examples**
+
+* [Extension system showcase](/en/docs/examples/extension-system)

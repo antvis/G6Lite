@@ -1,15 +1,15 @@
 1:"$Sreact.fragment"
-2:I[17787,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-3:I[17787,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-4:I[66110,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
-6:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+2:I[917787,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"DocsPage"]
+3:I[917787,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"DocsBody"]
+4:I[266110,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"ExampleDetailClient"]
+6:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
 7:"$Sreact.suspense"
-5:T5e7,/**
+5:T73f,/**
  * Demo: Arrow directions - none / forward / bidirectional
  */
 import { Graph } from '@antv/g6-lite';
 
-export async function run(container: string | HTMLElement) {
+export async function runGraph(container: string | HTMLElement) {
   const graph = new Graph({
     autoFit: true,
     container,
@@ -31,24 +31,37 @@ export async function run(container: string | HTMLElement) {
         { source: 'n4', target: 't4', data: { dir: 'forward', lw: 6 } },
       ],
     },
-    node: { type: 'circle', style: { fill: '#5B8FF9', size: 24 } },
+    node: { type: 'circle', style: { fill: '#5B8FF9', size: 24, label: (node) => node.name ?? '' } },
+    // #region arrow-options
     edge: {
       type: 'line',
       style: {
         stroke: '#99ADD1',
-        lineWidth: (_s: any, _t: any, e: any) => e.data?.lw ?? 2,
-        endArrow: (_s: any, _t: any, e: any) => e.data?.dir !== 'none',
-        startArrow: (_s: any, _t: any, e: any) => e.data?.dir === 'both',
+        lineWidth: (_source, _target, edge) => Number(edge.data?.lw ?? 2),
+        endArrow: (_source, _target, edge) => edge.data?.dir !== 'none',
+        startArrow: (_source, _target, edge) => edge.data?.dir === 'both',
       },
     },
+    // #endregion arrow-options
     theme: 'light',
   });
 
-  await graph.render();
+  try {
+    await graph.render();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+
+export async function run(container: string | HTMLElement) {
+  const graph = await runGraph(container);
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => graph.destroy(),
   };
 }
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"边与箭头方向\",\"description\":\"比较无箭头、单向、双向和粗边箭头\",\"url\":\"https://g6lite.antv.vision/docs/examples/edge-arrows\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/edge-arrows\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/edge-arrows/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"边与箭头方向\",\"item\":\"https://g6lite.antv.vision/docs/examples/edge-arrows\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"edge-arrows","locale":"zh","initialSource":"$5"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"EOJTM9qFS6tmmrEoiTa9o"}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"边与箭头方向\",\"description\":\"比较无箭头、单向、双向和粗边箭头\",\"url\":\"https://g6lite.antv.vision/docs/examples/edge-arrows\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/edge-arrows\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/edge-arrows/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"边与箭头方向\",\"item\":\"https://g6lite.antv.vision/docs/examples/edge-arrows\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"edge-arrows","locale":"zh","initialSource":"$5"}]}]}]],[["$","script","script-0",{"src":"/_next/static/chunks/2g8onjn9ry2iz.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/2g7dmqvv2erk4.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"nBQ24oSAOgYQp4j9GWoSR"}
 8:null

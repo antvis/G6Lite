@@ -1,105 +1,16 @@
-# 交互配置 (/docs/guides/interactions)
+# 交互组合旧入口 (/docs/guides/interactions)
 
 
 
+正文已迁至 [交互组合](/docs/guides/behaviors)。从下方可直接进入对应章节。
 
-
-未配置 `behaviors` 时，画布默认启用滚轮缩放和拖拽平移，等价于 `['zoom-canvas', 'drag-canvas']`。每个 behavior 可以写成字符串，也可以写成配置对象。
-
-显式传入数组时，该数组就是完整行为列表；使用 `behaviors: []` 可关闭默认画布导航。
-
-常用交互的效果示意：虚线节点表示拖拽前的位置，强调描边表示选中状态，矩形虚线表示框选范围。
-
-<img alt="拖拽节点、单击选中节点和矩形框选的效果示意" src="__img0" title="拖拽与选择" />
-
-可运行示例：[拖拽节点](/docs/examples/drag-node)、[选择行为](/docs/examples/selection-behaviors)。
-
-```ts
-behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'];
-```
-
-```ts
-behaviors: ['drag-canvas', { type: 'brush-select', key: 'shift' }];
-```
-
-内置对象配置可通过 `BuiltInBehaviorOptionsMap` 按名称查询，`BuiltInBehaviorConfig` 是全部内置配置的联合类型。自定义 Behavior 应声明字面量 `type` 和独立 options 类型，并在配置处使用 `satisfies` 保留严格检查。
-
-## 内置 behaviors [#内置-behaviors]
-
-| 行为                | 说明                   |
-| ----------------- | -------------------- |
-| `zoom-canvas`     | 滚轮缩放画布               |
-| `drag-canvas`     | 拖拽平移画布               |
-| `drag-node`       | 拖拽移动节点，支持 Combo 整体拖拽 |
-| `drag-edge`       | 拖拽边端点重新连线            |
-| `click-select`    | 单击选中节点 / 边           |
-| `hover-highlight` | 悬停高亮节点或边             |
-| `highlight-node`  | 悬停节点时高亮节点及一度邻居       |
-| `highlight-edge`  | 悬停边时高亮边及两端节点         |
-| `brush-select`    | 矩形框选                 |
-| `lasso-select`    | 自由套索选择               |
-| `tooltip`         | 悬停或点击显示浮层            |
-
-## 常用组合 [#常用组合]
-
-浏览图：
-
-```ts
-behaviors: ['zoom-canvas', 'drag-canvas'];
-```
-
-浏览、拖拽和选择：
-
-```ts
-behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'];
-```
-
-分析型高亮：
-
-```ts
-behaviors: ['zoom-canvas', 'drag-canvas', 'hover-highlight', 'tooltip'];
-```
-
-Shift 框选，避免和拖拽画布冲突：
-
-```ts
-behaviors: ['drag-canvas', { type: 'brush-select', key: 'shift' }];
-```
-
-## 缩放手感与范围 [#缩放手感与范围]
-
-`zoom-canvas` 默认按归一化 wheel delta 的百分比连续缩放，对鼠标滚轮和触控板使用同一套规则。默认 `sensitivity` 为 `1`，同一动画帧内的同方向事件会合并，单帧缩放变化最多为 `15%`，默认范围为 `0.1` 到 `20`。
-
-```ts
-behaviors: [
-  {
-    type: 'zoom-canvas',
-    sensitivity: 0.5,
-    minZoom: 0.2,
-    maxZoom: 8,
-  },
-  'drag-canvas',
-];
-```
-
-`sensitivity` 是 wheel delta 的百分比乘数：例如默认配置下 `deltaY = -10` 会放大约 `10%`，`sensitivity: 0.5` 会将响应减半。减小该值会让缩放更缓和；无效或非正数配置会回退到安全默认值。
-
-## 事件分发模型 [#事件分发模型]
-
-G6Lite 内部由 `InteractionDispatcher` 统一处理指针事件。它每次只做一次拾取，然后按 `node -> edge -> combo -> canvas` 的优先级发出规范事件。所有 behavior 都消费这些事件。
-
-这意味着单击、双击、右键、滚轮、悬停等元素事件默认可监听，不需要额外启用单独的 click behavior。
-
-```ts
-graph.on('node:click', ({ nodeId }) => {
-  console.log(nodeId);
-});
-```
-
-## 相关 [#相关]
-
-* [事件](/docs/guides/events)
-* [自定义 Behavior](/docs/guides/custom-behavior)
-* [扩展体系](/docs/guides/extensions)
-* [Tooltip](/docs/guides/tooltip)
-* [示例总览](/docs/examples)
+* <span id="内置-behaviors" style="{ scrollMarginTop: '8rem' }" />[内置 behaviors](/docs/guides/behaviors#内置-behaviors)
+* <span id="常用组合" style="{ scrollMarginTop: '8rem' }" />[常用组合](/docs/guides/behaviors#常用组合)
+* <span id="缩放手感与范围" style="{ scrollMarginTop: '8rem' }" />[缩放手感与范围](/docs/guides/behaviors#缩放手感与范围)
+* <span id="邻域高亮" style="{ scrollMarginTop: '8rem' }" />[邻域高亮](/docs/guides/behaviors#邻域高亮)
+* <span id="事件分发模型" style="{ scrollMarginTop: '8rem' }" />[事件分发模型](/docs/guides/behaviors#事件分发模型)
+* <span id="常见问题" style="{ scrollMarginTop: '8rem' }" />[常见问题](/docs/guides/behaviors#常见问题)
+* <span id="加上-tooltip-后为什么不能缩放了" style="{ scrollMarginTop: '8rem' }" />[加上 tooltip 后为什么不能缩放了？](/docs/guides/behaviors#加上-tooltip-后为什么不能缩放了)
+* <span id="框选时为什么画布也在动" style="{ scrollMarginTop: '8rem' }" />[框选时为什么画布也在动？](/docs/guides/behaviors#框选时为什么画布也在动)
+* <span id="可以用-updateoptions-动态切换-behavior-吗" style="{ scrollMarginTop: '8rem' }" />[可以用 updateOptions 动态切换 Behavior 吗？](/docs/guides/behaviors#可以用-updateoptions-动态切换-behavior-吗)
+* <span id="相关" style="{ scrollMarginTop: '8rem' }" />[相关](/docs/guides/behaviors#相关)

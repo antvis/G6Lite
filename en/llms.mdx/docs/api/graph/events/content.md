@@ -1,0 +1,227 @@
+# Events (/en/docs/api/graph/events)
+
+
+
+<span id="on" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="off" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="once" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="code-and-rendered-result" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="grapheventmap" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+Use `graph.on()` to listen for events. See the [Graph API](/en/docs/api/graph#graph-events) for listener methods and the [event guide](/en/docs/guides/events) for interactive examples.
+
+<span id="element-event-inventory" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## Element events [#event-element]
+
+### Click and pointer events [#event-pointer]
+
+| Action                                                                   | <span id="event-element-nodes" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />Node             | <span id="event-element-edges" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />Edge             | <span id="combos" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />Combo                           | <span id="canvas" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />Canvas                          |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Click the target.                                                        | <span id="nodeclick" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:click`               | <span id="edgeclick" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:click`               | <span id="comboclick" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:click`               | <span id="canvasclick" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`canvas:click`             |
+| Double-click the target.                                                 | <span id="nodedblclick" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:dblclick`         | <span id="edgedblclick" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:dblclick`         | <span id="combodblclick" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:dblclick`         | <span id="canvasdblclick" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`canvas:dblclick`       |
+| Right-click the target. The browser’s default menu is suppressed.        | <span id="nodecontextmenu" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:contextmenu`   | <span id="edgecontextmenu" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:contextmenu`   | <span id="combocontextmenu" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:contextmenu`   | <span id="canvascontextmenu" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`canvas:contextmenu` |
+| Press the mouse button on the target.                                    | <span id="nodepointerdown" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:pointerdown`   | <span id="edgepointerdown" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:pointerdown`   | <span id="combopointerdown" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:pointerdown`   | <span id="canvaspointerdown" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`canvas:pointerdown` |
+| Release the mouse button in the window. The canvas receives the event.   | —                                                                                                              | —                                                                                                              | —                                                                                                                | <span id="canvaspointerup" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`canvas:pointerup`     |
+| Move into the target.                                                    | <span id="nodepointerover" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:pointerover`   | <span id="edgepointerover" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:pointerover`   | <span id="combopointerover" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:pointerover`   | —                                                                                                                |
+| Fires immediately after `pointerover`.                                   | <span id="nodepointerenter" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:pointerenter` | <span id="edgepointerenter" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:pointerenter` | <span id="combopointerenter" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:pointerenter` | —                                                                                                                |
+| Move the pointer over the target.                                        | <span id="nodepointermove" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:pointermove`   | <span id="edgepointermove" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:pointermove`   | <span id="combopointermove" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:pointermove`   | <span id="canvaspointermove" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`canvas:pointermove` |
+| Leave the target. Coordinates report the pointer position on exit.       | <span id="nodepointerleave" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:pointerleave` | <span id="edgepointerleave" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:pointerleave` | <span id="combopointerleave" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:pointerleave` | —                                                                                                                |
+| Scroll over the target. Read `nativeEvent.deltaY` for the scroll amount. | <span id="nodewheel" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:wheel`               | <span id="edgewheel" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:wheel`               | —                                                                                                                | <span id="canvaswheel" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`canvas:wheel`             |
+
+<span id="element-event-payloads" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+#### Callback fields [#read-event-parameters]
+
+| Field                           | Meaning                                                                               |
+| ------------------------------- | ------------------------------------------------------------------------------------- |
+| `targetType` / `targetId`       | Target type and element ID. Nodes, edges, and Combos have a `targetId`.               |
+| `nodeId` / `edgeId` / `comboId` | The target element’s ID. Edge events also supply `edgeIndex`, `source`, and `target`. |
+| `data`                          | Optional business data attached to the node or edge.                                  |
+| `client`                        | CSS pixel coordinates relative to the browser viewport.                               |
+| `canvas`                        | CSS pixel coordinates relative to the top-left of the canvas.                         |
+| `graph`                         | Graph coordinates for positioning within the graph.                                   |
+| `nativeEvent`                   | A `MouseEvent` for mouse input or a `WheelEvent` for scrolling.                       |
+
+<span id="listen-to-a-node-click" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+On a node click, read the target, business data, and coordinates. Use the original mouse event to check whether Shift was held.
+
+```ts
+graph.on('node:click', (event) => {
+  console.log({
+    target: { type: event.targetType, id: event.targetId },
+    data: event.data,
+    client: event.client,
+    canvas: event.canvas,
+    graph: event.graph,
+    shiftKey: event.nativeEvent.shiftKey,
+  });
+});
+```
+
+#### Picking and gestures [#picking-and-gestures]
+
+Hit testing checks nodes, edges, Combos, then the canvas. When the pointer changes targets, the old target receives `pointerleave`, followed by `pointerover`, `pointerenter`, and `pointermove` on the new target. Over a Combo background, `canvas:pointermove` also fires and the wheel emits `canvas:wheel`. Dragging can suppress the following click.
+
+<span id="selection-events" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### Selection events [#event-selection]
+
+Enable `click-select`, `brush-select`, or `lasso-select` to receive the corresponding events. They fire after selection state is written.
+
+| Action                                             | Node                                                                                                           | Edge                                                                                                           | Selection set                                                                                              |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Toggle selection.                                  | <span id="nodeselectchange" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:selectchange` | <span id="edgeselectchange" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:selectchange` | —                                                                                                          |
+| Clear a nonempty selection.                        | —                                                                                                              | —                                                                                                              | <span id="selectionclear" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`selection:clear` |
+| Hit nodes during brush selection, with throttling. | <span id="brushselect" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`brush:select`           | —                                                                                                              | —                                                                                                          |
+| Finish brush selection. The result can be empty.   | <span id="brushend" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`brush:end`                 | —                                                                                                              | —                                                                                                          |
+| Hit nodes during lasso selection.                  | <span id="lassoselect" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`lasso:select`           | —                                                                                                              | —                                                                                                          |
+| Finish lasso selection. The result can be empty.   | <span id="lassoend" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`lasso:end`                 | —                                                                                                              | —                                                                                                          |
+
+#### Callback fields [#selection-callback-fields]
+
+| Field               | Meaning                                                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `nodeId` / `edgeId` | The ID of the element whose selection changed. Edge events also provide `edgeIndex`, `source`, and `target`.         |
+| `selected`          | The updated selection state after a toggle.                                                                          |
+| `ids`               | IDs cleared by `selection:clear`, which can include nodes and edges.                                                 |
+| `nodeIds`           | Node IDs reported by brush and lasso events. `brush:end` returns all currently selected nodes when the gesture ends. |
+| `event`             | The original `MouseEvent` when toggling or clearing selection.                                                       |
+
+<span id="read-final-selection" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+With `brush-select` enabled, listen for `brush:end` to read the selected nodes when the gesture ends.
+
+```ts
+graph.on('brush:end', ({ nodeIds }) => {
+  console.log('Selected nodes', nodeIds);
+});
+```
+
+Lasso events report the nodes hit by the current gesture. Use `findNodesByState('selected')` and `findEdgesByState('selected')` for the full graph selection. [Selection and drag guide](/en/docs/guides/events/selection-drag)
+
+<span id="drag-events" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### Drag events [#event-drag]
+
+`drag-node` handles node and Combo drags. `drag-edge` handles endpoint drags.
+
+| Action                                                                                                  | Node                                                                                                     | Edge                                                                                                     | Combo                                                                                                      |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Start dragging. Nodes and Combos must move more than 3 CSS pixels. Edges start on primary-button press. | <span id="nodedragstart" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:dragstart` | <span id="edgedragstart" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:dragstart` | <span id="combodragstart" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:dragstart` |
+| Drag in progress. Node and Combo events fire after the node or Combo member positions are updated.      | <span id="nodedrag" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:drag`           | <span id="edgedrag" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:drag`           | <span id="combodrag" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:drag`           |
+| Release the mouse button to end the drag.                                                               | <span id="nodedragend" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`node:dragend`     | <span id="edgedragend" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`edge:dragend`     | <span id="combodragend" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:dragend`     |
+
+#### Callback fields [#edge-drag-payload]
+
+| Field                               | Meaning                                                                                                                                            |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `nodeId` / `nodeIds`                | The first dragged node ID and the full list of dragged node IDs in node drag events.                                                               |
+| `comboId`                           | The dragged Combo’s ID in Combo drag events.                                                                                                       |
+| `dx` / `dy`                         | Cumulative displacement from the start, in graph coordinates, in `node:drag` and `combo:drag`.                                                     |
+| `edgeId` / `edgeIndex`              | The edge ID and index in edge drag events. `edgeId` is optional.                                                                                   |
+| `source` / `target`                 | Endpoint node IDs. On a valid drop, `edge:dragend` returns proposed endpoints for the application to validate and apply.                           |
+| `dragEnd`                           | The endpoint being dragged in `edge:dragstart` and `edge:drag` (`source` or `target`). The closer endpoint is chosen, with `target` used on a tie. |
+| `originalSource` / `originalTarget` | Endpoint IDs before the drag, reported by `edge:dragend`.                                                                                          |
+| `reconnected` / `newEndpoint`       | Whether the drop hit a valid target and, when present, its node ID in `edge:dragend`.                                                              |
+| `event`                             | The original `MouseEvent`. Node and Combo `dragend` events provide only the drag result.                                                           |
+
+<span id="read-final-positions" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+At the end of the drag, use `nodeIds` to look up the positions of all dragged nodes.
+
+```ts
+graph.on('node:dragend', ({ nodeIds }) => {
+  const positions = nodeIds.map((id) => graph.getElementPosition(id));
+  console.log(positions);
+});
+```
+
+<span id="lifecycle-and-data-events" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## Lifecycle and data events [#event-lifecycle]
+
+Use these events to track layout, drawing, and data changes. [Rendering, layout, and data updates](/en/docs/guides/events/lifecycle)
+
+### Layout and rendering [#event-rendering]
+
+| Event                                                                                                       | When it fires                                                                                                   | Callback fields                          |
+| ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| <span id="beforelayout" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`beforelayout`       | Before computation when a layout is configured and nodes are present.                                           | `nodeCount: number`                      |
+| <span id="layoutstart" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`layout:start`        | Immediately after `beforelayout`, before computation.                                                           | `nodeCount: number`                      |
+| <span id="layoutend" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`layout:end`            | After a valid computation, before positions are written back. `duration` is in milliseconds.                    | `duration: number`, `nodeCount: number`  |
+| <span id="afterlayout" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`afterlayout`         | Immediately after `layout:end`. Await `graph.layout()` to read final positions.                                 | `duration: number`, `nodeCount: number`  |
+| <span id="beforerender" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`beforerender`       | During an explicit `render()`, before fitting the viewport and drawing.                                         | `nodeCount: number`, `edgeCount: number` |
+| <span id="afterrender" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`afterrender`         | After the synchronous drawing step of an explicit `render()`. Await `graph.render()` before the first mutation. | `nodeCount: number`, `edgeCount: number` |
+| <span id="resize" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`resize`                   | After resizing the canvas and applying any configured fitting. Dimensions are in CSS pixels.                    | `width: number`, `height: number`        |
+| <span id="event-lifecycle-destroy" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`destroy` | When the instance is first destroyed, before canvas and listener cleanup.                                       | No arguments                             |
+
+<span id="ordering-and-completion-boundaries" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="ordering-and-completion" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+`render()`, `layout()`, and `setData()` emit layout events when they run a layout. A cancelled layout may skip its end events.
+
+<span id="receive-the-first-render-event" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+Register a one-time `afterrender` listener before the first `render()`. Use `datachange` to read the node and edge counts after each data replacement.
+
+```ts
+graph.once('afterrender', ({ nodeCount, edgeCount }) => {
+  console.log('First draw', nodeCount, edgeCount);
+});
+await graph.render();
+
+graph.on('datachange', ({ nodeCount, edgeCount }) => {
+  console.log('Data replaced', nodeCount, edgeCount);
+});
+await graph.setData({
+  nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'B', x: 120, y: 0 }],
+  edges: [{ source: 'A', target: 'B' }],
+});
+```
+
+### Data updates and Combos [#event-data]
+
+<span id="events-and-missing-ids" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+| Event                                                                                                       | When it fires                                                                                                                                        | Callback fields                                                                                     |
+| ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| <span id="datachange" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`datachange`           | After `setData()` replaces the full dataset.                                                                                                         | `nodeCount: number`, `edgeCount: number`                                                            |
+| <span id="afteradditem" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`afteradditem`       | After adding a node or edge, once per item.                                                                                                          | `type: 'node'`, `id: string` or `type: 'edge'`, `id: string`, `source: string`, `target: string`    |
+| <span id="afterremoveitem" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`afterremoveitem` | For each ID passed to remove a node or edge, including missing IDs. Edges removed along with a node have no separate event.                          | `type` (`node` / `edge`), `id: string`                                                              |
+| <span id="afterupdateitem" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`afterupdateitem` | After a node position, node data, or edge data update, once per item. `updateNodePosition()` also emits for a missing node or unchanged coordinates. | `type` (`node` / `edge`), `id: string`, `action` (`position` or `data` for nodes, `data` for edges) |
+| <span id="combocollapse" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:collapse`    | After a Combo changes to the collapsed state.                                                                                                        | `comboId: string`                                                                                   |
+| <span id="comboexpand" style="{ display: 'inline-block', scrollMarginTop: '8rem' }" />`combo:expand`        | After a Combo changes to the expanded state.                                                                                                         | `comboId: string`                                                                                   |
+
+## EventEmitter [#eventemitter]
+
+Use `EventEmitter` to send custom events between UI components. Pass a rendered graph, the toolbar’s Reset view button, and a status element to `bindResetView()`. Clicking the button restores the initial view and updates the status. Call the returned cleanup function when the page unmounts.
+
+```ts
+import { EventEmitter, type Graph } from '@antv/g6-lite';
+
+export function bindResetView(graph: Graph, button: HTMLButtonElement, status: HTMLElement) {
+  const events = new EventEmitter();
+  const resetCamera = () => graph.resetCamera();
+  const showStatus = () => {
+    status.textContent = 'View reset';
+  };
+  const onClick = () => events.emit('view:reset');
+
+  events.on('view:reset', resetCamera);
+  events.on('view:reset', showStatus);
+  button.addEventListener('click', onClick);
+
+  return () => {
+    button.removeEventListener('click', onClick);
+    events.off('view:reset', resetCamera);
+    events.off('view:reset', showStatus);
+  };
+}
+```

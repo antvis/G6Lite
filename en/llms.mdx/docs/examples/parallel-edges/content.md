@@ -4,4 +4,111 @@
 
 
 
-<ExampleDetail id="parallel-edges" locale="en" />
+Separate same-direction parallel edges, reverse edges, and single edges automatically.
+
+## Try it
+
+Drag nodes, hover, and select edges to inspect curves and labels.
+
+## Data
+
+Four nodes and seven edges, including six parallel or reverse edges.
+
+## Complete runnable code
+
+```ts
+/**
+ * Demo: process-parallel-edges
+ */
+import { Graph, type TooltipContext } from '@antv/g6-lite';
+
+export async function run(container: string | HTMLElement) {
+  const graph = new Graph({
+    // Padding keeps arc-apex edge labels and bottom node labels inside view.
+    autoFit: { padding: 56 },
+    container,
+    data: {
+      nodes: [
+        { id: 'source', name: 'Source', x: 180, y: 220 },
+        { id: 'target', name: 'Target', x: 520, y: 220 },
+        { id: 'singleA', name: 'Single A', x: 180, y: 420 },
+        { id: 'singleB', name: 'Single B', x: 520, y: 420 },
+      ],
+      edges: [
+        { id: 'e1', source: 'source', target: 'target', data: { label: 'approve' } },
+        { id: 'e2', source: 'source', target: 'target', data: { label: 'reject' } },
+        { id: 'e3', source: 'source', target: 'target', data: { label: 'review' } },
+        { id: 'e4', source: 'source', target: 'target', data: { label: 'archive' } },
+        { id: 'r1', source: 'target', target: 'source', data: { label: 'rollback' } },
+        { id: 'r2', source: 'target', target: 'source', data: { label: 'notify' } },
+        { id: 'single', source: 'singleA', target: 'singleB', data: { label: 'single edge' } },
+      ],
+    },
+    node: {
+      type: 'circle',
+      style: {
+        size: 34,
+        fill: (node) => (node.id.startsWith('single') ? '#36B37E' : '#5B8FF9'),
+        stroke: '#ffffff',
+        strokeWidth: 2,
+        label: (node) => node.name ?? node.id,
+        labelPlacement: 'bottom',
+        labelFontSize: 12,
+      },
+    },
+    edge: {
+      parallelEdges: {
+        enabled: true,
+        offset: 26,
+        includeReverse: true,
+      },
+      style: {
+        stroke: (_s, _t, edge) => (edge.source === 'target' ? '#F08F56' : '#6B8FF8'),
+        endArrow: true,
+        arrowSize: 12,
+        label: (_s, _t, edge) => String(edge.data?.label ?? ''),
+        labelFontSize: 11,
+        labelBackground: 'rgba(255,255,255,0.92)',
+        labelBackgroundPadding: 4,
+        labelAutoRotate: true,
+      },
+      stateStyles: {
+        selected: { stroke: '#F4664A', lineWidth: 2 },
+        active: { stroke: '#00A3A3' },
+      },
+    },
+    behaviors: [
+      'zoom-canvas',
+      'drag-canvas',
+      'drag-node',
+      'hover-highlight',
+      'click-select',
+      {
+        type: 'tooltip',
+        trigger: 'hover',
+        getContent: (ctx: TooltipContext) => {
+          if (ctx.itemType === 'edge') {
+            const label = (ctx.data as { label?: string } | undefined)?.label ?? ctx.edgeId;
+            return `${ctx.source} -> ${ctx.target}<br/><span style="color:#8c8c8c">${label}</span>`;
+          }
+          return String(ctx.nodeId);
+        },
+      },
+    ],
+    theme: 'light',
+  });
+
+  await graph.render();
+  return {
+    getData: () => graph.getData(),
+    fitView: () => graph.fitView({ padding: 64 }),
+    destroy: () => graph.destroy(),
+  };
+}
+```
+
+
+## Related documentation
+
+- [Parallel edges and loops](/en/docs/guides/edge#parallel-edges)
+- [Edge reference](/en/docs/api/options#options-edge)

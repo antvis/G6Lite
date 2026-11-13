@@ -1,41 +1,64 @@
-# 性能指标 (/docs/metrics/performance)
+# 性能对比 (/docs/metrics/performance)
 
 
 
-性能结果只在运行环境、数据规模与配置一致时具有可比性；官网不使用缺少环境信息的绝对跑分或跨机器营销对比。
+本页比较 G6Lite、G6、Sigma.js 和 ECharts 的 Graph 系列。首绘使用同一份预置坐标数据，包体积使用同一种构建方式。测试于 2026-11-13 完成，G6Lite 使用本地打包的 `0.1.0`。
 
-本页记录的是测量方法和选型边界，不表示 G6Lite 在所有数据、布局和设备上都快于其他图库。布局、纯渲染和交互更新必须分别比较。
+<span id="常用图库选型对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-## 环境要求 [#环境要求]
+<span id="当前公开口径" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-公开或比较结果时至少记录：
+## 首绘耗时 [#render-time]
 
-* G6Lite 版本、Git commit 与工作区是否干净。
-* Node、Chromium、操作系统和架构。
-* CPU 型号；浏览器结果还需记录 user agent、视口和 DPR。
-* 数据节点/边数量、布局与迭代次数。
-* 样本量与误差。
+表中是从创建图到渲染 API 完成后再经过两帧的中位耗时，单位为毫秒。本轮使用无头 Chromium，WebGL 由 SwiftShader 软件渲染。
 
-不同环境的结果不应直接计算“提升百分比”。
+| npm 包                               | 渲染器       | 1,000 节点 / 3,000 边（ms） | 5,000 节点 / 15,000 边（ms） |
+| ----------------------------------- | --------- | ---------------------: | ----------------------: |
+| `@antv/g6-lite@0.1.0`               | WebGL     |                  134.1 |                   146.1 |
+| `@antv/g6@5.1.1`                    | Canvas 2D |                  297.4 |                 1,502.2 |
+| `sigma@4.0.4` + `graphology@0.26.0` | WebGL 2   |                  466.1 |                   748.4 |
+| `echarts@6.1.0`                     | Canvas 2D |                   56.6 |                   236.3 |
 
-## 当前公开口径 [#当前公开口径]
+<span id="环境要求" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-* 首页只展示 WebGL 1.0、内置布局能力与包体积预算等稳定事实。
-* 包体积由 `limit-size` 独立校验，详见 [包体积](/docs/metrics/bundle-size)。
-* 具体业务选型应使用真实数据和目标设备完整测量，再结合 [性能调优](/docs/metrics/performance-tuning) 分析瓶颈。
+<span id="如何进行数值对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-## 常用图库选型对比 [#常用图库选型对比]
+### 测试条件 [#benchmark-method]
 
-产品定位摘要：G6Lite 聚焦轻量 WebGL 与渲染后的增量交互；G6 v5 提供更完整的元素、动画、插件和多环境能力；sigma.js 聚焦 Graphology 数据上的 WebGL 网络渲染；Cytoscape.js 同时提供图论模型、算法和交互式可视化。
+* Apple M3 Pro，macOS（Darwin 25.2.0），无头 Chromium 151.0.7922.34。画布 900 × 600 CSS 像素，DPR 1。WebGL 渲染器为 `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`。
+* 数据使用相同节点、边和固定坐标，绘制圆形节点与直线边，关闭标签和动画，不运行布局。每个规模下，每个库预热 3 次后交错测量 20 次，测完销毁实例。
+* 库在计时前已加载。计时包含图实例和内部模型的创建、首次渲染与两次帧回调。Sigma.js 包含 Graphology 建图。该指标反映本场景的首绘等待，GPU 执行时间、布局和交互需分别测量。 [下载原始样本](/benchmarks/graph-performance.json)
 
-逐项的渲染、布局、元素、Combo、交互、扩展、动画、算法、SSR 与 TypeScript 对比已集中到[常用图库能力对比](/docs/compatibility/library-comparison)。本页只维护测量方法，避免两处能力矩阵随版本漂移。
+本轮结果只适用于上述测试环境，不代表最低浏览器版本认证。各浏览器的能力版本参考与尚未覆盖的验收范围见[最低浏览器版本](/docs/compatibility/browser#最低浏览器版本)。
 
-选择时应先列出必须能力，再使用同一份业务数据验证候选方案。例如，sigma.js 使用已有坐标而 G6Lite 重新运行 force 布局时，首屏总耗时不能直接归因于渲染器；应分别记录布局时间和不含布局的渲染时间。
+## 浏览器包体积 [#bundle-size]
 
-## 如何进行数值对比 [#如何进行数值对比]
+使用 esbuild 0.21.5 将各库的 npm 入口和依赖打包为单个浏览器脚本，并进行代码压缩。G6Lite 测量默认入口，可选布局按需引入。ECharts 只引入 GraphChart 和 CanvasRenderer，Sigma.js 包含 Graphology。体积以 KiB 计，不含 source map。
 
-* 固定数据、坐标、节点/边样式、标签策略、视口、DPR、浏览器和硬件。
-* 预置坐标与重新布局分成两组结果，不能混在同一列。
-* 同时记录中位数、P95、样本量和误差，不用一次运行结果得出结论。
-* 除首屏外，至少验证拖拽、缩放、拾取、高亮、批量更新和销毁后的内存趋势。
-* 将候选库版本、适配代码和完整配置与报告一起留档，避免后续无法复现。
+| npm 包                               | 代码压缩后（KiB） | gzip -9（KiB） |
+| ----------------------------------- | ---------: | -----------: |
+| `@antv/g6-lite@0.1.0`               |      511.3 |        159.5 |
+| `@antv/g6@5.1.1`                    |    1,435.3 |        413.4 |
+| `sigma@4.0.4` + `graphology@0.26.0` |      438.4 |        110.7 |
+| `echarts@6.1.0`                     |      386.3 |        130.2 |
+
+### G6Lite CDN 文件体积 [#umd-size]
+
+CDN 文件使用 `gzip -9` 分别测量，1 kB = 1,000 字节。首页展示默认脚本的体积。
+
+| 发布文件                     | 内容                | gzip -9（kB） |
+| ------------------------ | ----------------- | ----------: |
+| `g6-lite.min.js`         | 默认脚本，包含渲染、交互和内置布局 |       150.2 |
+| `g6-lite-layouts.min.js` | 六种可选布局，使用时额外加载    |        29.1 |
+
+需要使用可选布局时，加载附加脚本后注册对应的布局。 [可选布局用法](/docs/guides/layout-overview#optional-layouts)
+
+## 业务图怎么测 [#performance-tuning]
+
+用真实数据和目标设备分别记录布局、首绘和交互。首屏慢先拆开布局与绘制，再评估 Worker。更新卡顿时，复用图实例，通过增量 API 更新数据或状态。缩放掉帧时，逐项对比标签、装饰和视口尺寸。反复挂载后检查销毁与监听清理。 [Worker 布局](/docs/guides/layout-worker) · [数据写入](/docs/api/graph#graph-data-mutations) · [标签策略](/docs/api/options#options-label)
+
+**相关可运行示例**
+
+* [200 节点](/docs/examples/large)
+* [5000 节点与标签](/docs/examples/large-labeled)
+* [AI Papers 大规模关系图](/docs/examples/real-dataset)

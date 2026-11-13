@@ -1,0 +1,14 @@
+# 选择事件（旧入口） (/docs/api/graph/events/selection)
+
+
+
+内容已并入 [选择事件明细](/docs/api/graph/events#event-selection)。
+
+* <span id="读取最终选择" style="{ display: 'block', scrollMarginTop: '8rem' }" />[读取最终选择](/docs/api/graph/events#读取最终选择)
+* <span id="nodeselectchange" style="{ display: 'block', scrollMarginTop: '8rem' }" />[node:selectchange](/docs/api/graph/events#nodeselectchange)
+* <span id="edgeselectchange" style="{ display: 'block', scrollMarginTop: '8rem' }" />[edge:selectchange](/docs/api/graph/events#edgeselectchange)
+* <span id="selectionclear" style="{ display: 'block', scrollMarginTop: '8rem' }" />[selection:clear](/docs/api/graph/events#selectionclear)
+* <span id="brushselect" style="{ display: 'block', scrollMarginTop: '8rem' }" />[brush:select](/docs/api/graph/events#brushselect)
+* <span id="brushend" style="{ display: 'block', scrollMarginTop: '8rem' }" />[brush:end](/docs/api/graph/events#brushend)
+* <span id="lassoselect" style="{ display: 'block', scrollMarginTop: '8rem' }" />[lasso:select](/docs/api/graph/events#lassoselect)
+* <span id="lassoend" style="{ display: 'block', scrollMarginTop: '8rem' }" />[lasso:end](/docs/api/graph/events#lassoend)

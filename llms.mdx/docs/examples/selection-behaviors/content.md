@@ -4,4 +4,75 @@
 
 
 
-<ExampleDetail id="selection-behaviors" locale="zh" />
+在同一示例中比较 click、brush 和 lasso 选择行为。
+
+## 如何体验
+
+三种方式同时生效：Shift+点击多选，Shift+拖拽框选，Ctrl/⌘+拖拽拉索。
+
+## 数据说明
+
+规则分布的节点用于观察不同选择范围。
+
+## 完整运行代码
+
+```ts
+// Local presentation helpers in this repository are used only for the example controls.
+import { Graph } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+export async function run(container: string | HTMLElement) {
+  const nodes = Array.from({ length: 12 }, (_, index) => ({
+    id: String(index),
+    x: 120 + (index % 4) * 120,
+    y: 100 + Math.floor(index / 4) * 110,
+  }));
+  const graph = new Graph({
+    autoFit: true,
+    container,
+    data: { nodes, edges: [] },
+    node: {
+      style: { size: 30, label: (node) => node.id, labelPlacement: 'center', labelColor: '#fff' },
+      stateStyles: { selected: { fill: '#873BF4', stroke: '#5B21B6', strokeWidth: 3 } },
+    },
+    behaviors: [
+      { type: 'drag-canvas', ignoreModifierKeys: true },
+      'zoom-canvas',
+      { type: 'click-select', multiple: true, trigger: 'shift' },
+      { type: 'brush-select', key: 'shift' },
+      { type: 'lasso-select', key: 'ctrl' },
+    ],
+  });
+  await graph.render();
+  graph.fitView({ padding: 80 });
+
+  const ui = createDemoPanel(container, 'Shift+点击多选，Shift+拖拽框选，Ctrl/⌘+自由拖拽套索选择。');
+
+  // Keep the modifier keys visible at all times; the event line updates as
+  // the user interacts, the hint line stays.
+  const HINT = 'Shift+点击多选 · Shift+拖拽框选 · Ctrl/⌘+拖拽拉索';
+  const render = (eventName: string) => {
+    const selected = graph.findNodesByState('selected').join(', ') || '-';
+    ui.setStatus(`${HINT}\n${eventName}\nselected=${selected}`);
+  };
+  graph.on('node:selectchange', () => render('node:selectchange'));
+  graph.on('brush:end', () => render('brush:end'));
+  graph.on('lasso:end', () => render('lasso:end'));
+  render('ready');
+
+  return {
+    getData: () => graph.getData(),
+    fitView: () => graph.fitView({ padding: 64 }),
+    destroy: () => {
+      graph.destroy();
+      ui.destroy();
+    },
+  };
+}
+```
+
+
+## 继续阅读
+
+- [状态使用](/docs/guides/states)
+- [交互组合](/docs/guides/behaviors)

@@ -1,0 +1,108 @@
+# Vue integration (/en/docs/getting-started/vue)
+
+
+
+
+
+## Use with Vue [#use-with-vue]
+
+Import `GraphView` into your page.
+
+```vue
+<script setup lang="ts">
+import GraphView from './GraphView.vue';
+</script>
+
+<template>
+  <GraphView />
+</template>
+```
+
+<span id="prepare-two-datasets" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="vue-synchronize-data-with-watch" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### Define GraphView [#define-graphview]
+
+Save the following as `GraphView.vue`. The component creates a graph on mount, calls `setData()` when you switch datasets, and destroys the instance on unmount.
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+
+const fitView = { padding: 32, maxZoom: 1 };
+const containerRef = ref<HTMLDivElement | null>(null);
+const ready = ref(false);
+let graph: Graph | undefined;
+
+onMounted(async () => {
+  if (!containerRef.value) return;
+
+  const instance = new Graph({
+    container: containerRef.value,
+    data: basicData,
+    layout: { type: 'circular', radius: 120 },
+    node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
+    edge: { style: { endArrow: true } },
+    autoFit: fitView,
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+  graph = instance;
+
+  try {
+    await instance.render();
+    if (!instance.destroyed) ready.value = true;
+  } catch (error) {
+    if (!instance.destroyed) {
+      instance.destroy();
+      console.error(error);
+    }
+  }
+});
+
+onBeforeUnmount(() => graph?.destroy());
+
+async function changeData(event: Event) {
+  const instance = graph;
+  if (!ready.value || !instance || instance.destroyed) return;
+
+  const { value } = event.target as HTMLSelectElement;
+  const data = value === 'expanded' ? expandedData : basicData;
+  try {
+    await instance.setData(data, { fitView });
+  } catch (error) {
+    if (!instance.destroyed) console.error(error);
+  }
+}
+</script>
+
+<template>
+  <div>
+    <select aria-label="Graph data" :disabled="!ready" @change="changeData">
+      <option value="basic">Basic network</option>
+      <option value="expanded">Extended network</option>
+    </select>
+    <div ref="containerRef" style="width: 100%; height: 360px" />
+  </div>
+</template>
+```
+
+## Result [#update-the-graph-when-data-changes]
+
+Select “Extended network” to add David and the Bob → David edge. Select “Basic network” to restore the original graph.
+
+<QuickStartExample locale="en" variant="framework-data" />

@@ -1,0 +1,10 @@
+# Transform 与 Plugin 配置（旧入口） (/docs/api/options/transforms-plugins)
+
+
+
+内容已并入 [插件与转换](/docs/api/options#options-transforms-plugins)。
+
+* <span id="transforms" style="{ display: 'block', scrollMarginTop: '8rem' }" />[transforms](/docs/api/options#transforms)
+* <span id="plugins" style="{ display: 'block', scrollMarginTop: '8rem' }" />[plugins](/docs/api/options#plugins)
+* <span id="调用与变更" style="{ display: 'block', scrollMarginTop: '8rem' }" />[调用与变更](/docs/api/options#调用与变更)
+* <span id="选项与支持边界" style="{ display: 'block', scrollMarginTop: '8rem' }" />[选项与支持边界](/docs/api/options#选项与支持边界)

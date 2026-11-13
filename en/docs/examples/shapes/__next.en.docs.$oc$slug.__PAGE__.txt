@@ -1,10 +1,10 @@
 1:"$Sreact.fragment"
-2:I[17787,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-3:I[17787,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-4:I[66110,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
-9:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+2:I[917787,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"DocsPage"]
+3:I[917787,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"DocsBody"]
+4:I[266110,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"ExampleDetailClient"]
+9:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
 a:"$Sreact.suspense"
-5:Td39,/**
+5:Tdba,/**
  * Demo: 混合图形 — 矩形节点 + 弧线边 + 粗线边
  */
 import { Graph } from '@antv/g6-lite';
@@ -45,8 +45,8 @@ export async function run(container: string | HTMLElement) {
       type: 'rect',
       style: {
         fill: (d) => ['#5B8FF9', '#5AD8A6', '#F6BD16', '#E86452', '#6DC8EC', '#945FB9'][parseInt(d.id) % 6],
-        width: 20,
-        height: 12,
+        width: 32,
+        height: 20,
       },
     },
     edge: {
@@ -56,7 +56,7 @@ export async function run(container: string | HTMLElement) {
         curvature: 0.25,
       },
     },
-    layout: { type: 'circular', radius: 120 },
+    layout: { type: 'circular', radius: 48 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
     theme: 'light',
   });
@@ -89,7 +89,7 @@ export async function run(container: string | HTMLElement) {
     },
     node: {
       type: 'circle',
-      style: { fill: '#E86452', size: 12 },
+      style: { fill: '#E86452', size: 24 },
     },
     edge: {
       type: 'line',
@@ -98,13 +98,14 @@ export async function run(container: string | HTMLElement) {
         lineWidth: 3,
       },
     },
-    layout: { type: 'circular', radius: 100 },
+    layout: { type: 'circular', radius: 48 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
     theme: 'light',
   });
   await graph2.render();
 
   return {
+    getData: () => ({ views: [graph1.getData(), graph2.getData()] }),
     fitView() {
       graph1.fitView();
       graph2.fitView();
@@ -112,11 +113,13 @@ export async function run(container: string | HTMLElement) {
     destroy() {
       graph1.destroy();
       graph2.destroy();
+      rectContainer.remove();
+      thickContainer.remove();
     },
   };
 }
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Node shapes\",\"description\":\"Compare circle and rectangle nodes side by side.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/shapes\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/shapes\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/shapes/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Node shapes\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/shapes\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"shapes","locale":"en","initialSource":"$5"}]}]}]],["$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"EOJTM9qFS6tmmrEoiTa9o"}
-6:["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}]
-7:["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Node shapes\",\"description\":\"Compare circle and rectangle nodes side by side.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/shapes\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/shapes\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/shapes/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Node shapes\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/shapes\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"shapes","locale":"en","initialSource":"$5"}]}]}]],["$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"nBQ24oSAOgYQp4j9GWoSR"}
+6:["$","script","script-0",{"src":"/_next/static/chunks/2g8onjn9ry2iz.js","async":true}]
+7:["$","script","script-1",{"src":"/_next/static/chunks/2g7dmqvv2erk4.js","async":true}]
 8:["$","$L9",null,{"children":["$","$a",null,{"name":"Next.MetadataOutlet","children":"$@b"}]}]
 b:null

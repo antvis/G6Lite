@@ -1,0 +1,15 @@
+# 视口与坐标（旧入口） (/docs/concepts/viewport)
+
+
+
+内容已迁至 [视口与坐标](/docs/guides/viewport)。
+
+* <span id="图的位置与当前视野" style="{ scrollMarginTop: '8rem' }" />[图的位置与当前视野](/docs/guides/viewport#图的位置与当前视野)
+* <span id="观察缩放平移与适配" style="{ scrollMarginTop: '8rem' }" />[观察缩放、平移与适配](/docs/guides/viewport#选择适配时机)
+* <span id="三种坐标各自做什么" style="{ scrollMarginTop: '8rem' }" />[三种坐标各自做什么](/docs/guides/viewport#转换坐标定位-dom-内容)
+* <span id="坐标怎样转换" style="{ scrollMarginTop: '8rem' }" />[坐标怎样转换](/docs/guides/viewport#转换坐标定位-dom-内容)
+* <span id="居中适配和自动适配" style="{ scrollMarginTop: '8rem' }" />[居中、适配和自动适配](/docs/guides/viewport#选择适配时机)
+* <span id="常见问题" style="{ scrollMarginTop: '8rem' }" />[常见问题](/docs/guides/viewport#常见问题)
+* <span id="平移或缩放后要保存新的节点坐标吗" style="{ scrollMarginTop: '8rem' }" />[平移或缩放后，要保存新的节点坐标吗？](/docs/guides/viewport#平移或缩放后要保存新的节点坐标吗)
+* <span id="菜单为什么越缩放越偏" style="{ scrollMarginTop: '8rem' }" />[菜单为什么越缩放越偏？](/docs/guides/viewport#菜单为什么越缩放越偏)
+* <span id="居中后为什么内容仍显示不全" style="{ scrollMarginTop: '8rem' }" />[居中后为什么内容仍显示不全？](/docs/guides/viewport#居中后为什么内容仍显示不全)

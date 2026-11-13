@@ -1,15 +1,12 @@
 1:"$Sreact.fragment"
-3:I[17787,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-4:I[17787,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-5:I[66110,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
-a:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+3:I[917787,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"DocsPage"]
+4:I[917787,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"DocsBody"]
+5:I[266110,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"ExampleDetailClient"]
+a:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
 b:"$Sreact.suspense"
-2:T42d,{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Viewport and coordinate conversion","description":"Validate camera, fit, zoom, focus, resize, and screen/graph coordinate conversion","url":"https://g6lite.antv.vision/en/docs/examples/viewport-controls","mainEntityOfPage":"https://g6lite.antv.vision/en/docs/examples/viewport-controls","image":"https://g6lite.antv.vision/en/og/docs/examples/viewport-controls/image.png","inLanguage":"en","author":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"publisher":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"isPartOf":{"@id":"https://g6lite.antv.vision/#website"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://g6lite.antv.vision/en"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://g6lite.antv.vision/en/docs"},{"@type":"ListItem","position":3,"name":"Viewport and coordinate conversion","item":"https://g6lite.antv.vision/en/docs/examples/viewport-controls"}]}]}6:Tc4b,// Local presentation helpers in this repository are used only for the example controls.
+2:T42d,{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Viewport and coordinate conversion","description":"Validate camera, fit, zoom, focus, resize, and screen/graph coordinate conversion","url":"https://g6lite.antv.vision/en/docs/examples/viewport-controls","mainEntityOfPage":"https://g6lite.antv.vision/en/docs/examples/viewport-controls","image":"https://g6lite.antv.vision/en/og/docs/examples/viewport-controls/image.png","inLanguage":"en","author":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"publisher":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"isPartOf":{"@id":"https://g6lite.antv.vision/#website"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://g6lite.antv.vision/en"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://g6lite.antv.vision/en/docs"},{"@type":"ListItem","position":3,"name":"Viewport and coordinate conversion","item":"https://g6lite.antv.vision/en/docs/examples/viewport-controls"}]}]}6:Ta5c,// Local presentation helpers in this repository are used only for the example controls.
 import { Graph } from '@antv/g6-lite';
-import { buttonStyle, createDemoPanel } from './demo-panel.ts';
-
-const button = (action: string, label: string) =>
-  `<button data-action="${action}" style="${buttonStyle}">${label}</button>`;
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -34,59 +31,46 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
   graph.fitView({ padding: 80 });
 
-  const ui = createDemoPanel(
-    container,
-    '视口与坐标转换',
-    '验证 camera、fitCenter、zoomBy、focusItem、setSize 和屏幕/图坐标互转。',
-    [
-      button('zoom-in', 'zoomBy +'),
-      button('zoom-out', 'zoomBy −'),
-      button('fit', 'fitView'),
-      button('center', 'fitCenter'),
-      button('focus', 'focus C'),
-      button('camera', 'setCamera'),
-      button('reset', 'resetCamera'),
-      button('resize', 'setSize'),
-      button('coords', '坐标互转'),
-    ].join(''),
-  );
+  const ui = createDemoPanel(container);
 
   const showCamera = (prefix: string) => {
     const camera = graph.getCamera();
     ui.setStatus(`${prefix}\nzoom=${camera.zoom.toFixed(3)} x=${camera.x.toFixed(1)} y=${camera.y.toFixed(1)}\nnodes=${graph.getNodes().length} edges=${graph.getEdges().length}`);
   };
 
-  ui.controls.addEventListener('click', (event) => {
-    const action = (event.target as HTMLElement).dataset.action;
-    if (action === 'zoom-in') graph.zoomBy(1.25);
-    else if (action === 'zoom-out') graph.zoomBy(0.8);
-    else if (action === 'fit') graph.fitView({ padding: 64 });
-    else if (action === 'center') graph.fitCenter();
-    else if (action === 'focus') graph.focusItem('c');
-    else if (action === 'camera') graph.setCamera({ zoom: 1.1, x: 80, y: 40 });
-    else if (action === 'reset') graph.resetCamera();
-    else if (action === 'resize') graph.setSize(720, 460);
-    else if (action === 'coords') {
-      const position = graph.getNodePosition('a')!;
-      const screen = graph.graphToScreen(position.x, position.y);
-      const restored = graph.screenToGraph(screen.x, screen.y);
-      ui.setStatus(`graph=(${position.x.toFixed(1)}, ${position.y.toFixed(1)})\nscreen=(${screen.x.toFixed(1)}, ${screen.y.toFixed(1)})\nrestored=(${restored.x.toFixed(1)}, ${restored.y.toFixed(1)})`);
-      return;
-    }
-    showCamera(action ?? 'ready');
+  const addCameraAction = (label: string, action: string, run: () => void) => {
+    ui.addAction(label, () => {
+      run();
+      showCamera(action);
+    });
+  };
+  addCameraAction('zoomBy +', 'zoom-in', () => graph.zoomBy(1.25));
+  addCameraAction('zoomBy −', 'zoom-out', () => graph.zoomBy(0.8));
+  addCameraAction('fitView', 'fit', () => graph.fitView({ padding: 64 }));
+  addCameraAction('fitCenter', 'center', () => graph.fitCenter());
+  addCameraAction('focus C', 'focus', () => graph.focusItem('c'));
+  addCameraAction('setCamera', 'camera', () => graph.setCamera({ zoom: 1.1, x: 80, y: 40 }));
+  addCameraAction('resetCamera', 'reset', () => graph.resetCamera());
+  addCameraAction('setSize', 'resize', () => graph.setSize(720, 460));
+  ui.addAction('坐标互转', () => {
+    const position = graph.getNodePosition('a')!;
+    const screen = graph.graphToScreen(position.x, position.y);
+    const restored = graph.screenToGraph(screen.x, screen.y);
+    ui.setStatus(`graph=(${position.x.toFixed(1)}, ${position.y.toFixed(1)})\nscreen=(${screen.x.toFixed(1)}, ${screen.y.toFixed(1)})\nrestored=(${restored.x.toFixed(1)}, ${restored.y.toFixed(1)})`);
   });
 
   showCamera('ready');
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();
-      ui.panel.remove();
+      ui.destroy();
     },
   };
 }
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],["$","$L3",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L4",null,{"className":"examples-docs-body","children":["$","$L5",null,{"id":"viewport-controls","locale":"en","initialSource":"$6"}]}]}]],["$L7","$L8"],"$L9"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"EOJTM9qFS6tmmrEoiTa9o"}
-7:["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}]
-8:["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],["$","$L3",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L4",null,{"className":"examples-docs-body","children":["$","$L5",null,{"id":"viewport-controls","locale":"en","initialSource":"$6"}]}]}]],["$L7","$L8"],"$L9"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"nBQ24oSAOgYQp4j9GWoSR"}
+7:["$","script","script-0",{"src":"/_next/static/chunks/2g8onjn9ry2iz.js","async":true}]
+8:["$","script","script-1",{"src":"/_next/static/chunks/2g7dmqvv2erk4.js","async":true}]
 9:["$","$La",null,{"children":["$","$b",null,{"name":"Next.MetadataOutlet","children":"$@c"}]}]
 c:null

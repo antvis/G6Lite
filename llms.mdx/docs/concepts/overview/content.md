@@ -1,50 +1,11 @@
-# G6Lite 是什么 (/docs/concepts/overview)
+# G6Lite 是什么（旧入口） (/docs/concepts/overview)
 
 
 
-**G6Lite · 轻量图可视化，为大规模关系数据而生**
+产品介绍已并入 [G6Lite 是什么](/docs)。创建第一个关系图见[快速上手](/docs/getting-started/quick-start)。
 
-丰富的布局与交互，配合轻量高效的 WebGL 渲染，让大规模关系清晰呈现，让数据探索流畅自如。
-
-它保留 G6 用户熟悉的图配置心智：数据、节点、边、布局、交互和主题，但实现重点放在 WebGL 渲染、增量刷新和高频交互上。
-
-## 适合的场景 [#适合的场景]
-
-* 万级节点的关系探索、资产拓扑、知识图谱、依赖分析。
-* 频繁高亮、选中、邻居聚焦、状态切换的分析型交互。
-* 需要轻量包体，同时希望接入 AntV 布局能力的项目。
-* 对首屏可接受布局耗时，但要求渲染后交互开销稳定的场景。
-
-## 需要评估的场景 [#需要评估的场景]
-
-* 10 万级以上超大图且首屏速度是唯一核心指标。
-* 强依赖完整插件生态、动画系统、图论分析算法的场景。
-* 需要 SVG / Canvas 细粒度 DOM 级定制的场景。
-* 服务端渲染输出图片或 SVG 的场景。
-
-## 与 G6 v5 的关系 [#与-g6-v5-的关系]
-
-G6 v5 是功能完整的图可视化框架，插件、元素、动画、交互和生态能力更全面。G6Lite 更像是一个性能优先的轻量内核：
-
-| 维度   | G6Lite                | G6 v5    |
-| ---- | --------------------- | -------- |
-| 渲染技术 | WebGL + Canvas 2D 标签层 | Canvas   |
-| 主要目标 | 大规模渲染和高频交互            | 完整图可视化能力 |
-| 包体   | 更轻                    | 更完整      |
-| 扩展生态 | 有限，聚焦核心能力             | 更丰富      |
-| 适用重点 | 分析型大图                 | 通用图可视化   |
-
-如果你的应用需要完整插件生态，优先评估 G6 v5。如果你的核心瓶颈是大图渲染、高亮和状态切换，优先评估 G6Lite。
-
-## 使用模型 [#使用模型]
-
-一张图由 `Graph` 实例管理：`data` 描述关系，`node` 和 `edge` 定义外观，`layout` 计算位置，`behaviors` 添加交互，`theme` 统一视觉风格。
-
-先理解[数据模型](/docs/concepts/data-model)，再按照 [Graph 生命周期](/docs/concepts/graph-lifecycle)组织创建、更新与销毁。渲染图层、调度和扩展的内部协作见[技术架构](/docs/concepts/architecture)。
-
-## 下一步 [#下一步]
-
-* [数据模型](/docs/concepts/data-model)
-* [Graph 生命周期](/docs/concepts/graph-lifecycle)
-* [技术架构](/docs/concepts/architecture)
-* [安装与第一个图](/docs/getting-started/quick-start)
+* <span id="使用模型" style="{ scrollMarginTop: '8rem' }" />[图数据与更新](/docs/guides/data) · [调用链示例](/docs/examples/dependency-graph)
+* <span id="适合的场景" style="{ scrollMarginTop: '8rem' }" />[适用场景与核心能力](/docs)
+* <span id="需要评估的场景" style="{ scrollMarginTop: '8rem' }" />[运行环境](/docs/compatibility/browser) · [Combo 配置](/docs/api/options#options-combo)
+* <span id="与-g6-v5-的关系" style="{ scrollMarginTop: '8rem' }" />[从 G6 v5 迁移](/docs/compatibility/g6-v5-migration)
+* <span id="下一步" style="{ scrollMarginTop: '8rem' }" />[从这里开始](/docs#从这里开始)

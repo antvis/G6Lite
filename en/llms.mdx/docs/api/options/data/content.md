@@ -1,0 +1,11 @@
+# Graph data reference (previous URL) (/en/docs/api/options/data)
+
+
+
+This section has moved to [Graph data](/en/docs/api/options#options-data).
+
+* <span id="graphdata" style="{ display: 'block', scrollMarginTop: '8rem' }" />[GraphData](/en/docs/api/options#graphdata)
+* <span id="graphnode" style="{ display: 'block', scrollMarginTop: '8rem' }" />[GraphNode](/en/docs/api/options#graphnode)
+* <span id="graphedge" style="{ display: 'block', scrollMarginTop: '8rem' }" />[GraphEdge](/en/docs/api/options#graphedge)
+* <span id="combodata" style="{ display: 'block', scrollMarginTop: '8rem' }" />[ComboData](/en/docs/api/options#options-data-combodata)
+* <span id="initial-states-and-export" style="{ display: 'block', scrollMarginTop: '8rem' }" />[Export graph data with `getData()`](/en/docs/api/graph#getdata)

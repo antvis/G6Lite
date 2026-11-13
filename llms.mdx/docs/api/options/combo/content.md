@@ -1,0 +1,20 @@
+# Combo 配置参考（旧入口） (/docs/api/options/combo)
+
+
+
+查阅[配置概览](/docs/api/options#options-combo)或[Combo 使用指南](/docs/guides/combo)。
+
+* <span id="combodata" style="{ display: 'block', scrollMarginTop: '8rem' }" />[ComboData](/docs/api/options#options-combo-combodata)
+* <span id="节点归属与嵌套" style="{ display: 'block', scrollMarginTop: '8rem' }" />[节点归属与嵌套](/docs/api/options#节点归属与嵌套)
+* <span id="初始折叠" style="{ display: 'block', scrollMarginTop: '8rem' }" />[`collapsed`](/docs/api/options#初始折叠)
+* <span id="初始状态" style="{ display: 'block', scrollMarginTop: '8rem' }" />[`states`](/docs/api/options#初始状态)
+* <span id="只读查询模型" style="{ display: 'block', scrollMarginTop: '8rem' }" />[只读查询模型](/docs/guides/combo#只读查询模型)
+* <span id="基础外观与局部覆盖" style="{ display: 'block', scrollMarginTop: '8rem' }" />[基础外观与局部覆盖](/docs/guides/combo#基础外观与局部覆盖)
+* <span id="基础样式字段" style="{ display: 'block', scrollMarginTop: '8rem' }" />[基础样式字段](/docs/guides/combo#基础样式字段)
+* <span id="代码与对应效果" style="{ display: 'block', scrollMarginTop: '8rem' }" />[代码与对应效果](/docs/guides/combo#options-combo-代码与对应效果)
+* <span id="字段回调与覆盖顺序" style="{ display: 'block', scrollMarginTop: '8rem' }" />[样式函数与覆盖顺序](/docs/guides/combo#字段回调与覆盖顺序)
+* <span id="留白包围框与标签" style="{ display: 'block', scrollMarginTop: '8rem' }" />[留白、包围框与标签](/docs/guides/combo#留白包围框与标签)
+* <span id="运行时修改边界" style="{ display: 'block', scrollMarginTop: '8rem' }" />[运行时修改边界](/docs/guides/combo#运行时修改边界)
+* <span id="折叠形态" style="{ display: 'block', scrollMarginTop: '8rem' }" />[折叠形态](/docs/guides/combo#折叠形态)
+* <span id="状态样式" style="{ display: 'block', scrollMarginTop: '8rem' }" />[状态样式](/docs/guides/combo#options-combo-状态样式)
+* <span id="相关入口" style="{ display: 'block', scrollMarginTop: '8rem' }" />[相关入口](/docs/guides/combo#options-combo-相关入口)

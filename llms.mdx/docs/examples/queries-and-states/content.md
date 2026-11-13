@@ -4,4 +4,132 @@
 
 
 
-<ExampleDetail id="queries-and-states" locale="zh" />
+验证元素、邻接、状态查询，以及批量状态和可见性控制。
+
+## 如何体验
+
+查询 root 应得到 n1、n2 两个邻居和两条关联边。再对比批量增减、按指定 ID 替换状态、Combo 高亮与隐藏；未指定的 ID 保留原状态，全部清理恢复空状态。
+
+## 数据说明
+
+使用带邻接关系的数据验证 Graph 查询模型。
+
+## 完整运行代码
+
+```ts
+// Local presentation helpers in this repository are used only for the example controls.
+import { Graph, type GraphData } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+const DATA: GraphData = {
+  nodes: [
+    { id: 'root', x: 180, y: 160, comboId: 'left', data: { label: 'Root' } },
+    { id: 'n1', x: 340, y: 90, comboId: 'right', data: { label: 'N1' } },
+    { id: 'n2', x: 340, y: 230, comboId: 'right', data: { label: 'N2' } },
+    { id: 'n3', x: 500, y: 160, data: { label: 'N3' } },
+  ],
+  edges: [
+    { id: 'e-root-n1', source: 'root', target: 'n1' },
+    { id: 'e-root-n2', source: 'root', target: 'n2' },
+    { id: 'e-n1-n3', source: 'n1', target: 'n3' },
+    { id: 'e-n2-n3', source: 'n2', target: 'n3' },
+  ],
+  combos: [
+    { id: 'left', data: { label: '查询起点' } },
+    { id: 'right', data: { label: '状态分组' } },
+  ],
+};
+
+export async function run(container: string | HTMLElement) {
+  const graph = new Graph({
+    autoFit: true,
+    container,
+    data: DATA,
+    node: {
+      style: {
+        size: 32,
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'center',
+        labelColor: '#fff',
+      },
+      stateStyles: {
+        selected: { fill: '#873BF4', stroke: '#5B21B6', strokeWidth: 3 },
+        active: { fill: '#13C2C2', stroke: '#08979C', strokeWidth: 3 },
+        highlight: { fill: '#FA8C16', stroke: '#D46B08', strokeWidth: 3 },
+      },
+    },
+    edge: { style: { stroke: '#94a3b8', endArrow: true } },
+    combo: { style: { padding: 24, label: (combo) => String(combo.data?.label ?? combo.id) } },
+    behaviors: ['zoom-canvas', 'drag-canvas'],
+  });
+  await graph.render();
+  graph.fitView({ padding: 80 });
+
+  const ui = createDemoPanel(container);
+
+  const showStateSummary = (prefix: string) => {
+    ui.setStatus(
+      `${prefix}\nselected nodes=${graph.findNodesByState('selected').join(', ') || '-'}\n` +
+        `active edges=${graph.findEdgesByState('active').join(', ') || '-'}\n` +
+        `highlight combos=${graph.findCombosByState('highlight').join(', ') || '-'}`,
+    );
+  };
+
+  ui.addAction('查询 root', () => {
+    const element = graph.getElementData('root');
+    const position = graph.getElementPosition('root');
+    ui.setStatus(
+      `hasNode=${graph.hasNode('root')} hasEdge=${graph.hasEdge('e-root-n1')} hasElement=${graph.hasElement('right')}\n` +
+        `element=${element?.id} position=${position?.x},${position?.y}\n` +
+        `neighbors=${graph.getNeighborNodes('root').join(', ')}\n` +
+        `adjacent=${graph.getAdjacentEdges('root').map((edge) => edge.id).join(', ')}`,
+    );
+  });
+  ui.addAction('批量设状态', () => {
+    graph.batchSetState([
+      { id: 'root', state: 'selected', value: true },
+      { id: 'n3', state: 'selected', value: true },
+      { id: 'e-root-n1', state: 'active', value: true },
+    ]);
+    showStateSummary('batchSetState');
+  });
+  ui.addAction('替换状态', () => {
+    graph.setElementStates({ root: ['highlight'], n1: ['selected'], 'e-root-n2': ['active'] });
+    showStateSummary('setElementStates');
+  });
+  ui.addAction('Combo 状态', () => {
+    graph.setItemState('right', 'highlight', true);
+    const children = graph.getComboChildren('right');
+    ui.setStatus(`combo=${graph.getComboData('right')?.id}\nchildren=${children.nodes.join(', ')}\nstates=${graph.getItemStates('right').join(', ')}`);
+  });
+  ui.addAction('隐藏 n2', () => {
+    const hidden = graph.getItemStates('n2').includes('hidden');
+    if (hidden) graph.showItem('n2');
+    else graph.hideItem('n2');
+    ui.setStatus(`n2 states=${graph.getItemStates('n2').join(', ') || '-'}`);
+  });
+  ui.addAction('全部清理', () => {
+    for (const node of graph.getNodes()) graph.clearItemStates(node.id);
+    for (const edge of graph.getEdges()) graph.clearItemStates(edge.id);
+    for (const comboId of ['left', 'right']) graph.clearItemStates(comboId);
+    showStateSummary('clearItemStates');
+  });
+
+  showStateSummary('ready');
+  return {
+    getData: () => graph.getData(),
+    fitView: () => graph.fitView({ padding: 64 }),
+    destroy: () => {
+      graph.destroy();
+      ui.destroy();
+    },
+  };
+}
+```
+
+
+## 继续阅读
+
+- [读取与邻接查询](/docs/api/graph#graph-data)
+- [状态与显隐](/docs/api/graph#graph-states)
+- [Combo 操作](/docs/api/graph#graph-combo)

@@ -4,4 +4,61 @@
 
 
 
-<ExampleDetail id="neighbor-highlight" locale="zh" />
+悬停节点高亮邻居和连边，悬停边高亮两端节点。
+
+## 如何体验
+
+悬停节点或边。
+
+## 数据说明
+
+hub 与两级分支共 7 个节点、7 条边，用于观察一度邻接高亮。
+
+## 完整运行代码
+
+```ts
+/**
+ * Demo: hover a node to highlight its neighbors, or an edge to highlight its endpoints.
+ */
+import { Graph, register } from '@antv/g6-lite';
+import radial from '@antv/g6-lite/layouts/radial';
+
+export async function run(container: string | HTMLElement) {
+  register('layout', 'radial', radial);
+  const graph = new Graph({
+    autoFit: true,
+    container,
+    data: {
+      nodes: ['hub', 'a', 'b', 'c', 'd', 'e', 'f'].map((id) => ({ id, data: { label: id.toUpperCase() } })),
+      edges: [
+        { source: 'hub', target: 'a' },
+        { source: 'hub', target: 'b' },
+        { source: 'hub', target: 'c' },
+        { source: 'a', target: 'd' },
+        { source: 'b', target: 'e' },
+        { source: 'c', target: 'f' },
+        { source: 'd', target: 'e' },
+      ],
+    },
+    node: {
+      style: {
+        size: (node) => (node.id === 'hub' ? 36 : 24),
+        fill: (node) => (node.id === 'hub' ? '#E86452' : '#5B8FF9'),
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'bottom',
+      },
+    },
+    edge: { style: { stroke: '#C5CEDB', lineWidth: 2 } },
+    layout: { type: 'radial', unitRadius: 120, linkDistance: 100 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
+  });
+  await graph.render();
+  return graph;
+}
+```
+
+
+## 继续阅读
+
+- [邻居查询](/docs/api/graph#getneighbornodes)
+- [高亮交互](/docs/guides/behaviors)

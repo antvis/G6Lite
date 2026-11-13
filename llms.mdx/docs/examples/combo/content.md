@@ -4,4 +4,345 @@
 
 
 
-<ExampleDetail id="combo" locale="zh" />
+展示嵌套分组、折叠展开、运行时归组和数据导出。
+
+## 如何体验
+
+点击分组背景可折叠或展开单个分组。用画布上的按钮批量操作，在「更多」中调整节点归属、创建分组或导出数据。
+
+## 数据说明
+
+10 个业务节点、9 条边和 4 个嵌套分组。
+
+## 完整运行代码
+
+```ts
+// Local presentation helpers in this repository are used only for the example controls.
+/**
+ * Combo (Group Container) Demo
+ * Demonstrates: nested application groups, fixed positioning, collapse/expand,
+ * membership changes, runtime combo creation, and data export.
+ */
+
+import { Graph } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+const NODE_COLORS: Record<string, string> = {
+  client: '#7D9FD3',
+  service: '#70A991',
+  data: '#C89C5D',
+  observability: '#9299A8',
+};
+
+export async function run(container: string | HTMLElement) {
+  const containerEl =
+    typeof container === 'string'
+      ? (document.querySelector(container) as HTMLElement)
+      : container;
+  containerEl.style.position = 'relative';
+
+  const graph = new Graph({
+    autoFit: true,
+    container: containerEl,
+    data: {
+      nodes: [
+        {
+          id: 'web',
+          name: 'Web 端',
+          x: 100,
+          y: 150,
+          comboId: 'client-apps',
+          data: { layer: 'client' },
+        },
+        {
+          id: 'mobile',
+          name: '移动端',
+          x: 100,
+          y: 255,
+          comboId: 'client-apps',
+          data: { layer: 'client' },
+        },
+        {
+          id: 'console',
+          name: '运营控制台',
+          x: 100,
+          y: 360,
+          comboId: 'client-apps',
+          data: { layer: 'client' },
+        },
+        {
+          id: 'gateway',
+          name: 'API 网关',
+          x: 335,
+          y: 255,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'auth',
+          name: '认证服务',
+          x: 500,
+          y: 150,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'order',
+          name: '订单服务',
+          x: 500,
+          y: 255,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'worker',
+          name: '异步任务',
+          x: 500,
+          y: 360,
+          comboId: 'service-layer',
+          data: { layer: 'service' },
+        },
+        {
+          id: 'cache',
+          name: 'Redis 缓存',
+          x: 720,
+          y: 150,
+          comboId: 'data-layer',
+          data: { layer: 'data' },
+        },
+        {
+          id: 'mysql',
+          name: 'MySQL',
+          x: 720,
+          y: 255,
+          comboId: 'data-layer',
+          data: { layer: 'data' },
+        },
+        {
+          id: 'mq',
+          name: '消息队列',
+          x: 720,
+          y: 360,
+          comboId: 'data-layer',
+          data: { layer: 'data' },
+        },
+      ],
+      edges: [
+        { source: 'web', target: 'gateway' },
+        { source: 'mobile', target: 'gateway' },
+        { source: 'console', target: 'gateway' },
+        { source: 'gateway', target: 'auth' },
+        { source: 'gateway', target: 'order' },
+        { source: 'gateway', target: 'worker' },
+        { source: 'auth', target: 'cache' },
+        { source: 'order', target: 'mysql' },
+        { source: 'worker', target: 'mq' },
+      ],
+      combos: [
+        {
+          id: 'client-apps',
+          data: { name: '客户端' },
+          style: {
+            fill: 'rgba(104, 145, 205, 0.08)',
+            stroke: 'rgba(104, 145, 205, 0.42)',
+            padding: 38,
+          },
+        },
+        {
+          id: 'business-platform',
+          data: { name: '业务平台' },
+          style: {
+            fill: 'rgba(112, 132, 160, 0.045)',
+            stroke: 'rgba(112, 132, 160, 0.28)',
+            padding: 24,
+            labelFontSize: 13,
+          },
+        },
+        {
+          id: 'service-layer',
+          parentId: 'business-platform',
+          data: { name: '服务层' },
+          style: {
+            fill: 'rgba(91, 158, 130, 0.08)',
+            stroke: 'rgba(91, 158, 130, 0.4)',
+            padding: 38,
+          },
+        },
+        {
+          id: 'data-layer',
+          parentId: 'business-platform',
+          data: { name: '数据层' },
+          style: {
+            fill: 'rgba(205, 155, 82, 0.09)',
+            stroke: 'rgba(205, 155, 82, 0.42)',
+            padding: 38,
+          },
+        },
+      ],
+    },
+    node: {
+      type: 'circle',
+      style: {
+        size: 18,
+        fill: (node) => NODE_COLORS[String(node.data?.layer)] ?? '#9CA3AF',
+        stroke: '#FFFFFF',
+        strokeWidth: 2,
+        label: (node) =>
+          node.name ?? (node.data?.label as string | undefined) ?? node.id,
+        labelPlacement: 'bottom',
+        labelOffsetY: 4,
+        labelFontSize: 11,
+        labelColor: '#475569',
+      },
+      stateStyles: {
+        selected: { stroke: '#3B82F6', strokeWidth: 3 },
+      },
+    },
+    edge: {
+      type: 'cubic',
+      style: {
+        stroke: 'rgba(115, 137, 166, 0.58)',
+        lineWidth: 1.2,
+        endArrow: false,
+      },
+    },
+    combo: {
+      style: {
+        borderRadius: 12,
+        label: (combo) =>
+          (combo.data as Record<string, string> | undefined)?.name ?? combo.id,
+        labelPlacement: 'inside',
+        labelFontSize: 12,
+        labelColor: '#526071',
+        collapsedType: 'rect',
+        collapsedSize: [72, 38],
+        count: false,
+        stateStyles: {
+          selected: { stroke: '#3B82F6', strokeWidth: 2 },
+          active: { stroke: '#60A5FA', strokeWidth: 2 },
+        },
+      },
+    },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+  });
+
+  await graph.render();
+  graph.fitView(0.82);
+
+  const ui = createDemoPanel(containerEl, '点击分组背景可折叠或展开');
+  let consoleInService = false;
+  let runtimeCreated = false;
+
+  ui.addAction('全部折叠', () => {
+    graph.collapseCombo('client-apps');
+    graph.collapseCombo('business-platform');
+    if (runtimeCreated) graph.collapseCombo('observability');
+    ui.setStatus('已折叠顶层分组');
+  });
+
+  ui.addAction('全部展开', () => {
+    graph.expandCombo('business-platform');
+    graph.expandCombo('client-apps');
+    graph.expandCombo('service-layer');
+    graph.expandCombo('data-layer');
+    if (runtimeCreated) graph.expandCombo('observability');
+    ui.setStatus('已展开全部分组');
+  });
+
+  const toggleGroup = (comboId: string) => {
+    graph.toggleCombo(comboId);
+    const group = graph.getComboData(comboId);
+    ui.setStatus(`${group?.data?.name ?? comboId}${group?.collapsed ? '已折叠' : '已展开'}`);
+  };
+
+  graph.on('combo:click', ({ comboId }) => toggleGroup(comboId));
+  const more = ui.gui.addFolder('更多').close();
+  ui.addAction('切换数据层', () => {
+    graph.expandCombo('business-platform');
+    toggleGroup('data-layer');
+  }, more);
+
+  const consoleButton = ui.addAction('控制台加入服务层', () => {
+    graph.expandCombo('business-platform');
+    graph.expandCombo('service-layer');
+    if (consoleInService) {
+      graph.addToCombo('console', 'client-apps');
+      consoleButton.name('控制台加入服务层');
+      ui.setStatus('运营控制台已回到客户端');
+    } else {
+      graph.addToCombo('console', 'service-layer');
+      consoleButton.name('控制台回到客户端');
+      ui.setStatus('运营控制台已加入服务层');
+    }
+    consoleInService = !consoleInService;
+  }, more);
+
+  const runtimeButton = ui.addAction('创建可观测分组', () => {
+    if (runtimeCreated) return;
+    graph.addNodes([
+      {
+        id: 'logs',
+        x: 570,
+        y: 455,
+        data: { layer: 'observability', label: '日志采集' },
+      },
+      {
+        id: 'metrics',
+        x: 720,
+        y: 455,
+        data: { layer: 'observability', label: '指标监控' },
+      },
+    ]);
+    graph.createCombo(
+      {
+        id: 'observability',
+        data: { name: '可观测性', source: 'createCombo' },
+        style: {
+          fill: 'rgba(134, 126, 176, 0.08)',
+          stroke: 'rgba(134, 126, 176, 0.42)',
+          padding: 32,
+          label: '可观测性',
+          labelPlacement: 'inside',
+          labelColor: '#645F83',
+          collapsedType: 'rect',
+          collapsedSize: [84, 38],
+          count: false,
+        },
+      },
+      ['logs', 'metrics'],
+    );
+    runtimeCreated = true;
+    runtimeButton.name('已创建可观测分组').disable();
+    graph.fitView(0.78);
+    ui.setStatus('createCombo() 已执行');
+  }, more);
+
+  ui.addAction('导出数据', () => {
+    const data = graph.getData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'g6lite-combo-data.json';
+    link.click();
+    URL.revokeObjectURL(url);
+    ui.setStatus(`${data.nodes.length} 节点 · ${data.combos?.length ?? 0} 分组`);
+  }, more);
+
+  return {
+    getData: () => graph.getData(),
+    fitView: () => graph.fitView({ padding: 64 }),
+    destroy() {
+      graph.destroy();
+      ui.destroy();
+    },
+  };
+}
+```
+
+
+## 继续阅读
+
+- [Combo 指南](/docs/guides/combo)
+- [Combo 方法](/docs/api/graph#graph-combo)
+- [Combo 配置](/docs/api/options#options-combo)

@@ -1,197 +1,287 @@
 # 文档
 
-- [概览](/docs): G6Lite 文档：入门、概念、配置、API、示例与性能验证
-- [用 AI 构建 G6Lite 图](/docs/ai): 使用 G6Lite Skill、本地 AI Agent 与 Sive 创建、排查和优化关系图
-- 快速开始
+- [G6Lite 是什么](/docs): 轻量图可视化，为大规模关系数据而生
+- 开始使用
   - [快速上手](/docs/getting-started/quick-start): 安装 G6Lite，创建第一个可交互的关系图
-  - [在框架中使用](/docs/getting-started/react): 在 React 和 Vue 3 中使用 G6Lite
-- 核心概念
-  - [G6Lite 是什么](/docs/concepts/overview): G6Lite 的定位、适用场景和与 G6 v5 的关系
-  - [图数据模型](/docs/concepts/data-model): 节点、边与可选分组，以及数据与显示的关系
-  - [Graph 生命周期](/docs/concepts/graph-lifecycle): 创建、首次渲染、运行中更新与销毁的调用顺序
+  - [React 接入](/docs/getting-started/react): 在 React 组件中创建关系图并更新数据
+  - [Vue 接入](/docs/getting-started/vue): 在 Vue 3 组件中创建关系图并更新数据
+- [G6Lite AI 使用指南](/docs/ai): 用 AI Skill 在项目中生成或修改关系图代码，用 Sive 在线查询 API 和使用示例。
+- API
+  - [API 文档已迁移](/docs/api): 从图 API、事件参考和配置项查找公开接口。
+  - 图 API
+    - [图 API](/docs/api/graph): 查询图的构造函数、实例方法、事件和扩展接口
+    - [事件](/docs/api/graph/events): 查询图事件的触发时机和回调参数。
+  - [图配置项](/docs/api/options): GraphOptions 的顶层字段、默认值与分项配置
+  - [扩展参考](/docs/api/extensions): 扩展的配置位置、上下文、绘制回调和生命周期。
+- 图 Graph
+  - [图总览](/docs/graph/overview): 了解 Graph 的生命周期、配置项和实例属性，运行一个完整的配置示例
+- 使用指南
+  - [视口与坐标](/docs/guides/viewport): 适配画布、保留用户视野、转换坐标并定位菜单
+  - [扩展体系](/docs/guides/extensions): 先选配置或扩展，再进入对应教程和公共契约
+  - [数据 Data](/docs/guides/data): 了解图数据结构、节点与边的增删改查、分组和远程数据加载
+  - [元素状态](/docs/guides/states): 设置选中和高亮样式，增减状态并在数据更新后恢复选择
+  - [节点通用配置项](/docs/guides/node): 介绍节点形状、数据映射、状态、标签、图标、装饰与动态更新
+  - [自定义节点](/docs/guides/custom-node): 注册业务节点，添加轻量覆盖绘制与装饰边界锚点，并验证更新
+  - [自定义节点装饰](/docs/guides/custom-decoration): 实现装饰内容的测量和绘制，配置定位、堆叠、排序、溢出与碰撞
+  - [边通用配置项](/docs/guides/edge): 按场景选择边类型，配置样式、标签、交互、平行边与路由
+  - [自定义边](/docs/guides/custom-edge): 复用内置边基型，注册业务样式、函数映射与状态，并验证数据更新
+  - [分组通用配置项](/docs/guides/combo): 设置分组的边框、标签、状态和折叠样式，调整成员归属
+  - [标签与图标](/docs/guides/label): 配置节点与边标签、节点图标、长文本、显示策略和运行时更新
+  - [自定义 Label Renderer](/docs/guides/custom-label-renderer): 为节点和边实现多行内容，复用引擎的定位、旋转、碰撞和调度
+  - [布局总览](/docs/guides/layout-overview): 根据图的用途选择布局，比较同一份数据的排列效果
+  - [布局通用配置项](/docs/guides/layout): 选择网络或树布局，复用已有坐标，并在运行时重新排列
+  - [网格布局 Grid](/docs/guides/layout-grid): 节点按行列排成网格。
+  - [环形布局 Circular](/docs/guides/layout-circular): 节点沿圆周排列，半径也可以逐个变化，形成螺旋。
+  - [层级布局 Dagre](/docs/guides/layout-dagre): 节点按有向边的关系分层排列。
+  - [力导向布局 Force](/docs/guides/layout-force): 边的引力拉近相连的节点，节点间的斥力把它们分开。
+  - [D3 力导向布局](/docs/guides/layout-d3-force): D3 的力模拟根据节点间的作用力计算位置。
+  - [ForceAtlas2 力导向布局](/docs/guides/layout-force-atlas2): 相连的节点互相吸引，同时受斥力和中心引力影响。
+  - [Fruchterman 力导向布局](/docs/guides/layout-fruchterman): 用边的引力和节点间的斥力调整位置，再用中心引力聚拢整张图。
+  - [同心圆布局 Concentric](/docs/guides/layout-concentric): 按排序指标把节点分到不同圆环，指标值较大的节点靠近中心。
+  - [缩进树布局 Indented](/docs/guides/layout-indented): 节点按树的遍历顺序逐行排列，子节点随层级加深而缩进。
+  - [思维导图布局 Mindmap](/docs/guides/layout-mindmap): 分支从中心主题向一侧或两侧展开。
+  - [鱼骨布局 Fishbone](/docs/guides/layout-fishbone): 问题放在主干末端，原因分类沿主干两侧展开。
+  - [放射布局 Radial](/docs/guides/layout-radial): 节点按到中心节点的最短路径距离分圈。
+  - [多维尺度布局 MDS](/docs/guides/layout-mds): 多维尺度分析（MDS）用平面距离近似表示图中节点的最短路径距离。
+  - [随机布局 Random](/docs/guides/layout-random): 节点随机散布在布局中心附近。
+  - [Worker 布局指南](/docs/guides/layout-worker): 启用异步布局、取消旧任务，并检查 Worker 回退与部署资源
+  - [自定义布局](/docs/guides/custom-layout): 注册坐标计算，处理配置、取消信号和清理，并区分 Graph 执行与独立计算
+  - [交互总览](/docs/guides/behavior-overview): 查看内置交互，配置、切换和卸载交互，并监听图事件。
+  - [交互通用配置项](/docs/guides/behaviors): 组合浏览、选择、拖动、高亮和 Tooltip，并连接业务事件
+  - [拖动画布](/docs/guides/behavior-drag-canvas): 从画布空白处拖动，平移整张图。
+  - [缩放画布](/docs/guides/behavior-zoom-canvas): 滚动鼠标滚轮，以画布中心为基准缩放。
+  - [点击选中](/docs/guides/behavior-click-select): 点击节点或边切换选中状态，点击画布空白处清空选择。
+  - [框选](/docs/guides/behavior-brush-select): 拖出矩形，选中中心落在矩形内的节点。
+  - [套索选择](/docs/guides/behavior-lasso-select): 沿自由轮廓拖动，选中中心落在圈内的节点。
+  - [拖动节点与分组](/docs/guides/behavior-drag-node): 拖动节点，或从分组空白处拖动整个分组。
+  - [拖动边端点](/docs/guides/behavior-drag-edge): 拖动已有边的端点，松开时通过事件获取重连目标。
+  - [悬停高亮节点](/docs/guides/behavior-highlight-node): 悬停节点时，突出该节点及与它直接相连的节点和边。
+  - [悬停高亮边](/docs/guides/behavior-highlight-edge): 悬停边时，突出这条边及其两端节点。
+  - [邻域高亮](/docs/guides/behavior-hover-highlight): 悬停时高亮节点的邻域，或高亮边及其两端节点。
+  - [提示框 Tooltip](/docs/guides/behavior-tooltip): 悬停或点击节点和边时，显示它们的详细信息。
+  - [自定义交互](/docs/guides/custom-behavior): 实现独立实例的业务选择行为，完成注册、激活与清理
+  - [插件总览](/docs/guides/plugins): 了解 G6Lite 的插件，以及如何配置、替换和卸载插件
+  - [自定义插件](/docs/guides/custom-plugin): 实现、注册并使用一个点击计数器插件
+  - [数据处理 Transform](/docs/guides/transform-overview): 了解 Transform 的执行时机，配置平行边和自定义数据处理
+  - [主题](/docs/guides/theme): 选择预设、应用品牌色、切换主题，并排查样式覆盖
+  - [缩放与平移画布](/docs/guides/behavior-navigation): 设置滚轮缩放速度、范围和拖动画布的手势
+  - [点击、框选与套索](/docs/guides/behavior-selection): 配置节点和边的点击选中，以及节点的区域选择
+  - [拖动节点、分组与边](/docs/guides/behavior-dragging): 移动节点和分组，或拖动边的端点并保存重连结果
+  - 事件入门
+    - [事件入门](/docs/guides/events): 从监听一次点击开始，连接画布操作与业务
+    - [选择与拖动](/docs/guides/events/selection-drag): 同步业务选择、保存拖拽结果，并清理监听
+    - [渲染、布局与数据更新](/docs/guides/events/lifecycle): 了解何时可以更新图、读取布局坐标或处理数据替换。
+    - [自定义事件](/docs/guides/events/custom): 用工具栏按钮触发业务事件，并在页面卸载时清理监听。
+  - [网格、环形与层级布局](/docs/guides/layout-arrangements): 用 Grid、Circular 和 Dagre 排列节点
+  - [关系网络布局](/docs/guides/layout-networks): 按连接关系、中心节点或图距离排列网络
+  - [树布局](/docs/guides/layout-trees): 用脑图、缩进树和鱼骨图展示父子关系
+- 元素 Element
+  - [元素总览](/docs/elements/overview): 查看 G6Lite 节点、边、分组的内置形态、元素构成、状态和自定义示例
+  - [节点总览](/docs/elements/node): 了解 G6Lite 的内置节点、自定义节点、节点数据结构、样式配置和状态
+  - [边总览](/docs/elements/edge): 了解边的方向、内置类型、数据结构与配置方法
+  - [分组总览](/docs/elements/combo): 了解分组的用途、成员归属和基本配置
+- 性能与原理
+  - [性能对比](/docs/metrics/performance): 同一图数据下 G6Lite、G6、Sigma.js 与 ECharts 的首绘耗时和浏览器包体积
+- 开始使用
   - [技术架构](/docs/concepts/architecture): 图运行时、绘制图层、渲染调度与布局交互如何协作
-- 配置指南
-  - [数据](/docs/guides/data): 将业务数据转换为 GraphData，并选择整份替换或增量更新
-  - [节点](/docs/guides/node): 节点类型、样式函数、状态样式和性能建议
-  - [边](/docs/guides/edge): 边类型、箭头、标签、状态样式和平行边
-  - [标签与图标](/docs/guides/label): 节点标签、边标签和节点图标配置
-  - [Combo](/docs/guides/combo): 节点分组容器的声明、样式、折叠展开和整体拖拽
-  - [主题](/docs/guides/theme): 使用 light / dark 主题并覆盖 token
-  - [布局配置](/docs/guides/layout): 内置布局类型、选型建议、常用参数与 Worker 支持
-  - [交互配置](/docs/guides/interactions): 内置 behaviors、启用方式和常用交互组合
-  - [自定义 Behavior](/docs/guides/custom-behavior): 使用类型安全的 options、GraphEventMap 和 extensionFactory 编写可复用交互扩展
-  - [事件](/docs/guides/events): 使用 GraphEventMap 和 graph.on、graph.off、graph.once 监听公开事件
-  - [Tooltip 配置](/docs/guides/tooltip): 使用内置 tooltip behavior 展示节点和边信息
-  - [平行边与自环处理](/docs/guides/parallel-edges): 处理多条同源同目标边和自环边的展示
-  - [扩展体系](/docs/guides/extensions): 通过配置、函数式映射和公开扩展 API 完成受控业务定制
-  - [自定义节点](/docs/guides/custom-node): 使用统一 register 和函数式 NodeExtension 扩展节点表现形式
-  - [自定义 Label Renderer](/docs/guides/custom-label-renderer): 自定义节点和边的 Label 内容，并复用定位、旋转、碰撞与调度能力
-- API 参考
-  - [可用 API](/docs/api): 业务代码可以从 @antv/g6-lite 直接使用的入口、调用顺序和类型
-  - [Graph 类](/docs/api/graph): Graph 的创建、数据、状态、视口、布局和事件方法
-  - [配置](/docs/api/options): new Graph() 可传入的数据、节点、边、布局、交互、标签和主题
-  - [扩展](/docs/api/extensions): register、extensionFactory、runLayout，以及扩展里可以调用的上下文
+- 排查与升级
+  - [浏览器与运行环境](/docs/compatibility/browser): 实际能力、ESM、Worker、CSP、SSR 和设备验收边界
+  - [从 G6 v5 迁移](/docs/compatibility/g6-v5-migration): 逐项迁移配置、数据、交互、事件和扩展，保留可回退的业务基线
+  - [故障排查](/docs/compatibility/troubleshooting): 排查画布、布局、交互与接入问题，按症状找到检查步骤
 - 示例
   - [图表示例](/docs/examples): 按 G6Lite 公开能力分类浏览并直接运行官网示例
   - [最简关系图](/docs/examples/basic): 使用最少配置渲染一个可缩放、可拖拽的关系图
   - [默认主题与交互状态](/docs/examples/default-theme): 并排检查 light、dark 预设主题和节点、边默认状态
-  - [节点与边增删改](/docs/examples/data-mutations): 集中演示节点和边的单个、批量新增、更新和删除
-  - [查询、批量状态与可见性](/docs/examples/queries-and-states): 验证元素、邻接、状态查询，以及批量状态和可见性控制
-  - [全量替换数据](/docs/examples/set-data): 用 setData 替换整图数据，并在替换后切换布局。
-  - [搜索并聚焦](/docs/examples/search-focus): 按名称搜索节点，高亮匹配项并把视口移过去。
   - [节点数据映射样式](/docs/examples/node-style): 按业务字段动态设置节点颜色、尺寸和高亮交互
+  - [常用布局切换](/docs/examples/layouts): 在同一份数据上切换 circular、force、grid 和 dagre
+  - [悬停高亮](/docs/examples/hover): 悬停节点或边时高亮关联元素，并淡化其余元素。
+  - [Tooltip 浮层](/docs/examples/tooltip): 悬停节点或边时展示自定义业务信息
   - [图形类型](/docs/examples/shapes): 并排查看圆形和矩形节点。
-  - [节点边框与圆角](/docs/examples/node-border): 调整描边、线宽和矩形圆角。
-  - [边与箭头方向](/docs/examples/edge-arrows): 比较无箭头、单向、双向和粗边箭头
+  - [200 节点](/docs/examples/large): 用 200 个节点快速查看中等规模图的渲染和交互。
+  - [5000 节点与标签](/docs/examples/large-labeled): 在 5000 个节点上绘制 Canvas 标签。
+  - [边状态与权重](/docs/examples/edge-states): 用权重映射边宽，并查看边的状态样式。
   - [边类型](/docs/examples/edge-types): 展示直线、虚线、弧线和曲线。
   - [边颜色](/docs/examples/edge-colors): 按业务分类给边映射颜色。
-  - [边状态与权重](/docs/examples/edge-states): 用权重映射边宽，并查看边的状态样式。
-  - [细边交互热区](/docs/examples/edge-hit-area): 保持细线外观，同时扩大直线、曲线和自环的拾取范围。
-  - [平行边与反向边](/docs/examples/parallel-edges): 自动错开同源同目标的多条边、反向边和单边
+  - [边与箭头方向](/docs/examples/edge-arrows): 比较无箭头、单向、双向和粗边箭头
   - [自环边](/docs/examples/edge-loops): 展示一个节点上的单条和多层嵌套自环。
+  - [交互热区](/docs/examples/edge-hit-area): 保持细线外观，同时扩大直线、曲线和自环的拾取范围。
+  - [平行边与反向边](/docs/examples/parallel-edges): 自动错开同源同目标的多条边、反向边和单边
+  - [呼吸节点](/docs/examples/breathing-node): 用自定义节点动画表现选中和高亮状态。
+  - [节点边框与圆角](/docs/examples/node-border): 调整描边、线宽和矩形圆角。
+  - [流程图](/docs/examples/flowchart): 用层级布局和折线边绘制决策流程。
+  - [人物关系网络](/docs/examples/relationship): 使用力导布局和关系标签展示人物关联
+  - [组织架构图](/docs/examples/org-chart): 使用层级布局展示组织与团队关系
+  - [缩进树](/docs/examples/indented-tree): 用缩进布局展示目录结构。
+  - [思维导图](/docs/examples/mindmap): 围绕中心主题展开双向知识分支
+  - [鱼骨图](/docs/examples/fishbone): 将问题、分类与原因组织为鱼骨归因结构
+  - [全量替换数据](/docs/examples/set-data): 用 setData 替换整图数据，并在替换后切换布局。
   - [标签位置与图标](/docs/examples/labels): 展示节点标签、边标签、图标，并在运行时切换位置。
   - [标签渲染策略](/docs/examples/label-rendering-options): 对比固定字号、低缩放持续绘制和关闭碰撞隐藏。
-  - [折线与正交路由](/docs/examples/polyline-routing): 用圆角正交折线连接从左到右的流程节点。
+  - [自定义标签渲染](/docs/examples/custom-label-renderer): 节点和边共用一个自定义 Label Renderer。
   - [Combo 分组容器](/docs/examples/combo): 展示嵌套分组、折叠展开、运行时归组和数据导出
-  - [常用布局切换](/docs/examples/layouts): 在同一份数据上切换 circular、force、grid 和 dagre
-  - [更多内置布局](/docs/examples/layout-gallery): 比较 radial、concentric、ForceAtlas2、fruchterman、MDS 和 random
-  - [流程图](/docs/examples/flowchart): 用层级布局和折线边绘制决策流程。
-  - [缩进树](/docs/examples/indented-tree): 用缩进布局展示目录结构。
+  - [自定义节点与显式边 ID](/docs/examples/custom-node-extension): 注册自定义节点，并使用显式边 ID 与 Combo 状态。
+  - [AI Papers 大规模关系图](/docs/examples/real-dataset): 使用真实论文引用网络验证大图渲染和交互链路
+  - [扩展系统综合示例](/docs/examples/extension-system): 组合验证 decoration、edge、layout、transform、behavior 和 plugin 扩展
+  - [节点与边增删改](/docs/examples/data-mutations): 集中演示节点和边的单个、批量新增、更新和删除
+  - [查询、批量状态与可见性](/docs/examples/queries-and-states): 验证元素、邻接、状态查询，以及批量状态和可见性控制
+  - [视口与坐标转换](/docs/examples/viewport-controls): 验证 camera、fit、zoom、focus、resize 和屏幕/图坐标互转
+  - [更多布局示例](/docs/examples/layout-gallery): 比较 radial、concentric、ForceAtlas2、fruchterman、MDS 和 random
+  - [点选、框选与拉索选择](/docs/examples/selection-behaviors): 在同一示例中比较 click、brush 和 lasso 选择行为
+  - [拖拽边端点](/docs/examples/drag-edge): 把边的端点拖到另一个节点上，完成重新连线。
+  - [搜索并聚焦](/docs/examples/search-focus): 按名称搜索节点，高亮匹配项并把视口移过去。
+  - [折线与正交路由](/docs/examples/polyline-routing): 用圆角正交折线连接从左到右的流程节点。
   - [Worker 布局](/docs/examples/layout-worker): 把力导向计算放到 Web Worker，避免挡住主线程。
   - [辐射树](/docs/examples/radial-tree): 用辐射布局把一棵主题树铺在中心节点周围。
   - [调用链](/docs/examples/dependency-graph): 用从左到右的层级布局展示服务之间的调用关系。
-  - [人物关系网络](/docs/examples/relationship): 使用力导布局和关系标签展示人物关联
-  - [组织架构图](/docs/examples/org-chart): 使用层级布局展示组织与团队关系
-  - [思维导图](/docs/examples/mindmap): 围绕中心主题展开双向知识分支
-  - [鱼骨图](/docs/examples/fishbone): 将问题、分类与原因组织为鱼骨归因结构
-  - [Tooltip 浮层](/docs/examples/tooltip): 悬停节点或边时展示自定义业务信息
-  - [悬停高亮](/docs/examples/hover): 悬停节点或边时高亮关联元素，并淡化其余元素。
-  - [一度邻居高亮](/docs/examples/neighbor-highlight): 悬停节点高亮邻居和连边，悬停边高亮两端节点。
-  - [点选、框选与拉索选择](/docs/examples/selection-behaviors): 在同一示例中比较 click、brush 和 lasso 选择行为
   - [拖拽节点与 Combo](/docs/examples/drag-node): 拖拽单个节点，或拖拽 Combo 背景带动其中的节点。
-  - [拖拽边端点](/docs/examples/drag-edge): 把边的端点拖到另一个节点上，完成重新连线。
+  - [一度邻居高亮](/docs/examples/neighbor-highlight): 悬停节点高亮邻居和连边，悬停边高亮两端节点。
   - [事件面板](/docs/examples/event-log): 点击、拖拽和选择节点时，查看 Graph 发出的公开事件。
   - [右键菜单](/docs/examples/context-menu): 在节点上打开右键菜单，执行聚焦或高亮。
-  - [视口与坐标转换](/docs/examples/viewport-controls): 验证 camera、fit、zoom、focus、resize 和屏幕/图坐标互转
   - [缩放范围与灵敏度](/docs/examples/zoom-options): 把滚轮缩放限制在指定灵敏度和最小、最大比例之间。
-  - [扩展系统综合示例](/docs/examples/extension-system): 组合验证 decoration、edge、layout、transform、behavior 和 plugin 扩展
-  - [呼吸节点](/docs/examples/breathing-node): 用自定义节点动画表现选中和高亮状态。
-  - [自定义标签渲染](/docs/examples/custom-label-renderer): 节点和边共用一个自定义 Label Renderer。
-  - [自定义节点与显式边 ID](/docs/examples/custom-node-extension): 注册自定义节点，并使用显式边 ID 与 Combo 状态。
-  - [注册自定义 Behavior](/docs/examples/custom-behavior): 注册一个 Behavior：点击节点时选中它，点击画布时清除。
+  - [注册自定义交互](/docs/examples/custom-behavior): 注册一个 Behavior：点击节点时选中它，点击画布时清除。
   - [自定义布局](/docs/examples/custom-layout): 注册一个把节点排成两行的布局扩展。
   - [节点徽章](/docs/examples/decoration-badges): 在节点边界堆叠计数、状态和文本徽章。
-  - [AI Papers 大规模关系图](/docs/examples/real-dataset): 使用真实论文引用网络验证大图渲染和交互链路
-  - [200 节点](/docs/examples/large): 用 200 个节点快速查看中等规模图的渲染和交互。
-  - [5000 节点与标签](/docs/examples/large-labeled): 在 5000 个节点上绘制 Canvas 标签。
-- 技术指标
-  - [性能指标](/docs/metrics/performance): G6Lite 的性能指标口径、环境记录与结果使用边界
-  - [性能调优](/docs/metrics/performance-tuning): 大图首屏、交互、标签、状态与布局的优化建议和度量方法
-  - [包体积](/docs/metrics/bundle-size): G6Lite 与主流图表、图可视化库的包体积对比
-- 兼容性
-  - [兼容性总览](/docs/compatibility): 浏览器、运行环境、公开 API 稳定性与 G6 v5 迁移边界
-  - [浏览器与运行环境](/docs/compatibility/browser): G6Lite 的 WebGL 支持矩阵、最低浏览器版本与已知问题
-  - [API 稳定性与发布边界](/docs/compatibility/api-stability): G6Lite 的公开入口、稳定能力、弃用兼容层与实验性能力说明
-  - [常用图库能力对比](/docs/compatibility/library-comparison): 按渲染、布局、元素、交互、扩展、算法和运行环境对比 G6Lite、G6 v5、sigma.js 与 Cytoscape.js
-  - [从 G6 v5 迁移](/docs/compatibility/g6-v5-migration): 按配置、数据、Behavior、事件、Graph API 和扩展体系迁移到 G6Lite
-- [常见问题](/docs/faq): G6Lite 的选型、性能、兼容性、SSR、TypeScript 与 Combo 高频问题
-- [更新日志](/docs/changelog): G6Lite 的版本与变更记录
 
 # Documentation
 
-- [Overview](/en/docs): G6Lite documentation for getting started, configuration, API, examples, metrics, and compatibility
-- [Build G6Lite graphs with AI](/en/docs/ai): Use the G6Lite Skill, local AI agents, and Sive to create, troubleshoot, and optimize graph visualizations
-- Quick start
+- [What is G6Lite?](/en/docs): Lightweight graph visualization, built for large-scale relationship data
+- Getting started
   - [Quick start](/en/docs/getting-started/quick-start): Install G6Lite and create your first interactive graph
-  - [Use with React and Vue](/en/docs/getting-started/react): Use G6Lite in React and Vue 3
-- Core concepts
-  - [What is G6Lite?](/en/docs/concepts/overview): Positioning, suitable workloads, and the relationship between G6Lite and G6 v5
-  - [Graph data model](/en/docs/concepts/data-model): Nodes, edges, optional groups, and the relationship between data and appearance
-  - [Graph lifecycle](/en/docs/concepts/graph-lifecycle): The calling sequence for creation, first render, updates, and destruction
+  - [React integration](/en/docs/getting-started/react): Create a graph and update its data in a React component
+  - [Vue integration](/en/docs/getting-started/vue): Create a graph and update its data in a Vue 3 component
+- [G6Lite AI Guide](/en/docs/ai): Use the AI Skill to write graph code in your project and ask Sive for API guidance and examples.
+- API
+  - [API documentation has moved](/en/docs/api): Find public interfaces in Graph API, Event reference, and Configuration options.
+  - Graph API
+    - [Graph API](/en/docs/api/graph): Look up the graph constructor, instance methods, events, and extension APIs
+    - [Events](/en/docs/api/graph/events): Look up when graph events fire and what their handlers receive.
+  - [Graph options](/en/docs/api/options): GraphOptions fields, defaults, and detailed configuration by topic
+  - [Extension reference](/en/docs/api/extensions): Configuration, context, drawing callbacks, and lifecycle for extensions.
+- Graph
+  - [Graph overview](/en/docs/graph/overview): Learn about the Graph lifecycle, options, and instance properties, and run a complete example
+- Usage guides
+  - [Viewport and coordinates](/en/docs/guides/viewport): Fit the canvas, preserve the user view, convert coordinates, and position menus
+  - [Extension system](/en/docs/guides/extensions): Choose configuration or an extension, then follow the relevant tutorial and contract
+  - [Data](/en/docs/guides/data): Understand graph data, node and edge operations, Combo groups, and remote loading
+  - [Element states](/en/docs/guides/states): Style selection and highlighting, update states, and restore selection after data changes
+  - [Common node options](/en/docs/guides/node): Choose shapes, map data and states, add labels, icons and badges, and update nodes at runtime
+  - [Custom nodes](/en/docs/guides/custom-node): Register business nodes, add lightweight overlays and decoration anchors, and verify updates
+  - [Custom node decorations](/en/docs/guides/custom-decoration): Measure and draw content while configuring placement, stacking, sorting, overflow, and collisions
+  - [Common edge options](/en/docs/guides/edge): Choose edge types and configure appearance, labels, interactions, parallel edges, and routing
+  - [Custom edges](/en/docs/guides/custom-edge): Reuse built-in edge bases with data-driven styles, states, and data updates
+  - [Common combo options](/en/docs/guides/combo): Configure combo outlines, labels, states, collapsed shapes, and membership
+  - [Labels and icons](/en/docs/guides/label): Configure node and edge labels, node icons, long text, visibility policies, and runtime updates
+  - [Custom Label Renderer](/en/docs/guides/custom-label-renderer): Render multiline node and edge content while retaining engine positioning, rotation, collision, and scheduling
+  - [Layout overview](/en/docs/guides/layout-overview): Choose a layout and compare how it arranges the same graph
+  - [Common layout options](/en/docs/guides/layout): Choose a network or tree layout, retain existing coordinates, and rearrange at runtime
+  - [Grid layout](/en/docs/guides/layout-grid): Arrange nodes in a grid of rows and columns.
+  - [Circular layout](/en/docs/guides/layout-circular): Arrange nodes around a circle or vary the radius to form a spiral.
+  - [Dagre layout](/en/docs/guides/layout-dagre): Arrange nodes in layers based on directed edges.
+  - [Force layout](/en/docs/guides/layout-force): Attraction pulls linked nodes together and repulsion keeps nodes apart.
+  - [D3 force layout](/en/docs/guides/layout-d3-force): Use D3’s force simulation to position nodes.
+  - [ForceAtlas2 layout](/en/docs/guides/layout-force-atlas2): Connected nodes attract while repulsion and gravity shape the network.
+  - [Fruchterman layout](/en/docs/guides/layout-fruchterman): Balance edge attraction and node repulsion, with gravity pulling the graph inward.
+  - [Concentric layout](/en/docs/guides/layout-concentric): Place nodes in rings by a ranking metric, with higher values near the center.
+  - [Indented tree layout](/en/docs/guides/layout-indented): List nodes in traversal order and indent them by depth.
+  - [Mind map layout](/en/docs/guides/layout-mindmap): Expand branches to one or both sides of a central topic.
+  - [Fishbone layout](/en/docs/guides/layout-fishbone): Place a problem at the end of a spine, with cause categories on either side.
+  - [Radial layout](/en/docs/guides/layout-radial): Place nodes in rings by shortest-path distance from a focal node.
+  - [MDS layout](/en/docs/guides/layout-mds): Multidimensional scaling (MDS) approximates shortest-path distances in two dimensions.
+  - [Random layout](/en/docs/guides/layout-random): Scatter nodes randomly around the layout center.
+  - [Worker layout guide](/en/docs/guides/layout-worker): Run layouts asynchronously, cancel stale tasks, and verify Worker fallback and deployment assets
+  - [Custom layouts](/en/docs/guides/custom-layout): Register position calculations, handle options and cancellation, and distinguish Graph execution from standalone calculation
+  - [Interaction overview](/en/docs/guides/behavior-overview): Browse built-in behaviors, configure and switch them, and listen for graph events.
+  - [Common behavior options](/en/docs/guides/behaviors): Combine navigation, selection, dragging, highlighting, and Tooltip with application events
+  - [Drag canvas](/en/docs/guides/behavior-drag-canvas): Drag empty space to pan the graph.
+  - [Zoom canvas](/en/docs/guides/behavior-zoom-canvas): Use the mouse wheel to zoom around the canvas center.
+  - [Click to select](/en/docs/guides/behavior-click-select): Click a node or edge to toggle selection. Click empty canvas to clear it.
+  - [Brush select](/en/docs/guides/behavior-brush-select): Drag a rectangle to select nodes whose centers fall inside it.
+  - [Lasso select](/en/docs/guides/behavior-lasso-select): Trace a freehand outline to select nodes whose centers fall inside it.
+  - [Drag nodes and combos](/en/docs/guides/behavior-drag-node): Drag a node, or drag empty space within a combo to move the entire combo.
+  - [Drag edge endpoints](/en/docs/guides/behavior-drag-edge): Drag an endpoint of an existing edge and use the drop event to read the proposed connection.
+  - [Highlight on node hover](/en/docs/guides/behavior-highlight-node): Hover a node to emphasize it, its immediate neighbors, and their connecting edges.
+  - [Highlight on edge hover](/en/docs/guides/behavior-highlight-edge): Hover an edge to emphasize it and its two endpoints.
+  - [Highlight neighbors](/en/docs/guides/behavior-hover-highlight): Highlight a node’s neighborhood or an edge and its endpoints on hover.
+  - [Tooltip](/en/docs/guides/behavior-tooltip): Show details for a node or edge on hover or click.
+  - [Custom interactions](/en/docs/guides/custom-behavior): Implement isolated business selection with registration, activation, and cleanup
+  - [Plugin overview](/en/docs/guides/plugins): Learn how to configure, replace, and unmount plugins in G6Lite
+  - [Custom Plugins](/en/docs/guides/custom-plugin): Implement, register, and use a click counter plugin
+  - [Transforms](/en/docs/guides/transform-overview): Learn when transforms run and how to configure parallel edges and custom transforms
+  - [Themes](/en/docs/guides/theme): Choose a preset, apply brand colors, switch themes, and troubleshoot style overrides
+  - [Zoom and pan the canvas](/en/docs/guides/behavior-navigation): Set wheel speed, zoom limits, and drag-to-pan gestures
+  - [Click, brush, and lasso selection](/en/docs/guides/behavior-selection): Configure click selection for nodes and edges and area selection for nodes
+  - [Drag nodes, combos, and edges](/en/docs/guides/behavior-dragging): Move nodes and combos or reconnect an edge endpoint
+  - Event basics
+    - [Event basics](/en/docs/guides/events): Start with a click listener and connect canvas interactions to your application
+    - [Selection and dragging](/en/docs/guides/events/selection-drag): Synchronize selection, persist drag results, and clean up listeners
+    - [Rendering, layout, and data updates](/en/docs/guides/events/lifecycle): Know when to update the graph, read node positions, or respond to data replacement.
+    - [Custom events](/en/docs/guides/events/custom): Dispatch an application event from a toolbar button and clean up its listeners on unmount.
+  - [Grid, circular, and layered layouts](/en/docs/guides/layout-arrangements): Arrange nodes with Grid, Circular, and Dagre
+  - [Network layouts](/en/docs/guides/layout-networks): Arrange networks by connections, a focal node, or graph distance
+  - [Tree layouts](/en/docs/guides/layout-trees): Show parent-child relationships with mind maps, indented trees, and fishbone diagrams
+- Elements
+  - [Element overview](/en/docs/elements/overview): Explore G6Lite element types, visual parts, states, and custom rendering examples
+  - [Node overview](/en/docs/elements/node): Learn about built-in and custom nodes, node data, styling, and states in G6Lite
+  - [Edge overview](/en/docs/elements/edge): Learn about edge direction, built-in types, edge data, and configuration
+  - [Combo overview](/en/docs/elements/combo): Learn what combos do and how to define and configure them
+- Performance and internals
+  - [Performance comparison](/en/docs/metrics/performance): First-draw timing and browser bundle sizes for G6Lite, G6, Sigma.js, and ECharts on the same graph data
+- Getting started
   - [Technical architecture](/en/docs/concepts/architecture): How the graph runtime, drawing layers, scheduling, layouts, and interactions work together
-- Configuration
-  - [Data](/en/docs/guides/data): Map application data to GraphData and choose full replacement or incremental updates
-  - [Nodes](/en/docs/guides/node): Configure node types, functional styles, labels, and state styles
-  - [Edges](/en/docs/guides/edge): Configure line, arc, curve, polyline, arrows, labels, and state styles
-  - [Labels and icons](/en/docs/guides/label): Configure node labels, edge labels, icons, placement, rotation, and collision behavior
-  - [Combos](/en/docs/guides/combo): Group nodes with nested, collapsible, draggable combo containers
-  - [Themes](/en/docs/guides/theme): Use light and dark presets or override G6Lite theme tokens
-  - [Layout configuration](/en/docs/guides/layout): Choose built-in layouts, configure workers, and rerun layout at runtime
-  - [Interaction configuration](/en/docs/guides/interactions): Combine viewport, element, selection, highlight, and tooltip behaviors
-  - [Custom Behavior](/en/docs/guides/custom-behavior): Build reusable interactions with typed options, GraphEventMap, and extensionFactory
-  - [Events](/en/docs/guides/events): Listen to public events with GraphEventMap and graph.on, graph.off, and graph.once
-  - [Tooltip configuration](/en/docs/guides/tooltip): Show node and edge information with the built-in tooltip behavior
-  - [Parallel and self-loop edges](/en/docs/guides/parallel-edges): Separate multiple edges that share endpoints and render self-loops clearly
-  - [Extension system](/en/docs/guides/extensions): Extend nodes, edges, labels, layouts, behaviors, transforms, decorations, and plugins
-  - [Custom nodes](/en/docs/guides/custom-node): Register functional NodeExtension implementations through the public package API
-  - [Custom label renderers](/en/docs/guides/custom-label-renderer): Customize label measurement and drawing while reusing G6Lite placement and scheduling
-- API reference
-  - [Usable APIs](/en/docs/api): Package-root functions, classes, and types application code can call
-  - [Graph](/en/docs/api/graph): Create a graph and call its data, state, viewport, layout, and event methods
-  - [Options](/en/docs/api/options): Data, node, edge, layout, interaction, label, and theme fields accepted by new Graph()
-  - [Extensions](/en/docs/api/extensions): register, extensionFactory, runLayout, and the context an extension can call
+- Troubleshooting and upgrades
+  - [Browsers and runtime](/en/docs/compatibility/browser): Runtime capabilities, ESM, Worker, CSP, SSR, and device acceptance boundaries
+  - [Migrate from G6 v5](/en/docs/compatibility/g6-v5-migration): Migrate configuration, data, interactions, events, and extensions with a reversible business baseline
+  - [Troubleshooting](/en/docs/compatibility/troubleshooting): Diagnose canvas, layout, interaction, and setup issues by symptom
 - Examples
   - [Graph examples](/en/docs/examples): Browse and run website examples organized by G6Lite public capabilities
   - [Minimal graph](/en/docs/examples/basic): Render a zoomable and draggable graph with minimal configuration
   - [Default themes and interaction states](/en/docs/examples/default-theme): Inspect light and dark presets together with built-in node and edge states
-  - [Node and edge mutations](/en/docs/examples/data-mutations): Demonstrate individual and batch node and edge additions, updates, and removals
-  - [Queries, batch states, and visibility](/en/docs/examples/queries-and-states): Inspect elements, adjacency, and states while controlling batch states and visibility
-  - [Replace graph data](/en/docs/examples/set-data): Replace the whole graph with setData, then switch layouts.
-  - [Search and focus](/en/docs/examples/search-focus): Search nodes by name, highlight matches, and move the viewport to them.
   - [Data-driven node styles](/en/docs/examples/node-style): Map business fields to node colors, sizes, and highlight interactions
+  - [Common layout switching](/en/docs/examples/layouts): Switch between circular, force, grid, and dagre with the same data
+  - [Hover highlight](/en/docs/examples/hover): Highlight related elements on hover and dim the rest.
+  - [Tooltip](/en/docs/examples/tooltip): Show custom business information while hovering nodes or edges
   - [Node shapes](/en/docs/examples/shapes): Compare circle and rectangle nodes side by side.
-  - [Node stroke and radius](/en/docs/examples/node-border): Adjust stroke, width, and rectangle corner radius.
-  - [Edge arrow directions](/en/docs/examples/edge-arrows): Compare no-arrow, one-way, bidirectional, and wide-arrow edges
+  - [200 nodes](/en/docs/examples/large): Inspect rendering and interaction on a 200-node graph.
+  - [5,000 labeled nodes](/en/docs/examples/large-labeled): Draw canvas labels on a 5,000-node graph.
+  - [Edge states and weight](/en/docs/examples/edge-states): Map edge width from weight and inspect edge state styles.
   - [Edge types](/en/docs/examples/edge-types): Show line, dashed, arc, and cubic edges.
   - [Edge colors](/en/docs/examples/edge-colors): Map edge colors from a business category.
-  - [Edge states and weight](/en/docs/examples/edge-states): Map edge width from weight and inspect edge state styles.
-  - [Thin-edge hit area](/en/docs/examples/edge-hit-area): Keep a thin stroke while expanding the pick area of lines, curves, and loops.
-  - [Parallel and reverse edges](/en/docs/examples/parallel-edges): Separate same-direction parallel edges, reverse edges, and single edges automatically
+  - [Edge arrow directions](/en/docs/examples/edge-arrows): Compare no-arrow, one-way, bidirectional, and wide-arrow edges
   - [Self-loop edges](/en/docs/examples/edge-loops): Show one self-loop and several nested loops on a node.
+  - [Hit area](/en/docs/examples/edge-hit-area): Keep a thin stroke while expanding the pick area of lines, curves, and loops.
+  - [Parallel and reverse edges](/en/docs/examples/parallel-edges): Separate same-direction parallel edges, reverse edges, and single edges automatically
+  - [Breathing node](/en/docs/examples/breathing-node): Show selected and highlight states with a custom node animation.
+  - [Node stroke and radius](/en/docs/examples/node-border): Adjust stroke, width, and rectangle corner radius.
+  - [Flowchart](/en/docs/examples/flowchart): Draw a decision flow with a hierarchical layout and polyline edges.
+  - [Character relationship network](/en/docs/examples/relationship): Explore character connections with force layout and relationship labels
+  - [Organization chart](/en/docs/examples/org-chart): Show organization and team reporting relationships with hierarchical layout
+  - [Indented tree](/en/docs/examples/indented-tree): Show a directory with the indented layout.
+  - [Mind map](/en/docs/examples/mindmap): Organize knowledge with two-sided branches around a central topic
+  - [Fishbone diagram](/en/docs/examples/fishbone): Organize a problem, categories, and causes into a fishbone structure
+  - [Replace graph data](/en/docs/examples/set-data): Replace the whole graph with setData, then switch layouts.
   - [Label placement and icons](/en/docs/examples/labels): Show node labels, edge labels, and icons, and change their placement at runtime.
   - [Label rendering policy](/en/docs/examples/label-rendering-options): Compare fixed size, low-zoom drawing, and collision hiding.
-  - [Polyline orthogonal routing](/en/docs/examples/polyline-routing): Connect a left-to-right flow with rounded orthogonal polylines.
+  - [Custom label renderer](/en/docs/examples/custom-label-renderer): Share one custom label renderer between nodes and edges.
   - [Combo containers](/en/docs/examples/combo): Explore nested groups, collapse and expand, runtime regrouping, and data export
-  - [Common layout switching](/en/docs/examples/layouts): Switch between circular, force, grid, and dagre with the same data
-  - [More built-in layouts](/en/docs/examples/layout-gallery): Compare radial, concentric, ForceAtlas2, fruchterman, MDS, and random layouts
-  - [Flowchart](/en/docs/examples/flowchart): Draw a decision flow with a hierarchical layout and polyline edges.
-  - [Indented tree](/en/docs/examples/indented-tree): Show a directory with the indented layout.
+  - [Custom nodes and explicit edge IDs](/en/docs/examples/custom-node-extension): Register a custom node and use explicit edge IDs with combo state.
+  - [AI Papers large relationship graph](/en/docs/examples/real-dataset): Validate large-graph rendering and interaction with a real paper citation network
+  - [Extension system showcase](/en/docs/examples/extension-system): Combine decoration, edge, layout, transform, behavior, and plugin extensions
+  - [Node and edge mutations](/en/docs/examples/data-mutations): Demonstrate individual and batch node and edge additions, updates, and removals
+  - [Queries, batch states, and visibility](/en/docs/examples/queries-and-states): Inspect elements, adjacency, and states while controlling batch states and visibility
+  - [Viewport and coordinate conversion](/en/docs/examples/viewport-controls): Validate camera, fit, zoom, focus, resize, and screen/graph coordinate conversion
+  - [More layout examples](/en/docs/examples/layout-gallery): Compare radial, concentric, ForceAtlas2, fruchterman, MDS, and random layouts
+  - [Click, brush, and lasso selection](/en/docs/examples/selection-behaviors): Compare click, brush, and lasso selection behaviors in one example
+  - [Drag edge endpoints](/en/docs/examples/drag-edge): Drag an edge endpoint onto another node to reconnect it.
+  - [Search and focus](/en/docs/examples/search-focus): Search nodes by name, highlight matches, and move the viewport to them.
+  - [Polyline orthogonal routing](/en/docs/examples/polyline-routing): Connect a left-to-right flow with rounded orthogonal polylines.
   - [Worker layout](/en/docs/examples/layout-worker): Run force layout in a Web Worker so the main thread stays responsive.
   - [Radial tree](/en/docs/examples/radial-tree): Place a topic tree around a center node with the radial layout.
   - [Call graph](/en/docs/examples/dependency-graph): Show service calls with a left-to-right hierarchical layout.
-  - [Character relationship network](/en/docs/examples/relationship): Explore character connections with force layout and relationship labels
-  - [Organization chart](/en/docs/examples/org-chart): Show organization and team reporting relationships with hierarchical layout
-  - [Mind map](/en/docs/examples/mindmap): Organize knowledge with two-sided branches around a central topic
-  - [Fishbone diagram](/en/docs/examples/fishbone): Organize a problem, categories, and causes into a fishbone structure
-  - [Tooltip](/en/docs/examples/tooltip): Show custom business information while hovering nodes or edges
-  - [Hover highlight](/en/docs/examples/hover): Highlight related elements on hover and dim the rest.
-  - [One-hop highlight](/en/docs/examples/neighbor-highlight): Highlight a node with its neighbors, or an edge with its endpoints.
-  - [Click, brush, and lasso selection](/en/docs/examples/selection-behaviors): Compare click, brush, and lasso selection behaviors in one example
   - [Drag nodes and combos](/en/docs/examples/drag-node): Drag a node, or drag a combo background to move its nodes.
-  - [Drag edge endpoints](/en/docs/examples/drag-edge): Drag an edge endpoint onto another node to reconnect it.
+  - [One-hop highlight](/en/docs/examples/neighbor-highlight): Highlight a node with its neighbors, or an edge with its endpoints.
   - [Event log](/en/docs/examples/event-log): Inspect the public events emitted by click, drag, and selection.
   - [Context menu](/en/docs/examples/context-menu): Open a node context menu to focus or highlight it.
-  - [Viewport and coordinate conversion](/en/docs/examples/viewport-controls): Validate camera, fit, zoom, focus, resize, and screen/graph coordinate conversion
   - [Zoom range and sensitivity](/en/docs/examples/zoom-options): Limit wheel zoom with sensitivity, minimum zoom, and maximum zoom.
-  - [Extension system showcase](/en/docs/examples/extension-system): Combine decoration, edge, layout, transform, behavior, and plugin extensions
-  - [Breathing node](/en/docs/examples/breathing-node): Show selected and highlight states with a custom node animation.
-  - [Custom label renderer](/en/docs/examples/custom-label-renderer): Share one custom label renderer between nodes and edges.
-  - [Custom nodes and explicit edge IDs](/en/docs/examples/custom-node-extension): Register a custom node and use explicit edge IDs with combo state.
-  - [Register a custom behavior](/en/docs/examples/custom-behavior): Register a behavior that selects a clicked node and clears selection on the canvas.
+  - [Register a custom interaction](/en/docs/examples/custom-behavior): Register a behavior that selects a clicked node and clears selection on the canvas.
   - [Custom layout](/en/docs/examples/custom-layout): Register a layout extension that places nodes in two rows.
   - [Node badges](/en/docs/examples/decoration-badges): Stack count, status, and text badges on a node boundary.
-  - [AI Papers large relationship graph](/en/docs/examples/real-dataset): Validate large-graph rendering and interaction with a real paper citation network
-  - [200 nodes](/en/docs/examples/large): Inspect rendering and interaction on a 200-node graph.
-  - [5,000 labeled nodes](/en/docs/examples/large-labeled): Draw canvas labels on a 5,000-node graph.
-- Technical metrics
-  - [Performance metrics](/en/docs/metrics/performance): Measurement boundaries and rules for keeping G6Lite performance comparisons reproducible
-  - [Performance tuning](/en/docs/metrics/performance-tuning): Measure and optimize first render, layout, updates, labels, and viewport interaction
-  - [Bundle size](/en/docs/metrics/bundle-size): Bundle size comparison between G6Lite and mainstream charting and graph visualization libraries
-- Compatibility
-  - [Compatibility overview](/en/docs/compatibility): Browser, runtime, public API stability, and G6 v5 migration boundaries
-  - [Browsers and runtime environment](/en/docs/compatibility/browser): WebGL, ESM, browser support, SSR boundaries, and known runtime constraints
-  - [API stability and release boundary](/en/docs/compatibility/api-stability): Public package entry points, deprecated compatibility APIs, and experimental capabilities
-  - [Graph library comparison](/en/docs/compatibility/library-comparison): Compare G6Lite, G6 v5, sigma.js, and Cytoscape.js across rendering, layout, elements, interaction, extensions, algorithms, and runtimes
-  - [Migrate from G6 v5](/en/docs/compatibility/g6-v5-migration): Migrate configuration, data, Behaviors, events, Graph APIs, and extensions from G6 v5 to G6Lite
-- [FAQ](/en/docs/faq): Selection, performance, compatibility, SSR, TypeScript, and combo questions
-- [Changelog](/en/docs/changelog): Important G6Lite beta changes and migration boundaries

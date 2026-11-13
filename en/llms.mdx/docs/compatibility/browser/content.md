@@ -1,39 +1,67 @@
-# Browsers and runtime environment (/en/docs/compatibility/browser)
+# Browsers and runtime (/en/docs/compatibility/browser)
 
 
 
-G6Lite prefers WebGL 2.0 and falls back to WebGL 1.0. Canvas 2D is used for labels and combo outlines, so WebGL 2.0 is not a hard requirement.
+Graph runs in a real browser DOM container. It prefers WebGL2 and then tries WebGL1; text and Combo also need Canvas 2D. Build-time Node.js requirements do not imply server rendering support.
 
-## Minimum versions [#minimum-versions]
+## Rendering dependencies [#rendering-dependencies]
 
-| Browser                  | Minimum        | Release year | Main boundary                                     |
-| ------------------------ | -------------- | ------------ | ------------------------------------------------- |
-| Chrome                   | 80+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
-| Firefox                  | 74+            | 2020         | ES2020 syntax, native ESM, and WebGL 1.0          |
-| Safari on macOS          | 13.1+          | 2020         | ES2020 syntax and WebGL 1.0                       |
-| Safari on iOS            | 13.4+          | 2020         | ES2020 syntax; mobile GPU limits still apply      |
-| Edge                     | 80+ (Chromium) | 2020         | Chromium-based Edge only; EdgeHTML is unsupported |
-| Android WebView / Chrome | 80+            | 2020         | ES2020 syntax; validate low-end GPU capacity      |
+| Capability                             | Requirement and role                                                                                       |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| DOM / Canvas 2D                        | Required for containers, text, and information layers                                                      |
+| WebGL2 / WebGL1                        | At least one usable context; blocked GPUs or remote environments may expose APIs but fail context creation |
+| ResizeObserver / requestAnimationFrame | Resize observation and scheduling; required browser APIs                                                   |
+| ESM / dynamic import / AbortController | Modules, lazy layouts, cancellation; check actual artifacts and application build targets                  |
 
-Internet Explorer and EdgeHTML are not supported. These are syntax and platform boundaries for the untranspiled ESM-only package, not a complete certified device matrix. See [Can I Use optional chaining](https://caniuse.com/mdn-javascript_operators_optional_chaining), [Chrome 80](https://developer.chrome.com/blog/new-in-chrome-80), [Firefox 74](https://www.mozilla.org/firefox/74.0/releasenotes/), and [Safari 13.1](https://webkit.org/blog/10247/new-webkit-features-in-safari-13-1/).
+<span id="minimum-versions" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## Minimum browser versions [#minimum-browser-versions]
+
+G6Lite does not yet have certified minimum supported browser versions. The table lists minimum versions for syntax and APIs used by the core code, as starting points for testing. These versions have not passed G6Lite compatibility acceptance.
+
+| Browser                  | Core syntax and API version reference | Module Worker API version reference |
+| ------------------------ | ------------------------------------- | ----------------------------------- |
+| Chrome (desktop)         | 80                                    | 80                                  |
+| Edge (Chromium, desktop) | 80                                    | 80                                  |
+| Firefox (desktop)        | 74                                    | 114                                 |
+| Safari (macOS)           | 13.1                                  | 15                                  |
+
+The core reference takes the highest requirement among optional chaining, nullish coalescing, ResizeObserver, and AbortController. The Worker column only identifies when module Workers became available. Sources: [optional chaining](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining#browser_compatibility), [nullish coalescing](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing#browser_compatibility), [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#browser_compatibility), [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController#browser_compatibility), and [Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker#browser_compatibility).
+
+The ES2020 target controls this library's TypeScript output; it does not automatically downlevel layout dependencies. For example, current layout dependencies contain private class methods. Loading the UMD bundle containing layouts or importing the affected layouts may require newer versions than the table indicates. Check dependencies, transpilation targets, and runtime APIs in the application build. Browsers without module Worker support may fall back to the main thread; a successful fallback is not a Worker pass.
+
+Browser/WebView, GPU drivers, and bundles determine usability. Validate creation, rendering, zoom, layouts, Worker execution, resizing, and cleanup before recording the passing scope for a target version. Mobile browsers and enterprise WebViews require separate acceptance. Legacy IE/EdgeHTML are not current targets.
 
 ## Coverage reference [#coverage-reference]
 
-Using global usage data from `caniuse-lite@1.0.30001806`, retrieved on **2026-07-29**:
+Usage-share percentages are not G6Lite device pass rates. This page does not maintain an unreproducible global coverage figure. Record the project’s browser, OS, GPU, DPR, and verification date.
 
-* The browser families and minimum versions explicitly listed above account for approximately &#x2A;*90.4%** of global browser usage.
-* Across every browser tracked by Can I Use, versions supporting both WebGL 1.0 and native ESM account for approximately &#x2A;*94.8%**.
+<span id="comparison-with-sigmajs" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-Sources: [Can I Use WebGL](https://caniuse.com/webgl), [JavaScript modules](https://caniuse.com/es6-module), and [caniuse-lite](https://github.com/browserslist/caniuse-lite). These figures are selection references, not G6Lite device certification rates. Enterprise browsers, embedded WebViews, disabled GPU acceleration, and low-end devices require separate validation.
+## Browser comparison with sigma.js [#browser-comparison-with-sigmajs]
 
-## Comparison with sigma.js [#comparison-with-sigmajs]
+Browser requirements vary by library and major version. Check the compatibility documentation for the version you plan to use.
 
-The sigma.js v3 README describes a WebGL renderer for graphs with thousands of nodes and edges, built on Graphology. Its `sigma@3.0.3` package provides both ESM and CommonJS builds. The official [README](https://github.com/jacomyal/sigma.js#readme) and [package metadata](https://github.com/jacomyal/sigma.js/blob/main/packages/sigma/package.json) checked on 2026-07-29 do not publish an equivalent minimum-browser matrix.
+## WebGL support matrix [#webgl-support-matrix]
 
-An omitted matrix should not be interpreted as legacy-browser support. Both libraries require WebGL and a modern JavaScript toolchain; G6Lite explicitly documents the syntax floor of its untranspiled package, while sigma.js consumers need to validate their own build target.
+WebGL1 is the fallback; WebGL2 is not mandatory. Acceleration, optional extensions, and resource limits affect output and throughput. A WebGL version does not determine a supported node count.
 
-G6Lite needs a real DOM canvas and WebGL context. In Next.js, Nuxt, or other SSR frameworks, instantiate `Graph` only on the client. Standard mini-program runtimes without compatible DOM and WebGL surfaces are not supported.
+## Worker, CSP and deployment [#worker-csp-and-deployment]
 
-The renderer uses `regl`, which dynamically compiles WebGL commands. If the host enables Content Security Policy, `script-src` must allow `'unsafe-eval'`; `'wasm-unsafe-eval'` alone is not sufficient. Hosts that cannot allow this directive are not supported by the current renderer.
+The ESM package uses a module Worker URL for layouts. Verify base paths, files, Content-Type, cross-origin rules, and host CSP. worker: true does not prove execution; clone or loading failures may fall back. See the [Worker guide](/en/docs/guides/layout-worker).
 
-Hardware acceleration, mobile GPU memory, high DPR, and browser limits on active WebGL contexts affect capacity. Handle `WebGL not supported`, keep graph containers at non-zero size, and test realistic devices.
+regl uses dynamic function compilation, which conflicts with strict CSP that prohibits eval. wasm-unsafe-eval alone is insufficient. Confirm host security requirements instead of treating weaker site policies as a universal fix.
+
+## Modules, SSR, and resources [#modules-ssr-and-resources]
+
+The package root provides ESM and type declarations. CommonJS applications can use `await import('@antv/g6-lite')` in asynchronous client code. Graph renders in the browser. See [Quick start](/en/docs/getting-started/quick-start) for React, Vue, and UMD setup.
+
+In React and Vue, create the graph after the component mounts on the client. Check the available APIs if you need arbitrary HTML or React node trees, server-side rendering, or full animation orchestration. See [Combo configuration](/en/docs/api/options#options-combo) for the experimental boundaries of nesting and collapse.
+
+High DPR, large containers, and concurrent graphs increase pixel and GPU costs. Context and memory limits depend on browser/device. The engine handles context lost/restored and attempts resource restoration, without guaranteeing host or application-state recovery. Call destroy when leaving.
+
+## Test scope [#test-scope]
+
+Local Chromium automation covers executed paths only. It does not certify Safari, Firefox, mobile, or enterprise WebViews. Record tested environments and uncovered devices, and repeat [measurement](/en/docs/metrics/performance) with business data.
+
+The current public [performance samples](/benchmarks/graph-performance.json), recorded on 2026-11-10, use headless Chromium 151.0.7922.34 on macOS with SwiftShader. They cover first draw with fixed positions, labels disabled, and no layout execution. They do not validate the older browser versions above or the Worker path.

@@ -4,4 +4,61 @@
 
 
 
-<ExampleDetail id="neighbor-highlight" locale="en" />
+Highlight a node with its neighbors, or an edge with its endpoints.
+
+## Try it
+
+Hover a node or an edge.
+
+## Data
+
+Seven nodes and seven edges form a hub with two branch levels for one-hop highlighting.
+
+## Complete runnable code
+
+```ts
+/**
+ * Demo: hover a node to highlight its neighbors, or an edge to highlight its endpoints.
+ */
+import { Graph, register } from '@antv/g6-lite';
+import radial from '@antv/g6-lite/layouts/radial';
+
+export async function run(container: string | HTMLElement) {
+  register('layout', 'radial', radial);
+  const graph = new Graph({
+    autoFit: true,
+    container,
+    data: {
+      nodes: ['hub', 'a', 'b', 'c', 'd', 'e', 'f'].map((id) => ({ id, data: { label: id.toUpperCase() } })),
+      edges: [
+        { source: 'hub', target: 'a' },
+        { source: 'hub', target: 'b' },
+        { source: 'hub', target: 'c' },
+        { source: 'a', target: 'd' },
+        { source: 'b', target: 'e' },
+        { source: 'c', target: 'f' },
+        { source: 'd', target: 'e' },
+      ],
+    },
+    node: {
+      style: {
+        size: (node) => (node.id === 'hub' ? 36 : 24),
+        fill: (node) => (node.id === 'hub' ? '#E86452' : '#5B8FF9'),
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'bottom',
+      },
+    },
+    edge: { style: { stroke: '#C5CEDB', lineWidth: 2 } },
+    layout: { type: 'radial', unitRadius: 120, linkDistance: 100 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
+  });
+  await graph.render();
+  return graph;
+}
+```
+
+
+## Related documentation
+
+- [Neighbor queries](/en/docs/api/graph#getneighbornodes)
+- [Highlight interactions](/en/docs/guides/behaviors)

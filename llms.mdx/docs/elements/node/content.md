@@ -1,0 +1,94 @@
+# 节点总览 (/docs/elements/node)
+
+
+
+
+
+## 什么是节点 [#什么是节点]
+
+节点（Node）表示图中的对象或概念，例如用户、设备或服务。每个节点都有唯一的 `id`，边通过 `source` 和 `target` 引用节点 ID 来表示对象之间的关系。
+
+## 节点体系 [#节点体系]
+
+### 内置节点 [#内置节点]
+
+通过 `node.type` 直接使用 G6Lite 的内置节点。下图展示了圆形的填充与描边，以及矩形的直角与圆角效果。
+
+| 节点类型 | 类型名称     | 用途与尺寸                                                 |
+| ---- | -------- | ----------------------------------------------------- |
+| 圆形节点 | `circle` | 默认类型，适合标记用户或设备，用 `size` 指定直径                          |
+| 矩形节点 | `rect`   | 适合展示服务名或卡片内容，用 `width`、`height` 和 `borderRadius` 设置外形 |
+
+尺寸和圆角的默认值见[主图形样式](/docs/guides/node#nodestyleconfig)。
+
+### 自定义节点 [#自定义节点]
+
+用 `NodeExtension` 在 `circle` 或 `rect` 基础上封装业务节点。例如，可以根据服务状态设置填充色，并用 `drawOverlay()` 绘制告警标记。先调用 `register('node', name, extension)`，再将 `node.type` 设为注册名称。见[自定义节点](/docs/guides/custom-node)。
+
+## 数据结构 [#数据结构]
+
+在 `data.nodes` 中提供节点列表。每一项都是一个 [`GraphNode`](/docs/guides/data#graphnode)。
+
+| 字段        | 类型            | 必填 | 说明                             |
+| --------- | ------------- | -- | ------------------------------ |
+| `id`      | `string`      | 是  | 节点的唯一标识，用于连接、查询和更新             |
+| `name`    | `string`      | 否  | 节点名称，可由标签回调读取                  |
+| `data`    | `NodeData`    | 否  | 自定义业务数据，可由样式函数读取               |
+| `x`、`y`   | `number`      | 否  | 图坐标，无布局时用于放置节点                 |
+| `fx`、`fy` | `number`      | 否  | 布局完成后固定的横坐标和纵坐标                |
+| `comboId` | `string`      | 否  | 所属分组的 ID，引用 `data.combos` 中的分组 |
+| `states`  | `NodeState[]` | 否  | 初始状态，例如 `['selected']`         |
+
+```ts
+const data = {
+  nodes: [
+    { id: 'api', name: 'API', x: 80, y: 100, data: { health: 'ok' } },
+    { id: 'db', name: 'Database', x: 220, y: 100, data: { health: 'warning' } },
+  ],
+  edges: [{ source: 'api', target: 'db' }],
+};
+```
+
+## 配置方法 [#配置方法]
+
+### 实例化图时全局配置 [#实例化图时全局配置]
+
+在 `new Graph()` 中传入 `node`。常量样式适用于所有节点，例如下面的直径 `32`。
+
+### 按节点数据配置 [#按节点数据配置]
+
+为 `node.style` 的单个字段传入函数。下面根据每个节点的 `data.health` 设置颜色，并通过 `name` 显示标签。`#container` 需要是页面上已有且有宽高的元素。
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: '#container',
+  data,
+  node: {
+    type: 'circle',
+    style: {
+      size: 32,
+      fill: (node) => node.data?.health === 'warning' ? '#F59E0B' : '#1783FF',
+      label: (node) => node.name ?? node.id,
+    },
+  },
+});
+
+await graph.render();
+```
+
+样式字段依次取自 `node.style`、扩展的 `getStyle()`、扩展默认样式、主题或内置回退值。完整字段和用法见[节点通用配置项](/docs/guides/node#nodeconfig)。
+
+### 渲染后更新节点 [#渲染后更新节点]
+
+用 `graph.updateNodeData()` 更新单个节点的业务字段。用 `graph.updateOptions()` 更新全图的节点配置，样式对象按字段合并。下面把数据库节点切换成正常颜色，并把所有圆形节点的直径更新为 `40`。
+
+```ts
+graph.updateNodeData('db', { health: 'ok' });
+graph.updateOptions({ node: { style: { size: 40 } } });
+```
+
+## 节点状态 [#节点状态]
+
+在节点数据的 `states` 中声明初始状态。渲染后用 `graph.setItemState('db', 'selected', true)` 启用选中状态，将最后一个参数设为 `false` 可取消选中。通过 `node.stateStyles.selected` 可以设置选中时的描边、填充或光晕。见[元素状态](/docs/guides/states)和[节点状态样式](/docs/guides/node#options-node-状态样式)。

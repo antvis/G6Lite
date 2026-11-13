@@ -1,66 +1,15 @@
-# Tooltip 配置 (/docs/guides/tooltip)
+# Tooltip 旧入口 (/docs/guides/tooltip)
 
 
 
+正文已迁至 [Tooltip](/docs/guides/behaviors#tooltip)。从下方可直接进入对应章节。
 
-
-启用 `tooltip` behavior 后，G6Lite 会在命中节点或边时显示浮层。
-
-```ts
-behaviors: ['tooltip'];
-```
-
-自定义浮层效果示意：悬停节点后展示业务信息。图中的内容和深色卡片均由业务配置，库不预设这些视觉样式。
-
-<img alt="悬停服务节点时展示名称、运行状态和请求量的自定义 Tooltip 示意" src="__img0" title="自定义 Tooltip" />
-
-可运行示例：[Tooltip](/docs/examples/tooltip)。
-
-## 自定义内容 [#自定义内容]
-
-```ts
-behaviors: [
-  {
-    type: 'tooltip',
-    trigger: 'hover',
-    getContent: (ctx) =>
-      ctx.itemType === 'node'
-        ? `<b>${ctx.data?.label ?? ctx.nodeId}</b>`
-        : `${ctx.source} -> ${ctx.target}`,
-  },
-];
-```
-
-`getContent` 可以返回字符串或 HTMLElement。返回字符串时会写入 `innerHTML`，需要自行确保内容安全。
-
-## 配置项 [#配置项]
-
-| 选项           | 类型                               | 默认值                | 说明             |
-| ------------ | -------------------------------- | ------------------ | -------------- |
-| `trigger`    | `'hover' \| 'click'`             | `'hover'`          | 触发方式           |
-| `getContent` | `(ctx) => string \| HTMLElement` | label / id         | 自定义内容          |
-| `enable`     | `(ctx) => boolean`               | 总是显示               | 按元素控制是否显示      |
-| `offset`     | `[number, number]`               | `[10, 10]`         | 相对指针偏移         |
-| `delay`      | `number`                         | `80`               | hover 防抖，单位 ms |
-| `className`  | `string`                         | `'g6lite-tooltip'` | 浮层 class       |
-
-## 样式 [#样式]
-
-库本身不附带 tooltip 视觉样式。你可以用默认 class 自定义：
-
-```css
-.g6lite-tooltip {
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.78);
-  color: #fff;
-  font-size: 12px;
-  pointer-events: none;
-}
-```
-
-## 相关 [#相关]
-
-* [交互总览](/docs/guides/interactions)
-* [事件](/docs/guides/events)
-* [API: TooltipOptions](/docs/api)
+* <span id="自定义内容" style="{ scrollMarginTop: '8rem' }" />[自定义内容](/docs/guides/behaviors#自定义内容)
+* <span id="点击显示" style="{ scrollMarginTop: '8rem' }" />[点击显示](/docs/guides/behaviors#点击显示)
+* <span id="配置项" style="{ scrollMarginTop: '8rem' }" />[配置项](/docs/guides/behaviors#配置项)
+* <span id="样式" style="{ scrollMarginTop: '8rem' }" />[样式](/docs/guides/behaviors#样式)
+* <span id="常见问题" style="{ scrollMarginTop: '8rem' }" />[常见问题](/docs/guides/behaviors#tooltip-常见问题)
+* <span id="为什么卡片没有背景或者点击不了" style="{ scrollMarginTop: '8rem' }" />[为什么卡片没有背景，或者点击不了？](/docs/guides/behaviors#为什么卡片没有背景或者点击不了)
+* <span id="为什么-combo-上没有-tooltip" style="{ scrollMarginTop: '8rem' }" />[为什么 Combo 上没有 Tooltip？](/docs/guides/behaviors#为什么-combo-上没有-tooltip)
+* <span id="更新数据后已打开的内容会立即更新吗" style="{ scrollMarginTop: '8rem' }" />[更新数据后，已打开的内容会立即更新吗？](/docs/guides/behaviors#更新数据后已打开的内容会立即更新吗)
+* <span id="相关" style="{ scrollMarginTop: '8rem' }" />[相关](/docs/guides/behaviors#相关)

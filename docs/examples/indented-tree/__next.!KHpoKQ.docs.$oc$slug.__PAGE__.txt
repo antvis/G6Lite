@@ -1,10 +1,10 @@
 1:"$Sreact.fragment"
-2:I[17787,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsPage"]
-3:I[17787,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"DocsBody"]
-4:I[66110,["/_next/static/chunks/3gw62evh-_0q_.js","/_next/static/chunks/25mh4flcztwnr.js","/_next/static/chunks/2p057ktwm881o.js","/_next/static/chunks/1vsibcmejsino.js","/_next/static/chunks/0o5i34w0ui1bs.js","/_next/static/chunks/3qazmxr2fxmvv.js","/_next/static/chunks/1er1zp97kmur0.js","/_next/static/chunks/3mceikp70876x.js"],"ExampleDetailClient"]
-9:I[75049,["/_next/static/chunks/25swliz85_nlr.js","/_next/static/chunks/3j0pso0ll31zg.js"],"OutletBoundary"]
+2:I[917787,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"DocsPage"]
+3:I[917787,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"DocsBody"]
+4:I[266110,["/_next/static/chunks/0t89xvkiqjymv.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0fe7x8pf1v-a4.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/39f94rmr_edvb.js","/_next/static/chunks/2g8onjn9ry2iz.js","/_next/static/chunks/2g7dmqvv2erk4.js"],"ExampleDetailClient"]
+9:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
 a:"$Sreact.suspense"
-5:T19e6,// Local presentation helpers in this repository are used only for the example controls.
+5:T1b64,// Local presentation helpers in this repository are used only for the example controls.
 /**
  * Demo: 缩进树 — 项目目录结构
  *
@@ -14,8 +14,9 @@ a:"$Sreact.suspense"
  *
  * 通过右上角菜单切换两种模式。
  */
-import { Graph } from '@antv/g6-lite';
-import { mountCanvasMenu } from './demo-panel.ts';
+import { Graph, register } from '@antv/g6-lite';
+import indented from '@antv/g6-lite/layouts/indented';
+import { createDemoPanel } from './demo-panel.ts';
 import { attachLabelsCanvas, type GraphInstanceWithTools } from './tooling.ts';
 
 const data = {
@@ -152,16 +153,23 @@ function configMinimal() {
 }
 
 export async function run(container: string | HTMLElement) {
+  register('layout', 'indented', indented);
   const wrapper =
     typeof container === 'string'
       ? (document.querySelector(container)! as HTMLElement)
       : container;
   wrapper.style.position = 'relative';
 
-  let currentGraph: any = null;
+  let currentGraph: Graph | null = null;
+  let cleanupLabels: (() => void) | undefined;
+  let generation = 0;
+  let disposed = false;
   let currentMode = 'styled';
 
   async function renderMode(mode: string) {
+    const token = ++generation;
+    cleanupLabels?.();
+    cleanupLabels = undefined;
     if (currentGraph) {
       currentGraph.destroy();
       // Remove old label canvas
@@ -183,13 +191,15 @@ export async function run(container: string | HTMLElement) {
       theme: 'light',
     });
 
+    currentGraph = graph;
     await graph.render();
+    if (disposed || token !== generation) { graph.destroy(); return; }
 
     const g = graph as unknown as GraphInstanceWithTools;
     const labelColorFn = cfg.labelColor;
     const labelPosition = cfg.labelPosition;
     const isMinimal = currentMode === 'minimal';
-    attachLabelsCanvas(wrapper, g, {
+    cleanupLabels = attachLabelsCanvas(wrapper, g, {
       nodeLabel: (n) => n.name ?? n.id,
       position: labelPosition,
       nodeSize: (n: any) => {
@@ -205,30 +215,26 @@ export async function run(container: string | HTMLElement) {
     currentGraph = graph;
   }
 
-  mountCanvasMenu(wrapper, {
-    caption: '样式',
-    items: [
-      { value: 'styled', label: '有背景' },
-      { value: 'minimal', label: '无样式' },
-    ],
-    value: 'styled',
-    onSelect(value) {
-      if (value !== currentMode) void renderMode(value);
-    },
+  await renderMode('styled');
+  const ui = createDemoPanel(wrapper);
+  ui.addChoice('样式', { 有背景: 'styled', 无样式: 'minimal' }, 'styled', (value) => {
+    if (value !== currentMode) void renderMode(value);
   });
 
-  await renderMode('styled');
-
   return {
+    getData: () => currentGraph?.getData(),
     fitView: () => currentGraph?.fitView(),
     destroy: () => {
+      disposed = true;
+      generation++;
+      cleanupLabels?.();
       if (currentGraph) currentGraph.destroy();
-      wrapper.querySelector(':scope > [data-canvas-controls]')?.remove();
+      ui.destroy();
     },
   };
 }
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"缩进树\",\"description\":\"用缩进布局展示目录结构。\",\"url\":\"https://g6lite.antv.vision/docs/examples/indented-tree\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/indented-tree\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/indented-tree/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"缩进树\",\"item\":\"https://g6lite.antv.vision/docs/examples/indented-tree\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"indented-tree","locale":"zh","initialSource":"$5"}]}]}]],["$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"EOJTM9qFS6tmmrEoiTa9o"}
-6:["$","script","script-0",{"src":"/_next/static/chunks/1er1zp97kmur0.js","async":true}]
-7:["$","script","script-1",{"src":"/_next/static/chunks/3mceikp70876x.js","async":true}]
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"缩进树\",\"description\":\"用缩进布局展示目录结构。\",\"url\":\"https://g6lite.antv.vision/docs/examples/indented-tree\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/indented-tree\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/indented-tree/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"缩进树\",\"item\":\"https://g6lite.antv.vision/docs/examples/indented-tree\"}]}]}"}}],["$","$L2",null,{"toc":[],"full":true,"footer":{"enabled":false},"children":["$","$L3",null,{"className":"examples-docs-body","children":["$","$L4",null,{"id":"indented-tree","locale":"zh","initialSource":"$5"}]}]}]],["$L6","$L7"],"$L8"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"nBQ24oSAOgYQp4j9GWoSR"}
+6:["$","script","script-0",{"src":"/_next/static/chunks/2g8onjn9ry2iz.js","async":true}]
+7:["$","script","script-1",{"src":"/_next/static/chunks/2g7dmqvv2erk4.js","async":true}]
 8:["$","$L9",null,{"children":["$","$a",null,{"name":"Next.MetadataOutlet","children":"$@b"}]}]
 b:null

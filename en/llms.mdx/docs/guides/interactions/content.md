@@ -1,61 +1,16 @@
-# Interaction configuration (/en/docs/guides/interactions)
+# Previous interaction guide (/en/docs/guides/interactions)
 
 
 
-Without an explicit list, G6Lite enables zoom and canvas dragging. Passing `behaviors: []` disables the defaults.
+Continue to [Combine interactions](/en/docs/guides/behaviors), or jump to the corresponding section below.
 
-```ts
-behaviors: [
-  'zoom-canvas',
-  'drag-canvas',
-  'drag-node',
-  'click-select',
-  'hover-highlight',
-  'tooltip',
-];
-```
-
-Each behavior can be a string or an object with options. Picking and element event dispatch are shared, so behaviors consume one consistent interaction stream. See [events](/en/docs/guides/events).
-
-`BuiltInBehaviorOptionsMap` maps each built-in name to its supported object configuration, while `BuiltInBehaviorConfig` is the union of all built-in configurations. Custom Behaviors should declare a literal `type`, a dedicated options type, and use `satisfies` at activation sites.
-
-## Zoom feel and bounds [#zoom-feel-and-bounds]
-
-`zoom-canvas` treats normalized wheel delta as a percentage for both mouse wheels and trackpads. The default `sensitivity` is `1`. Same-direction events within one animation frame are combined, each frame is capped at a `15%` zoom change, and the default zoom range is `0.1` to `20`.
-
-```ts
-behaviors: [
-  {
-    type: 'zoom-canvas',
-    sensitivity: 0.5,
-    minZoom: 0.2,
-    maxZoom: 8,
-  },
-  'drag-canvas',
-];
-```
-
-`sensitivity` multiplies the wheel-delta percentage: with the default, `deltaY = -10` zooms in by about `10%`; `sensitivity: 0.5` halves that response. Use a smaller value for gentler zooming. Invalid or non-positive values fall back to safe defaults.
-
-## Built-in Behaviors [#built-in-behaviors]
-
-* `zoom-canvas`: wheel zoom.
-* `drag-canvas`: canvas panning.
-* `drag-node`: node movement and Combo group dragging.
-* `drag-edge`: edge endpoint reconnection.
-* `click-select`: node and edge selection.
-* `hover-highlight`, `highlight-node`, and `highlight-edge`: analytical highlighting.
-* `brush-select` and `lasso-select`: area selection.
-* `tooltip`: hover- or click-triggered information overlay.
-
-## Event dispatch [#event-dispatch]
-
-The internal interaction dispatcher performs one shared pick and emits normalized events in node → edge → combo → canvas priority. Click, double-click, context-menu, wheel, and hover events can be observed without enabling a separate click Behavior.
-
-```ts
-graph.on('node:click', ({ nodeId }) => {
-  console.log(nodeId);
-});
-```
-
-See [Custom Behavior](/en/docs/guides/custom-behavior) for the typed factory and registration pattern, and [Extension system](/en/docs/guides/extensions) for category boundaries and lifecycle rules.
+* <span id="built-in-behaviors" style="{ scrollMarginTop: '8rem' }" />[Built-in Behaviors](/en/docs/guides/behaviors#built-in-behaviors)
+* <span id="common-combinations" style="{ scrollMarginTop: '8rem' }" />[Common combinations](/en/docs/guides/behaviors#common-combinations)
+* <span id="zoom-feel-and-bounds" style="{ scrollMarginTop: '8rem' }" />[Zoom feel and bounds](/en/docs/guides/behaviors#zoom-feel-and-bounds)
+* <span id="neighborhood-highlighting" style="{ scrollMarginTop: '8rem' }" />[Neighborhood highlighting](/en/docs/guides/behaviors#neighborhood-highlighting)
+* <span id="event-dispatch" style="{ scrollMarginTop: '8rem' }" />[Event dispatch](/en/docs/guides/behaviors#event-dispatch)
+* <span id="common-questions" style="{ scrollMarginTop: '8rem' }" />[Common questions](/en/docs/guides/behaviors#common-questions)
+* <span id="why-did-adding-tooltip-disable-zoom" style="{ scrollMarginTop: '8rem' }" />[Why did adding tooltip disable zoom?](/en/docs/guides/behaviors#why-did-adding-tooltip-disable-zoom)
+* <span id="why-does-brushing-also-move-the-canvas" style="{ scrollMarginTop: '8rem' }" />[Why does brushing also move the canvas?](/en/docs/guides/behaviors#why-does-brushing-also-move-the-canvas)
+* <span id="can-updateoptions-switch-behaviors" style="{ scrollMarginTop: '8rem' }" />[Can updateOptions switch Behaviors?](/en/docs/guides/behaviors#can-updateoptions-switch-behaviors)
+* <span id="related" style="{ scrollMarginTop: '8rem' }" />[Related](/en/docs/guides/behaviors#related)

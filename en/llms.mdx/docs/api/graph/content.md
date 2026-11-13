@@ -1,407 +1,1226 @@
-# Graph (/en/docs/api/graph)
+# Graph API (/en/docs/api/graph)
 
 
 
-`Graph` is the instance application code uses to operate one graph. Import it from the package root, pass [options](/en/docs/api/options), then `await graph.render()`.
+
+
+## Contents [#graph-api-contents]
+
+<nav className="graph-api-contents" aria-label="Contents">
+  * **Creation and cleanup**
+    * [new Graph()](#new-graph)
+    * [render()](#graph-lifecycle-render)
+    * [destroy()](#graph-lifecycle-destroy)
+    * [Update options](#graph-lifecycle-updateoptions)
+  * **Data access and updates**
+    * [Data queries](#graph-data)
+    * [Data mutations](#graph-data-mutations)
+  * **State and groups**
+    * [State and visibility](#graph-states)
+    * [Combo operations](#graph-combo)
+  * **Viewport and layout**
+    * [Viewport and coordinates](#graph-viewport)
+    * [Layout](#graph-layout)
+  * **Events and extensions**
+    * [Event API](#graph-events)
+    * [register()](#graph-extensions-register)
+</nav>
+
+<span id="lifecycle" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+In these examples, `graph` is an existing instance. See [Quick start](/en/docs/getting-started/quick-start) for setup.
+
+## Lifecycle and style updates [#graph-lifecycle]
+
+Create the graph and await its first `render()`. Reuse the instance for updates and call `destroy()` on unmount. [Lifecycle events](/en/docs/api/graph/events#event-lifecycle)
+
+<span id="new-graphoptions" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### new Graph() [#new-graph]
+
+`new Graph(options: GraphOptions): Graph`
+
+Create a graph with data and a mounted, nonzero-size container. Pass a CSS selector or an `HTMLElement`, then call [render()](#graph-lifecycle-render). [Constructor options](/en/docs/api/options)
 
 ```ts
 import { Graph } from '@antv/g6-lite';
 
-const graph = new Graph({ container, data });
-await graph.render();
-```
-
-Data writes, state changes, and `layout()` run after the first successful `render()`. After `destroy()`, those methods return immediately.
-
-## Lifecycle [#lifecycle]
-
-### `new Graph(options)` [#new-graphoptions]
-
-```ts
 const graph = new Graph({
-  container: document.getElementById('container')!,
-  data: { nodes: [{ id: 'a' }, { id: 'b' }], edges: [{ source: 'a', target: 'b' }] },
+  container: '#container',
+  data: { nodes: [{ id: 'A' }], edges: [] },
 });
 ```
 
-Stores `container`, `data`, and the rest of the configuration, then creates a canvas inside the container. There is no layout result yet, and element queries are empty.
+<Callout type="warn" title="Caution">
+  Give each graph instance its own container. An invalid container throws `Invalid container`. If the container already has a `canvas`, Graph reuses the first one and removes it when you call `destroy()`.
+</Callout>
 
-`container` accepts a CSS selector (such as `#container`) or an `HTMLElement`. The element must already be in the document.
+<span id="render" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-### `render()` [#render]
+### render() [#graph-lifecycle-render]
+
+`graph.render(): Promise<void>`
+
+Render the graph with the current data and options. Await the first render before updating data, state, or styles.
 
 ```ts
 await graph.render();
 ```
 
-Runs the configured transforms and layout, initializes the runtime, and draws the first frame. Wait for the first render before calling data and state methods. See [Graph lifecycle](/en/docs/concepts/graph-lifecycle) for initialization and asynchronous cleanup.
+Use [updateOptions()](#graph-lifecycle-updateoptions) to change styles on the current graph.
 
-Calling it again on the same instance cancels an in-flight layout and redraws from the latest data and options.
+<span id="updateoptions" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-The render emits `beforerender` and `afterrender`.
+<span id="refresh" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-### `destroy()` [#destroy]
+<span id="graph-lifecycle-refresh" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="visual-updates-refresh-and-rebuilding" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### updateOptions() [#graph-lifecycle-updateoptions]
+
+`graph.updateOptions(options): void`
+
+Update the graph’s styles or interactions after the first render. Pass any of `node`, `edge`, `label`, `theme`, and `behaviors` in `options`. See [configuration details](/en/docs/api/options#graphoptions).
+
+```ts
+graph.updateOptions({
+  node: { style: { fill: '#F59E0B' } },
+  edge: { style: { lineWidth: 2 } },
+});
+```
+
+### setBehaviors() [#setbehaviors]
+
+`graph.setBehaviors(behaviors?: readonly BehaviorOption[]): void`
+
+Replace the full interaction list. Pass `[]` to disable all behaviors, or omit the argument to restore `zoom-canvas` and `drag-canvas`.
+
+```ts
+const modes = {
+  browse: ['zoom-canvas', 'drag-canvas'],
+  select: ['zoom-canvas', 'click-select', 'brush-select'],
+  off: [],
+} as const;
+
+const switchMode = (mode: keyof typeof modes) => graph.setBehaviors(modes[mode]);
+
+switchMode('select'); // Enable click and brush selection
+```
+
+<span id="destroy" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### destroy() [#graph-lifecycle-destroy]
+
+`graph.destroy(): void`
+
+Destroy the instance and release its canvas, interactions, and Graph listeners. Call immediately on unmount, even if the first render is still pending.
 
 ```ts
 graph.destroy();
 ```
 
-Aborts an in-flight layout, emits `destroy`, tears down interactions, plugins, and the renderer, and removes the canvas. A second call has no further effect. `destroyed` is then `true`.
+<span id="destroyed" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-### `destroyed` [#destroyed]
+<span id="isdestroyed" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-```ts
-if (graph.destroyed) return;
-```
+### destroyed [#graph-lifecycle-destroyed]
 
-Whether the instance has been destroyed.
+`graph.destroyed: boolean`
 
-### `refresh()` [#refresh]
+Read-only. Changes from `false` to `true` when destruction starts. Check it after asynchronous work to see whether the instance has been destroyed. Track render completion and stale requests in their respective tasks.
 
 ```ts
-graph.refresh();
-```
+import type { Graph, GraphData } from '@antv/g6-lite';
 
-Forces one full style pass and draw. Data, state, and viewport changes already schedule their own frame. Call this only when an input changed outside the methods the engine observes.
-
-## Reading data [#reading-data]
-
-Queries return the current read-only view. Use the write methods below to change what is drawn.
-
-```ts
-const snapshot = graph.getData();
-const nodes = graph.getNodes();
-const node = graph.getNodeData('n1');
-const neighbors = graph.getNeighborNodes('n1');
-const edges = graph.getAdjacentEdges('n1');
-
-if (graph.hasNode('n1') && node) {
-  node.x;
-  node.y;
-  node.data;
-  neighbors.length;
-  edges[0]?.source;
-  snapshot.nodes.length;
+export async function reload(graph: Graph, load: () => Promise<GraphData>) {
+  const data = await load();
+  if (graph.destroyed) return;
+  await graph.setData(data, { fitView: false });
 }
 ```
 
-| Method                     | Returns                     | Description                                                       |
-| -------------------------- | --------------------------- | ----------------------------------------------------------------- |
-| `getData()`                | `GraphData`                 | Snapshot of the current nodes, edges, and combos                  |
-| `getNodes()`               | `readonly NodeModel[]`      | Every node                                                        |
-| `getNodeData(id)`          | `NodeModel \| undefined`    | Node by id                                                        |
-| `getEdges()`               | `readonly EdgeModel[]`      | Every edge                                                        |
-| `getEdgeData(id)`          | `EdgeModel \| undefined`    | Edge by id                                                        |
-| `getComboData(id)`         | `ComboModel \| undefined`   | Combo by id                                                       |
-| `getElementData(id)`       | `ElementModel \| undefined` | Node, edge, or combo by id                                        |
-| `getNodeCount()`           | `number`                    | Node count                                                        |
-| `getEdgeCount()`           | `number`                    | Edge count                                                        |
-| `hasNode(id)`              | `boolean`                   | Whether the node exists                                           |
-| `hasEdge(id)`              | `boolean`                   | Whether the edge exists                                           |
-| `hasElement(id)`           | `boolean`                   | Whether that node, edge, or combo exists                          |
-| `getElementPosition(id)`   | `{ x, y } \| null`          | Graph position of a node or combo. An edge has no single position |
-| `getNeighborNodes(nodeId)` | `string[]`                  | Ids of neighboring nodes                                          |
-| `getAdjacentEdges(nodeId)` | `{ id, source, target }[]`  | Edges connected to the node                                       |
+<span id="reading-data" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-`NodeModel` has `id`, `name`, `x`, `y`, `data`, and `states`. `EdgeModel` has `id`, `source`, `target`, `data`, and `states`. `states` is a read-only set.
+## Data queries [#graph-data]
 
-Before the first `render()`, `getData()` returns a copy of the data passed to the constructor. The other queries behave as an empty graph.
+<span id="query-timing-and-returned-values" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-## Replacing data and styles [#replacing-data-and-styles]
+<span id="compatibility-methods" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-### `setData()` [#setdata]
+### getData() [#getdata]
+
+`graph.getData(): GraphData`
+
+Return a [GraphData](/en/docs/api/options#graphdata) snapshot of nodes, edges, and Combos.
 
 ```ts
-await graph.setData(
-  {
-    nodes: [{ id: 'a' }, { id: 'b' }],
-    edges: [{ id: 'a-b', source: 'a', target: 'b' }],
-  },
-  { fitView: false },
-);
+const { nodes, edges } = graph.getData();
 ```
 
-Replaces the whole graph with a new set of nodes, edges, and combos. A configured `layout` runs again, the graph redraws, and `datachange` is emitted.
+<span id="snapshots-and-live-queries" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-`options.fitView` controls the viewport after replacement:
+### getNodes() [#getnodes]
 
-* Omitted or `true`: calls `fitView()` with `0.9`.
-* `false`: keeps the current camera.
-* A number or `FitViewOptions`: forwards that value to `fitView()`.
+`graph.getNodes(): readonly NodeModel[]`
 
-Use the incremental methods below for local additions and edits so the whole graph is not laid out again.
+Return a read-only view of the [NodeModel](/en/docs/guides/data#model-fields) array.
 
-### `updateOptions()` [#updateoptions]
+<span id="model-fields" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### getNodeData() [#getnodedata]
+
+`graph.getNodeData(id: string): NodeModel | undefined`
+
+Look up a [NodeModel](/en/docs/guides/data#model-fields) by ID. Return `undefined` if it is missing.
 
 ```ts
-graph.updateOptions({
-  node: { style: { fill: '#5366ad', size: 32 } },
-  theme: { type: 'light' },
-});
+const node = graph.getNodeData('A');
 ```
 
-Merges node, edge, label, and theme options, then recomputes styles. Object `style` values merge with the previous style. A function style replaces the previous style entirely.
+### getEdges() [#getedges]
 
-Layout, behaviors, and plugins are outside this argument. Change layout with `setLayout()` followed by `layout()`.
+`graph.getEdges(): readonly EdgeModel[]`
 
-## Changing nodes and edges [#changing-nodes-and-edges]
+Return a read-only view of the [EdgeModel](/en/docs/guides/data#model-fields) array.
 
-These methods require a completed first `render()`. Batch methods draw once.
+### getEdgeData() [#getedgedata]
 
-### Nodes [#nodes]
+`graph.getEdgeData(id: string): EdgeModel | undefined`
+
+Look up an [EdgeModel](/en/docs/guides/data#model-fields) by its actual ID. Return `undefined` if it is missing.
+
+### getComboData() [#getcombodata]
+
+`graph.getComboData(id: string): ComboModel | undefined`
+
+Look up a Combo by ID. Return `undefined` if it is missing. [ComboModel fields](/en/docs/guides/combo#read-only-query-model)
+
+### getElementData() [#getelementdata]
+
+`graph.getElementData(id: string): ElementModel | undefined`
+
+Look up a node, edge, or Combo in that order. Return an [ElementModel](/en/docs/guides/data#model-fields), or `undefined` if the ID is missing.
+
+### getNodeCount() [#getnodecount]
+
+`graph.getNodeCount(): number`
+
+Count all nodes, including hidden ones.
+
+### getEdgeCount() [#getedgecount]
+
+`graph.getEdgeCount(): number`
+
+Counts current edges, including hidden edges.
+
+### hasNode() [#hasnode]
+
+`graph.hasNode(id: string): boolean`
+
+Check whether the node exists.
+
+### hasEdge() [#hasedge]
+
+`graph.hasEdge(id: string): boolean`
+
+Check whether the edge exists.
+
+### hasElement() [#haselement]
+
+`graph.hasElement(id: string): boolean`
+
+Check whether a node, edge, or Combo has the ID.
+
+### getElementPosition() [#getelementposition]
+
+`graph.getElementPosition(id: string): { x: number; y: number } | null`
+
+Return graph coordinates for a node or Combo, checking nodes first. Edges and missing IDs return `null`. Combo positions update when the graph draws.
+
+### getNeighborNodes() [#getneighbornodes]
+
+`graph.getNeighborNodes(nodeId: string): string[]`
+
+Return unique neighboring node IDs from incoming and outgoing edges. A self-loop includes the node itself.
+
+### getAdjacentEdges() [#getadjacentedges]
+
+`graph.getAdjacentEdges(nodeId: string): Array<{ id: string; source: string; target: string }>`
+
+Match incoming and outgoing edges by endpoint ID. Each result has only `id`, `source`, and `target`. A self-loop appears once.
+
+<span id="changing-nodes-and-edges" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="common-prerequisites-and-type-shorthand" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## Data mutations [#graph-data-mutations]
+
+Update data after the first `render()` completes. Calls after destruction leave data untouched. Incremental methods schedule a redraw. See the [data guide](/en/docs/guides/data).
+
+<span id="replacing-data-and-styles" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="setdata" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### setData() [#graph-data-mutations-setdata]
+
+`graph.setData(data: GraphData, options?: SetDataOptions): Promise<void>`
+
+Replace all nodes, edges, and Combos and run the configured transforms and layout. Include any elements, memberships, and states you want to keep in the new data.
+
+Omit `fitView` or pass `true` to run `fitView(0.9)`. Pass `false` to keep the current zoom and position, or pass a number or `FitViewOptions` to customize the fit. See [fitView()](#graph-viewport-fitview).
 
 ```ts
-graph.addNode({ id: 'n4', x: 240, y: 80, data: { label: 'N4' } });
-graph.updateNodeData('n4', { label: 'Updated' });
-graph.updateNodePosition('n4', 260, 100);
-graph.updateNodePositions([
-  { id: 'n1', x: 40, y: 40 },
-  { id: 'n4', x: 280, y: 120 },
-]);
-graph.removeNode('n4');
+await graph.setData(nextData, { fitView: false });
 ```
 
-`addNode()` requires a unique `id` and graph coordinates. It does not run layout again.
+The graph emits [`datachange`](#datachange) after writing the new data. A superseded or cancelled update can still resolve. A failed update can leave data partially written.
 
-`updateNodeData()` merges the business payload. Style functions that read those fields are recomputed on the next frame.
+<span id="nodes" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-`removeNode()` also removes edges connected to that node.
+### addNode() [#addnode]
 
-A successful change emits `afteradditem`, `afterupdateitem`, or `afterremoveitem`.
+`graph.addNode(node: { id: string; x: number; y: number; data?: Record<string, unknown> }): void`
 
-### Edges [#edges]
+Adds a node with id and graph x/y. Duplicate node IDs are currently ignored. Initial states, comboId, and fx/fy are not parameters; use the corresponding APIs afterward. Does not run layout.
+
+### addNodes() [#addnodes]
+
+`graph.addNodes(nodes: Array<{ id: string; x: number; y: number; data?: Record<string, unknown> }>): void`
+
+Batch addition; duplicate IDs are skipped. Schedules drawing together, without a transaction guarantee.
+
+### updateNodeData() [#updatenodedata]
+
+`graph.updateNodeData(id: string, data: Record<string, unknown>): void`
+
+Shallow-merge node data, replacing nested objects. The batch overload is `graph.updateNodeData(updates: NodeDataUpdate[]): void` with `id` and `data` per entry. Missing nodes are skipped. IDs, positions, and memberships stay the same.
+
+### updateNodePosition() [#updatenodeposition]
+
+`graph.updateNodePosition(id: string, x: number, y: number): void`
+
+Changes graph coordinates; missing nodes leave data unchanged. These are not client CSS pixels. No layout or fit is run.
+
+### updateNodePositions() [#updatenodepositions]
+
+`graph.updateNodePositions(updates: NodePositionUpdate[]): void`
+
+NodePositionUpdate contains id/x/y. Updates valid changed positions in order and schedules together. Missing or unchanged entries emit no corresponding update event.
+
+### removeNode() [#removenode]
+
+`graph.removeNode(id: string): void`
+
+Removes a node and all incoming/outgoing edges, releasing its membership without deleting the Combo. Missing nodes leave data unchanged.
+
+### removeNodes() [#removenodes]
+
+`graph.removeNodes(ids: string[]): void`
+
+Batch-removes nodes and adjacent edges, ignoring missing IDs. Query order can change.
+
+<span id="edges" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### addEdge() [#addedge]
+
+`graph.addEdge(edge: { id?: string; source: string; target: string; data?: Record<string, unknown>; states?: ElementState[] }): string`
+
+Add an edge and return its ID. Omit `id` to generate one. Duplicate explicit IDs throw. Validate both endpoints before calling. After destruction, this returns an empty string.
+
+### addEdges() [#addedges]
+
+`graph.addEdges(edges: Array<{ id?: string; source: string; target: string; data?: Record<string, unknown>; states?: ElementState[] }>): string[]`
+
+Returns actual IDs in input order, or \[] after destruction. A duplicate explicit ID can throw after earlier entries were written; no rollback is provided.
+
+### updateEdgeData() [#updateedgedata]
+
+`graph.updateEdgeData(id: string, data: Record<string, unknown>): void`
+
+The single-edge form shallow-merges data only. The overload graph.updateEdgeData(updates: EdgeDataUpdate\[]): void also changes source/target. Entries have id and optional data/source/target; IDs are not changed. The batch path validates new endpoints for existing edges before writes; missing endpoints throw, while missing edges are skipped.
+
+### removeEdge() [#removeedge]
+
+`graph.removeEdge(id: string): void`
+
+Removes the edge without removing endpoints. Missing edges leave data unchanged.
+
+### removeEdges() [#removeedges]
+
+`graph.removeEdges(ids: string[]): void`
+
+Batch-removes edges, ignores missing IDs, and schedules updates together.
+
+<span id="incremental-updates-in-code-and-canvas" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### Batch usage [#batch-usage]
 
 ```ts
-const edgeId = graph.addEdge({ source: 'n1', target: 'n4', data: { weight: 1 } });
-graph.updateEdgeData(edgeId, { weight: 2 });
-graph.updateEdgeData([{ id: edgeId, source: 'n2', target: 'n4' }]);
-graph.removeEdge(edgeId);
+// Rendered; A exists
+graph.addNodes([{ id: 'D', x: 300, y: 40 }, { id: 'E', x: 300, y: 120 }]);
+graph.addEdges([{ id: 'A-D', source: 'A', target: 'D' }]);
+graph.updateNodeData([{ id: 'D', data: { score: 2 } }]);
+graph.updateNodePositions([{ id: 'D', x: 320, y: 60 }]);
+graph.updateEdgeData([{ id: 'A-D', target: 'E', data: { weight: 3 } }]);
+graph.removeNodes(['D', 'E']); // Adjacent edges are removed too
 ```
 
-`source` and `target` must already exist. When `id` is omitted the engine generates one, and the return value is that id. Later queries and removal use it.
+<span id="state-visibility-and-focus" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-The batch form of `updateEdgeData()` can also change an edge's endpoints.
+<span id="prerequisites" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-## State, visibility, and focus [#state-visibility-and-focus]
+## State and visibility [#graph-states]
 
-Built-in state names are `default`, `active`, `selected`, `disabled`, `highlight`, `inactive`, and `hidden`. Application-defined names are accepted and can be styled with `node.stateStyles` or `edge.stateStyles`.
+Change states after the first render completes. Graph writes state changes immediately and schedules a redraw.
 
-### `setItemState()` [#setitemstate]
+An ID can identify a node, edge, or Combo. Graph ignores missing IDs and resolves collisions in node, edge, then Combo order. See the [state guide](/en/docs/guides/states).
+
+<span id="setitemstate" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### setItemState() [#graph-states-setitemstate]
+
+`graph.setItemState(id: string, state: ElementState, value: boolean): void`
+
+true adds one state; false removes only that state. Other states remain. Adding an existing flag does not duplicate it; removing an absent flag leaves the set unchanged.
 
 ```ts
-graph.setItemState('n1', 'selected', true);
-graph.setItemState('n1', 'selected', false);
+// Rendered, with node A
+graph.setItemState('A', 'selected', true);
+graph.setItemState('A', 'review', true);
+graph.setItemState('A', 'review', false); // selected remains
 ```
 
-Turns one state on or off for a node, edge, or combo. `value: false` removes only that state.
+<span id="toggle-replace-and-clear" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-### `setElementStates()` [#setelementstates]
+<span id="setelementstates" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### setElementStates() [#graph-states-setelementstates]
+
+`graph.setElementStates(id: string, states: ElementState[]): void`
 
 ```ts
-graph.setElementStates('n1', ['selected', 'highlight']);
-graph.setElementStates({
-  n1: ['selected'],
-  'a-b': ['active'],
-});
+import type { ElementState, Graph } from '@antv/g6-lite';
+declare const graph: Graph;
+declare const states: ElementState[];
+graph.setElementStates('A', states);
+graph.setElementStates({ A: ['selected'], 'A-B': ['highlight'] });
 ```
 
-Replaces the complete state list of an element. The object form updates many elements and draws once.
+Replace the full state set for each specified element. Pass one ID and a state array, or a map from IDs to state arrays. Use an empty array `[]` to clear an element's states.
 
-### `batchSetState()` [#batchsetstate]
+Graph deduplicates states and filters out `default`. To change the override order for a node or edge, clear its states first, then apply the new order. Combos follow a fixed [state style order](/en/docs/guides/combo#options-combo-state-styles).
+
+<span id="batchsetstate" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### batchSetState() [#graph-states-batchsetstate]
+
+`graph.batchSetState(items: Array<{ id: string; state: ElementState; value: boolean }>): void`
+
+Apply changes in array order. The last entry for an element and state wins. Mix nodes, edges, and Combos in one batch and Graph schedules drawing once.
 
 ```ts
 graph.batchSetState([
-  { id: 'n1', state: 'highlight', value: true },
-  { id: 'n2', state: 'inactive', value: true },
+  { id: 'A', state: 'review', value: true },
+  { id: 'A-B', state: 'highlight', value: false },
+  { id: 'group', state: 'selected', value: true },
 ]);
 ```
 
-Turns individual states on or off in one batch. Use it when one interaction, such as hover highlight, touches many elements.
+<span id="query-and-clear" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-### Query and clear [#query-and-clear]
+### getItemStates() [#getitemstates]
 
-```ts
-const states = graph.getItemStates('n1');
-const selected = graph.findNodesByState('selected');
-graph.clearItemStates('n1');
-```
+`graph.getItemStates(id: string): ElementState[]`
 
-`clearItemStates()` removes every state on that element. The `find*ByState()` methods return ids that currently have the state.
-
-### `hideItem()` and `showItem()` [#hideitem-and-showitem]
+Return a copy of the element’s state array, or `[]` if there is no result.
 
 ```ts
-graph.hideItem('n2');
-graph.showItem('n2');
+const selected = graph.getItemStates('A').includes('selected');
 ```
 
-Hide or show a node, edge, or combo through the `hidden` state. `showItem()` clears only `hidden` and leaves other states in place.
+### findNodesByState() [#findnodesbystate]
 
-### `focusItem()` [#focusitem]
+`graph.findNodesByState(state: ElementState): string[]`
+
+Return node IDs with the given state, including hidden matches, or `[]` if none match.
 
 ```ts
-graph.focusItem('n1');
-graph.focusItem(['n1', 'n2'], 24);
+const nodeIds = graph.findNodesByState('selected');
 ```
 
-Centers the viewport on one or more nodes. The current zoom is kept when the targets fit. Otherwise the view zooms out just enough to leave `padding` screen pixels. The default `padding` is `20`. Nothing happens when none of the ids resolve to a node.
+### findEdgesByState() [#findedgesbystate]
 
-## Viewport [#viewport]
+`graph.findEdgesByState(state: ElementState): string[]`
 
-The camera is the current view: graph-space translation `x` and `y`, plus `zoom`.
+Return edge IDs with the given state, or `[]` if none match.
+
+### findCombosByState() [#findcombosbystate]
+
+`graph.findCombosByState(state: ElementState): string[]`
+
+Return Combo IDs whose own state matches, or `[]` if none match.
+
+### clearItemStates() [#clearitemstates]
+
+`graph.clearItemStates(id: string): void`
+
+Clears every business state on the element, including selected and explicit hidden. Use setItemState(id, state, false) to remove only your flag. Structural hidden from a collapsed Combo remains; clearing states cannot bypass collapsing.
+
+```ts
+graph.clearItemStates('A');
+```
+
+<span id="hideitem-and-showitem" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### hideItem() [#hideitem]
+
+`graph.hideItem(id: string): void`
+
+Equivalent to setItemState(id, 'hidden', true). Other states, data, and positions remain. It does not delete, relayout, or fit. Only the specified ID changes; connected edges, child nodes, and child Combos do not automatically receive hidden. List targets explicitly to hide them together.
+
+<span id="visibility-and-state-queries" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+```ts
+graph.hideItem('A');
+graph.showItem('A');
+```
+
+### showItem() [#showitem]
+
+`graph.showItem(id: string): void`
+
+Equivalent to setItemState(id, 'hidden', false). Removes explicit business hidden only, keeping selected and other flags. It does not restore deleted elements or expand collapsed Combos.
+
+<span id="combo" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="prerequisites-and-boundaries" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## Combo operations [#graph-combo]
+
+Use these methods to create and remove groups, change membership, and collapse or expand groups. See [Combo configuration](/en/docs/api/options#options-combo) for fields and styles and the [Combo guide](/en/docs/guides/combo) for examples.
+
+<span id="code-and-effect" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### createCombo() [#createcombo]
+
+`graph.createCombo(combo: ComboData, childNodeIds?: string[]): void`
+
+Adds a group and assigns existing nodes, without creating or moving them. parentId should name an existing parent. Validate hierarchy and IDs. A duplicate ID does not create a group, but member assignment can still run. Initial collapsed can affect assigned-node visibility.
+
+```ts
+graph.createCombo({ id: 'team' }, ['A', 'B']);
+```
+
+### removeCombo() [#removecombo]
+
+`graph.removeCombo(comboId: string): void`
+
+Removes only the group, leaving nodes and edges. Direct nodes lose membership; direct child Combos become parentless rather than moving to the grandparent. Releases removed hierarchy hiding while preserving explicit business hidden.
+
+### addToCombo() [#addtocombo]
+
+`graph.addToCombo(nodeId: string, comboId: string): void`
+
+Moves an existing node from its previous group to the target without repositioning or layout. Collapsed targets apply structural hiding. Validate both IDs first: an invalid target can currently clear old membership rather than reject the operation.
+
+### removeFromCombo() [#removefromcombo]
+
+`graph.removeFromCombo(nodeId: string): void`
+
+Removes direct membership without deleting the node. Releases hierarchy-derived hiding while preserving business hidden.
+
+### getComboChildren() [#getcombochildren]
+
+`graph.getComboChildren(id: string): { nodes: string[]; combos: string[] }`
+
+Returns new arrays of direct node and child Combo IDs, without recursive traversal. Missing groups or no model return empty arrays. Ordering is not guaranteed.
+
+### getNodeCombo() [#getnodecombo]
+
+`graph.getNodeCombo(nodeId: string): string | undefined`
+
+Returns direct membership, or undefined for ungrouped/missing nodes or no model.
+
+### collapseCombo() [#collapsecombo]
+
+`graph.collapseCombo(comboId: string): void`
+
+Sets collapsed=true, hides descendant nodes and adjacent edges, without virtual edges. Descendant Combo borders are not automatically hidden. Emits combo:collapse for an actual transition, not missing or already collapsed groups.
+
+### expandCombo() [#expandcombo]
+
+`graph.expandCombo(comboId: string): void`
+
+Expands and releases this level’s structural hiding. Other collapsed ancestors and business hidden still apply. Emits combo:expand for an actual transition only.
+
+### toggleCombo() [#togglecombo]
+
+`graph.toggleCombo(comboId: string): void`
+
+Delegates to expand or collapse according to current state. Missing groups do nothing; the corresponding transition event is emitted.
+
+### Membership and models [#membership-and-models]
+
+```ts
+const parent = graph.getNodeCombo('B');
+const direct = graph.getComboChildren('base');
+const combo = graph.getComboData('base');
+console.log(parent, direct, combo?.collapsed);
+```
+
+getComboData returns a readonly-typed ComboModel. See [model fields](/en/docs/guides/combo#read-only-query-model). getData exports current membership, parentId, and collapsed, excluding collapse-derived hidden.
+
+<span id="states-visibility-and-compatibility" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### Combo state and visibility [#combo-state-and-visibility]
+
+Nodes, edges, and Combos share `setItemState()`, `getItemStates()`, and `clearItemStates()`. The code below toggles `selected` while preserving other states. Use `findCombosByState('selected')` to find every selected Combo.
+
+```ts
+const selected = graph.getItemStates(comboId).includes('selected');
+graph.setItemState(comboId, 'selected', !selected);
+```
+
+Call the code above from a `combo:click` listener to toggle selection. `hidden` hides the group itself. Use [collapseCombo()](#collapsecombo) to collapse its members.
+
+Continue with [group data](/en/docs/api/options#options-combo-combodata) · [State methods](/en/docs/api/graph#graph-states) · [Data export](/en/docs/api/graph#getdata).
+
+<span id="viewport" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="timing-and-units" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## Viewport and coordinates [#graph-viewport]
+
+The viewport is the part of the graph you can see on the canvas. Panning or zooming leaves each node's graph coordinates unchanged.
+
+### getCamera() [#getcamera]
+
+`graph.getCamera(): Camera`
+
+Returns a snapshot of the current view. `x` and `y` are offsets in graph units, and `zoom` is the scale. You can read the snapshot after construction. To read the view displayed on the canvas, wait for the first render to finish.
 
 ```ts
 const camera = graph.getCamera();
-graph.setCamera({ x: camera.x, y: camera.y, zoom: 1 });
-graph.zoomBy(1.2);
-graph.fitCenter();
+console.log(camera.zoom); // Current zoom level
+```
+
+You can also save the whole `camera` and pass it to [`setCamera(camera)`](#setcamera) later to restore the saved pan and zoom.
+
+<span id="save-restore-and-focus" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### setCamera() [#setcamera]
+
+`graph.setCamera(partial: Partial<Camera>): void`
+
+Set the view's pan and zoom by passing only the fields you want to change. Pass `{ zoom: 2 }` to change just the zoom. `x` and `y` are offsets in graph units, and `zoom` is clamped to `0.1–20`.
+
+### resetCamera() [#resetcamera]
+
+`graph.resetCamera(): void`
+
+Restore the zoom and position from the first render. Calls before the first render have no effect. After a container resize, use [fitView()](#graph-viewport-fitview) to fit the graph again.
+
+```ts
 graph.resetCamera();
 ```
 
-| Method                   | Description                                                                             |
-| ------------------------ | --------------------------------------------------------------------------------------- |
-| `getCamera()`            | Returns a `{ x, y, zoom }` snapshot                                                     |
-| `setCamera(partial)`     | Merges the provided camera fields                                                       |
-| `resetCamera()`          | Returns to the camera captured at the end of the first render. Earlier calls do nothing |
-| `getZoom()`              | Current zoom                                                                            |
-| `setSize(width, height)` | Sets the canvas size in CSS pixels                                                      |
-| `fitCenter()`            | Keeps zoom and moves the graph content to the viewport center                           |
+### getZoom() [#getzoom]
 
-### Container resize [#container-resize]
+`graph.getZoom(): number`
 
-Graph uses `ResizeObserver` to synchronize the canvas with its container. `setSize(width, height)` updates canvas dimensions in CSS pixels through the same viewport update path.
+Return the current zoom factor, equal to `getCamera().zoom`.
 
-By default, resizing preserves the current camera so the user's zoom and pan remain intact. Enabling [`autoFit`](/en/docs/api/options#autofit) fits the content again according to that configuration.
+<span id="zoomto-and-zoomby" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-The `resize` event fires after optional fitting, so listeners observe the final camera. A size change does not require a new instance or another `render()`.
+### zoomTo() [#zoomto]
 
-### `zoomTo()` and `zoomBy()` [#zoomto-and-zoomby]
+`graph.zoomTo(zoom: number, options?: ZoomOptions): void`
+
+Sets the zoom level to the value you pass.
+
+
 
 ```ts
-graph.zoomTo(1.5, { center: { x: 320, y: 180 } });
-graph.zoomBy(2, { minZoom: 0.2, maxZoom: 8 });
+const anchor = graph.getElementPosition('A');
+if (!anchor) return;
+const center = graph.graphToScreen(anchor.x, anchor.y);
+graph.zoomTo(1.5, { center });
 ```
 
-`zoomTo()` sets an absolute zoom. `zoomBy(2)` multiplies the current zoom by 2.
-
-`ZoomOptions`:
-
-| Field     | Default                                | Description                                 |
-| --------- | -------------------------------------- | ------------------------------------------- |
-| `center`  | Client coordinate of the canvas center | Screen point that stays fixed while zooming |
-| `minZoom` | `0.1`                                  | Lower zoom bound                            |
-| `maxZoom` | `20`                                   | Upper zoom bound                            |
-
-### `fitView()` [#fitview]
+**Complete runnable code**
 
 ```ts
-graph.fitView();
+import { Graph } from '@antv/g6-lite';
+import GUI from 'lil-gui';
+
+export function runZoomTo(container: HTMLElement) {
+  return run(container, 'zoomTo(1.5)', (graph) => {
+    // #region zoom-to
+    const anchor = graph.getElementPosition('A');
+    if (!anchor) return;
+    const center = graph.graphToScreen(anchor.x, anchor.y);
+    graph.zoomTo(1.5, { center });
+    // #endregion zoom-to
+  });
+}
+
+export function runZoomBy(container: HTMLElement) {
+  return run(container, 'zoomBy(1.5)', (graph) => {
+    // #region zoom-by
+    graph.zoomBy(1.5, { maxZoom: 4 });
+    // #endregion zoom-by
+  });
+}
+
+async function run(container: HTMLElement, label: string, changeZoom: (graph: Graph) => void) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'A', x: -28, y: 12 },
+        { id: 'B', x: 0, y: -20 },
+        { id: 'C', x: 28, y: 12 },
+      ],
+      edges: [
+        { id: 'A-B', source: 'A', target: 'B' },
+        { id: 'B-C', source: 'B', target: 'C' },
+        { id: 'A-C', source: 'A', target: 'C' },
+      ],
+    },
+    node: { style: { size: 14, label: (node) => node.id } },
+    behaviors: [],
+    autoFit: false,
+  });
+
+  const panel = createDemoPanel(container);
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => {
+    panel.destroy();
+    destroy();
+  };
+
+  try {
+    await graph.render();
+    graph.zoomTo(2);
+
+    const updateStatus = () => panel.setStatus(`zoom = ${graph.getZoom()}`);
+    panel.addAction(label, () => {
+      changeZoom(graph);
+      updateStatus();
+    });
+    updateStatus();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+
+
+export function createDemoPanel(container: string | HTMLElement, description = '') {
+  const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+  if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+
+  let gui: GUI | undefined;
+  const getGui = () => {
+    if (!gui) {
+      gui = new GUI({ container: host, width: 160 });
+      gui.domElement.classList.add('g6lite-demo-controls');
+      gui.domElement.dataset.captureIgnore = '';
+      Object.assign(gui.domElement.style, {
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        zIndex: '30',
+        maxWidth: 'calc(100% - 20px)',
+        maxHeight: 'calc(100% - 20px)',
+      });
+    }
+    return gui;
+  };
+
+  let status: HTMLDivElement | undefined;
+  const setStatus = (message: string) => {
+    if (!status) {
+      status = document.createElement('div');
+      status.setAttribute('role', 'status');
+      status.dataset.role = 'status';
+      status.dataset.captureIgnore = '';
+      status.style.cssText =
+        'position:absolute;left:12px;bottom:10px;z-index:20;max-width:min(28rem,calc(100% - 24px));color:#64748b;font:12px/1.45 system-ui,sans-serif;pointer-events:none;white-space:pre-wrap;';
+      host.append(status);
+    }
+    status.textContent = message;
+  };
+  if (description) setStatus(description);
+
+  return {
+    get gui() {
+      return getGui();
+    },
+    addAction(label: string, action: () => void, folder = getGui()) {
+      return folder.add({ [label]: action }, label);
+    },
+    addChoice<T extends string>(
+      label: string,
+      choices: readonly T[] | Record<string, T>,
+      value: T,
+      onChange: (value: T) => void,
+    ) {
+      const options = Array.isArray(choices) ? [...choices] : choices;
+      return getGui().add({ value }, 'value', options).name(label).onChange(onChange);
+    },
+    setStatus,
+    destroy() {
+      gui?.destroy();
+      status?.remove();
+    },
+  };
+}
+```
+
+
+
+Zoom defaults to the canvas center. To zoom around the mouse position, pass the event's `event.client` as `center`.
+
+| ZoomOptions | Default       | Meaning                                               |
+| ----------- | ------------- | ----------------------------------------------------- |
+| `center`    | Canvas center | Zoom center `{ x, y }` in browser viewport CSS pixels |
+| `minZoom`   | `0.1`         | Lower bound for this call                             |
+| `maxZoom`   | `20`          | Upper bound for this call                             |
+
+Use a finite positive `zoom` and keep `minZoom` at or below `maxZoom`. The final zoom is clamped to `0.1–20`.
+
+### zoomBy() [#zoomby]
+
+`graph.zoomBy(ratio: number, options?: ZoomOptions): void`
+
+Multiplies the current zoom by `ratio`. Use a finite positive `ratio` and the same center and limits as [zoomTo()](#zoomto).
+
+
+
+```ts
+graph.zoomBy(1.5, { maxZoom: 4 });
+```
+
+**Complete runnable code**
+
+```ts
+import { Graph } from '@antv/g6-lite';
+import GUI from 'lil-gui';
+
+export function runZoomTo(container: HTMLElement) {
+  return run(container, 'zoomTo(1.5)', (graph) => {
+    // #region zoom-to
+    const anchor = graph.getElementPosition('A');
+    if (!anchor) return;
+    const center = graph.graphToScreen(anchor.x, anchor.y);
+    graph.zoomTo(1.5, { center });
+    // #endregion zoom-to
+  });
+}
+
+export function runZoomBy(container: HTMLElement) {
+  return run(container, 'zoomBy(1.5)', (graph) => {
+    // #region zoom-by
+    graph.zoomBy(1.5, { maxZoom: 4 });
+    // #endregion zoom-by
+  });
+}
+
+async function run(container: HTMLElement, label: string, changeZoom: (graph: Graph) => void) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'A', x: -28, y: 12 },
+        { id: 'B', x: 0, y: -20 },
+        { id: 'C', x: 28, y: 12 },
+      ],
+      edges: [
+        { id: 'A-B', source: 'A', target: 'B' },
+        { id: 'B-C', source: 'B', target: 'C' },
+        { id: 'A-C', source: 'A', target: 'C' },
+      ],
+    },
+    node: { style: { size: 14, label: (node) => node.id } },
+    behaviors: [],
+    autoFit: false,
+  });
+
+  const panel = createDemoPanel(container);
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => {
+    panel.destroy();
+    destroy();
+  };
+
+  try {
+    await graph.render();
+    graph.zoomTo(2);
+
+    const updateStatus = () => panel.setStatus(`zoom = ${graph.getZoom()}`);
+    panel.addAction(label, () => {
+      changeZoom(graph);
+      updateStatus();
+    });
+    updateStatus();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+
+
+export function createDemoPanel(container: string | HTMLElement, description = '') {
+  const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+  if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+
+  let gui: GUI | undefined;
+  const getGui = () => {
+    if (!gui) {
+      gui = new GUI({ container: host, width: 160 });
+      gui.domElement.classList.add('g6lite-demo-controls');
+      gui.domElement.dataset.captureIgnore = '';
+      Object.assign(gui.domElement.style, {
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        zIndex: '30',
+        maxWidth: 'calc(100% - 20px)',
+        maxHeight: 'calc(100% - 20px)',
+      });
+    }
+    return gui;
+  };
+
+  let status: HTMLDivElement | undefined;
+  const setStatus = (message: string) => {
+    if (!status) {
+      status = document.createElement('div');
+      status.setAttribute('role', 'status');
+      status.dataset.role = 'status';
+      status.dataset.captureIgnore = '';
+      status.style.cssText =
+        'position:absolute;left:12px;bottom:10px;z-index:20;max-width:min(28rem,calc(100% - 24px));color:#64748b;font:12px/1.45 system-ui,sans-serif;pointer-events:none;white-space:pre-wrap;';
+      host.append(status);
+    }
+    status.textContent = message;
+  };
+  if (description) setStatus(description);
+
+  return {
+    get gui() {
+      return getGui();
+    },
+    addAction(label: string, action: () => void, folder = getGui()) {
+      return folder.add({ [label]: action }, label);
+    },
+    addChoice<T extends string>(
+      label: string,
+      choices: readonly T[] | Record<string, T>,
+      value: T,
+      onChange: (value: T) => void,
+    ) {
+      const options = Array.isArray(choices) ? [...choices] : choices;
+      return getGui().add({ value }, 'value', options).name(label).onChange(onChange);
+    },
+    setStatus,
+    destroy() {
+      gui?.destroy();
+      status?.remove();
+    },
+  };
+}
+```
+
+
+
+<span id="fitview" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### fitView() [#graph-viewport-fitview]
+
+`graph.fitView(options?: number | FitViewOptions): void`
+
+Adjusts translation and zoom to content bounds, including node bodies, edge paths, and Combo boxes. It does not guarantee room for all external labels or DOM decorations. Current node bounds do not exclude hidden nodes; a distant hidden node can still reduce the fit scale. Does nothing with no nodes.
+
+| Input           | Behavior                                                        |
+| --------------- | --------------------------------------------------------------- |
+| Omitted         | Equivalent to fitView(0.9)                                      |
+| Positive number | Multiplies the fit result without padding; not an absolute zoom |
+| Object          | Uses a factor of 1 and the padding / limits below               |
+
+| FitViewOptions | Default | Meaning                                                    |
+| -------------- | ------- | ---------------------------------------------------------- |
+| padding        | 0       | CSS pixels, uniform or `[top, right, bottom, left]`        |
+| minZoom        | 0.1     | Lower bound; too high can prevent a complete fit           |
+| maxZoom        | 20      | Upper bound; a smaller value avoids over-enlarging content |
+
+The underlying camera still clamps to 0.1–20. Use nonnegative padding and a valid range; excessive padding or restrictive limits can prevent a complete fit.
+
+```ts
 graph.fitView(0.8);
-graph.fitView({ padding: [24, 16, 24, 16], minZoom: 0.2, maxZoom: 2 });
+graph.fitView({ padding: [32, 24, 48, 24], maxZoom: 1 });
 ```
 
-Fits the camera to the bounding box of every node.
+Initial render uses an autoFit object or numeric value; omitted, false, or true uses 0.9. setData defaults separately to 0.9, without inheriting the autoFit object. layout does not fit automatically. See [fitting timing](/en/docs/guides/viewport#choose-when-to-fit).
 
-* A number is a scale applied to that fit. The default is `0.9`. The first `render()` uses it unless [`autoFit`](/en/docs/api/options#autofit) supplies another policy.
-* An object uses `padding`, `minZoom`, and `maxZoom`. `padding` is one CSS pixel value or `[top, right, bottom, left]`. The scale is `1`, `minZoom` defaults to `0.1`, and `maxZoom` defaults to `20`.
+### fitCenter() [#fitcenter]
 
-### Coordinate conversion [#coordinate-conversion]
+`graph.fitCenter(): void`
+
+Preserves zoom and centers the bounds of node center points. It does not recompute zoom from node dimensions, edge paths, Combos, or labels. Does nothing with no nodes. Use fitView to fit content.
+
+```ts
+graph.fitCenter();
+```
+
+<span id="focusitem" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### focusItem() [#graph-viewport-focusitem]
+
+`graph.focusItem(id: string | string[], padding?: number): void`
+
+Focuses nodes only. Edge IDs, Combo IDs, and missing IDs are ignored; no valid nodes means no action. Centers target node points, keeping zoom if they fit and otherwise zooming out. It never zooms in automatically. padding defaults to 20 CSS pixels; negatives become 0.
+
+Bounds use node centers, excluding body size and labels; the underlying camera limits still apply. This method does not alter states, positions, or layout, or expand collapsed Combos.
+
+```ts
+graph.focusItem('A');
+graph.focusItem(['A', 'B'], 32);
+```
+
+<span id="container-resize" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### setSize() [#setsize]
+
+`graph.setSize(width: number, height: number): void`
+
+Set the canvas width and height to finite positive values in CSS pixels. The canvas follows changes to the container size automatically. Size updates emit `resize`. If `autoFit` is enabled, Graph refits the view first. The default `false` preserves the current view. Set it to `true` to use the default factor of `0.9`, or pass a positive number or [`FitViewOptions`](#graph-viewport-fitview). Coordinate conversion requires a mounted, visible canvas with positive dimensions. After destruction, both conversions return `{ x: 0, y: 0 }`.
+
+<span id="fitting-after-a-container-narrows-or-widens" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+```ts
+graph.setSize(640, 480);
+```
+
+<span id="coordinate-conversion" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### screenToGraph() [#screentograph]
+
+`graph.screenToGraph(screenX: number, screenY: number): { x: number; y: number }`
+
+Takes client CSS coordinates, matching MouseEvent.clientX / clientY, and returns graph coordinates under the current camera. Do not pass display screenX / screenY or offsetX / offsetY. Canvas position and backing-buffer scale are handled internally; do not multiply by DPR.
 
 ```ts
 graph.on('canvas:click', (event) => {
-  const point = graph.screenToGraph(event.nativeEvent.clientX, event.nativeEvent.clientY);
-  const screen = graph.graphToScreen(point.x, point.y);
-  screen.x;
+  const point = graph.screenToGraph(event.client.x, event.client.y);
+  console.log(point, event.graph); // Same graph position
 });
 ```
 
-Arguments and return values are client coordinates, the same space as `MouseEvent.clientX` and `clientY`. Element events already split `client`, `canvas`, and `graph`, so most click handlers can read those fields directly.
+### graphToScreen() [#graphtoscreen]
 
-## Layout [#layout]
+`graph.graphToScreen(graphX: number, graphY: number): { x: number; y: number }`
+
+Takes graph coordinates and returns client CSS coordinates, suitable for fixed DOM positioning. Recompute after page scrolling, container movement, or camera changes; the result is not a fixed page coordinate.
 
 ```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR' });
+const client = graph.graphToScreen(0, 0);
+const point = graph.screenToGraph(client.x, client.y);
+console.log(client, point);
+```
+
+<span id="layout" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## Layout [#graph-layout]
+
+### setLayout() [#setlayout]
+
+`graph.setLayout(config: LayoutConfig): void`
+
+Replaces the layout configuration. To rearrange an existing graph with the new configuration, call [layout()](#graph-layout-layout).
+
+### layout() [#graph-layout-layout]
+
+`graph.layout(): Promise<void>`
+
+After the first render, recalculates and updates node positions using the current layout configuration. To see the whole graph after rearranging it, call [fitView()](#graph-viewport-fitview) after `await graph.layout()`.
+
+<span id="graph-layout-code-and-rendered-result" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+```ts
+graph.setLayout({ type: 'circular' });
 await graph.layout();
-graph.cancelLayout();
+graph.fitView();
 ```
 
-`setLayout()` replaces the layout used by the next run. `layout()` executes it on the current graph data and writes the resulting coordinates back to the nodes. It returns immediately when no layout is configured or the graph has no nodes.
+#### Computation and fitting [#computation-and-fitting]
 
-`cancelLayout()` abandons an in-flight layout. An older run that finishes later does not overwrite a newer result.
+| Call         | Layout                                 | Camera                                                            |
+| ------------ | -------------------------------------- | ----------------------------------------------------------------- |
+| First render | Computes when configured               | Fits initially; autoFit objects or numeric values affect that fit |
+| layout       | Computes when configured and nonempty  | Retains current camera                                            |
+| setData      | Computes configured layout on new data | Fits by default; `{ fitView: false }` retains camera              |
 
-Layout names and parameters are in [Layout](/en/docs/guides/layout). To compute positions without a Graph, use [`runLayout()`](/en/docs/api/extensions#runlayout).
+### cancelLayout() [#cancellayout]
 
-## Combo [#combo]
+`graph.cancelLayout(): void`
 
-Combo collapse, nesting, and runtime regrouping are experimental. Their configuration may change within `0.1.x`. Visual options are in [Combo](/en/docs/guides/combo). Call these methods after the first `render()`. A call before that returns immediately and does not create or change a combo.
+Cancels the current layout and keeps the existing node positions and layout configuration. Call `layout()` again to start a new run. The cancelled `layout()` Promise can still resolve normally. [Worker cancellation example](/en/docs/guides/layout-worker#code-and-rendered-result)
+
+<span id="graph-extensions-runlayout" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### runLayout [#graph-layout-runlayout]
+
+Import from the package root to compute positions without Graph:
 
 ```ts
-graph.createCombo({ id: 'group', data: { label: 'Group' } }, ['n1', 'n2']);
-graph.addToCombo('n3', 'group');
-const children = graph.getComboChildren('group');
-graph.collapseCombo('group');
-graph.expandCombo('group');
-graph.removeFromCombo('n3');
-graph.removeCombo('group');
-children.nodes;
+import type { ExtensionContext, GraphData, LayoutConfig, LayoutResult } from '@antv/g6-lite';
+
+declare function runLayout(
+  data: GraphData,
+  config: LayoutConfig,
+  viewport?: { width: number; height: number },
+  runtime?: { signal?: AbortSignal; extensionContext?: ExtensionContext },
+): Promise<LayoutResult>;
 ```
 
-The second argument of `createCombo()` places existing nodes into the new combo. `collapseCombo()` hides the nodes under it and emits `combo:collapse`. `expandCombo()` restores them and emits `combo:expand`. Collapsing or expanding a combo that is already in the target state does not emit again.
+| Input / result           | Contract                                                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| data                     | Flat nodes/edges; the function creates no Graph and performs no drawing or fitting                                                         |
+| config                   | LayoutConfig; Workers require an explicit option, without the ≥ 1000-node automatic switch                                                 |
+| viewport                 | Defaults missing width/height/center; omitted values use algorithm defaults rather than a Graph container                                  |
+| runtime.signal           | Optional cancellation signal; cancellation generally returns input positions as a fallback rather than guaranteeing AbortError             |
+| runtime.extensionContext | Optional extension initialization context. Graph provides it internally. Standalone calls skip `Layout.init` when this argument is omitted |
+| result                   | `{ nodes: Array<GraphNode & { x: number; y: number }> }`; no edges are returned; do not treat it as a deep clone                           |
 
-Select and hide combos with `setItemState()` and `hideItem()`. The older `setComboState()` remains only for existing code.
-
-## Events [#events]
+<span id="compute-and-display-coordinates" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
 ```ts
-graph.once('afterrender', () => {
-  graph.fitView(0.9);
+import { runLayout } from '@antv/g6-lite';
+
+const { nodes } = await runLayout(data, { type: 'dagre', rankdir: 'LR' });
+console.log(nodes);
+```
+
+<Callout type="warn" title="Standalone calculation boundaries">
+  Execution order follows the configuration reference: registered names, built-in functional trees, Worker, then library algorithm. With viewport, extension execute context width/height prefer viewport values; explicit config.width/height remain in context.options. Without viewport, context dimensions fall back to config or 800×600.
+
+  Standalone runLayout does not perform Graph's final fx/fy override, execute Graph transforms, or emit Graph layout events. Use results in your own renderer; use instance layout for Graph's writeback, state, and event sequence.
+</Callout>
+
+Continue with the [configuration reference](/en/docs/api/options#options-layout), [Graph overview](/en/docs/api/graph), or [custom layouts](/en/docs/guides/extensions).
+
+<span id="events" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## Event API [#graph-events]
+
+### on() [#on]
+
+`graph.on<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void`
+
+Receive events until unsubscribed or the instance is destroyed.
+
+Listeners run synchronously in registration order, and any errors they throw propagate to the caller.
+
+```ts
+graph.on('node:click', ({ nodeId }) => {
+  console.log('clicked', nodeId);
 });
 ```
 
-Names in `GraphEventMap` infer the handler argument. Custom event names can be subscribed too; the handler declares that payload.
+**Parameters**: event is the name; handler receives arguments inferred from that name. **Returns**: void.
+
+**Common events**
+
+| Event                                                          | When it fires                                           |
+| -------------------------------------------------------------- | ------------------------------------------------------- |
+| [`beforerender`](/en/docs/api/graph/events#beforerender)       | Before drawing begins                                   |
+| [`afterrender`](/en/docs/api/graph/events#afterrender)         | After an explicit render finishes drawing synchronously |
+| [`datachange`](/en/docs/api/graph/events#datachange)           | After `setData()` writes the new data                   |
+| [`resize`](/en/docs/api/graph/events#resize)                   | After the canvas size is updated                        |
+| [`destroy`](/en/docs/api/graph/events#event-lifecycle-destroy) | When the graph is first destroyed                       |
+
+See the [event reference](/en/docs/api/graph/events) for the full list and callback parameters. Use [EventEmitter](/en/docs/api/graph/events#eventemitter) for application-owned dispatch.
+
+### off() [#off]
+
+`graph.off<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void`
+
+Unsubscribe using the original function. Also cancels a pending once listener.
 
 ```ts
-graph.on('node:click', (event) => {
-  event.nodeId;
-  event.nativeEvent.clientX;
-});
+import type { Graph, GraphEventMap } from '@antv/g6-lite';
 
-const onRender = (payload: { nodeCount: number; edgeCount: number }) => {
-  console.log(payload.nodeCount);
-};
-graph.on('afterrender', onRender);
-graph.off('afterrender', onRender);
+declare const graph: Graph;
+const onClick = ({ nodeId }: GraphEventMap['node:click'][0]) => console.log(nodeId);
+graph.on('node:click', onClick);
+graph.off('node:click', onClick);
 ```
 
-`off()` needs the same function that was passed to `on()`. `once()` removes the listener after the first emit. `destroy` has no arguments.
+**Parameters**: original event name and handler reference, both required. **Returns**: void.
 
-Element click, hover, and wheel events are emitted by the engine and do not require an extra behavior. Selection, drag, brush, and lasso events appear only when that behavior is enabled. Field notes are in [Events](/en/docs/guides/events).
+<span id="graph-events-code-and-rendered-result" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-| Event                                                      | Main fields                                               |
-| ---------------------------------------------------------- | --------------------------------------------------------- |
-| `node:*`                                                   | `nodeId`, `nativeEvent`, `data`, `graph`                  |
-| `edge:*`                                                   | `edgeId`, `edgeIndex`, `source`, `target`, `nativeEvent`  |
-| `combo:pointerdown` / `click` / `dblclick` / `contextmenu` | `comboId`, `nativeEvent`                                  |
-| `canvas:*`                                                 | `nativeEvent`, and no target element id                   |
-| `node:selectchange`                                        | `nodeId`, `selected`, `event`                             |
-| `edge:selectchange`                                        | `edgeId`, `edgeIndex`, `source`, `target`, `selected`     |
-| `selection:clear`                                          | `ids`                                                     |
-| `node:dragstart` / `node:drag` / `node:dragend`            | `nodeId`, `nodeIds`; drag also has `dx`, `dy`             |
-| `combo:dragstart` / `combo:drag` / `combo:dragend`         | `comboId`; drag also has `dx`, `dy`                       |
-| `edge:dragstart` / `edge:drag` / `edge:dragend`            | `source`, `target`, `dragEnd`; end also has `reconnected` |
-| `brush:select` / `brush:end`                               | `nodeIds`                                                 |
-| `lasso:select` / `lasso:end`                               | `nodeIds`                                                 |
-| `beforelayout` / `layout:start`                            | `nodeCount`                                               |
-| `layout:end` / `afterlayout`                               | `duration`, `nodeCount`                                   |
-| `beforerender` / `afterrender`                             | `nodeCount`, `edgeCount`                                  |
-| `resize`                                                   | `width`, `height`                                         |
-| `datachange`                                               | `nodeCount`, `edgeCount`                                  |
-| `afteradditem`                                             | `type`, `id`; edges also include `source`, `target`       |
-| `afterremoveitem`                                          | `type`, `id`                                              |
-| `afterupdateitem`                                          | `type`, `id`, `action`                                    |
-| `combo:collapse` / `combo:expand`                          | `comboId`                                                 |
-| `destroy`                                                  | No arguments                                              |
+### once() [#once]
 
-`node:*` and `edge:*` each include `pointerover`, `pointerenter`, `pointermove`, `pointerleave`, `pointerdown`, `click`, `dblclick`, `contextmenu`, and `wheel`. `canvas:*` includes `pointermove`, `pointerdown`, `pointerup`, `click`, `dblclick`, `contextmenu`, and `wheel`.
+`graph.once<K extends keyof GraphEventMap>(event: K, handler: Handler<GraphEventMap[K]>): void`
 
-The native input is `nativeEvent`. The older `event` field remains for existing listeners.
+Receive only the next occurrence after registration, then automatically unsubscribe. Past events are not replayed.
+
+```ts
+graph.once('afterrender', ({ nodeCount }) => console.log(nodeCount));
+await graph.render();
+```
+
+**Parameters** are the same as on. **Returns**: void. Adding after destruction does nothing.
+
+### emit() [#emit]
+
+`graph.emit<K extends string>(event: K, ...args: K extends keyof GraphEventMap ? GraphEventMap[K] : unknown[]): void`
+
+Call the graph’s event listeners synchronously. This works before the first render and returns immediately after destruction.
+
+```ts
+graph.emit('business:reset');
+```
+
+`GraphEventMap` types declared event arguments. Dispatching a built-in event also notifies Behaviors listening to it. Use a distinct name such as `business:reset` for application events. [Custom event example](/en/docs/guides/events/custom)
+
+## Extension API [#graph-extensions]
+
+<span id="extension-registration" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="extension-registration-register" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="graph-extensions-extensionfactory" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### `register()` [#graph-extensions-register]
+
+`register(type, name, extension): void`
+
+Register a custom node, edge, label, decoration, behavior, layout, transform, or plugin. Use its registered name in Graph options to enable it.
+
+<span id="minimal-registration-and-activation" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+This example applies a custom curved edge to the graph. Use a visible container with the ID `container`.
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+
+register('edge', 'app-dependency', { base: 'arc', style: { curvature: 0.2 } });
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [{ id: 'a', x: 0, y: 0 }, { id: 'b', x: 120, y: 0 }],
+    edges: [{ source: 'a', target: 'b' }],
+  },
+  edge: { type: 'app-dependency' },
+});
+await graph.render();
+```
+
+See the [extension reference](/en/docs/api/extensions) for configuration and callbacks by type.

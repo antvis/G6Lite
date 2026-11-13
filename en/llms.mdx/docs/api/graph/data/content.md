@@ -1,0 +1,24 @@
+# Data query method reference (previous URL) (/en/docs/api/graph/data)
+
+
+
+This section has moved to [Data queries](/en/docs/api/graph#graph-data).
+
+* <span id="query-timing-and-returned-values" style="{ display: 'block', scrollMarginTop: '8rem' }" />[Query timing and returned values](/en/docs/api/graph#query-timing-and-returned-values)
+* <span id="getdata" style="{ display: 'block', scrollMarginTop: '8rem' }" /><span id="compatibility-methods" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getData](/en/docs/api/graph#getdata)
+* <span id="snapshots-and-live-queries" style="{ display: 'block', scrollMarginTop: '8rem' }" />[Snapshots and live queries](/en/docs/api/graph#snapshots-and-live-queries)
+* <span id="getnodes" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getNodes](/en/docs/api/graph#getnodes)
+* <span id="getnodedata" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getNodeData](/en/docs/api/graph#getnodedata)
+* <span id="getedges" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getEdges](/en/docs/api/graph#getedges)
+* <span id="getedgedata" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getEdgeData](/en/docs/api/graph#getedgedata)
+* <span id="getcombodata" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getComboData](/en/docs/api/graph#getcombodata)
+* <span id="getelementdata" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getElementData](/en/docs/api/graph#getelementdata)
+* <span id="getnodecount" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getNodeCount](/en/docs/api/graph#getnodecount)
+* <span id="getedgecount" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getEdgeCount](/en/docs/api/graph#getedgecount)
+* <span id="hasnode" style="{ display: 'block', scrollMarginTop: '8rem' }" />[hasNode](/en/docs/api/graph#hasnode)
+* <span id="hasedge" style="{ display: 'block', scrollMarginTop: '8rem' }" />[hasEdge](/en/docs/api/graph#hasedge)
+* <span id="haselement" style="{ display: 'block', scrollMarginTop: '8rem' }" />[hasElement](/en/docs/api/graph#haselement)
+* <span id="getelementposition" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getElementPosition](/en/docs/api/graph#getelementposition)
+* <span id="getneighbornodes" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getNeighborNodes](/en/docs/api/graph#getneighbornodes)
+* <span id="getadjacentedges" style="{ display: 'block', scrollMarginTop: '8rem' }" />[getAdjacentEdges](/en/docs/api/graph#getadjacentedges)
+* <span id="model-fields" style="{ display: 'block', scrollMarginTop: '8rem' }" />[Query return types](/en/docs/guides/data#model-fields)

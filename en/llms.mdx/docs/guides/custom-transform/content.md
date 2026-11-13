@@ -1,0 +1,14 @@
+# Custom Transforms (previous URL) (/en/docs/guides/custom-transform)
+
+
+
+This content now lives in [Transforms](/en/docs/guides/transform-overview) under [Custom transforms](/en/docs/guides/transform-overview#custom-transforms).
+
+* <span id="implement-and-activate" style="{ scrollMarginTop: '8rem' }" />[Implement and register](/en/docs/guides/transform-overview#implement-and-activate)
+* <span id="code-example" style="{ scrollMarginTop: '8rem' }" />[Code example](/en/docs/guides/transform-overview#code-example)
+* <span id="options-and-cleanup" style="{ scrollMarginTop: '8rem' }" />[Options and cleanup](/en/docs/guides/transform-overview#options-and-cleanup)
+* <span id="configuration-and-cleanup" style="{ scrollMarginTop: '8rem' }" />[Options and cleanup](/en/docs/guides/transform-overview#options-and-cleanup)
+* <span id="full-versus-incremental-updates" style="{ scrollMarginTop: '8rem' }" />[Full versus incremental updates](/en/docs/guides/transform-overview#when-transforms-run)
+* <span id="why-did-refresh-or-layout-not-run-the-transform" style="{ scrollMarginTop: '8rem' }" />[When transforms run](/en/docs/guides/transform-overview#when-transforms-run)
+* <span id="common-questions" style="{ scrollMarginTop: '8rem' }" />[Common questions](/en/docs/guides/transform-overview#custom-transforms)
+* <span id="is-update-a-patch" style="{ scrollMarginTop: '8rem' }" />[Options passed to update()](/en/docs/guides/transform-overview#options-and-cleanup)

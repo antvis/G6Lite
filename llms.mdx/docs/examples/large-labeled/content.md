@@ -4,4 +4,83 @@
 
 
 
-<ExampleDetail id="large-labeled" locale="zh" />
+在 5000 个节点上绘制 Canvas 标签。
+
+## 如何体验
+
+缩小查看全图，放大后再阅读节点标签。
+
+## 数据说明
+
+合成网络包含 5000 个节点、15000 条边；内置 Canvas 标签在低缩放隐藏并避让碰撞，放大后逐步阅读。
+
+## 完整运行代码
+
+```ts
+/**
+ * Demo: 5000 节点 + 标签 — 性能与标签验证
+ */
+import { Graph } from '@antv/g6-lite';
+
+function generateData(nodeCount: number, degree: number) {
+  const nodes = Array.from({ length: nodeCount }, (_, i) => ({
+    id: String(i),
+    name: `N${i}`,
+    data: { cluster: i % 3 === 0 ? 'a' : i % 3 === 1 ? 'b' : 'c' },
+  }));
+  const edges: Array<{ source: string; target: string; data: { label: string } }> = [];
+  for (let i = 0; i < nodeCount; i++) {
+    const k = Math.min(degree, nodeCount - 1);
+    for (let j = 0; j < k; j++) {
+      const t = (i + 1 + j * 13) % nodeCount;
+      if (t !== i) {
+        edges.push({
+          source: String(i),
+          target: String(t),
+          data: { label: `e${i}-${t}` },
+        });
+      }
+    }
+  }
+  return { nodes, edges };
+}
+
+export async function run(container: string | HTMLElement) {
+  const wrap = typeof container === 'string' ? (document.querySelector(container) as HTMLElement) : container;
+  const { nodes, edges } = generateData(5000, 3);
+
+  const graph = new Graph({
+    autoFit: true,
+    container: wrap,
+    data: { nodes, edges },
+    node: {
+      type: 'circle',
+      style: {
+        fill: (d) => {
+          const c = (d.data?.cluster as string) ?? 'a';
+          return c === 'a' ? '#5B8FF9' : c === 'b' ? '#61DDAA' : '#F6BD16';
+        },
+        size: 4,
+        label: (node) => node.name ?? node.id,
+        labelPlacement: 'bottom',
+        labelFontSize: 12,
+      },
+    },
+    edge: { type: 'line', style: { lineWidth: 0.5 } },
+    label: { scaleWithZoom: false, hideOnLowZoom: true, hideOnCollision: true },
+    layout: { type: 'force', linkDistance: 25 },
+    behaviors: ['zoom-canvas', 'drag-canvas'],
+    theme: 'light',
+  });
+
+  await graph.render();
+
+  return graph;
+}
+```
+
+
+## 继续阅读
+
+- [性能测量](/docs/metrics/performance)
+- [性能优化](/docs/metrics/performance#performance-tuning)

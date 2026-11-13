@@ -1,0 +1,16 @@
+# Drag events (previous URL) (/en/docs/api/graph/events/drag)
+
+
+
+This section has moved to [Drag event details](/en/docs/api/graph/events#event-drag).
+
+* <span id="read-final-positions" style="{ display: 'block', scrollMarginTop: '8rem' }" />[Read final positions](/en/docs/api/graph/events#read-final-positions)
+* <span id="nodedragstart" style="{ display: 'block', scrollMarginTop: '8rem' }" />[node:dragstart](/en/docs/api/graph/events#nodedragstart)
+* <span id="nodedrag" style="{ display: 'block', scrollMarginTop: '8rem' }" />[node:drag](/en/docs/api/graph/events#nodedrag)
+* <span id="nodedragend" style="{ display: 'block', scrollMarginTop: '8rem' }" />[node:dragend](/en/docs/api/graph/events#nodedragend)
+* <span id="combodragstart" style="{ display: 'block', scrollMarginTop: '8rem' }" />[combo:dragstart](/en/docs/api/graph/events#combodragstart)
+* <span id="combodrag" style="{ display: 'block', scrollMarginTop: '8rem' }" />[combo:drag](/en/docs/api/graph/events#combodrag)
+* <span id="combodragend" style="{ display: 'block', scrollMarginTop: '8rem' }" />[combo:dragend](/en/docs/api/graph/events#combodragend)
+* <span id="edgedragstart" style="{ display: 'block', scrollMarginTop: '8rem' }" />[edge:dragstart](/en/docs/api/graph/events#edgedragstart)
+* <span id="edgedrag" style="{ display: 'block', scrollMarginTop: '8rem' }" />[edge:drag](/en/docs/api/graph/events#edgedrag)
+* <span id="edgedragend" style="{ display: 'block', scrollMarginTop: '8rem' }" />[edge:dragend](/en/docs/api/graph/events#edgedragend)

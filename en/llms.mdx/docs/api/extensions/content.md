@@ -1,120 +1,295 @@
-# Extensions (/en/docs/api/extensions)
+# Extension reference (/en/docs/api/extensions)
 
 
 
-When configuration cannot express a difference, register it with `register()` and refer to it by name from `GraphOptions`. Tutorials are in [Extensions](/en/docs/guides/extensions), [Custom node](/en/docs/guides/custom-node), and [Custom behavior](/en/docs/guides/custom-behavior).
+<span id="register" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-```ts
-import { extensionFactory, register } from '@antv/g6-lite';
-```
+## Extension types and factories [#extension-types]
 
-## `register()` [#register]
+See [register()](/en/docs/api/graph#graph-extensions-register) for an example of registering and enabling an extension.
 
-```ts
-register(type, name, extension): void
-```
+| Category     | Extension type                                                 | Graph option                                |
+| ------------ | -------------------------------------------------------------- | ------------------------------------------- |
+| `node`       | [`NodeExtension`](#nodeextension)                              | `node.type`                                 |
+| `edge`       | [`EdgeExtension`](#edgeextension)                              | `edge.type`                                 |
+| `label`      | [`LabelRenderer<TData>`](#labelrenderer)                       | `node.labelRenderer` / `edge.labelRenderer` |
+| `decoration` | [`DecorationRenderer`](#decorationrenderer)                    | `node.decorations[].renderer`               |
+| `behavior`   | [`BehaviorExtension<TOptions, TEventMap>`](#behaviorextension) | `behaviors[].type`                          |
+| `layout`     | [`LayoutExtension<TOptions>`](#layoutextension)                | `layout.type`                               |
+| `transform`  | [`TransformExtension<TOptions>`](#transformextension)          | `transforms[].type`                         |
+| `plugin`     | [`PluginExtension<TOptions>`](#pluginextension)                | `plugins[].type`                            |
 
-`type` is the extension category. `name` is the string later written into configuration, and it cannot be empty. A later registration with the same category and name replaces the previous definition.
+<span id="registration-rules" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-| `type`         | Where the name is used                       | What the extension provides                                                                                                                                                                                 |
-| -------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `'node'`       | `node.type`                                  | `base?: 'circle' \| 'rect'`, default `style`, `stateStyles`, and `getStyle(node)`. Optional `drawOverlay()` draws a screen-space decoration, and `getBoundaryAnchor()` returns a point on the node boundary |
-| `'edge'`       | `edge.type`                                  | `base?: 'line' \| 'arc' \| 'polyline' \| 'cubic'`, default `style`, `stateStyles`, and `getStyle(source, target, edge)`                                                                                     |
-| `'label'`      | `node.labelRenderer` or `edge.labelRenderer` | `measure(params)` returns width and height; `draw(params)` paints onto the canvas                                                                                                                           |
-| `'decoration'` | `node.decorations[].renderer`                | The same `measure` / `draw` pair, with data from the decoration config                                                                                                                                      |
-| `'layout'`     | `layout.type`                                | `execute(data, context)` returns nodes with `x` and `y`. `context` includes `width`, `height`, `signal`, and the current `options`                                                                          |
-| `'behavior'`   | `type` inside `behaviors`                    | `getEvents()` maps event names to handlers. Implement `init(context, options)` and `destroy()` when the behavior has a lifecycle                                                                            |
-| `'transform'`  | `type` inside `transforms`                   | `beforeRender(data)` returns the next `GraphData`. Implement `update(options)` when options can change                                                                                                      |
-| `'plugin'`     | `type` inside `plugins`                      | `mount(container)` attaches independent DOM. Use `init` / `destroy` for its lifecycle                                                                                                                       |
+Within a category, registering the same name again applies the new definition to future instances.
 
-Node and edge extensions are usually stateless style objects. Layouts, behaviors, transforms, and plugins usually keep state, so wrap them in `extensionFactory()`.
+<span id="extensionfactory" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-```ts
-register('edge', 'dependency', {
-  base: 'arc',
-  style: { stroke: '#91caff', curvature: 0.2, endArrow: true },
-});
+<span id="graph-extensions-extensionfactory" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-register(
-  'behavior',
-  'pin-click',
-  extensionFactory(() => {
-    let context: ExtensionContext | undefined;
-    return {
-      init(next) {
-        context = next;
-      },
-      getEvents() {
-        return {
-          'node:click': ({ nodeId }) => context?.state.set(nodeId, ['selected']),
-        };
-      },
-    };
-  }),
-);
-```
+<span id="extension-registration-extensionfactory" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-Register before creating the Graph, or before a render that reads the name. Behaviors, transforms, and plugins resolve names from the registry at render time.
+For stateful extensions, pass a factory directly to `register()`. Return a new instance each time the factory runs.
 
-A plain object or a zero-argument class can still be registered. Objects are cloned on a best-effort basis, and classes are constructed again. Use `extensionFactory()` when a stateful extension needs a predictable instance per graph.
+<span id="runlayout" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-## `extensionFactory()` [#extensionfactory]
+See [runLayout()](/en/docs/api/graph#graph-layout-runlayout) to compute layout coordinates independently.
 
-```ts
-extensionFactory(factory: () => Extension): () => Extension
-```
+<span id="extension-context" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-Marks the function as an extension factory. The engine calls it once per Graph, so graphs do not share one closure.
+<span id="compatibility-members" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-## Extension context [#extension-context]
+## ExtensionContext [#extensioncontext]
 
-Behaviors, plugins, and some layouts receive `ExtensionContext` from `init(context, options)`. `options` is read-only.
+Extensions receive their context in `init(context, options)`. Use `context.data` for business data, `context.state` for element states, and `context.viewport` for coordinate conversion. Release extension-owned resources in `destroy()`.
 
-| Member                                                       | Use                                         |
-| ------------------------------------------------------------ | ------------------------------------------- |
-| `context.data.getNode(id)` / `getEdge(id)`                   | Read a read-only snapshot                   |
-| `context.data.getNodeIds()` / `getEdgeIds()`                 | Current id lists                            |
-| `context.data.updateNode(id, data)` / `updateEdge(id, data)` | Merge business fields                       |
-| `context.state.set(id, states)`                              | Replace one element's state list            |
-| `context.state.setAll(stateMap)`                             | Replace many elements at once               |
-| `context.state.get(id)` / `clear(id)`                        | Read or clear state                         |
-| `context.viewport.screenToGraph(point)`                      | Client coordinates to graph coordinates     |
-| `context.viewport.graphToScreen(point)`                      | Graph coordinates to client coordinates     |
-| `context.viewport.getZoom()`                                 | Current zoom                                |
-| `context.requestRender()`                                    | Request a draw on the next frame            |
-| `context.isDestroyed()`                                      | Whether the owning Graph has been destroyed |
+`init(context: ExtensionContext, options: Readonly<TOptions>): void` and `destroy(): void` are synchronous hooks.
 
-Snapshots from `data` cannot be mutated in place. Write through `updateNode`, `updateEdge`, and `state`.
+### data: snapshots and business-field updates [#data-snapshots-and-business-field-updates]
 
-`context.graph`, and the flat `screenToGraph()`, `graphToScreen()`, and `getZoom()` on the context, remain for existing extensions. New extensions use `data`, `state`, `viewport`, and `requestRender()`.
+| Call                                                   | Result and behavior                                                               |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| getNode(id: string)                                    | ExtensionNodeData or undefined                                                    |
+| getEdge(id: string)                                    | ExtensionEdgeData or undefined                                                    |
+| getNodeIds() / getEdgeIds()                            | New string\[] arrays, empty without a model; order is not guaranteed              |
+| updateNode(id: string, data: Record\<string, unknown>) | void; shallow-merge node data, without changing identity, position, or membership |
+| updateEdge(id: string, data: Record\<string, unknown>) | void; shallow-merge edge data, without changing endpoints                         |
 
-## `runLayout()` [#runlayout]
+id is an element ID. Missing elements read as undefined and are skipped by updates. Writes follow [Graph data-method prerequisites](/en/docs/api/graph#graph-data-mutations): use after the first valid render; destruction prevents writes.
 
-Compute positions without creating a Graph:
+**Snapshot fields**
 
-```ts
-import { runLayout } from '@antv/g6-lite';
+| Field           | Type (all fields readonly)          | Snapshot                                        |
+| --------------- | ----------------------------------- | ----------------------------------------------- |
+| id              | string                              | Nodes and edges                                 |
+| name?           | string                              | Nodes only                                      |
+| x / y           | number, graph coordinates           | Nodes only                                      |
+| source / target | string, endpoint node IDs           | Edges only                                      |
+| data?           | Readonly\<Record\<string, unknown>> | Optional on nodes and edges                     |
+| states          | readonly ElementState\[]            | Nodes and edges; an array, unlike a Model's Set |
 
-const result = await runLayout(
-  { nodes, edges },
-  { type: 'dagre', rankdir: 'LR' },
-  { width: 800, height: 600 },
-);
+Reads copy the element record, state array, and top-level `data`. Nested objects may be shared, and values may be unfrozen at runtime. Top-level edits do not write back. Snapshots contain only the fields listed above.
 
-result.nodes.forEach((node) => {
-  node.x;
-  node.y;
-});
-```
+During initial layout or Transform execution, context.data may be empty; during replacement, it may contain previously committed data. Use the data argument of execute(data, runtime) / beforeRender(data) as the current operation's input.
 
-```ts
-runLayout(
-  data: GraphData,
-  config: LayoutConfig,
-  viewport?: { width: number; height: number },
-): Promise<LayoutResult>
-```
+### state: replace state members [#state-replace-state-members]
 
-`LayoutResult` is `{ nodes }`, and every node has numeric `x` and `y`. A registered layout of the same name, and the built-in `mindmap`, `indented`, and `fishbone` layouts, run before `@antv/layout`. With `config.worker: true`, algorithms that support a Worker run there and fall back to the same algorithm on the main thread if the Worker fails.
+| Call                                               | Result and behavior                                                    |
+| -------------------------------------------------- | ---------------------------------------------------------------------- |
+| set(id: string, states: ElementState\[])           | void; replaces that element's complete list, rather than adding states |
+| setAll(stateMap: Record\<string, ElementState\[]>) | void; replaces listed IDs only, retaining unlisted elements            |
+| get(id: string)                                    | New ElementState\[] array; empty for a missing element                 |
+| clear(id: string)                                  | void; clears the specified element's states                            |
 
-To rerun layout on a Graph that is already rendered, use [`graph.setLayout()`](/en/docs/api/graph#layout) and `graph.layout()`. Those calls write coordinates back into the current graph and draw.
+Nodes, edges, and Combos are supported; IDs should be unique across categories. To add a marker, read first and retain other states. See [state methods](/en/docs/api/graph#graph-states) for visibility/folding restrictions, missing IDs, and update timing.
+
+### viewport: coordinates and zoom [#viewport-coordinates-and-zoom]
+
+| Call                                             | Result and units                                                        |
+| ------------------------------------------------ | ----------------------------------------------------------------------- |
+| `screenToGraph(point: { x: number; y: number })` | `{ x: number; y: number }`, client CSS coordinates to graph coordinates |
+| `graphToScreen(point: { x: number; y: number })` | `{ x: number; y: number }`, graph coordinates to client CSS coordinates |
+| getZoom()                                        | number, camera zoom ratio                                               |
+
+point is an object argument. Do not pass offsetX/Y or multiply by DPR. See [coordinate methods](/en/docs/api/graph#screentograph) for container offsets, examples, and prerequisites.
+
+### requestRender and isDestroyed [#requestrender-and-isdestroyed]
+
+`requestRender(): void` schedules drawing. It does not execute layout, remount extensions, or signal synchronous draw completion. Normal data / state writes already schedule updates.
+
+`isDestroyed(): boolean` reflects destruction of the owning Graph. Check before asynchronous writes and also cancel extension-owned work; checking alone does not cancel it.
+
+### Cleanup and errors [#cleanup-and-errors]
+
+Graph unbinds handlers returned by `getEvents()`. Extensions clean up their own resources and async work. `destroy()` can run after a partial `init()` failure.
+
+## Drawing extensions [#extension-drawing]
+
+Drawing extensions are stateless descriptors cached by name and potentially shared across Graphs. They have no init / destroy lifecycle. See [registration](#extension-types) for caching. Prefer configuration for style differences and renderers for custom content.
+
+### NodeExtension [#nodeextension]
+
+Register with register('node', name, descriptor); activate with node.type.
+
+| Field / callback           | Type and behavior                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------ |
+| base?                      | 'circle' or 'rect'; defaults to circle, reusing the WebGL base and picking                 |
+| style?                     | Partial\<NodeStyleConfig>, default styles                                                  |
+| stateStyles?               | Partial\<Record\<string, NodeStateStyleOverride>>, default state styles                    |
+| getStyle?(node)            | GraphNode → Partial\<NodeStyleConfig>; synchronous, pure, potentially evaluated repeatedly |
+| drawOverlay?(ctx, params)  | CanvasRenderingContext2D, NodeOverlayDrawParams → boolean or void                          |
+| getBoundaryAnchor?(params) | NodeBoundaryAnchorParams → x/y point, a screen-space offset from the node center           |
+
+Base style precedence is descriptor style → descriptor getStyle → configured fields. State precedence is theme → extension → configuration. A whole-object node.style function has a separate resolution path; do not assume it merges descriptor defaults or state layers. See [node configuration](/en/docs/guides/node#options-node).
+
+#### NodeOverlayDrawParams [#nodeoverlaydrawparams]
+
+| Field      | Type and units                                                     |
+| ---------- | ------------------------------------------------------------------ |
+| node       | GraphNode with numeric x/y; its coordinates remain in graph space  |
+| x / y      | number, node center in overlay backing-store pixels                |
+| nodeSize   | number, size in graph units, not an already scaled screen diameter |
+| dpr / zoom | number, supplied DPR and camera scale                              |
+| camera     | Camera with x/y/zoom; read the current transform only              |
+| time       | number, milliseconds from performance.now()                        |
+
+Use the supplied `x` and `y` in the Canvas2D overlay. Scale graph dimensions by `zoom` and fixed CSS dimensions by `dpr`. The supplied position is already in screen coordinates. Pair `ctx.save()` with `ctx.restore()` and avoid retaining `ctx` or changing the camera.
+
+Returning true requests continued redraw for animation. Static content returns void / false. Overlay graphics do not extend WebGL picking or create an arbitrary interactive scene graph. Hidden or culled nodes may not invoke the callback; this is not a business event.
+
+#### NodeBoundaryAnchorParams [#nodeboundaryanchorparams]
+
+| Field            | Type and meaning                                        |
+| ---------------- | ------------------------------------------------------- |
+| node             | GraphNode                                               |
+| placement        | 'left' / 'right' / 'top' / 'bottom'                     |
+| crossOffsetRatio | number, decoration cross-axis offset ratio              |
+| width / height   | number, final screen dimensions in backing-store pixels |
+| borderRadius     | number, screen corner radius                            |
+
+Return a screen offset from the center, not client coordinates, and do not multiply by dpr / zoom again. This hook positions decoration boundary anchors; it does not change edge connection ports, the node shape, or picking geometry. Exceptions use the built-in base anchor. See [Custom nodes](/en/docs/guides/custom-node).
+
+### EdgeExtension [#edgeextension]
+
+Register with register('edge', name, descriptor); activate with edge.type.
+
+| Field / callback                | Type and behavior                                          |
+| ------------------------------- | ---------------------------------------------------------- |
+| base?                           | 'line' / 'arc' / 'polyline' / 'cubic'; defaults to line    |
+| style?                          | Partial\<NonNullable\<EdgeConfig\['style']>>               |
+| stateStyles?                    | Partial\<Record\<string, EdgeStateStyleOverride>>          |
+| getStyle?(source, target, edge) | GraphNode, GraphNode, GraphEdge → partial EdgeConfig.style |
+
+Return styles synchronously, not a path, DOM, or Canvas content. Endpoints are node input views; edge is the edge record, not an array index. Reuse base batching, arrows, and picking. There is no arbitrary custom WebGL shader / draw hook.
+
+Object-form configured fields override descriptor getStyle and style; state styles then apply. See [edge style functions](/en/docs/guides/edge#options-edge-style-callbacks) for field precedence. Routing, curvature, hit widths, and units follow [edge configuration](/en/docs/api/options#options-edge); getStyle is not a layout operation.
+
+### LabelRenderer [#labelrenderer]
+
+Register with register('label', name, renderer); activate with node.labelRenderer / edge.labelRenderer. One renderer can handle both.
+
+* measure(params: LabelMeasureParams): LabelLayout\<T>
+* draw(params: LabelDrawParams\<T>): void
+
+#### Input and output [#input-and-output]
+
+| Input                  | Content                                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| ctx                    | CanvasRenderingContext2D                                                                           |
+| text                   | string, resolved nonempty text; data containing text alone does not activate labels                |
+| style                  | Readonly\<ResolvedLabelStyle>, functions resolved and dimensions converted to backing-store pixels |
+| dpr / zoom             | number, current DPR and zoom; do not rescale resolved style dimensions                             |
+| type / item            | 'node' + GraphNode, or 'edge' + GraphEdge                                                          |
+| node                   | GraphNode for type='node' only                                                                     |
+| edge / source / target | GraphEdge and endpoint GraphNodes for type='edge' only                                             |
+| layout                 | draw only; Readonly\<LabelLayout\<T>>, from this measurement                                       |
+
+LabelMeasureParams is the NodeLabelParams / EdgeLabelParams discriminated union. Narrow type before accessing category-specific fields.
+
+LabelLayout\<T> contains width, height, and optional data. Dimensions must be finite positive numbers representing the full visual bounds. data carries calculations from measure to draw. Measurement does not guarantee a draw: collision, low zoom, or viewport culling can skip it.
+
+**Complete ResolvedLabelStyle fields**
+
+labelFontSize, labelOffsetX/Y, labelBackgroundPadding, and labelMaxWidth are numbers in backing-store pixels; labelMaxWidth=0 means unlimited. labelFontFamily, labelFontWeight, and labelColor are strings; labelBackground is string or false; labelPlacement is LabelPlacement / EdgeLabelPlacement; labelAutoRotate is boolean.
+
+These are final inputs to the renderer. Implement backgrounds, wrapping, and truncation yourself; labelMaxWidth does not automatically clip custom text.
+
+draw is centered on the label, with edge rotation already applied. Stay inside declared bounds; out-of-bounds content can invalidate collisions, and automatic hard clipping is not promised. The engine owns traversal, positioning, policy, collisions, and refresh. See current [edge label geometry limitations](/en/docs/guides/edge#edge-labels).
+
+Missing registration, measure / draw exceptions, or invalid dimensions fall back to the default single-line renderer for that label with diagnostics. Suppression by collision or culling is not an error fallback. See [Custom Label Renderer](/en/docs/guides/custom-label-renderer).
+
+### DecorationRenderer [#decorationrenderer]
+
+Register with register('decoration', name, renderer); activate with node.decorations\[].renderer for node content only.
+
+* measure(params: DecorationMeasureParams\<T>): LabelLayout
+* draw(params: DecorationDrawParams\<T>): void
+
+| Input                  | Content                                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| ctx / node             | CanvasRenderingContext2D / GraphNode                                                                 |
+| data                   | T, from single data, the current stack item, or overflowData; not automatically the entire node.data |
+| dpr / zoom             | number, DPR and camera zoom                                                                          |
+| nodeWidth / nodeHeight | number, final node dimensions in backing-store pixels                                                |
+| layout                 | draw only; Readonly\<LabelLayout>                                                                    |
+
+Use the LabelLayout dimension rules; draw is centered on the current decoration content. There is no ResolvedLabelStyle: the renderer defines fonts, colors, and business values. DecorationRenderer\<T> uses T for input data; layout.data remains unknown and requires validation.
+
+Graph handles decoration placement, stacking, and collision. An unknown name, invalid measurement, or callback error skips the decoration or group and logs a diagnostic. [Decoration options](/en/docs/api/options#config-node-decoration)
+
+## Runtime extensions [#extension-runtime]
+
+Runtime extensions use factories to create instances. See [ExtensionContext](#extensioncontext) for shared initialization, context, and cleanup rules.
+
+<span id="instance-scope" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### Instance scope and lifecycle [#lifecycle-at-a-glance]
+
+See [drawing extensions](#extension-drawing) for their caching rules.
+
+| Category  | Order                                             | Reuse / release                                                                                              |
+| --------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Behavior  | init → getEvents → handlers → destroy             | Each configured entry gets an instance on every mount in each Graph. Unmount unbinds returned handlers first |
+| Layout    | init → execute → destroy                          | New instance per execution; standalone runLayout skips init                                                  |
+| Transform | init → beforeRender; reused update → beforeRender | Reused by position and name; release on removal, replacement, destruction                                    |
+| Plugin    | init → mount → destroy                            | Each configured entry gets an instance on every mount in each Graph. Calling render again remounts plugins   |
+
+init, destroy, getEvents, beforeRender, update, and mount are synchronous hooks; returned Promises are not awaited. Only Layout.execute explicitly supports asynchronous results.
+
+### BehaviorExtension [#behaviorextension]
+
+TOptions extends BehaviorOptions; TEventMap defaults to GraphEventMap. Required getEvents(): BehaviorEventHandlers\<TEventMap> returns a partial event-name-to-handler mapping.
+
+After successful init, the engine calls getEvents and binds function entries. Arguments follow event-map tuples, not a universal MouseEvent. Each handler's synchronous exception is isolated. Unmount unbinds these handlers before destroy; release extension-owned DOM listeners and timers yourself.
+
+The canonical fields, options, and defaults remain in the [Behavior contract](/en/docs/api/options#custom-interaction-contract). Follow [Custom interactions](/en/docs/guides/custom-behavior) for implementation.
+
+### LayoutExtension [#layoutextension]
+
+Required execute(data: GraphData, runtime) returns an object containing positioned nodes, or a Promise of that object.
+
+| Input / output         | Content                                                                                                                     |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| data                   | Current GraphData input; compute from it rather than committed context.data                                                 |
+| runtime.width / height | number, canvas CSS viewport; standalone defaults to configuration or 800 / 600                                              |
+| runtime.signal?        | AbortSignal for cancellation                                                                                                |
+| runtime.options        | Readonly\<TOptions>, current resolved configuration including type and viewport defaults; shallow-copied and frozen         |
+| Result nodes           | `Array<GraphData['nodes'][number] & { x: number; y: number }>`; finite graph coordinates, retaining IDs and business fields |
+
+The result is not GraphData: return positioned nodes, not edges, DOM, or rendering objects. Do not write internal models or draw inside execute. Graph applies results and schedules updates. See [layout methods](/en/docs/api/graph#graph-layout) for reruns, fixed axes, and cancellation.
+
+Graph-managed execution supplies ExtensionContext and calls init. Standalone runLayout has no Graph, skips init, and still calls execute / destroy. Read configuration from runtime.options rather than requiring init.
+
+`destroy()` runs after success, failure, or cancellation. Split long work into chunks, check `signal`, and clean up owned Workers and timers. Registered layouts take precedence and run on the main thread. `worker: true` does not move custom code.
+
+Creation failure may continue another layout path. Once created, init / execute failures log and return input-position fallback (missing axes become 0), without guaranteeing the same-named built-in algorithm. Graph generations discard canceled results; a fulfilled Promise does not prove application.
+
+### TransformExtension [#transformextension]
+
+| Optional hook  | Signature and call                                                 |
+| -------------- | ------------------------------------------------------------------ |
+| beforeRender   | (data: GraphData) → GraphData; synchronously return complete input |
+| update         | (options: Readonly\<Partial\<TOptions>>) → void on reuse           |
+| init / destroy | Inherited from Extension\<TOptions>                                |
+
+Activation requires beforeRender in practice; missing methods cause release and skipping. Registered transforms run in array order, feeding each output to the next, before layout. Initial render and setData run them; incremental writes and layout() do not rerun registered transforms.
+
+A matching name at the same position reuses its instance and calls `update()` before each transform. The hook receives the full current options, or `{}` for string configuration. Use defaults for omitted fields.
+
+context.data contains committed data and may be empty or stale. Use the beforeRender data argument. Outputs are not fully validated: ensure valid IDs, endpoints, Combos, and fields before returning. Inputs are not recursively copied; mutating then throwing cannot roll back.
+
+beforeRender exceptions log and retain the incoming data. init / update failures release and skip that instance; a later operation may recreate it. The special process-parallel-edges entry does not use registered Transform lifecycle; see [configuration](/en/docs/api/options#options-transforms-plugins).
+
+### PluginExtension [#pluginextension]
+
+TOptions extends PluginOptions and includes type. Optional mount(container: HTMLElement): void receives the Graph DOM container, not a Canvas. init receives the whole configuration, including type and business fields, rather than an options child.
+
+mount runs after the graph interaction runtime is established. Own your DOM, listeners, and state; scope styles and do not replace Graph children. An instance without mount may still receive init / destroy.
+
+Repeated render destroys old plugins before creating and mounting replacements. setData and layout do not remount. There is no Plugin.update hook, and updateOptions does not accept plugins. Recreate to change entries or constructor options; see [Plugin configuration](/en/docs/api/options#plugins).
+
+Unregistered entries and creation failures are skipped. An `init()` failure destroys the instance before skipping it. A synchronous `mount()` error is logged and cleanup runs on unmount. Handle partial mounting, repeated cleanup, and async cancellation in `destroy()`.
+
+### Resource and context boundaries [#resource-and-context-boundaries]
+
+Graph manages extension instances and handlers returned by Behavior. Extensions access the graph through [ExtensionContext](#extensioncontext) and release their own DOM listeners, requests, timers, Observers, and Workers.

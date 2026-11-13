@@ -1,23 +1,21 @@
-# FAQ (/en/docs/faq)
+# FAQ (previous URL) (/en/docs/faq)
 
 
 
-## Should I use G6Lite or G6 v5? [#should-i-use-g6lite-or-g6-v5]
+This content now lives in [Troubleshooting](/en/docs/compatibility/troubleshooting).
 
-Choose G6Lite when WebGL rendering, frequent state updates, and a smaller controlled capability surface match the product. Choose G6 v5 when the complete plugin, animation, and element ecosystem matters more.
-
-## Why is first render slow with a force layout? [#why-is-first-render-slow-with-a-force-layout]
-
-Layout computation often dominates first render. Reuse existing coordinates, control iterations, use a worker, or choose a deterministic layout. Measure layout time and rendering without layout separately.
-
-## Can G6Lite run during SSR? [#can-g6lite-run-during-ssr]
-
-No. It needs a real DOM canvas and WebGL context. Instantiate `Graph` in a client-only lifecycle such as React `useEffect`.
-
-## Where do TypeScript types come from? [#where-do-typescript-types-come-from]
-
-Import values and types from `@antv/g6-lite`. Deep `src/` paths are not public API.
-
-## Are combos stable? [#are-combos-stable]
-
-Combo rendering is available, but collapse, nesting, and runtime regrouping remain experimental in `0.1.x`.
+* <span id="how-should-i-choose-between-g6lite-and-g6-v5" style="{ scrollMarginTop: '8rem' }" />[How should I choose between G6Lite and G6 v5?](/en/docs/compatibility/troubleshooting#how-should-i-choose-between-g6lite-and-g6-v5)
+* <span id="what-if-force-layout-makes-startup-slow" style="{ scrollMarginTop: '8rem' }" />[What if force layout makes startup slow?](/en/docs/compatibility/troubleshooting#what-if-force-layout-makes-startup-slow)
+* <span id="what-if-highlighting-or-selection-stutters" style="{ scrollMarginTop: '8rem' }" />[What if highlighting or selection stutters?](/en/docs/compatibility/troubleshooting#what-if-highlighting-or-selection-stutters)
+* <span id="what-browsers-and-webgl-capabilities-are-required" style="{ scrollMarginTop: '8rem' }" />[What browsers and WebGL capabilities are required?](/en/docs/compatibility/troubleshooting#what-browsers-and-webgl-capabilities-are-required)
+* <span id="can-graph-run-directly-in-nodejs-or-during-ssr" style="{ scrollMarginTop: '8rem' }" />[Can Graph run directly in Node.js or during SSR?](/en/docs/compatibility/troubleshooting#can-graph-run-directly-in-nodejs-or-during-ssr)
+* <span id="where-should-typescript-types-be-imported-from" style="{ scrollMarginTop: '8rem' }" />[Where should TypeScript types be imported from?](/en/docs/compatibility/troubleshooting#where-should-typescript-types-be-imported-from)
+* <span id="can-i-use-combo" style="{ scrollMarginTop: '8rem' }" />[Can I use Combo?](/en/docs/compatibility/troubleshooting#can-i-use-combo)
+* <span id="can-examples-run-online" style="{ scrollMarginTop: '8rem' }" />[Can examples run online?](/en/docs/compatibility/troubleshooting#can-examples-run-online)
+* <span id="what-if-the-canvas-is-blank-tiny-or-missing-labels" style="{ scrollMarginTop: '8rem' }" />[What if the canvas is blank, tiny, or missing labels?](/en/docs/compatibility/troubleshooting#blank-canvas)
+* <span id="what-if-an-installed-package-does-not-contain-a-field" style="{ scrollMarginTop: '8rem' }" />[What if an installed package does not contain a field?](/en/docs/compatibility/troubleshooting#what-if-an-installed-package-does-not-contain-a-field)
+* <span id="should-i-use-g6lite-or-g6-v5" style="{ scrollMarginTop: '8rem' }" />[How should I choose between G6Lite and G6 v5?](/en/docs/compatibility/troubleshooting#how-should-i-choose-between-g6lite-and-g6-v5)
+* <span id="why-is-first-render-slow-with-a-force-layout" style="{ scrollMarginTop: '8rem' }" />[What if force layout makes startup slow?](/en/docs/compatibility/troubleshooting#what-if-force-layout-makes-startup-slow)
+* <span id="can-g6lite-run-during-ssr" style="{ scrollMarginTop: '8rem' }" />[Can Graph run directly in Node.js or during SSR?](/en/docs/compatibility/troubleshooting#can-graph-run-directly-in-nodejs-or-during-ssr)
+* <span id="where-do-typescript-types-come-from" style="{ scrollMarginTop: '8rem' }" />[Where should TypeScript types be imported from?](/en/docs/compatibility/troubleshooting#where-should-typescript-types-be-imported-from)
+* <span id="are-combos-stable" style="{ scrollMarginTop: '8rem' }" />[Can I use Combo?](/en/docs/compatibility/troubleshooting#can-i-use-combo)

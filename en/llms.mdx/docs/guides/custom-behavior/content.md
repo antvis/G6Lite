@@ -1,182 +1,148 @@
-# Custom Behavior (/en/docs/guides/custom-behavior)
+# Custom interactions (/en/docs/guides/custom-behavior)
 
 
 
-A Behavior consumes public Graph events and updates data or states through `ExtensionContext`. Use it for graph interactions such as business selection, highlighting, or event coordination. Use a Plugin for independently owned DOM, observers, keyboard listeners, or peripheral controllers, and use a Transform for render-time data preprocessing.
+
+
+When built-ins cannot express a business rule, consume public Graph events through a Behavior and update data or state through ExtensionContext. Here, clicking a node makes it uniquely active. Canvas clicks clear only active, preserving A's initial selected state.
 
 ## Public type pattern [#public-type-pattern]
 
-The core public types are:
-
-```ts
-interface BehaviorOptions<TType extends string = string> {
-  type: TType;
-}
-
-type BehaviorConfig<
-  TType extends string = string,
-  TOptions extends object = Record<string, unknown>,
-> = Readonly<BehaviorOptions<TType> & TOptions>;
-
-interface BehaviorExtension<
-  TOptions extends BehaviorOptions = BehaviorConfig,
-  TEventMap extends object = GraphEventMap,
-> {
-  init?(context: ExtensionContext, options: Readonly<TOptions>): void;
-  getEvents(): BehaviorEventHandlers<TEventMap>;
-  destroy?(): void;
-}
-```
-
-`GraphEventMap` is the single “event name → argument tuple” contract. It infers a required `nodeId` and `MouseEvent` for `'node:click'`, a `WheelEvent` for `'canvas:wheel'`, and zero arguments for `destroy`.
+Give the name a literal type and business options their own type, then use satisfies at activation. Full generics, event mappings, and lifecycle signatures are in the [Behavior contract](/en/docs/api/options#custom-interaction-contract).
 
 ## Recommended exports [#recommended-exports]
 
-A reusable Behavior should export a stable name, its options type, and an explicit registration function:
-
-```text
-src/
-  behavior.ts
-  index.ts
-tests/
-  behavior.test.ts
-```
-
-Avoid registration through import side effects alone. Applications should call the registration function before creating the Graph so global registry ordering and name replacement remain visible.
+Export a stable name, options type, and explicit registration function. Register before creating Graph, and use a business or package prefix to avoid global registry collisions. Do not rely on import side effects for registration order.
 
 ## Complete implementation [#complete-implementation]
 
+The code below drives the canvas. Every factory call creates a fresh closure. State updates remove only the state owned by this Behavior and append it to the target. click-select is omitted, so clicks do not alter selected.
+
+
+
 ```ts
 import {
-  extensionFactory,
-  register,
-  type BehaviorExtension,
-  type BehaviorOptions,
-  type ElementState,
-  type ExtensionContext,
+  Graph, register,
+  type BehaviorExtension, type BehaviorOptions, type ElementState, type ExtensionContext,
 } from '@antv/g6-lite';
 
-export const BUSINESS_SELECT_BEHAVIOR = 'business-select' as const;
-
-export interface BusinessSelectBehaviorOptions extends BehaviorOptions<
-  typeof BUSINESS_SELECT_BEHAVIOR
-> {
+export const BUSINESS_SELECT = 'docs-business-select' as const;
+export interface BusinessSelectOptions extends BehaviorOptions<typeof BUSINESS_SELECT> {
   state?: ElementState;
 }
 
-function createBusinessSelectBehavior(): BehaviorExtension<BusinessSelectBehaviorOptions> {
+export function createBusinessSelect(): BehaviorExtension<BusinessSelectOptions> {
   let context: ExtensionContext | undefined;
-  let state: ElementState = 'selected';
-
+  let state: ElementState = 'active';
+  const select = (nodeId?: string) => {
+    if (!context || context.isDestroyed()) return;
+    const next: Record<string, ElementState[]> = {};
+    for (const id of context.data.getNodeIds()) {
+      const retained = context.state.get(id).filter((value) => value !== state);
+      next[id] = id === nodeId ? [...retained, state] : retained;
+    }
+    context.state.setAll(next);
+  };
   return {
-    init(nextContext, options) {
-      context = nextContext;
-      state = options.state ?? 'selected';
-    },
-
+    init(nextContext, options) { context = nextContext; state = options.state ?? 'active'; },
     getEvents() {
       return {
         'node:click': ({ nodeId, nativeEvent }) => {
-          if (nativeEvent.button !== 0) return;
-          context?.state.set(nodeId, [state]);
+          if (nativeEvent.button === 0) select(nodeId);
         },
-        'canvas:click': () => {
-          if (!context) return;
-          const stateMap = Object.fromEntries(context.data.getNodeIds().map((id) => [id, []]));
-          context.state.setAll(stateMap);
-        },
+        'canvas:click': () => select(),
       };
     },
-
-    destroy() {
-      context = undefined;
-    },
+    destroy() { context = undefined; },
   };
 }
 
-export function registerBusinessSelectBehavior(): void {
-  register('behavior', BUSINESS_SELECT_BEHAVIOR, extensionFactory(createBusinessSelectBehavior));
+// #region registration
+export function registerBusinessSelect() {
+  register('behavior', BUSINESS_SELECT, () => createBusinessSelect());
+}
+// #endregion registration
+
+export async function run(container: HTMLElement) {
+  registerBusinessSelect();
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'A', x: 0, y: 0, states: ['selected'] },
+        { id: 'B', x: 160, y: 0 }, { id: 'C', x: 320, y: 0 },
+      ],
+      edges: [{ source: 'A', target: 'B' }, { source: 'B', target: 'C' }],
+    },
+    node: {
+      style: { size: 32, label: (node) => node.id, labelOffsetY: 8 },
+      stateStyles: { active: { fill: '#F08F56', stroke: '#914C1D', strokeWidth: 2 } },
+    },
+    behaviors: [{ type: BUSINESS_SELECT, state: 'active' } satisfies BusinessSelectOptions],
+    autoFit: { padding: 56, maxZoom: 1 },
+  });
+  const status = document.createElement('div');
+  status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';
+  status.setAttribute('role', 'status');
+  const updateStatus = () => {
+    status.textContent = `active: ${graph.findNodesByState('active').join(', ') || 'none'} | selected: ${graph.findNodesByState('selected').join(', ') || 'none'}`;
+  };
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => { status.remove(); destroy(); };
+  try {
+    await graph.render();
+    graph.on('node:click', updateStatus);
+    graph.on('canvas:click', updateStatus);
+    updateStatus();
+    container.append(status);
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
 }
 ```
 
-This pattern does not extend `this`, inherit from a base class, or require intersection-type assertions. Every factory call returns a fresh closure so Graph instances do not share context or mutable options.
+
 
 ## Register and activate [#register-and-activate]
 
-```ts
-registerBusinessSelectBehavior();
+The example calls registerBusinessSelect before constructing Graph and checks the configuration with satisfies BusinessSelectOptions. String names also activate the Behavior; normalized init options include type, and missing state defaults to active.
 
-const graph = new Graph({
-  container: 'container',
-  data,
-  behaviors: [
-    'zoom-canvas',
-    {
-      type: BUSINESS_SELECT_BEHAVIOR,
-      state: 'active',
-    } satisfies BusinessSelectBehaviorOptions,
-  ],
-});
-```
-
-Both a string reference and an object activate the extension. A string is normalized to `{ type: BUSINESS_SELECT_BEHAVIOR }`, so the read-only options passed to `init()` always include `type`.
-
-`BuiltInBehaviorOptionsMap` maps built-in names to their supported object configurations, while `BuiltInBehaviorConfig` is their union. `GraphOptions.behaviors` remains open for third-party names; use `satisfies YourBehaviorOptions` to strictly check a custom object.
+Multiple Graphs can reuse the registered factory; each mounted Behavior owns its context and state. Re-registering a name does not replace mounted instances. See [mounting and updates](/en/docs/api/options#mounting-and-updates).
 
 ## Event typing [#event-typing]
 
-A Behavior consumes the complete `GraphEventMap` by default:
+getEvents infers argument tuples from GraphEventMap. node:click has typed nodeId and nativeEvent; destroy has no arguments. Extend consumer event types by intersection:
 
 ```ts
-const behavior: BehaviorExtension<BusinessSelectBehaviorOptions> = {
-  getEvents() {
-    return {
-      'node:click': ({ nodeId, nativeEvent }) => {
-        // nodeId: string
-        // nativeEvent: MouseEvent
-      },
-      'canvas:wheel': ({ nativeEvent }) => {
-        // nativeEvent: WheelEvent
-      },
-      destroy: () => {
-        // zero arguments
-      },
-    };
-  },
-};
-```
+import type { BehaviorExtension, BehaviorOptions, GraphEventMap } from '@antv/g6-lite';
 
-The second generic can extend a host-defined event contract:
-
-```ts
 interface BusinessEventMap {
-  'business:selection-reset': [payload: { source: 'toolbar' | 'shortcut' }];
+  'business:reset': [payload: { source: 'toolbar' | 'shortcut' }];
 }
-
 type BusinessBehavior = BehaviorExtension<
-  BusinessSelectBehaviorOptions,
+  BehaviorOptions<'business-select'>,
   GraphEventMap & BusinessEventMap
 >;
 ```
 
-This generic adds consumer-side typing only. This release does not add a public event `emit` API; do not use internal `graph.eventEmitter` to publish events.
+The application can call `graph.emit('business:reset', { source: 'toolbar' })` to invoke this handler. Augment `GraphEventMap` to check the payload at the call site. See the [custom event example](/en/docs/guides/events/custom).
 
 ## Lifecycle and cleanup [#lifecycle-and-cleanup]
 
-The supported Behavior lifecycle is `create → init → getEvents → destroy`. Behavior does not promise `update()`; Graph destroys the old instance and creates a new one when interactions are remounted.
+The engine runs create → init → getEvents, then unbinds handlers and calls destroy on teardown. [`setBehaviors()`](/en/docs/api/graph#setbehaviors) and `updateOptions({ behaviors })` destroy the old behaviors and create those in the new list. A behavior with the same name still receives new options in the new instance’s init. Readonly options are a type constraint, with no guarantee of runtime freezing.
 
-The runtime automatically registers and removes handlers returned by `getEvents()`. Each handler is error-isolated with diagnostics that include the Behavior name and event name, so one failure does not stop unrelated handlers.
+The engine cleans up getEvents bindings. Clean up your own window listeners, timers, observers, and DOM in destroy. Graph stays alive when behaviors switch, so use a behavior-local AbortController or teardown flag for asynchronous work and handle Promise rejections.
 
-Listeners on `window` or `document`, timers, observers, and asynchronous work created directly by the Behavior must still be released in `destroy()`. Resources better owned by a peripheral component should live in a Plugin.
+## Use a custom behavior in your project [#boundaries-and-replacement]
 
-## Boundaries and replacement [#boundaries-and-replacement]
+Use `context.state` to change element states and `context.data.updateNode()` or `updateEdge()` to change business data. Register the behavior under a distinct name, such as `docs-business-select`, to avoid overriding a built-in behavior. [Extension context API](/en/docs/api/extensions#extensioncontext) · [Registration rules](/en/docs/api/extensions#registration-rules)
 
-* Import public APIs only from the `@antv/g6-lite` package root.
-* Use `context.data`, `context.state`, `context.viewport`, `requestRender()`, and `isDestroyed()`; new code must not depend on deprecated `context.graph`.
-* Do not access Renderer, picking, DataModel, WebGL state, or GPU buffers.
-* A registered Behavior replaces a built-in Behavior with the same name. A failing registered implementation does not fall back to the built-in implementation.
-* Prefix extension names with a business or package namespace to reduce global registry collisions.
+In the example above, click B, then click empty canvas. B gains and then loses its `active` state. A stays `selected` throughout. The `select()` function in the full code shows how to change only the state owned by this behavior. [Try the example](#complete-implementation)
 
-If an interaction requires low-level gesture sessions, camera writes, position writes, or a general overlay root that is not public yet, extend the public contract first instead of bypassing it with assertions.
+Continue with the [Behavior reference](/en/docs/api/options#options-behaviors), [interaction guide](/en/docs/guides/behaviors), or [Extension system](/en/docs/guides/extensions).
 
-See `site/demos/extension-system.ts` for a complete runnable example.
+**Related runnable examples**
+
+* [Register a custom interaction](/en/docs/examples/custom-behavior)

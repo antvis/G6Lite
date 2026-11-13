@@ -1,0 +1,25 @@
+site/src/lib/localized-path.ts
+  s_584ca1892a3157::t_ba0aa3119ff151 1-14
+site/src/lib/i18n.ts
+  s_584ca1892a3157::t_ba0aa3119ff151 3-6,8
+site/src/lib/seo.ts
+  s_584ca1892a3157::t_ba0aa3119ff151 3
+site/src/lib/shared.ts
+  s_584ca1892a3157::t_ba0aa3119ff151 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "77119299036320cd690163c786db604e412ea888",
+  "prompts": {},
+  "sessions": {
+    "s_584ca1892a3157": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1cf7b-c7c3-72b2-a849-b662c1a4f2c2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

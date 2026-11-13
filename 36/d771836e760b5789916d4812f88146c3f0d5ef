@@ -1,0 +1,67 @@
+site/demos/org-chart.ts
+  s_b6755afc2e50c8::t_e62ae1542c056f 79
+site/content/docs/zh/guides/label.mdx
+  s_b6755afc2e50c8::t_5c15930d8dc2c1 53,89,94
+  s_b6755afc2e50c8::t_d0da79d34e261c 27,47
+tests/unit/renderer/labelRenderer.test.ts
+  s_b6755afc2e50c8::t_207ded150cf85f 1392-1394
+  s_b6755afc2e50c8::t_5c15930d8dc2c1 515,1388,1537
+site/demos/fishbone.ts
+  s_b6755afc2e50c8::t_e62ae1542c056f 138
+site/content/docs/zh/guides/edge.mdx
+  s_b6755afc2e50c8::t_5c15930d8dc2c1 316
+site/demos/extension-system.ts
+  s_b6755afc2e50c8::t_e62ae1542c056f 22-24,26-27
+site/content/docs/en/api/options.mdx
+  s_b6755afc2e50c8::t_5c15930d8dc2c1 516
+src/extensions/contracts.ts
+  s_b6755afc2e50c8::t_8ddd8157ff1bda 144-145
+site/content/docs/zh/guides/node.mdx
+  s_b6755afc2e50c8::t_5c15930d8dc2c1 150
+site/content/docs/en/guides/label.mdx
+  s_b6755afc2e50c8::t_d0da79d34e261c 27,47,89
+  s_b6755afc2e50c8::t_5c15930d8dc2c1 53,94
+src/renderer/labelStyle.ts
+  s_b6755afc2e50c8::t_b9ef014312abb0 22-26,28,69,92,95,122
+src/renderer/labelRenderer.ts
+  s_b6755afc2e50c8::t_7ee3b7839a03aa 49,222,240,258,275,365,392,402,433,442,465,475,625,646,681,703,759,814,817,855,904,907-918,935-936,948,952,1014,1018,1022,1045,1078,1170,1269,1272-1278,1293-1296
+  s_b6755afc2e50c8::t_207ded150cf85f 396
+site/content/docs/zh/api/options.mdx
+  s_b6755afc2e50c8::t_5c15930d8dc2c1 516
+src/extensions/builtinBadge.ts
+  s_b6755afc2e50c8::t_e62ae1542c056f 2
+  s_b6755afc2e50c8::t_8ddd8157ff1bda 98-101,119
+src/graph.ts
+  s_b6755afc2e50c8::t_8ddd8157ff1bda 1581
+site/demos/docs-extension-decoration.ts
+  s_b6755afc2e50c8::t_e62ae1542c056f 5,7-8
+site/content/docs/en/guides/edge.mdx
+  s_b6755afc2e50c8::t_5c15930d8dc2c1 314
+site/content/docs/en/guides/node.mdx
+  s_b6755afc2e50c8::t_5c15930d8dc2c1 150
+site/demos/mindmap.ts
+  s_b6755afc2e50c8::t_e62ae1542c056f 176
+site/demos/tooling.ts
+  s_b6755afc2e50c8::t_e62ae1542c056f 2,39,53-54,132,134,164-165,210,247-248,462,528-529,600
+src/types.ts
+  s_b6755afc2e50c8::t_8ddd8157ff1bda 388,391-392
+src/renderer/comboRenderer.ts
+  s_b6755afc2e50c8::t_207ded150cf85f 57-60,89-94
+  s_b6755afc2e50c8::t_8ddd8157ff1bda 15,101-103,122,124,191,227,242,273,387,390
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "36d771836e760b5789916d4812f88146c3f0d5ef",
+  "prompts": {},
+  "sessions": {
+    "s_b6755afc2e50c8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1d45b-9bab-79f1-9757-c29a997bc88d",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

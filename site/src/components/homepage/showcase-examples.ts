@@ -5,6 +5,10 @@ export const showcaseIds = ['relationship', 'org-chart', 'mindmap', 'fishbone'] 
 export type ShowcaseId = (typeof showcaseIds)[number];
 type Options = Omit<GraphOptions, 'container'>;
 
+export function getShowcaseOptionalLayout(id: ShowcaseId): 'mindmap' | 'fishbone' | undefined {
+  return id === 'mindmap' || id === 'fishbone' ? id : undefined;
+}
+
 /** Add visible edge states to the node-only hover behavior. */
 export function bindHomepageHighlight(graph: Graph): () => void {
   const edgesByNode = new Map<string, string[]>();
@@ -308,7 +312,14 @@ export function showcaseSource(id: ShowcaseId, locale: Locale, dark = false): st
     .slice(2, -2);
   const nodes = data.nodes.map((node) => `    ${JSON.stringify(node)}`).join(',\n');
   const edges = data.edges.map((edge) => `    ${JSON.stringify(edge)}`).join(',\n');
-  return `import { Graph } from '@antv/g6-lite';
+  const layout = getShowcaseOptionalLayout(id);
+  const imports = layout
+    ? `import { Graph, register } from '@antv/g6-lite';
+import ${layout} from '@antv/g6-lite/layouts/${layout}';
+
+register('layout', '${layout}', ${layout});`
+    : "import { Graph } from '@antv/g6-lite';";
+  return `${imports}
 
 // HTML: <div id="container" style="height: 360px"></div>
 const data = {

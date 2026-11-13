@@ -1,82 +1,41 @@
 ---
-title: 用 AI 构建 G6Lite 图
-description: 提供可执行输入，使用 G6Lite Skill 生成实现，并验证数据、交互与清理
+title: G6Lite AI 使用指南
+description: 用 AI Skill 在项目中生成或修改关系图代码，用 Sive 在线查询 API 和使用示例。
 ---
 
-import { ArchitectureDiagram } from '@/components/architecture-diagram';
+## AI Skill
 
-让 Agent 先生成一个能渲染、能更新、能销毁的小图，再逐步增加能力。输入中注明已安装的 G6Lite 版本，避免把 G6 v5 配置混进来。
+G6Lite 提供了一个 [AI Skill](https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph)（`antv-g6lite-graph`），可以帮你在项目中创建关系图、给现有图添加拖拽和缩放等交互，以及排查渲染问题。
 
-## 两种使用方式
+### 安装和使用
 
-<Cards>
-  <Card title="本地 Agent + G6Lite Skill" href="https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph">在项目中读取类型、修改代码并运行验证。</Card>
-  <Card title="Sive 在线问答" href="https://sive.antv.antgroup.com/qa">咨询 API 或整理实现思路，再回到项目验证。</Card>
-</Cards>
+在项目目录运行下面的命令，将 Skill 安装到支持 Skill 的编程助手中。
 
-Sive 的回答取决于其当前知识库。项目实现以已安装包的类型、当前文档和真实浏览器结果为准。
-
-## 在本地使用 Skill
-
-将仓库中的 [antv-g6lite-graph](https://github.com/antvis/G6Lite/tree/master/skills/antv-g6lite-graph) 目录交给支持 Skill 的 Agent，按所用客户端的安装方式加载；Skill 本身不安装 G6Lite npm 包。支持显式调用的客户端可以在请求中写：
-
-```text
-Use $antv-g6lite-graph to implement the graph described below.
-Check the installed @antv/g6-lite version and package-root types first.
+```bash
+npx skills add antvis/G6Lite --skill antv-g6lite-graph
 ```
 
-在项目目录用 `npm ls @antv/g6-lite` 确认版本。Skill 的主要约束是包根 API、浏览器生命周期、真实支持范围和分阶段验证；不确定的字段先查询[API 总览](/docs/api)，不要猜测深层导入或照搬 v5 插件。
+安装后，在编程助手中打开项目，并在请求里指定使用 `antv-g6lite-graph`。新建图时，提供一份节点和边的数据样例，以及想要的布局和交互。修改现有图时，给出组件路径和需要保留的行为。排查问题时，附上报错和复现步骤。
 
-## 适合交给 Agent 的任务
-
-| 任务 | 应提供的输入 |
-| --- | --- |
-| 创建或更新关系图 | 框架、数据样本、ID/端点规则、规模、容器尺寸 |
-| 增加选择、拖拽或 Tooltip | 手势、业务响应、状态保留和清理要求 |
-| 调整布局、标签或品牌效果 | 已有坐标、布局目标、标签密度、目标截图 |
-| 迁移或排障 | 当前版本、最小代码、报错与复现步骤、必须保留的行为 |
-
-### 可复制的输入模板
+### 示例提示词
 
 ```text
-使用 $antv-g6lite-graph 完成以下任务：
-- 项目：React + TypeScript；先读取实际依赖与 G6Lite 版本
-- 数据：3 个节点 A/B/C，边 A→B、A→C；节点 ID 稳定
-- 容器：宽度 100%，高度 360px；仅客户端创建
-- 布局：circular；显示节点 ID；支持缩放、平移、拖拽
-- 更新：新增 D 和 B→D，复用 Graph；保留视野
-- 清理：首次 render 未完成就卸载，也不能遗留画布或监听
-- 输出：完整组件、必要依赖、验证操作与预期结果
-先确认字段与方法真实存在，再实现。超出能力边界时明确说明。
+请使用 G6Lite Skill（antv-g6lite-graph），根据项目安装的 @antv/g6-lite 版本实现一个 React + TypeScript 组件。
+- 初始显示 A、B、C 三个节点，以及 A→B、A→C 两条边。
+- 让节点环形排列并显示 ID，支持缩放、平移和拖拽节点。
+- 加一个「添加节点」按钮。点击后新增节点 D 和边 B→D，保留画布的缩放和位置。
+- 在浏览器中创建图，组件卸载时清理画布和事件监听。
+给出完整组件和运行方式。
 ```
 
-将框架、规模和交互替换为实际需求。需要 Vue 时，改用 [Vue 接入](/docs/getting-started/vue)的生命周期。
+## Sive 在线问答
 
-## 推荐工作流
+想先查清楚某个 API 怎么用，或找一段可以参考的示例，可以打开 [Sive 在线问答](https://sive.antv.antgroup.com/qa)，直接用自然语言提问。遇到具体项目问题时，带上 G6Lite 版本、使用的框架和相关代码片段。
 
-1. **跑通最小图**：确认容器、数据、首次 render；对照[快速上手](/docs/getting-started/quick-start)。
-2. **增加一类能力**：样式、布局、状态或扩展逐项添加；参数查[参考](/docs/api)，步骤查[指南](/docs)。
-3. **验证变化和离开**：切换数据、快速切页、重复挂载；React 再启用 StrictMode。
-4. **用真实业务验收**：检查目标设备上的标签、拾取、布局耗时与资源清理；参考[性能测量](/docs/metrics/performance)。
+下面三个问题可以直接复制到 Sive。
 
-### 最小验收操作
+- 「G6Lite 怎么开启节点拖拽？请给出最小配置。」
+- 「用 `setData()` 更新节点和边时，怎么保留画布的缩放和位置？请给一段示例。」
+- 「在 React 里切换页面时，应该在哪里调用 `destroy()`？如果图还没渲染完，要怎么处理？」
 
-模板案例应先出现 3 节点 / 2 边，更新后出现 4 / 3；视野保留，拖拽仍可用。卸载后不应遗留画布；重新挂载可以再次操作。类型检查通过和浏览器可操作都要验证，不能仅根据代码截图判断成功。
-
-## Agent 需要理解的引擎
-
-字段和返回值查[包根 API](/docs/api)；渲染、布局、更新和扩展分工查[技术架构](/docs/concepts/architecture)。
-
-<details>
-  <summary>查看引擎职责图</summary>
-  <ArchitectureDiagram locale="zh" compact />
-</details>
-
-## 继续阅读
-
-<Cards>
-  <Card title="React 接入" href="/docs/getting-started/react" />
-  <Card title="Vue 接入" href="/docs/getting-started/vue" />
-  <Card title="运行示例" href="/docs/examples" />
-  <Card title="G6 v5 迁移" href="/docs/compatibility/g6-v5-migration" />
-</Cards>
+拿到示例后，可以对照[交互配置](/docs/api/options#options-behaviors)、[setData()](/docs/api/graph#graph-data-mutations-setdata)或[destroy()](/docs/api/graph#graph-lifecycle-destroy)，再把相关代码放到项目里运行。

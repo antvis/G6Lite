@@ -1,0 +1,22 @@
+---
+title: Drag nodes, combos, and edges
+description: Move nodes and combos or reconnect an edge endpoint
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+[Drag nodes and combos](/en/docs/guides/behavior-drag-node) · [Drag edge endpoints](/en/docs/guides/behavior-drag-edge)
+
+## Drag nodes and combos
+
+Enable `drag-node` to move nodes. Dragging a selected node moves the other selected nodes with it. Dragging empty space inside a combo moves the whole combo.
+
+<NodeDocExample id="behavior-drag-node" locale="en" focus="drag-options" />
+
+Use the combo API to change membership. [Combo methods](/en/docs/guides/combo#change-membership)
+
+## Drag an edge endpoint
+
+Enable `drag-edge` to drag an endpoint. On release, `edge:dragend` reports the proposed endpoints. Use `updateEdgeData()` to save an accepted reconnection.
+
+<NodeDocExample id="behavior-drag-edge" locale="en" focus="reconnect" />

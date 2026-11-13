@@ -25,12 +25,7 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const ui = createDemoPanel(
-    container,
-    '节点拖拽阈值',
-    '普通点击不应触发拖拽事件；移动超过 3px 后才进入拖拽。',
-    '',
-  );
+  const ui = createDemoPanel(container, '普通点击不应触发拖拽事件；移动超过 3px 后才进入拖拽。');
   const counts = { dragstart: 0, drag: 0, dragend: 0 };
   let latest = '等待操作';
   const render = () => ui.setStatus(
@@ -41,5 +36,5 @@ export async function run(container: string | HTMLElement) {
   graph.on('node:dragend', ({ nodeId }: { nodeId: string }) => { counts.dragend++; latest = `${nodeId}:dragend`; render(); });
   render();
 
-  return { destroy: () => { graph.destroy(); ui.panel.remove(); } };
+  return { destroy: () => { graph.destroy(); ui.destroy(); } };
 }

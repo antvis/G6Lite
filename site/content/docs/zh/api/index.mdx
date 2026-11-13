@@ -1,61 +1,13 @@
 ---
-title: API 总览
-description: 包根运行入口与类型目录，按任务查询 Graph、配置、扩展和工具
+title: API 文档已迁移
+description: 从图 API、事件参考和配置项查找公开接口。
 ---
 
-业务代码从 @antv/g6-lite 包根导入。总览帮助选择查询入口，完整签名、字段与行为统一维护在对应参考页；开发步骤看[使用指南](/docs/guides/data)或[扩展总览](/docs/guides/extensions)。
+API 参考从[图 API](/docs/api/graph)开始。
 
-```ts
-import { Graph, register, extensionFactory, runLayout, resolveTheme, EventEmitter } from '@antv/g6-lite';
-import type { GraphOptions, GraphData, GraphEventMap } from '@antv/g6-lite';
-```
-
-## 可以直接使用的入口
-
-| 入口 | 用途 | 查询位置 |
-| --- | --- | --- |
-| Graph | 操作一张图 | [按任务查询全部公开成员](/docs/api/graph) |
-| GraphOptions 与主题配置类型 | 声明构造配置 | [顶层字段与分主题入口](/docs/api/options) |
-| register / extensionFactory | 注册扩展与创建隔离实例 | [注册、工厂与作用域](/docs/api/extensions/registration) |
-| runLayout | 独立计算节点坐标 | [工具函数](/docs/api/utilities#runlayout) |
-| resolveTheme | 解析预设与 token | [工具函数](/docs/api/utilities#resolvetheme) |
-| EventEmitter / Handler | 应用自己的事件分发 | [独立事件工具](/docs/api/utilities#eventemitter) |
-
-图事件使用 [Graph.on / off / once](/docs/api/graph/events)，扩展实例作用域按类别确定，不统一“每个 Graph 一次”。
-
-## 按领域查询类型
-
-常用入口：[输入数据](/docs/api/options/data)、[运行时 Model](/docs/api/graph/data#模型字段)、[状态](/docs/api/graph/states)、[配置](/docs/api/options)、[图事件](/docs/api/graph/events#grapheventmap)、[扩展契约](/docs/api/extensions)。
-
-<details>
-<summary>按领域查看全部包根类型名</summary>
-
-- **构造配置**（[顶层字段](/docs/api/options)）：`GraphOptions`。
-- **数据、模型与状态**（[输入](/docs/api/options/data) · [Model](/docs/api/graph/data) · [写入](/docs/api/graph/data-mutations) · [状态](/docs/api/graph/states)）：`GraphData`, `GraphNode`, `GraphEdge`, `ComboData`, `NodeData`, `EdgeData`, `NodeModel`, `EdgeModel`, `ComboModel`, `ElementModel`, `BuiltInElementState`, `ElementState`, `NodeState`, `EdgeState`, `NodeDataUpdate`, `NodePositionUpdate`, `EdgeDataUpdate`, `SetDataOptions`。
-- **节点、边与分组样式**（[节点](/docs/api/options/node) · [边](/docs/api/options/edge) · [Combo](/docs/api/options/combo)）：`NodeConfig`, `EdgeConfig`, `ComboConfig`, `NodeStyleConfig`, `NodeStyleValue`, `NodeStateStyleOverride`, `EdgeStyleValue`, `EdgeStateStyleOverride`, `ComboStyleConfig`, `ComboStyleValue`, `ComboStateStyleOverride`, `ParallelEdgesConfig`。
-- **标签策略与装饰配置**（[标签策略](/docs/api/options/label) · [装饰](/docs/api/options/node#nodedecorationconfig)）：`LabelOptions`, `LabelType`, `LabelPlacement`, `EdgeLabelPlacement`, `NodeBadgeItem`, `NodeBadgeKind`, `NodeDecorationConfig`, `NodeDecorationPlacement`, `NodeDecorationAnchor`, `NodeDecorationAttachment`。
-- **布局、视口与主题**（[布局](/docs/api/graph/layout) · [视口](/docs/api/graph/viewport) · [主题](/docs/api/options/theme)）：`LayoutConfig`, `LayoutResult`, `Camera`, `GraphPoint`, `ViewportPoint`, `FitViewOptions`, `ZoomOptions`, `ThemeOption`, `ThemeTokens`。
-- **事件与独立分发**（[图事件](/docs/api/graph/events) · [独立分发](/docs/api/utilities#eventemitter)）：`GraphEventMap`, `GraphElementEvent`, `NodeGraphEvent`, `EdgeGraphEvent`, `ComboGraphEvent`, `CanvasGraphEvent`, `Handler`。
-- **Behavior 与 Tooltip**（[配置](/docs/api/options/behaviors) · [协议](/docs/api/extensions/runtime#behaviorextension)）：`BehaviorName`, `BehaviorConfig`, `BehaviorOption`, `BehaviorOptions`, `BuiltInBehaviorConfig`, `BuiltInBehaviorOptionsMap`, `BrushSelectOptions`, `ClickSelectConfig`, `DragCanvasOptions`, `HoverHighlightConfig`, `LassoSelectOptions`, `TooltipContext`, `TooltipOptions`, `ZoomCanvasOptions`, `BehaviorExtension`, `BehaviorEventHandlers`, `EventArguments`。
-- **绘制协议**（[完整协议](/docs/api/extensions/drawing)）：`NodeExtension`, `NodeExtensionInput`, `NodeBoundaryAnchorParams`, `NodeOverlayDrawParams`, `EdgeExtension`, `LabelRenderer`, `LabelMeasureParams`, `LabelDrawParams`, `NodeLabelParams`, `EdgeLabelParams`, `LabelLayout`, `ResolvedLabelStyle`, `DecorationRenderer`, `DecorationMeasureParams`, `DecorationDrawParams`。
-- **运行扩展与注册**（[注册与上下文](/docs/api/extensions/registration) · [运行协议](/docs/api/extensions/runtime) · [配置](/docs/api/options/transforms-plugins)）：`Extension`, `ExtensionCategory`, `ExtensionFactory`, `ExtensionInput`, `ExtensionConstructor`, `ExtensionContext`, `ExtensionDataContext`, `ExtensionStateContext`, `ExtensionViewportContext`, `ExtensionNodeData`, `ExtensionEdgeData`, `LayoutExtension`, `TransformExtension`, `PluginExtension`, `PluginOptions`, `PluginOption`, `TransformOption`。
-
-ExtensionConstructor 属于兼容类型，替代方式查[弃用清单](/docs/compatibility/api-stability#弃用兼容层)。类型目录不增加深层源码导入入口。
-
-</details>
-
-## 调用顺序
-
-首次创建、事件订阅、有效 render 与卸载清理见[Graph 生命周期](/docs/concepts/graph-lifecycle)，精确前提见[生命周期方法](/docs/api/graph/lifecycle)。运行环境、模块格式和客户端要求见[浏览器与运行环境](/docs/compatibility/browser)与[ESM / CommonJS 边界](/docs/compatibility/api-stability#esm-与-commonjs)。
-
-## 读取结果不能直接改
-
-查询 Model 是只读类型的实时视图，getData 是分层浅复制的导出快照。变更通过数据或状态 API，完整复制规则见[数据读取](/docs/api/graph/data)，任务选择见[数据指南](/docs/guides/data)。
-
-## 引擎内部方法
-
-类上出现的内部成员不属于业务 API；不要直接依赖渲染器、拾取或内部事件分发。具体边界与公开替代入口统一查[公开与内部边界](/docs/compatibility/api-stability#公开与内部边界)。
-
-## 已有项目里的兼容入口
-
-BaseNode、BreathingNode、registerNode 及弃用方法仅保留给已有项目；完整名称和替代方式统一查[弃用兼容层](/docs/compatibility/api-stability#弃用兼容层)。升级规则与实验能力也在稳定性页维护。
+- <span id="可以直接使用的入口" style={{ display: 'block', scrollMarginTop: '8rem' }} />[构造函数与实例方法](/docs/api/graph#new-graph) · [独立布局](/docs/api/graph#graph-layout-runlayout) · [主题解析](/docs/api/options#resolvetheme) · [独立事件分发](/docs/api/graph/events#eventemitter) · [扩展注册](/docs/api/graph#extension-registration)
+- <span id="按领域查询类型" style={{ display: 'block', scrollMarginTop: '8rem' }} />[构造配置与数据类型](/docs/api/options) · [事件类型](/docs/api/graph#off)
+- <span id="调用顺序" style={{ display: 'block', scrollMarginTop: '8rem' }} />[生命周期](/docs/api/graph#graph-lifecycle)
+- <span id="读取结果不能直接改" style={{ display: 'block', scrollMarginTop: '8rem' }} />[数据读取与返回值](/docs/api/graph#graph-data)
+- <span id="引擎内部方法" style={{ display: 'block', scrollMarginTop: '8rem' }} />[图事件](/docs/api/graph#graph-events) · [坐标转换](/docs/api/graph#graph-viewport)
+- <span id="已有项目里的兼容入口" style={{ display: 'block', scrollMarginTop: '8rem' }} />[自定义节点与兼容入口](/docs/guides/custom-node)

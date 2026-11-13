@@ -1,6 +1,6 @@
 /**
  * Custom node extension demo.
- * Demonstrates: function-style node registration, explicit edge IDs, and Combo state API.
+ * Demonstrates: function-style node registration, explicit edge IDs, and shared element state methods for Combos.
  */
 
 import { Graph, register, type NodeExtension } from '@antv/g6-lite';
@@ -94,30 +94,20 @@ export async function run(container: string | HTMLElement) {
   });
 
   await graph.render();
-  graph.setComboState('demo-combo', 'selected', true);
+  graph.setItemState('demo-combo', 'selected', true);
 
   const containerEl =
     typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
 
-  const ui = createDemoPanel(
-    containerEl,
-    '自定义节点',
-    'demo-combo states: selected',
-    '<button data-action="combo">切换 Combo 状态</button><button data-action="edge">选中显式边 ID</button>',
-  );
-
-  ui.controls.addEventListener('click', (event) => {
-    const action = (event.target as HTMLElement).dataset.action;
-    if (action === 'combo') {
-      const selected = graph.getComboStates('demo-combo').includes('selected');
-      graph.setComboState('demo-combo', 'selected', !selected);
-      ui.setStatus(`demo-combo states: ${graph.getComboStates('demo-combo').join(', ') || '(none)'}`);
-      return;
-    }
-    if (action === 'edge') {
-      graph.setItemState('edge-worker-a-store', 'selected', true);
-      ui.setStatus('selected edgeId: edge-worker-a-store');
-    }
+  const ui = createDemoPanel(containerEl, 'demo-combo states: selected');
+  ui.addAction('切换 Combo 状态', () => {
+    const selected = graph.getItemStates('demo-combo').includes('selected');
+    graph.setItemState('demo-combo', 'selected', !selected);
+    ui.setStatus(`demo-combo states: ${graph.getItemStates('demo-combo').join(', ') || '(none)'}`);
+  });
+  ui.addAction('选中显式边 ID', () => {
+    graph.setItemState('edge-worker-a-store', 'selected', true);
+    ui.setStatus('selected edgeId: edge-worker-a-store');
   });
 
   graph.on('edge:click', (payload: { edgeId?: string }) => {
@@ -132,7 +122,7 @@ export async function run(container: string | HTMLElement) {
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();
-      ui.panel.remove();
+      ui.destroy();
     },
   };
 }

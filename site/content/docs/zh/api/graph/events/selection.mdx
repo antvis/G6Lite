@@ -1,101 +1,15 @@
 ---
-title: 选择事件
-description: 点击选择、清空选择、框选与套索的事件和参数
+title: 选择事件（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-先启用 click-select、brush-select 或 lasso-select，再监听对应事件。下面的事件在选择状态写回后发出；代码直接设置 selected 状态不会补发这些事件。
+内容已并入 [选择事件明细](/docs/api/graph/events#event-selection)。
 
-## 读取最终选择
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-
-declare const graph: Graph;
-graph.on('brush:end', () => {
-  console.log(graph.findNodesByState('selected'));
-});
-```
-
-框选与套索不会逐个发 node:selectchange。要同步所有来源，参考[选择与拖拽指南](/docs/guides/events#选择与拖拽事件)。
-
-## node:selectchange
-
-click-select 切换被点击节点的选中状态后触发。
-
-```ts
-type Payload = {
-  nodeId: string;
-  selected: boolean;
-  event: MouseEvent
-};
-```
-
-## edge:selectchange
-
-click-select 切换被点击边的选中状态后触发。
-
-```ts
-type Payload = {
-  edgeId: string;
-  edgeIndex: number;
-  source: string;
-  target: string;
-  selected: boolean;
-  event: MouseEvent;
-};
-```
-
-## selection:clear
-
-click-select 清空非空选择后触发，ids 可混合节点与边；不会逐个发取消选中事件。
-
-```ts
-type Payload = {
-  ids: string[];
-  event: MouseEvent
-};
-```
-
-## brush:select
-
-框选命中非空节点集合时触发，过程中会节流，结束时还会做一次最终计算。
-
-```ts
-type Payload = {
-  nodeIds: string[]
-};
-```
-
-## brush:end
-
-一次框选结束后触发；nodeIds 可为空。
-
-```ts
-type Payload = {
-  nodeIds: string[]
-};
-```
-
-## lasso:select
-
-套索命中非空集合时触发；nodeIds 是本次套索集合。
-
-```ts
-type Payload = {
-  nodeIds: string[]
-};
-```
-
-## lasso:end
-
-套索结束后触发，集合可为空；它不一定等于全图最终选中集合。
-
-```ts
-type Payload = {
-  nodeIds: string[]
-};
-```
-
-这些是派生事件载荷，不包含元素事件的 client、canvas、graph 或 nativeEvent；其中 event 仍为有效的 MouseEvent 字段。套索可能保留其他来源已有的选择，最终集合请查询 findNodesByState / findEdgesByState。
-
-[行为选择规则](/docs/api/options/behaviors#选择) · [事件 API](/docs/api/graph/events)。
+- <span id="读取最终选择" style={{ display: 'block', scrollMarginTop: '8rem' }} />[读取最终选择](/docs/api/graph/events#读取最终选择)
+- <span id="nodeselectchange" style={{ display: 'block', scrollMarginTop: '8rem' }} />[node:selectchange](/docs/api/graph/events#nodeselectchange)
+- <span id="edgeselectchange" style={{ display: 'block', scrollMarginTop: '8rem' }} />[edge:selectchange](/docs/api/graph/events#edgeselectchange)
+- <span id="selectionclear" style={{ display: 'block', scrollMarginTop: '8rem' }} />[selection:clear](/docs/api/graph/events#selectionclear)
+- <span id="brushselect" style={{ display: 'block', scrollMarginTop: '8rem' }} />[brush:select](/docs/api/graph/events#brushselect)
+- <span id="brushend" style={{ display: 'block', scrollMarginTop: '8rem' }} />[brush:end](/docs/api/graph/events#brushend)
+- <span id="lassoselect" style={{ display: 'block', scrollMarginTop: '8rem' }} />[lasso:select](/docs/api/graph/events#lassoselect)
+- <span id="lassoend" style={{ display: 'block', scrollMarginTop: '8rem' }} />[lasso:end](/docs/api/graph/events#lassoend)

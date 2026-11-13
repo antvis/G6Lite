@@ -1,6 +1,6 @@
 import { Graph } from '@antv/g6-lite';
 import type { EdgeLabelPlacement } from '@antv/g6-lite';
-import { buttonStyle, createDemoPanel } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: string | HTMLElement) {
   let placement: EdgeLabelPlacement = 'center';
@@ -51,26 +51,17 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const ui = createDemoPanel(
-    container,
-    '自环边标签',
-    '默认碰撞开启时，多条自环标签应全部可见，并沿真实曲线定位。拖动节点后仍应跟随。',
-    `${(['start', 'center', 'end'] as EdgeLabelPlacement[])
-      .map((value) => `<button data-placement="${value}" style="${buttonStyle}">${value}</button>`)
-      .join('')}`,
-  );
+  const ui = createDemoPanel(container);
   const render = () =>
     ui.setStatus(`labelPlacement: ${placement}\n1 / 3 / 5 条自环标签全部可见且多环分离即 PASS`);
-  ui.controls.querySelectorAll<HTMLElement>('[data-placement]').forEach((button) => {
-    button.addEventListener('click', () => {
-      placement = button.dataset.placement as EdgeLabelPlacement;
-      graph.updateOptions({
-        edge: { style: { labelPlacement: () => placement } },
-      });
-      render();
+  ui.addChoice<EdgeLabelPlacement>('位置', ['start', 'center', 'end'], placement, (value) => {
+    placement = value;
+    graph.updateOptions({
+      edge: { style: { labelPlacement: () => placement } },
     });
+    render();
   });
   render();
 
-  return { destroy: () => { graph.destroy(); ui.panel.remove(); } };
+  return { destroy: () => { graph.destroy(); ui.destroy(); } };
 }

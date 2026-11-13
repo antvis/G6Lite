@@ -1,210 +1,25 @@
 ---
-title: Edge configuration reference
-description: Complete EdgeConfig fields, defaults, callbacks, states, curve routing, labels, and parallel edges
+title: Edge configuration reference (previous URL)
+description: Find the corresponding sections at their new location
 ---
 
-import { NodeDocExample as EdgeDocExample } from '@/components/node-doc-example';
-
-`GraphOptions.edge` has type `EdgeConfig`. This page defines top-level configuration, every style field, state overrides, curve routing, labels, parallel edges, and runtime updates, with code and previews from the same source. Follow the [edge guide](/en/docs/guides/edge) for steps and troubleshooting; see [GraphOptions](/en/docs/api/options) for the overall structure.
-
-## EdgeConfig
-
-All top-level fields are optional.
-
-| Field | Type | Default behavior and entry |
-| --- | --- | --- |
-| `type` | `'line' \| 'arc' \| 'polyline' \| 'cubic' \| string` | Defaults to `'line'`; register custom names with `register('edge', ...)`, using the extension's declared `base` |
-| `style` | `EdgeConfig['style']` | Appearance field object; callback-capable fields use `EdgeStyleValue<T>` below |
-| `stateStyles` | `Partial<Record<EdgeState, EdgeStateStyleOverride>>` | Override appearance per state; see [State styles](#state-styles) |
-| `labelRenderer` | `string` | Default edge-label renderer when omitted; register a named label extension first and supply nonempty `edge.style.label` |
-| `parallelEdges` | `boolean \| ParallelEdgesConfig` | Omission does not enable separation through this field; an existing transform entry still operates independently. See [Parallel edges](/en/docs/guides/parallel-edges) |
-
-Built-in types represent straight lines, arcs, polylines, and cubic Bézier curves. Unknown names currently fall back to a line primitive; do not rely on that instead of registration. See [`GraphEdge`](/en/docs/api/options#edge-graphedge) for `source`, `target`, and `id` data fields.
-
-## Basic styles
-
-These fields belong in `edge.style`. Defaults apply to built-in edges; themes and edge extensions can alter fallbacks.
-
-| Field | Type | Default or fallback | Meaning |
-| --- | --- | --- | --- |
-| `stroke` | `EdgeStyleValue<string>` | `theme.edgeStroke`; light `'#99ADD1'`, dark `'#637088'` | Edge and arrow color |
-| `lineWidth` | `EdgeStyleValue<number>` | `theme.edgeLineWidth`, preset `1` | Visual width; use a finite positive value |
-| `opacity` | `EdgeStyleValue<number>` | `1` | Opacity from `0` to `1` |
-| `lineDash` | `EdgeStyleValue<number[]>` | `[]` | Empty means solid; the current period uses the sum of the first two values, as described in [Dash rules](#dash-rules) |
-| `startArrow` | `EdgeStyleValue<boolean>` | `false` | Source-end arrow pointing toward `source` |
-| `endArrow` | `EdgeStyleValue<boolean>` | `theme.edgeArrow`, `true` in both light and dark | Target-end arrow pointing toward `target` |
-| `arrowSize` | `EdgeStyleValue<number>` | Derived from line width | Length along the path; use a finite positive explicit length. Nonpositive values use automatic length |
-| `hitAreaWidth` | `EdgeStyleValue<number>` | Final `lineWidth` | Total picking width, independent of visual width; see [Picking width](#picking-width) |
-
-`lineWidth`, `hitAreaWidth`, `arrowSize`, and dash periods use screen-rendering pixels and retain their rendered dimensions across camera zoom. Do not multiply them by zoom, DPR, or picking framebuffer scale. Node positions remain in graph coordinates.
-
-The three rows are Plain (thin gray solid line, no arrows), Dash (translucent orange dashes, target arrow), and Both (thick blue solid line, arrows at both ends). All arrows explicitly use `arrowSize: 16`. Click an edge for its purple selected style; reset restores the initial effect.
-
-<EdgeDocExample id="edge-style" locale="en" />
-
-### Style callbacks
-
-`EdgeStyleValue<T>` is `T | ((source: GraphNode, target: GraphNode, edge: GraphEdge) => T)`. The first two arguments are endpoint nodes; the third is the edge. Read edge business fields from `edge.data`. The example maps color, width, dashes, opacity, and arrow directions.
-
-The public `style` type is a field object, not a function returning the whole object. Per-field precedence is explicit edge style → extension `getStyle(source, target, edge)` result → extension default style → theme or built-in fallback. Keep callbacks inexpensive and provide valid fallbacks for missing data.
-
-### Dash rules
-
-The renderer uses `lineDash[0] + lineDash[1]` as the period, drawing half and leaving half empty; later entries are ignored. Thus `[4, 12]` and `[8, 8]` look the same, rather than following arbitrary Canvas dash sequences. Fewer than two entries or a nonpositive period produces no dashes. Use finite nonnegative values with a positive sum.
-
-Built-in straight lines can use a 1-pixel rendering path when no wider geometry or state requirement is present; that path does not draw dashes. For predictable dashed lines, explicitly set `lineWidth > 1`, as above. Dash gaps remain pickable; arrowheads are not interrupted by the dash period.
-
-## Arrows
-
-`startArrow` and `endArrow` control the source and target ends defined by edge data. Explicitly set `endArrow: false` to disable the preset target arrow.
-
-Automatic length is `10` for width at most `2`, `12` for width above `2` and at most `4`, and `Math.round(lineWidth * 2.5)` for thicker lines. `arrowSize` controls length along the edge; transverse width is line width plus `12`, rather than both dimensions being set together. Arrows meet the endpoint node boundary, with space reserved in the line body.
-
-The current static path caches automatic length from the base width. When a state changes width, static and per-field callback paths can produce different automatic arrow lengths. Specify a positive `arrowSize`, such as `16` above, when you need a predictable size across states.
-
-## Picking width
-
-`hitAreaWidth` is the total hit width around a path. For example, `24` gives approximately `12` on each side; the hit area itself is invisible. After resolution it is at least the visual width. Negative, non-finite, or omitted values fall back to visual width.
-
-Both edges below have visual `lineWidth: 1.5`. The upper hit width is `2`; the lower is `24`. Click near the thin lines: the lower one is easier to select. Selection changes color to purple while keeping the thin visual width. Zoom with the toolbar and compare again; picking width retains its screen-rendering size semantics.
-
-<EdgeDocExample id="edge-hit-area" locale="en" />
-
-Hover, click selection, tooltips, and edge dragging share the picking result. Configuring hit width alone does not install a behavior; the example uses `click-select`. Lines, arcs, curves, polylines, self-loops, and arrowheads use this policy. Compare more paths in the [thin-edge example](/en/docs/examples/edge-hit-area).
-
-## State styles
-
-`EdgeStateStyleOverride` accepts the following constants, not field callbacks:
-
-| Field | Type | Effect |
-| --- | --- | --- |
-| `stroke` | `string` | Override edge and arrow color |
-| `lineWidth` | `number` | Override visual width |
-| `hitAreaWidth` | `number` | Override total picking width, never below the current visual width |
-| `opacity` | `number` | Override opacity |
-| `lineDash` | `number[]` | Override dash-period input |
-
-Activate states through behaviors or `graph.setItemState(edgeId, state, value)`. Each state chooses the first defined object from configuration, extension, and theme; it does not merge fields with the same theme state. States apply in state-set iteration order, later fields winning; `default` is skipped. `hidden` takes priority and sets resolved opacity to `0`. See [Graph state and visibility APIs](/en/docs/api/graph#state-visibility-and-focus).
-
-## Runtime updates
-
-After the first `await graph.render()`, call `graph.updateOptions({ edge: { style: ... } })` on the existing instance. Style fields merge, while a supplied `stateStyles` replaces the entire state map; submit a complete map to retain other states. This recomputes appearance without rerunning layout. Update business fields with `updateEdgeData()`; update endpoints through its batch form, supplying `id`, `source`, and `target` in each update item. See [Edge mutations](/en/docs/api/graph#edges) and [`updateOptions()`](/en/docs/api/graph#updateoptions).
-
-## Parallel edges and self-loops
-
-`edge.parallelEdges` accepts a boolean or `ParallelEdgesConfig`. With only the object entry, `{ offset: 30 }` does not enable separation; use `{ enabled: true, offset: 30 }`. Use `true` for defaults.
-
-| Field | Type | Default and rules |
-| --- | --- | --- |
-| `enabled` | `boolean` | Disabled by default; explicitly enable the object entry or supply the transform. A false value in edge configuration disables both entries |
-| `offset` | `number` | `20`, offset step in graph coordinates; non-finite or nonpositive values fall back to `20` |
-| `mergeBy` | `Array<'source' \| 'target'>` | `['source', 'target']`; grouping always uses both endpoints. Subsets or an empty array do not enable business-field grouping |
-| `includeReverse` | `boolean` | `true` groups A→B with B→A; `false` groups each direction separately, so two single reverse edges may still overlap |
-| `minOffset` | `number` | `0`, minimum absolute non-center offset; non-finite or negative values fall back to `0` |
-| `maxOffset` | `number` | `80`, maximum absolute offset; non-finite or negative values fall back to `80` |
-
-### Grouping and spacing
-
-Offsets follow the current edge-array order: `(index - (count - 1) / 2) * offset`, then clamp the magnitude to min/max; a center offset stays `0`. Three edges at step `20` receive `-20, 0, 20`; two receive `-10, 10`. Keep `0 <= minOffset <= maxOffset`. Several edges can overlap at the cap; `maxOffset: 0` collapses all offsets.
-
-The step offsets the curve control point along its normal, rather than guaranteeing equal screen-space distances between paths. A quadratic midpoint moves by about half the control-point offset; zoom also changes screen spacing. The engine handles direction signs, so do not manually negate reverse-edge values.
-
-Separation affects `arc`; default `line` switches to an arc path when a multi-edge group exists. Dedicated `cubic` and `polyline` paths take priority and do not use this offset. An enabled single-edge `arc` group becomes straight, and grouped curvature replaces `style.curvature`. Keep data order and edge IDs stable; reordering, adding, or removing grouped edges can change their paths.
-
-The preview shows three same-direction edges, two reverse edges (orange for reverse), and two self-loops. Self-loops render independently and do not join separation groups; disabling separation does not disable loops.
-
-<EdgeDocExample id="edge-parallel" locale="en" />
-
-### Entries and precedence
-
-Use `transforms: [{ type: 'process-parallel-edges', options: { offset: 30 } }]`, or the string `'process-parallel-edges'`. Parameters belong inside `options`; `distance` is not an option.
-
-Resolution is field-based: built-in defaults → the last matching object transform's `options` → the `edge.parallelEdges` object. String entries only enable processing. Any matching transform entry enables it, so `options.enabled: false` alone does not disable that transform. Explicitly disable with `edge.parallelEdges: false` or `{ enabled: false }`. A boolean `parallelEdges: true` does not reset supplied transform options.
-
-Call `graph.updateOptions({ edge: { parallelEdges: { enabled: true, offset: 30 } } })` to regroup at runtime without rerunning layout. The new object replaces the previous `parallelEdges` object; resubmit other options to retain them. `updateOptions()` does not accept `transforms`. Loop size and levels are internal; offset/min/max do not control them. See the [parallel-edge guide](/en/docs/guides/parallel-edges) for steps.
-
-## Curves and polyline routing
-
-For an orth / indented workflow and comparison, see the [polyline routing guide](/en/docs/guides/polyline-routing).
-
-These fields belong in `edge.style`. Routing determines the connecting path; layout determines node positions. Setting `router` does not arrange data as a tree. Path geometry uses graph coordinates and scales with the camera, unlike screen-space line width.
-
-| Field | Type | Default and applicability |
-| --- | --- | --- |
-| `curvature` | `EdgeStyleValue<number>` | `0.3`; only `arc`, dimensionless. The control point is the endpoint midpoint plus the perpendicular endpoint vector times this value. Sign changes side; `0` is straight; parallel metadata takes priority |
-| `curveOffset` | `EdgeStyleValue<number>` | `60` graph units; only `cubic`, horizontal control-handle length at each endpoint |
-| `radius` | `EdgeStyleValue<number>` | `0` graph units; rounded corners for `orth`, `indented`, and `fishbone`. Use a finite nonnegative value; the actual radius is limited to half of each neighboring segment |
-| `router` | `'orth' \| 'tree' \| 'indented' \| 'fishbone'` | `'orth'`; only `polyline`, a graph-wide constant without per-edge callbacks |
-| `indentTarget` | `'left' \| 'right'` | `'left'`; horizontal `indented` routing only, described below; a constant |
-| `trunkGap` | `number` | `0`; retained in the public type, but currently not read by routing calculations, so it does not move the trunk |
-
-### Arcs and cubic curves
-
-The following rows compare `curvature: -0.35 / 0 / 0.35` at equal endpoint distances. Parallel-edge processing is disabled so automatic offsets do not replace manual curvature.
-
-<EdgeDocExample id="edge-curves" locale="en" />
-
-`cubic` enters and exits the left/right node boundaries according to the endpoints' horizontal order. `curveOffset` sets horizontal control handles in graph units; `curvature` does not affect it. The two rows below compare `30` and `120` with equal relative endpoint positions. Endpoints at the same height may still produce a straight line; a larger offset does not guarantee visible bending, and oversized handles can fold back.
-
-<EdgeDocExample id="edge-cubic" locale="en" />
-
-### Choosing a router
-
-| router | Path and constraints |
-| --- | --- |
-| `orth` | Horizontal/vertical paths based on endpoint rectangles and direction; routes to one side for close or reversed endpoints. Only considers those endpoints, not all graph obstacles |
-| `tree` | Groups outgoing edges and distributes ports. The renderer currently tessellates smooth cubic paths rather than sharp right angles; `radius` does not control that smoothing |
-| `indented` | A parent trunk with L-shaped child branches for directory trees; supports rounded corners |
-| `fishbone` | Horizontal spine and diagonal bone geometry; the current direction parameter does not change calculations. Pair with the built-in fishbone layout, rather than using it as a general orthogonal router |
-
-Direction comes from `layout.rankdir ?? layout.direction ?? 'TB'` when creating the graph, not from `edge.style`. Orthogonal routing supports TB/BT/LR/RL. Tree routing currently shares port calculations between BT/TB and RL/LR, so mirrored ports are not guaranteed. The indented example explicitly supplies LR because the layout's internal LR default differs from routing's TB default.
-
-The reused orthogonal example below lets Dagre position nodes, `router: 'orth'` connect them, and `radius: 12` round corners. It does not guarantee avoidance of other nodes or every edge crossing.
-
-<EdgeDocExample id="edge-orth" locale="en" />
-
-### Indented targets and trunks
-
-For horizontal `indented` routing, `indentTarget: 'left'` starts at the parent's bottom center and follows a vertical trunk to the child's near boundary: left for LR, right for RL. The `'right'` mode uses a background-free text convention: from the parent center to `target.x ± target.width`, not the right boundary of a centered rectangle. It is not an arbitrary rectangular port selector. TB/BT routing does not read this option.
-
-The preview uses rectangles, an LR indented layout, `indentTarget: 'left'`, and `radius: 10`. The parent position determines the trunk; change `layout.indent` for depth spacing and `layout.rowHeight` for row spacing. `trunkGap` currently cannot adjust the trunk.
-
-<EdgeDocExample id="edge-indented" locale="en" />
-
-The data model currently captures `router` and layout direction at creation; `updateOptions()` does not update those values. Destroy and recreate the instance to change routing mode or direction. Per-field updates to `curvature`, `curveOffset`, and `radius` can use `updateOptions()`; updating styles does not rerun layout.
-
-## Edge labels
-
-These `edge.style` fields all support the same three-argument callbacks as basic styles. Text is not automatically taken from edge IDs or data; configure `label` explicitly.
-
-| Field | Type | Default and rules |
-| --- | --- | --- |
-| `label` | `EdgeStyleValue<string \| false>` | `false`; only nonempty strings render, while empty strings or `false` hide the label |
-| `labelFontSize` | `EdgeStyleValue<number>` | `10` screen pixels; use a finite positive value |
-| `labelFontFamily` | `EdgeStyleValue<string>` | System sans-serif stack: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif |
-| `labelColor` | `EdgeStyleValue<string>` | `'#666'`, independent of line color |
-| `labelPlacement` | `EdgeStyleValue<'start' \| 'center' \| 'end'>` | `'center'`; path parameters `t = 0.2 / 0.5 / 0.8`, not exact endpoints |
-| `labelBackground` | `EdgeStyleValue<string \| false>` | `'rgba(255,255,255,0.8)'`; `false` disables the background |
-| `labelBackgroundPadding` | `EdgeStyleValue<number>` | `2` screen pixels around the background; use a finite nonnegative value |
-| `labelAutoRotate` | `EdgeStyleValue<boolean>` | `true`; follow the tangent while keeping text upright. `false` keeps text horizontal |
-
-The three rows show start, center, and end positions with label backgrounds. Clicking changes line color while label color still comes from `labelColor`. Collision and low-zoom hiding are explicitly disabled for comparison; applications can retain the default policies.
-
-<EdgeDocExample id="edge-labels" locale="en" />
-
-### Position and visibility
-
-The label layer samples cached edge paths for position and tangent, falling back to interpolation along the endpoint chord when no path is cached. Currently `cubic` and `polyline` labels use that chord for positioning and rotation, so they are not guaranteed to follow the rendered curve or route. `center` is not an equal-arc-length midpoint for every path.
-
-Edge font sizes and padding retain screen dimensions, independent of `label.scaleWithZoom`. Defaults `hideOnLowZoom: true`, `edgeMinZoom: 0.5`, and `hideOnCollision: true` can hide labels. A hidden edge or endpoint also suppresses its label. First check nonempty text, then [global label policies](/en/docs/api/options/label#labeloptions), zoom, and collisions. Line `opacity` is not a label-visibility switch.
-
-Edge configuration does not provide node-only `labelMaxWidth`, `labelOffsetX/Y`, `labelFontWeight`, or icon fields; state styles do not override label fields either. For complex drawing, use a registered `edge.labelRenderer` and still supply nonempty `edge.style.label`. See [Custom Label Renderer](/en/docs/guides/custom-label-renderer) for registration and measure/draw contracts.
-
-## Other configuration
-
-- [Edge guide](/en/docs/guides/edge): type selection, steps, and path illustrations.
-- [GraphEdge data](/en/docs/api/options#edge-graphedge): edge identity, endpoints, business data, and initial states.
-- [Parallel edges and self-loops](/en/docs/guides/parallel-edges): `parallelEdges` objects and transforms.
-- [Label guide](/en/docs/guides/label): edge-label content and placement.
-- [Custom Label Renderer](/en/docs/guides/custom-label-renderer): registration and drawing protocols.
-- [GraphOptions entry](/en/docs/api/options): top-level configuration structure.
+See the [configuration overview](/en/docs/api/options#options-edge) or the [edge guide](/en/docs/guides/edge).
+
+- <span id="edgeconfig" style={{ display: 'block', scrollMarginTop: '8rem' }} />[EdgeConfig](/en/docs/guides/edge#edgeconfig)
+- <span id="basic-styles" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Basic styles](/en/docs/guides/edge#basic-styles)
+- <span id="style-callbacks" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Style functions](/en/docs/guides/edge#options-edge-style-callbacks)
+- <span id="dash-rules" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Dash rules](/en/docs/guides/edge#dash-rules)
+- <span id="arrows" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Arrows](/en/docs/guides/edge#arrows)
+- <span id="picking-width" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Picking width](/en/docs/guides/edge#picking-width)
+- <span id="state-styles" style={{ display: 'block', scrollMarginTop: '8rem' }} />[State styles](/en/docs/guides/edge#options-edge-state-styles)
+- <span id="runtime-updates" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Runtime updates](/en/docs/guides/edge#options-edge-runtime-updates)
+- <span id="parallel-edges-and-self-loops" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Parallel edges and self-loops](/en/docs/guides/edge#parallel-edges-and-self-loops)
+- <span id="grouping-and-spacing" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Adjust parallel-edge spacing and grouping](/en/docs/guides/edge#grouping-and-spacing)
+- <span id="entries-and-precedence" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Configure parallel edges in transforms](/en/docs/guides/edge#entries-and-precedence)
+- <span id="curves-and-polyline-routing" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Curves and polyline routing](/en/docs/guides/edge#curves-and-polyline-routing)
+- <span id="arcs-and-cubic-curves" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Arcs and cubic curves](/en/docs/guides/edge#arcs-and-cubic-curves)
+- <span id="choosing-a-router" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Choosing a router](/en/docs/guides/edge#choosing-a-router)
+- <span id="indented-targets-and-trunks" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Indented targets and trunks](/en/docs/guides/edge#indented-targets-and-trunks)
+- <span id="edge-labels" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Edge labels](/en/docs/guides/edge#edge-labels)
+- <span id="position-and-visibility" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Position and visibility](/en/docs/guides/edge#position-and-visibility)
+- <span id="other-configuration" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Other configuration](/en/docs/guides/edge#other-configuration)

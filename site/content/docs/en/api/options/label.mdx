@@ -1,84 +1,14 @@
 ---
-title: Label policy reference
-description: LabelOptions defaults, zoom thresholds, collision order, scope, and runtime updates
+title: Label policy reference (previous URL)
+description: Find the corresponding sections at their new location
 ---
 
-import { NodeDocExample as LabelDocExample } from '@/components/node-doc-example';
+See the [configuration overview](/en/docs/api/options#options-label) or the [Labels and icons guide](/en/docs/guides/label).
 
-Entry: `GraphOptions.label?: LabelOptions`. It controls node/edge label visibility. Set content and appearance in [node.style](/en/docs/api/options/node#labels) or [edge.style](/en/docs/api/options/edge#edge-labels). For workflows, see [Labels and icons](/en/docs/guides/label).
-
-## LabelOptions
-
-All fields are optional constants; none accept callbacks.
-
-| Field | Type | Default | Rules |
-| --- | --- | --- | --- |
-| `scaleWithZoom` | `boolean` | `true` | Node-label dimensions follow camera zoom; false keeps screen dimensions. Edge labels always keep screen dimensions |
-| `hideOnLowZoom` | `boolean` | `true` | Enables both minimum-zoom thresholds below; false bypasses both |
-| `hideOnCollision` | `boolean` | `true` | Hides labels overlapping earlier labels; nodes and edges share a collision layer |
-| `nodeMinZoom` | `number` | `0.3` | Minimum camera zoom for node labels; equality passes |
-| `edgeMinZoom` | `number` | `0.5` | Minimum camera zoom for edge labels; equality passes |
-
-Thresholds accept finite nonnegative numbers, including `0`. Negative values, NaN, and Infinity fall back to the corresponding default. Zoom is the camera scale, not pixels; do not multiply thresholds by DPR.
-
-## Code and matching result
-
-The example starts at zoom 0.4 with scaleWithZoom explicitly disabled for readable text. Node labels pass their threshold, while the Request edge label is below 0.5 and hidden. Two nearby node labels collide, retaining the earlier one.
-
-- Disable hideOnCollision to reveal overlapping labels.
-- Disable hideOnLowZoom to show the edge label at the current zoom.
-- Enable scaleWithZoom, then zoom in/out to compare node and edge text sizes.
-
-<LabelDocExample id="label-policy" locale="en" />
-
-## Zoom thresholds
-
-With default low-zoom hiding, labels passing the threshold check are listed below. Content, hidden states, and collisions still determine final visibility.
-
-| Camera zoom | Node labels | Edge labels |
-| --- | --- | --- |
-| Below 0.3 | Hidden | Hidden |
-| 0.3 to below 0.5 | Rendering candidates | Hidden |
-| At least 0.5 | Rendering candidates | Rendering candidates |
-
-Set one MinZoom to 0 to bypass only that label type's threshold. Disabling hideOnLowZoom does not disable collision hiding.
-
-## Collision order
-
-Each frame processes node labels before edge labels, following rendering-data order within each type. Earlier labels reserve space; later overlapping labels are hidden. Recalculation on each frame means zoom or order changes can change the survivors. selected/highlight receive no automatic priority.
-
-<details>
-<summary>Collision bounds and custom renderers</summary>
-
-Built-in labels use unrotated text rectangles, excluding extra background padding. Custom labelRenderer bounds come from measure's width/height. The policy hides overlaps without moving labels or avoiding node bodies.
-
-Custom node/edge labelRenderers also pass low-zoom and collision checks; sizing policy affects the engine-provided style. Renderers computing their own dimensions from zoom must keep them consistent. Node-label scaling has internal limits and is not indefinitely linear at extreme zoom.
-
-</details>
-
-## Scope
-
-- Labels need nonempty text; `label: false` or an empty string draws nothing. Business data alone does not create labels.
-- Node icons, decorations/badges, and Combo labels use separate rules, unaffected by these five fields.
-- Element hidden states, hidden edge endpoints, and viewport culling still affect visibility. Disabling both hiding policies does not guarantee every label appears.
-
-See [node labels](/en/docs/api/options/node#labels), [edge labels](/en/docs/api/options/edge#edge-labels), or [Combo labels](/en/docs/api/options/combo#padding-bounds-and-labels) for content and appearance.
-
-## Runtime updates
-
-After the first `await graph.render()`, update individual fields. Omitted fields keep their current values:
-
-```ts
-graph.updateOptions({ label: { hideOnCollision: false } });
-graph.updateOptions({ label: { nodeMinZoom: 0.6 } });
-```
-
-Both changes persist. `label: {}` does not reset policies; explicitly setting a field to undefined restores its built-in default.
-
-Updates reprocess styles and configured transforms without rerunning layout or automatically fitting the view. See [updateOptions](/en/docs/api/graph#updateoptions) for the signature.
-
-## Related entries
-
-- [Labels and icons](/en/docs/guides/label): content and appearance.
-- [Custom Label Renderer](/en/docs/guides/custom-label-renderer): measurement and drawing contracts.
-- [Complete label-policy example](/en/docs/examples/label-rendering-options): more zoom comparisons.
+- <span id="labeloptions" style={{ display: 'block', scrollMarginTop: '8rem' }} />[LabelOptions](/en/docs/api/options#labeloptions)
+- <span id="code-and-matching-result" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Code and matching result](/en/docs/guides/label#options-label-code-and-matching-result)
+- <span id="zoom-thresholds" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Zoom thresholds](/en/docs/guides/label#zoom-thresholds)
+- <span id="collision-order" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Collision order](/en/docs/guides/label#collision-order)
+- <span id="scope" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Scope](/en/docs/guides/label#scope)
+- <span id="runtime-updates" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Runtime updates](/en/docs/guides/label#options-label-runtime-updates)
+- <span id="related-entries" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Related entries](/en/docs/guides/label#options-label-related-entries)

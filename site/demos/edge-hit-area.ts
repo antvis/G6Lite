@@ -17,12 +17,7 @@ export async function run(container: string | HTMLElement) {
     'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px;width:100%;height:calc(100% - 36px);padding:8px;box-sizing:border-box;';
   root.appendChild(board);
 
-  const ui = createDemoPanel(
-    root,
-    '边交互热区',
-    '边保持 1.5px 视觉宽度，但中心线两侧约 8px 都可悬停或点击。缩放后屏幕热区保持不变。',
-    '',
-  );
+  const ui = createDemoPanel(root, '边保持 1.5px 视觉宽度，但中心线两侧约 8px 都可悬停或点击。缩放后屏幕热区保持不变。');
 
   for (const [index, item] of EDGE_TYPES.entries()) {
     const panel = document.createElement('div');
@@ -93,7 +88,7 @@ export async function run(container: string | HTMLElement) {
     destroy: () => {
       graphs.forEach((graph) => graph.destroy());
       board.remove();
-      ui.panel.remove();
+      ui.destroy();
     },
   };
 }

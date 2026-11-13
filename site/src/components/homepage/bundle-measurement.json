@@ -1,17 +1,9 @@
 {
-  "version": "0.1.0-beta.27",
-  "measuredAt": "2026-11-03",
-  "sourceCommit": "a36fa95b",
-  "initialBytes": 95726,
+  "version": "0.1.0",
+  "measuredAt": "2026-11-13",
+  "gzipBytes": 150176,
   "unitBytes": 1000,
-  "entry": "dist/index.js",
-  "compression": "minify + Gzip",
-  "scope": "初始入口，未加载布局",
-  "command": "npm run build && npm run size",
-  "baseline": {
-    "name": "G6",
-    "version": "5.1.1",
-    "gzippedBytes": 399800,
-    "source": "Bundlephobia"
-  }
+  "entry": "dist/g6-lite.min.js",
+  "compression": "Gzip",
+  "command": "npm run build && gzip -9 -c dist/g6-lite.min.js | wc -c"
 }

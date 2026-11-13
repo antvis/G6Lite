@@ -1,0 +1,45 @@
+---
+title: ForceAtlas2 力导向布局
+description: 相连的节点互相吸引，同时受斥力和中心引力影响。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+相连的节点互相吸引，同时受斥力和中心引力影响。
+
+## 使用场景
+
+适合观察关系密集的群组和群组之间的连接。
+
+## 基本用法
+
+布局类型通过 `layout.type` 指定。
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'force-atlas2' },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `kr` | 节点间的斥力系数。 | `number` | `5` |
+| `kg` | 将节点拉向中心的引力系数。 | `number` | `1` |
+| `barnesHut` | 是否用 Barnes–Hut 近似计算斥力。 | `boolean` | `true` |
+| `maxIteration` | 布局的最大迭代次数。 | `number` | `100`，超过 5000 个节点时为 `50` |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
+
+## 代码示例
+
+示例提高斥力和中心引力，展示三个相连的群组。
+
+<NodeDocExample id="built-in-layout" layoutType="force-atlas2" locale="zh" />
+
+[对比关系网络布局](/docs/guides/layout-networks)

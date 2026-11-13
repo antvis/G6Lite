@@ -1,0 +1,44 @@
+---
+title: Fruchterman layout
+description: Balance edge attraction and node repulsion, with gravity pulling the graph inward.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Balance edge attraction and node repulsion, with gravity pulling the graph inward.
+
+## When to use it
+
+Use it for networks without a clear center or hierarchy.
+
+## Basic usage
+
+Set the layout type with `layout.type`.
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'fruchterman' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `gravity` | Strength of the pull toward the layout center. | `number` | `10` |
+| `speed` | Speed factor for node movement in the simulation. | `number` | `5` |
+| `maxIteration` | Maximum number of iterations. | `number` | Depends on node count |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
+
+## Code example
+
+The example sets gravity to 12.
+
+<NodeDocExample id="built-in-layout" layoutType="fruchterman" locale="en" />
+
+[Compare network layouts](/en/docs/guides/layout-networks)

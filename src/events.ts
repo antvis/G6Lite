@@ -27,6 +27,12 @@ const AntVEventEmitterConstructor = resolveEventEmitterConstructor(eventEmitterM
 
 export class EventEmitter {
   private readonly emitter = new AntVEventEmitterConstructor();
+  private emissionDepth = 0;
+
+  /** @internal Listener lists must not be rebuilt while the delegate iterates them. */
+  get emitting(): boolean {
+    return this.emissionDepth > 0;
+  }
 
   on<Args extends unknown[]>(event: string, handler: Handler<Args>): void {
     this.emitter.on(event, handler);
@@ -41,7 +47,12 @@ export class EventEmitter {
   }
 
   emit<Args extends unknown[]>(event: string, ...args: Args): void {
-    this.emitter.emit(event, ...args);
+    this.emissionDepth++;
+    try {
+      this.emitter.emit(event, ...args);
+    } finally {
+      this.emissionDepth--;
+    }
   }
 
   removeAllListeners(event?: string): void {

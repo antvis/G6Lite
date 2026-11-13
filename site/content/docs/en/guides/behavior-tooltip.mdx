@@ -1,0 +1,22 @@
+---
+title: Tooltip
+description: Show details for a node or edge on hover or click.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+Show details for a node or edge on hover or click.
+
+## Configuration
+
+Set the trigger with `trigger` and return the content from `getContent`. In click mode, click the same element again or click empty canvas to close the tooltip.
+
+```ts
+behaviors: [{ type: 'tooltip', trigger: 'hover', delay: 120 }],
+```
+
+## Example
+
+<NodeDocExample id="behavior-tooltip-hover" locale="en" focus="tooltip" />
+
+[Run the example and view the full code](/en/docs/examples/tooltip) · [Options and defaults](/en/docs/api/options#tooltipoptions) · [See click triggering and styling](/en/docs/guides/behaviors#tooltip)

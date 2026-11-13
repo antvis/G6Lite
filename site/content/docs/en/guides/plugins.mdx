@@ -1,0 +1,56 @@
+---
+title: Plugin overview
+description: Learn how to configure, replace, and unmount plugins in G6Lite
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## What is a plugin?
+
+A plugin adds a separate feature to a graph, such as a statistics panel or an application toolbar.
+
+## Built-in plugins
+
+G6Lite has no built-in plugins. Use the [`tooltip` behavior](/en/docs/guides/behaviors#tooltip) for tooltips and the [theme](/en/docs/guides/theme) for the canvas background. To add your own panel, [write a custom plugin](/en/docs/guides/custom-plugin).
+
+## Configuration [#configure-a-plugin]
+
+### Basic configuration
+
+Register the plugin and use its registered name as `type` in `plugins`. The [custom plugin guide](/en/docs/guides/custom-plugin) implements the `createCounter` factory used here.
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+
+register('plugin', 'docs-counter', createCounter);
+
+const graph = new Graph({
+  container,
+  data,
+  plugins: [{ type: 'docs-counter' }],
+});
+
+await graph.render();
+```
+
+### Configure plugin options
+
+Put plugin options alongside `type`. This example uses `caption` to set the counter title. Click a node or **Plugin +1** to increment the count.
+
+<NodeDocExample id="extension-plugin" locale="en" focus="activate" />
+
+### Replace a plugin or its options
+
+Set `plugins` when you create the graph. To replace a plugin or change its options, destroy the old graph and create a graph with the new configuration.
+
+### Mount and unmount
+
+| Operation | What happens to plugins |
+| --- | --- |
+| `await graph.render()` | Mounts plugins on first render and remounts them on subsequent calls. Click **Render again** in the example to reset the count. |
+| `await graph.setData(nextData)` | Updates graph data while plugins keep running. |
+| `graph.destroy()` | Destroys the graph and calls each plugin's `destroy()` to release its resources. |
+
+## Custom plugins
+
+The [custom plugin guide](/en/docs/guides/custom-plugin) uses the same counter to show how to create the panel, listen for node clicks, and clean up on unmount. For configuration fields, see the [plugin options reference](/en/docs/api/options#plugins).

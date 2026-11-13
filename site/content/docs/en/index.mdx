@@ -1,9 +1,17 @@
 ---
-title: Overview
-description: Start with your first graph, then find guides, API contracts, extensions, and troubleshooting by task
+title: What is G6Lite?
+description: Lightweight graph visualization, built for large-scale relationship data
 ---
 
-G6Lite displays and explores relationship data in a browser. Start with installation for a new integration, or choose the task you need for an existing graph.
+G6Lite is a browser-based graph visualization engine built for large-scale relationship data. Use it for service and device topologies, relationship networks, and knowledge graphs to understand connections and explore regions of interest in large graphs.
+
+## Core capabilities
+
+- **Lightweight loading** — Keep the core separate from layouts and load algorithms on demand to reduce initial loading overhead.
+- **Efficient rendering** — Combine batched WebGL rendering with incremental updates to display and explore large-scale relationship graphs.
+- **Flexible layouts and interactions** — Choose from multiple graph layouts and add zoom, pan, drag, selection, and highlighting.
+- **Customization and extensions** — Map business data to visual styles and extend graph elements, layouts, and interactions as needed.
+- **AI-assisted development** — Use the G6Lite Skill to help an agent create graphs, refine styles, and configure interactions.
 
 ## Start here
 
@@ -11,28 +19,5 @@ G6Lite displays and explores relationship data in a browser. Start with installa
   <Card title="Install and render your first graph" href="/en/docs/getting-started/quick-start">Prepare a container, render, try interactions, and clean up.</Card>
   <Card title="React integration" href="/en/docs/getting-started/react">Handle mounting, data updates, and unmounting.</Card>
   <Card title="Develop with AI" href="/en/docs/ai">Give an agent data and constraints to produce verifiable code.</Card>
+  <Card title="Vue integration" href="/en/docs/getting-started/vue">Mount a graph with a template ref, sync data, and clean up on unmount.</Card>
 </Cards>
-
-For Vue, see the [framework example](/en/docs/getting-started/vue). Before choosing a library, read [What is G6Lite?](/en/docs/concepts/overview) and the [capability comparison](/en/docs/compatibility/library-comparison).
-
-## Documentation structure
-
-| What I need | Start here |
-| --- | --- |
-| Connect business data or refresh a graph | [Data guide](/en/docs/guides/data) · [Data model](/en/docs/concepts/data-model) |
-| Change nodes, edges, or groups | [Nodes](/en/docs/guides/node) · [Edges](/en/docs/guides/edge) · [Combo](/en/docs/guides/combo) |
-| Configure text and brand appearance | [Labels and icons](/en/docs/guides/label) · [Theme](/en/docs/guides/theme) |
-| Choose a layout or fit a canvas | [Layout selection](/en/docs/guides/layout) · [Viewport and coordinates](/en/docs/guides/viewport) |
-| Add selection, dragging, or business responses | [Interactions](/en/docs/guides/interactions) · [States](/en/docs/guides/states) · [Events](/en/docs/guides/events) |
-| Look up arguments, return values, or complete fields | [Graph methods](/en/docs/api/graph) · [GraphOptions](/en/docs/api/options) · [Utilities](/en/docs/api/utilities) |
-| Build custom capabilities | [Extension tutorials](/en/docs/guides/extensions) · [Extension contracts](/en/docs/api/extensions) |
-
-Guides provide task steps; API references define individual contracts. Run the results in the [example gallery](/en/docs/examples).
-
-## Core capabilities
-
-WebGL draws nodes and edges, while Canvas 2D presents labels and groups. G6Lite includes layouts, states, incremental updates, and controlled extensions. See [product positioning](/en/docs/concepts/overview) for workload boundaries and [architecture](/en/docs/concepts/architecture) for internals.
-
-## Choosing G6Lite
-
-For blank canvases, zoom, or interaction issues, start with the [FAQ](/en/docs/faq) and [runtime requirements](/en/docs/compatibility/browser). Evaluate large graphs with [performance metrics](/en/docs/metrics/performance) and [tuning](/en/docs/metrics/performance-tuning). Existing G6 projects should read the [migration guide](/en/docs/compatibility/g6-v5-migration).

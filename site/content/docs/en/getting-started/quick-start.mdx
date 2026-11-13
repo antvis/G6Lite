@@ -5,18 +5,14 @@ description: Install G6Lite and create your first interactive graph
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-Create a collaboration network with 6 nodes and 7 edges: install → prepare the container → await the first render → verify interactions → destroy when leaving.
+Choose an integration method. Both create the same team collaboration graph with 6 nodes and 7 edges.
 
-<QuickStartExample locale="en" variant="network" />
-
-There are two ways to run this example:
-
-- [Package manager](#package-manager)
-- [script / CDN (requires a source build)](#cdn)
+- [Package manager](#package-manager) works with projects that use a bundler such as Vite or Webpack. Install the package and import `Graph` from `@antv/g6-lite`.
+- [CDN](#cdn) works directly in HTML. Import `Graph` with a `<script type="module">` tag.
 
 ## Package manager
 
-This tutorial pins `0.1.0-beta.27`. The npm latest tag may point to an earlier version; check installed versions and types when upgrading. The introductory code is checked against published types. Development features such as autoFit differ from the archive; use only fields available in the installed package.
+### Install
 
 For projects using a bundler such as Vite or Webpack, install G6Lite with one of the following package managers:
 
@@ -24,20 +20,22 @@ For projects using a bundler such as Vite or Webpack, install G6Lite with one of
 
 ```bash
 # npm
-npm install @antv/g6-lite@0.1.0-beta.27
+npm install @antv/g6-lite@0.1.0
 ```
 
 ```bash
 # pnpm
-pnpm add @antv/g6-lite@0.1.0-beta.27
+pnpm add @antv/g6-lite@0.1.0
 ```
 
 ```bash
 # Yarn
-yarn add @antv/g6-lite@0.1.0-beta.27
+yarn add @antv/g6-lite@0.1.0
 ```
 
 </div>
+
+### Create the graph
 
 After installation, add a container with an explicit size:
 
@@ -103,26 +101,19 @@ try {
 }
 ```
 
-The force-directed layout positions the nodes automatically. Node data controls their colors and sizes, and `behaviors` enables zoom, pan, node dragging, and hover highlighting. TypeScript declarations are included in the package.
+TypeScript declarations are included in the package.
+
+Call `graph.destroy()` before removing the container or unmounting the component.
 
 ## CDN
 
-The checked npm `0.1.0-beta.27` archive does not include `dist/g6-lite.min.js`; that npm CDN file URL cannot be used. For script integration, build from source that provides UMD:
-
-```bash
-git clone https://github.com/antvis/G6Lite.git
-cd G6Lite
-git checkout 6fec8e82
-npm install
-npm run build
+```js
+import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
 ```
 
-The output is `dist/g6-lite.min.js`; Node.js 20+ is required. UMD exposes the API through `window.G6Lite`.
+### Create the graph
 
-Place the built file beside index.html below and serve the folder with a static server. Alternatively upload the script to your own CDN and replace src. The UMD build inlines runtime dependencies and layouts.
-
-<details>
-<summary>Complete HTML; save as index.html</summary>
+Save the HTML below as `index.html` and open it in your browser.
 
 ```html
 <!doctype html>
@@ -134,8 +125,9 @@ Place the built file beside index.html below and serve the folder with a static 
   </head>
   <body>
     <div id="container" style="height: 360px"></div>
-    <script src="./g6-lite.min.js"></script>
-    <script>
+    <script type="module">
+      import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
+
       const data = {
         nodes: [
           { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
@@ -156,7 +148,7 @@ Place the built file beside index.html below and serve the folder with a static 
         ],
       };
 
-      const graph = new G6Lite.Graph({
+      const graph = new Graph({
         container: '#container',
         data,
         node: {
@@ -192,21 +184,17 @@ Place the built file beside index.html below and serve the folder with a static 
 </html>
 ```
 
-</details>
+The single-page example destroys the instance on `pagehide`. Recreate it if the browser restores the page from its back/forward cache.
 
-Pin the source commit and built artifact in production instead of floating master or beta URLs. See [bundle size](/en/docs/metrics/bundle-size) for ESM and UMD loading differences.
+<span id="verify-and-clean-up" style={{ scrollMarginTop: '8rem' }} />
 
-## Verify and clean up
+## Result
 
-Expect 6 labeled nodes and 7 edges. Try wheel zoom, dragging the background, dragging a node, and hover highlighting. For a blank graph, check non-zero container dimensions, WebGL, and console errors; see the [FAQ](/en/docs/faq).
+Both methods render the team collaboration graph below, with 6 labeled nodes and 7 edges. Drag the background to pan the canvas.
 
-Run the package example after the real DOM is mounted. Before unmounting a component or removing its container, call:
+<QuickStartExample locale="en" variant="network" />
 
-```ts
-graph.destroy();
-```
-
-Removing DOM alone does not replace instance cleanup. The CDN single-page example uses pagehide; recreate the graph if the page returns from the browser's back/forward cache. Use the framework lifecycle below for application routes.
+For a blank graph, check the container dimensions, WebGL support, and browser console.
 
 ## Use in frontend frameworks
 
@@ -220,5 +208,3 @@ In React and Vue, obtain the DOM element through a ref, create the graph after c
     Manage a graph with template refs and lifecycle hooks.
   </Card>
 </Cards>
-
-In frameworks such as Next.js and Nuxt, create `Graph` only on the client, after the DOM is available.

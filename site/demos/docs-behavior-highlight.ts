@@ -19,7 +19,9 @@ export async function run(container: HTMLElement) {
       stateStyles: { highlight: { fill: '#00A876', stroke: '#005C41', strokeWidth: 2 } },
     },
     edge: { style: { hitAreaWidth: 12 }, stateStyles: { highlight: { stroke: '#00A876', lineWidth: 2 } } },
+    // #region highlight
     behaviors: ['zoom-canvas', 'drag-canvas', { type: 'hover-highlight', degree: 1, inactiveState: 'inactive' }],
+    // #endregion highlight
     autoFit: { padding: 60, maxZoom: 1 },
   });
   const status = document.createElement('div');

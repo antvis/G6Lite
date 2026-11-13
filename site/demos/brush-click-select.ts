@@ -31,12 +31,7 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const ui = createDemoPanel(
-    container,
-    '框选与点击选择',
-    '按住 Shift 拖拽框选。松手后结果必须保留；独立点击空白才清空。',
-    '',
-  );
+  const ui = createDemoPanel(container, '按住 Shift 拖拽框选。松手后结果必须保留；独立点击空白才清空。');
   let latest = '等待 Shift 框选';
   const render = () => {
     const selected = graph.findNodesByState('selected');
@@ -47,5 +42,5 @@ export async function run(container: string | HTMLElement) {
   graph.on('selection:clear', () => { latest = 'selection:clear'; render(); });
   render();
 
-  return { destroy: () => { graph.destroy(); ui.panel.remove(); } };
+  return { destroy: () => { graph.destroy(); ui.destroy(); } };
 }

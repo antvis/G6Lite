@@ -19,7 +19,7 @@ Drag nodes or zoom to inspect both lines and backgrounds. Expand the complete so
 
 ## Protocol
 
-Inputs include text, resolved style, ctx, dpr, and zoom. type='node' provides node; type='edge' provides edge / source / target. Narrow type before using category-specific fields. See [LabelRenderer](/en/docs/api/extensions/drawing#labelrenderer).
+Inputs include text, resolved style, ctx, dpr, and zoom. type='node' provides node; type='edge' provides edge / source / target. Narrow type before using category-specific fields. See [LabelRenderer](/en/docs/api/extensions#labelrenderer).
 
 Font sizes, offsets, and padding in style already use backing-store pixels; do not multiply by DPR or zoom. The draw origin is the label center and edge rotation is already applied.
 
@@ -33,17 +33,14 @@ Check nonempty label, hidden states, low-zoom thresholds, and collisions before 
 
 ### What happens for invalid dimensions or drawing errors?
 
-The current label falls back to default single-line rendering with diagnostics. Do not return 0, NaN, or infinite dimensions. Decoration failures behave differently; see [drawing contracts](/en/docs/api/extensions/drawing).
+The current label falls back to default single-line rendering with diagnostics. Do not return 0, NaN, or infinite dimensions. Decoration failures behave differently; see [drawing contracts](/en/docs/api/extensions#extension-drawing).
 
 ### Do edge labels always follow the rendered path?
 
-Current polyline / cubic positions and rotations use the endpoint chord and may not follow routed paths. See [edge labels](/en/docs/api/options/edge#edge-labels).
+Current polyline / cubic positions and rotations use the endpoint chord and may not follow routed paths. See [edge labels](/en/docs/guides/edge#edge-labels).
 
-See the complete [custom label example](/en/docs/examples/custom-label-renderer) and [registration](/en/docs/api/extensions/registration) for shared caching.
+See the complete [custom label example](/en/docs/examples/custom-label-renderer) and [registration](/en/docs/api/graph#extension-registration) for shared caching.
 
-<details data-related-examples>
-<summary>Related runnable examples</summary>
+**Related runnable examples**
 
 - [Custom label renderer](/en/docs/examples/custom-label-renderer)
-
-</details>

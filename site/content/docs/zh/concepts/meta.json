@@ -1,11 +1,6 @@
 {
-  "title": "核心概念",
+  "title": "开始使用",
   "pages": [
-    "overview",
-    "data-model",
-    "graph-lifecycle",
-    "states",
-    "viewport",
     "architecture"
   ]
 }

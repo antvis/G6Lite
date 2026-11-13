@@ -1,13 +1,17 @@
 /**
  * Demo: constrain wheel zoom with sensitivity, minZoom, and maxZoom.
  */
-import { Graph } from '@antv/g6-lite';
+import { Graph, type BuiltInBehaviorConfig } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
-const MIN_ZOOM = 0.4;
-const MAX_ZOOM = 2;
-
 export async function run(container: string | HTMLElement) {
+  // #region navigation
+  const behaviors = [
+    { type: 'zoom-canvas', sensitivity: 1.4, minZoom: 0.4, maxZoom: 2 },
+    { type: 'drag-canvas', ignoreModifierKeys: true },
+  ] satisfies [BuiltInBehaviorConfig, BuiltInBehaviorConfig];
+  // #endregion navigation
+  const [{ minZoom, maxZoom }] = behaviors;
   const graph = new Graph({
     autoFit: true,
     container,
@@ -26,29 +30,12 @@ export async function run(container: string | HTMLElement) {
       ],
     },
     node: { style: { size: 28, fill: '#5B8FF9' } },
-    behaviors: [
-      { type: 'zoom-canvas', sensitivity: 1.4, minZoom: MIN_ZOOM, maxZoom: MAX_ZOOM },
-      'drag-canvas',
-    ],
+    behaviors,
   });
-  await graph.render();
-
-  const ui = createDemoPanel(
-    container,
-    '缩放范围',
-    '',
-    `<button data-zoom="${MIN_ZOOM}">最小 ${MIN_ZOOM}</button><button data-zoom="1">1x</button><button data-zoom="${MAX_ZOOM}">最大 ${MAX_ZOOM}</button>`,
-  );
+  const ui = createDemoPanel(container);
   const report = () => {
-    ui.setStatus(`sensitivity 1.4 · 范围 ${MIN_ZOOM}–${MAX_ZOOM} · 当前 ${graph.getZoom().toFixed(2)}`);
+    ui.setStatus(`Zoom ${graph.getZoom().toFixed(2)}× · ${minZoom}–${maxZoom}×`);
   };
-  ui.controls.addEventListener('click', (event) => {
-    const zoom = Number((event.target as HTMLElement).dataset.zoom);
-    if (!Number.isFinite(zoom)) return;
-    graph.zoomTo(zoom);
-    report();
-  });
-  report();
   const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
   let reportFrame: number | undefined;
   const onWheel = () => {
@@ -57,14 +44,26 @@ export async function run(container: string | HTMLElement) {
   };
   host.addEventListener('wheel', onWheel, { passive: true });
 
-  return {
-    getData: () => graph.getData(),
-    fitView: () => { graph.fitView(); report(); },
-    destroy() {
-      host.removeEventListener('wheel', onWheel);
-      if (reportFrame !== undefined) cancelAnimationFrame(reportFrame);
-      graph.destroy();
-      ui.panel.remove();
-    },
+  const fitView = graph.fitView.bind(graph);
+  graph.fitView = (options) => { fitView(options); report(); };
+  const zoomTo = graph.zoomTo.bind(graph);
+  graph.zoomTo = (zoom, options) => { zoomTo(zoom, options); report(); };
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => {
+    host.removeEventListener('wheel', onWheel);
+    if (reportFrame !== undefined) cancelAnimationFrame(reportFrame);
+    ui.destroy();
+    destroy();
   };
+  try {
+    await graph.render();
+    ui.addAction(`${minZoom}×`, () => graph.zoomTo(minZoom));
+    ui.addAction('1×', () => graph.zoomTo(1));
+    ui.addAction(`${maxZoom}×`, () => graph.zoomTo(maxZoom));
+    report();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
 }

@@ -63,7 +63,7 @@ await graph.render();
 - Built-in edge paths cover `line`, `arc`, `polyline`, and `cubic`, including self-loop and arrow handling where configured.
 - Official layouts include `circular`, `concentric`, `dagre`, `d3-force`, `force`, `force-atlas2`, `fruchterman`, `grid`, `mds`, `radial`, `random`, `fishbone`, `indented`, and `mindmap`.
 - Common built-in behaviors include canvas zoom/drag, node drag, click selection, hover highlighting, edge drag, brush/lasso selection, and tooltip.
-- Use `register()` and `extensionFactory()` for custom node, edge, label, decoration, layout, behavior, transform, and plugin extensions.
+- Use `register()` for custom node, edge, label, decoration, layout, behavior, transform, and plugin extensions. Pass a factory that returns a fresh instance for stateful extensions.
 - Do not invent arbitrary HTML/SVG node trees, G6 v5 plugins, animation orchestration, graph algorithms, Node.js rendering, or a mature community plugin ecosystem.
 
 ## Choose the implementation path

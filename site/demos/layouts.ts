@@ -2,7 +2,7 @@
  * Demo: 布局 — 同一数据切换 circular / force / grid / dagre
  */
 import { Graph } from '@antv/g6-lite';
-import { mountChoiceSelect } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 const data = {
   nodes: [
@@ -54,9 +54,10 @@ export async function run(container: string | HTMLElement) {
 
   await renderLayout(0);
 
-  mountChoiceSelect(wrapper, '布局', ['Circular', 'Force', 'Grid', 'Dagre'], 'Circular', (value) => {
-    const index = ['Circular', 'Force', 'Grid', 'Dagre'].indexOf(value);
-    if (index >= 0) void renderLayout(index);
+  const ui = createDemoPanel(wrapper);
+  const labels = ['Circular', 'Force', 'Grid', 'Dagre'];
+  ui.addChoice('布局', labels, labels[0], (value) => {
+    void renderLayout(labels.indexOf(value));
   });
 
   return {
@@ -65,7 +66,7 @@ export async function run(container: string | HTMLElement) {
     destroy: () => {
       currentGraph?.destroy();
       currentGraph = null;
-      wrapper.querySelector('[data-canvas-controls]')?.remove();
+      ui.destroy();
     },
   };
 }

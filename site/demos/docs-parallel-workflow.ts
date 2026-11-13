@@ -1,11 +1,25 @@
-import { Graph } from '@antv/g6-lite';
-import { buttonStyle } from './demo-panel.ts';
+import { Graph, type EdgeConfig } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
-  let enabled = true;
-  let offset = 48;
-  let includeReverse = true;
-  const options = () => ({ enabled, offset, includeReverse, maxOffset: 100 });
+  // #region separation
+  const selfLoop = { id: 'bb', source: 'B', target: 'B' };
+  const parallelEdges = { enabled: true, offset: 48, includeReverse: true, maxOffset: 100 };
+  const edge: EdgeConfig = {
+    type: 'line',
+    parallelEdges,
+    style: {
+      endArrow: true,
+      lineWidth: 2,
+      stroke: (_source, _target, edge) => {
+        if (edge.source === edge.target) return '#7c3aed';
+        return edge.source === 'D' ? '#f6903d' : '#1783ff';
+      },
+    },
+  };
+  // #endregion separation
+  let { enabled, offset, includeReverse } = parallelEdges;
+  const options = () => ({ ...parallelEdges, enabled, offset, includeReverse });
   const graph = new Graph({
     container,
     data: {
@@ -17,62 +31,58 @@ export async function run(container: HTMLElement) {
         { id: 'ab1', source: 'A', target: 'B' },
         { id: 'ab2', source: 'A', target: 'B' },
         { id: 'ab3', source: 'A', target: 'B' },
+        selfLoop,
         { id: 'cd', source: 'C', target: 'D' },
         { id: 'dc', source: 'D', target: 'C' },
       ],
     },
     node: { style: { size: 26, label: (node) => node.id, labelPlacement: 'bottom' } },
-    // #region separation
-    edge: {
-      type: 'line',
-      parallelEdges: options(),
-      style: {
-        endArrow: true, lineWidth: 2,
-        stroke: (_source, _target, edge) => edge.source === 'D' ? '#f6903d' : '#1783ff',
-      },
-    },
-    // #endregion separation
+    edge,
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
     autoFit: { padding: [90, 64, 64, 64], maxZoom: 1 },
   });
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;left:12px;top:12px;right:60px;z-index:20;display:flex;flex-wrap:wrap;gap:6px;';
+  const ui = createDemoPanel(container);
   const status = document.createElement('div');
   status.setAttribute('role', 'status');
   status.style.cssText = 'position:absolute;left:12px;bottom:10px;background:#fff;color:#334155;padding:4px 8px;font:12px system-ui;pointer-events:none;';
-  const update = () => {
+  const applySeparationOptions = () => {
     // #region update
     graph.updateOptions({ edge: { parallelEdges: options() } });
     // #endregion update
+  };
+  const updateStatus = () => {
     status.textContent = `enabled: ${enabled} · offset: ${offset} · includeReverse: ${includeReverse} · A→B: ${graph.getEdges().filter((edge) => edge.source === 'A').length}`;
   };
   const actions: Array<[string, () => void]> = [
-    ['Toggle separation', () => { enabled = !enabled; }],
-    ['Spacing 24 / 64', () => { offset = offset === 24 ? 64 : 24; }],
-    ['Toggle reverse group', () => { includeReverse = !includeReverse; }],
+    ['Toggle separation', () => {
+      enabled = !enabled;
+      applySeparationOptions();
+    }],
+    ['Spacing 24 / 64', () => {
+      offset = offset === 24 ? 64 : 24;
+      applySeparationOptions();
+    }],
+    ['Toggle reverse group', () => {
+      includeReverse = !includeReverse;
+      applySeparationOptions();
+    }],
     // #region mutation
     ['Add ab4', () => { if (!graph.getEdgeData('ab4')) graph.addEdge({ id: 'ab4', source: 'A', target: 'B' }); }],
     ['Remove ab4', () => { graph.removeEdge('ab4'); }],
     // #endregion mutation
   ];
-  for (const [label, action] of actions) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = label;
-    button.style.cssText = buttonStyle;
-    button.onclick = () => { action(); update(); };
-    controls.append(button);
-  }
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
-    for (const button of controls.querySelectorAll('button')) button.onclick = null;
-    controls.remove(); status.remove(); destroy();
+    ui.destroy(); status.remove(); destroy();
   };
   try {
     await graph.render();
     if (graph.destroyed) return graph;
-    container.append(controls, status);
-    update();
+    for (const [label, action] of actions) {
+      ui.addAction(label, () => { action(); updateStatus(); });
+    }
+    container.append(status);
+    updateStatus();
     return graph;
   } catch (error) {
     graph.destroy();

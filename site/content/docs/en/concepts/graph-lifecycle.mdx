@@ -1,84 +1,15 @@
 ---
-title: Graph lifecycle
-description: The calling sequence for creation, first render, updates, and destruction
+title: Graph lifecycle (previous URL)
+description: See Graph methods for creation, rendering, updates, and destruction
 ---
 
-import { GraphLifecycleFlow } from '@/components/graph-lifecycle-flow';
-import { NodeDocExample } from '@/components/node-doc-example';
+Lifecycle guidance is now in [Graph methods](/en/docs/api/graph#graph-lifecycle).
 
-Usually, create one instance, reuse it after the first render, and destroy it on exit. This page helps choose operations by stage. See the [lifecycle method reference](/en/docs/api/graph/lifecycle) for signatures and boundaries.
-
-## Lifecycle overview
-
-<GraphLifecycleFlow locale="en" />
-
-## Creation and first render
-
-Use a dedicated mounted container with nonzero dimensions. Construction prepares the canvas and renderer; render performs layout and drawing.
-
-On a normal path that has not been canceled, superseded, or destroyed, await graph.render() before data and state writes. The first afterrender still precedes completed initialization and is not a safe data-write entry point. See [framework integration](/en/docs/getting-started/react) for mounting and cleanup.
-
-## Updates during use
-
-| Change | Operation | Details |
-| --- | --- | --- |
-| Replace all data | await graph.setData(nextData) | [Data updates](/en/docs/guides/data#replace-all-data) |
-| Change elements or states | Element / state methods | [Incremental updates](/en/docs/api/graph#changing-nodes-and-edges), [states](/en/docs/api/graph/states) |
-| Change appearance or theme | graph.updateOptions(options) | [Merge rules](/en/docs/api/graph/lifecycle#updateoptions) |
-| Change external style input | graph.refresh() | [Refresh boundaries](/en/docs/api/graph/lifecycle#refresh) |
-| Recalculate positions | setLayout, then await layout | [Layout methods](/en/docs/api/graph/layout) |
-| Zoom, pan, or fit | Viewport methods | [Viewport and coordinates](/en/docs/api/graph/viewport) |
-
-These operations reuse the instance. Repeated render rebuilds the runtime and refits. Temporary states and incremental changes need not survive; do not use it for routine updates.
-
-## Destruction and asynchronous cleanup
-
-Destroy immediately on page exit or unmount, even while initialization is pending. A destroyed instance cannot be reused. Repeated destruction after normal cleanup has no additional effect.
-
-Check graph.destroyed after asynchronous work. Concurrent requests also need your own sequence or cancellation. destroyed indicates destruction only, not successful initialization or current task validity.
-
-Graph owns its canvas, interaction, plugins, and listeners. Application requests, timers, and DOM listeners still require application cleanup. See the [render contract](/en/docs/api/graph/lifecycle#render) for canceled and failed paths.
-
-## Complete example
-
-The log shows afterrender, then await render resolved, followed by selecting A. Compare visual updates, refresh, and rendering again. Finally destroy the graph, observe canvas removal, then use Reset example to create a new instance.
-
-<NodeDocExample id="graph-lifecycle" locale="en" focus="initialize" />
-
-<details>
-<summary>Mount on a page and return cleanup</summary>
-
-```ts
-import { Graph, type GraphData } from '@antv/g6-lite';
-
-export function mountGraph(container: HTMLElement, data: GraphData) {
-  const graph = new Graph({ container, data });
-
-  async function initialize() {
-    await graph.render();
-    if (graph.destroyed) return;
-    console.log(graph.getNodeCount()); // Business logic after normal initialization
-  }
-
-  void initialize().catch((error) => {
-    graph.destroy();
-    console.error(error);
-  });
-
-  return () => graph.destroy(); // Pass to page or component cleanup
-}
-```
-
-</details>
-
-## Common questions
-
-### Why can data writes fail inside afterrender?
-
-The first event precedes the initialized flag. Subscribe before render to receive events, then perform writes after await graph.render().
-
-### Why can an operation still be unavailable after render fulfills?
-
-Canceled, superseded, or destroyed tasks can fulfill normally. Check instance and application task validity, not just Promise fulfillment. Create a new instance after destruction; calling render again cannot revive it.
-
-Continue with [lifecycle methods](/en/docs/api/graph/lifecycle), [event order and payloads](/en/docs/api/graph/events/lifecycle), and the [event guide](/en/docs/guides/events/lifecycle).
+- <span id="lifecycle-overview" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Lifecycle and style updates](/en/docs/api/graph#graph-lifecycle)
+- <span id="creation-and-first-render" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Creation and first render](/en/docs/api/graph#graph-lifecycle-render)
+- <span id="updates-during-use" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Data updates](/en/docs/api/graph#graph-data-mutations)
+- <span id="destruction-and-asynchronous-cleanup" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Destruction and asynchronous cleanup](/en/docs/api/graph#graph-lifecycle-destroy)
+- <span id="complete-example" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Style update example](/en/docs/api/graph#graph-lifecycle-updateoptions)
+- <span id="common-questions" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Render timing and cancellation](/en/docs/api/graph#graph-lifecycle-render)
+- <span id="why-can-data-writes-fail-inside-afterrender" style={{ display: 'block', scrollMarginTop: '8rem' }} />[First render and afterrender](/en/docs/api/graph#graph-lifecycle-render)
+- <span id="why-can-an-operation-still-be-unavailable-after-render-fulfills" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Render cancellation and superseded tasks](/en/docs/api/graph#graph-lifecycle-render)

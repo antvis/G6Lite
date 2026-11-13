@@ -1,0 +1,18 @@
+---
+title: Drag edge endpoints
+description: Drag an endpoint of an existing edge and use the drop event to read the proposed connection.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+Drag an endpoint of an existing edge and use the drop event to read the proposed connection.
+
+## Configuration
+
+Start dragging near an endpoint. On release, `edge:dragend` reports the proposed connection. Call `updateEdgeData()` to apply it.
+
+## Example
+
+<NodeDocExample id="behavior-drag-edge" locale="en" focus="reconnect" />
+
+[Options and defaults](/en/docs/api/options#navigation-and-dragging)

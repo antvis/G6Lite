@@ -1,4 +1,5 @@
 import { Graph, type FitViewOptions, type GraphData } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
   const fit: FitViewOptions = { padding: [76, 48, 100, 48], maxZoom: 1 };
@@ -29,8 +30,7 @@ export async function run(container: HTMLElement) {
     const unchanged = before.x === after.x && before.y === after.y && before.zoom === after.zoom;
     lastAction = `Last reload (${keepView ? 'keep view' : 'refit'}): camera ${unchanged ? 'unchanged' : 'changed'}`;
   };
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;left:12px;top:12px;right:150px;display:flex;flex-wrap:wrap;gap:6px;z-index:20;';
+  const ui = createDemoPanel(container);
   const status = document.createElement('div');
   status.setAttribute('role', 'status');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;right:12px;padding:8px;background:white;color:#334155;font:12px/1.5 system-ui;white-space:pre-line;pointer-events:none;z-index:20;';
@@ -47,25 +47,6 @@ export async function run(container: HTMLElement) {
     ['Reload + fit', () => reload(false)],
     ['Focus A', () => { graph.focusItem('A'); lastAction = 'Focused A'; }],
   ];
-  const buttons = actions.map(([label, action]) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = label;
-    button.style.cssText = 'padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;color:#334155;font:12px system-ui;cursor:pointer;';
-    button.onclick = async () => {
-      for (const item of buttons) item.disabled = true;
-      try {
-        await action();
-        if (!disposed) update();
-      } catch {
-        if (!disposed) { lastAction = 'Update failed'; update(); }
-      } finally {
-        if (!disposed) for (const item of buttons) item.disabled = false;
-      }
-    };
-    controls.append(button);
-    return button;
-  });
   const events = ['node:pointermove', 'edge:pointermove', 'canvas:pointermove', 'canvas:pointerup', 'resize'] as const;
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
@@ -74,8 +55,7 @@ export async function run(container: HTMLElement) {
     for (const event of events) graph.off(event, schedule);
     window.removeEventListener('click', schedule);
     window.removeEventListener('wheel', schedule);
-    for (const button of buttons) button.onclick = null;
-    controls.remove(); status.remove();
+    ui.destroy(); status.remove();
     destroy();
   };
   try {
@@ -85,7 +65,18 @@ export async function run(container: HTMLElement) {
     for (const event of events) graph.on(event, schedule);
     window.addEventListener('click', schedule);
     window.addEventListener('wheel', schedule, { passive: true });
-    container.append(controls, status);
+    const buttons = actions.map(([label, action]) => ui.addAction(label, async () => {
+        for (const item of buttons) item.disable();
+        try {
+          await action();
+          if (!disposed) update();
+        } catch {
+          if (!disposed) { lastAction = 'Update failed'; update(); }
+        } finally {
+          if (!disposed) for (const item of buttons) item.enable();
+        }
+    }));
+    container.append(status);
     update();
     return graph;
   } catch (error) {

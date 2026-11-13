@@ -1,4 +1,5 @@
 import { Graph } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -36,8 +37,7 @@ export async function run(container: HTMLElement) {
   };
   const remove = () => graph.removeNode('D'); // Also removes C-D.
   // #endregion mutation
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;left:12px;top:12px;right:150px;display:flex;flex-wrap:wrap;gap:6px;z-index:20;';
+  const ui = createDemoPanel(container);
   const status = document.createElement('div');
   status.setAttribute('role', 'status');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;right:12px;padding:8px;background:white;color:#334155;font:12px/1.5 system-ui;white-space:pre-line;pointer-events:none;z-index:20;';
@@ -61,21 +61,16 @@ export async function run(container: HTMLElement) {
     ['Add D', () => { add(); last = 'Added D'; }],
     ['Remove D', () => { remove(); last = 'Removed D'; }],
   ];
-  const buttons = actions.map(([label, action]) => {
-    const button = document.createElement('button');
-    button.type = 'button'; button.textContent = label;
-    button.style.cssText = 'padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;color:#334155;font:12px system-ui;cursor:pointer;';
-    button.onclick = () => { action(); report(); };
-    controls.append(button); return button;
-  });
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
-    for (const button of buttons) button.onclick = null;
-    controls.remove(); status.remove(); destroy();
+    ui.destroy(); status.remove(); destroy();
   };
   try {
     await graph.render();
     if (graph.destroyed) return graph;
-    container.append(controls, status); report(); return graph;
+    for (const [label, action] of actions) {
+      ui.addAction(label, () => { action(); report(); });
+    }
+    container.append(status); report(); return graph;
   } catch (error) { graph.destroy(); throw error; }
 }

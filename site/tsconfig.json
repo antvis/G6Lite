@@ -26,6 +26,24 @@
       "@antv/g6-lite": [
         "../src/index.ts"
       ],
+      "@antv/g6-lite/layouts/mds": [
+        "../src/layout/optional/mds.ts"
+      ],
+      "@antv/g6-lite/layouts/radial": [
+        "../src/layout/optional/radial.ts"
+      ],
+      "@antv/g6-lite/layouts/indented": [
+        "../src/layout/optional/indented.ts"
+      ],
+      "@antv/g6-lite/layouts/mindmap": [
+        "../src/layout/optional/mindmap.ts"
+      ],
+      "@antv/g6-lite/layouts/fishbone": [
+        "../src/layout/optional/fishbone.ts"
+      ],
+      "@antv/g6-lite/layouts/random": [
+        "../src/layout/optional/random.ts"
+      ],
       "collections/*": [
         "./.source/*"
       ]

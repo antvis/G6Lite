@@ -84,6 +84,7 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
 
   let el: HTMLDivElement | null = null;
   let showTimer: ReturnType<typeof setTimeout> | null = null;
+  let disposed = false;
   // For click trigger: identity of the currently pinned element (toggle support).
   let pinnedKey: string | null = null;
 
@@ -138,6 +139,7 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
 
   const show = (ctx: TooltipContext): void => {
     if (enable && !enable(ctx)) return;
+    if (disposed) return;
     const target = ensureEl();
     setBody(getContent(ctx), target, allowHtml);
     target.style.visibility = 'visible';
@@ -223,6 +225,7 @@ export function tooltip(renderer: Renderer, graph?: Graph, options?: TooltipOpti
   }
 
   return () => {
+    disposed = true;
     if (trigger === 'hover') {
       emitter.off('node:pointerover', onNodeOver);
       emitter.off('node:pointermove', onNodeMove);

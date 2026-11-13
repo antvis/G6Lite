@@ -3,41 +3,32 @@
 }
 
 .dataControls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-fd-border);
-  font-size: 13px;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  max-width: calc(100% - 24px);
+  font-size: 12px;
+  pointer-events: none;
 }
 
-.dataControls button {
-  padding: 7px 12px;
-  border: 1px solid var(--color-fd-border);
-  border-radius: 6px;
-  color: var(--color-fd-foreground);
-  background: var(--color-fd-background);
-  cursor: pointer;
+.dataPanel {
+  pointer-events: auto;
 }
 
-.dataControls button[aria-pressed='true'] {
-  border-color: var(--color-fd-primary);
-  color: var(--color-fd-primary);
-  background: var(--color-fd-muted);
+.dataPanel,
+.dataPanel > :global(.lil-gui) {
+  max-width: 100%;
 }
 
-.dataControls button:focus-visible {
-  outline: 2px solid var(--color-fd-primary);
-  outline-offset: 2px;
+.dataPanel > :global(.lil-gui) {
+  --name-width: 30%;
 }
 
-.dataControls button:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.dataControls span {
+.dataControls > span {
   color: var(--color-fd-muted-foreground);
 }
 
@@ -47,13 +38,15 @@
 
 .tools {
   position: absolute;
-  top: 12px;
   right: 12px;
+  bottom: 12px;
   z-index: 2;
   display: flex;
   align-items: center;
   gap: 4px;
   color: #64748b;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 90%);
 }
 
 .tools svg {
@@ -65,8 +58,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: var(--canvas-tool-size);
+  height: var(--canvas-tool-size);
   padding: 0;
   border: 0;
   border-radius: 6px;
@@ -90,16 +83,29 @@
   outline-offset: 2px;
 }
 
-@media (pointer: coarse) {
-  .tools button {
-    width: 44px;
-    height: 44px;
-  }
-}
-
 .viewport {
+  --canvas-tool-size: 32px;
+  --canvas-toolbar-width: calc(4 * var(--canvas-tool-size) + 12px);
   position: relative;
   overflow: hidden;
+}
+
+.viewport:has(.tools > :only-child) {
+  --canvas-toolbar-width: var(--canvas-tool-size);
+}
+
+.viewport:has(.tools > :nth-child(3):last-child) {
+  --canvas-toolbar-width: calc(3 * var(--canvas-tool-size) + 8px);
+}
+
+.canvas > [role='status'] {
+  margin-inline-end: calc(var(--canvas-toolbar-width) + 12px);
+}
+
+@media (pointer: coarse) {
+  .viewport {
+    --canvas-tool-size: 44px;
+  }
 }
 
 :global(.docs-brand-layout) :global(#nd-page) .preview > .viewport {

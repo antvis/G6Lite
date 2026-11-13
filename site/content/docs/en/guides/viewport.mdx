@@ -1,11 +1,17 @@
 ---
-title: Viewport fitting and coordinates
-description: Choose when to fit, convert pointer coordinates, and preserve the user's view during data updates
+title: Viewport and coordinates
+description: Fit the canvas, preserve the user view, convert coordinates, and position menus
 ---
 
 import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
 
-Decide when the view may change before choosing a fitting method. See [viewport and coordinates](/en/docs/concepts/viewport) for graph positions versus the camera.
+The viewport is the part of the graph you can currently see. Panning or zooming changes how you view it; connections and node graph coordinates stay unchanged.
+
+## Graph positions and the current view
+
+A node's x / y is its graph position, supplied by data or computed by layout. Camera x / y / zoom describes translation and scale. Dragging a node changes its position; dragging the canvas changes the camera.
+
+Relayout and fitting are separate steps: layout computes positions, while fitView adjusts the camera to bring content into view.
 
 ## Choose when to fit
 
@@ -19,6 +25,16 @@ Decide when the view may change before choosing a fitting method. See [viewport 
 
 The first await graph.render() performs an initial fit even with autoFit: false. Data replacement, relayout, and container resizing have separate policies. Do not call render again just to refresh the viewport.
 
+Use the buttons below to compare centering and fitting. Zoom or pan first, then choose Center or Fit. Center retains zoom. Fit adjusts both translation and scale. Reset camera restores the first rendered camera.
+
+<LayoutDocExample id="viewport-concept" locale="en" focus="camera" />
+
+[fitView parameters](/en/docs/api/graph#graph-viewport-fitview) · [fitCenter parameters](/en/docs/api/graph#fitcenter)
+
+### Why is the graph still small after fitting?
+
+Check for distant nodes, far-reaching edges or Combos, then inspect padding and maxZoom. The example caps maxZoom at 1 to avoid over-enlarging a small graph. fitCenter only centers; use zoomTo or zoomBy to zoom in explicitly.
+
 ## Refresh data with or without fitting
 
 Zoom with the toolbar or drag empty canvas, then choose Reload + keep view. B moves from x=240 to x=800 while the camera stays unchanged; B may leave the viewport. Use Reset example, then Reload + fit to compare: the updated content fits into view.
@@ -29,14 +45,11 @@ Use fitView: false to keep the view; no camera save-and-restore is needed. New c
 
 Omitting the second setData argument uses fitView(0.9); it does not inherit the initial autoFit padding. Pass a fit options object to this setData call, as in the example, to reuse your padding.
 
-<details>
-<summary>Asynchronous refresh and saved views</summary>
+**Asynchronous refresh and saved views**
 
 The example disables buttons during an update. For concurrent application requests, use a request sequence or cancellation to apply only the latest result. Check graph.destroyed after asynchronous work.
 
 To restore a view across pages, save the getCamera() snapshot and call setCamera(saved) after the new instance's await render(). The camera records translation and zoom only; a different container size or different graph positions may show a different area. Calling fitView immediately afterward overwrites the restored camera.
-
-</details>
 
 ## Handle resizing and completed layouts
 
@@ -48,13 +61,17 @@ Zoom first, then switch Width 65% / 100% below. Only container CSS width changes
 
 The container needs nonzero width and height. To reset the view when revealing a hidden tab, explicitly fitView after the container reaches its final size. The resize event follows any automatic fitting.
 
-After await graph.layout(), either call `graph.fitView({ padding: 32, maxZoom: 1 })` or retain the current camera. Layout computes node positions; fitting is explicit. See [layout methods](/en/docs/api/graph/layout) for asynchronous cancellation.
+After await graph.layout(), either call `graph.fitView({ padding: 32, maxZoom: 1 })` or retain the current camera. Layout computes node positions; fitting is explicit. See [layout methods](/en/docs/api/graph#graph-layout) for asynchronous cancellation.
 
 ## Convert coordinates to position DOM content
 
-Reuse the concept page's A-point observer below. Zoom and pan to compare canvas and client positions. Page scrolling changes client while keeping canvas unchanged. The key code projects graph coordinates into client coordinates and converts them back.
+Use screenToGraph and graphToScreen to convert between graph and client coordinates. Watch A in the canvas above to compare the three coordinate spaces. Zooming or panning changes the canvas position. Scrolling the page changes the client position.
 
-<LayoutDocExample id="viewport-concept" locale="en" focus="coordinates" />
+| Coordinates | Origin | Common use |
+| --- | --- | --- |
+| graph | The graph's own coordinate system | Store node positions, run layouts, create graph elements |
+| canvas | Canvas top-left, CSS pixels | Position auxiliary content inside the canvas container |
+| client | Browser viewport top-left, CSS pixels | Match mouse clientX / clientY, place fixed menus |
 
 Convert DOM mouse events using clientX / clientY. Element events already supply event.graph, event.canvas, and event.client. Fixed menus use client coordinates. Absolutely positioned content inside a canvas container without borders or padding uses CSS coordinates relative to that container.
 
@@ -74,13 +91,21 @@ export function placeMarker(graph: Graph, marker: HTMLElement, point: { x: numbe
 }
 ```
 
-Reproject the anchor after zooming, panning, or page scrolling; close menus that should not follow. Do not multiply by DPR. screenToGraph does not take offsetX / offsetY or screenX / screenY. See [the three coordinate spaces](/en/docs/concepts/viewport#three-coordinate-spaces).
+Reproject the anchor after zooming, panning, or page scrolling; close menus that should not follow. Do not multiply by DPR. screenToGraph does not take offsetX / offsetY or screenX / screenY.
 
 ## Common questions
 
-### Why is the graph still small after fitting?
+### Should I save new node positions after panning or zooming?
 
-Check for distant nodes, far-reaching edges or Combos, then inspect padding and maxZoom. The example caps maxZoom at 1 to avoid over-enlarging a small graph. fitCenter only centers; use zoomTo or zoomBy to zoom in explicitly.
+These operations did not move nodes. Read getCamera to save the user's view, or element positions to save the layout; handle them separately.
+
+### Why does a menu drift as I zoom?
+
+Check for graph coordinates used directly as CSS positions, or canvas positions treated as client. Choose coordinates according to where the menu is mounted.
+
+### Why does centered content still not fit?
+
+fitCenter changes position only. Use fitView to adjust zoom too, and check padding and zoom bounds.
 
 ### Why does refreshing move the view with autoFit disabled?
 
@@ -88,15 +113,12 @@ Check that setData receives fitView: false and that application code does not ca
 
 ### Why do method and wheel zoom limits differ?
 
-minZoom and maxZoom on zoomTo / zoomBy constrain that call only. Wheel limits belong to the zoom-canvas Behavior, and fitView limits are separate again. Set each when consistent limits are required. See [wheel zoom options](/en/docs/api/options/behaviors#navigation-and-dragging).
+minZoom and maxZoom on zoomTo / zoomBy constrain that call only. Wheel limits belong to the zoom-canvas Behavior, and fitView limits are separate again. Set each when consistent limits are required. See [wheel zoom options](/en/docs/api/options#navigation-and-dragging).
 
-Continue with [viewport methods](/en/docs/api/graph/viewport), [autoFit](/en/docs/api/options#autofit), [setData](/en/docs/api/graph#setdata), and [element event coordinates](/en/docs/api/graph/events/element#read-event-parameters).
+Continue with [viewport methods](/en/docs/api/graph#graph-viewport), [autoFit](/en/docs/api/options#autofit), [setData](/en/docs/api/graph#setdata), and [element event coordinates](/en/docs/api/graph/events#read-event-parameters).
 
-<details data-related-examples>
-<summary>Related runnable examples</summary>
+**Related runnable examples**
 
 - [Search and focus](/en/docs/examples/search-focus)
 - [Viewport and coordinate conversion](/en/docs/examples/viewport-controls)
 - [Zoom range and sensitivity](/en/docs/examples/zoom-options)
-
-</details>

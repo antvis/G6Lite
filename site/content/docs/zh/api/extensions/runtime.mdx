@@ -1,75 +1,13 @@
 ---
-title: 运行类扩展契约
-description: Behavior、Layout、Transform 和 Plugin 的钩子、执行输入、生命周期与失败边界
+title: 运行类扩展契约（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-运行类扩展用返回新实例的 extensionFactory 注册。通用 init / destroy、上下文与异常规则见[注册契约](/docs/api/extensions/registration)，本页定义各类别额外的调用。
+内容已并入 [运行时扩展](/docs/api/extensions#extension-runtime)。
 
-## 生命周期速查
-
-| 类别 | 执行顺序 | 何时复用 / 释放 |
-| --- | --- | --- |
-| Behavior | init → getEvents → 事件回调 → destroy | 每次挂载创建；卸载先解绑返回的监听 |
-| Layout | init → execute → destroy | 每次执行新实例；独立 runLayout 不调用 init |
-| Transform | init → beforeRender；复用时 update → beforeRender | 按配置位置和名称复用；移除、替换、销毁时释放 |
-| Plugin | init → mount → destroy | 每次挂载创建；重复 render 重新挂载，setData 不重新挂载 |
-
-init、destroy、getEvents、beforeRender、update、mount 是同步钩子，不等待返回的 Promise。只有 Layout.execute 明确支持异步结果。
-
-## BehaviorExtension
-
-TOptions 继承 BehaviorOptions，TEventMap 默认 GraphEventMap；getEvents(): BehaviorEventHandlers&lt;TEventMap&gt; 为必需方法，返回按事件名组织的可选函数映射。
-
-引擎在 init 成功后调用 getEvents，逐项绑定返回的函数；事件参数按事件映射中的参数元组推导，不能统一假定为 MouseEvent。每个 handler 的同步异常独立隔离；卸载解绑这些 handler，再调用 destroy。自建的 DOM 监听、计时器等仍由扩展清理。
-
-完整字段、配置和默认行为不重复维护，见[BehaviorExtension 契约](/docs/api/options/behaviors#自定义-behavior-契约)；实现步骤见[自定义 Behavior](/docs/guides/custom-behavior)。
-
-## LayoutExtension
-
-execute(data: GraphData, runtime) 为必需方法，返回带坐标的 nodes 对象或该对象的 Promise。
-
-| 输入 / 输出 | 完整内容 |
-| --- | --- |
-| data | 本次 GraphData 输入；以它为计算来源，不从 context.data 重新取旧数据 |
-| runtime.width / height | number，画布 CSS 视口尺寸；独立计算未给视口时取配置或 800 / 600 |
-| runtime.signal? | AbortSignal，取消标记 |
-| runtime.options | Readonly&lt;TOptions&gt;，本次解析后的完整配置，含 type 与视口补齐；顶层复制并冻结 |
-| 结果 nodes | `Array<GraphData['nodes'][number] & { x: number; y: number }>`；x/y 为有限图坐标，保留节点 id 与业务字段 |
-
-结果不是新的 GraphData：布局只返回节点坐标，不返回边、DOM 或渲染对象。不要在 execute 中写入内部模型或发起绘制；Graph 负责结果应用与更新。重排、固定轴与取消见[布局方法](/docs/api/graph/layout)。
-
-Graph 管理路径会传入 ExtensionContext 并调用 init；独立 runLayout 没有所属 Graph，跳过 init，仍执行 execute 和 destroy。需要配置时从 runtime.options 读取，不要依赖 init 必定运行。
-
-每次执行成功、失败或取消均经过 destroy。耗时循环与异步阶段检查 signal；同步死循环无法被异步取消，应分块让出主线程并释放自己的 Worker / 计时器。自定义注册布局优先于内置/库布局，当前在主线程执行，worker: true 不会自动搬迁任意扩展代码。
-
-创建失败时可能继续其他布局路径；已创建扩展的 init / execute 失败会诊断并返回输入坐标回退（缺省轴为 0），不再保证回退同名内置算法。取消后的 Graph 代次会放弃旧结果；Promise 正常结束不等于结果被应用。
-
-## TransformExtension
-
-| 可选钩子 | 签名与调用 |
-| --- | --- |
-| beforeRender | (data: GraphData) → GraphData；同步返回完整的新输入 |
-| update | (options: Readonly&lt;Partial&lt;TOptions&gt;&gt;) → void；复用实例时调用 |
-| init / destroy | 继承 Extension&lt;TOptions&gt; |
-
-实际激活需要 beforeRender；没有该方法的注册项会被释放并跳过。按 transforms 数组顺序串联，前一项输出成为下一项输入，然后才执行布局。首次 render 与 setData 会转换；普通增量写入、refresh 或 layout() 不重新跑注册 Transform。
-
-同一位置同名复用时，每次转换都会调用 update，即使选项值未变化。当前传入该配置项的完整 options 对象（字符串形式为 {}），不是计算出的 diff；因此缺省字段应按本次 options 重新恢复默认值。
-
-context.data 是已提交数据，可能为空或属于上一版，不能替代 beforeRender 的 data。返回值不做完整结构校验；业务自行保证 ID、端点、Combo 与字段合法，先验证再返回。输入也不承诺被递归复制；原地修改后抛错不提供回滚。
-
-beforeRender 抛错时诊断并沿用传入数据；init / update 失败时释放该实例并跳过当前项，后续可重新创建。特殊的 process-parallel-edges 不走注册 Transform 生命周期，见[配置参考](/docs/api/options/transforms-plugins)。
-
-## PluginExtension
-
-TOptions 继承 PluginOptions，包含 type。额外可选方法为 mount(container: HTMLElement): void；init 收到整个配置对象（type 与业务选项），不是单独的 options 子对象。
-
-container 是 Graph 的 DOM 容器，不是 Canvas。mount 在图的交互运行时建立后执行，插件自行创建独立 DOM、监听与状态；样式应限定作用域，勿覆盖或替换 Graph 子节点。无 mount 的实例仍可能收到 init / destroy。
-
-重复 render 先销毁旧插件再创建并挂载新插件；setData、layout、refresh 不重新挂载。没有 Plugin.update 钩子，updateOptions 不接受 plugins。变更插件列表或构造选项时重建实例，配置形状见[Plugin 配置](/docs/api/options/transforms-plugins#plugins)。
-
-未注册项跳过；创建失败跳过，init 失败先 destroy 再跳过，mount 同步异常记录诊断，其清理仍会在后续卸载执行。不要依赖异常自动撤销已创建的 DOM；destroy 要支持部分挂载、重复清理与异步任务取消。
-
-## 资源与上下文边界
-
-Graph 自动管理扩展实例和 Behavior 返回的事件映射。业务自行管理的 DOM 事件、请求、定时器、Observer 和 Worker 仍需释放。新代码使用[受控上下文](/docs/api/extensions/registration#extensioncontext)，不依赖 context.graph 或内部事件总线。
+- <span id="生命周期速查" style={{ display: 'block', scrollMarginTop: '8rem' }} />[生命周期速查](/docs/api/extensions#生命周期速查)
+- <span id="behaviorextension" style={{ display: 'block', scrollMarginTop: '8rem' }} />[BehaviorExtension](/docs/api/extensions#behaviorextension)
+- <span id="layoutextension" style={{ display: 'block', scrollMarginTop: '8rem' }} />[LayoutExtension](/docs/api/extensions#layoutextension)
+- <span id="transformextension" style={{ display: 'block', scrollMarginTop: '8rem' }} />[TransformExtension](/docs/api/extensions#transformextension)
+- <span id="pluginextension" style={{ display: 'block', scrollMarginTop: '8rem' }} />[PluginExtension](/docs/api/extensions#pluginextension)
+- <span id="资源与上下文边界" style={{ display: 'block', scrollMarginTop: '8rem' }} />[资源与上下文边界](/docs/api/extensions#资源与上下文边界)

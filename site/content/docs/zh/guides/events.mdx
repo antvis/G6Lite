@@ -5,7 +5,7 @@ description: 从监听一次点击开始，连接画布操作与业务
 
 import { NodeDocExample as EventDocExample } from '@/components/node-doc-example';
 
-图事件告诉你用户点了哪里、选择了什么，以及数据操作进行到哪一步。从点击开始；选择和拖拽、生命周期在左侧子目录展开。
+图事件告诉你用户点了哪里、选择了什么，以及数据操作进行到哪一步。先用节点点击示例试用监听，再按下文的链接查看其他事件用法。
 
 ## 元素事件
 
@@ -33,7 +33,11 @@ graph.on('node:click', ({ nodeId }) => {
 - canvas 是相对画布左上角的 CSS 像素。
 - graph 是图坐标，适合创建或移动图内元素。
 
-点击边时读取 edgeId / source / target，点击分组背景时读取 comboId。完整字段及其他鼠标事件查[元素事件](/docs/api/graph/events/element)。
+点击边时读取 edgeId / source / target，点击分组背景时读取 comboId。完整字段及其他鼠标事件查[元素事件](/docs/api/graph/events#event-element)。
+
+### 监听分组悬停
+
+用 `combo:pointerover` 打开分组提示，用 `combo:pointerleave` 关闭。指针从分组背景移到内部节点时，也会触发离开事件。见[Combo 事件](/docs/api/graph/events#event-element-combo)。
 
 ## 取消监听
 
@@ -48,25 +52,25 @@ export function observeClicks(graph: Graph, onClick: () => void) {
 }
 ```
 
-只需要下一次事件时使用 once。上面的 Arm once 按钮注册下一次节点点击；Listening 关闭的是持续监听，两者彼此独立。完整参数查 [on / off / once](/docs/api/graph/events#on)。
+只需要下一次事件时使用 once。上面的 Arm once 按钮注册下一次节点点击；Listening 关闭的是持续监听，两者彼此独立。完整参数查 [on / off / once](/docs/api/graph#on)。
 
 ## 选择与拖拽事件
 
 同步“哪些节点被选中”，监听选择结果；保存“节点移到了哪里”，监听拖拽结束。先启用对应 Behavior，再连接业务 UI。
 
-继续[选择与拖拽](/docs/guides/events/selection-drag)：操作画布，再接入选择同步、位置保存和清理函数。
+试用画布并查看同步选择、保存位置的代码。 [选择与拖动](/docs/guides/events/selection-drag)
 
 ## 生命周期与数据事件
 
 首次渲染、局部修改、整体替换与重排触发的事件不同。afterrender 不会在每次数据更新后重复触发。
 
-继续[生命周期与数据](/docs/guides/events/lifecycle)：用可操作日志比较事件顺序，再选择完成时机。
+查看[渲染、布局与数据更新](/docs/guides/events/lifecycle)，了解何时可以更新图、读取布局坐标或处理数据替换。
 
 ## 常见问题
 
 ### 为什么 nativeEvent 是 undefined？
 
-元素点击、悬停和滚轮有 nativeEvent；选择与部分拖拽事件使用 event，拖拽结束与区域选择可能没有原始事件字段。按[事件 API](/docs/api/graph/events)查询对应载荷。
+元素点击、悬停和滚轮有 nativeEvent；选择与部分拖拽事件使用 event，拖拽结束与区域选择可能没有原始事件字段。按[事件参考](/docs/api/graph/events)查询对应载荷。
 
 ### 为什么布局结束时读到的坐标还是旧的？
 
@@ -76,23 +80,13 @@ layout:end / afterlayout 在写回前通知。等待 await graph.layout() 后查
 
 检查是否重复注册、off 是否使用原函数、once 是否已消费，以及对应 Behavior 是否启用。
 
-## 自定义事件类型
+## 自定义事件 [#自定义事件类型]
 
-<details>
-<summary>TypeScript 类型与业务事件</summary>
+用 `graph.emit()` 发送业务事件，例如工具栏按钮发出的重置视图通知。 [查看自定义事件示例](/docs/guides/events/custom)
 
-普通监听可自动推导参数，通常不必先学习 GraphEventMap。需要为复用函数声明类型时查 [GraphEventMap](/docs/api/graph/events#grapheventmap)。
+继续查阅 [事件 API 参考](/docs/api/graph/events) · [交互组合](/docs/guides/behaviors) · [事件面板](/docs/examples/event-log)。
 
-未知事件名的参数声明不会创建业务事件，Graph 没有公开 emit。业务消息使用自己的通道；扩展开发见[自定义 Behavior](/docs/guides/custom-behavior)。
-
-</details>
-
-继续查询：[事件 API](/docs/api/graph/events) · [交互组合](/docs/guides/interactions) · [事件面板](/docs/examples/event-log)。
-
-<details data-related-examples>
-<summary>相关可运行示例</summary>
+**相关可运行示例**
 
 - [事件面板](/docs/examples/event-log)
 - [右键菜单](/docs/examples/context-menu)
-
-</details>

@@ -1,105 +1,17 @@
 ---
-title: 交互组合
-description: 组合浏览、选择、拖动与高亮，并连接业务事件
+title: 交互组合旧入口
+description: 旧链接的章节入口。完整内容已迁至交互指南。
 ---
 
-import { NodeDocExample as BehaviorDocExample } from '@/components/node-doc-example';
+正文已迁至 [交互组合](/docs/guides/behaviors)。从下方可直接进入对应章节。
 
-从用户操作选择 behaviors。显式列表会替换默认缩放和平移，需要它们时一并写入；全部参数见 [Behavior 配置参考](/docs/api/options/behaviors)。
-
-## 内置 behaviors
-
-| 想完成的操作 | 使用行为 |
-| --- | --- |
-| 浏览图 | zoom-canvas + drag-canvas，省略 behaviors 时默认启用 |
-| 选择与移动 | click-select + drag-node |
-| 区域选择 | brush-select 或 lasso-select，给平移留出不同手势 |
-| 查看关联 | hover-highlight，避免叠加多套高亮 |
-| 查看元素信息 | tooltip；可编辑浮层由应用实现 |
-| 调整连线 | drag-edge 提供事件，业务负责验证与写回端点 |
-
-## 常用组合
-
-下面用空白拖拽框选，因此未启用 drag-canvas。单击选中、Shift+单击追加，拖动已选节点会整体移动；状态行显示当前选中的节点。
-
-<BehaviorDocExample id="behavior-selection" locale="zh" />
-
-若还需要拖动画布，可将空白手势分开。以下是创建 Graph 时可用的配置：
-
-```ts
-import type { BehaviorName, BuiltInBehaviorConfig } from '@antv/g6-lite';
-
-const behaviors = [
-  'zoom-canvas',
-  { type: 'drag-canvas', ignoreModifierKeys: true },
-  'drag-node',
-  { type: 'click-select', multiple: true, trigger: 'shift' },
-  { type: 'brush-select', key: 'shift' },
-  { type: 'lasso-select', key: 'ctrl' },
-] satisfies Array<BehaviorName | BuiltInBehaviorConfig>;
-```
-
-空白拖动平移，Shift+空白拖动框选，Ctrl/Meta+空白拖动套索。click-select 的 ctrl 与 meta 是不同修饰键；区域选择的 ctrl 则接受两者。具体选择替换规则与事件差异见[选择参考](/docs/api/options/behaviors#选择)。
-
-## 缩放手感与范围
-
-在 zoom-canvas 对象上调 sensitivity、minZoom、maxZoom；例如 sensitivity: 0.5 可减缓滚轮响应。它以画布中心缩放，滚轮边界不限制代码中的 fitView。归一化、默认值和回退规则见[导航参考](/docs/api/options/behaviors#导航与拖拽)。
-
-## 邻域高亮
-
-悬停 B 后，A/B/C/E 及关联边高亮，其他节点弱化；悬停边时只强调它与两端。移开清理悬停状态。这里用状态样式定义绿色，Behavior 负责何时写入状态。
-
-<BehaviorDocExample id="behavior-highlight" locale="zh" />
-
-## 事件分发模型
-
-无需开启 click-select 也能监听 node:click；click-select 提供的是 selected 状态切换。业务监听可在 render 前注册，卸载时用同一函数解绑：
-
-```ts
-const onNodeClick = ({ nodeId }: { nodeId: string }) => console.log(nodeId);
-graph.on('node:click', onNodeClick);
-// 组件卸载时：
-graph.off('node:click', onNodeClick);
-```
-
-选中联动同时关注 node:selectchange、edge:selectchange、brush:end、lasso:end；需要最终集合时主动查询状态，不能假定所有选择来源都逐个发出 node:selectchange。接入与清理代码见[事件指南](/docs/guides/events#选择与拖拽事件)，完整入参查[事件参考](/docs/api/graph/events#选择事件)。
-
-<details>
-<summary>连线编辑与底层分发</summary>
-
-drag-edge 发出重连建议，不自动修改 source/target，也没有跟随鼠标的临时连线。业务接收 edge:dragend，验证 reconnected 后更新自己的边数据，再通过 setData 等公开入口写回。若配置了 layout，setData 仍会重新计算布局；fitView: false 只保留相机。
-
-内部统一拾取，命中优先级为 node → edge → combo → canvas，Behavior 消费同一事件流。无需自行访问 Picking、Renderer 或内部 eventEmitter。
-
-</details>
-
-## 常见问题
-
-### 加上 tooltip 后为什么不能缩放了？
-
-显式 behaviors 替换默认列表，把 zoom-canvas 和 drag-canvas 一并写入。
-
-### 框选时为什么画布也在动？
-
-将框选绑定 Shift，保留 drag-canvas 的 ignoreModifierKeys: true；不要让框选和套索使用相同手势。
-
-### 可以用 updateOptions 动态切换 Behavior 吗？
-
-目前不支持；组合在初始化时确定。更换实例时销毁旧实例；业务自建的监听和 DOM 也要清理。
-
-## 相关
-
-- [Behavior 配置参考](/docs/api/options/behaviors)：全部参数、默认值和边界。
-- [自定义 Behavior](/docs/guides/custom-behavior) · [Tooltip](/docs/guides/tooltip)。
-- [事件指南](/docs/guides/events) · [选择行为示例](/docs/examples/selection-behaviors)。
-- [邻居高亮示例](/docs/examples/neighbor-highlight)：悬停后观察一度邻接范围。
-
-<details data-related-examples>
-<summary>相关可运行示例</summary>
-
-- [悬停高亮](/docs/examples/hover)
-- [一度邻居高亮](/docs/examples/neighbor-highlight)
-- [拖拽节点与 Combo](/docs/examples/drag-node)
-- [拖拽边端点](/docs/examples/drag-edge)
-
-</details>
+- <span id="内置-behaviors" style={{ scrollMarginTop: '8rem' }} />[内置 behaviors](/docs/guides/behaviors#内置-behaviors)
+- <span id="常用组合" style={{ scrollMarginTop: '8rem' }} />[常用组合](/docs/guides/behaviors#常用组合)
+- <span id="缩放手感与范围" style={{ scrollMarginTop: '8rem' }} />[缩放手感与范围](/docs/guides/behaviors#缩放手感与范围)
+- <span id="邻域高亮" style={{ scrollMarginTop: '8rem' }} />[邻域高亮](/docs/guides/behaviors#邻域高亮)
+- <span id="事件分发模型" style={{ scrollMarginTop: '8rem' }} />[事件分发模型](/docs/guides/behaviors#事件分发模型)
+- <span id="常见问题" style={{ scrollMarginTop: '8rem' }} />[常见问题](/docs/guides/behaviors#常见问题)
+- <span id="加上-tooltip-后为什么不能缩放了" style={{ scrollMarginTop: '8rem' }} />[加上 tooltip 后为什么不能缩放了？](/docs/guides/behaviors#加上-tooltip-后为什么不能缩放了)
+- <span id="框选时为什么画布也在动" style={{ scrollMarginTop: '8rem' }} />[框选时为什么画布也在动？](/docs/guides/behaviors#框选时为什么画布也在动)
+- <span id="可以用-updateoptions-动态切换-behavior-吗" style={{ scrollMarginTop: '8rem' }} />[可以用 updateOptions 动态切换 Behavior 吗？](/docs/guides/behaviors#可以用-updateoptions-动态切换-behavior-吗)
+- <span id="相关" style={{ scrollMarginTop: '8rem' }} />[相关](/docs/guides/behaviors#相关)

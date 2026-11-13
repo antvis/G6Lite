@@ -19,7 +19,7 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 ## 协议约定
 
-传入 text、已解析的 style、ctx、dpr、zoom。type='node' 时可读 node；type='edge' 时可读 edge / source / target。先按 type 分支再访问专用字段，完整联合类型查[LabelRenderer](/docs/api/extensions/drawing#labelrenderer)。
+传入 text、已解析的 style、ctx、dpr、zoom。type='node' 时可读 node；type='edge' 时可读 edge / source / target。先按 type 分支再访问专用字段，完整联合类型查[LabelRenderer](/docs/api/extensions#labelrenderer)。
 
 style 的字号、偏移和内边距已经是 backing-store 像素，不再乘 DPR 或 zoom。draw 原点位于标签中心，边旋转已应用，不要重复平移到节点或再次旋转。
 
@@ -33,17 +33,14 @@ measure 返回有限正数宽高，覆盖全部自绘内容；layout.data 仅缓
 
 ### 宽高错误或绘制抛错会怎样？
 
-当前标签回退默认单行渲染并诊断；不要返回 0、NaN 或无限尺寸。Decoration 的失败行为不同，见[绘制契约](/docs/api/extensions/drawing)。
+当前标签回退默认单行渲染并诊断；不要返回 0、NaN 或无限尺寸。Decoration 的失败行为不同，见[绘制契约](/docs/api/extensions#extension-drawing)。
 
 ### 边标签一定沿真实路径放置吗？
 
-当前 polyline / cubic 使用端点连线位置与旋转，不能保证贴合折线或曲线。见[边标签限制](/docs/api/options/edge#边标签)。
+当前 polyline / cubic 使用端点连线位置与旋转，不能保证贴合折线或曲线。见[边标签限制](/docs/guides/edge#边标签)。
 
-完整案例：[自定义 Label Renderer](/docs/examples/custom-label-renderer)。注册与共享缓存见[公共契约](/docs/api/extensions/registration)。
+完整案例：[自定义 Label Renderer](/docs/examples/custom-label-renderer)。注册与共享缓存见[公共契约](/docs/api/graph#extension-registration)。
 
-<details data-related-examples>
-<summary>相关可运行示例</summary>
+**相关可运行示例**
 
 - [自定义标签渲染](/docs/examples/custom-label-renderer)
-
-</details>

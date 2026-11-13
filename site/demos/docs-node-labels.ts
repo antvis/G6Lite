@@ -5,25 +5,25 @@ export async function run(container: HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: 'API', x: 100, y: 100, data: { placement: 'left', icon: 'A' } },
-        { id: 'Database', x: 260, y: 100, data: { placement: 'bottom', icon: 'D' } },
-        { id: 'Cache', x: 420, y: 100, data: { placement: 'right', icon: 'C' } },
+        { id: 'api', name: 'API', x: 100, y: 100, data: { placement: 'left' } },
+        { id: 'Database', x: 260, y: 100 },
+        { id: 'cache', name: 'Cache', x: 420, y: 100, data: { placement: 'right' } },
+        { id: 'worker', name: 'Worker', x: 580, y: 100, data: { hideLabel: true } },
       ],
       edges: [],
     },
+    // #region label-style
     node: {
       style: {
         size: 40,
         fill: '#1783FF',
-        label: (node) => node.id,
-        labelPlacement: (node) => node.data?.placement as LabelPlacement,
-        labelOffsetY: 0,
-        icon: (node) => String(node.data?.icon ?? ''),
-        iconType: 'text',
-        iconFontSize: 20,
-        iconColor: '#fff',
+        label: (node) => node.data?.hideLabel ? false : (node.name ?? node.id),
+        labelPlacement: (node) => (node.data?.placement as LabelPlacement | undefined) ?? 'bottom',
+        labelFontSize: 14,
+        labelFontWeight: '600',
       },
     },
+    // #endregion label-style
     autoFit: { padding: 48, maxZoom: 1 },
     behaviors: [],
   });

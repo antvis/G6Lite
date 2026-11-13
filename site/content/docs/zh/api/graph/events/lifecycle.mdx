@@ -1,187 +1,23 @@
 ---
-title: 生命周期与数据事件
-description: 布局、渲染、数据修改、尺寸与销毁的逐项事件参考
+title: 生命周期与数据事件（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-布局和渲染事件描述计算或绘制阶段；数据事件描述方法完成的数据操作。先注册监听，再执行目标操作，事件不会补发历史记录。
+内容已并入 [生命周期与数据事件明细](/docs/api/graph/events#event-lifecycle)。
 
-## 接收首次渲染事件
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-
-declare const graph: Graph;
-graph.once('afterrender', ({ nodeCount }) => console.log(nodeCount));
-await graph.render();
-```
-
-操作日志与常用顺序见[生命周期事件使用](/docs/guides/events/lifecycle)，方法调用与资源清理见[生命周期方法参考](/docs/api/graph/lifecycle)。这些事件不表示浏览器已经绘制下一帧。
-
-## beforelayout
-
-有布局且节点非空时，在计算之前触发，随后是 layout:start。
-
-```ts
-type Payload = {
-  nodeCount: number
-};
-```
-
-## layout:start
-
-紧随 beforelayout，在布局计算前触发。
-
-```ts
-type Payload = {
-  nodeCount: number
-};
-```
-
-## layout:end
-
-有效布局计算结束后触发，此时还未写回节点坐标。duration 为计算耗时（毫秒），不含绘制。
-
-```ts
-type Payload = {
-  duration: number;
-  nodeCount: number
-};
-```
-
-## afterlayout
-
-紧随 layout:end，在坐标写回前触发；需要最终位置应等待 await graph.layout()。
-
-```ts
-type Payload = {
-  duration: number;
-  nodeCount: number
-};
-```
-
-## beforerender
-
-显式调用 render 时，布局和运行时准备完成、适配与同步绘制之前触发。
-
-```ts
-type Payload = {
-  nodeCount: number;
-  edgeCount: number
-};
-```
-
-## afterrender
-
-显式 render 的同步绘制之后触发。局部更新、setData、layout 不触发此事件；初次触发还在初始化标记和插件挂载之前。增量修改应等 await graph.render() 完成后执行。
-
-```ts
-type Payload = {
-  nodeCount: number;
-  edgeCount: number
-};
-```
-
-## resize
-
-画布尺寸与可选自动适配完成后触发。width/height 使用容器 CSS 像素。
-
-```ts
-type Payload = {
-  width: number;
-  height: number
-};
-```
-
-## destroy
-
-首次销毁时触发，无参数。实例已标记销毁、待定布局已取消，运行时和画布尚未完成清理；随后清除图监听。
-
-处理函数为 `() => void`，不接收 payload。
-
-## datachange
-
-有效 setData 写回数据、可选适配并请求绘制后触发。它表示整体替换，不是逐项数据差异。
-
-```ts
-type Payload = {
-  nodeCount: number;
-  edgeCount: number
-};
-```
-
-## afteradditem
-
-addNode(s) / addEdge(s) 调度绘制后触发；批量调用逐项发。边载荷还带 source/target。
-
-```ts
-type Payload = {
-  type: 'node';
-  id: string
-} | {
-  type: 'edge';
-  id: string;
-  source: string;
-  target: string
-};
-```
-
-## afterremoveitem
-
-removeNode(s) / removeEdge(s) 调度绘制后触发；删节点连带删边不另发边事件。
-
-```ts
-type Payload = {
-  type: 'node' | 'edge';
-  id: string
-};
-```
-
-## afterupdateitem
-
-updateNodePosition(s)、updateNodeData、updateEdgeData 调度绘制后按结果逐项发；拖拽节点也会发 position 事件。不要在此回调里无条件更新同一数据，以免同步递归。
-
-```ts
-type Payload = | {
-  type: 'node';
-  id: string;
-  action: 'position' | 'data'
-}
-      | {
-  type: 'edge';
-  id: string;
-  action: 'data'
-};
-```
-
-## combo:collapse
-
-collapseCombo 修改折叠状态并调度绘制后触发；已折叠时不重复发。
-
-```ts
-type Payload = {
-  comboId: string
-};
-```
-
-## combo:expand
-
-expandCombo 修改展开状态并调度绘制后触发；已展开时不重复发。
-
-```ts
-type Payload = {
-  comboId: string
-};
-```
-
-## 顺序与完成边界
-
-- 成功的显式 render（有布局且非空）：beforelayout → layout:start → layout:end → afterlayout → beforerender → afterrender。无布局时省略四个布局事件。
-- setData：可选布局四事件 → 写回与可选适配 → 请求绘制 → datachange；不产生 beforerender/afterrender。
-- layout：布局四事件 → 写回 → 请求绘制；没有 datachange。结束事件中查询位置仍可能是旧值，需 await layout 后查询。
-- 增量 after*item、datachange、Combo 事件不表示浏览器已绘制下一帧；初次 afterrender 发生在 initialized 标记和插件挂载之前。初始数据修改应等待 await graph.render() 完成，再调用增量方法。
-
-取消或过期任务不保证配对结束事件；独立 runLayout 不发 Graph 事件。完整取消与计算契约见[布局方法参考](/docs/api/graph/layout)。
-
-增量事件不保证字段实际发生变化。setData 不拆成逐项增删改事件；设置状态、可见性、相机或视觉选项也不会补发 datachange 或 afterrender。
-
-[事件 API](/docs/api/graph/events) · [事件主题](/docs/guides/events)。
+- <span id="接收首次渲染事件" style={{ display: 'block', scrollMarginTop: '8rem' }} />[接收首次渲染事件](/docs/api/graph/events#接收首次渲染事件)
+- <span id="beforelayout" style={{ display: 'block', scrollMarginTop: '8rem' }} />[beforelayout](/docs/api/graph/events#beforelayout)
+- <span id="layoutstart" style={{ display: 'block', scrollMarginTop: '8rem' }} />[layout:start](/docs/api/graph/events#layoutstart)
+- <span id="layoutend" style={{ display: 'block', scrollMarginTop: '8rem' }} />[layout:end](/docs/api/graph/events#layoutend)
+- <span id="afterlayout" style={{ display: 'block', scrollMarginTop: '8rem' }} />[afterlayout](/docs/api/graph/events#afterlayout)
+- <span id="beforerender" style={{ display: 'block', scrollMarginTop: '8rem' }} />[beforerender](/docs/api/graph/events#beforerender)
+- <span id="afterrender" style={{ display: 'block', scrollMarginTop: '8rem' }} />[afterrender](/docs/api/graph/events#afterrender)
+- <span id="resize" style={{ display: 'block', scrollMarginTop: '8rem' }} />[resize](/docs/api/graph/events#resize)
+- <span id="destroy" style={{ display: 'block', scrollMarginTop: '8rem' }} />[destroy](/docs/api/graph/events#event-lifecycle-destroy)
+- <span id="datachange" style={{ display: 'block', scrollMarginTop: '8rem' }} />[datachange](/docs/api/graph/events#datachange)
+- <span id="afteradditem" style={{ display: 'block', scrollMarginTop: '8rem' }} />[afteradditem](/docs/api/graph/events#afteradditem)
+- <span id="afterremoveitem" style={{ display: 'block', scrollMarginTop: '8rem' }} />[afterremoveitem](/docs/api/graph/events#afterremoveitem)
+- <span id="afterupdateitem" style={{ display: 'block', scrollMarginTop: '8rem' }} />[afterupdateitem](/docs/api/graph/events#afterupdateitem)
+- <span id="combocollapse" style={{ display: 'block', scrollMarginTop: '8rem' }} />[combo:collapse](/docs/api/graph/events#combocollapse)
+- <span id="comboexpand" style={{ display: 'block', scrollMarginTop: '8rem' }} />[combo:expand](/docs/api/graph/events#comboexpand)
+- <span id="顺序与完成边界" style={{ display: 'block', scrollMarginTop: '8rem' }} />[顺序与完成边界](/docs/api/graph/events#event-lifecycle-顺序与完成边界)

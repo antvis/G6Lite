@@ -1,5 +1,5 @@
 import { Graph } from '@antv/g6-lite';
-import { buttonStyle, createDemoPanel } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -30,18 +30,12 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const ui = createDemoPanel(
-    container,
-    '增量新增节点',
-    '每次通过 addNodes() 新增一个没有边的节点。节点应立即显示并可选择。',
-    `<button data-action="add" style="${buttonStyle}">新增孤立节点</button>
-     <button data-action="fit" style="${buttonStyle}">适配视口</button>`,
-  );
+  const ui = createDemoPanel(container, '每次通过 addNodes() 新增一个没有边的节点。节点应立即显示并可选择。');
   let count = 0;
   const updateStatus = (lastId = '无') => {
     ui.setStatus(`节点总数: ${graph.getNodeCount()}\n最近新增: ${lastId}\n结果: ${lastId === '无' || graph.hasNode(lastId) ? 'PASS' : 'FAIL'}`);
   };
-  ui.controls.querySelector('[data-action="add"]')!.addEventListener('click', () => {
+  ui.addAction('新增孤立节点', () => {
     count++;
     const id = `isolated-${count}`;
     graph.addNodes([
@@ -54,8 +48,8 @@ export async function run(container: string | HTMLElement) {
     ]);
     updateStatus(id);
   });
-  ui.controls.querySelector('[data-action="fit"]')!.addEventListener('click', () => graph.fitView({ padding: 48 }));
+  ui.addAction('适配视口', () => graph.fitView({ padding: 48 }));
   updateStatus();
 
-  return { destroy: () => { graph.destroy(); ui.panel.remove(); } };
+  return { destroy: () => { graph.destroy(); ui.destroy(); } };
 }

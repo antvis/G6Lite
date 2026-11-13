@@ -3,16 +3,24 @@ import path from 'node:path';
 import type { Locale } from './i18n';
 import { getSiteExample, localizedText } from './site-examples';
 
+function readDemoFile(file: string): string {
+  return readFileSync(path.join(process.cwd(), 'demos', file), 'utf8').replace(/\r\n/g, '\n').trim() + '\n';
+}
+
+export function readSiteExampleHelper(id: string) {
+  if (id === 'combo') return { name: 'demo-panel.ts', source: readDemoFile('demo-panel.ts') };
+}
+
 export function readSiteExampleSource(id: string): string {
   const example = getSiteExample(id);
   if (!example) throw new Error('Unknown site example: ' + id);
-  const source = readFileSync(path.join(process.cwd(), 'demos', example.file), 'utf8').replace(/\r\n/g, '\n').trim();
+  const source = readDemoFile(example.file);
   const note = /from\s+['"]\.\/demo-panel\.ts['"]/.test(source)
     ? '// Local presentation helpers in this repository are used only for the example controls.\n'
     : /from\s+['"]\.\/tooling\.ts['"]/.test(source)
       ? '// Local presentation helpers in this repository provide example label overlays.\n'
       : '';
-  return note + source + '\n';
+  return note + source;
 }
 
 // Replace MDX placeholders with the same source shown beside the live canvas.

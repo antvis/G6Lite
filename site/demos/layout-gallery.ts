@@ -1,5 +1,8 @@
-import { Graph, type LayoutConfig } from '@antv/g6-lite';
-import { buttonStyle, createDemoPanel } from './demo-panel.ts';
+import { Graph, register, type LayoutConfig } from '@antv/g6-lite';
+import mds from '@antv/g6-lite/layouts/mds';
+import radial from '@antv/g6-lite/layouts/radial';
+import random from '@antv/g6-lite/layouts/random';
+import { createDemoPanel } from './demo-panel.ts';
 
 const NODES = Array.from({ length: 18 }, (_, index) => ({ id: String(index), data: { label: String(index) } }));
 const EDGES = Array.from({ length: 17 }, (_, index) => ({ id: `e-${index}`, source: String(Math.floor(index / 2)), target: String(index + 1) }));
@@ -14,6 +17,9 @@ const LAYOUTS: Array<{ label: string; config: LayoutConfig }> = [
 ];
 
 export async function run(container: string | HTMLElement) {
+  register('layout', 'mds', mds);
+  register('layout', 'radial', radial);
+  register('layout', 'random', random);
   const graph = new Graph({
     autoFit: true,
     container,
@@ -26,21 +32,15 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
   graph.fitView({ padding: 72 });
 
-  const ui = createDemoPanel(
-    container,
-    '内置布局补全',
-    '覆盖原 Playground 缺失的 radial、concentric、ForceAtlas2、fruchterman、MDS 和 random。',
-    LAYOUTS.map((layout, index) => `<button data-layout="${index}" style="${buttonStyle}">${layout.label}</button>`).join(''),
-  );
-
-  ui.controls.addEventListener('click', async (event) => {
-    const index = Number((event.target as HTMLElement).dataset.layout);
-    if (!Number.isInteger(index) || !LAYOUTS[index]) return;
-    ui.setStatus(`running ${LAYOUTS[index].label}…`);
-    graph.setLayout(LAYOUTS[index].config);
+  const ui = createDemoPanel(container);
+  const labels = LAYOUTS.map(({ label }) => label);
+  ui.addChoice('布局', labels, labels[0], async (label) => {
+    const layout = LAYOUTS[labels.indexOf(label)];
+    ui.setStatus(`running ${label}…`);
+    graph.setLayout(layout.config);
     await graph.layout();
     graph.fitView({ padding: 72 });
-    ui.setStatus(`${LAYOUTS[index].label} complete\nnodes=${graph.getNodeCount()} edges=${graph.getEdgeCount()}`);
+    ui.setStatus(`${label} complete\nnodes=${graph.getNodeCount()} edges=${graph.getEdgeCount()}`);
   });
 
   ui.setStatus('Radial complete');
@@ -49,7 +49,7 @@ export async function run(container: string | HTMLElement) {
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();
-      ui.panel.remove();
+      ui.destroy();
     },
   };
 }

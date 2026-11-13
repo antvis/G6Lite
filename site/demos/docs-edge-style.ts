@@ -18,6 +18,7 @@ export async function run(container: HTMLElement) {
       })),
     },
     node: { style: { size: 20, label: (node) => String(node.data?.label ?? '') } },
+    // #region edge-options
     edge: {
       type: 'line',
       style: {
@@ -32,6 +33,7 @@ export async function run(container: HTMLElement) {
       },
       stateStyles: { selected: { stroke: '#873bf4', lineWidth: 6 } },
     },
+    // #endregion edge-options
     behaviors: ['click-select'],
     autoFit: { padding: 48, maxZoom: 1 },
   });

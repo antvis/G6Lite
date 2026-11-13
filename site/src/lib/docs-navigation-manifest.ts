@@ -2,8 +2,11 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import manifest from '../../docs-navigation.json';
 import { localizedPath, type Locale } from './i18n';
 
-type Entry = string | { id?: string; page?: string; title?: { zh: string; en: string }; children: Entry[] };
-type Section = { id: string; title: { zh: string; en: string }; children: Entry[] };
+type LocalizedTitle = Record<Locale, string>;
+type Entry = string
+  | { page: string; title?: LocalizedTitle; anchor?: string }
+  | { id?: string; page?: string; title?: LocalizedTitle; children: Entry[] };
+type Section = { id: string; title: LocalizedTitle; children: Entry[] };
 
 function page(tree: PageTree.Root, ref: string, locale: Locale): PageTree.Item {
   const slug = ref === 'index' ? '' : ref.endsWith('/index') ? ref.slice(0, -6) : ref;
@@ -24,6 +27,14 @@ function page(tree: PageTree.Root, ref: string, locale: Locale): PageTree.Item {
 }
 function entry(tree: PageTree.Root, item: Entry, locale: Locale): PageTree.Node {
   if (typeof item === 'string') return page(tree, item, locale);
+  if (!('children' in item)) {
+    const node = page(tree, item.page, locale);
+    return {
+      ...node,
+      name: item.title?.[locale] ?? node.name,
+      url: item.anchor ? `${node.url}#${item.anchor}` : node.url,
+    };
+  }
   const index = item.page ? page(tree, item.page, locale) : undefined;
   return {
     type: 'folder', $id: 'docs-group-' + (item.id ?? item.page),
@@ -48,7 +59,9 @@ export function getManifestTree(tree: PageTree.Root, locale: Locale): PageTree.R
     ...tree, $id: 'docs-navigation-root-' + locale,
     children: [
       page(tree, manifest.overview, locale),
-      ...manifest.order.map((id) => getManifestSection(id, tree, locale)),
+      ...manifest.order.map((item) => typeof item === 'string'
+        ? getManifestSection(item, tree, locale)
+        : entry(tree, item, locale)),
     ],
   };
 }

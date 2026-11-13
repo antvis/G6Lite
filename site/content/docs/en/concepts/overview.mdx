@@ -1,39 +1,12 @@
 ---
-title: What is G6Lite?
-description: A browser graph engine for relationship exploration, with a clear usage model and capability boundary
+title: What is G6Lite? (previous URL)
+description: Content has moved to the documentation home and quick start
 ---
 
-G6Lite visualizes graphs in a browser. Nodes and edges represent relationships; layouts, zooming, dragging, selection, and highlighting support exploration. WebGL draws nodes and edges, while Canvas 2D draws labels and Combo groups.
+The product introduction is now at [What is G6Lite?](/en/docs). Create your first graph with [Quick start](/en/docs/getting-started/quick-start).
 
-## Good fits
-
-- Relationship exploration, topology, knowledge graphs, and dependency analysis.
-- Analytical interfaces with frequent selection, highlighting, neighbor queries, and incremental updates.
-- Products whose visual requirements fit common node and edge shapes and controlled extensions.
-
-Graph size alone does not determine suitability. Layout, label density, interactions, DPR, and devices affect the result. Use the [performance measurements](/en/docs/metrics/performance) with your real workload.
-
-## Evaluate carefully
-
-Arbitrary HTML / React node trees, multiple renderers, general animation orchestration, a mature built-in plugin ecosystem, graph algorithms, and server-side rendering are outside the current complete capability set. [Nested and collapsed Combo groups](/en/docs/api/options/combo) remain experimental.
-
-Rendering requires real DOM, Canvas, and WebGL. SSR frameworks must create graphs after client mounting. See [runtime requirements](/en/docs/compatibility/browser) and [API stability](/en/docs/compatibility/api-stability) for environment, experimental, and compatibility boundaries.
-
-## Relationship with G6 v5
-
-G6Lite and G6 v5 are separate packages and implementations. Similar concepts do not make configurations, plugins, events, or extension protocols interchangeable. Compare [G6 v5 and other candidates](/en/docs/compatibility/library-comparison) for broader graphics, animations, and plugins. Follow the [migration guide](/en/docs/compatibility/g6-v5-migration) for an existing project.
-
-## Usage model
-
-One `Graph` manages one visualization: `data` defines relationships, `node / edge` appearance, `layout` positions, `behaviors` interactions, and `theme` shared styles.
-
-Prepare [valid data](/en/docs/concepts/data-model) and a sized container, then call `new Graph(options)` and `await graph.render()`. Reuse the instance for updates; call `destroy()` when leaving the page. See the [quick start](/en/docs/getting-started/quick-start), [lifecycle](/en/docs/concepts/graph-lifecycle), and [GraphOptions](/en/docs/api/options) for steps, timing, and fields.
-
-## Next steps
-
-<Cards>
-  <Card title="Render your first graph" href="/en/docs/getting-started/quick-start" />
-  <Card title="Configure appearance" href="/en/docs/guides/node" />
-  <Card title="Run existing examples" href="/en/docs/examples" />
-  <Card title="Understand architecture" href="/en/docs/concepts/architecture" />
-</Cards>
+- <span id="usage-model" style={{ scrollMarginTop: '8rem' }} />[Graph data and updates](/en/docs/guides/data) · [Call graph example](/en/docs/examples/dependency-graph)
+- <span id="good-fits" style={{ scrollMarginTop: '8rem' }} />[Use cases and core capabilities](/en/docs)
+- <span id="evaluate-carefully" style={{ scrollMarginTop: '8rem' }} />[Runtime requirements](/en/docs/compatibility/browser) · [Combo configuration](/en/docs/api/options#options-combo)
+- <span id="relationship-with-g6-v5" style={{ scrollMarginTop: '8rem' }} />[Migrating from G6 v5](/en/docs/compatibility/g6-v5-migration)
+- <span id="next-steps" style={{ scrollMarginTop: '8rem' }} />[Start here](/en/docs#start-here)

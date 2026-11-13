@@ -1,44 +1,17 @@
 ---
-title: 常见问题
-description: 直接答复高频问题，进入唯一详细来源
+title: 常见问题（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-## G6Lite 和 G6 v5 怎么选？
+内容已迁至 [故障排查](/docs/compatibility/troubleshooting)。
 
-先比较必须具备的图形、环境和交互能力，再用业务数据验证。详见[能力对比](/docs/compatibility/library-comparison)。
-
-## 力导向布局首屏慢怎么办？
-
-分开测量布局和 render；已有坐标时省略 layout，支持时评估 Worker 与迭代参数。步骤见[性能优化](/docs/metrics/performance-tuning)。
-
-## 高亮或选中卡顿怎么办？
-
-复用 Graph，通过状态 API 更新，不为一次高亮重建或替换整图。见[状态指南](/docs/guides/states)。
-
-## 浏览器和 WebGL 要求是什么？
-
-需要真实 DOM、Canvas 2D 和可用的 WebGL1 或 WebGL2。具体模块、Worker 和 CSP 约束见[运行环境](/docs/compatibility/browser)。
-
-## 能在 Node.js 或 SSR 阶段直接运行吗？
-
-Graph 不能在普通 Node.js / SSR 阶段出图。在客户端挂载后创建并在卸载时销毁，见[框架接入](/docs/getting-started/react)。
-
-## TypeScript 类型从哪里导入？
-
-值和类型均从 @antv/g6-lite 包根导入，以所安装包的声明为准。开发源码与 npm 归档可能不同，见[稳定性](/docs/compatibility/api-stability)。
-
-## Combo 可以使用吗？
-
-可以验证分组、嵌套和折叠，但当前仍为实验能力。使用前检查[Combo 边界](/docs/api/options/combo)。
-
-## 示例能在线运行吗？
-
-可以在[示例中心](/docs/examples)运行；操作预期、数据说明和代码在各案例页面中。
-
-## 画布空白、图很小或标签消失怎么办？
-
-按[故障排查](/docs/compatibility/troubleshooting)先检查尺寸和数据，再逐项恢复布局、标签和交互。
-
-## 安装后某个字段不存在怎么办？
-
-先检查实际版本和包根类型，不复制开发分支字段。安装与 UMD 的已知发布物差异见[快速上手](/docs/getting-started/quick-start)。
+- <span id="g6lite-和-g6-v5-怎么选" style={{ scrollMarginTop: '8rem' }} />[G6Lite 和 G6 v5 怎么选？](/docs/compatibility/troubleshooting#g6lite-和-g6-v5-怎么选)
+- <span id="力导向布局首屏慢怎么办" style={{ scrollMarginTop: '8rem' }} />[力导向布局首屏慢怎么办？](/docs/compatibility/troubleshooting#力导向布局首屏慢怎么办)
+- <span id="高亮或选中卡顿怎么办" style={{ scrollMarginTop: '8rem' }} />[高亮或选中卡顿怎么办？](/docs/compatibility/troubleshooting#高亮或选中卡顿怎么办)
+- <span id="浏览器和-webgl-要求是什么" style={{ scrollMarginTop: '8rem' }} />[浏览器和 WebGL 要求是什么？](/docs/compatibility/troubleshooting#浏览器和-webgl-要求是什么)
+- <span id="能在-nodejs-或-ssr-阶段直接运行吗" style={{ scrollMarginTop: '8rem' }} />[能在 Node.js 或 SSR 阶段直接运行吗？](/docs/compatibility/troubleshooting#能在-nodejs-或-ssr-阶段直接运行吗)
+- <span id="typescript-类型从哪里导入" style={{ scrollMarginTop: '8rem' }} />[TypeScript 类型从哪里导入？](/docs/compatibility/troubleshooting#typescript-类型从哪里导入)
+- <span id="combo-可以使用吗" style={{ scrollMarginTop: '8rem' }} />[Combo 可以使用吗？](/docs/compatibility/troubleshooting#combo-可以使用吗)
+- <span id="示例能在线运行吗" style={{ scrollMarginTop: '8rem' }} />[示例能在线运行吗？](/docs/compatibility/troubleshooting#示例能在线运行吗)
+- <span id="画布空白图很小或标签消失怎么办" style={{ scrollMarginTop: '8rem' }} />[画布空白、图很小或标签消失怎么办？](/docs/compatibility/troubleshooting#空白画布)
+- <span id="安装后某个字段不存在怎么办" style={{ scrollMarginTop: '8rem' }} />[安装后某个字段不存在怎么办？](/docs/compatibility/troubleshooting#安装后某个字段不存在怎么办)

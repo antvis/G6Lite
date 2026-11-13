@@ -1,7 +1,17 @@
-import { Graph } from '@antv/g6-lite';
-import { buttonStyle } from './demo-panel.ts';
+import { Graph, type EdgeConfig, type LayoutConfig } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
+  // #region routing
+  const layout = {
+    type: 'dagre', rankdir: 'LR',
+    nodesep: 40, ranksep: 96, nodeSize: [84, 32],
+  } satisfies LayoutConfig;
+  const edge: EdgeConfig = {
+    type: 'polyline',
+    style: { router: 'orth', radius: 16, endArrow: true, lineWidth: 2 },
+  };
+  // #endregion routing
   const graph = new Graph({
     container,
     data: {
@@ -17,42 +27,30 @@ export async function run(container: HTMLElement) {
       type: 'rect',
       style: { width: 84, height: 32, borderRadius: 5, label: (node) => node.id, labelPlacement: 'center', labelColor: '#fff' },
     },
-    // #region routing
-    layout: {
-      type: 'dagre', rankdir: 'LR',
-      nodesep: 40, ranksep: 96, nodeSize: [84, 32],
-    },
-    edge: {
-      type: 'polyline',
-      style: { router: 'orth', radius: 16, endArrow: true, lineWidth: 2 },
-    },
-    // #endregion routing
+    layout,
+    edge,
     behaviors: ['zoom-canvas', 'drag-canvas'],
     autoFit: { padding: 48, maxZoom: 1 },
   });
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;left:12px;top:12px;z-index:20;display:flex;gap:6px;';
-  for (const radius of [0, 16]) {
-    const button = document.createElement('button');
-    button.textContent = `radius ${radius}`;
-    button.style.cssText = buttonStyle;
-    button.type = 'button';
-    button.setAttribute('aria-pressed', String(radius === 16));
-    button.addEventListener('click', () => {
+  const ui = createDemoPanel(container);
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => { ui.destroy(); destroy(); };
+  try {
+    await graph.render();
+    ui.addChoice('Radius', ['0', '16'], '16', (value) => {
+      const radius = Number(value);
       // #region rounding
       graph.updateOptions({ edge: { style: { radius } } });
       // #endregion rounding
-      for (const item of controls.querySelectorAll('button')) {
-        item.setAttribute('aria-pressed', String(item === button));
+    });
+    ui.addChoice<'LR' | 'TB'>('Direction', ['LR', 'TB'], 'LR', async (rankdir) => {
+      try {
+        graph.setLayout({ ...layout, rankdir });
+        await graph.render();
+      } catch {
+        if (!graph.destroyed) ui.setStatus('Layout failed');
       }
     });
-    controls.append(button);
-  }
-  const destroy = graph.destroy.bind(graph);
-  graph.destroy = () => { controls.remove(); destroy(); };
-  try {
-    await graph.render();
-    container.append(controls);
     return graph;
   } catch (error) {
     graph.destroy();

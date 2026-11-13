@@ -1,166 +1,20 @@
 ---
-title: 状态与显隐方法参考
-description: 增减、替换、查询和清空状态，以及隐藏和恢复元素的调用契约
+title: 状态与显隐方法参考（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-import { NodeDocExample as StateDocExample } from '@/components/node-doc-example';
+内容已并入 [状态与显隐](/docs/api/graph#graph-states)。
 
-增减一个标记用 setItemState，替换整组用 setElementStates，同时改多个元素用 batchSetState。操作流程见[状态使用指南](/docs/guides/states)，基本关系见[元素状态](/docs/concepts/states)。
-
-## 调用前提
-
-修改方法都返回 void，须等待首次 await graph.render() 完成；此前调用会抛错，实例销毁后不执行。状态写入同步生效，绘制会被安排到后续帧，无需再次 render。
-
-id 可以指节点、边或 Combo；不存在的 id 不修改任何元素，也不因 id 缺失抛错。应让三类元素使用不同的 ID；重名时按节点 → 边 → Combo 查找。
-
-ElementState 接受内置名称和自定义字符串：default、active、selected、disabled、highlight、inactive、hidden。状态外观查[节点](/docs/api/options/node#状态样式)、[边](/docs/api/options/edge#状态样式)和 [Combo](/docs/api/options/combo#状态样式)参考。disabled 不自动禁止交互；程序改状态不发送 node:selectchange 等 Behavior 选择事件。
-
-## setItemState
-
-`graph.setItemState(id: string, state: ElementState, value: boolean): void`
-
-true 增加一个状态，false 只移除该状态，其他状态保留。重复增加不会追加重复项；移除不存在的状态不改变集合。
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-declare const graph: Graph; // 已完成 render，包含 A
-graph.setItemState('A', 'selected', true);
-graph.setItemState('A', 'review', true);
-graph.setItemState('A', 'review', false); // selected 仍保留
-```
-
-### 增减、替换与清空的区别
-
-A 初始 selected。Toggle review 叠加橙色，Replace with highlight 只保留高亮，Clear A 清空集合。预览的状态行直接读取 getItemStates。
-
-<StateDocExample id="state-concept" locale="zh" focus="states" />
-
-## setElementStates
-
-`graph.setElementStates(id: string, states: ElementState[]): void`
-
-`graph.setElementStates(stateMap: Record<string, ElementState[]>): void`
-
-```ts
-import type { ElementState, Graph } from '@antv/g6-lite';
-declare const graph: Graph;
-declare const states: ElementState[];
-graph.setElementStates('A', states);
-graph.setElementStates({ A: ['selected'], 'A-B': ['highlight'] });
-```
-
-两种重载均返回 void：单 id 加状态数组，或 `Record<string, ElementState[]>`。只替换被指定元素的完整集合；映射中未出现的元素保持原样，空数组清空该元素，空映射不修改元素。
-
-重复名称按集合存储，default 被过滤，不表示一个独立有效样式。需要回到基础外观时传空数组或 clearItemStates；setItemState(id, 'default', true) 不会清除已有标记。
-
-节点和边当前比较状态成员是否相同：仅调整同一组名称的数组顺序，不保证更新覆盖顺序。确需重排时先清空再写入。Combo 的状态样式另按其支持的固定顺序处理，见[覆盖规则](/docs/api/options/combo#状态样式)。
-
-## batchSetState
-
-`graph.batchSetState(items: Array<{ id: string; state: ElementState; value: boolean }>): void`
-
-按数组顺序增减单个状态，不替换其他状态。同一 id / state 重复出现时依次执行，最后一次决定该标记是否存在。节点、边和 Combo 可以混用；批次统一请求绘制，不对每个元素单独绘制。
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-declare const graph: Graph;
-graph.batchSetState([
-  { id: 'A', state: 'review', value: true },
-  { id: 'A-B', state: 'highlight', value: false },
-  { id: 'group', state: 'selected', value: true },
-]);
-```
-
-## getItemStates
-
-`graph.getItemStates(id: string): ElementState[]`
-
-返回当前状态的新数组，修改数组不会写回图。不含该元素、尚未创建数据模型或没有状态时返回 []。此方法不检查是否已销毁；销毁后不要把残留查询结果当作仍可操作的图。
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-declare const graph: Graph;
-const states = graph.getItemStates('A');
-const selected = states.includes('selected');
-console.log(selected);
-```
-
-## findNodesByState
-
-`graph.findNodesByState(state: ElementState): string[]`
-
-返回带该标记的节点 ID 新数组；未建模型或没有匹配项时返回 []。查询包括仍有 selected 的隐藏节点，不等于“当前屏幕可见的节点”。
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-declare const graph: Graph;
-const nodeIds = graph.findNodesByState('selected');
-console.log(nodeIds);
-```
-
-## findEdgesByState
-
-`graph.findEdgesByState(state: ElementState): string[]`
-
-返回带该标记的边 ID 新数组，空结果为 []。边与节点分别查询，不会因为端点选中就自动把边算作选中。
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-declare const graph: Graph;
-const edgeIds = graph.findEdgesByState('selected');
-console.log(edgeIds);
-```
-
-## findCombosByState
-
-`graph.findCombosByState(state: ElementState): string[]`
-
-返回带该标记的 Combo ID 新数组，空结果为 []。不把子节点的状态推导为父 Combo 状态。三个 find 方法均扫描当前对应集合，不承诺按选中时间排序，也不检查销毁状态。
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-declare const graph: Graph;
-const comboIds = graph.findCombosByState('selected');
-console.log(comboIds);
-```
-
-## clearItemStates
-
-`graph.clearItemStates(id: string): void`
-
-清空指定元素的全部业务状态，包括 selected 和显式 hidden。只想移除自己的标记时用 setItemState(id, state, false)。折叠 Combo 导致的结构性 hidden 会保留，不能用清空状态绕过折叠。
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-declare const graph: Graph;
-graph.clearItemStates('A');
-```
-
-## hideItem
-
-`graph.hideItem(id: string): void`
-
-等价于 setItemState(id, 'hidden', true)，保留其他状态、元素数据和坐标。不删除元素、不重新布局或适配视口；只改变该 id 的状态，不自动给关联边、子节点或子 Combo 设置 hidden。需要一起隐藏时显式列出目标。
-
-### 显隐与状态查询
-
-A 初始 selected，B 位于 group 内。Hide A 隐藏 A，但状态和 selected nodes 查询仍包含 A；Show A 恢复带紫色描边的 A。Hide A + edge 一起隐藏 A 和边，再点 Show A，边仍隐藏；Clear A 会连 selected 一起移除。Select 按钮同时替换节点、边和 Combo 的状态，观察三类查询结果。
-
-<StateDocExample id="state-visibility" locale="zh" focus="visibility" />
-
-## showItem
-
-`graph.showItem(id: string): void`
-
-等价于 setItemState(id, 'hidden', false)，只移除显式业务 hidden，保留 selected 等其他状态。不恢复已经删除的元素，也不展开折叠的 Combo。
-
-<details>
-<summary>折叠与自定义样式的边界</summary>
-
-节点或边仍受折叠 Combo 影响时，showItem、clearItemStates、setElementStates(id, []) 都不会解除结构性隐藏；先通过[Combo 操作](/docs/guides/combo)展开对应分组。业务显式 hidden 与折叠派生 hidden 分开处理；展开也不会清除显式业务隐藏。
-
-当前节点整对象 style 函数绕过状态样式解析，包括节点主体的 hidden 透明度。需要统一状态和显隐外观时使用逐字段 style 配置；不要把 API 已记录 hidden 理解为所有自定义绘制都自动处理隐藏。见[样式函数](/docs/api/options/node#样式函数)。
-
-</details>
-
-继续查询：[状态使用](/docs/guides/states) · [状态概念](/docs/concepts/states) · [选择事件](/docs/api/graph/events/selection) · [focusItem 定位](/docs/api/graph/viewport#focusitem)。
+- <span id="调用前提" style={{ display: 'block', scrollMarginTop: '8rem' }} />[调用前提](/docs/api/graph#调用前提)
+- <span id="setitemstate" style={{ display: 'block', scrollMarginTop: '8rem' }} />[setItemState](/docs/api/graph#graph-states-setitemstate)
+- <span id="增减替换与清空的区别" style={{ display: 'block', scrollMarginTop: '8rem' }} />[增减、替换与清空的区别](/docs/api/graph#增减替换与清空的区别)
+- <span id="setelementstates" style={{ display: 'block', scrollMarginTop: '8rem' }} />[setElementStates](/docs/api/graph#graph-states-setelementstates)
+- <span id="batchsetstate" style={{ display: 'block', scrollMarginTop: '8rem' }} />[batchSetState](/docs/api/graph#graph-states-batchsetstate)
+- <span id="getitemstates" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getItemStates](/docs/api/graph#getitemstates)
+- <span id="findnodesbystate" style={{ display: 'block', scrollMarginTop: '8rem' }} />[findNodesByState](/docs/api/graph#findnodesbystate)
+- <span id="findedgesbystate" style={{ display: 'block', scrollMarginTop: '8rem' }} />[findEdgesByState](/docs/api/graph#findedgesbystate)
+- <span id="findcombosbystate" style={{ display: 'block', scrollMarginTop: '8rem' }} />[findCombosByState](/docs/api/graph#findcombosbystate)
+- <span id="clearitemstates" style={{ display: 'block', scrollMarginTop: '8rem' }} />[clearItemStates](/docs/api/graph#clearitemstates)
+- <span id="hideitem" style={{ display: 'block', scrollMarginTop: '8rem' }} />[hideItem](/docs/api/graph#hideitem)
+- <span id="显隐与状态查询" style={{ display: 'block', scrollMarginTop: '8rem' }} />[显隐与状态查询](/docs/api/graph#显隐与状态查询)
+- <span id="showitem" style={{ display: 'block', scrollMarginTop: '8rem' }} />[showItem](/docs/api/graph#showitem)

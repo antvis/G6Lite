@@ -1,33 +1,42 @@
 ---
-title: 生命周期与数据
-description: 比较首次渲染、增量修改、整体替换与重排的事件
+title: 渲染、布局与数据更新
+description: 了解何时可以更新图、读取布局坐标或处理数据替换。
 ---
 
 import { NodeDocExample as EventDocExample } from '@/components/node-doc-example';
 
-更新数据不等于重新执行 render，计算布局不等于浏览器已绘制下一帧。先观察日志，再选择需要的完成时机。实例阶段与资源清理见[Graph 生命周期](/docs/concepts/graph-lifecycle)，调用契约见[生命周期方法参考](/docs/api/graph/lifecycle)。
+## 操作完成后怎么继续 [#选择正确的完成时机]
+
+| 要做什么 | 写法 |
+| --- | --- |
+| 首次渲染后更新图 | 等待 `await graph.render()`，再修改数据或状态。 |
+| 重新布局后读取坐标 | 等待 `await graph.layout()`，再调用 `getNodePosition()`。 |
+| 在每次整图数据替换后更新业务界面 | 监听 `datachange`，回调会收到更新后的节点数和边数。 |
+
+```ts
+await graph.render();
+
+graph.on('datachange', ({ nodeCount, edgeCount }) => {
+  console.log('数据已替换', nodeCount, edgeCount);
+});
+await graph.setData(nextData);
+
+await graph.layout();
+const position = graph.getNodePosition('A');
+```
+
+如果要收到首次渲染通知，在调用 `render()` 前注册 `graph.once('afterrender', handler)`。`layout:end` 和 `afterlayout` 在坐标写回前触发，读取最终坐标请等待 `graph.layout()` 完成。
 
 ## 观察事件顺序
 
-在 render 前订阅，才能接收首次布局与渲染事件。初始数据修改等 await graph.render() 完成后执行。操作下面的按钮，比较日志：
+示例加载时，日志会显示首次布局和渲染的事件。再点击画布右上角的按钮，查看对应操作触发了哪些事件。
+
+| 示例按钮 | 日志里会出现什么 |
+| --- | --- |
+| **Update A**、**Add D**、**Remove D** | 分别触发 `afterupdateitem`、`afteradditem`、`afterremoveitem`。先添加 D，再试删除。 |
+| **Replace data** | 示例配置了布局，因此先触发布局事件，再触发 `datachange`。 |
+| **Layout** | 触发布局事件。 |
 
 <EventDocExample id="events-lifecycle" locale="zh" focus="lifecycle" />
 
-Update A / Add D / Remove D 产生对应 after*item；Replace data 产生布局事件和 datachange；Layout 只有布局事件。它们不会重复触发 afterrender；数据已写回与下一帧已绘制是不同的时机。完整顺序与取消边界见[生命周期参考](/docs/api/graph/events/lifecycle)。
-
-## 选择正确的完成时机
-
-首次初始化：render 前注册 once('afterrender', handler)，等待 await graph.render() 后再修改数据或状态。
-
-整体替换：使用 await graph.setData(nextData)，需要替换通知时监听 datachange。
-
-重新布局：await graph.layout() 后查询坐标。layout:end / afterlayout 在写回之前，不适合直接读取最终位置。
-
-<details>
-<summary>取消、过期任务和卸载</summary>
-
-取消或过期布局不保证配对结束事件。退出时销毁 Graph，另行清理请求、计时器和业务监听；异步返回后检查 graph.destroyed。完整语义见 [布局方法](/docs/api/graph/layout)。
-
-</details>
-
-[返回事件入门](/docs/guides/events) · [逐项事件与载荷](/docs/api/graph/events/lifecycle)。
+完整事件顺序、回调参数和取消时的行为见[事件 API 参考](/docs/api/graph/events#event-lifecycle)。卸载时的清理方法见[图的生命周期](/docs/api/graph#graph-lifecycle)。

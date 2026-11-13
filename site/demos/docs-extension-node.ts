@@ -1,5 +1,5 @@
 import { Graph, register, type NodeExtension } from '@antv/g6-lite';
-import { buttonStyle } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 // #region descriptor
 const statusNode: NodeExtension = {
@@ -10,6 +10,7 @@ const statusNode: NodeExtension = {
       ? { fill: '#fff1f0', stroke: '#cf1322' }
       : { fill: '#e6f4ff', stroke: '#1677ff' };
   },
+  // #region overlay-and-anchor
   drawOverlay(ctx, { x, y, zoom }) {
     ctx.save();
     ctx.fillStyle = '#5366ad';
@@ -21,6 +22,7 @@ const statusNode: NodeExtension = {
     if (placement === 'left') return { x: -width / 2, y: height * crossOffsetRatio };
     return { x: width * crossOffsetRatio, y: placement === 'top' ? -height / 2 : height / 2 };
   },
+  // #endregion overlay-and-anchor
 };
 register('node', 'docs-status-node', statusNode);
 // #endregion descriptor
@@ -45,16 +47,16 @@ export async function run(container: HTMLElement) {
     behaviors: ['click-select', 'zoom-canvas', 'drag-canvas'],
     autoFit: { padding: 64, maxZoom: 1 },
   });
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.textContent = 'Toggle B status';
-  button.style.cssText = 'position:absolute;left:12px;top:12px;z-index:20;' + buttonStyle;
-  button.addEventListener('click', () => {
-    const status = graph.getNodeData('B')?.data?.status === 'error' ? 'ok' : 'error';
-    graph.updateNodeData('B', { status });
-  });
+  const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
-  graph.destroy = () => { button.remove(); destroy(); };
-  try { await graph.render(); container.append(button); return graph; }
+  graph.destroy = () => { ui.destroy(); destroy(); };
+  try {
+    await graph.render();
+    ui.addAction('Toggle B status', () => {
+      const status = graph.getNodeData('B')?.data?.status === 'error' ? 'ok' : 'error';
+      graph.updateNodeData('B', { status });
+    });
+    return graph;
+  }
   catch (error) { graph.destroy(); throw error; }
 }

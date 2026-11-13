@@ -5,31 +5,31 @@ description: 复用内置边基型，注册业务样式、函数映射与状态�
 
 import { NodeDocExample } from '@/components/node-doc-example';
 
-需要复用业务关系外观时定义 EdgeExtension；只有颜色或线宽差异时先用[边配置](/docs/api/options/edge)。扩展选择内置基型并提供样式，不直接绘制任意路径。
+用 `EdgeExtension` 为一类业务关系封装可复用的边类型。边的路径由 `base` 决定，方向由箭头表示，文字由 `edge.style.label` 提供。只需在一张图里按数据改变线宽或颜色时，可以直接用[样式函数](/docs/guides/edge#样式函数)。
 
 ## 注册与启用
 
-1. 从 line / arc / polyline / cubic 选择 base。
-2. 注册无状态描述，getStyle 根据 source、target、edge 返回样式。
-3. 在 Graph 的 edge.type 使用注册名，注册必须先于 render。
+选择 `arc` 作为路径基型，用 `getStyle()` 按权重决定颜色和线宽，再用 `register('edge', ...)` 注册类型。
 
-<NodeDocExample id="extension-edge" locale="zh" focus="descriptor" />
+<NodeDocExample id="extension-edge" locale="zh" focus="descriptor" view="code" />
 
-light 权重为 1，heavy 为 4；单击边看到紫色选中样式。Toggle heavy weight 切换业务权重；如果边仍选中，先点击空白清理选择，再比较基础颜色与线宽。
+在 `new Graph()` 中把 `edge.type` 设为注册名。下例中 `light` 的初始权重为 `1`，`heavy` 为 `4`。
+
+<NodeDocExample id="extension-edge" locale="zh" focus="edge-activation" />
 
 ## 覆盖与更新
 
-本例使用 updateEdgeData 写入业务字段，getStyle 在后续样式解析时重新求值。不要直接修改查询 Model，也不在回调中修改 Graph 或保存当前边。
+在上方示例点击 **Toggle heavy weight**，`updateEdgeData()` 会更新 `heavy` 的权重，`getStyle()` 随之调整颜色和线宽。点击边可查看紫色选中样式，点击空白处可恢复基础样式。
 
-edge.style 的逐字段配置可覆盖扩展默认值，状态层可继续覆盖；例如选中时的 4 像素线宽独立于权重。整对象函数的特殊路径查[样式回调](/docs/api/options/edge#样式回调)。
+<NodeDocExample id="extension-edge" locale="zh" focus="edge-weight-update" view="code" />
 
-箭头、拾取热区和批处理沿用基型。polyline 的 router、布局方向和几何更新限制仍然有效，见[折线路由](/docs/guides/polyline-routing)。
+样式优先级和扩展字段见 [EdgeExtension](/docs/api/extensions#edgeextension)。
 
 ## 常见问题
 
 ### 能实现任意自定义 draw 或 WebGL shader 吗？
 
-当前 EdgeExtension 只有基型、默认样式、getStyle 与状态样式，没有任意 draw / shader 钩子。完整签名查[EdgeExtension](/docs/api/extensions/drawing#edgeextension)。
+当前 EdgeExtension 只有基型、默认样式、getStyle 与状态样式，没有任意 draw / shader 钩子。完整签名查[EdgeExtension](/docs/api/extensions#edgeextension)。
 
 ### 为什么标签没有显示？
 
@@ -37,6 +37,6 @@ edge.style 的逐字段配置可覆盖扩展默认值，状态层可继续覆盖
 
 ### 为什么边难以选中？
 
-配置 hitAreaWidth 并启用交互。本例热区为 14；它不会把可见线条画粗，完整规则见[边热区](/docs/api/options/edge#点击热区)。
+配置 `hitAreaWidth` 并启用交互。本例热区为 14，线宽保持原样。完整规则见[交互热区](/docs/guides/edge#交互热区)。
 
-注册、缓存和错误边界查[公共契约](/docs/api/extensions/registration)。
+注册、缓存和错误边界查[公共契约](/docs/api/graph#extension-registration)。

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { DataModel } from '@src/dataModel.js';
 import { EventEmitter } from '@src/events.js';
+import { registerExtension } from '@src/extensions/registry.js';
 import { Graph } from '@src/graph.js';
 import type { Renderer } from '@src/renderer/renderer.js';
 import { RefreshLevel } from '@src/scheduler.js';
@@ -264,6 +265,35 @@ describe('P0: destroyed Graph API safety', () => {
     eventEmitter.emit('node:click');
 
     expect(handler).not.toHaveBeenCalled();
+  });
+});
+
+describe('Graph.emit', () => {
+  it('dispatches business arguments synchronously through on, once and off', () => {
+    const graph = Object.assign(Object.create(Graph.prototype) as Graph, {
+      _destroyed: false,
+      eventEmitter: new EventEmitter(),
+    });
+    const persistent = vi.fn();
+    const once = vi.fn();
+    const selection = { nodeId: 'a' };
+    graph.on('business:select', persistent);
+    graph.once('business:select', once);
+
+    graph.emit('business:select', selection, 'toolbar');
+    expect(persistent).toHaveBeenCalledExactlyOnceWith(selection, 'toolbar');
+    expect(once).toHaveBeenCalledExactlyOnceWith(selection, 'toolbar');
+    graph.emit('business:select', selection, 'keyboard');
+    expect(persistent).toHaveBeenCalledTimes(2);
+    expect(once).toHaveBeenCalledTimes(1);
+
+    graph.off('business:select', persistent);
+    graph.emit('business:select', selection, 'toolbar');
+    expect(persistent).toHaveBeenCalledTimes(2);
+    graph.on('business:select', persistent);
+    Object.assign(graph, { _destroyed: true });
+    graph.emit('business:select', selection, 'toolbar');
+    expect(persistent).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -871,6 +901,113 @@ describe('P1: label rendering options', () => {
       },
     });
     expect(forceFlush).toHaveBeenCalledWith(RefreshLevel.FULL_PROCESS);
+  });
+});
+
+describe('Graph behavior replacement', () => {
+  function createGraph() {
+    const canvas = document.createElement('canvas');
+    const dataModel = new DataModel({ theme: {} });
+    dataModel.addNode({ id: 'a', x: 10, y: 20 });
+    dataModel.addNode({ id: 'b', x: 50, y: 70 });
+    const graph = Object.create(Graph.prototype) as Graph;
+    const detach = vi.fn();
+    const setHighlight = vi.fn();
+    const forceFlush = vi.fn();
+    Object.assign(graph, {
+      options: {},
+      eventEmitter: new EventEmitter(),
+      initialized: true,
+      interactionTeardown: detach,
+      dataModel,
+      scheduler: { forceFlush, schedule: vi.fn() },
+      renderer: {
+        getCanvas: () => canvas,
+        getEdges: () => [],
+        getCamera: () => ({ x: 100, y: 200, zoom: 2 }),
+        setHighlight,
+      },
+    });
+    const click = (nodeId: string) =>
+      graph.eventEmitter.emit('node:click', { nodeId, event: new MouseEvent('click') });
+    return { graph, canvas, dataModel, click, detach, setHighlight, forceFlush };
+  }
+
+  it('replaces the list without replacing the data model, viewport, or event dispatcher', () => {
+    const { graph, dataModel, click, detach, forceFlush } = createGraph();
+    const onClick = vi.fn();
+    graph.on('node:click', onClick);
+    graph.setBehaviors(['constructor', 'click-select']);
+    click('a');
+    expect(graph.findNodesByState('selected')).toEqual(['a']);
+
+    graph.updateOptions({ behaviors: [] });
+    click('b');
+    expect(graph.findNodesByState('selected')).toEqual(['a']);
+    expect(graph.getNodeData('a')).toBe(dataModel.getNode('a'));
+    expect(graph.getCamera()).toEqual({ x: 100, y: 200, zoom: 2 });
+    expect(onClick).toHaveBeenCalledTimes(2);
+    expect(detach).not.toHaveBeenCalled();
+    expect(forceFlush).not.toHaveBeenCalled();
+
+    graph.setBehaviors(['click-select']);
+    graph.setBehaviors(['click-select']);
+    click('b');
+    expect(graph.findNodesByState('selected')).toEqual(['b']);
+    graph.setBehaviors([]);
+  });
+
+  it('finishes event dispatch before unmounting a custom behavior', async () => {
+    const { graph, click } = createGraph();
+    const handler = vi.fn();
+    const destroy = vi.fn();
+    const businessListener = vi.fn();
+    registerExtension('behavior', 'replaceable-behavior', {
+      getEvents: () => ({ 'node:click': handler }),
+      destroy,
+    });
+    graph.once('node:click', () => graph.setBehaviors(['click-select']));
+    graph.setBehaviors(['replaceable-behavior']);
+    graph.on('node:click', businessListener);
+
+    click('a');
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(businessListener).toHaveBeenCalledTimes(1);
+    expect(destroy).not.toHaveBeenCalled();
+    await Promise.resolve();
+    expect(destroy).toHaveBeenCalledTimes(1);
+
+    click('b');
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(businessListener).toHaveBeenCalledTimes(2);
+    expect(graph.findNodesByState('selected')).toEqual(['b']);
+    graph.setBehaviors([]);
+  });
+
+  it('cleans up hover and Tooltip resources on replacement', () => {
+    vi.useFakeTimers();
+    const { graph, canvas, setHighlight } = createGraph();
+    const hover = () =>
+      graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: new MouseEvent('mousemove') });
+    try {
+      graph.setBehaviors(['highlight-node', { type: 'tooltip', className: 'switch-tooltip' }]);
+      hover();
+      expect(canvas.style.cursor).toBe('pointer');
+      graph.setBehaviors([]);
+      vi.runAllTimers();
+      expect(canvas.style.cursor).toBe('default');
+      expect(setHighlight).toHaveBeenLastCalledWith({ nodeIds: new Set(), edgeIndices: new Set() });
+      expect(document.querySelector('.switch-tooltip')).toBeNull();
+
+      graph.setBehaviors([{ type: 'tooltip', trigger: 'click', className: 'switch-tooltip' }]);
+      graph.eventEmitter.emit('node:click', { nodeId: 'a', event: new MouseEvent('click') });
+      expect(document.querySelector('.switch-tooltip')?.textContent).toBe('a');
+      graph.setBehaviors([]);
+      expect(document.querySelector('.switch-tooltip')).toBeNull();
+    } finally {
+      graph.setBehaviors([]);
+      vi.useRealTimers();
+    }
   });
 });
 

@@ -11,17 +11,17 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@antv/g6-lite"><img alt="npm 版本" src="https://img.shields.io/npm/v/@antv/g6-lite.svg"></a>
+  <a href="https://www.npmjs.com/package/@antv/g6-lite/v/0.1.0"><img alt="npm 版本" src="https://img.shields.io/badge/version-0.1.0-blue"></a>
   <a href="https://github.com/antvis/G6Lite/actions/workflows/build.yml"><img alt="构建" src="https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg"></a>
-  <a href="https://bundlephobia.com/package/@antv/g6-lite"><img alt="压缩后体积" src="https://img.shields.io/bundlephobia/minzip/@antv/g6-lite"></a>
-  <a href="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"><img alt="UMD gzip 体积" src="https://img.badgesize.io/https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
+  <a href="https://bundlephobia.com/package/@antv/g6-lite@0.1.0"><img alt="压缩后体积" src="https://img.shields.io/bundlephobia/minzip/@antv/g6-lite/0.1.0"></a>
+  <a href="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"><img alt="UMD gzip 体积" src="https://img.badgesize.io/https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
   <a href="./LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/@antv/g6-lite.svg"></a>
 </p>
 
 <p align="center">
   <a href="https://g6lite.antv.vision">官网</a> ·
   <a href="https://g6lite.antv.vision/docs/getting-started/quick-start">快速开始</a> ·
-  <a href="https://g6lite.antv.vision/docs/api">API</a> ·
+  <a href="https://g6lite.antv.vision/docs/api/graph">API</a> ·
   <a href="https://g6lite.antv.vision/docs/examples">示例</a>
 </p>
 
@@ -38,7 +38,7 @@
 ## 安装
 
 ```bash
-npm install @antv/g6-lite
+npm install @antv/g6-lite@0.1.0
 ```
 
 ## 快速开始
@@ -86,11 +86,11 @@ await graph.render();
 
 ## CDN / UMD
 
-无需构建工具，在浏览器中直接加载 UMD 包即可使用 `window.G6Lite`。产物包含运行时依赖、布局算法和内联的布局 Worker：
+无需构建工具，在浏览器中直接加载 UMD 包即可使用 `window.G6Lite`。主脚本包含运行时依赖和内置布局。可选布局的接入方式见[布局总览](https://g6lite.antv.vision/docs/guides/layout-overview#optional-layouts)。
 
 ```html
 <div id="container" style="width: 100%; height: 500px"></div>
-<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
 <script>
   const graph = new G6Lite.Graph({
     container: '#container',
@@ -108,18 +108,18 @@ await graph.render();
 </script>
 ```
 
-- [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js)
-- [UNPKG](https://unpkg.com/@antv/g6-lite@beta/dist/g6-lite.min.js)
+- [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
+- [UNPKG](https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
 
-生产环境请将 `beta` 替换为已发布的确切版本号。UMD 徽章展示完整 CDN 文件的下载体积；Bundlephobia 徽章展示该服务打包 npm 入口后测得的体积。
+UMD 徽章展示完整 CDN 文件的下载体积；Bundlephobia 徽章展示该服务打包 npm 入口后测得的体积。
 
 ## 继续阅读
 
 - [官网](https://g6lite.antv.vision)
 - [快速开始](https://g6lite.antv.vision/docs/getting-started/quick-start)
-- [核心概念](https://g6lite.antv.vision/docs/concepts/overview)
+- [G6Lite 是什么](https://g6lite.antv.vision/docs)
 - [数据与配置](https://g6lite.antv.vision/docs/guides/data)
-- [API 参考](https://g6lite.antv.vision/docs/api)
+- [图 API](https://g6lite.antv.vision/docs/api/graph)
 - [示例](https://g6lite.antv.vision/docs/examples)
 - [性能指标](https://g6lite.antv.vision/docs/metrics/performance)
 - [浏览器兼容性](https://g6lite.antv.vision/docs/compatibility/browser)

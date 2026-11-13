@@ -1,42 +1,32 @@
 ---
-title: 自定义 Plugin
-description: 挂载独立 DOM，管理事件订阅、多实例和卸载清理，验证重复挂载
+title: 自定义插件
+description: 实现、注册并使用一个点击计数器插件
 ---
 
 import { NodeDocExample } from '@/components/node-doc-example';
 
-Plugin 适合独立 DOM 工具、统计面板或外围状态；图内交互用 Behavior。每次挂载创建独立实例，资源由插件自己释放。
+下面实现一个点击计数器。它在图容器里显示面板，点击节点或面板上的按钮时更新计数。
 
-## 实现、注册与挂载
+## 实现插件 [#实现注册与挂载]
 
-init 接收整个配置对象；mount 收到 Graph 容器，不是 Canvas。本例创建计数器，只追加自己的 DOM，不替换画布子节点。
+用工厂函数创建插件。计数、面板和退订函数都保存在工厂函数内部，每个插件实例独立管理自己的状态。
+
+| 方法 | 在示例中的作用 |
+| --- | --- |
+| `init(context, options)` | 读取标题等插件参数。 |
+| `mount(container)` | 在图容器里创建面板，订阅节点点击。 |
+| `destroy()` | 退订节点点击，移除面板。插件自己创建的定时器等资源也在这里清理。 |
+
+## 注册与使用
+
+用 `register('plugin', 'docs-counter', createCounter)` 注册工厂，再在 `plugins` 中配置 `{ type: 'docs-counter', caption: 'Clicks' }`。完整的图配置见[插件总览](/docs/guides/plugins#配置插件)。
+
+## 代码示例
+
+点击节点或 **Plugin +1**，计数会加一。点击 **Render again** 后，计数归零；再次点击节点，计数仍然只加一。
 
 <NodeDocExample id="extension-plugin" locale="zh" focus="plugin" />
 
-Plugin +1 或单击节点使计数加一。Render again 销毁旧插件、重新挂载并回到 0；重复几次后单击节点仍只加一，验证没有重复订阅。展开完整代码查看宿主订阅函数与激活配置。
+展开「完整代码」可查看节点点击的接入方式：应用通过 `subscribe` 传入订阅函数，在里面调用 `graph.on()`，并返回调用 `graph.off()` 的退订函数。如果重挂载后一次点击加了多次，检查 `destroy()` 是否执行了退订。
 
-## 事件与作用域
-
-插件监听自己创建的 DOM 按钮，并保存原函数供 removeEventListener 使用。Graph 的 node:click 由宿主通过公开 on / off 封装成 subscribe 选项，返回退订函数；插件不依赖已弃用的 context.graph 或内部事件总线。
-
-这是一项业务自定义选项，不是引擎默认注入。宿主拥有 Graph，订阅在 mount 时建立，此时 Graph 已创建；不要在构造参数求值时提前访问未初始化变量。
-
-状态 count、DOM 和退订函数都位于工厂内部；全局注册的是工厂，不是当前 Graph 的 DOM 实例。两个 Graph 可使用相同注册名和各自配置，不共享计数。
-
-## 选项与清理
-
-Plugin 配置项是含 type 的对象，caption、subscribe 直接放顶层，不放 options 内。没有 Plugin.update，setData 不重新挂载；改变构造选项时重建 Graph，见[配置参考](/docs/api/options/transforms-plugins#plugins)。
-
-destroy 先退订，再移除 DOM 监听与节点，清空引用；支持部分 mount 后失败和重复清理。自己的请求、timer、Observer、Worker 也需取消或释放。异步回调检查已销毁状态并处理错误，不假定引擎等待 mount 的 Promise。
-
-## 常见问题
-
-### 为什么多次 render 后点击增加多次？
-
-检查是否保存并调用了退订函数，DOM 监听是否使用原函数引用解除；不要把状态和监听放在模块全局。
-
-### 为什么 setData 不把计数器归零？
-
-setData 只更换数据，不重新挂载 Plugin。本例用 render 演示重建的生命周期，不推荐为了重置业务计数而重建整图。
-
-完整钩子与失败行为查[PluginExtension](/docs/api/extensions/runtime#pluginextension)；更多扩展组合见[综合案例](/docs/examples/extension-system)。
+更多钩子见 [PluginExtension](/docs/api/extensions#pluginextension)。

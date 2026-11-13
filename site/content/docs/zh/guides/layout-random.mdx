@@ -1,0 +1,49 @@
+---
+title: 随机布局 Random
+description: 节点随机散布在布局中心附近。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+节点随机散布在布局中心附近。
+
+## 使用场景
+
+适合快速预览图数据。每次重新计算都会随机生成坐标。
+
+## 基本用法
+
+这是可选布局。先导入并注册，再设置 `layout.type`。CDN 接入见[可选布局](/docs/guides/layout-overview#optional-layouts)。
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import random from '@antv/g6-lite/layouts/random';
+
+register('layout', 'random', random);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'random' },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `width` | 控制水平散布范围。 | `number` | 画布宽度 |
+| `height` | 控制垂直散布范围。 | `number` | 画布高度 |
+| `center` | 散布中心的图坐标。 | `[number, number]` | 布局范围的中心 |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
+
+## 代码示例
+
+节点散布在 `[200, 120]` 附近。点击重置可重新生成位置。
+
+<NodeDocExample id="built-in-layout" layoutType="random" locale="zh" />
+
+[查看布局示例合集](/docs/examples/layout-gallery)

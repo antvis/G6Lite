@@ -1,155 +1,25 @@
 ---
-title: Data query method reference
-description: Data snapshots, readonly models, existence, positions, and adjacency queries
+title: Data query method reference (previous URL)
+description: Find the corresponding sections at their new location
 ---
 
-import { NodeDocExample } from '@/components/node-doc-example';
-
-Use query methods for the working graph and getData for an editable export. Update through public methods rather than mutating models. See the [data guide](/en/docs/guides/data).
-
-## Query timing and returned values
-
-Before the first render, getData returns a shallow snapshot of constructor data. Other queries return empty-model values: [], undefined, null, 0, or false. After a valid render they read the current model. Queries do not check destroyed; retained values after destruction do not prove the instance is usable.
-
-Readonly models and arrays are type-level contracts, not a runtime-freezing guarantee. Graph owns these views; do not mutate them or retain them as permanent snapshots. Query again after setData, render, or deletion.
-
-## getData
-
-`graph.getData(): GraphData`
-
-Returns new node, edge, and optional Combo arrays and records, copying top-level data/style objects and state arrays. Nested objects and functions can still be shared. It is not a recursive deep copy or a guaranteed JSON-serializable result; editing it does not update the graph.
-
-After rendering it includes current positions, actual edge IDs, membership, and states, excluding collapse-derived hidden. It is not a backup of all original options; retain fx/fy and layout configuration separately.
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-declare const graph: Graph;
-const snapshot = graph.getData();
-snapshot.nodes[0].data = { ...snapshot.nodes[0].data, score: 999 };
-console.log(graph.getNodeData(snapshot.nodes[0].id)?.data); // The assignment did not write back
-```
-
-### Snapshots and live queries
-
-Inspect A reads neighbors and adjacent edges. Edit snapshot changes the exported score to 999 while A remains at 1. Update A writes to the graph. Add D / Remove D change node and edge counts.
-
-<NodeDocExample id="data-workflow" locale="en" focus="query" />
-
-## getNodes
-
-`graph.getNodes(): readonly NodeModel[]`
-
-Returns a readonly-typed view of the current node array, without copying it or its models. Deletion can reorder it; query again after replacement.
-
-## getNodeData
-
-`graph.getNodeData(id: string): NodeModel | undefined`
-
-Looks up a node ID; missing IDs return undefined. The model has no comboId or fx/fy; query membership with getNodeCombo and keep constraints in application data.
-
-## getEdges
-
-`graph.getEdges(): readonly EdgeModel[]`
-
-Returns a readonly-typed view of the current edge array, with no creation-time ordering guarantee.
-
-## getEdgeData
-
-`graph.getEdgeData(id: string): EdgeModel | undefined`
-
-Looks up the actual edge ID. For generated IDs, use the add result or getEdges. Missing IDs return undefined.
-
-## getComboData
-
-`graph.getComboData(id: string): ComboModel | undefined`
-
-Returns the current group model, or undefined. See ComboModel for membership, bounds, and state fields.
-
-## getElementData
-
-`graph.getElementData(id: string): ElementModel | undefined`
-
-Resolves node → edge → Combo, or undefined. ElementModel is their union; narrow it before reading type-specific fields.
-
-## getNodeCount
-
-`graph.getNodeCount(): number`
-
-Counts current nodes, including hidden nodes; not the number visible on screen.
-
-## getEdgeCount
-
-`graph.getEdgeCount(): number`
-
-Counts current edges, including hidden edges.
-
-## hasNode
-
-`graph.hasNode(id: string): boolean`
-
-Whether the node exists, regardless of viewport or hidden state.
-
-## hasEdge
-
-`graph.hasEdge(id: string): boolean`
-
-Whether the edge exists; a same-named node does not imply an edge.
-
-## hasElement
-
-`graph.hasElement(id: string): boolean`
-
-Whether a node, edge, or Combo has the ID. Prefer distinct IDs across types.
-
-## getElementPosition
-
-`graph.getElementPosition(id: string): { x: number; y: number } | null`
-
-Returns a new graph-position object for a node or Combo, preferring nodes. Edges and missing IDs return null. Combo bounds update during drawing, so immediate post-membership geometry need not be final.
-
-## getNeighborNodes
-
-`graph.getNeighborNodes(nodeId: string): string[]`
-
-Scans edges for a new deduplicated array of neighbors in either direction, without filtering hidden elements. Loops include the node itself; parallel edges do not duplicate neighbors.
-
-## getAdjacentEdges
-
-`graph.getAdjacentEdges(nodeId: string): Array<{ id: string; source: string; target: string }>`
-
-Returns new records for incoming and outgoing edges, with id/source/target only. A loop appears once; parallel edges remain distinct. It matches endpoints without checking that the node exists.
-
-
-## Model fields
-
-| Model | Fields |
-| --- | --- |
-| NodeModel | readonly id, name?, x, y, data?, states |
-| EdgeModel | readonly id, source, target, data?, states |
-| ElementModel | NodeModel \| EdgeModel \| ComboModel |
-
-x/y are graph-coordinate numbers; data is optional `Readonly<Record<string, unknown>>`, and states is `ReadonlySet<ElementState>`, read using has or iteration. See [ComboModel](/en/docs/api/options/combo#read-only-query-model).
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-declare const graph: Graph;
-const element = graph.getElementData('A');
-if (element && 'source' in element) console.log(element.source, element.target);
-console.log(graph.getNodeData('A')?.states.has('selected'));
-```
-
-## Compatibility methods
-
-- `graph.toData(): GraphData`: deprecated; equivalent to getData.
-- `graph.getNodePosition(id: string): { x: number; y: number } | null`: deprecated; nodes only. Use getElementPosition.
-
-Continue with [mutations](/en/docs/api/graph/data-mutations) · [State queries](/en/docs/api/graph/states) · [Data fields](/en/docs/api/options/data).
-
-Complete example: [Queries, states, and visibility](/en/docs/examples/queries-and-states).
-
-<details data-related-examples>
-<summary>Related runnable examples</summary>
-
-- [Queries, batch states, and visibility](/en/docs/examples/queries-and-states)
-
-</details>
+This section has moved to [Data queries](/en/docs/api/graph#graph-data).
+
+- <span id="query-timing-and-returned-values" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Query timing and returned values](/en/docs/api/graph#query-timing-and-returned-values)
+- <span id="getdata" style={{ display: 'block', scrollMarginTop: '8rem' }} /><span id="compatibility-methods" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getData](/en/docs/api/graph#getdata)
+- <span id="snapshots-and-live-queries" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Snapshots and live queries](/en/docs/api/graph#snapshots-and-live-queries)
+- <span id="getnodes" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getNodes](/en/docs/api/graph#getnodes)
+- <span id="getnodedata" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getNodeData](/en/docs/api/graph#getnodedata)
+- <span id="getedges" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getEdges](/en/docs/api/graph#getedges)
+- <span id="getedgedata" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getEdgeData](/en/docs/api/graph#getedgedata)
+- <span id="getcombodata" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getComboData](/en/docs/api/graph#getcombodata)
+- <span id="getelementdata" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getElementData](/en/docs/api/graph#getelementdata)
+- <span id="getnodecount" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getNodeCount](/en/docs/api/graph#getnodecount)
+- <span id="getedgecount" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getEdgeCount](/en/docs/api/graph#getedgecount)
+- <span id="hasnode" style={{ display: 'block', scrollMarginTop: '8rem' }} />[hasNode](/en/docs/api/graph#hasnode)
+- <span id="hasedge" style={{ display: 'block', scrollMarginTop: '8rem' }} />[hasEdge](/en/docs/api/graph#hasedge)
+- <span id="haselement" style={{ display: 'block', scrollMarginTop: '8rem' }} />[hasElement](/en/docs/api/graph#haselement)
+- <span id="getelementposition" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getElementPosition](/en/docs/api/graph#getelementposition)
+- <span id="getneighbornodes" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getNeighborNodes](/en/docs/api/graph#getneighbornodes)
+- <span id="getadjacentedges" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getAdjacentEdges](/en/docs/api/graph#getadjacentedges)
+- <span id="model-fields" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Query return types](/en/docs/guides/data#model-fields)

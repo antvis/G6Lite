@@ -1,0 +1,44 @@
+---
+title: Fruchterman 力导向布局
+description: 用边的引力和节点间的斥力调整位置，再用中心引力聚拢整张图。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+用边的引力和节点间的斥力调整位置，再用中心引力聚拢整张图。
+
+## 使用场景
+
+适合展示无明确中心或层级的关系网络。
+
+## 基本用法
+
+布局类型通过 `layout.type` 指定。
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'fruchterman' },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `gravity` | 向布局中心聚拢的强度。 | `number` | `10` |
+| `speed` | 模拟中节点移动的速度系数。 | `number` | `5` |
+| `maxIteration` | 布局的最大迭代次数。 | `number` | 按节点数计算 |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
+
+## 代码示例
+
+示例将中心引力设为 12。
+
+<NodeDocExample id="built-in-layout" layoutType="fruchterman" locale="zh" />
+
+[对比关系网络布局](/docs/guides/layout-networks)

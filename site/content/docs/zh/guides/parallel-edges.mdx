@@ -1,74 +1,17 @@
 ---
-title: 平行边与自环处理
-description: 分离同向与反向边，调整间距，在增删边后保持身份，并展示自环标签
+title: 平行边与自环（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-import { NodeDocExample } from '@/components/node-doc-example';
+内容已迁至 [边](/docs/guides/edge#平行边与自环)。
 
-同一对节点有多条关系时，用平行边分离；source 与 target 相同的边则是自环，由渲染器独立处理。先保留每条边的稳定 id，再调整路径。完整字段与优先级见[平行边参考](/docs/api/options/edge#平行边与自环)。
-
-## 分离同向与反向边
-
-1. 使用默认 line 或 arc，设置 `edge.parallelEdges: { enabled: true, offset: 48, includeReverse: true }`。
-2. 有向关系开启 endArrow；反向边默认与正向边归为同组，无需手动翻转偏移。
-3. 从较小间距开始，结合标签密度和实际缩放调整。offset 使用图坐标，不是屏幕像素间距。
-
-下面上排为三条 A→B，下排为 C→D 与橙色 D→C。点击 **Toggle separation** 对比重叠与分离，再用 **Spacing 24 / 64** 比较间距。**Toggle reverse group** 关闭反向合组后，下排各自成为单边组，会重新重叠。
-
-<NodeDocExample id="parallel-workflow" locale="zh" focus="separation" />
-
-已有配置使用 transform 时，可以沿用：
-
-```ts
-transforms: [
-  { type: 'process-parallel-edges', options: { offset: 48, includeReverse: true } },
-]
-```
-
-两种入口选择一种即可；参数放在 options 中，distance 不是此处配置。需要显式关闭时使用 `edge.parallelEdges: false`。同时存在两种入口的覆盖规则查[配置优先级](/docs/api/options/edge#两种入口与优先级)。
-
-## 增删边后更新
-
-在上方点 **Add ab4**，A→B 从三条变为四条，原来的边也会重新分配路径；**Remove ab4** 恢复三条。重复添加不会创建同 ID 的重复边。
-
-用 addEdge / removeEdge 增删，或在首次 render 后用 updateOptions 更新平行边选项，无需重新布局。新的 parallelEdges 对象会替换旧对象；示例每次提交 enabled、offset、includeReverse 和 maxOffset，避免调整间距时丢失其他设置。
-
-保持 id 与边数组顺序可减少不必要的变化，但增删或重排同组边仍可能移动已有路径。不要用“第几条弧线”作为业务身份。参数和更新边界见[数据写入](/docs/api/graph/data-mutations) · [样式与配置更新](/docs/api/graph/lifecycle)。
-
-## 自环与标签
-
-让边的 source 与 target 指向同一个节点即可。下方 A 有一个自环、B 有三个，边标签使用各自 id；即使 `parallelEdges: false`，自环仍然分层显示。拖动节点，观察环和标签跟随。
-
-<NodeDocExample id="self-loops" locale="zh" focus="loops" />
-
-自环大小和层级由内置渲染器决定，offset / minOffset / maxOffset 不控制它们。用 edge.style.label 生成文字，颜色、箭头与状态沿用普通边配置；更多定位与碰撞设置见[边标签参考](/docs/api/options/edge#边标签)。
-
-## 使用建议
-
-- 自动分离使用 line 或 arc；cubic / polyline 的专用路径不使用平行边偏移。
-- 先用颜色、箭头区分方向，再添加必要的标签，避免所有关系同时挤满文字。
-- 业务分组放在 edge.data，用样式回调映射颜色或标签；mergeBy 不支持任意业务字段分组。
-
-## 常见问题
-
-### 配了 offset，为什么还是重叠？
-
-对象入口须带 enabled: true，并确认边使用 line / arc。若仅一对反向边，保留 includeReverse: true；关闭后它们会各自成为零偏移的单边组。
-
-### 增大 offset，为什么有些边没有继续分开？
-
-检查 maxOffset 是否限制了外层偏移。多条边达到相同上限时可能重叠；偏移也不是曲线中点的等距像素间隔。分组与限幅规则查[间距参考](/docs/api/options/edge#分组与间距)。
-
-### 为什么自环不受平行边开关或间距影响？
-
-自环不参与平行边分组，也不需要 process-parallel-edges。不要通过复制节点或给反向边手动取负偏移来制造自环。
-
-### 为什么删了一条边，其他边的位置也变了？
-
-同组按当前边数组重新居中分配路径。稳定 id 用于保留关系身份，不保证某条边一直在同一侧。
-
-## 示例入口
-
-[平行边与反向边](/docs/examples/parallel-edges) · [自环边](/docs/examples/edge-loops)
-
-[边使用指南](/docs/guides/edge) · [平行边完整参考](/docs/api/options/edge#平行边与自环) · [折线路由](/docs/guides/polyline-routing)
+- <span id="分离同向与反向边" style={{ scrollMarginTop: '8rem' }} />[分离同向与反向边](/docs/guides/edge#分离同向与反向边)
+- <span id="增删边后更新" style={{ scrollMarginTop: '8rem' }} />[添加或删除平行边](/docs/guides/edge#增删边后更新)
+- <span id="自环与标签" style={{ scrollMarginTop: '8rem' }} />[自环与标签](/docs/guides/edge#自环与标签)
+- <span id="使用建议" style={{ scrollMarginTop: '8rem' }} />[使用建议](/docs/guides/edge#平行边与自环)
+- <span id="常见问题" style={{ scrollMarginTop: '8rem' }} />[常见问题](/docs/guides/edge#常见问题)
+- <span id="配了-offset为什么还是重叠" style={{ scrollMarginTop: '8rem' }} />[配了 offset，为什么还是重叠？](/docs/guides/edge#为什么多条边仍然重叠)
+- <span id="增大-offset为什么有些边没有继续分开" style={{ scrollMarginTop: '8rem' }} />[增大 offset，为什么有些边没有继续分开？](/docs/guides/edge#为什么多条边仍然重叠)
+- <span id="为什么自环不受平行边开关或间距影响" style={{ scrollMarginTop: '8rem' }} />[为什么自环不受平行边开关或间距影响？](/docs/guides/edge#为什么改-offset-后自环大小没变)
+- <span id="为什么删了一条边其他边的位置也变了" style={{ scrollMarginTop: '8rem' }} />[为什么删了一条边，其他边的位置也变了？](/docs/guides/edge#增删边后更新)
+- <span id="示例入口" style={{ scrollMarginTop: '8rem' }} />[示例入口](/docs/guides/edge#相关)

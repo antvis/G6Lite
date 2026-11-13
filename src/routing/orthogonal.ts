@@ -344,7 +344,6 @@ export function computeIndentedRoutes(
   edges: Array<{ index: number; src: NodeRect; tgt: NodeRect }>,
   direction: LayoutDirection = 'LR',
   targetEnd: 'left' | 'right' = 'left',
-  _trunkGap: number = 0,
 ): Map<number, Waypoint[]> {
   const result = new Map<number, Waypoint[]>();
 

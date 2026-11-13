@@ -1,44 +1,12 @@
 ---
-title: 性能优化
-description: 从首屏、交互、标签和资源症状定位瓶颈，并验证调整结果
+title: 性能优化（旧入口）
+description: 查看合并后的性能数据
 ---
 
-一次只调整一个变量，按[测量方法](/docs/metrics/performance)保存调整前后样本。先区分布局、主线程绘制和 GPU/设备限制。
+内容已并入[性能对比](/docs/metrics/performance#performance-tuning)。
 
-## 首屏与布局
-
-**症状：首次出现图很慢。** 先看布局与模块加载耗时。已有坐标时省略 layout；需要布局时先用 grid 验证绘制，再按业务选择 force 等算法、限制相应迭代参数。不要把 grid 的速度当成 force 优化结果。
-
-支持的算法可尝试 Worker，但要在 Network/Performance 中确认任务确实离开主线程；克隆失败、资源加载或 CSP 问题会回退。参数与取消查[Worker](/docs/guides/layout-worker) · [布局配置](/docs/api/options/layout)。
-
-## 高频更新
-
-**症状：每次选择或更新都卡顿。** 检查是否反复 new Graph、render 或 setData。状态用状态 API，批量位置用 updateNodePositions；只有全量替换才用 setData。不要将业务字段更新与坐标更新混在一起。
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-
-export function markRelated(graph: Graph, nodeIds: string[]) {
-  graph.batchSetState(nodeIds.map((id) => ({
-    id, state: 'highlight', value: true,
-  })));
-}
-```
-
-验证相同数据下连续选择/清空、拖拽和批量写入的帧时间；状态切换不应重建实例。完整返回值和刷新边界查[状态](/docs/api/graph/states) · [写入](/docs/api/graph/data-mutations)。
-
-## 样式与标签
-
-**症状：缩放、拖拽时掉帧。** 暂时关闭标签，比较相同视口；再逐步恢复必要标签、边文字和装饰。缓存样式回调所需业务计算，回调中只读字段，不执行网络请求或全图聚合。
-
-使用真实标签密度测试阈值和碰撞策略，查[标签策略](/docs/api/options/label)。用 [5000 节点与标签](/docs/examples/large-labeled)对比开关，不能把无标签结果当成完整业务效果。
-
-## 资源与设备
-
-**症状：多次进入后变慢或画布丢失。** 检查卸载是否 destroy、订阅是否退订、业务请求是否取消。比较挂载/销毁后的画布与活动实例数量。高 DPR、大画布和同时打开多个图都会增加资源成本，不能只靠减少节点解决。
-
-[React](/docs/getting-started/react) · [Vue](/docs/getting-started/vue) · [环境要求](/docs/compatibility/browser)
-
-## 对比口径
-
-保留相同视觉与交互要求，重复测量中位数、P95、帧时间和资源趋势。桌面自动化结果不能替代移动设备验收；性能预算由业务目标决定，不使用通用“最大节点数”承诺。
+- <span id="首屏与布局" style={{ display: 'block', scrollMarginTop: '8rem' }} />[首屏与布局](/docs/metrics/performance#performance-tuning)
+- <span id="高频更新" style={{ display: 'block', scrollMarginTop: '8rem' }} />[高频更新](/docs/metrics/performance#performance-tuning)
+- <span id="样式与标签" style={{ display: 'block', scrollMarginTop: '8rem' }} />[样式与标签](/docs/metrics/performance#performance-tuning)
+- <span id="资源与设备" style={{ display: 'block', scrollMarginTop: '8rem' }} />[资源与设备](/docs/metrics/performance#performance-tuning)
+- <span id="对比口径" style={{ display: 'block', scrollMarginTop: '8rem' }} />[对比口径](/docs/metrics/performance#benchmark-method)

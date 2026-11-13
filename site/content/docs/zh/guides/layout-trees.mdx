@@ -1,0 +1,26 @@
+---
+title: 树布局
+description: 用脑图、缩进树和鱼骨图展示父子关系
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 选择布局
+
+树的父子关系用边表示。`source` 填父节点，`target` 填子节点。使用一棵连通、无环且只有一个根的树。
+
+| 想呈现什么 | 布局与常用参数 |
+| --- | --- |
+| 脑图分支 | [`mindmap`](/docs/guides/layout-mindmap)，层级间距用 `levelGap`，同侧节点间距用 `nodeGap` |
+| 文件目录 | [`indented`](/docs/guides/layout-indented)，缩进量用 `indent`，行距用 `rowHeight` |
+| 根、分类、条目三层结构 | [`fishbone`](/docs/guides/layout-fishbone)，主干上的分类间距用 `categoryGap` |
+
+## 配置与示例
+
+用 **Tree layout** 切换三种布局。示例同时调整边的画法，缩进树用折线连接，鱼骨图用斜线展示条目。
+
+这三种树布局都需要先注册。 [可选布局](/docs/guides/layout-overview#optional-layouts)
+
+<NodeDocExample id="layout-tree" locale="zh" focus="tree-layouts" />
+
+默认值和字段说明见[树布局参考](/docs/api/options#config-tree-layout-fields)。

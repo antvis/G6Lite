@@ -3,6 +3,7 @@
   "pagesIndex": "../events.mdx",
   "pages": [
     "selection-drag",
-    "lifecycle"
+    "lifecycle",
+    "custom"
   ]
 }

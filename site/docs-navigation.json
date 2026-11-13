@@ -1,4 +1,51 @@
 {
+  "legacyPages": {
+    "api/index": "api/graph",
+    "api/utilities": "api/graph/events",
+    "concepts/overview": "index",
+    "concepts/graph-lifecycle": "api/graph",
+    "guides/interactions": "guides/behaviors",
+    "guides/custom-transform": "guides/transform-overview",
+    "guides/tooltip": "guides/behaviors",
+    "guides/parallel-edges": "guides/edge",
+    "guides/polyline-routing": "guides/edge",
+    "faq": "compatibility/troubleshooting",
+    "concepts/states": "guides/states",
+    "concepts/viewport": "guides/viewport",
+    "concepts/data-model": "guides/data",
+    "api/graph/lifecycle": "api/graph",
+    "api/graph/data": "api/graph",
+    "api/graph/data-mutations": "api/graph",
+    "api/graph/states": "api/graph",
+    "api/graph/viewport": "api/graph",
+    "api/graph/layout": "api/graph",
+    "api/graph/combo": "api/graph",
+    "api/graph/events/element": "api/graph/events",
+    "api/graph/events/selection": "api/graph/events",
+    "api/graph/events/drag": "api/graph/events",
+    "api/graph/events/lifecycle": "api/graph/events",
+    "api/extensions/registration": "api/extensions",
+    "api/extensions/drawing": "api/extensions",
+    "api/extensions/runtime": "api/extensions",
+    "api/options/data": "api/options",
+    "api/options/node": "guides/node",
+    "api/options/edge": "api/options",
+    "api/options/combo": "api/options",
+    "api/options/label": "api/options",
+    "api/options/layout": "api/options",
+    "api/options/behaviors": "api/options",
+    "api/options/theme": "api/options",
+    "api/options/transforms-plugins": "api/options",
+    "metrics/performance-tuning": "metrics/performance",
+    "metrics/bundle-size": "metrics/performance"
+  },
+  "retiredPages": [
+    "compatibility/library-comparison",
+    "compatibility/index",
+    "compatibility/api-stability",
+    "changelog",
+    "graph/lifecycle"
+  ],
   "sections": {
     "guides": {
       "id": "guides",
@@ -8,125 +55,128 @@
       },
       "children": [
         {
-          "id": "elements",
+          "id": "graph",
           "title": {
-            "zh": "数据与元素",
-            "en": "Data and elements"
+            "zh": "图 Graph",
+            "en": "Graph"
           },
           "children": [
-            "guides/data",
-            "guides/node",
-            "guides/edge",
-            "guides/label",
-            "guides/combo",
-            "guides/theme"
-          ]
-        },
-        {
-          "id": "layout-viewport",
-          "title": {
-            "zh": "布局与视口",
-            "en": "Layout and viewport"
-          },
-          "children": [
-            "guides/layout",
-            "guides/layout-worker",
+            "graph/overview",
+            "api/options",
             "guides/viewport",
-            "guides/parallel-edges",
-            "guides/polyline-routing"
+            "guides/extensions"
           ]
         },
+        "guides/data",
         {
-          "id": "interaction",
-          "title": {
-            "zh": "状态与交互",
-            "en": "States and interaction"
-          },
+          "id": "elements",
+          "title": { "zh": "元素 Element", "en": "Elements" },
           "children": [
+            "elements/overview",
             "guides/states",
-            "guides/interactions",
             {
-              "page": "guides/events",
+              "id": "node",
+              "title": { "zh": "节点 Node", "en": "Nodes" },
               "children": [
-                "guides/events/selection-drag",
-                "guides/events/lifecycle"
+                "elements/node",
+                "guides/node",
+                "guides/custom-node",
+                "guides/custom-decoration"
               ]
             },
-            "guides/tooltip"
-          ]
-        }
-      ]
-    },
-    "extensions": {
-      "id": "extensions",
-      "title": {
-        "zh": "扩展开发",
-        "en": "Extension development"
-      },
-      "children": [
-        "guides/extensions",
-        "guides/custom-node",
-        "guides/custom-edge",
-        "guides/custom-label-renderer",
-        "guides/custom-decoration",
-        "guides/custom-behavior",
-        "guides/custom-layout",
-        "guides/custom-transform",
-        "guides/custom-plugin"
-      ]
-    },
-    "api": {
-      "id": "api",
-      "title": {
-        "zh": "API 参考",
-        "en": "API reference"
-      },
-      "children": [
-        "api/index",
-        {
-          "page": "api/graph",
-          "children": [
-            "api/graph/lifecycle",
-            "api/graph/data",
-            "api/graph/data-mutations",
-            "api/graph/states",
-            "api/graph/viewport",
-            "api/graph/layout",
-            "api/graph/combo",
             {
-              "page": "api/graph/events",
+              "id": "edge",
+              "title": { "zh": "边 Edge", "en": "Edges" },
               "children": [
-                "api/graph/events/element",
-                "api/graph/events/selection",
-                "api/graph/events/drag",
-                "api/graph/events/lifecycle"
+                "elements/edge",
+                "guides/edge",
+                "guides/custom-edge"
+              ]
+            },
+            {
+              "id": "combo",
+              "title": { "zh": "分组 Combo", "en": "Combos" },
+              "children": [
+                "elements/combo",
+                "guides/combo"
+              ]
+            },
+            {
+              "id": "label",
+              "title": { "zh": "标签 Label", "en": "Labels" },
+              "children": [
+                "guides/label",
+                "guides/custom-label-renderer"
               ]
             }
           ]
         },
         {
-          "page": "api/options",
+          "id": "layout",
+          "title": {
+            "zh": "布局",
+            "en": "Layout"
+          },
           "children": [
-            "api/options/data",
-            "api/options/node",
-            "api/options/edge",
-            "api/options/combo",
-            "api/options/label",
-            "api/options/theme",
-            "api/options/layout",
-            "api/options/behaviors",
-            "api/options/transforms-plugins"
+            "guides/layout-overview",
+            "guides/layout",
+            "guides/layout-grid",
+            "guides/layout-circular",
+            "guides/layout-dagre",
+            "guides/layout-force",
+            "guides/layout-d3-force",
+            "guides/layout-force-atlas2",
+            "guides/layout-fruchterman",
+            "guides/layout-concentric",
+            {
+              "id": "optional-layouts",
+              "title": { "zh": "推荐可选布局", "en": "Recommended optional layouts" },
+              "children": [
+                "guides/layout-indented",
+                "guides/layout-mindmap",
+                "guides/layout-fishbone",
+                "guides/layout-radial",
+                "guides/layout-mds",
+                "guides/layout-random"
+              ]
+            },
+            "guides/layout-worker",
+            "guides/custom-layout"
           ]
         },
         {
-          "page": "api/extensions",
+          "id": "interaction",
+          "title": {
+            "zh": "交互",
+            "en": "Interaction"
+          },
           "children": [
-            "api/extensions/registration",
-            "api/extensions/drawing",
-            "api/extensions/runtime"
+            "guides/behavior-overview",
+            "guides/behaviors",
+            "guides/behavior-drag-canvas",
+            "guides/behavior-zoom-canvas",
+            "guides/behavior-click-select",
+            "guides/behavior-brush-select",
+            "guides/behavior-lasso-select",
+            "guides/behavior-drag-node",
+            "guides/behavior-drag-edge",
+            "guides/behavior-highlight-node",
+            "guides/behavior-highlight-edge",
+            "guides/behavior-hover-highlight",
+            "guides/behavior-tooltip",
+            "guides/custom-behavior"
           ]
         },
-        "api/utilities"
+        {
+          "id": "plugin",
+          "title": { "zh": "插件", "en": "Plugins" },
+          "children": [
+            "guides/plugins",
+            "guides/custom-plugin"
+          ]
+        },
+        "guides/transform-overview",
+        "guides/theme"
       ]
     },
     "performance": {
@@ -137,25 +187,7 @@
       },
       "children": [
         "metrics/performance",
-        "metrics/performance-tuning",
-        "metrics/bundle-size",
         "concepts/architecture"
-      ]
-    },
-    "help": {
-      "id": "help",
-      "title": {
-        "zh": "帮助与升级",
-        "en": "Help and upgrades"
-      },
-      "children": [
-        "compatibility/index",
-        "compatibility/browser",
-        "compatibility/api-stability",
-        "compatibility/g6-v5-migration",
-        "compatibility/troubleshooting",
-        "faq",
-        "changelog"
       ]
     },
     "start": {
@@ -165,37 +197,21 @@
         "en": "Getting started"
       },
       "children": [
-        "concepts/overview",
-        "compatibility/library-comparison",
         "getting-started/quick-start",
         "getting-started/react",
         "getting-started/vue",
         "ai"
-      ]
-    },
-    "concepts": {
-      "id": "concepts",
-      "title": {
-        "zh": "核心概念",
-        "en": "Core concepts"
-      },
-      "children": [
-        "concepts/data-model",
-        "concepts/graph-lifecycle",
-        "concepts/states",
-        "concepts/viewport"
       ]
     }
   },
   "overview": "index",
   "order": [
     "start",
-    "concepts",
+    { "page": "api/graph", "title": { "zh": "API", "en": "API" } },
     "guides",
-    "extensions",
-    "api",
     "performance",
-    "help"
+    { "page": "compatibility/browser" },
+    { "page": "compatibility/g6-v5-migration" }
   ],
   "rootTitle": {
     "zh": "文档",
@@ -203,11 +219,13 @@
   },
   "physicalSections": {
     "getting-started": "start",
-    "concepts": "concepts",
+    "concepts": "start",
     "guides": "guides",
-    "api": "api",
+    "api": { "zh": "API", "en": "API" },
+    "graph": { "zh": "图 Graph", "en": "Graph" },
+    "elements": { "zh": "元素 Element", "en": "Elements" },
     "metrics": "performance",
-    "compatibility": "help"
+    "compatibility": { "zh": "排查与升级", "en": "Troubleshooting and upgrades" }
   },
   "externalCollections": [
     {
@@ -217,5 +235,20 @@
         "en": "Examples"
       }
     }
+  ],
+  "unlistedPages": [
+    "guides/behavior-navigation",
+    "guides/behavior-selection",
+    "guides/behavior-dragging",
+    "guides/events",
+    "guides/events/selection-drag",
+    "guides/events/lifecycle",
+    "guides/events/custom",
+    "api/graph/events",
+    "guides/layout-arrangements",
+    "guides/layout-networks",
+    "guides/layout-trees",
+    "api/extensions",
+    "compatibility/troubleshooting"
   ]
 }

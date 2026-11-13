@@ -1,13 +1,19 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import GUI, { type Controller } from 'lil-gui';
 import { Minus, Plus, RotateCcw, Scan } from 'lucide-react';
 
-import type { Graph } from '../../../src/index.ts';
+import type { FitViewOptions, Graph } from '../../../src/index.ts';
 import type { Locale } from '@/lib/i18n';
 import { dataModelExampleOptions } from '@/lib/data-model-example';
 import { frameworkGraphData, quickStartNetworkOptions, quickStartOptions } from '@/lib/quick-start';
 import styles from './quick-start-example.module.css';
+
+function frameworkDataFit(container: HTMLElement | null): FitViewOptions {
+  // Leave room for the dataset panel and toolbar on narrow canvases.
+  return { padding: container && container.clientWidth < 480 ? [116, 24, 68, 24] : 32, maxZoom: 1 };
+}
 
 export function QuickStartExample({
   locale,
@@ -18,6 +24,9 @@ export function QuickStartExample({
 }) {
   const mountRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);
+  const dataControlsRef = useRef<HTMLDivElement>(null);
+  const dataController = useRef<Controller | null>(null);
+  const dataSettings = useRef({ dataset: 'basic' });
   const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [expanded, setExpanded] = useState(false);
@@ -81,6 +90,27 @@ export function QuickStartExample({
           edges: 'edges',
         };
 
+  const { basic, expanded: extended, dataControls } = copy;
+  useEffect(() => {
+    const container = dataControlsRef.current;
+    if (!container) return;
+    const gui = new GUI({ container, title: dataControls, width: 220 });
+    dataController.current = gui.add(dataSettings.current, 'dataset', {
+      [basic]: 'basic',
+      [extended]: 'expanded',
+    }).name(locale === 'zh' ? '数据' : 'Data').onChange((value: string) => {
+      setExpanded(value === 'expanded');
+    });
+    return () => {
+      gui.destroy();
+      dataController.current = null;
+    };
+  }, [basic, extended, dataControls, locale, variant]);
+
+  useEffect(() => {
+    dataController.current?.enable(status === 'ready');
+  }, [status, locale, variant]);
+
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
@@ -96,7 +126,11 @@ export function QuickStartExample({
             : variant === 'data-model'
               ? dataModelExampleOptions()
               : quickStartOptions();
-        graph = new Graph({ container: mount, ...options });
+        graph = new Graph({
+          container: mount,
+          ...options,
+          autoFit: variant === 'framework-data' ? frameworkDataFit(mount) : options.autoFit,
+        });
         const canvas = mount.querySelector('canvas');
         if (canvas) canvas.dataset.previewLayer = 'graph';
         graphRef.current = graph;
@@ -135,7 +169,7 @@ export function QuickStartExample({
     const update = async () => {
       try {
         await graph.setData(frameworkGraphData(expanded), {
-          fitView: { padding: 32, maxZoom: 1 },
+          fitView: frameworkDataFit(mountRef.current),
         });
         if (active) setCounts({ nodes: graph.getNodeCount(), edges: graph.getEdgeCount() });
       } catch {
@@ -153,6 +187,12 @@ export function QuickStartExample({
     setAttempt((value) => value + 1);
   }
 
+  function fitPreview() {
+    graphRef.current?.fitView(
+      variant === 'framework-data' ? frameworkDataFit(mountRef.current) : { padding: 32 },
+    );
+  }
+
   return (
     <figure
       className={`${styles.preview} docs-example-card not-prose`}
@@ -161,29 +201,6 @@ export function QuickStartExample({
       data-framework-edges={variant === 'framework-data' ? counts?.edges : undefined}
       aria-label={copy.title}
     >
-      {variant === 'framework-data' && (
-        <div className={styles.dataControls} role="group" aria-label={copy.dataControls}>
-          <button
-            type="button"
-            aria-pressed={!expanded}
-            disabled={status !== 'ready'}
-            onClick={() => setExpanded(false)}
-          >
-            {copy.basic}
-          </button>
-          <button
-            type="button"
-            aria-pressed={expanded}
-            disabled={status !== 'ready'}
-            onClick={() => setExpanded(true)}
-          >
-            {copy.expanded}
-          </button>
-          <span role="status">
-            {counts && `${counts.nodes} ${copy.nodes} · ${counts.edges} ${copy.edges}`}
-          </span>
-        </div>
-      )}
       <div className={`${styles.viewport} docs-example-card-body`}>
         <div className={styles.canvas} ref={mountRef} role="img" aria-label={copy.title} />
         {status !== 'ready' && (
@@ -191,10 +208,18 @@ export function QuickStartExample({
             {status === 'error' ? copy.error : copy.loading}
           </div>
         )}
+        {variant === 'framework-data' && (
+          <div className={styles.dataControls}>
+            <div ref={dataControlsRef} className={styles.dataPanel} />
+            <span role="status">
+              {counts && `${counts.nodes} ${copy.nodes} · ${counts.edges} ${copy.edges}`}
+            </span>
+          </div>
+        )}
         <div className={styles.tools} role="toolbar" aria-label={copy.toolbar}>
           <button
             type="button"
-            onClick={() => graphRef.current?.fitView({ padding: 32 })}
+            onClick={fitPreview}
             disabled={status !== 'ready'}
             aria-label={copy.fit}
             title={copy.fit}

@@ -1,61 +1,13 @@
 ---
-title: API overview
-description: Root runtime exports and type index for Graph, configuration, extensions, and utilities
+title: API documentation has moved
+description: Find public interfaces in Graph API, Event reference, and Configuration options.
 ---
 
-Import application APIs from @antv/g6-lite. Use this overview to choose a reference; canonical pages own signatures, fields, and behavior. Follow [data workflows](/en/docs/guides/data) or [Extensions](/en/docs/guides/extensions) for implementation.
+Start with the [Graph API](/en/docs/api/graph).
 
-```ts
-import { Graph, register, extensionFactory, runLayout, resolveTheme, EventEmitter } from '@antv/g6-lite';
-import type { GraphOptions, GraphData, GraphEventMap } from '@antv/g6-lite';
-```
-
-## Entries you can call
-
-| Entry | Purpose | Reference |
-| --- | --- | --- |
-| Graph | Operate one graph | [All public members by task](/en/docs/api/graph) |
-| GraphOptions and topic option types | Declare constructor input | [Top-level fields and topics](/en/docs/api/options) |
-| register / extensionFactory | Register extensions and create isolated instances | [Registration, factories, scope](/en/docs/api/extensions/registration) |
-| runLayout | Calculate node positions independently | [Utilities](/en/docs/api/utilities#runlayout) |
-| resolveTheme | Resolve presets and tokens | [Utilities](/en/docs/api/utilities#resolvetheme) |
-| EventEmitter / Handler | Dispatch application-owned events | [Independent event utility](/en/docs/api/utilities#eventemitter) |
-
-Use [Graph.on / off / once](/en/docs/api/graph/events) for graph subscriptions. Extension scope varies by category rather than exactly one factory call per Graph.
-
-## Types by domain
-
-Common entries: [input data](/en/docs/api/options/data), [live Models](/en/docs/api/graph/data#model-fields), [states](/en/docs/api/graph/states), [configuration](/en/docs/api/options), [events](/en/docs/api/graph/events#grapheventmap), and [extension contracts](/en/docs/api/extensions).
-
-<details>
-<summary>All root type names grouped by domain</summary>
-
-- **Constructor configuration** ([Top-level fields](/en/docs/api/options)): `GraphOptions`.
-- **Data, models, and states** ([Input](/en/docs/api/options/data) · [Models](/en/docs/api/graph/data) · [Writes](/en/docs/api/graph/data-mutations) · [States](/en/docs/api/graph/states)): `GraphData`, `GraphNode`, `GraphEdge`, `ComboData`, `NodeData`, `EdgeData`, `NodeModel`, `EdgeModel`, `ComboModel`, `ElementModel`, `BuiltInElementState`, `ElementState`, `NodeState`, `EdgeState`, `NodeDataUpdate`, `NodePositionUpdate`, `EdgeDataUpdate`, `SetDataOptions`.
-- **Node, edge, and Combo styles** ([Nodes](/en/docs/api/options/node) · [Edges](/en/docs/api/options/edge) · [Combos](/en/docs/api/options/combo)): `NodeConfig`, `EdgeConfig`, `ComboConfig`, `NodeStyleConfig`, `NodeStyleValue`, `NodeStateStyleOverride`, `EdgeStyleValue`, `EdgeStateStyleOverride`, `ComboStyleConfig`, `ComboStyleValue`, `ComboStateStyleOverride`, `ParallelEdgesConfig`.
-- **Label policy and decoration options** ([Label policy](/en/docs/api/options/label) · [Decorations](/en/docs/api/options/node#nodedecorationconfig)): `LabelOptions`, `LabelType`, `LabelPlacement`, `EdgeLabelPlacement`, `NodeBadgeItem`, `NodeBadgeKind`, `NodeDecorationConfig`, `NodeDecorationPlacement`, `NodeDecorationAnchor`, `NodeDecorationAttachment`.
-- **Layout, viewport, and themes** ([Layout](/en/docs/api/graph/layout) · [Viewport](/en/docs/api/graph/viewport) · [Themes](/en/docs/api/options/theme)): `LayoutConfig`, `LayoutResult`, `Camera`, `GraphPoint`, `ViewportPoint`, `FitViewOptions`, `ZoomOptions`, `ThemeOption`, `ThemeTokens`.
-- **Events and independent dispatch** ([Graph events](/en/docs/api/graph/events) · [Independent dispatch](/en/docs/api/utilities#eventemitter)): `GraphEventMap`, `GraphElementEvent`, `NodeGraphEvent`, `EdgeGraphEvent`, `ComboGraphEvent`, `CanvasGraphEvent`, `Handler`.
-- **Behaviors and Tooltip** ([Options](/en/docs/api/options/behaviors) · [Contract](/en/docs/api/extensions/runtime#behaviorextension)): `BehaviorName`, `BehaviorConfig`, `BehaviorOption`, `BehaviorOptions`, `BuiltInBehaviorConfig`, `BuiltInBehaviorOptionsMap`, `BrushSelectOptions`, `ClickSelectConfig`, `DragCanvasOptions`, `HoverHighlightConfig`, `LassoSelectOptions`, `TooltipContext`, `TooltipOptions`, `ZoomCanvasOptions`, `BehaviorExtension`, `BehaviorEventHandlers`, `EventArguments`.
-- **Drawing contracts** ([Contracts](/en/docs/api/extensions/drawing)): `NodeExtension`, `NodeExtensionInput`, `NodeBoundaryAnchorParams`, `NodeOverlayDrawParams`, `EdgeExtension`, `LabelRenderer`, `LabelMeasureParams`, `LabelDrawParams`, `NodeLabelParams`, `EdgeLabelParams`, `LabelLayout`, `ResolvedLabelStyle`, `DecorationRenderer`, `DecorationMeasureParams`, `DecorationDrawParams`.
-- **Runtime extensions and registration** ([Registration/context](/en/docs/api/extensions/registration) · [Runtime](/en/docs/api/extensions/runtime) · [Options](/en/docs/api/options/transforms-plugins)): `Extension`, `ExtensionCategory`, `ExtensionFactory`, `ExtensionInput`, `ExtensionConstructor`, `ExtensionContext`, `ExtensionDataContext`, `ExtensionStateContext`, `ExtensionViewportContext`, `ExtensionNodeData`, `ExtensionEdgeData`, `LayoutExtension`, `TransformExtension`, `PluginExtension`, `PluginOptions`, `PluginOption`, `TransformOption`.
-
-ExtensionConstructor is a compatibility type; see [deprecated entries](/en/docs/compatibility/api-stability#deprecated-compatibility-entries). This index does not authorize deep source imports.
-
-</details>
-
-## Call order
-
-Follow [Graph lifecycle](/en/docs/concepts/graph-lifecycle) for creation, subscriptions, valid rendering, and unmount cleanup. See [lifecycle methods](/en/docs/api/graph/lifecycle) for exact prerequisites. Environment, module format, and client requirements belong in [runtime environments](/en/docs/compatibility/browser) and [ESM / CommonJS boundaries](/en/docs/compatibility/api-stability#esm-and-commonjs).
-
-## Query results are read-only
-
-Models are live views with read-only types; getData returns a snapshot shallow-copied by layer. Write through data/state APIs. See [queries](/en/docs/api/graph/data) for copying rules and the [data guide](/en/docs/guides/data) for workflows.
-
-## Engine-only members
-
-Internal class members are outside application API. Avoid renderer, picking, and internal event transport. See [public and internal boundaries](/en/docs/compatibility/api-stability#public-and-internal-boundaries) for public alternatives.
-
-## Compatibility entries
-
-BaseNode, BreathingNode, registerNode, and deprecated methods support existing consumers. Canonical names and replacements are in [deprecated compatibility entries](/en/docs/compatibility/api-stability#deprecated-compatibility-entries), alongside upgrade and experimental-capability boundaries.
+- <span id="entries-you-can-call" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Constructor and instance methods](/en/docs/api/graph#new-graph) · [Standalone layout](/en/docs/api/graph#graph-layout-runlayout) · [Theme resolution](/en/docs/api/options#resolvetheme) · [Standalone event dispatch](/en/docs/api/graph/events#eventemitter) · [Extension registration](/en/docs/api/graph#extension-registration)
+- <span id="types-by-domain" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Configuration and data types](/en/docs/api/options) · [Event types](/en/docs/api/graph#off)
+- <span id="call-order" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Lifecycle](/en/docs/api/graph#graph-lifecycle)
+- <span id="query-results-are-read-only" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Data queries and return values](/en/docs/api/graph#graph-data)
+- <span id="engine-only-members" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Graph events](/en/docs/api/graph#graph-events) · [Coordinate conversion](/en/docs/api/graph#graph-viewport)
+- <span id="compatibility-entries" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Custom nodes and compatibility](/en/docs/guides/custom-node)

@@ -1,105 +1,17 @@
 ---
-title: Combine interactions
-description: Combine navigation, selection, dragging, and highlighting with application events
+title: Previous interaction guide
+description: Section links for older bookmarks. The full content has moved to the interaction guide.
 ---
 
-import { NodeDocExample as BehaviorDocExample } from '@/components/node-doc-example';
+Continue to [Combine interactions](/en/docs/guides/behaviors), or jump to the corresponding section below.
 
-Choose behaviors from user tasks. An explicit list replaces default zoom and pan, so include them when needed. All options are in the [Behavior reference](/en/docs/api/options/behaviors).
-
-## Built-in Behaviors
-
-| Task | Behavior |
-| --- | --- |
-| Browse | zoom-canvas + drag-canvas; enabled when behaviors is omitted |
-| Select and move | click-select + drag-node |
-| Select an area | brush-select or lasso-select, using a different gesture from pan |
-| Inspect relationships | hover-highlight; avoid overlapping hover behaviors |
-| Inspect element details | tooltip; use application overlays for editable content |
-| Edit connections | drag-edge supplies events; application validates and applies endpoints |
-
-## Common combinations
-
-This example reserves empty-space dragging for brush selection and omits drag-canvas. Click to select, Shift-click to append, and drag a selected node to move the group. The status reports selected nodes.
-
-<BehaviorDocExample id="behavior-selection" locale="en" />
-
-To also pan, assign different gestures at Graph creation:
-
-```ts
-import type { BehaviorName, BuiltInBehaviorConfig } from '@antv/g6-lite';
-
-const behaviors = [
-  'zoom-canvas',
-  { type: 'drag-canvas', ignoreModifierKeys: true },
-  'drag-node',
-  { type: 'click-select', multiple: true, trigger: 'shift' },
-  { type: 'brush-select', key: 'shift' },
-  { type: 'lasso-select', key: 'ctrl' },
-] satisfies Array<BehaviorName | BuiltInBehaviorConfig>;
-```
-
-Drag empty space to pan, Shift-drag to brush, or Ctrl/Meta-drag to lasso. click-select distinguishes ctrl and meta; area selection's ctrl accepts either. See [selection rules](/en/docs/api/options/behaviors#selection) for replacement and event semantics.
-
-## Zoom feel and bounds
-
-Set sensitivity, minZoom, and maxZoom on zoom-canvas; sensitivity: 0.5 softens wheel response. Zoom centers on the canvas. Wheel bounds do not restrict programmatic fitView. See [navigation options](/en/docs/api/options/behaviors#navigation-and-dragging) for defaults, normalization, and fallback.
-
-## Neighborhood highlighting
-
-Hover B to highlight A/B/C/E and connecting edges while dimming other nodes. An edge emphasizes itself and its endpoints. Leaving clears hover states. State styles define green; the Behavior decides when to apply the states.
-
-<BehaviorDocExample id="behavior-highlight" locale="en" />
-
-## Event dispatch
-
-Listening to node:click does not require click-select; that Behavior adds selected-state toggling. Subscribe before render if needed, then unsubscribe with the same function:
-
-```ts
-const onNodeClick = ({ nodeId }: { nodeId: string }) => console.log(nodeId);
-graph.on('node:click', onNodeClick);
-// On component unmount:
-graph.off('node:click', onNodeClick);
-```
-
-Selection integration should account for node:selectchange, edge:selectchange, brush:end, and lasso:end. Query state for the final set; not every selection source emits a per-node selectchange. See the [event guide](/en/docs/guides/events#selection-and-drag-events) for integration and cleanup, and the [event reference](/en/docs/api/graph/events#selection-events) for complete payloads.
-
-<details>
-<summary>Connection editing and dispatch internals</summary>
-
-drag-edge proposes reconnection without changing source/target or drawing a temporary edge. Handle edge:dragend, validate reconnected, update application edge data, then apply it through public methods such as setData. A configured layout still runs during setData; fitView: false preserves only the camera.
-
-Shared picking prioritizes node → edge → combo → canvas. Behaviors consume that event stream; do not access internal Picking, Renderer, or eventEmitter.
-
-</details>
-
-## Common questions
-
-### Why did adding tooltip disable zoom?
-
-The explicit list replaced defaults. Include zoom-canvas and drag-canvas too.
-
-### Why does brushing also move the canvas?
-
-Bind brushing to Shift and retain drag-canvas's ignoreModifierKeys: true. Give brush and lasso different gestures.
-
-### Can updateOptions switch Behaviors?
-
-Currently no; combinations are selected at initialization. Destroy replaced instances and clean up application listeners and DOM too.
-
-## Related
-
-- [Behavior reference](/en/docs/api/options/behaviors): options, defaults, and boundaries.
-- [Custom Behavior](/en/docs/guides/custom-behavior) · [Tooltip](/en/docs/guides/tooltip).
-- [Events](/en/docs/guides/events) · [Selection example](/en/docs/examples/selection-behaviors).
-- [Neighbor highlighting](/en/docs/examples/neighbor-highlight): hover to inspect one-hop adjacency.
-
-<details data-related-examples>
-<summary>Related runnable examples</summary>
-
-- [Hover highlight](/en/docs/examples/hover)
-- [One-hop highlight](/en/docs/examples/neighbor-highlight)
-- [Drag nodes and combos](/en/docs/examples/drag-node)
-- [Drag edge endpoints](/en/docs/examples/drag-edge)
-
-</details>
+- <span id="built-in-behaviors" style={{ scrollMarginTop: '8rem' }} />[Built-in Behaviors](/en/docs/guides/behaviors#built-in-behaviors)
+- <span id="common-combinations" style={{ scrollMarginTop: '8rem' }} />[Common combinations](/en/docs/guides/behaviors#common-combinations)
+- <span id="zoom-feel-and-bounds" style={{ scrollMarginTop: '8rem' }} />[Zoom feel and bounds](/en/docs/guides/behaviors#zoom-feel-and-bounds)
+- <span id="neighborhood-highlighting" style={{ scrollMarginTop: '8rem' }} />[Neighborhood highlighting](/en/docs/guides/behaviors#neighborhood-highlighting)
+- <span id="event-dispatch" style={{ scrollMarginTop: '8rem' }} />[Event dispatch](/en/docs/guides/behaviors#event-dispatch)
+- <span id="common-questions" style={{ scrollMarginTop: '8rem' }} />[Common questions](/en/docs/guides/behaviors#common-questions)
+- <span id="why-did-adding-tooltip-disable-zoom" style={{ scrollMarginTop: '8rem' }} />[Why did adding tooltip disable zoom?](/en/docs/guides/behaviors#why-did-adding-tooltip-disable-zoom)
+- <span id="why-does-brushing-also-move-the-canvas" style={{ scrollMarginTop: '8rem' }} />[Why does brushing also move the canvas?](/en/docs/guides/behaviors#why-does-brushing-also-move-the-canvas)
+- <span id="can-updateoptions-switch-behaviors" style={{ scrollMarginTop: '8rem' }} />[Can updateOptions switch Behaviors?](/en/docs/guides/behaviors#can-updateoptions-switch-behaviors)
+- <span id="related" style={{ scrollMarginTop: '8rem' }} />[Related](/en/docs/guides/behaviors#related)

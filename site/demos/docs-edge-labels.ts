@@ -12,6 +12,7 @@ export async function run(container: HTMLElement) {
       edges: rows.map((id) => ({ id, source: id + '-s', target: id + '-t', data: { placement: id } })),
     },
     node: { style: { size: 20 } },
+    // #region edge-label-options
     edge: {
       type: 'line',
       style: {
@@ -21,12 +22,13 @@ export async function run(container: HTMLElement) {
         labelPlacement: (_s, _t, edge) => edge.data?.placement as EdgeLabelPlacement,
         labelFontSize: 12,
         labelColor: '#334155',
-        labelBackground: '#eef2ff',
+        labelBackground: (_s, _t, edge) => edge.id === 'start' ? false : '#eef2ff',
         labelBackgroundPadding: 4,
         labelAutoRotate: true,
       },
       stateStyles: { selected: { stroke: '#873bf4' } },
     },
+    // #endregion edge-label-options
     label: { hideOnCollision: false, hideOnLowZoom: false },
     behaviors: ['click-select'],
     autoFit: { padding: 48, maxZoom: 1 },

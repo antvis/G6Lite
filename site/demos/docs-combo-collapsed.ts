@@ -10,6 +10,7 @@ export async function run(container: HTMLElement) {
         { id: id + '-b', x: x + 24, y: 160, comboId: id },
       ]),
       edges: [],
+      // #region collapsed-shapes
       combos: [
         { id: 'circle', collapsed: true },
         { id: 'rect', collapsed: true, style: {
@@ -20,6 +21,7 @@ export async function run(container: HTMLElement) {
           collapsedType: 'rect', collapsedSize: [120, 48], label: 'Archive',
         } },
       ],
+      // #endregion collapsed-shapes
     },
     node: { style: { size: 22 } },
     combo: { style: {

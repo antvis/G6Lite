@@ -1,5 +1,5 @@
-import { Graph, extensionFactory, register, type ExtensionContext, type LayoutExtension } from '@antv/g6-lite';
-import { buttonStyle } from './demo-panel.ts';
+import { Graph, register, type ExtensionContext, type LayoutExtension } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 interface ColumnOptions extends Record<string, unknown> { gap?: number; delay?: number }
 function pause(signal: AbortSignal | undefined, delay: number) {
@@ -28,7 +28,7 @@ export function createColumnLayout(): LayoutExtension<ColumnOptions> {
     destroy() { context = undefined; },
   };
 }
-register('layout', 'docs-column', extensionFactory(createColumnLayout));
+register('layout', 'docs-column', () => createColumnLayout());
 // #endregion layout
 
 export async function run(container: HTMLElement) {
@@ -41,8 +41,7 @@ export async function run(container: HTMLElement) {
     autoFit: { padding: 56, maxZoom: 1 },
   });
   let revision = 0;
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;top:12px;left:12px;z-index:20;display:flex;gap:6px;flex-wrap:wrap;';
+  const ui = createDemoPanel(container);
   const status = document.createElement('div');
   status.setAttribute('role', 'status');
   status.style.cssText = 'position:absolute;bottom:12px;left:12px;font:12px system-ui;color:#334155;background:white;padding:4px;';
@@ -56,14 +55,18 @@ export async function run(container: HTMLElement) {
     graph.fitView({ padding: 56, maxZoom: 1 });
     status.textContent = mode === 'grid' ? 'Canceled old run; grid' : 'Column layout complete';
   };
-  for (const [mode, label] of [['column', 'Layout again'], ['slow', 'Slow layout'], ['grid', 'Cancel + grid']]) {
-    const button = document.createElement('button'); button.type = 'button';
-    button.textContent = label; button.style.cssText = buttonStyle;
-    button.addEventListener('click', () => { void apply(mode).catch((error) => { if (!graph.destroyed) status.textContent = String(error); }); });
-    controls.append(button);
-  }
   const destroy = graph.destroy.bind(graph);
-  graph.destroy = () => { revision++; controls.remove(); status.remove(); destroy(); };
-  try { await graph.render(); status.textContent = 'Column layout complete'; container.append(controls, status); return graph; }
+  graph.destroy = () => { revision++; ui.destroy(); status.remove(); destroy(); };
+  try {
+    await graph.render();
+    status.textContent = 'Column layout complete';
+    for (const [mode, label] of [['column', 'Layout again'], ['slow', 'Slow layout'], ['grid', 'Cancel + grid']]) {
+      ui.addAction(label, () => {
+        void apply(mode).catch((error) => { if (!graph.destroyed) status.textContent = String(error); });
+      });
+    }
+    container.append(status);
+    return graph;
+  }
   catch (error) { graph.destroy(); throw error; }
 }

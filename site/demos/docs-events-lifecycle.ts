@@ -1,4 +1,5 @@
 import { Graph, type GraphData, type GraphEventMap } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
   const initialData = (): GraphData => ({
@@ -14,8 +15,7 @@ export async function run(container: HTMLElement) {
     behaviors: [],
     autoFit: fit,
   });
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;top:12px;left:12px;right:150px;display:flex;flex-wrap:wrap;gap:6px;z-index:20;';
+  const ui = createDemoPanel(container);
   const status = document.createElement('div');
   status.setAttribute('role', 'status');
   status.style.cssText = 'position:absolute;bottom:12px;left:12px;right:12px;background:white;color:#334155;padding:6px 10px;font:12px/1.4 system-ui;white-space:pre-line;pointer-events:none;z-index:20;';
@@ -38,53 +38,47 @@ export async function run(container: HTMLElement) {
   };
   for (const event of events) watch(event); // Before render: capture initial events.
   // #endregion lifecycle
-  const buttons: HTMLButtonElement[] = [];
   let disposed = false;
-  const addButton = (label: string, action: () => void | Promise<void>) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = label;
-    button.style.cssText = 'padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;color:#334155;font:12px system-ui;cursor:pointer;';
-    button.onclick = async () => {
-      for (const item of buttons) item.disabled = true;
-      lines.length = 0;
-      push(`> ${label}`);
-      try {
-        await action();
-        if (!disposed) { graph.fitView(fit); push('operation complete'); }
-      } catch {
-        if (!disposed) push('operation failed');
-      } finally {
-        if (!disposed) for (const item of buttons) item.disabled = false;
-      }
-    };
-    buttons.push(button);
-    controls.append(button);
-  };
-  addButton('Update A', () => {
-    const edits = Number(graph.getNodeData('A')?.data?.edits ?? 0) + 1;
-    graph.updateNodeData('A', { edits });
-  });
-  addButton('Add D', () => {
-    if (!graph.getNodePosition('D')) graph.addNode({ id: 'D', x: 320, y: 100 });
-  });
-  addButton('Remove D', () => {
-    if (graph.getNodePosition('D')) graph.removeNode('D');
-  });
-  addButton('Replace data', () => graph.setData(initialData(), { fitView: false }));
-  addButton('Layout', () => graph.layout());
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
     disposed = true;
     for (const cleanup of cleanups) cleanup();
-    for (const button of buttons) button.onclick = null;
-    controls.remove();
+    ui.destroy();
     status.remove();
     destroy();
   };
   try {
     await graph.render();
-    container.append(controls, status);
+    const buttons: ReturnType<typeof ui.addAction>[] = [];
+    const addButton = (label: string, action: () => void | Promise<void>) => {
+      const button = ui.addAction(label, async () => {
+        for (const item of buttons) item.disable();
+        lines.length = 0;
+        push(`> ${label}`);
+        try {
+          await action();
+          if (!disposed) { graph.fitView(fit); push('operation complete'); }
+        } catch {
+          if (!disposed) push('operation failed');
+        } finally {
+          if (!disposed) for (const item of buttons) item.enable();
+        }
+      });
+      buttons.push(button);
+    };
+    addButton('Update A', () => {
+      const edits = Number(graph.getNodeData('A')?.data?.edits ?? 0) + 1;
+      graph.updateNodeData('A', { edits });
+    });
+    addButton('Add D', () => {
+      if (!graph.getNodePosition('D')) graph.addNode({ id: 'D', x: 320, y: 100 });
+    });
+    addButton('Remove D', () => {
+      if (graph.getNodePosition('D')) graph.removeNode('D');
+    });
+    addButton('Replace data', () => graph.setData(initialData(), { fitView: false }));
+    addButton('Layout', () => graph.layout());
+    container.append(status);
     return graph;
   } catch (error) {
     graph.destroy();

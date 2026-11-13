@@ -23,6 +23,7 @@ export async function run(container: HTMLElement) {
     behaviors: ['drag-node', 'drag-canvas', 'zoom-canvas'],
     autoFit: { padding: 56, maxZoom: 1 },
   });
+  // #region change-membership
   graph.on('node:click', ({ nodeId }) => {
     if (nodeId !== 'mobile') return;
     const target = graph.getNodeCombo(nodeId) === 'client' ? 'service' : 'client';
@@ -30,6 +31,7 @@ export async function run(container: HTMLElement) {
     // Membership changes do not move nodes; position this example explicitly.
     graph.updateNodePosition(nodeId, target === 'client' ? 200 : 380, 180);
   });
+  // #endregion change-membership
   try {
     await graph.render();
     return graph;

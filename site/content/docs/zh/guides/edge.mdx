@@ -1,165 +1,398 @@
 ---
-title: 边
+title: 边通用配置项
 description: 按场景选择边类型，配置样式、标签、交互、平行边与路由
 ---
 
 import { NodeDocExample as EdgeDocExample } from '@/components/node-doc-example';
 
-本页按使用步骤组织。查字段类型、默认值和限制见[边配置参考](/docs/api/options/edge)；查 source、target、id 和业务数据结构见 [GraphEdge](/docs/api/options#边-graphedge)。
+用 `GraphOptions.edge` 选择路径，设置线条、箭头和标签。端点、方向与数据结构见[边总览](/docs/elements/edge)。
 
-- 先画出关系：从[基础配置](#基础配置)开始，再按拓扑[选择类型](#类型)。
-- 多条关系重叠：看[平行边与自环](#平行边与自环)；层级连接看[折线路由](#折线路由)。
-- 细线难点中或标签不显示：看[交互热区](#细边交互热区)、[边标签](#边标签)与[常见问题](#常见问题)。
+<span id="基础配置" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-## 基础配置
+## EdgeConfig [#edgeconfig]
 
-先准备两端节点，确保边的 source、target 引用已存在的节点 id，再设置 `edge.type` 和 `edge.style`。给需要更新、选择或删除的边提供稳定 id。
+`EdgeConfig` 对应 `new Graph()` 的 `edge` 选项。下例绘制一条蓝色直线，终点带箭头，选中后改用紫色。
 
-下面完整示例用三组数据配置细实线、虚线与双向箭头。点击边可看到紫色选中状态，重置恢复初始效果；展示与完整代码使用同一份源码。
+```ts
+import { Graph } from '@antv/g6-lite';
 
-<EdgeDocExample id="edge-style" locale="zh" />
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [{ id: 'a', x: 80, y: 100 }, { id: 'b', x: 260, y: 100 }],
+    edges: [{ id: 'a-b', source: 'a', target: 'b' }],
+  },
+  edge: {
+    type: 'line',
+    style: { stroke: '#1783FF', lineWidth: 2, endArrow: true },
+    stateStyles: { selected: { stroke: '#7C3AED', lineWidth: 4 } },
+  },
+  behaviors: ['click-select'],
+});
 
-## 类型
+await graph.render();
+```
 
-先按关系的展示需求选择全图边类型，再决定是否需要自动分离或路由。
+| 属性 | 描述 | 类型 | 默认值 | 必选 |
+| --- | --- | --- | --- | --- |
+| [`type`](#类型) | 内置边类型或已注册的自定义边名称 | `string` | `'line'` | 否 |
+| [`style`](#样式字段) | 线条、路径参数、箭头和标签 | `EdgeConfig['style']` | 主题和内置样式 | 否 |
+| [`stateStyles`](#状态样式) | 按状态覆盖外观 | `Partial<Record<EdgeState, EdgeStateStyleOverride>>` | 扩展或主题状态样式 | 否 |
+| [`parallelEdges`](#平行边与自环) | 分离同端点的多条边 | `boolean \| ParallelEdgesConfig` | 关闭 | 否 |
+| [`labelRenderer`](#edge-label-renderer) | 已注册的标签渲染器 | `string` | 内置标签渲染器 | 否 |
 
-| 场景 | 选择 | 后续配置 |
+## 指定边类型 [#类型]
+
+用 `edge.type` 指定边类型，默认是 `line`（直线边）。下面将整张图的边设为 `polyline`（折线边）。
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  edge: { type: 'polyline' },
+});
+```
+
+| 类型值 | 名称 | 适用场景 |
 | --- | --- | --- |
-| 普通关系 | 默认 `line` | 先设置颜色、线宽和方向 |
-| 同端点多条关系或需要手动弯曲 | `arc` | 启用 parallelEdges，或在关闭分离时设置 curvature |
-| 左右层级之间的平滑连接 | `cubic` | 用 curveOffset 调整水平控制柄；不使用平行边自动偏移 |
-| 流程、目录树或鱼骨图 | `polyline` | 匹配布局方向与 router；它不会自动排布节点 |
+| `line` | [直线边](#edge-line) | 直接连接两个端点 |
+| `arc` | [弧线边](#edge-arc) | 调整弯曲方向，或分开同端点的多条边 |
+| `cubic` | [三次贝塞尔曲线边](#edge-cubic) | 平滑连接左右层级 |
+| `polyline` | [折线边](#edge-polyline) | 流程图、目录树或鱼骨图中的路由连接 |
 
-[曲率与控制柄参考](/docs/api/options/edge#弧线与三次曲线)提供可运行对照。自定义类型先注册 edge 扩展，基型决定可用路径；未知名称回退为直线不代表扩展已注册成功。
+自定义类型先[注册边扩展](/docs/guides/custom-edge)，再把 `edge.type` 设为注册名称。
 
-## 样式字段
+### 直线边 Line [#edge-line]
 
-把关系的业务属性放到 `edge.data`，按字段映射外观。例如风险决定颜色、权重决定线宽、关系类别决定标签。回调为 `(source, target, edge) => value`，前两项是节点，第三项才是边；基础示例已经使用这三个入参读取边数据。
+`line` 直接连接两个端点。`endArrow: true` 在终点加箭头。
 
-配置时依次考虑：
+```ts
+const edge = { type: 'line', style: { lineWidth: 2, endArrow: true } };
+```
 
-1. 用 stroke、lineWidth 区分类别与权重，opacity 弱化次要关系。
-2. 有方向语义时保留 endArrow，需要双向时再加 startArrow；无方向时显式关闭默认终点箭头。
-3. 需要虚线时设置两项周期并使用大于 1 的线宽；当前不是 Canvas 的任意长短交替模式。
-4. 几何参数与类型配套使用，避免给 line 配 curvature 或给 arc 配 router。
+### 弧线与三次曲线 [#弧线与三次曲线]
 
-精确字段与回退规则见[基础样式](/docs/api/options/edge#基础样式)、[箭头](/docs/api/options/edge#箭头)及[样式回调](/docs/api/options/edge#样式回调)。`style` 使用字段对象，支持回调的字段各自配置函数。
+#### 弧线边 Arc [#edge-arc]
 
-## 细边交互热区
+`curvature` 控制弧线方向和弯曲程度。示例对比 `-0.35`、`0` 和 `0.35`。
 
-保留细线的视觉密度，用 hitAreaWidth 扩大可点范围，再安装 click-select、tooltip 等需要的行为。仅扩大热区不会自动启用这些交互。
+<EdgeDocExample id="edge-curves" locale="zh" />
 
-下面两条边的视觉线宽均为 1.5，上方热区为 2，下方为 24。点击细线附近比较命中范围；选中只改变颜色，线宽保持不变。图中的热区不可见。
+#### 三次曲线边 Cubic [#edge-cubic]
 
-<EdgeDocExample id="edge-hit-area" locale="zh" />
+`curveOffset` 控制三次曲线两端的水平控制柄。示例对比 `30` 和 `120`。两端等高时，边可能仍呈直线。
 
-热区宽度是屏幕像素中的总宽度，24 对应中心线两侧各约 12；缩放时不需要手动乘 zoom 或 DPR。数值规则和适用路径见[点击热区参考](/docs/api/options/edge#点击热区)。
+<EdgeDocExample id="edge-cubic" locale="zh" />
+
+<span id="基础样式" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+<span id="edge-style-fields" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+## Style 边样式 [#样式字段]
+
+### 主图形样式 [#edge-path-styles]
+
+线条样式控制边的颜色、粗细、透明度和方向。
+
+| 字段 | 类型 | 默认或回退 | 说明 |
+| --- | --- | --- | --- |
+| `stroke` | `EdgeStyleValue<string>` | `theme.edgeStroke`；light 为 `'#99ADD1'`，dark 为 `'#637088'` | 边和箭头颜色 |
+| `lineWidth` | `EdgeStyleValue<number>` | `theme.edgeLineWidth`，预设为 `1` | 视觉线宽，使用有限正数 |
+| `opacity` | `EdgeStyleValue<number>` | `1` | 不透明度，使用 `0` 到 `1` |
+| `lineDash` | `EdgeStyleValue<number[]>` | `[]` | 空数组为实线；当前按前两个值之和计算虚线周期，见[虚线规则](#虚线规则) |
+| `startArrow` | `EdgeStyleValue<boolean>` | `false` | 起点箭头，指向 `source` |
+| `endArrow` | `EdgeStyleValue<boolean>` | `theme.edgeArrow`，light、dark 均为 `true` | 终点箭头，指向 `target` |
+| `arrowSize` | `EdgeStyleValue<number>` | 根据线宽自动计算 | 箭头沿路径方向的长度；显式长度使用有限正数，非正值使用自动长度 |
+| `hitAreaWidth` | `EdgeStyleValue<number>` | 最终 `lineWidth` | 总点击热区宽度，不改变视觉线宽，见[交互热区](#交互热区) |
+
+线宽、热区宽度、箭头长度和虚线周期使用屏幕渲染像素，随缩放保持大小。
+
+<span id="样式回调" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+### 样式函数 [#样式函数]
+
+样式函数接收 `(source, target, edge)`，可根据每条边的数据计算样式。示例按 `edge.data` 画出细实线、虚线和双向箭头。
+
+<EdgeDocExample id="edge-style" locale="zh" focus="edge-options" />
+
+### 虚线规则 [#虚线规则]
+
+用 `lineDash` 绘制虚线，前两个数相加决定虚线周期。直线示例将 `lineWidth` 设为 `3`，对比实线和两种虚线间距。
+
+<EdgeDocExample id="edge-dashes" locale="zh" focus="dash-options" view="code" />
+
+<EdgeDocExample id="edge-dashes" locale="zh" view="preview" />
+
+### 箭头 [#箭头]
+
+用 `startArrow` 和 `endArrow` 控制两端箭头，用 `arrowSize` 设置长度。
+
+<EdgeDocExample id="edge-arrows" locale="zh" focus="arrow-options" />
+
+[箭头尺寸与默认值](/docs/api/options#config-edge-style)
+
+<span id="点击热区" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+<span id="细边交互热区" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+## 交互热区 [#交互热区]
+
+用 `hitAreaWidth` 扩大边的命中范围，同时保持原线宽。示例用 `click-select` 启用点击选中。
+
+<EdgeDocExample id="edge-hit-area" locale="zh" focus="hit-area" view="code" />
+
+<EdgeDocExample id="edge-hit-area" locale="zh" view="preview" />
+
+<span id="options-edge-状态样式" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
 ## 状态样式
 
-先在 edge.stateStyles 中声明 selected、highlight、inactive 等效果，再由交互行为或状态 API 激活。基础示例已经配置 click-select 和 selected；只写 stateStyles 不会自动触发选中。
+用 [`edge.stateStyles`](/docs/api/options#config-edge-state-style) 设置不同状态的外观。点击边查看紫色选中样式。
 
-业务实例首次 render 完成后，也可以按 id 控制状态：
+<EdgeDocExample id="edge-state-styles" locale="zh" focus="state-styles" />
 
-```ts
-graph.setItemState('Plain', 'selected', true);
-graph.setItemState('Plain', 'selected', false);
-```
-
-这里的 Plain 是基础示例中的边 id。配置同名状态对象会替代主题该状态的对象，多个状态的覆盖顺序也会影响结果；完整规则见[状态样式参考](/docs/api/options/edge#状态样式)。状态字段不用于切换边类型或标签颜色。
+<span id="parallel-edges" style={{ scrollMarginTop: '8rem' }} />
 
 ## 平行边与自环
 
-先确认需要区分的是同一对节点的多条关系，再配置 `parallelEdges: true`，或显式写 `{ enabled: true, offset: 60 }`。使用 arc 或默认 line；cubic、polyline 不使用该自动偏移。
+同一对节点的多条关系用平行边分离。自环是起点和终点相同的边，可独立配置。
 
-下面分别展示三条同向边、一对双向边和两个自环。橙色表示反向关系。边顺序参与偏移分配；增删关系后重新分组是正常行为。
+### 分离同向与反向边
 
-<EdgeDocExample id="edge-parallel" locale="zh" />
+用 `edge.parallelEdges` 分开同一对节点之间重叠的边。上排有三条 A→B 的同向边和一条 B→B 的紫色自环，下排是一对反向边。
 
-已有项目也可保留 `transforms: [{ type: 'process-parallel-edges', options: { offset: 18 } }]`。两种入口通常选择一个；同时使用时查看[优先级参考](/docs/api/options/edge#两种入口与优先级)，不要把 distance 当成间距字段。offset 是图坐标中的控制点偏移，不是屏幕上两条线的固定间距。
+<EdgeDocExample id="parallel-workflow" locale="zh" focus="separation" />
 
-自环只需 source 与 target 相同，不依赖分离开关；offset 不调整自环大小。更多使用场景见[平行边与自环指南](/docs/guides/parallel-edges)。
+### 调整平行边的间距和分组 [#分组与间距]
+
+在 `new Graph()` 中通过 `edge.parallelEdges` 开启分离并设置参数。此配置适用于 `line` 和 `arc`。
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  edge: {
+    type: 'line',
+    parallelEdges: { enabled: true, offset: 48, includeReverse: true },
+  },
+});
+```
+
+- **间距**。点击上方 **Spacing 24 / 64**，对比 A→B 的三条边。`offset` 从 `24` 增至 `64` 时，外侧两条边弯得更开。
+- **分组**。`includeReverse: true` 将 C→D 和 D→C 放在同一组，两条边会分开。点击 **Toggle reverse group** 设为 `false` 后，它们各自成组，在示例里会重叠。
+
+图渲染后，可以用 `updateOptions()` 改间距。它会替换整个 `parallelEdges` 对象，因此要带上继续使用的设置。
+
+```ts
+graph.updateOptions({
+  edge: { parallelEdges: { enabled: true, offset: 64, includeReverse: true } },
+});
+```
+
+偏移单位、上限和分组规则见 [ParallelEdgesConfig](/docs/api/options#config-parallel-edge-fields)。
+
+### 在 transforms 中配置平行边 [#两种入口与优先级]
+
+如果项目把数据处理集中配置在 `transforms` 中，也可以在这里开启平行边分离。两种写法选一种即可。
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  transforms: [
+    { type: 'process-parallel-edges', options: { offset: 24 } },
+  ],
+});
+```
+
+如果两处设置了同一个选项，以 `edge.parallelEdges` 为准。例如，两处分别设置 `offset: 48` 和 `offset: 24`，最终使用 `48`。将 `edge.parallelEdges` 设为 `false` 可关闭分离。
+
+### 添加或删除平行边 [#增删边后更新]
+
+开启平行边分离后，添加或删除一条边，图会按新的边数自动重新排列同组的边。点击上方 **Add ab4**，A→B 从三条变成四条，原有的边也会挪动。
+
+```ts
+graph.addEdge({ id: 'ab4', source: 'A', target: 'B' });
+```
+
+点击 **Remove ab4** 删除刚加的边，A→B 恢复三条。
+
+```ts
+graph.removeEdge('ab4');
+```
+
+### 自环与标签
+
+让 `source` 与 `target` 指向同一节点即可画出自环。拖动节点，观察环和标签一起移动。
+
+<EdgeDocExample id="self-loops" locale="zh" focus="loops" />
+
+自环的大小和层级由渲染器决定，`parallelEdges` 的间距仅用于不同端点之间的边。
+
+<span id="polyline-routing" style={{ scrollMarginTop: '8rem' }} />
+
+<span id="曲线与折线路由" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+<span id="edge-polyline" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
 ## 折线路由
 
-完整步骤、圆角切换与 orth / indented 对比见[折线路由指南](/docs/guides/polyline-routing)。
+用 `edge.type: 'polyline'` 启用折线，再用 `router` 选择路径。字段和默认值见 [EdgeConfig.style](/docs/api/options#config-edge-style)。
 
-先用布局确定节点位置和方向，再选择 `edge.type: 'polyline'` 与 router。流程图通常从 orth 开始；缩进目录用 indented 并显式设置 layout.direction；tree 当前为平滑树形连接，fishbone 配合鱼骨布局。
+<span id="路由选择" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-下面 Dagre 用 LR 方向排列节点，orth 连接两端边界，radius 处理圆角。可以拖动画布、缩放或重置；这是端点路由，不保证避开其他所有节点。
+### 选择路由
 
-<EdgeDocExample id="edge-orth" locale="zh" />
+| 路由 | 适用场景 |
+| --- | --- |
+| `orth` | 流程图。用横纵线段连接两端，可用 `radius` 加圆角 |
+| `tree` | 层级图。同源边分配端口，以平滑曲线连接 |
+| `indented` | 目录树。父节点主干连接各子项 |
+| `fishbone` | 鱼骨图。与 `fishbone` 布局配合使用 |
 
-[缩进目标与主干参考](/docs/api/options/edge#缩进目标与主干)有矩形目录树的代码与实际效果。普通矩形优先使用 indentTarget: 'left'；'right' 是无背景文本的专用坐标约定。trunkGap 当前不生效，层级间距应配置布局参数。更换 router 或方向需要重建实例，见[路由限制](/docs/api/options/edge#曲线与折线路由)。
+### 正交连接与圆角
+
+折线由横线和竖线组成。示例里的 **Radius** 设为 `0` 时是直角，设为 `16` 时是圆角。
+
+<EdgeDocExample id="polyline-orth" locale="zh" focus="routing" />
+
+### 目录树的缩进连接
+
+子节点像文件目录一样逐级向右缩进，同一个父节点下的子节点共用一条竖线。
+
+<EdgeDocExample id="edge-indented" locale="zh" focus="routing" />
+
+用 `layout.indent` 和 `layout.rowHeight` 调整缩进和行距。
+
+<span id="缩进目标与主干" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+#### 选择子节点的接线位置 [#如何选择-indenttarget]
+
+`indentTarget` 用于横向目录树。像上方示例那样，子节点是矩形时用 `left`，连线接到靠近父节点的一侧。
+
+```ts
+edge: {
+  type: 'polyline',
+  style: { router: 'indented', indentTarget: 'left' },
+},
+```
+
+子节点只有文字时，可以用 `right` 让线延伸到文字末端。在[缩进树示例](/docs/examples/indented-tree)里切换「有背景」和「无样式」，就能看到区别。
+
+### 设置折线方向 [#方向与更新]
+
+折线随布局方向走。Dagre 布局用 `rankdir`，`LR` 表示从左到右，`TB` 表示从上到下。切换[正交连接与圆角示例](#正交连接与圆角)里的 **Direction** 可以对比两种效果。
+
+```ts
+graph.setLayout({ type: 'dagre', rankdir: 'TB', nodeSize: [84, 32] });
+await graph.render();
+```
+
+缩进树布局用 `direction`。设为 `LR` 向右缩进，设为 `RL` 向左缩进。
 
 ## 边标签
 
-先用 label 回调提供非空文本，再设置位置、字号与底色。边标签与边线颜色独立；下面 start、center、end 分别展示三个位置，代码同时提供实际效果。
+标签名用 `edge.style.label` 设置，位置通过 `edge.style.labelPlacement` 配置。下图从上到下分别展示靠近起点（`start`）、居中（`center`）和靠近终点（`end`）的效果。
 
-<EdgeDocExample id="edge-labels" locale="zh" />
+<EdgeDocExample id="edge-labels" locale="zh" focus="edge-label-options" />
 
-这个对照显式关闭碰撞和低缩放隐藏，便于查看。业务中可保留默认策略，只显示关键关系的标签，避免过密。边标签保持屏幕尺寸；当前 cubic 和 polyline 的标签沿端点连线定位，不保证跟随弯曲路径。字段、显示条件与自定义渲染器入口见[边标签参考](/docs/api/options/edge#边标签)。
+| 字段 | 类型 | 默认与规则 |
+| --- | --- | --- |
+| `label` | `EdgeStyleValue<string \| false>` | `false`；非空字符串才绘制，空串或 `false` 隐藏 |
+| `labelFontSize` | `EdgeStyleValue<number>` | `10` 屏幕像素；使用有限正数 |
+| `labelFontFamily` | `EdgeStyleValue<string>` | 系统无衬线字体栈 |
+| `labelColor` | `EdgeStyleValue<string>` | `'#666'`，独立于边线颜色 |
+| `labelPlacement` | `EdgeStyleValue<'start' \| 'center' \| 'end'>` | `'center'`；分别取路径参数 `t = 0.2 / 0.5 / 0.8`，不是精确端点 |
+| `labelBackground` | `EdgeStyleValue<string \| false>` | `'rgba(255,255,255,0.8)'`；`false` 关闭底色 |
+| `labelBackgroundPadding` | `EdgeStyleValue<number>` | `2` 屏幕像素，底色四周内边距，使用有限非负数 |
+| `labelAutoRotate` | `EdgeStyleValue<boolean>` | `true`；随路径切线旋转并保持文字正向，`false` 保持水平 |
 
-## 运行时更新
+### 标签背景样式 [#edge-label-background]
 
-按变更目的选择 API；以下用于已完成首次 render 的业务实例，不是本页的操作按钮。
+用 `labelBackground` 和 `labelBackgroundPadding` 设置底色和内边距。上方示例的 `start` 标签关闭了底色。
 
-| 变更 | 操作 |
-| --- | --- |
-| 某条边的业务属性 | `graph.updateEdgeData('Plain', { risk: 'high' })`；对应样式回调读取该属性后才有视觉变化 |
-| 两端重新连接 | `graph.updateEdgeData([{ id: 'Plain', source: 'a', target: 'b' }])`；端点节点须存在 |
-| 全图边样式 | `graph.updateOptions({ edge: { style: { lineWidth: 2 } } })` |
-| 分离参数 | `graph.updateOptions({ edge: { parallelEdges: { enabled: true, offset: 30 } } })`；提交需要保留的完整对象 |
-| 临时选中或隐藏 | 用状态和显隐 API，避免替换整份数据 |
-| 路由模式或布局方向 | 销毁后以新配置创建实例；样式更新不会更新创建时保存的路由模式和方向 |
+### 位置与显示条件 [#位置与显示条件]
 
-更多方法见[边增量操作](/docs/api/graph#边)和[配置更新](/docs/api/graph#updateoptions)。高频更新优先批量修改数据，并保持边 id 稳定。
+`cubic` 和 `polyline` 标签按两端连线定位和旋转。标签字号固定，显隐受[全局标签策略](/docs/guides/label#全局标签策略)以及边和端点的 `hidden` 状态控制。
+
+### labelRenderer [#edge-label-renderer]
+
+`edge.labelRenderer` 指定标签的绘制方式。下面的 `demo-multiline` 将协议和请求类型画成两行。
+
+<EdgeDocExample id="extension-label" locale="zh" focus="edge-label" />
+
+渲染器的注册与实现见[自定义 Label Renderer](/docs/guides/custom-label-renderer)。
+
+## 开发自定义边 [#custom-edge]
+
+用 `EdgeExtension` 封装可复用的路径和样式。注册、使用和运行示例见[自定义边](/docs/guides/custom-edge)。
+
+## 动态更新边 [#动态更新边]
+
+<span id="运行时更新" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+<span id="options-edge-运行时更新" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+渲染后可更新一条边的数据或调整全图样式。示例中 **Lower SQL latency** 更新 SQL 边，**Set edge color** 改变两条边的颜色。
+
+<EdgeDocExample id="edge-updates" locale="zh" focus="edge-updates" />
+
+更多操作见 [`updateEdgeData()`](/docs/api/graph#updateedgedata) 和 [`updateOptions()`](/docs/api/graph#updateoptions)。
 
 ## 常见问题
 
 ### 为什么多条边仍然重叠？
 
-先检查对象入口是否 enabled: true，再确认类型是默认 line 或 arc。检查 maxOffset 是否把偏移压到同一值，以及 includeReverse 是否把反向边分到不同组。单独的两条反向边在分组关闭时仍可能重叠。
+确认 `enabled: true` 且边类型为 `line` 或 `arc`，再检查 `maxOffset` 和 `includeReverse`。
 
 ### 为什么改 offset 后自环大小没变？
 
-自环不参与平行边分组。当前大小与层级由内置自环渲染器决定，parallelEdges 的间距字段不控制它。
+自环大小由渲染器决定，`offset` 只控制平行边间距。
 
 ### 为什么细线仍然难点中？
 
-扩大 hitAreaWidth 后还需要对应交互行为。总宽度不是单侧半径，最终热区也不会小于视觉线宽；用上面的 2/24 对照确认实际效果。
+配合 `hitAreaWidth` 使用 `click-select` 等交互行为。
 
 ### 为什么看不到标签？
 
-先确认 label 返回非空字符串，再检查缩放阈值、碰撞、边和端点的 hidden 状态。把文本存入 data 本身不会自动绘制；排查时可暂时关闭隐藏策略。
+检查 `edge.style.label` 是否返回非空文本，再检查缩放、碰撞及边和端点的隐藏状态。
 
-### 为什么改 router 或 trunkGap 没变化？
+### 为什么运行中修改 router 没有生效？ [#为什么改-router-或-trunkgap-没变化]
 
-router 在创建时保存，当前需要重建实例才能切换；trunkGap 虽然在类型中，但尚未用于计算。主干与间距由当前布局和路由决定。
+用 `updateOptions()` 设置新的 `router` 后，调用 `render()` 重新生成折线路径。
 
 ### 为什么边没有按预期绕开节点？
 
-orth 只依据两个端点计算，不执行全图障碍物避让。先调整节点间距与布局，再选择合适路径，不要把圆角当成避障参数。
+`orth` 根据两个端点布线。可调整布局和节点间距，避免边穿过其他节点。
 
 ### 为什么配置了状态却没触发？
 
-stateStyles 只描述效果，需要行为或 setItemState 激活。确认传入的是边 id，且配置了需要的状态字段。
+用交互行为或 `setItemState(edgeId, state, true)` 激活状态。
+
+### 为什么线没有贴合节点边界？
+
+检查节点实际尺寸、布局 `nodeSize` 和方向。横向目录树中的矩形可用 `indentTarget: 'left'`。
+
+### 为什么标签看起来没有沿折线排列？
+
+`polyline` 标签按两端连线定位和旋转。
+
+<span id="其他配置" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
 ## 相关
 
-- [边配置参考](/docs/api/options/edge)：全部字段、默认值、限制与可运行对照。
-- [数据模型](/docs/concepts/data-model)：边身份、端点和业务数据。
-- [交互配置](/docs/guides/interactions)：行为组合与选中操作。
+- [EdgeConfig 配置概览](/docs/api/options#options-edge)
+- [数据模型](/docs/guides/data#节点边与分组)：边身份、端点和业务数据。
+- [交互配置](/docs/guides/behaviors)：行为组合与选中操作。
 - [标签与图标](/docs/guides/label)：跨节点和边的标签使用。
 - [示例总览](/docs/examples)：更多场景与可运行案例。
 
-<details data-related-examples>
-<summary>相关可运行示例</summary>
+**相关可运行示例**
 
 - [边与箭头方向](/docs/examples/edge-arrows)
 - [边类型](/docs/examples/edge-types)
 - [边颜色](/docs/examples/edge-colors)
 - [边状态与权重](/docs/examples/edge-states)
-- [细边交互热区](/docs/examples/edge-hit-area)
-
-</details>
+- [交互热区](/docs/examples/edge-hit-area)
+- [平行边与反向边](/docs/examples/parallel-edges)
+- [自环边](/docs/examples/edge-loops)
+- [折线与正交路由](/docs/examples/polyline-routing)

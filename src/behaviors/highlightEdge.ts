@@ -9,8 +9,10 @@ import type { Renderer } from '../renderer/renderer';
 export function highlightEdge(renderer: Renderer, graph?: Graph): () => void {
   if (!graph) return () => {};
   const canvas = renderer.getCanvas();
+  let active = false;
 
   const onOver = (payload: { source: string; target: string; edgeIndex: number }) => {
+    active = true;
     canvas.style.cursor = 'pointer';
     renderer.setHighlight({
       nodeIds: new Set([payload.source, payload.target]),
@@ -19,6 +21,7 @@ export function highlightEdge(renderer: Renderer, graph?: Graph): () => void {
   };
 
   const onLeave = () => {
+    active = false;
     canvas.style.cursor = 'default';
     renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
   };
@@ -28,5 +31,6 @@ export function highlightEdge(renderer: Renderer, graph?: Graph): () => void {
   return () => {
     graph.eventEmitter.off('edge:pointerover', onOver);
     graph.eventEmitter.off('edge:pointerleave', onLeave);
+    if (active) onLeave();
   };
 }

@@ -1,69 +1,12 @@
 ---
-title: 图数据配置参考
-description: GraphData、GraphNode、GraphEdge 的字段、标识、坐标和初始状态
+title: 图数据配置参考（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-输入交给 new Graph 或 setData；读取后的 Model 不是输入对象，见[查询模型](/docs/api/graph/data#模型字段)。按业务接入见[数据指南](/docs/guides/data)。
+内容已并入 [图数据](/docs/api/options#options-data)。
 
-## GraphData
-
-| 字段 | 类型 | 规则 |
-| --- | --- | --- |
-| nodes | GraphNode[] | 必填，空图传 [] |
-| edges | GraphEdge[] | 必填，无边传 [] |
-| combos | ComboData[] | 可选；省略不创建分组 |
-
-```ts
-import type { GraphData } from '@antv/g6-lite';
-const data: GraphData = {
-  nodes: [
-    { id: 'A', x: 0, y: 0, data: { score: 1 }, states: ['selected'] },
-    { id: 'B', x: 200, y: 0, comboId: 'team' },
-  ],
-  edges: [{ id: 'A-B', source: 'A', target: 'B', data: { weight: 2 } }],
-  combos: [{ id: 'team', data: { name: 'Team' } }],
-};
-console.log(data);
-```
-
-使用不同且稳定的字符串 ID；节点、边和 Combo 跨类型也应避免重名。应用校验唯一性、端点存在、有限坐标和无环 Combo 层级；不要依赖所有输入路径都提供一致的校验或回滚。
-
-## GraphNode
-
-| 字段 | 类型 | 必填 / 默认与含义 |
-| --- | --- | --- |
-| id | string | 必填，节点身份，不用数组下标作持久标识 |
-| name | string | 可选名称；通过 label 配置决定如何展示 |
-| data | NodeData | 可选业务对象，cluster?: string，其余字段为 unknown |
-| x / y | number | 可选图坐标；无布局时缺省轴为 0，有布局时可被重新计算 |
-| fx / fy | number | 可选固定轴；执行布局时在结果写回前覆盖对应轴 |
-| states | ElementState[] | 可选初始状态，缺省为空；运行时按集合存储 |
-| comboId | string | 可选直接归属，须引用已声明 Combo |
-
-无布局时定位使用 x/y，不依赖 fx/fy。当前 Model 与渲染后的 getData 不保存 fx/fy；layout() 又基于当前快照计算。需要持续固定时，由应用保留原始约束并在 setData 输入中携带，不能假设一次输入永久锁住节点。
-
-输入的 data 可能被运行时引用，外部直接修改不会自动触发更新。使用 updateNodeData；data 中的嵌套对象需要应用管理所有权。颜色、尺寸和标签定义在 node 配置，不属于 GraphNode 顶层字段。
-
-## GraphEdge
-
-| 字段 | 类型 | 必填 / 默认与含义 |
-| --- | --- | --- |
-| id | string | 可选，省略生成 e0、e1 等；全量替换重新分配，持久业务边应显式传入 |
-| source | string | 必填，起点节点 ID，不是 Combo ID |
-| target | string | 必填，终点节点 ID |
-| data | Record&lt;string, unknown&gt; | 可选业务对象 |
-| states | ElementState[] | 可选初始状态，缺省为空 |
-
-source 等于 target 表示自环；相同端点可以存在多条不同 ID 的边，错开效果另配[平行边与自环](/docs/api/options/edge#平行边与自环)。
-
-## ComboData
-
-使用 combos 声明分组，节点通过 comboId 加入；parentId 表示父分组。6 个数据字段、嵌套、初始折叠和状态的唯一定义见[ComboData](/docs/api/options/combo#combodata)。运行时归组见[Combo 指南](/docs/guides/combo)。
-
-## 初始状态与导出
-
-初始 states 是名称数组；查询 Model 中则是 ReadonlySet。selected 不等于已注册点击行为，disabled 不自动阻止交互。setData 整体替换时，旧状态不会自动复制到新元素；需要保留的业务状态应显式带回，见[状态使用](/docs/guides/states)。
-
-getData 导出当前坐标、身份与业务状态，不是原配置的完整备份；折叠派生的 hidden 不作为业务状态导出。快照是分层浅复制，完整规则见[getData](/docs/api/graph/data#getdata)。
-
-继续阅读：[数据写入](/docs/api/graph/data-mutations) · [节点配置](/docs/api/options/node) · [边配置](/docs/api/options/edge)。
+- <span id="graphdata" style={{ display: 'block', scrollMarginTop: '8rem' }} />[GraphData](/docs/api/options#graphdata)
+- <span id="graphnode" style={{ display: 'block', scrollMarginTop: '8rem' }} />[GraphNode](/docs/api/options#graphnode)
+- <span id="graphedge" style={{ display: 'block', scrollMarginTop: '8rem' }} />[GraphEdge](/docs/api/options#graphedge)
+- <span id="combodata" style={{ display: 'block', scrollMarginTop: '8rem' }} />[ComboData](/docs/api/options#options-data-combodata)
+- <span id="初始状态与导出" style={{ display: 'block', scrollMarginTop: '8rem' }} />[导出图数据 `getData()`](/docs/api/graph#getdata)

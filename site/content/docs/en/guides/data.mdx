@@ -1,43 +1,87 @@
 ---
-title: Data ingestion and updates
-description: Map application data, choose replacement or incremental updates, and manage async refreshes
+title: Data
+description: Understand graph data, node and edge operations, Combo groups, and remote loading
 ---
 
+import { GraphDataModelDiagram } from '@/components/graph-data-model-diagram';
 import { NodeDocExample } from '@/components/node-doc-example';
 
-Connect business entities and graph elements with stable IDs. Prepare input, then choose updates by scope. See the [data reference](/en/docs/api/options/data), and [data model](/en/docs/concepts/data-model).
+## Overview
 
-## Map application data
+A graph contains nodes, edges, and optional Combo groups. Map application objects to nodes and relationships to edges, then pass the data to `Graph`. Once the graph is rendered, replace the whole dataset or update the elements that changed.
 
-Map entities to nodes and relationships to edges. Put business fields in data for styles, tooltips, and panels. Give persistent relationships stable edge IDs too.
+## Data structure
+
+### Graph data (GraphData) [#nodes-edges-and-groups]
+
+A, B, and C belong to the same Combo in this diagram. Each edge connects two nodes by ID.
+
+<GraphDataModelDiagram locale="en" />
+
+| Field | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `nodes` | [`GraphNode[]`](#graphnode) | Yes | — | Node list. Pass `[]` to create an empty graph. |
+| `edges` | [`GraphEdge[]`](#graphedge) | Yes | — | Edge list. Pass `[]` if the graph has no edges. |
+| `combos` | [`ComboData[]`](#combodata) | No | No groups | Group list. Nodes reference these groups through `comboId`. |
+
+<span id="positions-and-states" />
+
+### Node data (GraphNode) [#graphnode]
+
+| Field | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `id` | `string` | Yes | — | Unique node ID. Edges use it to specify endpoints, and you can use it to query or update the node. |
+| `name` | `string` | No | — | Node name. Read and display it in a `node.style.label` callback. |
+| `data` | [`NodeData`](/en/docs/api/options#config-node-data-fields) | No | — | Application data such as `{ score: 80 }`. If supplied, `cluster` must be a string. |
+| `x` | `number` | No | `0` without layout | Horizontal graph coordinate. With a layout, the algorithm determines the final position. Use `fx` to fix the horizontal coordinate. |
+| `y` | `number` | No | `0` without layout | Vertical graph coordinate. With a layout, the algorithm determines the final position. Use `fy` to fix the vertical coordinate. |
+| `fx` | `number` | No | Horizontal coordinate is unfixed | Sets the node's horizontal coordinate after layout. |
+| `fy` | `number` | No | Vertical coordinate is unfixed | Sets the node's vertical coordinate after layout. |
+| `comboId` | `string` | No | No group membership | ID of the containing Combo. It must reference a group declared in `combos`. |
+| `states` | `NodeState[]` | No | `[]` | Initial node states such as `['selected']`. Use `node.stateStyles` to configure their appearance. |
+
+### Edge data (GraphEdge) [#graphedge]
+
+| Field | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `id` | `string` | No | Generated automatically | Unique edge ID. Supply a stable ID to identify the same edge after replacing the dataset. |
+| `source` | `string` | Yes | — | Start node ID. It must reference a node in `nodes`. |
+| `target` | `string` | Yes | — | End node ID. It must reference a node in `nodes`. Using the same ID as `source` creates a self-loop. |
+| `data` | `EdgeData` | No | — | Application data of type `Record<string, unknown>`, such as `{ weight: 2 }`. |
+| `states` | `EdgeState[]` | No | `[]` | Initial edge states such as `['selected']`. Use `edge.stateStyles` to configure their appearance. |
+
+### Group data (ComboData) [#combodata]
+
+| Field | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `id` | `string` | Yes | — | Unique group ID. Nodes reference it through `comboId` and child groups through `parentId`. |
+| `parentId` | `string` | No | No parent group | Parent group ID. It must reference a group in the same `combos` list. Parent links must be acyclic. |
+| `collapsed` | `boolean` | No | `false` | Set to `true` to start collapsed and hide descendant nodes and their incident edges. |
+| `style` | `Partial<ComboStyleConfig>` | No | Graph-level group style | Overrides specific style fields for this group, for example `{ fill: '#e6f4ff' }`. [Group style options](/en/docs/api/options#options-combo) |
+| `data` | `Record<string, unknown>` | No | — | Application data such as `{ department: 'engineering' }`. |
+| `states` | `ElementState[]` | No | `[]` | Initial group states such as `['selected']`. Use `combo.stateStyles` to configure their appearance. |
+
+## Data operations
+
+### Initialize data
+
+Pass `data` to `new Graph()` and await the initial `render()` before calling data mutation methods. The `#container` element must be mounted and have a nonzero width and height.
 
 ```ts
-import type { GraphData } from '@antv/g6-lite';
+import { Graph } from '@antv/g6-lite';
 
-const users = [
-  { id: 'alice', name: 'Alice', team: 'design' },
-  { id: 'bob', name: 'Bob', team: 'engineering' },
-];
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'B', x: 120, y: 0 }],
+    edges: [{ id: 'A-B', source: 'A', target: 'B' }],
+  },
+});
 
-const data: GraphData = {
-  nodes: users.map((user) => ({
-    id: user.id,
-    data: { name: user.name, team: user.team },
-  })),
-  edges: [{ source: 'alice', target: 'bob' }],
-};
+await graph.render();
 ```
 
-This converts data only. Display also needs a container and render. Configure layout when positions are absent; see [quick start](/en/docs/getting-started/quick-start).
-
-## Validate data
-
-- Use stable string IDs and avoid collisions across element types.
-- Edge endpoints must exist; Combo memberships and parent links must be valid and acyclic.
-- Provide finite x/y without layout; retain fixed-axis constraints in application input.
-- Validate before writing. Batches have no rollback guarantee; do not mutate models.
-
-## Choose an update path
+### Choose an update path
 
 | Change | Method | What changes |
 | --- | --- | --- |
@@ -47,24 +91,122 @@ This converts data only. Display also needs a container and render. Configure la
 | Position changes | updateNodePosition(s) | Graph position changes; identity remains |
 | Selection, visibility, membership | State / Combo methods | Use the relevant APIs without full replacement |
 
-## Replace all data
+### Replace all data
 
-Call setData after a valid initial render. It runs configured layout and defaults to fitView(0.9). fitView: false retains the camera. Zoom below, then compare reloads as B alternates between x=240 and 800.
+Pass a complete `GraphData` object to `setData()`. It runs the configured layout and fits the graph by default. Use `fitView: false` to keep the current zoom and pan.
 
-<NodeDocExample id="viewport-preserve" locale="en" focus="preserve-view" />
+```ts
+await graph.setData(nextData, { fitView: false });
+```
 
-Camera, states, and data have separate retention policies. Restore selected only for stable IDs still present in new input; see [preserving selection](/en/docs/guides/states). See [viewport policies](/en/docs/guides/viewport).
+The incoming data defines the initial selection. To preserve selection, restore it for stable IDs still present in the new dataset. [Preserve selection](/en/docs/guides/states) · [Viewport example](/en/docs/guides/viewport)
 
-## Incremental updates
+### Incremental updates
 
-Update A increments score and changes size. Add D creates the node and C-D; Remove D removes the adjacent edge too. Edit snapshot edits only an export, without writing back.
+Continue with the graph from the initialization example. Add node C and edge B-C, then update their application data.
+
+```ts
+graph.addNode({ id: 'C', x: 240, y: 0 });
+graph.addEdge({ id: 'B-C', source: 'B', target: 'C' });
+
+graph.updateNodeData('C', { score: 80 });
+graph.updateEdgeData('B-C', { weight: 2 });
+```
+
+Removing an edge keeps its endpoints. Removing a node also removes all its incident edges.
+
+```ts
+graph.removeEdge('B-C');
+graph.removeNode('C');
+```
+
+In the example below, inspect A, change its score, or add and remove node D.
 
 <NodeDocExample id="data-workflow" locale="en" focus="mutation" />
 
-Incremental methods do not layout or fit; routine updates need no render. Prefer batch methods for multiple elements. Nested data updates are shallow rather than recursive.
+Incremental methods schedule a redraw. Use batch methods for multiple elements. Application data is shallow-merged by top-level key, so a nested object is replaced as a whole.
 
-<details>
-<summary>Async requests: cancel previous loads and clean up</summary>
+### Query data
+
+Use `getNodes()` and `getEdges()` for lists, or `getNodeData(id)` and `getEdgeData(id)` to look up one element by ID.
+
+```ts
+const nodes = graph.getNodes();
+const edges = graph.getEdges();
+const node = graph.getNodeData('B');
+const edge = graph.getEdgeData('A-B');
+```
+
+#### Input, models, and snapshots [#input-models-and-snapshots]
+
+| Form | Purpose | Updating it |
+| --- | --- | --- |
+| GraphData input | Declare nodes, edges, and Combos | Pass to new Graph / setData |
+| Query models | Read the working graph; states is a set | Use Graph mutation APIs |
+| getData snapshot | Export positions, memberships, and states | Explicitly setData; nested objects can remain shared |
+
+Stable IDs represent business identity; array order and coordinates do not. Equal endpoints can have distinct edge IDs. Supply stable edge IDs to preserve selection across refreshes.
+
+Models are Graph-owned live views. Query again after replacing or removing data. Before the first render, queries return their respective empty values, while `getData()` returns a snapshot of the constructor data. Queries may still return values after destruction. Check [destroyed](/en/docs/api/graph#graph-lifecycle-destroyed) for the instance state.
+
+After rendering, `getData()` exports the current positions, actual edge IDs, memberships, and states. The snapshot omits collapse-derived `hidden`. Save fixed axes `fx` and `fy` and layout options separately.
+
+##### Query return types [#model-fields]
+
+| Return type | Fields |
+| --- | --- |
+| `NodeModel` | `id`, `name?`, `x`, `y`, `data?`, `states` |
+| `EdgeModel` | `id`, `source`, `target`, `data?`, `states` |
+| [ComboModel](/en/docs/guides/combo#read-only-query-model) | Group position, size, members, collapse state, and more |
+| `ElementModel` | `NodeModel \| EdgeModel \| ComboModel` |
+
+Fields are read-only. A `?` marks an optional field. Node `x` and `y` use graph coordinates, `data` is a `Readonly<Record<string, unknown>>`, and `states` is a `ReadonlySet<ElementState>`.
+
+```ts
+const element = graph.getElementData('A-B');
+if (element && 'source' in element) {
+  console.log(element.source, element.target);
+}
+const selected = graph.getNodeData('A')?.states.has('selected');
+```
+
+### Complex data structures
+
+**Nested groups.** In initial data, use `parentId` for the parent group and `comboId` for each node's membership. At runtime, you can create groups, move existing nodes, and change the collapsed state. The example adds the existing B node to Storage and then collapses Storage.
+
+```ts
+graph.createCombo({ id: 'platform' });
+graph.createCombo({ id: 'storage', parentId: 'platform' }, ['B']);
+graph.collapseCombo('storage');
+```
+
+**Trees.** Flatten the tree into `nodes` and `edges`. Each edge points from parent to child, for example `{ source: 'root', target: 'child' }`. Pass the result to a tree layout such as `mindmap` or `indented`. [Combo guide](/en/docs/guides/combo) · [Tree layout examples](/en/docs/api/options#config-tree-layout-fields)
+
+<span id="map-application-data" />
+<span id="validate-data" />
+
+## Load remote data
+
+If the endpoint returns a complete dataset, render an empty graph first, then load the JSON. The example assumes the endpoint returns valid `GraphData`. If it returns application records, map them to graph data and validate IDs, edge endpoints, and group membership before applying them.
+
+```ts
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: '#container',
+  data: { nodes: [], edges: [] },
+  layout: { type: 'grid' },
+});
+await graph.render();
+
+const response = await fetch('/data/graph.json');
+if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+const data: GraphData = await response.json();
+if (!graph.destroyed) await graph.setData(data);
+```
+
+### Cancel stale requests and clean up
 
 The helper below owns cleanup of this page’s Graph. load accepts an AbortSignal. Handle refresh failures in the caller, and call dispose on exit.
 
@@ -98,29 +240,55 @@ export function createLoader(graph: Graph, load: (signal: AbortSignal) => Promis
 }
 ```
 
-</details>
+## API and examples [#related-references]
+
+**Read data**
+
+- [`getData()`](/en/docs/api/graph#getdata)
+- [`getNodes()`](/en/docs/api/graph#getnodes)
+- [`getNodeData()`](/en/docs/api/graph#getnodedata)
+- [`getEdges()`](/en/docs/api/graph#getedges)
+- [`getEdgeData()`](/en/docs/api/graph#getedgedata)
+- [`getComboData()`](/en/docs/api/graph#getcombodata)
+
+**Replace and update**
+
+- [`setData()`](/en/docs/api/graph#graph-data-mutations-setdata)
+- [`updateNodeData()`](/en/docs/api/graph#updatenodedata)
+- [`updateEdgeData()`](/en/docs/api/graph#updateedgedata)
+
+**Add and remove**
+
+- [`addNode()`](/en/docs/api/graph#addnode)
+- [`addEdge()`](/en/docs/api/graph#addedge)
+- [`createCombo()`](/en/docs/api/graph#createcombo)
+- [`removeNode()`](/en/docs/api/graph#removenode)
+- [`removeEdge()`](/en/docs/api/graph#removeedge)
+- [`removeCombo()`](/en/docs/api/graph#removecombo)
+
+**Runnable examples**
+
+- [Minimal graph](/en/docs/examples/basic)
+- [Full replacement](/en/docs/examples/set-data)
+- [Data mutations](/en/docs/examples/data-mutations)
+- [Character relationships](/en/docs/examples/relationship)
 
 ## Common questions
 
+### Why did editing exported data not update the graph?
+
+getData does not write back automatically. Use incremental methods for small changes, or explicitly setData for replacement and choose the view policy.
+
+### Why does an old index identify another element after removal?
+
+Array order can change. Query by ID and match nodes and edges separately; do not use saved indices as identity.
+
+<span id="data-and-appearance" />
+
 ### Why did labels or colors not change?
 
-Check that fields are inside data and read by the style callback. Editing exports or directly mutating models does not follow the public update flow.
+Check that fields are inside data and read by the style function. Editing exports or directly mutating models does not follow the public update flow.
 
 ### Why did refreshing lose the view or selection?
 
 setData fits by default and builds states from new input. fitView: false keeps the camera; preserve selection explicitly by stable IDs.
-
-## Related references
-
-[Runnable examples](/en/docs/examples/basic): [Full replacement](/en/docs/examples/set-data) · [Incremental mutations](/en/docs/examples/data-mutations) · [Business relationships](/en/docs/examples/relationship).
-
-[Queries](/en/docs/api/graph/data) · [Mutations](/en/docs/api/graph/data-mutations) · [States](/en/docs/api/graph/states) · [Combos](/en/docs/guides/combo) · [Layout](/en/docs/api/graph/layout).
-
-<details data-related-examples>
-<summary>Related runnable examples</summary>
-
-- [Minimal graph](/en/docs/examples/basic)
-- [Replace graph data](/en/docs/examples/set-data)
-- [Character relationship network](/en/docs/examples/relationship)
-
-</details>

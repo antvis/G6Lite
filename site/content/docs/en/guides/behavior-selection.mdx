@@ -1,0 +1,24 @@
+---
+title: Click, brush, and lasso selection
+description: Configure click selection for nodes and edges and area selection for nodes
+---
+
+[Click to select](/en/docs/guides/behavior-click-select) · [Brush select](/en/docs/guides/behavior-brush-select) · [Lasso select](/en/docs/guides/behavior-lasso-select)
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Choose a selection gesture
+
+| Gesture | Configuration |
+| --- | --- |
+| Click a node or edge | `click-select`. Enable `multiple` and hold the `trigger` key to add to the selection |
+| Draw a rectangle around nodes | `brush-select`, with `key` setting the modifier |
+| Draw a freehand outline around nodes | `lasso-select`, with `key` setting the modifier |
+
+## Configuration and example
+
+Click to select, Shift-click to add to the selection, or drag from empty space to select a rectangle. Set selected node colors in `node.stateStyles.selected`.
+
+<NodeDocExample id="behavior-selection" locale="en" focus="behavior-options" />
+
+When enabling pan, brush, and lasso together, give them distinct gestures. Try the [selection example](/en/docs/examples/selection-behaviors). To update an application panel after selection, listen for [selection events](/en/docs/guides/events/selection-drag).

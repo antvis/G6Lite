@@ -1,0 +1,150 @@
+---
+title: Common behavior options
+description: Combine navigation, selection, dragging, highlighting, and Tooltip with application events
+---
+
+import { NodeDocExample as BehaviorDocExample } from '@/components/node-doc-example';
+
+List behaviors in `new Graph()` through `behaviors`. See the [Interaction overview](/en/docs/guides/behavior-overview) for the available behaviors.
+
+## BehaviorOption [#built-in-behaviors]
+
+Use a behavior name, such as `'drag-canvas'`, to use its defaults. To customize it, pass an object with its name in `type` and its options alongside it.
+
+See the [11 built-in behavior previews](/en/docs/api/options#built-in-index).
+
+## Configure pan, brush, and lasso [#common-combinations]
+
+Drag empty space to pan, Shift-drag to select a rectangle, or Ctrl/Meta-drag to select a freehand area.
+
+```ts
+import type { BehaviorName, BuiltInBehaviorConfig } from '@antv/g6-lite';
+
+const behaviors = [
+  'zoom-canvas',
+  { type: 'drag-canvas', ignoreModifierKeys: true },
+  'drag-node',
+  { type: 'click-select', multiple: true, trigger: 'shift' },
+  { type: 'brush-select', key: 'shift' },
+  { type: 'lasso-select', key: 'ctrl' },
+] satisfies Array<BehaviorName | BuiltInBehaviorConfig>;
+```
+
+Try the three gestures in the [selection example](/en/docs/examples/selection-behaviors). Click selection distinguishes `ctrl` and `meta`, while area selection accepts either when set to `ctrl`. See the [selection reference](/en/docs/api/options#selection) for details.
+
+## Switch behaviors at runtime [#switch-behaviors]
+
+Choose Browse to pan by dragging empty space. In Select mode, drag empty space to brush or click a node to select it. The selection and view stay in place when you switch back to Browse or choose Off.
+
+<BehaviorDocExample id="behavior-switch" locale="en" focus="switch" />
+
+Pass the complete list. `setBehaviors([])` disables all behaviors, and `setBehaviors()` restores default zoom and pan. See [`setBehaviors()`](/en/docs/api/graph#setbehaviors) for the full rules.
+
+## Zoom feel and bounds
+
+Set sensitivity, minZoom, and maxZoom on zoom-canvas; sensitivity: 0.5 softens wheel response. Zoom centers on the canvas. Wheel bounds do not restrict programmatic fitView. See [navigation options](/en/docs/api/options#navigation-and-dragging) for defaults, normalization, and fallback.
+
+## Neighborhood highlighting
+
+Hover B to highlight A/B/C/E and connecting edges while dimming other nodes. An edge emphasizes itself and its endpoints. Leaving clears hover states. State styles define green; the Behavior decides when to apply the states.
+
+<BehaviorDocExample id="behavior-highlight" locale="en" focus="highlight" />
+
+## Tooltip
+
+Enable `tooltip` in `behaviors` to show node and edge details. Use hover for previews or click for details that stay open.
+
+### Custom content
+
+Hover API, DB, or an edge for 120ms to show a card; leave to hide it. enable excludes the Cache node. The code returns an HTMLElement populated with textContent, so angle brackets in the API name remain literal text.
+
+<BehaviorDocExample id="behavior-tooltip-hover" locale="en" focus="tooltip" />
+
+### Click to show
+
+Click API, DB, or an edge to show details. Repeating the same element or clicking empty canvas closes the card. Click mode does not use the hover delay; the displayed code runs this exact configuration.
+
+<BehaviorDocExample id="behavior-tooltip" locale="en" focus="tooltip" />
+
+### Options
+
+Find defaults, callback signatures, container, and context fields in [TooltipOptions](/en/docs/api/options#tooltipoptions) and [TooltipContext](/en/docs/api/options#tooltipcontext). ctx.event is the original mouse event, unlike the nativeEvent property on ordinary Graph events.
+
+Default content uses node data.label/id, or edge data.label/endpoint names. Custom getContent strings are written as HTML, so escape dynamic values. When HTML is unnecessary, prefer an element filled through textContent as above.
+
+### Styling
+
+The library positions and shows/hides the surface without a visual skin. Both examples style the returned element directly. Alternatively, configure className and style the outer surface, such as its default class:
+
+```css
+.g6lite-tooltip {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #163b65;
+  color: white;
+  font-size: 12px;
+}
+```
+
+By default the surface mounts in document.body, uses viewport positioning, and flips at edges. A custom container changes both mounting and collision boundaries; verify positioning ancestors, scrolling, and clipping, including how transforms affect fixed positioning.
+
+### Tooltip questions
+
+#### Why is the card unstyled or unclickable?
+
+Provide application CSS; there is no built-in visual skin. The overlay has pointer-events: none. Use your own application overlay for buttons, forms, or interactive cards.
+
+#### Why does a Combo show no Tooltip?
+
+The built-in handles nodes/edges only. Use public events with an application overlay for Combo details rather than internal picking.
+
+#### Does an open card update immediately after data changes?
+
+setData does not recreate Tooltip. Later pointer events read content again. Use setBehaviors to change Tooltip configuration. The old Tooltip releases its listeners, timers, and overlay.
+
+## Event dispatch
+
+Listening to node:click does not require click-select; that Behavior adds selected-state toggling. Subscribe before render if needed, then unsubscribe with the same function:
+
+```ts
+const onNodeClick = ({ nodeId }: { nodeId: string }) => console.log(nodeId);
+graph.on('node:click', onNodeClick);
+// On component unmount:
+graph.off('node:click', onNodeClick);
+```
+
+Selection integration should account for node:selectchange, edge:selectchange, brush:end, and lasso:end. Query state for the final set; not every selection source emits a per-node selectchange. See the [event guide](/en/docs/guides/events#selection-and-drag-events) for integration and cleanup, and the [event reference](/en/docs/api/graph/events#selection-events) for complete payloads.
+
+**Connection editing and dispatch internals**
+
+drag-edge proposes reconnection without changing source/target or drawing a temporary edge. Handle edge:dragend, validate reconnected, update application edge data, then apply it through public methods such as setData. A configured layout still runs during setData; fitView: false preserves only the camera.
+
+Shared picking prioritizes node → edge → combo → canvas. Behaviors consume that event stream; do not access internal Picking, Renderer, or eventEmitter.
+
+## Common questions
+
+### Why did adding tooltip disable zoom?
+
+The explicit list replaced defaults. Include zoom-canvas and drag-canvas too.
+
+### Why does brushing also move the canvas?
+
+Bind brushing to Shift and retain drag-canvas's ignoreModifierKeys: true. Give brush and lasso different gestures.
+
+### Can updateOptions switch Behaviors?
+
+Yes. Use `setBehaviors()` to switch interactions, or pass `behaviors` to `updateOptions()` when updating appearance at the same time.
+
+## Related
+
+- [Behavior reference](/en/docs/api/options#options-behaviors): options, defaults, and boundaries.
+- [Custom interactions](/en/docs/guides/custom-behavior) · [Standalone Tooltip example](/en/docs/examples/tooltip).
+- [Events](/en/docs/guides/events) · [Selection example](/en/docs/examples/selection-behaviors).
+- [Neighbor highlighting](/en/docs/examples/neighbor-highlight): hover to inspect one-hop adjacency.
+
+**Related runnable examples**
+
+- [Hover highlight](/en/docs/examples/hover)
+- [One-hop highlight](/en/docs/examples/neighbor-highlight)
+- [Drag nodes and combos](/en/docs/examples/drag-node)
+- [Drag edge endpoints](/en/docs/examples/drag-edge)

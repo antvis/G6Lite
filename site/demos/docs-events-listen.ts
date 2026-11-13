@@ -1,4 +1,5 @@
 import { Graph, type GraphElementEvent, type GraphEventMap } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -12,15 +13,7 @@ export async function run(container: HTMLElement) {
     behaviors: [],
     autoFit: { padding: 60, maxZoom: 1 },
   });
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;top:12px;left:12px;display:flex;gap:8px;z-index:20;';
-  const toggle = document.createElement('button');
-  const arm = document.createElement('button');
-  toggle.type = arm.type = 'button';
-  toggle.textContent = 'Listening: ON';
-  arm.textContent = 'Arm once';
-  for (const button of [toggle, arm]) button.style.cssText = 'padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;color:#334155;font:12px system-ui;cursor:pointer;';
-  controls.append(toggle, arm);
+  const ui = createDemoPanel(container);
   const status = document.createElement('div');
   status.setAttribute('role', 'status');
   status.style.cssText = 'position:absolute;bottom:12px;left:12px;right:12px;padding:8px;background:white;color:#334155;font:12px/1.6 system-ui;white-space:pre-line;pointer-events:none;z-index:20;';
@@ -41,38 +34,34 @@ export async function run(container: HTMLElement) {
   const clickEvents = ['node:click', 'edge:click', 'canvas:click'] as const;
   for (const event of clickEvents) graph.on(event, onClick);
   // #endregion listeners
-  let listening = true;
-  toggle.onclick = () => {
-    listening = !listening;
-    for (const event of clickEvents) {
-      if (listening) graph.on(event, onClick);
-      else graph.off(event, onClick);
-    }
-    toggle.textContent = `Listening: ${listening ? 'ON' : 'OFF'}`;
-  };
   const onOnce = ({ nodeId }: GraphEventMap['node:click'][0]) => {
     onceResult = `once: ${nodeId} (consumed)`;
-    update();
-  };
-  arm.onclick = () => {
-    graph.off('node:click', onOnce);
-    graph.once('node:click', onOnce);
-    onceResult = 'once: waiting for a node click';
     update();
   };
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
     for (const event of clickEvents) graph.off(event, onClick);
     graph.off('node:click', onOnce);
-    toggle.onclick = arm.onclick = null;
-    controls.remove();
+    ui.destroy();
     status.remove();
     destroy();
   };
   try {
     await graph.render();
     update();
-    container.append(controls, status);
+    ui.gui.add({ listening: true }, 'listening').name('Listening').onChange((listening: boolean) => {
+      for (const event of clickEvents) {
+        if (listening) graph.on(event, onClick);
+        else graph.off(event, onClick);
+      }
+    });
+    ui.addAction('Arm once', () => {
+      graph.off('node:click', onOnce);
+      graph.once('node:click', onOnce);
+      onceResult = 'once: waiting for a node click';
+      update();
+    });
+    container.append(status);
     return graph;
   } catch (error) {
     graph.destroy();

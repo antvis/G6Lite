@@ -6,6 +6,7 @@ import { expandNodeDocExamples } from './node-doc-example-source';
 import { getSiteExample, localizedText } from './site-examples';
 import { prefixMarkdownLinks } from './markdown-links';
 import { expandSiteExamples } from './site-example-source';
+import docsNavigation from '../../docs-navigation.json';
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
@@ -15,6 +16,17 @@ export const source = loader({
   url: (slugs, locale) => localizedDocsPath(slugs, (locale ?? 'zh') as Locale),
   plugins: [],
 });
+
+const legacyPages: Readonly<Record<string, string>> = docsNavigation.legacyPages;
+
+export function getLegacyDocsTarget(slugs: string[]): string | undefined {
+  const slug = slugs.join('/');
+  return legacyPages[slug] ?? legacyPages[slug ? `${slug}/index` : 'index'];
+}
+
+export function getPrimaryDocsPages(locale: Locale) {
+  return source.getPages(locale).filter((page) => !getLegacyDocsTarget(page.slugs));
+}
 
 export function getPageImage(page: (typeof source)['$inferPage']) {
   const segments = [...page.slugs, 'image.png'];
@@ -38,7 +50,7 @@ export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
 }
 
 export async function getLLMText(page: (typeof source)['$inferPage']) {
-  const processed = await page.data.getText('processed');
+  const processed = (await page.data.getText('processed')).replace(/<(?:ElementStyleGallery|ElementExtensionExamples)\b[^>]*\/>\s*/g, '');
   const locale = (page.locale ?? 'zh') as Locale;
   const example = page.slugs[0] === 'examples' ? getSiteExample(page.slugs[1] ?? '') : undefined;
   const links = example?.documentation?.map((link) =>

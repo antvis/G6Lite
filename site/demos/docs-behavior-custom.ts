@@ -1,5 +1,5 @@
 import {
-  Graph, extensionFactory, register,
+  Graph, register,
   type BehaviorExtension, type BehaviorOptions, type ElementState, type ExtensionContext,
 } from '@antv/g6-lite';
 
@@ -36,7 +36,7 @@ export function createBusinessSelect(): BehaviorExtension<BusinessSelectOptions>
 
 // #region registration
 export function registerBusinessSelect() {
-  register('behavior', BUSINESS_SELECT, extensionFactory(createBusinessSelect));
+  register('behavior', BUSINESS_SELECT, () => createBusinessSelect());
 }
 // #endregion registration
 

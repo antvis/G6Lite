@@ -5,7 +5,7 @@
  */
 
 import { Graph } from '@antv/g6-lite';
-import { mountActionSelect } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 const NODE_COLORS: Record<string, string> = {
   client: '#7D9FD3',
@@ -209,76 +209,55 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
   graph.fitView(0.82);
 
-  const toolbar = document.createElement('div');
-  toolbar.hidden = true;
-  toolbar.innerHTML = `
-    <button type="button" data-action="collapse-all">全部折叠</button>
-    <button type="button" data-action="expand-all">全部展开</button>
-    <button type="button" data-action="toggle-data">切换数据层</button>
-    <button type="button" data-action="move-console">控制台加入服务层</button>
-    <button type="button" data-action="create-runtime">创建可观测分组</button>
-    <button type="button" data-action="export">导出数据</button>
-  `;
-  containerEl.appendChild(toolbar);
-  mountActionSelect(containerEl, [...toolbar.querySelectorAll('button')]);
-
-  const status = document.createElement('div');
-  status.style.cssText =
-    'position:absolute;left:12px;bottom:10px;z-index:20;color:#64748b;font:12px/1.4 system-ui,sans-serif;pointer-events:none;';
-  status.textContent = '固定坐标 · 可拖拽';
-  containerEl.appendChild(status);
-  const consoleButton = toolbar.querySelector<HTMLButtonElement>(
-    '[data-action="move-console"]',
-  )!;
-  const runtimeButton = toolbar.querySelector<HTMLButtonElement>(
-    '[data-action="create-runtime"]',
-  )!;
+  const ui = createDemoPanel(containerEl, '点击分组背景可折叠或展开');
   let consoleInService = false;
   let runtimeCreated = false;
 
-  const setStatus = (message: string) => {
-    status.textContent = message;
-  };
-
-  toolbar.querySelector('[data-action="collapse-all"]')!.addEventListener('click', () => {
+  ui.addAction('全部折叠', () => {
     graph.collapseCombo('client-apps');
     graph.collapseCombo('business-platform');
     if (runtimeCreated) graph.collapseCombo('observability');
-    setStatus('已折叠顶层分组');
+    ui.setStatus('已折叠顶层分组');
   });
 
-  toolbar.querySelector('[data-action="expand-all"]')!.addEventListener('click', () => {
+  ui.addAction('全部展开', () => {
     graph.expandCombo('business-platform');
     graph.expandCombo('client-apps');
     graph.expandCombo('service-layer');
     graph.expandCombo('data-layer');
     if (runtimeCreated) graph.expandCombo('observability');
-    setStatus('已展开全部分组');
+    ui.setStatus('已展开全部分组');
   });
 
-  toolbar.querySelector('[data-action="toggle-data"]')!.addEventListener('click', () => {
+  const toggleGroup = (comboId: string) => {
+    graph.toggleCombo(comboId);
+    const group = graph.getComboData(comboId);
+    ui.setStatus(`${group?.data?.name ?? comboId}${group?.collapsed ? '已折叠' : '已展开'}`);
+  };
+
+  graph.on('combo:click', ({ comboId }) => toggleGroup(comboId));
+  const more = ui.gui.addFolder('更多').close();
+  ui.addAction('切换数据层', () => {
     graph.expandCombo('business-platform');
-    graph.toggleCombo('data-layer');
-    const collapsed = graph.getComboData('data-layer')?.collapsed;
-    setStatus(collapsed ? '数据层已折叠' : '数据层已展开');
-  });
+    toggleGroup('data-layer');
+  }, more);
 
-  consoleButton.addEventListener('click', () => {
+  const consoleButton = ui.addAction('控制台加入服务层', () => {
     graph.expandCombo('business-platform');
     graph.expandCombo('service-layer');
     if (consoleInService) {
       graph.addToCombo('console', 'client-apps');
-      consoleButton.textContent = '控制台加入服务层';
-      setStatus('运营控制台已回到客户端');
+      consoleButton.name('控制台加入服务层');
+      ui.setStatus('运营控制台已回到客户端');
     } else {
       graph.addToCombo('console', 'service-layer');
-      consoleButton.textContent = '控制台回到客户端';
-      setStatus('运营控制台已加入服务层');
+      consoleButton.name('控制台回到客户端');
+      ui.setStatus('运营控制台已加入服务层');
     }
     consoleInService = !consoleInService;
-  });
+  }, more);
 
-  runtimeButton.addEventListener('click', () => {
+  const runtimeButton = ui.addAction('创建可观测分组', () => {
     if (runtimeCreated) return;
     graph.addNodes([
       {
@@ -313,13 +292,12 @@ export async function run(container: string | HTMLElement) {
       ['logs', 'metrics'],
     );
     runtimeCreated = true;
-    runtimeButton.disabled = true;
-    runtimeButton.textContent = '已创建可观测分组';
+    runtimeButton.name('已创建可观测分组').disable();
     graph.fitView(0.78);
-    setStatus('createCombo() 已执行');
-  });
+    ui.setStatus('createCombo() 已执行');
+  }, more);
 
-  toolbar.querySelector('[data-action="export"]')!.addEventListener('click', () => {
+  ui.addAction('导出数据', () => {
     const data = graph.getData();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -328,17 +306,15 @@ export async function run(container: string | HTMLElement) {
     link.download = 'g6lite-combo-data.json';
     link.click();
     URL.revokeObjectURL(url);
-    setStatus(`${data.nodes.length} 节点 · ${data.combos?.length ?? 0} 分组`);
-  });
+    ui.setStatus(`${data.nodes.length} 节点 · ${data.combos?.length ?? 0} 分组`);
+  }, more);
 
   return {
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy() {
       graph.destroy();
-      toolbar.remove();
-      status.remove();
-      containerEl.querySelector('[data-canvas-controls]')?.remove();
+      ui.destroy();
     },
   };
 }

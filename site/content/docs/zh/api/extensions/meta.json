@@ -1,9 +1,0 @@
-{
-  "title": "扩展",
-  "pagesIndex": "../extensions.mdx",
-  "pages": [
-    "registration",
-    "drawing",
-    "runtime"
-  ]
-}

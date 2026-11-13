@@ -1,69 +1,16 @@
 ---
-title: Element states
-description: Understand states, Behaviors, and styles through adding, replacing, and clearing states
+title: Element states (previous URL)
+description: Find the corresponding sections at their new location
 ---
 
-import { NodeDocExample as StateDocExample } from '@/components/node-doc-example';
+This content now lives in [Element states](/en/docs/guides/states).
 
-States record whether an element is selected, highlighted, or marked by your application. One element can have several states, such as selected and awaiting review.
-
-## States, Behaviors, and styles
-
-- A **state** records a current flag, such as selected.
-- A **Behavior** decides when to change it, such as click-select responding to clicks.
-- A **state style** decides its appearance, such as a purple selected outline.
-
-Listening to node:click does not select nodes; defining stateStyles does not create an interaction. Behaviors and application code can both change states.
-
-## Try state changes
-
-A starts selected; B retains its base appearance. Toggle review adds an orange fill while keeping A's purple selection outline. Replace with highlight leaves only green highlighting. Clear A removes its states.
-
-<StateDocExample id="state-concept" locale="en" focus="states" />
-
-The readout queries getItemStates directly. State writes schedule drawing without another render call. Expand the runnable source for initial data and stateStyles.
-
-## Add, replace, and clear
-
-setItemState(id, name, true) adds one state; false removes only that state, preserving others. Toggle selected / Toggle review use this approach.
-
-setElementStates(id, names) replaces the entire collection. Replace with highlight sets A to ['highlight'], removing selected and review.
-
-clearItemStates(id) clears the collection, restoring base appearance; setElementStates(id, []) also clears it. Await graph.render() before the first mutation.
-
-## Where state styles belong
-
-Configure node.stateStyles / edge.stateStyles for nodes and edges, and combo.style.stateStyles for Combos. Each state overrides only the appearance fields it defines; remaining fields retain their base or other active-state values.
-
-Built-in themes provide selected, active, highlight, disabled, and inactive presets. The example's review name is custom, with orange explicitly configured. Use fields supported by the corresponding element.
-
-<details>
-<summary>Multiple states affecting the same field</summary>
-
-Nodes and edges apply states in collection order, so later fields can override earlier ones. Combos use an internal order for supported states; do not assume identical precedence or that selected always wins. See the [node](/en/docs/api/options/node#state-styles), [edge](/en/docs/api/options/edge#state-styles), and [Combo](/en/docs/api/options/combo#state-styles) references for full rules.
-
-</details>
-
-## Names and data
-
-selected commonly represents application selection; active / highlight emphasize elements, and inactive dims them. disabled is a visual state and does not automatically block clicks or dragging; enforce business restrictions in application logic.
-
-hidden controls visibility. default represents base appearance; you do not need to add a default state to restore it. Expand a collapsed Combo to restore elements hidden by that structure.
-
-States are maintained separately from business data. Declare initial states in the data's states array. When replacing data through setData, carry states you want to preserve in the new data; old temporary selection is not automatically retained.
-
-## Common questions
-
-### Why did adding a state not change appearance?
-
-Check that supported style fields are configured. The node whole-object style function currently skips stateStyles; use per-field configuration for state appearance. See [style callbacks](/en/docs/api/options/node#style-callbacks).
-
-### Why did setting selected emit no selection event?
-
-Programmatic state changes do not synthesize node:selectchange; click-select emits it. Synchronize business UI explicitly after programmatic writes. See [selection synchronization](/en/docs/guides/events/selection-drag#synchronize-selection).
-
-### Why is an element still hidden after clearing states?
-
-Check whether it belongs to a collapsed Combo. Expand that structure, then check the business hidden flag.
-
-Continue with the [state guide](/en/docs/guides/states), [state methods](/en/docs/api/graph/states), [interaction combinations](/en/docs/guides/interactions), and [theme state presets](/en/docs/api/options/theme#state-presets).
+- <span id="states-behaviors-and-styles" style={{ scrollMarginTop: '8rem' }} />[States, Behaviors, and styles](/en/docs/guides/states#states-behaviors-and-styles)
+- <span id="try-state-changes" style={{ scrollMarginTop: '8rem' }} />[Try state changes](/en/docs/guides/states#try-state-changes)
+- <span id="add-replace-and-clear" style={{ scrollMarginTop: '8rem' }} />[Add, replace, and clear](/en/docs/guides/states#add-business-flags-without-losing-selection)
+- <span id="where-state-styles-belong" style={{ scrollMarginTop: '8rem' }} />[Where state styles belong](/en/docs/guides/states#where-state-styles-belong)
+- <span id="names-and-data" style={{ scrollMarginTop: '8rem' }} />[Names and data](/en/docs/guides/states#names-and-data)
+- <span id="common-questions" style={{ scrollMarginTop: '8rem' }} />[Common questions](/en/docs/guides/states#common-questions)
+- <span id="why-did-adding-a-state-not-change-appearance" style={{ scrollMarginTop: '8rem' }} />[Why did adding a state not change appearance?](/en/docs/guides/states#why-did-adding-a-state-not-change-appearance)
+- <span id="why-did-setting-selected-emit-no-selection-event" style={{ scrollMarginTop: '8rem' }} />[Why did setting selected emit no selection event?](/en/docs/guides/states#why-did-setting-selected-emit-no-selection-event)
+- <span id="why-is-an-element-still-hidden-after-clearing-states" style={{ scrollMarginTop: '8rem' }} />[Why is an element still hidden after clearing states?](/en/docs/guides/states#why-is-an-element-still-hidden-after-clearing-states)

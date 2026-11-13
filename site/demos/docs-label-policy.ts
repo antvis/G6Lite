@@ -1,6 +1,8 @@
 import { Graph, type LabelOptions } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
+  // #region label-options
   const policy: Required<LabelOptions> = {
     scaleWithZoom: false,
     hideOnLowZoom: true,
@@ -8,6 +10,7 @@ export async function run(container: HTMLElement) {
     nodeMinZoom: 0.3,
     edgeMinZoom: 0.5,
   };
+  // #endregion label-options
   const graph = new Graph({
     container,
     data: {
@@ -24,25 +27,17 @@ export async function run(container: HTMLElement) {
     behaviors: [],
     autoFit: { minZoom: 0.4, maxZoom: 0.4 },
   });
-  const controls = document.createElement('div');
-  controls.style.cssText =
-    'position:absolute;left:12px;bottom:12px;z-index:20;display:flex;flex-wrap:wrap;gap:12px;font:12px system-ui;';
-  for (const key of ['scaleWithZoom', 'hideOnLowZoom', 'hideOnCollision'] as const) {
-    const label = document.createElement('label');
-    const input = document.createElement('input');
-    input.type = 'checkbox';
-    input.checked = policy[key];
-    input.addEventListener('change', () => {
-      graph.updateOptions({ label: { [key]: input.checked } });
-    });
-    label.append(input, ' ' + key);
-    controls.append(label);
-  }
+  const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
-  graph.destroy = () => { controls.remove(); destroy(); };
+  graph.destroy = () => { ui.destroy(); destroy(); };
   try {
     await graph.render();
-    container.append(controls);
+    const settings = { ...policy };
+    for (const key of ['scaleWithZoom', 'hideOnLowZoom', 'hideOnCollision'] as const) {
+      ui.gui.add(settings, key).onChange((checked: boolean) => {
+        graph.updateOptions({ label: { [key]: checked } });
+      });
+    }
     return graph;
   } catch (error) {
     graph.destroy();

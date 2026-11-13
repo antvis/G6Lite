@@ -599,31 +599,14 @@
   font-weight: 500;
   letter-spacing: 0;
 }
-.sizeVsBaseline {
-  margin-left: 10px;
-  color: var(--cyan-dark);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0;
-  white-space: nowrap;
-}
-.loadParts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.bundleArtifact {
+  align-self: flex-start;
   margin: 22px 0 16px;
   font-size: 12px;
-}
-.loadParts span {
   padding: 8px 10px;
   border-radius: 6px;
   background: var(--sky-strong);
   color: var(--cyan-dark);
-}
-.loadParts span + span {
-  background: var(--surface);
-  color: var(--muted);
-  border: 1px dashed var(--line);
 }
 .visualCaption {
   display: block;

@@ -1,0 +1,69 @@
+---
+title: 边总览
+description: 了解边的方向、内置类型、数据结构与配置方法
+---
+
+import { ElementStyleGallery } from '@/components/element-style-gallery';
+
+## 什么是边
+
+边（Edge）连接两个节点，表示服务调用、流程依赖等关系。`source` 是起点节点 ID，`target` 是终点节点 ID。`endArrow` 控制终点箭头，`startArrow` 控制起点箭头。
+
+同一对节点可以有多条边，例如用两条边区分读取和写入。`source` 与 `target` 相同时，边会绘制成自环。
+
+## 边类型
+
+<ElementStyleGallery element="edge" locale="zh" />
+
+| 内置类型 | 用途 | 主要配置 |
+| --- | --- | --- |
+| `line` | 默认类型，直接连接两个节点 | 线宽、颜色和箭头 |
+| `arc` | 用弧线区分关系或调整弯曲方向 | `curvature` |
+| `cubic` | 连接左右层级，用三次贝塞尔曲线过渡 | `curveOffset` |
+| `polyline` | 流程图、组织架构和目录树的折线连接 | `router`、`radius` |
+
+路径参数和平行边配置见[边通用配置项](/docs/guides/edge)。
+
+## 数据结构
+
+在 `data.edges` 中提供边列表。每项都是一个 [`GraphEdge`](/docs/guides/data#graphedge)。
+
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `source` | `string` | 是 | 起点 ID，引用 `data.nodes` 中的节点 |
+| `target` | `string` | 是 | 终点 ID，引用 `data.nodes` 中的节点 |
+| `id` | `string` | 否 | 边的唯一 ID，省略时自动生成。需要更新、选中或区分同端点的多条边时可显式指定 |
+| `data` | `EdgeData` | 否 | 自定义业务数据，例如协议、延迟或权重 |
+| `states` | `EdgeState[]` | 否 | 初始状态，例如 `['selected']` |
+
+## 配置方法
+
+在 `new Graph()` 中用 `edge` 设置全图边类型与样式。把每条边的业务字段写在 `data.edges` 中，再用 `edge.style` 中的样式函数读取。下例用协议生成标签，用延迟决定线宽。
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [{ id: 'api', x: 80, y: 100 }, { id: 'db', x: 260, y: 100 }],
+    edges: [{ id: 'api-db', source: 'api', target: 'db', data: { protocol: 'SQL', latency: 120 } }],
+  },
+  edge: {
+    type: 'line',
+    style: {
+      endArrow: true,
+      label: (_source, _target, edge) => String(edge.data?.protocol ?? ''),
+      lineWidth: (_source, _target, edge) => Number(edge.data?.latency ?? 0) >= 100 ? 4 : 2,
+    },
+  },
+});
+
+await graph.render();
+```
+
+图绘制后，可用 `graph.updateEdgeData('api-db', { latency: 60 })` 更新这条边的数据，或用 `graph.updateOptions({ edge: { style: { stroke: '#1783FF' } } })` 修改全图边的颜色。见[动态更新边](/docs/guides/edge#动态更新边)。
+
+## 自定义边
+
+用 `EdgeExtension` 将内置路径和业务样式封装为一个可复用的类型，例如按权重调整弧线的颜色和线宽。见[自定义边](/docs/guides/custom-edge)。

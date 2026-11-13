@@ -1,0 +1,50 @@
+---
+title: 放射布局 Radial
+description: 节点按到中心节点的最短路径距离分圈。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+节点按到中心节点的最短路径距离分圈。
+
+## 使用场景
+
+适合查看某个账号、服务或设备的直接和间接关系。
+
+## 基本用法
+
+这是可选布局。先导入并注册，再设置 `layout.type`。CDN 接入见[可选布局](/docs/guides/layout-overview#optional-layouts)。
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import radial from '@antv/g6-lite/layouts/radial';
+
+register('layout', 'radial', radial);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'radial' },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `focusNode` | 中心节点的 ID。 | `string` | 第一个节点 |
+| `unitRadius` | 相邻两圈之间的距离。 | `number` | 自动计算 |
+| `linkDistance` | 布局计算中的参考边长。 | `number` | `50` |
+| `preventOverlap` | 是否尝试避免同一圈的节点重叠。 | `boolean` | `false` |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
+
+## 代码示例
+
+紫色节点 `0` 位于中心，相邻两圈相距 68。
+
+<NodeDocExample id="built-in-layout" layoutType="radial" locale="zh" />
+
+[对比关系网络布局](/docs/guides/layout-networks)

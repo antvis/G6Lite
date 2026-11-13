@@ -1,118 +1,14 @@
 ---
-title: 主题配置参考
-description: ThemeOption、12 个主题 token、预设默认值、覆盖规则与 resolveTheme
+title: 主题配置参考（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-import { NodeDocExample as ThemeDocExample } from '@/components/node-doc-example';
+内容已并入 [主题](/docs/api/options#options-theme)。
 
-入口：`GraphOptions.theme?: ThemeOption`，省略时使用 light。主题提供节点、边的默认外观和画布背景。接入步骤与排查见[主题指南](/docs/guides/theme)。
-
-## ThemeOption
-
-```ts
-import type { ThemeOption, ThemeTokens } from '@antv/g6-lite';
-
-// ThemeOption = 'light' | 'dark'
-//   | ({ type: 'light' | 'dark' } & Partial<ThemeTokens>)
-const theme: ThemeOption = { type: 'light', nodeFill: '#00A876' };
-```
-
-对象必须包含 `type`；其余 token 均可省略，只接受固定值，不支持回调。先取预设，再按顶层字段覆盖；显式传入 undefined 会覆盖预设值，建议直接省略无需修改的字段。
-
-## ThemeTokens
-
-以下是内置预设值。字段单位及有效值沿用对应的[节点样式](/docs/api/options/node#nodestyleconfig)、[边样式](/docs/api/options/edge#基础样式)；主题本身不额外校验或归一化数值。
-
-| token | 类型 | light | dark | 作用 |
-| --- | --- | --- | --- | --- |
-| `nodeFill` | `string` | `#1783FF` | 同 light | 默认节点填充色 |
-| `nodeSize` | `number` | `24` | 同 light | 默认节点 size |
-| `nodeStroke` | `string` | `#fff` | `#333` | 默认节点描边色 |
-| `nodeStrokeWidth` | `number` | `0` | 同 light | 默认节点描边宽度 |
-| `edgeStroke` | `string` | `#99ADD1` | `#637088` | 默认边颜色 |
-| `edgeLineWidth` | `number` | `1` | 同 light | 默认边 lineWidth |
-| `edgeArrow` | `boolean` | `true` | 同 light | 默认边 endArrow |
-| `canvasBackground` | `string` | `#fff` | `#1a1a1a` | 图画布清屏背景色 |
-| `edgeDefaultColor` | `string` | `#99ADD1` | `#637088` | edgeStroke 缺失时的后备色 |
-| `edgeCategoryPalette` | `string[]` | 10 色，见下方 | 10 色，见下方 | 可读取的分类色板，不自动映射数据 |
-| `nodeStateStyles` | `Partial<Record<NodeState, NodeStateStyleOverride>>` | 见下方 | 见下方 | 默认节点状态样式 |
-| `edgeStateStyles` | `Partial<Record<EdgeState, EdgeStateStyleOverride>>` | 见下方 | 同 light | 默认边状态样式 |
-
-`edgeStroke` 在两个预设中都有值，单独改 edgeDefaultColor 不会改变默认边颜色。主题没有标签、图标或 Combo token；这些外观需分别配置。
-
-<details>
-<summary>完整分类色板</summary>
-
-light：`['#1783FF', '#00C9C9', '#F08F56', '#D580FF', '#7863FF', '#DB9D0D', '#60C42D', '#FF80CA', '#2491B3', '#17C76F']`。
-
-dark：`['#0F55A6', '#008383', '#9C5D38', '#8B53A6', '#4E40A6', '#8F6608', '#3E801D', '#A65383', '#175E75', '#0F8248']`。
-
-需要按类别着色时，读取 resolveTheme 的 edgeCategoryPalette，在 edge.style.stroke 字段回调中按业务类别取色；仅设置色板不会改变边颜色。
-
-</details>
-
-## 代码与对应效果
-
-选择 light、dark 或 brand。Default 使用主题基础样式，Selected 和 Disabled 使用状态样式；品牌主题保留预设的其他节点状态。标签颜色在切换时单独更新。
-
-<ThemeDocExample id="theme-switch" locale="zh" />
-
-## 状态预设
-
-节点描边强调色在 light 为 `#163B65`，dark 为 `#B7D3FF`。下表仅列各状态覆盖的字段。
-
-| 状态 | nodeStateStyles | edgeStateStyles |
-| --- | --- | --- |
-| `active` | haloWidth: 8，opacity: 1 | stroke: #1783FF，opacity: 1 |
-| `selected` | stroke: 强调色，strokeWidth: 2，haloWidth: 12，opacity: 1 | stroke: #1783FF，opacity: 1 |
-| `disabled` | opacity: 0.15 | opacity: 0.15，lineDash: [4, 4] |
-| `highlight` | stroke: 强调色，strokeWidth: 1，opacity: 1 | stroke: #1783FF，opacity: 1 |
-| `inactive` | opacity: 0.25 | opacity: 0.25 |
-
-状态字段分别见[节点状态样式](/docs/api/options/node#状态样式)、[边状态样式](/docs/api/options/edge#状态样式)。hidden 由渲染器直接隐藏，default 不应用状态覆盖；多状态按状态列表顺序叠加，后者覆盖同名字段。节点 active 在 halo 为 0 时补为 8，selected 的 halo 最小为 12，不能用 haloWidth: 0 关闭这两项内置表现。
-
-## 覆盖规则
-
-基础样式使用字段对象写法时：显式 node/edge.style 字段 > 注册扩展的默认样式 > 主题 token > 渲染器后备值。节点整对象样式函数走兼容路径，默认值与状态处理不同，见[样式函数](/docs/api/options/node#样式函数)。
-
-状态样式在基础样式后应用。每个状态优先选取 node/edge.stateStyles 中的对象，其次取扩展中的对象，最后取主题中的对象；选中一个对象后，不再从较低层补齐字段。空对象也会阻止该状态使用主题覆盖。
-
-<details>
-<summary>保留预设状态的写法</summary>
-
-theme 中的 nodeStateStyles、edgeStateStyles 会整张替换预设状态表。需要保留其他状态和同一状态内的其他字段时，分别展开两层：
-
-```ts
-import { resolveTheme, type ThemeOption } from '@antv/g6-lite';
-
-const base = resolveTheme('light');
-const theme: ThemeOption = {
-  type: 'light',
-  nodeStateStyles: {
-    ...base.nodeStateStyles,
-    selected: { ...base.nodeStateStyles?.selected, stroke: '#00A876' },
-  },
-};
-```
-
-</details>
-
-## resolveTheme
-
-此处统一维护主题解析规则；其他包根工具见[工具函数索引](/docs/api/utilities)。
-
-```ts
-import { resolveTheme, type ThemeTokens } from '@antv/g6-lite';
-
-const tokens: ThemeTokens = resolveTheme({ type: 'dark', nodeSize: 32 });
-```
-
-接收 ThemeOption，返回 `ThemeTokens`。该公开类型的字段仍为可选，读取时需考虑 undefined。函数新建顶层对象并复制色板数组；状态表及其内部对象没有深拷贝。将返回值视为只读，修改状态时用上面的展开写法，避免原地修改共享对象。
-
-## 运行时更新
-
-`graph.updateOptions({ theme: nextTheme })` 替换整个原主题选项并刷新样式，不会与上次传入的自定义 token 累加，也不重新运行布局或 fitView。
-
-从 `{ type: 'light', nodeSize: 36 }` 切到 `'dark'` 后，默认节点尺寸恢复为 24；显式 node.style.size 仍然优先。要保留品牌 token，构造完整的 nextTheme；标签配色、应用页面背景与系统深色模式需由应用同步。
-
-继续阅读：[主题指南](/docs/guides/theme) · [Graph.updateOptions](/docs/api/graph) · [默认主题与状态示例](/docs/examples/default-theme)。
+- <span id="themeoption" style={{ display: 'block', scrollMarginTop: '8rem' }} />[ThemeOption](/docs/api/options#themeoption)
+- <span id="themetokens" style={{ display: 'block', scrollMarginTop: '8rem' }} />[ThemeTokens](/docs/api/options#themetokens)
+- <span id="代码与对应效果" style={{ display: 'block', scrollMarginTop: '8rem' }} />[代码与对应效果](/docs/api/options#options-theme-代码与对应效果)
+- <span id="状态预设" style={{ display: 'block', scrollMarginTop: '8rem' }} />[状态预设](/docs/api/options#状态预设)
+- <span id="覆盖规则" style={{ display: 'block', scrollMarginTop: '8rem' }} />[覆盖规则](/docs/api/options#覆盖规则)
+- <span id="resolvetheme" style={{ display: 'block', scrollMarginTop: '8rem' }} />[resolveTheme](/docs/api/options#resolvetheme)
+- <span id="运行时更新" style={{ display: 'block', scrollMarginTop: '8rem' }} />[运行时更新](/docs/api/options#options-theme-运行时更新)

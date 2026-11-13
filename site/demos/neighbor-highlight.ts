@@ -1,9 +1,11 @@
 /**
  * Demo: hover a node to highlight its neighbors, or an edge to highlight its endpoints.
  */
-import { Graph } from '@antv/g6-lite';
+import { Graph, register } from '@antv/g6-lite';
+import radial from '@antv/g6-lite/layouts/radial';
 
 export async function run(container: string | HTMLElement) {
+  register('layout', 'radial', radial);
   const graph = new Graph({
     autoFit: true,
     container,

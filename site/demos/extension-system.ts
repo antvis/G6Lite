@@ -2,7 +2,6 @@
  * Demo: public extension APIs working together without internal imports.
  */
 import {
-  extensionFactory,
   Graph,
   register,
   type BehaviorExtension,
@@ -141,14 +140,10 @@ register('edge', 'business-relation', {
   style: { stroke: '#91caff', lineWidth: 2, curvature: 0.18, endArrow: true },
   stateStyles: { selected: { stroke: '#1677ff', lineWidth: 3 } },
 });
-register('layout', 'horizontal-business', extensionFactory(() => ({ ...horizontalLayout })));
-register(
-  'transform',
-  'normalize-business-data',
-  extensionFactory(() => ({ ...normalizeData })),
-);
-register('behavior', BUSINESS_CLICK_BEHAVIOR, extensionFactory(createBusinessClickBehavior));
-register('plugin', EXTENSION_HINT_PLUGIN, extensionFactory(createExtensionHintPlugin));
+register('layout', 'horizontal-business', () => ({ ...horizontalLayout }));
+register('transform', 'normalize-business-data', () => ({ ...normalizeData }));
+register('behavior', BUSINESS_CLICK_BEHAVIOR, () => createBusinessClickBehavior());
+register('plugin', EXTENSION_HINT_PLUGIN, () => createExtensionHintPlugin());
 
 export async function run(container: string | HTMLElement) {
   // Padding keeps the boundary badges (star, count pill) off the canvas edge.

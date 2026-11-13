@@ -1,6 +1,8 @@
 import { Graph, resolveTheme, type ThemeOption } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
+  // #region theme-options
   const themes: Record<string, ThemeOption> = {
     light: 'light',
     dark: 'dark',
@@ -13,6 +15,7 @@ export async function run(container: HTMLElement) {
       },
     },
   };
+  // #endregion theme-options
   const graph = new Graph({
     container,
     theme: themes.light,
@@ -28,25 +31,19 @@ export async function run(container: HTMLElement) {
     behaviors: [],
     autoFit: { padding: 56, maxZoom: 1 },
   });
-  const control = document.createElement('label');
-  control.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;padding:6px 10px;border-radius:6px;background:white;color:#334155;font:12px system-ui;';
-  const select = document.createElement('select');
-  select.setAttribute('aria-label', 'Theme');
-  for (const name of Object.keys(themes)) select.add(new Option(name, name));
-  select.addEventListener('change', () => {
-    graph.updateOptions({
-      theme: themes[select.value],
-      node: { style: { labelColor: select.value === 'dark' ? '#E2E8F0' : '#334155' } },
-    });
-    // Keep non-white theme backgrounds accurate inside the dotted docs canvas.
-    graph.getCanvas().style.mixBlendMode = select.value === 'light' ? 'multiply' : 'normal';
-  });
-  control.append('Theme ', select);
+  const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
-  graph.destroy = () => { control.remove(); destroy(); };
+  graph.destroy = () => { ui.destroy(); destroy(); };
   try {
     await graph.render();
-    container.append(control);
+    ui.addChoice('Theme', Object.keys(themes), 'light', (value) => {
+      graph.updateOptions({
+        theme: themes[value],
+        node: { style: { labelColor: value === 'dark' ? '#E2E8F0' : '#334155' } },
+      });
+      // Keep non-white theme backgrounds accurate inside the dotted docs canvas.
+      graph.getCanvas().style.mixBlendMode = value === 'light' ? 'multiply' : 'normal';
+    });
     return graph;
   } catch (error) {
     graph.destroy();

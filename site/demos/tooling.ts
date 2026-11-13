@@ -30,40 +30,6 @@ function graphToCanvas(
   };
 }
 
-export function attachCanvasTools(
-  container: HTMLElement,
-  graph: GraphInstanceWithTools
-): void {
-  const toolbar = document.createElement('div');
-  toolbar.className = 'canvas-toolbar';
-  toolbar.innerHTML = `
-    <button data-tool="zoom-in">＋</button>
-    <button data-tool="zoom-out">－</button>
-    <button data-tool="fit">全屏</button>
-    <button data-tool="reset">还原</button>
-  `;
-  container.appendChild(toolbar);
-
-  const ZOOM_STEP = 1.2;
-
-  toolbar.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    if (target.tagName !== 'BUTTON') return;
-    const tool = target.getAttribute('data-tool');
-    if (!tool) return;
-    const cam = graph.getCamera();
-    if (tool === 'zoom-in') {
-      graph.setCamera({ zoom: cam.zoom * ZOOM_STEP });
-    } else if (tool === 'zoom-out') {
-      graph.setCamera({ zoom: cam.zoom / ZOOM_STEP });
-    } else if (tool === 'reset') {
-      graph.resetCamera();
-    } else if (tool === 'fit') {
-      graph.fitView();
-    }
-  });
-}
-
 export function attachLabels(
   container: HTMLElement,
   graph: GraphInstanceWithTools,

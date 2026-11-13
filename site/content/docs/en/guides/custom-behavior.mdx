@@ -1,5 +1,5 @@
 ---
-title: Custom Behavior
+title: Custom interactions
 description: Implement isolated business selection with registration, activation, and cleanup
 ---
 
@@ -9,7 +9,7 @@ When built-ins cannot express a business rule, consume public Graph events throu
 
 ## Public type pattern
 
-Give the name a literal type and business options their own type, then use satisfies at activation. Full generics, event mappings, and lifecycle signatures are in the [Behavior contract](/en/docs/api/options/behaviors#custom-behavior-contract).
+Give the name a literal type and business options their own type, then use satisfies at activation. Full generics, event mappings, and lifecycle signatures are in the [Behavior contract](/en/docs/api/options#custom-interaction-contract).
 
 ## Recommended exports
 
@@ -25,7 +25,7 @@ The code below drives the canvas. Every factory call creates a fresh closure. St
 
 The example calls registerBusinessSelect before constructing Graph and checks the configuration with satisfies BusinessSelectOptions. String names also activate the Behavior; normalized init options include type, and missing state defaults to active.
 
-Multiple Graphs can reuse the registered factory; each mounted Behavior owns its context and state. Re-registering a name does not replace mounted instances. See [mounting and updates](/en/docs/api/options/behaviors#mounting-and-updates).
+Multiple Graphs can reuse the registered factory; each mounted Behavior owns its context and state. Re-registering a name does not replace mounted instances. See [mounting and updates](/en/docs/api/options#mounting-and-updates).
 
 ## Event typing
 
@@ -43,35 +43,22 @@ type BusinessBehavior = BehaviorExtension<
 >;
 ```
 
-This adds handler types, not a public emit method. Prefer [existing events](/en/docs/guides/events) for integration rather than internal eventEmitter.
+The application can call `graph.emit('business:reset', { source: 'toolbar' })` to invoke this handler. Augment `GraphEventMap` to check the payload at the call site. See the [custom event example](/en/docs/guides/events/custom).
 
 ## Lifecycle and cleanup
 
-The engine runs create → init → getEvents, then unbinds handlers and calls destroy on teardown. No update hook is promised; remounting destroys and recreates the instance. Readonly options are a type constraint, not guaranteed runtime freezing. Do not mutate the input.
+The engine runs create → init → getEvents, then unbinds handlers and calls destroy on teardown. [`setBehaviors()`](/en/docs/api/graph#setbehaviors) and `updateOptions({ behaviors })` destroy the old behaviors and create those in the new list. A behavior with the same name still receives new options in the new instance’s init. Readonly options are a type constraint, with no guarantee of runtime freezing.
 
-The engine cleans up getEvents bindings. Clean up your own window listeners, timers, observers, DOM, and asynchronous work in destroy. Check context.isDestroyed before asynchronous completion and handle Promise rejections yourself.
+The engine cleans up getEvents bindings. Clean up your own window listeners, timers, observers, and DOM in destroy. Graph stays alive when behaviors switch, so use a behavior-local AbortController or teardown flag for asynchronous work and handle Promise rejections.
 
-## Boundaries and replacement
+## Use a custom behavior in your project [#boundaries-and-replacement]
 
-- Import public package-root APIs and use context.data/state/viewport, requestRender, and isDestroyed.
-- Read snapshots; write payloads with data.updateNode/updateEdge and replace states with state.set/setAll.
-- Independent DOM, keyboard controllers, or observers generally belong in Plugins; preprocessing belongs in Transforms.
-- Registered names override built-ins without fallback on failure. Avoid overriding built-in names for temporary experiments.
+Use `context.state` to change element states and `context.data.updateNode()` or `updateEdge()` to change business data. Register the behavior under a distinct name, such as `docs-business-select`, to avoid overriding a built-in behavior. [Extension context API](/en/docs/api/extensions#extensioncontext) · [Registration rules](/en/docs/api/extensions#registration-rules)
 
-<details>
-<summary>Verify a reusable Behavior</summary>
+In the example above, click B, then click empty canvas. B gains and then loses its `active` state. A stays `selected` throughout. The `select()` function in the full code shows how to change only the state owned by this behavior. [Try the example](#complete-implementation)
 
-Check left-button filtering, canvas clearing, and preservation of other states. Mount two Graphs and verify independence; destroy one while the other remains usable. Remounting must not duplicate handler calls.
+Continue with the [Behavior reference](/en/docs/api/options#options-behaviors), [interaction guide](/en/docs/guides/behaviors), or [Extension system](/en/docs/guides/extensions).
 
-The public context does not expose low-level gesture sessions, camera writes, or node-position writes. Extend the public contract when needed instead of casting to internal renderer or deprecated context.graph.
+**Related runnable examples**
 
-</details>
-
-Continue with the [Behavior reference](/en/docs/api/options/behaviors), [interaction guide](/en/docs/guides/interactions), or [Extension system](/en/docs/guides/extensions).
-
-<details data-related-examples>
-<summary>Related runnable examples</summary>
-
-- [Register a custom behavior](/en/docs/examples/custom-behavior)
-
-</details>
+- [Register a custom interaction](/en/docs/examples/custom-behavior)

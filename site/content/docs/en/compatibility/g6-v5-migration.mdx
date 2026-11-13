@@ -3,16 +3,16 @@ title: Migrate from G6 v5
 description: Migrate configuration, data, interactions, events, and extensions with a reversible business baseline
 ---
 
-Scope: G6 5.1.1 [official integration](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start) and current G6Lite source. G6Lite is not a compatible G6 build. Check [published/source differences](/en/docs/compatibility/api-stability) first.
+G6Lite and G6 v5 use separate npm packages and implementations. This guide uses G6 5.1.1 as its starting point and maps its usage to the public G6Lite APIs. [G6 quick start](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start) · [Graph API](/en/docs/api/graph) · [GitHub Releases](https://github.com/antvis/G6Lite/releases)
 
 ## Decide whether to migrate
 
-Validate the most complex nodes, interactions, labels, and groups first. Keep G6 when arbitrary DOM/React nodes, multiple renderers, server rendering, full animation, algorithms, or established plugins are essential. Use the [capability comparison](/en/docs/compatibility/library-comparison), not package size alone.
+Validate the most complex nodes, interactions, labels, and groups first. Keep G6 when arbitrary DOM/React nodes, multiple renderers, server rendering, full animation, algorithms, or established plugins are essential.
 
 ## Installation and imports
 
 ```bash
-npm install @antv/g6-lite@0.1.0-beta.27
+npm install @antv/g6-lite@0.1.0
 ```
 
 Import values and types from @antv/g6-lite only; do not migrate to deep src/dist paths.
@@ -58,7 +58,7 @@ Call the returned disposer for cleanup. For React/Vue asynchronous unmounting, u
 | node.style.labelText | node.style.label |
 | width / height | Container CSS; runtime setSize |
 | palette / renderer / animation | Not drop-in equivalents; map styles or keep G6 |
-| setOptions | updateOptions only node / edge / label / theme; set layout separately |
+| setOptions | updateOptions supports node / edge / label / theme / behaviors; set layout separately |
 | plugins / transforms / behaviors | Recheck registration, names, options, and lifecycle |
 
 Complete fields: [GraphOptions](/en/docs/api/options)。
@@ -67,13 +67,13 @@ Complete fields: [GraphOptions](/en/docs/api/options)。
 
 Provide nodes/edges arrays, unique node IDs, and valid endpoints. Keep stable edge IDs. Use node x/y, comboId, and business data fields. Do not copy G6 internal models or assume per-node style compatibility.
 
-Runtime node additions require positions; full replacement and incremental writes differ. See [input data](/en/docs/api/options/data) · [data updates](/en/docs/guides/data)。
+Runtime node additions require positions; full replacement and incremental writes differ. See [input data](/en/docs/api/options#options-data) · [data updates](/en/docs/guides/data)。
 
 ## Node, Edge and Combo configuration
 
 Built-in circle/rect and common edges reuse WebGL primitives; they do not replace arbitrary scene-graph shapes. State styles live in node.stateStyles, edge.stateStyles, and combo.style.stateStyles. Nested/collapsed/runtime-grouped Combo remains experimental.
 
-[Nodes](/en/docs/api/options/node) · [Edges](/en/docs/api/options/edge) · [Combo](/en/docs/api/options/combo)
+[Nodes](/en/docs/guides/node#options-node) · [Edges](/en/docs/api/options#options-edge) · [Combo](/en/docs/api/options#options-combo)
 
 ## Behavior mapping
 
@@ -86,11 +86,11 @@ Built-in circle/rect and common edges reuse WebGL primitives; they do not replac
 | focus-element | focusItem |
 | zoom-canvas / click-select | Names may match; recheck options, payloads, and modifiers |
 
-Omitted behaviors enable default zoom/pan; [] disables them. See [Behavior](/en/docs/api/options/behaviors)。
+Omitted behaviors enable default zoom/pan; [] disables them. See [Behavior](/en/docs/api/options#options-behaviors)。
 
 ## Layout migration
 
-Matching names do not guarantee matching options. Fix data and node sizes when mapping center, rankdir, iteration, and distance options. At runtime call setLayout then await layout. See [layout contracts](/en/docs/api/graph/layout) for cancellation and Worker boundaries.
+Matching names do not guarantee matching options. Fix data and node sizes when mapping center, rankdir, iteration, and distance options. At runtime call setLayout then await layout. See [layout contracts](/en/docs/api/graph#graph-layout) for cancellation and Worker boundaries.
 
 ## Event migration
 
@@ -107,7 +107,7 @@ Use string names and GraphEventMap instead of G6 event enums. Element native eve
 | setElementState / getElementState | setElementStates / getItemStates |
 | hideElement / showElement | hideItem / showItem |
 | focusElement / resize | focusItem / setSize |
-| draw / render | render and refresh differ; consult lifecycle |
+| draw / render | [render for initial rendering](/en/docs/api/graph#graph-lifecycle-render), [updateOptions for visual changes](/en/docs/api/graph#graph-lifecycle-updateoptions) |
 
 Use the [method index](/en/docs/api/graph) for full arguments, returns, and missing-ID behavior. New code should avoid toData, isDestroyed, and internal getCanvas/updateData.
 
@@ -115,7 +115,7 @@ Use the [method index](/en/docs/api/graph) for full arguments, returns, and miss
 
 ## Extension, Transform and Plugin
 
-G6 base classes do not migrate unchanged. Select the category and follow [tutorials](/en/docs/guides/extensions) and [contracts](/en/docs/api/extensions). The controlled context is not a full Graph. Hosts can explicitly inject plugin subscriptions, with cleanup in destroy.
+G6 base classes do not migrate unchanged. Select the category and follow [tutorials](/en/docs/guides/extensions) and [contracts](/en/docs/api/graph#graph-extensions). The controlled context is not a full Graph. Hosts can explicitly inject plugin subscriptions, with cleanup in destroy.
 
 ## Unsupported capabilities and alternatives
 

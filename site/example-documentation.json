@@ -12,7 +12,7 @@
         "zh": "节点参考",
         "en": "Node reference"
       },
-      "href": "/docs/api/options/node"
+      "href": "/docs/api/options#options-node"
     },
     "edge": {
       "title": {
@@ -26,21 +26,21 @@
         "zh": "边参考",
         "en": "Edge reference"
       },
-      "href": "/docs/api/options/edge"
+      "href": "/docs/api/options#options-edge"
     },
     "parallel": {
       "title": {
         "zh": "平行边与自环",
         "en": "Parallel edges and loops"
       },
-      "href": "/docs/guides/parallel-edges"
+      "href": "/docs/guides/edge#parallel-edges"
     },
     "polyline": {
       "title": {
         "zh": "折线路由",
         "en": "Polyline routing"
       },
-      "href": "/docs/guides/polyline-routing"
+      "href": "/docs/guides/edge#polyline-routing"
     },
     "label": {
       "title": {
@@ -54,7 +54,7 @@
         "zh": "标签策略",
         "en": "Label policy"
       },
-      "href": "/docs/api/options/label"
+      "href": "/docs/api/options#options-label"
     },
     "layout": {
       "title": {
@@ -68,7 +68,7 @@
         "zh": "布局参考",
         "en": "Layout reference"
       },
-      "href": "/docs/api/options/layout"
+      "href": "/docs/api/options#options-layout"
     },
     "worker": {
       "title": {
@@ -82,28 +82,28 @@
         "zh": "布局方法",
         "en": "Layout methods"
       },
-      "href": "/docs/api/graph/layout"
+      "href": "/docs/api/graph#graph-layout"
     },
     "interactions": {
       "title": {
         "zh": "交互组合",
         "en": "Interactions"
       },
-      "href": "/docs/guides/interactions"
+      "href": "/docs/guides/behaviors"
     },
     "behaviors": {
       "title": {
         "zh": "Behavior 参考",
         "en": "Behavior reference"
       },
-      "href": "/docs/api/options/behaviors"
+      "href": "/docs/api/options#options-behaviors"
     },
     "tooltip": {
       "title": {
-        "zh": "Tooltip 指南",
-        "en": "Tooltip guide"
+        "zh": "Tooltip 用法",
+        "en": "Using Tooltip"
       },
-      "href": "/docs/guides/tooltip"
+      "href": "/docs/guides/behaviors#tooltip"
     },
     "events": {
       "title": {
@@ -131,7 +131,7 @@
         "zh": "视口方法",
         "en": "Viewport methods"
       },
-      "href": "/docs/api/graph/viewport"
+      "href": "/docs/api/graph#graph-viewport"
     },
     "extensions": {
       "title": {
@@ -145,14 +145,14 @@
         "zh": "绘制契约",
         "en": "Drawing contracts"
       },
-      "href": "/docs/api/extensions/drawing"
+      "href": "/docs/api/extensions#extension-drawing"
     },
     "runtime": {
       "title": {
         "zh": "运行契约",
         "en": "Runtime contracts"
       },
-      "href": "/docs/api/extensions/runtime"
+      "href": "/docs/api/extensions#extension-runtime"
     },
     "customNode": {
       "title": {
@@ -170,8 +170,8 @@
     },
     "customBehavior": {
       "title": {
-        "zh": "自定义 Behavior",
-        "en": "Custom Behavior"
+        "zh": "自定义交互",
+        "en": "Custom interactions"
       },
       "href": "/docs/guides/custom-behavior"
     },
@@ -201,7 +201,7 @@
         "zh": "性能优化",
         "en": "Performance tuning"
       },
-      "href": "/docs/metrics/performance-tuning"
+      "href": "/docs/metrics/performance#performance-tuning"
     }
   },
   "examples": {

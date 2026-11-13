@@ -33,7 +33,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
       hrefs: [
         siteConfig.repository,
         siteConfig.repository + '/issues',
-        localizedPath('/docs/changelog', locale),
+        siteConfig.repository + '/releases',
       ],
     },
     {

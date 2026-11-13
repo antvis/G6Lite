@@ -378,7 +378,7 @@
   {
     "id": "edge-hit-area",
     "file": "edge-hit-area.ts",
-    "title": "细边交互热区",
+    "title": "交互热区",
     "description": "保持细线视觉，同时扩大直线、曲线、折线、自环和箭头的拾取范围。",
     "category": "edge",
     "kind": "functional",
@@ -1061,7 +1061,7 @@
   {
     "id": "layout-gallery",
     "file": "layout-gallery.ts",
-    "title": "内置布局补全",
+    "title": "更多布局示例",
     "description": "覆盖 radial、concentric、ForceAtlas2、fruchterman、MDS 和 random。",
     "category": "layout",
     "docsGroup": "layout",
@@ -1389,7 +1389,7 @@
   {
     "id": "custom-behavior",
     "file": "custom-behavior.ts",
-    "title": "注册自定义 Behavior",
+    "title": "注册自定义交互",
     "description": "注册点击后选中节点的 Behavior。",
     "category": "extension",
     "docsGroup": "extension",

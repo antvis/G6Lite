@@ -1,6 +1,6 @@
 import { Graph } from '@antv/g6-lite';
 import type { NodePositionUpdate } from '@antv/g6-lite';
-import { buttonStyle, createDemoPanel } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 const ORIGINAL: NodePositionUpdate[] = [
   { id: 'a', x: 360, y: 220 },
@@ -37,13 +37,7 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const ui = createDemoPanel(
-    container,
-    '批量更新节点坐标',
-    '通过 updateNodePositions() 同步相同 ID 节点的新坐标，节点与边应一起移动。',
-    `<button data-action="server" style="${buttonStyle}">模拟服务端坐标</button>
-     <button data-action="undo" style="${buttonStyle}">撤销坐标</button>`,
-  );
+  const ui = createDemoPanel(container, '通过 updateNodePositions() 同步相同 ID 节点的新坐标，节点与边应一起移动。');
   const render = (action: string) => {
     const lines = ['a', 'b', 'c'].map((id) => {
       const position = graph.getNodePosition(id)!;
@@ -51,15 +45,15 @@ export async function run(container: string | HTMLElement) {
     });
     ui.setStatus(`${action}\n${lines.join('\n')}\ndata.stable: ${String(graph.getNodeData('a')?.data?.stable)}`);
   };
-  ui.controls.querySelector('[data-action="server"]')!.addEventListener('click', () => {
+  ui.addAction('模拟服务端坐标', () => {
     graph.updateNodePositions(SERVER);
     render('已批量应用服务端坐标');
   });
-  ui.controls.querySelector('[data-action="undo"]')!.addEventListener('click', () => {
+  ui.addAction('撤销坐标', () => {
     graph.updateNodePositions(ORIGINAL);
     render('已批量恢复原坐标');
   });
   render('等待操作');
 
-  return { destroy: () => { graph.destroy(); ui.panel.remove(); } };
+  return { destroy: () => { graph.destroy(); ui.destroy(); } };
 }

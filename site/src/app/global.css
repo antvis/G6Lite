@@ -311,7 +311,7 @@ body:has(#nd-docs-layout.examples-route-layout) {
 
 @media (min-width: 1280px) {
   #nd-docs-layout:not(.examples-route-layout) {
-    --fd-toc-width: 180px;
+    --fd-toc-width: clamp(260px, 20vw, 340px);
   }
 }
 
@@ -1886,8 +1886,7 @@ body.example-workspace-resizing {
   overflow: hidden;
 }
 
-.example-tabs,
-.example-preview-actions {
+.example-tabs {
   display: flex;
   gap: 0.35rem;
 }
@@ -2012,6 +2011,29 @@ body.example-workspace-resizing {
 .example-code-panel .example-utility-button.is-dirty {
   border-color: color-mix(in srgb, var(--example-code-active) 42%, var(--example-code-border));
   color: var(--example-code-text);
+}
+
+.example-source-files,
+.example-source-file-switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.example-source-files {
+  justify-content: space-between;
+  border-bottom: 1px solid var(--example-code-border);
+  padding: 0.5rem 1rem;
+}
+
+.example-source-file-switch button {
+  font-family: var(--font-mono);
+}
+
+.example-source-file-note {
+  color: var(--example-code-subtle);
+  font-family: var(--font-sans);
 }
 
 .example-code-content {
@@ -2317,6 +2339,18 @@ body.example-workspace-resizing {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.example-preview-canvas > [role='status'] {
+  margin-inline-end: calc(var(--canvas-toolbar-width) + 12px);
+}
+
+@media (pointer: fine) {
+  .g6lite-demo-controls.lil-gui,
+  .g6lite-demo-controls .lil-gui {
+    --widget-height: 18px;
+    --spacing: 2px;
+  }
 }
 
 /* Uniform card look for multi-canvas demo sections, so each sub-canvas reads
@@ -2769,14 +2803,6 @@ html.dark .examples-center-card-image img {
   .example-preview-footer {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .example-preview-actions {
-    width: 100%;
-  }
-
-  .example-preview-actions button {
-    flex: 1;
   }
 
   .example-detail-summary {
@@ -3430,6 +3456,65 @@ html.dark .examples-center-card-image img {
   text-underline-offset: 0.2em;
 }
 
+.docs-brand-layout #nd-page .prose #graph-api-contents {
+  margin-block: 1.4rem 0.65rem;
+}
+
+.graph-api-contents {
+  container: graph-api-contents / inline-size;
+  max-inline-size: 48rem;
+  line-height: 1.5;
+}
+
+.graph-api-contents ul,
+.graph-api-contents li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.graph-api-contents > ul {
+  display: grid;
+  gap: 0.75rem 1rem;
+}
+
+.graph-api-contents li > ul {
+  display: grid;
+  gap: 0.15rem;
+  margin-block-start: 0.25rem;
+  padding-inline-start: 0.55rem;
+  border-inline-start: 1px solid var(--color-fd-border);
+}
+
+.graph-api-contents a {
+  color: var(--color-fd-primary);
+  font-weight: 400;
+  line-height: 1.45;
+  text-decoration: none;
+}
+
+.graph-api-contents a:is(:hover, :focus-visible) {
+  text-decoration: underline;
+}
+
+@container graph-api-contents (min-width: 18rem) {
+  .graph-api-contents > ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container graph-api-contents (min-width: 34rem) {
+  .graph-api-contents > ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container graph-api-contents (min-width: 44rem) {
+  .graph-api-contents > ul {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
 .docs-brand-layout #nd-page .prose :not(pre) > code {
   border: 0;
   border-radius: 0.35rem;
@@ -3437,6 +3522,21 @@ html.dark .examples-center-card-image img {
   color: color-mix(in srgb, var(--brand-violet) 65%, var(--color-fd-foreground));
   padding: 0.16em 0.35em;
   font-weight: 620;
+}
+
+.docs-brand-layout #nd-page .graph-api-reference > :is(h3, h4):has(+ p > code:only-child:first-child) {
+  padding-block-end: 0.45rem;
+  border-block-end: 1px solid var(--color-fd-border);
+}
+
+.docs-brand-layout #nd-page .graph-api-reference > :is(h3, h4) + p > code:only-child:first-child {
+  display: block;
+  padding: 0.55rem 0.75rem;
+  background: var(--color-fd-muted);
+  color: var(--color-fd-foreground);
+  font-weight: 500;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /* 表格内的字段名不用标签样式：去底色和边距，回归普通代码文本 */
@@ -3652,20 +3752,33 @@ html.dark .examples-center-card-image img {
   font-weight: 600;
 }
 
-.docs-brand-layout #nd-page .prose > div:has(> table):not(.api-reference) {
+.docs-brand-layout #nd-page :is(.prose, .prose > :where(.effect-table)) > div:has(> table):not(.api-reference) {
   overflow: hidden auto;
   border: 1px solid color-mix(in srgb, var(--color-fd-border) 86%, transparent);
   border-radius: 0.7rem;
   background: var(--color-fd-card);
 }
 
-.docs-brand-layout #nd-page .prose > div:has(> table):not(.api-reference) table {
+.docs-brand-layout #nd-page :is(.prose, .prose > :where(.effect-table)) > div:has(> table):not(.api-reference) table {
   margin: 0;
   border: 0;
 }
 
-.docs-brand-layout #nd-page .prose > div:has(> table):not(.api-reference) thead {
+.docs-brand-layout #nd-page :is(.prose, .prose > :where(.effect-table)) > div:has(> table):not(.api-reference) thead {
   background: color-mix(in srgb, var(--color-fd-secondary) 82%, transparent);
+}
+
+.docs-brand-layout #nd-page :is(.prose > .effect-table, .scrollable-doc-tables) > div:has(> table):not(.api-reference) {
+  overflow-x: auto;
+}
+
+.docs-brand-layout #nd-page .effect-table :is(th, td):first-child {
+  white-space: nowrap;
+}
+
+.docs-brand-layout #nd-page .effect-table th:nth-child(2) {
+  width: 9.5rem;
+  text-align: center;
 }
 
 .docs-brand-layout #nd-page .docs-example-card {
@@ -3709,6 +3822,22 @@ html.dark .examples-center-card-image img {
   margin: 0;
   border: 0;
   border-radius: 0;
+}
+
+.docs-brand-layout #nd-page .effect-table .docs-example-card {
+  width: 8rem;
+}
+
+.docs-brand-layout #nd-page .effect-table .docs-example-card .docs-example-card-body {
+  padding: 0;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--color-fd-secondary) 55%, var(--color-fd-card));
+  box-shadow: none;
+}
+
+.docs-brand-layout #nd-page .effect-table .docs-example-card .docs-example-card-caption {
+  display: none;
 }
 
 .docs-brand-layout #nd-page .docs-example-gallery {
@@ -3876,6 +4005,10 @@ html.dark .examples-center-card-image img {
 }
 
 .docs-brand-layout #nd-toc {
+  /* The shared HomeLayout header is sticky and uses h-14. */
+  --docs-toc-top: 3.5rem;
+  top: var(--docs-toc-top);
+  height: calc(var(--fd-docs-height) - var(--docs-toc-top));
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -3899,20 +4032,34 @@ html.dark .examples-center-card-image img {
 .docs-brand-layout #nd-toc a {
   overflow-wrap: break-word;
   word-break: normal;
+  padding-block: 0.3125rem;
+  padding-inline-end: 0.5rem;
+  border-inline-start: 2px solid transparent;
+  border-radius: 0.25rem;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 400;
   line-height: 1.4;
-  border-radius: 0;
-  background: transparent;
 }
 
-.docs-brand-layout #nd-toc a[data-active='true'] {
+.docs-brand-layout #nd-toc a:where([data-active='true']) {
+  border-inline-start-color: var(--brand-accent);
   color: var(--brand-accent);
-  font-weight: 600;
-  background: transparent;
+  background: var(--brand-accent-soft);
 }
 
-.docs-brand-layout #nd-toc a:hover {
-  color: var(--color-fd-foreground);
-  background: transparent;
+/* Fumadocs marks top-level entries with ps-3. */
+.docs-brand-layout #nd-toc a:where(.docs-toc-flat > a, .ps-3) {
+  padding-inline-start: 0.5rem;
+  color: color-mix(in srgb, var(--color-fd-foreground) 85%, var(--color-fd-muted-foreground));
+}
+
+.docs-brand-layout #nd-toc .docs-toc-nested > a:not(.ps-3) + a.ps-3 {
+  margin-block-start: 0.375rem;
+}
+
+.docs-brand-layout #nd-toc a:hover:not([data-active='true']) {
+  background: var(--color-fd-muted);
 }
 
 .docs-brand-layout #nd-toc a code,

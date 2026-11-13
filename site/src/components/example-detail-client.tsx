@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { Maximize, Minimize, RotateCcw, Scan } from 'lucide-react';
 import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -24,6 +25,8 @@ import {
   siteExamples,
 } from '@/lib/site-examples';
 import { withBasePath } from '@/lib/shared';
+import { ExampleStackBlitz } from './example-stackblitz';
+import canvasStyles from './quick-start-example.module.css';
 
 type DetailTab = 'source' | 'data' | 'guide';
 type PreviewStatus = 'loading' | 'ready' | 'error';
@@ -80,10 +83,12 @@ export function ExampleDetailClient({
   id,
   locale,
   initialSource,
+  helperFile,
 }: {
   id: string;
   locale: Locale;
   initialSource: string;
+  helperFile?: { name: string; source: string };
 }) {
   const example = getSiteExample(id);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -105,6 +110,7 @@ export function ExampleDetailClient({
   // The editor draft starts from the build-time inlined source; full-page
   // navigation remounts this component, so one draft per page is enough.
   const [draft, setDraft] = useState(initialSource);
+  const [showHelper, setShowHelper] = useState(false);
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
   const [liveData, setLiveData] = useState({ display: '', full: '', unavailable: false });
   const [highlightedData, setHighlightedData] = useState({ source: '', html: '' });
@@ -326,6 +332,8 @@ export function ExampleDetailClient({
 
   // The server component inlines this source at build time.
   const source = initialSource;
+  const displayedHelper = showHelper ? helperFile : undefined;
+  const displayedSource = displayedHelper?.source ?? draft;
   const dirty = source.length > 0 && draft !== source;
   const highlightedJson =
     highlightedData.source === liveData.display ? highlightedData.html : '';
@@ -355,6 +363,10 @@ export function ExampleDetailClient({
           dataContext: '数据背景',
           capabilities: '关键能力',
           copy: '复制源码',
+          copyFile: '复制当前文件',
+          sourceFiles: '源码文件',
+          readOnly: '只读',
+          stackBlitz: '在 StackBlitz 中打开',
           copyData: '复制数据',
           copied: '已复制',
           run: '运行',
@@ -393,6 +405,10 @@ export function ExampleDetailClient({
           dataContext: 'Data context',
           capabilities: 'Key capabilities',
           copy: 'Copy source',
+          copyFile: 'Copy file',
+          sourceFiles: 'Source files',
+          readOnly: 'Read only',
+          stackBlitz: 'Open in StackBlitz',
           copyData: 'Copy data',
           copied: 'Copied',
           run: 'Run',
@@ -421,8 +437,8 @@ export function ExampleDetailClient({
         };
 
   async function copySource() {
-    if (!draft) return;
-    await navigator.clipboard.writeText(draft);
+    if (!displayedSource) return;
+    await navigator.clipboard.writeText(displayedSource);
     setCopyState('copied');
     window.setTimeout(() => setCopyState('idle'), 1600);
   }
@@ -564,7 +580,7 @@ export function ExampleDetailClient({
     updateWorkspaceSplit(currentWidth + (event.key === 'ArrowRight' ? 24 : -24), true);
   }
 
-  const sourceLineCount = draft ? draft.replace(/\n$/, '').split('\n').length : 0;
+  const sourceLineCount = displayedSource ? displayedSource.replace(/\n$/, '').split('\n').length : 0;
   const workspaceStyle = {
     '--example-preview-fr': `${splitRatio}fr`,
     '--example-code-fr': `${100 - splitRatio}fr`,
@@ -692,36 +708,8 @@ export function ExampleDetailClient({
                   {status === 'loading' ? copy.loading : status === 'ready' ? copy.ready : error}
                 </small>
               </div>
-              <div className="example-preview-actions">
-                <button
-                  className="example-utility-button"
-                  disabled={status !== 'ready'}
-                  onClick={() => void fitPreview()}
-                  type="button"
-                >
-                  <span aria-hidden="true">◎</span>
-                  {copy.fit}
-                </button>
-                <button
-                  className="example-utility-button"
-                  onClick={() => setRevision((value) => value + 1)}
-                  type="button"
-                >
-                  <span aria-hidden="true">↻</span>
-                  {status === 'error' ? copy.retry : copy.refresh}
-                </button>
-                <button
-                  aria-pressed={previewExpanded}
-                  className="example-utility-button"
-                  onClick={() => setPreviewExpanded((value) => !value)}
-                  type="button"
-                >
-                  <span aria-hidden="true">⛶</span>
-                  {previewExpanded ? copy.exitFullscreen : copy.fullscreen}
-                </button>
-              </div>
             </div>
-            <div className="example-preview-stage">
+            <div className={`example-preview-stage ${canvasStyles.viewport}`}>
               <div className="example-preview-canvas" ref={previewRef} />
               {status === 'loading' ? (
                 <div className="example-preview-overlay">
@@ -735,6 +723,34 @@ export function ExampleDetailClient({
                   <span>{error}</span>
                 </div>
               ) : null}
+              <div className={canvasStyles.tools} role="toolbar" aria-label={copy.preview}>
+                <button
+                  aria-label={copy.fit}
+                  disabled={status !== 'ready'}
+                  onClick={() => void fitPreview()}
+                  title={copy.fit}
+                  type="button"
+                >
+                  <Scan aria-hidden="true" />
+                </button>
+                <button
+                  aria-label={status === 'error' ? copy.retry : copy.refresh}
+                  onClick={() => setRevision((value) => value + 1)}
+                  title={status === 'error' ? copy.retry : copy.refresh}
+                  type="button"
+                >
+                  <RotateCcw aria-hidden="true" />
+                </button>
+                <button
+                  aria-label={previewExpanded ? copy.exitFullscreen : copy.fullscreen}
+                  aria-pressed={previewExpanded}
+                  onClick={() => setPreviewExpanded((value) => !value)}
+                  title={previewExpanded ? copy.exitFullscreen : copy.fullscreen}
+                  type="button"
+                >
+                  {previewExpanded ? <Minimize aria-hidden="true" /> : <Maximize aria-hidden="true" />}
+                </button>
+              </div>
             </div>
             <footer className="example-preview-footer">
               <span>
@@ -813,7 +829,7 @@ export function ExampleDetailClient({
                 <div className="example-code-actions">
                   <button
                     className={`example-utility-button${dirty ? ' is-dirty' : ''}`}
-                    disabled={!source}
+                    disabled={!source || !!displayedHelper}
                     onClick={() => void runEditedSource()}
                     type="button"
                   >
@@ -822,7 +838,7 @@ export function ExampleDetailClient({
                   </button>
                   <button
                     className="example-utility-button"
-                    disabled={!dirty}
+                    disabled={!dirty || !!displayedHelper}
                     onClick={resetEditedSource}
                     type="button"
                   >
@@ -840,7 +856,7 @@ export function ExampleDetailClient({
                   </button>
                   <button className="example-utility-button" onClick={copySource} type="button">
                     <span aria-hidden="true">⧉</span>
-                    {copyState === 'copied' ? copy.copied : copy.copy}
+                    {copyState === 'copied' ? copy.copied : helperFile ? copy.copyFile : copy.copy}
                   </button>
                 </div>
               ) : activeTab === 'data' ? (
@@ -857,6 +873,33 @@ export function ExampleDetailClient({
                 </div>
               ) : null}
             </div>
+            {activeTab === 'source' && helperFile ? (
+              <div className="example-source-files">
+                <div className="example-source-file-switch" role="group" aria-label={copy.sourceFiles}>
+                  {[example.file, helperFile.name].map((name) => (
+                    <button
+                      aria-pressed={name === (displayedHelper?.name ?? example.file)}
+                      className="example-utility-button"
+                      key={name}
+                      onClick={() => {
+                        setShowHelper(name === helperFile.name);
+                        setCopyState('idle');
+                      }}
+                      type="button"
+                    >
+                      {name}
+                      {name === helperFile.name && <span className="example-source-file-note">{copy.readOnly}</span>}
+                    </button>
+                  ))}
+                </div>
+                <ExampleStackBlitz
+                  entry={{ name: example.file, source: draft }}
+                  helper={helperFile}
+                  label={copy.stackBlitz}
+                  title={localizedText(example.title, locale)}
+                />
+              </div>
+            ) : null}
             <div className="example-code-content">
               <div hidden={activeTab !== 'guide'}>
                 <article className="example-guide-panel">
@@ -899,7 +942,13 @@ export function ExampleDetailClient({
               </div>
               {activeTab === 'source' ? (
                 source ? (
-                  <CodeEditor value={draft} onChange={setDraft} wrap={wrapSource} />
+                  <CodeEditor
+                    key={displayedHelper?.name ?? example.file}
+                    onChange={displayedHelper ? undefined : setDraft}
+                    readOnly={!!displayedHelper}
+                    value={displayedSource}
+                    wrap={wrapSource}
+                  />
                 ) : (
                   <div className="example-panel-message">{copy.sourceError}</div>
                 )
@@ -932,7 +981,7 @@ export function ExampleDetailClient({
                     <span>
                       TypeScript · ESM{sourceLineCount ? ` · ${sourceLineCount} ${copy.lines}` : ''}
                     </span>
-                    <span>{example.file}</span>
+                    <span>{displayedHelper?.name ?? example.file}</span>
                   </>
                 ) : (
                   <>

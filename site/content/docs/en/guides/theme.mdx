@@ -5,7 +5,7 @@ description: Choose a preset, apply brand colors, switch themes, and troubleshoo
 
 import { NodeDocExample as ThemeDocExample } from '@/components/node-doc-example';
 
-Use `theme` for default node, edge, and canvas colors. Choose light / dark, then override brand tokens; use node/edge.style field callbacks for data-driven colors. All fields and defaults are in the [Theme reference](/en/docs/api/options/theme).
+Use `theme` for default node, edge, and canvas colors. Choose light / dark, then override brand tokens; assign style functions to fields in `node.style` or `edge.style` for data-driven colors. All fields and defaults are in the [Theme reference](/en/docs/api/options#options-theme).
 
 ## Use a preset
 
@@ -30,7 +30,7 @@ const brandTheme: ThemeOption = {
 };
 ```
 
-State maps are replaced in full. To retain preset states such as disabled, construct a new map using the [spread pattern](/en/docs/api/options/theme#precedence).
+State maps are replaced in full. To retain preset states such as disabled, construct a new map using the [spread pattern](/en/docs/api/options#precedence).
 
 ## Precedence
 
@@ -56,7 +56,7 @@ Switching refreshes styles while preserving graph data, states, and the camera. 
 
 ## Default visual semantics
 
-Omitting theme selects light, with default node size 24. Labels require configured text, and their colors do not automatically follow the theme. See the [Theme reference](/en/docs/api/options/theme#state-presets) for defaults and state styles, or compare all built-in states in [Default themes and interaction states](/en/docs/examples/default-theme).
+Omitting theme selects light, with default node size 24. Labels require configured text, and their colors do not automatically follow the theme. See the [Theme reference](/en/docs/api/options#state-presets) for defaults and state styles, or compare all built-in states in [Default themes and interaction states](/en/docs/examples/default-theme).
 
 ## Common questions
 
@@ -74,13 +74,10 @@ Passing nodeStateStyles replaces the entire preset map. Spread the original map 
 
 ## Related
 
-- [Theme reference](/en/docs/api/options/theme): tokens, presets, precedence, and resolveTheme.
+- [Theme reference](/en/docs/api/options#options-theme): tokens, presets, precedence, and resolveTheme.
 - [Nodes](/en/docs/guides/node) · [Edges](/en/docs/guides/edge): data-driven appearance.
 - [Labels and icons](/en/docs/guides/label) · [Combos](/en/docs/guides/combo): coordinate other visual elements.
 
-<details data-related-examples>
-<summary>Related runnable examples</summary>
+**Related runnable examples**
 
 - [Default themes and interaction states](/en/docs/examples/default-theme)
-
-</details>

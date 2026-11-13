@@ -16,6 +16,7 @@ const REVIEWED_GRAPH_API = [
   'toData',
   'setData',
   'updateOptions',
+  'setBehaviors',
   'refresh',
   // Element queries
   'getNodes',
@@ -91,6 +92,7 @@ const REVIEWED_GRAPH_API = [
   'on',
   'off',
   'once',
+  'emit',
 ];
 
 function collectTypeScriptFiles(directory: string): string[] {
@@ -191,7 +193,6 @@ describe('package public API boundary', () => {
       'BreathingNode',
       'EventEmitter',
       'Graph',
-      'extensionFactory',
       'register',
       'registerNode',
       'resolveTheme',

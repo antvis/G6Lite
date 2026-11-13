@@ -1,4 +1,5 @@
 import { Graph, type ElementState } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -9,11 +10,13 @@ export async function run(container: HTMLElement) {
     },
     node: {
       style: { size: 34, label: (node) => node.id, labelOffsetY: 10 },
+      // #region state-styles
       stateStyles: {
         selected: { stroke: '#6D28D9', strokeWidth: 3 },
         review: { fill: '#F59E0B' },
         highlight: { fill: '#00A876', stroke: '#005C41', strokeWidth: 2 },
       },
+      // #endregion state-styles
     },
     behaviors: [],
     autoFit: { padding: 60, maxZoom: 1 },
@@ -26,8 +29,7 @@ export async function run(container: HTMLElement) {
   const replace = () => graph.setElementStates('A', ['highlight']);
   const clear = () => graph.clearItemStates('A');
   // #endregion states
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;left:12px;top:12px;right:150px;display:flex;flex-wrap:wrap;gap:6px;z-index:20;';
+  const ui = createDemoPanel(container);
   const status = document.createElement('div');
   status.setAttribute('role', 'status');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;right:12px;padding:8px;background:white;color:#334155;font:12px/1.6 system-ui;pointer-events:none;z-index:20;';
@@ -40,26 +42,19 @@ export async function run(container: HTMLElement) {
     ['Replace with highlight', replace],
     ['Clear A', clear],
   ];
-  const buttons = actions.map(([label, action]) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = label;
-    button.style.cssText = 'padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;color:#334155;font:12px system-ui;cursor:pointer;';
-    button.onclick = () => { action(); update(); };
-    controls.append(button);
-    return button;
-  });
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
-    for (const button of buttons) button.onclick = null;
-    controls.remove();
+    ui.destroy();
     status.remove();
     destroy();
   };
   try {
     await graph.render();
     update();
-    container.append(controls, status);
+    for (const [label, action] of actions) {
+      ui.addAction(label, () => { action(); update(); });
+    }
+    container.append(status);
     return graph;
   } catch (error) {
     graph.destroy();

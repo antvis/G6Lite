@@ -1,10 +1,8 @@
 {
-  "title": "API 参考",
+  "title": "API",
   "pages": [
-    "index",
     "graph",
-    "options",
-    "extensions",
-    "utilities"
+    "options.mdx",
+    "extensions.mdx"
   ]
 }

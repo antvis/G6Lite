@@ -2,6 +2,7 @@
  * Demo: open a node context menu from node:contextmenu.
  */
 import { Graph } from '@antv/g6-lite';
+import GUI from 'lil-gui';
 
 export async function run(container: string | HTMLElement) {
   const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
@@ -39,27 +40,27 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
   graph.fitView({ padding: 80 });
 
-  const menu = document.createElement('div');
-  menu.hidden = true;
-  menu.style.cssText =
-    'position:absolute;z-index:30;display:flex;flex-direction:column;min-width:120px;padding:4px;border-radius:8px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.12);';
-  host.append(menu);
+  const menu = new GUI({ container: host, title: '节点操作', width: 128 }).hide();
+  const element = menu.domElement;
+  element.dataset.captureIgnore = '';
+  Object.assign(element.style, {
+    position: 'absolute',
+    zIndex: '30',
+    maxWidth: '100%',
+    maxHeight: '100%',
+  });
 
   let activeId = '';
   const close = () => {
-    menu.hidden = true;
+    menu.hide();
   };
   const addAction = (label: string, action: () => void) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = label;
-    button.style.cssText =
-      'height:28px;border:0;border-radius:6px;background:transparent;text-align:left;padding:0 8px;cursor:pointer;';
-    button.addEventListener('click', () => {
-      action();
-      close();
-    });
-    menu.append(button);
+    menu.add({
+      [label]() {
+        action();
+        close();
+      },
+    }, label);
   };
   addAction('聚焦', () => graph.focusItem(activeId, 80));
   addAction('高亮', () => {
@@ -71,9 +72,11 @@ export async function run(container: string | HTMLElement) {
     nativeEvent.preventDefault();
     activeId = nodeId;
     const bounds = host.getBoundingClientRect();
-    menu.hidden = false;
-    menu.style.left = `${nativeEvent.clientX - bounds.left}px`;
-    menu.style.top = `${nativeEvent.clientY - bounds.top}px`;
+    menu.open().show();
+    const x = Math.max(0, Math.min(nativeEvent.clientX - bounds.left, bounds.width - element.offsetWidth));
+    const y = Math.max(0, Math.min(nativeEvent.clientY - bounds.top, bounds.height - element.offsetHeight));
+    element.style.left = `${x}px`;
+    element.style.top = `${y}px`;
   });
   graph.on('canvas:click', close);
 
@@ -82,7 +85,7 @@ export async function run(container: string | HTMLElement) {
     fitView: () => graph.fitView({ padding: 80 }),
     destroy() {
       graph.destroy();
-      menu.remove();
+      menu.destroy();
     },
   };
 }

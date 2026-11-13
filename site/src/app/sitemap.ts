@@ -1,8 +1,8 @@
 import type { MetadataRoute } from 'next';
 
-import { localizedDocsPath, localizedPath } from '@/lib/i18n';
+import { localizedDocsPath, localizedPath, type Locale } from '@/lib/i18n';
 import { absoluteSiteUrl } from '@/lib/seo';
-import { source } from '@/lib/source';
+import { getPrimaryDocsPages } from '@/lib/source';
 
 export const dynamic = 'force-static';
 
@@ -17,8 +17,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     en: absoluteSiteUrl(localizedPath('/ai', 'en')),
     'x-default': absoluteSiteUrl(localizedPath('/ai', 'zh')),
   };
-  const pages = ['zh', 'en'].flatMap((locale) =>
-    source.getPages(locale).map((page) => {
+  const pages = (['zh', 'en'] satisfies Locale[]).flatMap((locale) =>
+    getPrimaryDocsPages(locale).map((page) => {
       const zhPath = localizedDocsPath(page.slugs, 'zh');
       const enPath = localizedDocsPath(page.slugs, 'en');
       const path = locale === 'zh' ? zhPath : enPath;

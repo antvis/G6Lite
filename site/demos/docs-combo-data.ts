@@ -3,6 +3,7 @@ import { Graph } from '@antv/g6-lite';
 export async function run(container: HTMLElement) {
   const graph = new Graph({
     container,
+    // #region graph-data
     data: {
       nodes: [
         { id: 'web', x: 100, y: 120, comboId: 'client' },
@@ -21,6 +22,7 @@ export async function run(container: HTMLElement) {
         { id: 'archive', collapsed: true, data: { name: 'Archive (collapsed)' } },
       ],
     },
+    // #endregion graph-data
     node: { style: { size: 22, label: (node) => node.id } },
     edge: { style: { lineWidth: 2, endArrow: true } },
     combo: {

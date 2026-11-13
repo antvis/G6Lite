@@ -1,6 +1,6 @@
 {
   "name": "@antv/g6-lite",
-  "version": "0.1.0-beta.27",
+  "version": "0.1.0",
   "description": "Lightweight graph visualization, built for large-scale relationship data",
   "type": "module",
   "main": "dist/index.js",
@@ -12,6 +12,30 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./layouts/mds": {
+      "types": "./dist/layouts/mds.d.ts",
+      "import": "./dist/layouts/mds.js"
+    },
+    "./layouts/radial": {
+      "types": "./dist/layouts/radial.d.ts",
+      "import": "./dist/layouts/radial.js"
+    },
+    "./layouts/indented": {
+      "types": "./dist/layouts/indented.d.ts",
+      "import": "./dist/layouts/indented.js"
+    },
+    "./layouts/mindmap": {
+      "types": "./dist/layouts/mindmap.d.ts",
+      "import": "./dist/layouts/mindmap.js"
+    },
+    "./layouts/fishbone": {
+      "types": "./dist/layouts/fishbone.d.ts",
+      "import": "./dist/layouts/fishbone.js"
+    },
+    "./layouts/random": {
+      "types": "./dist/layouts/random.d.ts",
+      "import": "./dist/layouts/random.js"
     }
   },
   "files": [

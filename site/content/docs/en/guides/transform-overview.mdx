@@ -1,0 +1,96 @@
+---
+title: Transforms
+description: Learn when transforms run and how to configure parallel edges and custom transforms
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## What is a transform?
+
+A transform prepares a full set of graph data. Use it to share logic that generates node labels or filters the nodes and edges to draw.
+
+## When transforms run
+
+G6Lite runs custom transforms when `render()` or `setData()` processes a full input. It calls each `beforeRender(data)` in `transforms` order, then uses the result for layout and drawing.
+
+Calling `layout()` or `updateNodeData()` alone uses the current graph data. To keep a label in sync with a node field, read that field directly in the `node.style.label` style function.
+
+## Built-in transforms
+
+| Type | Description | Configuration example |
+| --- | --- | --- |
+| `process-parallel-edges` | Separates overlapping `line` or `arc` edges between the same pair of nodes. | [Parallel edge options and examples](/en/docs/guides/edge#entries-and-precedence) |
+
+Parallel edge offsets are computed after the graph data is applied. When separation is enabled, adding or removing an edge also rearranges the edges in its group.
+
+## Configuration
+
+### Basic configuration
+
+Set `transforms` when you create the graph. Use the built-in transform name directly, or register a custom transform before using it.
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  transforms: ['process-parallel-edges'],
+});
+
+await graph.render();
+```
+
+### Configure transform options
+
+Use an object to pass parameters. Set `type` to the transform name and put the parameters in `options`. Here, `offset` controls parallel edge spacing.
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  transforms: [{ type: 'process-parallel-edges', options: { offset: 48 } }],
+});
+
+await graph.render();
+```
+
+### Replace or remove transforms
+
+To replace a custom transform or change its parameters, destroy the old graph and create a graph with the new `transforms`. To remove a transform, omit it from the new configuration. You can also use `updateOptions()` to change parallel edge spacing or toggle separation at runtime. [Parallel edge options](/en/docs/guides/edge#grouping-and-spacing)
+
+## Custom transforms
+
+This example implements `docs-normalize`, a transform that prefixes node names to generate labels such as `Svc: API`.
+
+### Implement and register [#implement-and-activate]
+
+Implement `beforeRender(data)` in a factory. Read the nodes from the supplied `GraphData` and return the complete transformed data synchronously. The example adds `data.label` to each node and preserves the edges, Combos, and other fields.
+
+Register the factory with `register('transform', 'docs-normalize', createNormalize)`, then configure the graph.
+
+```ts
+transforms: [
+  { type: 'docs-normalize', options: { prefix: 'Svc' } },
+],
+node: {
+  style: { label: (node) => String(node.data?.label ?? node.id) },
+},
+```
+
+### Code example
+
+**Update name** only changes the node name. The generated label and the `run` count stay the same. **Reload data** calls `setData()`, updates the label from the new input, and increments `run`.
+
+<NodeDocExample id="extension-transform" locale="en" focus="transform" />
+
+### Options and cleanup
+
+| Method | What it does in the example |
+| --- | --- |
+| `init(context, options)` | Reads `prefix` when the instance is created, defaulting to `Svc`. |
+| `update(options)` | Reads the complete options when a later `render()` or `setData()` reuses the instance at the same position with the same name. |
+| `beforeRender(data)` | Generates labels from the current input and returns the processed data. |
+| `destroy()` | Releases the callback reference when the graph is destroyed. Release any timers or other resources owned by the transform here as well. |
+
+Return new objects for records you change. If you filter out nodes, also handle their associated edges and Combo references so the result remains valid.
+
+See [TransformOption](/en/docs/api/options#transforms) for configuration fields and [TransformExtension](/en/docs/api/extensions#transformextension) for the extension API.

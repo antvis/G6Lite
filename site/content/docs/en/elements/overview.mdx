@@ -1,0 +1,75 @@
+---
+title: Element overview
+description: Explore G6Lite element types, visual parts, states, and custom rendering examples
+---
+
+import { ElementStyleGallery } from '@/components/element-style-gallery';
+import { ElementExtensionExamples } from '@/components/element-extension-examples';
+import { NodeDocExample } from '@/components/node-doc-example';
+
+The three kinds of elements in a G6Lite graph are **nodes**, **edges**, and **Combos**. Labels add names, describe relationships, or identify groups.
+
+## Nodes [#node]
+
+Nodes represent objects such as users, devices, or services. Choose `circle` or `rect` with `node.type`, then set size, fill, and stroke in `node.style`. The examples compare solid and outlined circles, and square and rounded rectangle corners.
+
+<ElementStyleGallery element="node" locale="en" />
+
+[Node overview](/en/docs/elements/node)
+
+## Edges [#edge]
+
+Edges represent relationships such as friendships or service calls. Choose a straight line (`line`), arc (`arc`), cubic curve (`cubic`), or polyline (`polyline`) with `edge.type`. The arc below uses `lineDash`, and the cubic curve and polyline use `endArrow` to show direction.
+
+Use `parallelEdges` to separate multiple relationships between a pair of nodes. Set `source` and `target` to the same node to draw a self-loop.
+
+<ElementStyleGallery element="edge" locale="en" />
+
+The polyline above uses the `orth` router. See the [org chart for tree](/en/docs/examples/org-chart), [indented tree for indented](/en/docs/examples/indented-tree), and [fishbone diagram for fishbone](/en/docs/examples/fishbone). See [Edge overview](/en/docs/elements/edge) for types and data structure.
+
+## Combos [#combo]
+
+Combos organize related nodes into groups. Use `comboId` to add a node to a group and `parentId` to nest a group. An expanded Combo draws a boundary around its members. Set `collapsedType` to show a circle or rectangle when collapsed, with a member count or custom text.
+
+<ElementStyleGallery element="combo" locale="en" />
+
+[Combo overview](/en/docs/elements/combo)
+
+## Labels [#label]
+
+Set a node name with `node.style.label`, describe a relationship with `edge.style.label`, or add a group title with `combo.style.label`. Use `labelPlacement` to position the text, `labelBackground` to add a background to a node or edge label, and `labelAutoRotate` to rotate a label along its edge.
+
+<ElementStyleGallery element="label" locale="en" />
+
+[Label styling and visibility](/en/docs/guides/label)
+
+## Parts of an element [#element-parts]
+
+A node can combine a circle or rectangle with an `icon`, a `label`, and `node.decorations` such as a badge. An edge combines a path with optional arrows and a label. An expanded Combo can show a title on its boundary.
+
+<ElementStyleGallery element="parts" locale="en" />
+
+## Element states
+
+`default` uses the base appearance. The other built-in states are `active`, `selected`, `highlight`, `inactive`, `disabled`, and `hidden`. The hidden preview is blank. The disabled preview shows a muted gray node.
+
+<ElementStyleGallery element="state" locale="en" />
+
+The custom `review` state adds an orange fill. Combined with `selected`, it keeps the selection outline. Set initial states through `states` in the data or call `graph.setItemState()` after rendering. See [element states](/en/docs/guides/states) for how each element combines styles.
+
+## Configure elements [#configure]
+
+Set `node`, `edge`, and `combo` at the same level in `new Graph()`. This example uses `node.style` for the service nodes, `edge.style` for protocol labels and arrows, and `combo.style` for the storage group boundary and title. Click a node to see the outline set in `node.stateStyles.selected`.
+
+<NodeDocExample id="graph-options" locale="en" focus="element-options" />
+
+## Shape rendering and extensions [#drawing]
+
+Switch examples to see how extensions use `register()` in G6Lite. Each guide includes the runnable source.
+
+<ElementExtensionExamples locale="en" />
+
+- [Custom nodes](/en/docs/guides/custom-node) change the node style by service status and draw an overlay.
+- [Custom edges](/en/docs/guides/custom-edge) set arc color and width by edge weight.
+- [Custom node decorations](/en/docs/guides/custom-decoration) draw and stack badges next to a node.
+- [Custom label renderers](/en/docs/guides/custom-label-renderer) draw multiline text for nodes and edges.

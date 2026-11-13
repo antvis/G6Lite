@@ -1,15 +1,15 @@
 ---
-title: 自定义 Behavior
+title: 自定义交互
 description: 实现独立实例的业务选择行为，完成注册、激活与清理
 ---
 
 import { NodeDocExample as BehaviorDocExample } from '@/components/node-doc-example';
 
-内置行为不能表达业务规则时，用 Behavior 消费公开 Graph 事件，通过 ExtensionContext 更新数据或状态。本例点击节点使其成为唯一 active；点击空白只清理 active，保留 A 原有的 selected。
+自定义交互可以把业务操作封装起来。例如，点击节点时只激活当前节点，点击空白时清除激活状态。示例中的 A 原有的选中状态会保留。
 
 ## 公共类型范式
 
-为名称声明字面量 type，为业务选项声明独立类型；在激活处用 satisfies 检查。完整泛型、事件映射和生命周期签名统一见 [Behavior 契约](/docs/api/options/behaviors#自定义-behavior-契约)。
+为名称声明字面量 type，为业务选项声明独立类型；在激活处用 satisfies 检查。完整泛型、事件映射和生命周期签名统一见 [Behavior 契约](/docs/api/options#自定义交互契约)。
 
 ## 推荐文件与导出
 
@@ -17,7 +17,7 @@ import { NodeDocExample as BehaviorDocExample } from '@/components/node-doc-exam
 
 ## 完整实现
 
-下方代码直接驱动画布。工厂每次创建新闭包；state 表更新只移除本行为负责的状态，再给目标追加它。未启用 click-select，所以点击不会改动 selected。
+事件处理函数写在 `getEvents()` 的返回值里。示例监听节点和画布的点击，通过 `context.state` 更新激活状态。
 
 <BehaviorDocExample id="behavior-custom" locale="zh" />
 
@@ -25,7 +25,7 @@ import { NodeDocExample as BehaviorDocExample } from '@/components/node-doc-exam
 
 示例 run 中先调用 registerBusinessSelect，再创建 Graph，配置对象用 satisfies BusinessSelectOptions。字符串名称也可激活，init 收到的 options 会包含 type，缺省 state 使用 active。
 
-多个 Graph 可以复用同一注册工厂；每个已挂载 Behavior 持有自己的 context 和 state。后注册同名定义不会替换已经挂载的实例，更换配置的边界见[挂载与更新](/docs/api/options/behaviors#挂载与更新)。
+多个 Graph 可以复用同一注册工厂；每个已挂载 Behavior 持有自己的 context 和 state。后注册同名定义不会替换已经挂载的实例，更换配置的边界见[挂载与更新](/docs/api/options#挂载与更新)。
 
 ## 事件类型
 
@@ -43,35 +43,22 @@ type BusinessBehavior = BehaviorExtension<
 >;
 ```
 
-它只补充处理函数的类型，不提供新的公开 emit 方法。普通业务联动优先使用[已有事件](/docs/guides/events)，不访问内部 eventEmitter。
+应用可用 `graph.emit('business:reset', { source: 'toolbar' })` 触发这个处理函数。需要在调用处校验载荷时，用模块扩充把业务事件加入 `GraphEventMap`。见[自定义事件示例](/docs/guides/events/custom)。
 
 ## 生命周期与清理
 
-引擎执行 create → init → getEvents，并在卸载时解绑事件、调用 destroy。Behavior 不承诺 update；重新挂载会销毁再创建。Readonly options 是类型约束，运行时不保证冻结，不应修改传入对象。
+引擎执行 create → init → getEvents，卸载时解绑事件并调用 destroy。[`setBehaviors()`](/docs/api/graph#setbehaviors) 和 `updateOptions({ behaviors })` 会销毁旧行为，再按新列表创建。即使名称相同，新配置也交给新实例的 init。Readonly options 是类型约束，运行时不保证冻结。
 
-getEvents 返回的监听由引擎清理；你自己创建的 window 监听、timer、Observer、DOM 和异步任务需在 destroy 中清理。异步回调完成前检查 context.isDestroyed，并自行捕获 Promise 拒绝。
+getEvents 返回的监听由引擎清理。自己创建的 window 监听、timer、Observer 和 DOM 要在 destroy 中清理。切换行为时 Graph 仍存活，异步任务需用行为自己的 AbortController 或卸载标记停止，并处理 Promise 拒绝。
 
-## 边界与覆盖规则
+## 在项目中使用 [#边界与覆盖规则]
 
-- 只从包根导入公开 API，使用 context.data/state/viewport、requestRender 和 isDestroyed。
-- 只读快照用于读取；修改业务字段用 data.updateNode/updateEdge，替换状态用 state.set/setAll。
-- 独立 DOM、键盘控制器或 Observer 通常归 Plugin；渲染前数据处理归 Transform。
-- 同名注册优先于内置，注册实现失败不会自动回退内置；不要覆盖内置名称做临时试验。
+自定义交互通过 `context.state` 修改元素状态，通过 `context.data.updateNode()` 或 `updateEdge()` 修改业务数据。注册时给交互取一个独立的名称，例如 `docs-business-select`，避免覆盖内置交互。 [扩展上下文 API](/docs/api/extensions#extensioncontext) · [注册规则](/docs/api/extensions#注册规则)
 
-<details>
-<summary>验证一个可复用 Behavior</summary>
+在上方示例中点击 B，再点击空白处。B 的 `active` 状态会先添加再清除，A 的 `selected` 状态始终保留。完整代码中的 `select()` 展示了如何只修改当前交互管理的状态。 [试用示例](#完整实现)
 
-检查左键过滤、空白清理、原有状态保留；同时挂载两个 Graph，确认操作互不影响；销毁其中一个后，另一个继续工作。重新挂载后不应重复触发 handler。
+继续阅读：[交互总览](/docs/guides/behavior-overview) · [交互通用配置项](/docs/guides/behaviors) · [扩展体系](/docs/guides/extensions)。
 
-当前公开上下文没有底层手势 session、相机写操作或节点坐标写入接口；需要这些能力时先扩充公共契约，不通过类型断言访问 renderer 或已弃用 context.graph。
+**相关可运行示例**
 
-</details>
-
-继续阅读：[Behavior 参考](/docs/api/options/behaviors) · [交互组合](/docs/guides/interactions) · [扩展体系](/docs/guides/extensions)。
-
-<details data-related-examples>
-<summary>相关可运行示例</summary>
-
-- [注册自定义 Behavior](/docs/examples/custom-behavior)
-
-</details>
+- [注册自定义交互](/docs/examples/custom-behavior)

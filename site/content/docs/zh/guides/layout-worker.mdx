@@ -5,9 +5,15 @@ description: 启用异步布局、取消旧任务，并检查 Worker 回退与�
 
 import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
 
-Worker 将库布局的计算移出主线程；结果仍由主线程写回并绘制。它不减少绘制成本，也不保证算法本身更快。先完成[布局选择](/docs/guides/layout)，再决定执行位置。
+Worker 可以把布局计算放到后台线程，让画布在计算期间保持响应。布局类型和算法参数见[布局通用配置项](/docs/guides/layout)。
 
 ## 启用方式
+
+布局是否尝试在后台计算，由 `layout.worker` 设置。
+
+```ts
+layout: { type: 'force-atlas2', worker: true, maxIteration: 100 },
+```
 
 | layout.worker | Graph 中的行为 |
 | --- | --- |
@@ -15,7 +21,7 @@ Worker 将库布局的计算移出主线程；结果仍由主线程写回并绘�
 | true | 对库布局尝试 Worker；注册扩展与三个内置树布局仍优先在主线程执行 |
 | false | 显式关闭，包括大图 |
 
-独立 runLayout 没有按节点数自动启用的行为。Worker 失败会回退到同一算法的主线程实现；具体执行顺序和默认迭代值见[布局参考](/docs/api/options/layout#worker)。
+独立 runLayout 没有按节点数自动启用的行为。Worker 失败会回退到同一算法的主线程实现；具体执行顺序和默认迭代值见[布局参考](/docs/guides/layout#worker)。
 
 ## 代码与对应效果
 
@@ -27,7 +33,7 @@ Worker 将库布局的计算移出主线程；结果仍由主线程写回并绘�
 
 ## 传输与回退
 
-传入 Worker 的 layout 配置、节点 data 和边 data 必须可结构化克隆。函数、DOM 节点等值会导致传输失败；需要算法回调时显式设置 worker: false。node/edge.style 的回调不在这次传输中，可正常用于绘制。
+传入 Worker 的 layout 配置、节点 data 和边 data 必须可结构化克隆。函数、DOM 节点等值会导致传输失败；需要算法回调时显式设置 worker: false。节点和边的样式函数不在这次传输中，可正常用于绘制。
 
 Worker 仅收到节点 id/x/y/data 和边 source/target/data。Graph 在结果回写时处理 fx/fy；不要依赖未传递字段在 Worker 算法内可用。
 
@@ -60,11 +66,8 @@ Worker 仅收到节点 id/x/y/data 和边 source/target/data。Graph 在结果�
 
 Graph 会放弃被取消任务的结果，正常取消通常不会作为 AbortError 向调用方抛出。完成 Promise 也不表示坐标已写入；应用仍需检查自己的任务代次或销毁状态。
 
-继续阅读：[布局指南](/docs/guides/layout) · [布局方法](/docs/api/graph#布局) · [性能调优](/docs/metrics/performance-tuning)。
+继续阅读：[布局指南](/docs/guides/layout) · [布局方法](/docs/api/graph#布局) · [性能调优](/docs/metrics/performance#performance-tuning)。
 
-<details data-related-examples>
-<summary>相关可运行示例</summary>
+**相关可运行示例**
 
 - [Worker 布局](/docs/examples/layout-worker)
-
-</details>

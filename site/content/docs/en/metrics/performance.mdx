@@ -1,76 +1,69 @@
 ---
-title: Performance measurement
-description: Measure data, layout, rendering, and interactions separately with reproducible conditions
+title: Performance comparison
+description: First-draw timing and browser bundle sizes for G6Lite, G6, Sigma.js, and ECharts on the same graph data
 ---
 
-Fix data and environment before comparing equivalent work. Record drawing with supplied coordinates, layout-inclusive startup, and later interactions separately.
+This comparison covers G6Lite, G6, Sigma.js, and the ECharts Graph series. All renderers receive the same precomputed positions, and all bundles use the same build settings. The 2026-11-13 run used a locally packaged G6Lite `0.1.0` build.
 
-## Environment requirements
-
-Record package/source and dependency versions, browser/OS, CPU/GPU, CSS viewport, DPR, node/edge counts, labels/styles, layout options, cache state, and actual Worker execution. Save data, a seed where supported, runnable code, and raw samples.
-
-## Current public measurement scope
-
-| Metric | Boundary |
-| --- | --- |
-| Data preparation | Business input → GraphData; separate from rendering |
-| Layout | runLayout start → positions returned; separate cold/warm loads |
-| Construction and render resolution | new Graph → await render; CPU setup and draw submission, not GPU completion |
-| Interactions | Continuous zoom/drag, state and bulk position updates; frame times and main-thread tasks |
-| Resources | Compare instances, canvases, subscriptions, and memory after repeated mount/destroy |
-
-This function separates layout and render work and releases each instance. Use a visible, non-zero-size container. Grid illustrates the boundaries; its time does not represent other algorithms.
-
-```ts
-import { Graph, runLayout, type GraphData } from '@antv/g6-lite';
-
-export async function measureOnce(container: HTMLElement, data: GraphData) {
-  if (document.visibilityState !== 'visible') throw new Error('Keep the tab visible');
-  const start = performance.now();
-  const positions = await runLayout(data, { type: 'grid' });
-  const layoutMs = performance.now() - start;
-  const coordinates = new Map(positions.nodes.map((node) => [node.id, node]));
-  const positioned = { ...data, nodes: data.nodes.map((node) => ({
-    ...node, ...coordinates.get(node.id),
-  })) };
-  const createStart = performance.now();
-  const graph = new Graph({ container, data: positioned, behaviors: [] });
-  try {
-    await graph.render();
-    const renderResolvedMs = performance.now() - createStart;
-    await new Promise<void>((resolve) => requestAnimationFrame(() => {
-      requestAnimationFrame(() => resolve());
-    }));
-    return { layoutMs, renderResolvedMs, throughTwoFramesMs: performance.now() - createStart };
-  } finally {
-    graph.destroy();
-  }
-}
-```
-
-Use the monotonic [performance.now clock](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now). Two [requestAnimationFrame callbacks](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame) do not prove GPU completion or presentation to the user. Background tabs affect this measurement.
+<span id="library-selection-comparison" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
 <span id="selecting-a-graph-library" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-## Library selection comparison
+<span id="current-public-measurement-scope" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-Use the [capability comparison](/en/docs/compatibility/library-comparison) to select candidates. Match positions, labels, edges, and interactions. Do not compare one renderer without layout against another startup that includes force computation.
+## First-draw timing [#render-time]
+
+The table shows the median time in milliseconds from graph creation through two animation frames after the render API completes. Headless Chromium uses the SwiftShader software renderer for WebGL in this run.
+
+| npm package | Renderer | 1,000 nodes / 3,000 edges (ms) | 5,000 nodes / 15,000 edges (ms) |
+| --- | --- | ---: | ---: |
+| `@antv/g6-lite@0.1.0` | WebGL | 134.1 | 146.1 |
+| `@antv/g6@5.1.1` | Canvas 2D | 297.4 | 1,502.2 |
+| `sigma@4.0.4` + `graphology@0.26.0` | WebGL 2 | 466.1 | 748.4 |
+| `echarts@6.1.0` | Canvas 2D | 56.6 | 236.3 |
+
+<span id="environment-requirements" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+<span id="how-to-compare-numbers" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
 <span id="rules-for-numerical-comparisons" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-## How to compare numbers
+### Test conditions [#benchmark-method]
 
-1. Record cold startup separately. Warm up hot paths and collect at least 30 independent samples; report the count.
-2. Keep all samples; report median, P95, and range. Explain outliers instead of silently deleting them.
-3. Progress through 200/5000-node and realistic datasets, then verify dragging, labels, and cleanup on target devices.
+- Apple M3 Pro, macOS (Darwin 25.2.0), headless Chromium 151.0.7922.34. The canvas is 900 × 600 CSS pixels at DPR 1. The WebGL renderer reports `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`.
+- Each library receives the same nodes, edges, and fixed positions. The graphs use circular nodes and straight edges, with labels and animation disabled and no layout run. For each size, each library warms up 3 times, then runs 20 interleaved samples. The instance is disposed after each sample.
+- Libraries are loaded before timing. Samples cover instance and internal model creation, the first render, and two animation frame callbacks. Sigma.js includes building the Graphology graph. Measure GPU execution, layout, and interactions separately. [Download raw samples](/benchmarks/graph-performance.json)
 
-Runnable workloads: [200 nodes](/en/docs/examples/large) · [5000 nodes](/en/docs/examples/large-labeled) · [AI Papers](/en/docs/examples/real-dataset)。Read each example’s dataset description. For tuning see [performance tuning](/en/docs/metrics/performance-tuning)。
+These results apply only to the environment above and do not certify minimum supported browser versions. See [Minimum browser versions](/en/docs/compatibility/browser#minimum-browser-versions) for capability version references and the remaining acceptance scope.
 
-<details data-related-examples>
-<summary>Related runnable examples</summary>
+## Browser bundle size [#bundle-size]
 
-- [AI Papers large relationship graph](/en/docs/examples/real-dataset)
+esbuild 0.21.5 bundles each npm entry and its dependencies into a single minified browser script. The G6Lite measurement uses the default entry, with optional layouts imported separately as needed. ECharts imports GraphChart and CanvasRenderer only. Sigma.js includes Graphology. Sizes are in KiB and exclude source maps.
+
+| npm package | Minified (KiB) | gzip -9 (KiB) |
+| --- | ---: | ---: |
+| `@antv/g6-lite@0.1.0` | 511.3 | 159.5 |
+| `@antv/g6@5.1.1` | 1,435.3 | 413.4 |
+| `sigma@4.0.4` + `graphology@0.26.0` | 438.4 | 110.7 |
+| `echarts@6.1.0` | 386.3 | 130.2 |
+
+### G6Lite CDN file sizes [#umd-size]
+
+Each CDN file is measured with `gzip -9`. One kB is 1,000 bytes. The homepage shows the size of the default script.
+
+| Published file | Contents | gzip -9 (kB) |
+| --- | --- | ---: |
+| `g6-lite.min.js` | Default script with rendering, interactions, and built-in layouts | 150.2 |
+| `g6-lite-layouts.min.js` | Six optional layouts, loaded when needed | 29.1 |
+
+Load the optional script before registering the layout you want to use. [Optional layouts](/en/docs/guides/layout-overview#optional-layouts)
+
+## Measuring your own graph [#performance-tuning]
+
+Use production data and target devices to measure layout, first draw, and interactions separately. For a slow startup, isolate layout from drawing before assessing Worker execution. For slow updates, reuse the graph and update data or states incrementally. For frame drops during zoom, compare labels, decorations, and viewport size one at a time. Check disposal and listener cleanup after repeated mounts. [Worker layouts](/en/docs/guides/layout-worker) · [Data mutations](/en/docs/api/graph#graph-data-mutations) · [Label policy](/en/docs/api/options#options-label)
+
+**Related runnable examples**
+
 - [200 nodes](/en/docs/examples/large)
-- [5,000 labeled nodes](/en/docs/examples/large-labeled)
-
-</details>
+- [5000 nodes with labels](/en/docs/examples/large-labeled)
+- [AI Papers large relationship graph](/en/docs/examples/real-dataset)

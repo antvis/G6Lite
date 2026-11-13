@@ -1,58 +1,11 @@
 ---
-title: 工具函数
-description: 独立布局、主题解析与独立事件分发的查询入口
+title: 工具函数（旧入口）
+description: 独立布局、主题解析、事件分发和扩展注册的 API 参考链接
 ---
 
-工具不替代 Graph 实例方法。按任务选择下面入口；完整布局和主题契约保留在原主题参考中。
+独立事件分发器见[事件参考](/docs/api/graph/events)。
 
-| 任务 | 入口 | 完整参考 |
-| --- | --- | --- |
-| 不创建 Graph，先计算坐标 | runLayout | [参数、返回值、取消和示例](/docs/api/graph/layout#runlayout) |
-| 解析预设和品牌 token | resolveTheme | [签名、复制与覆盖规则](/docs/api/options/theme#resolvetheme) |
-| 应用自己的事件分发 | EventEmitter / Handler | [独立事件工具](#eventemitter) |
-| 注册扩展 | register / extensionFactory | [注册与作用域](/docs/api/extensions/registration) |
-
-## runLayout
-
-输入 GraphData、LayoutConfig 和可选视口 / 运行参数，返回 Promise&lt;LayoutResult&gt;，只含带坐标的 nodes。它不创建 Graph、不绘制、不运行 Graph transforms，也不执行 Graph 的最终固定轴覆盖；独立调用默认没有 ExtensionContext，不调用 Layout.init。
-
-签名、算法顺序、Worker 与取消边界统一查[runLayout](/docs/api/graph/layout#runlayout)。已有 Graph 的重新布局使用[setLayout + layout](/docs/api/graph/layout)，实现算法看[自定义布局](/docs/guides/custom-layout)。
-
-## resolveTheme
-
-输入 ThemeOption，返回 ThemeTokens；不修改 Graph，也不自动跟随页面深色模式。返回类型的字段仍为可选，不应把“已解析”理解为所有字段都变成必填。
-
-函数复制顶层与色板数组，状态表仍可能共享。完整字段、浅覆盖、引用规则和代码效果查[主题参考](/docs/api/options/theme#resolvetheme)，更新图主题用[updateOptions](/docs/api/graph/lifecycle#updateoptions)。
-
-## EventEmitter
-
-从包根导入 EventEmitter，使用 new EventEmitter() 创建独立的事件分发器。它不连接 Graph，也不提供 DOM 事件或 GraphEventMap 的事件名校验。图事件仍使用[graph.on / off / once](/docs/api/graph/events)。
-
-Handler&lt;Args extends unknown[]&gt; 是参数元组到 void 的函数类型。下面各泛型方法的 Args 都满足 unknown[]，用于本次调用的参数推导；不会建立跨所有调用的全局事件映射。
-
-| 方法 | 返回值与行为 |
-| --- | --- |
-| `on<Args>(event: string, handler: Handler<Args>): void` | 注册持续监听；同一函数重复注册会重复调用 |
-| `off<Args>(event: string, handler: Handler<Args>): void` | 用原函数引用移除该事件对应的监听，包括它的重复注册；未知项忽略 |
-| `once<Args>(event: string, handler: Handler<Args>): void` | 监听下一次匹配事件后移除 |
-| `emit<Args>(event: string, ...args: Args): void` | 同步分发参数，不发送 Graph 事件 |
-| `removeAllListeners(event?: string): void` | 清理指定事件；省略时清理此分发器全部监听 |
-
-这些方法返回 void，不支持链式调用。只清理自己拥有的分发器；不访问 graph.eventEmitter。
-
-```ts
-import { EventEmitter, type Handler } from '@antv/g6-lite';
-
-const bus = new EventEmitter();
-const received: number[] = [];
-const onProgress: Handler<[number]> = (value) => { received.push(value); };
-
-bus.on('progress', onProgress);
-bus.emit('progress', 25);
-bus.off('progress', onProgress);
-bus.emit('progress', 50);
-console.log(received); // [25]
-bus.removeAllListeners();
-```
-
-监听包含请求、计时器或 DOM 资源时，业务还需自行取消与释放；移除分发器监听不等于取消这些工作。
+- <span id="runlayout" style={{ display: 'block', scrollMarginTop: '8rem' }} />[`runLayout`](/docs/api/graph#graph-layout-runlayout)
+- <span id="resolvetheme" style={{ display: 'block', scrollMarginTop: '8rem' }} />[`resolveTheme`](/docs/api/options#resolvetheme)
+- <span id="eventemitter" style={{ display: 'block', scrollMarginTop: '8rem' }} />[`EventEmitter` / `Handler`](/docs/api/graph/events#eventemitter)
+- [`register`](/docs/api/graph#extension-registration)

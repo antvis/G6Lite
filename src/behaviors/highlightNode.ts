@@ -9,8 +9,10 @@ import type { Renderer } from '../renderer/renderer';
 export function highlightNode(renderer: Renderer, graph?: Graph): () => void {
   if (!graph) return () => {};
   const canvas = renderer.getCanvas();
+  let active = false;
 
   const onOver = (payload: { nodeId: string }) => {
+    active = true;
     const nodeId = payload.nodeId;
     canvas.style.cursor = 'pointer';
     const nodeIds = new Set<string>([nodeId]);
@@ -26,6 +28,7 @@ export function highlightNode(renderer: Renderer, graph?: Graph): () => void {
   };
 
   const onLeave = () => {
+    active = false;
     canvas.style.cursor = 'default';
     renderer.setHighlight({ nodeIds: new Set(), edgeIndices: new Set() });
   };
@@ -35,5 +38,6 @@ export function highlightNode(renderer: Renderer, graph?: Graph): () => void {
   return () => {
     graph.eventEmitter.off('node:pointerover', onOver);
     graph.eventEmitter.off('node:pointerleave', onLeave);
+    if (active) onLeave();
   };
 }

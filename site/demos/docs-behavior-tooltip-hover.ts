@@ -1,6 +1,7 @@
 import { Graph, type BuiltInBehaviorOptionsMap } from '@antv/g6-lite';
 
 export async function run(container: HTMLElement) {
+  // #region tooltip
   const tooltip: BuiltInBehaviorOptionsMap['tooltip'] = {
     type: 'tooltip', trigger: 'hover', delay: 120, className: 'docs-hover-tooltip',
     enable: (ctx) => ctx.nodeId !== 'Cache',
@@ -17,6 +18,7 @@ export async function run(container: HTMLElement) {
       return card;
     },
   };
+  // #endregion tooltip
   const graph = new Graph({
     container,
     data: {

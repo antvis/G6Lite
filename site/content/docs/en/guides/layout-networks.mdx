@@ -1,0 +1,25 @@
+---
+title: Network layouts
+description: Arrange networks by connections, a focal node, or graph distance
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Choose a layout
+
+| Goal | Layout |
+| --- | --- |
+| Bring connected nodes closer | [`force`](/en/docs/guides/layout-force), [`d3-force`](/en/docs/guides/layout-d3-force), [`force-atlas2`](/en/docs/guides/layout-force-atlas2), [`fruchterman`](/en/docs/guides/layout-fruchterman) |
+| Explore connections around one node | [`radial`](/en/docs/guides/layout-radial), with `focusNode` identifying the center |
+| Group nodes into rings by degree | [`concentric`](/en/docs/guides/layout-concentric), with `sortBy: 'degree'` |
+| Show graph distance in two dimensions | [`mds`](/en/docs/guides/layout-mds), with `linkDistance` setting the distance scale |
+
+## Configuration and example
+
+The example starts with a radial layout. Set `focusNode` to `0` to choose its center and `unitRadius` to 68 to space the rings. Use **Layout** to compare all seven layouts on the same network.
+
+Register Radial and MDS before using them. [Optional layouts](/en/docs/guides/layout-overview#optional-layouts)
+
+<NodeDocExample id="layout-networks" locale="en" focus="network-options" />
+
+See the [layout reference](/en/docs/api/options#config-library-layout-fields) for force options, the [Worker guide](/en/docs/guides/layout-worker) for background computation, and the [layout gallery](/en/docs/examples/layout-gallery) for more examples.

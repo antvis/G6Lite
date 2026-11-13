@@ -47,7 +47,7 @@ const COPY: Record<
         eyebrow: 'Public contract',
         title: '公开 API',
         description: '稳定、类型安全且不暴露渲染内部实现。',
-        items: ['Graph', 'register()', 'extensionFactory()', 'runLayout()', 'Public types'],
+        items: ['Graph', 'register()', 'runLayout()', 'Public types'],
         tone: 'api',
       },
       {
@@ -103,7 +103,7 @@ const COPY: Record<
         eyebrow: 'Public contract',
         title: 'Public API',
         description: 'Stable, typed contracts without renderer internals.',
-        items: ['Graph', 'register()', 'extensionFactory()', 'runLayout()', 'Public types'],
+        items: ['Graph', 'register()', 'runLayout()', 'Public types'],
         tone: 'api',
       },
       {

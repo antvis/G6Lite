@@ -1,0 +1,85 @@
+---
+title: Layout overview
+description: Choose a layout and compare how it arranges the same graph
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## What is a layout?
+
+A layout determines where nodes go. A workflow can run left to right, while a force-directed layout can bring connected nodes together. Omit `layout` to use the nodes’ existing `x` and `y` coordinates.
+
+## Choose a layout
+
+| Type | Description | Example configuration |
+| --- | --- | --- |
+| [`grid`](/en/docs/guides/layout-grid) | Arrange nodes in rows and columns. | `{ type: 'grid', cols: 3 }` |
+| [`circular`](/en/docs/guides/layout-circular) | Arrange nodes along a circle. | `{ type: 'circular', radius: 100 }` |
+| [`dagre`](/en/docs/guides/layout-dagre) | Arrange steps or dependencies in layers. | `{ type: 'dagre', rankdir: 'LR', ranksep: 80 }` |
+| [`force`](/en/docs/guides/layout-force) | Bring linked nodes closer while spacing nodes apart. | `{ type: 'force', linkDistance: 100 }` |
+| [`d3-force`](/en/docs/guides/layout-d3-force) | Arrange a network with D3 force simulation. | `{ type: 'd3-force', linkDistance: 100 }` |
+| [`force-atlas2`](/en/docs/guides/layout-force-atlas2) | Use force simulation to reveal network clusters. | `{ type: 'force-atlas2', kr: 8, kg: 2 }` |
+| [`fruchterman`](/en/docs/guides/layout-fruchterman) | Spread nodes using attraction and repulsion. | `{ type: 'fruchterman', gravity: 12 }` |
+| [`radial`](/en/docs/guides/layout-radial) | **Optional.** Arrange nodes in rings by graph distance from a focal node. | `{ type: 'radial', focusNode: '0', unitRadius: 68 }` |
+| [`concentric`](/en/docs/guides/layout-concentric) | Arrange nodes in concentric rings by degree. | `{ type: 'concentric', sortBy: 'degree' }` |
+| [`mds`](/en/docs/guides/layout-mds) | **Optional.** Approximate graph distances in two dimensions. | `{ type: 'mds', linkDistance: 80 }` |
+| [`indented`](/en/docs/guides/layout-indented) | **Optional.** Arrange a tree as an indented list. | `{ type: 'indented', indent: 80, rowHeight: 40 }` |
+| [`mindmap`](/en/docs/guides/layout-mindmap) | **Optional.** Arrange a tree as mind map branches. | `{ type: 'mindmap', levelGap: 120, nodeGap: 30 }` |
+| [`fishbone`](/en/docs/guides/layout-fishbone) | **Optional.** Arrange categories and items along a fishbone spine. | `{ type: 'fishbone', categoryGap: 180 }` |
+| [`random`](/en/docs/guides/layout-random) | **Optional.** Scatter nodes randomly within an area. | `{ type: 'random', width: 800, height: 600, center: [400, 300] }` |
+
+Pass these configuration objects to `layout`. See [Common layout options](/en/docs/guides/layout) for more parameters and previews.
+
+## Optional layouts [#optional-layouts]
+
+Indented, Mindmap, Fishbone, Radial, MDS, and Random require registration. With npm, import the layout from its own subpath, register it, and set `layout.type`.
+
+```ts
+import { register } from '@antv/g6-lite';
+import radial from '@antv/g6-lite/layouts/radial';
+
+register('layout', 'radial', radial);
+
+const layout = { type: 'radial', focusNode: '0', unitRadius: 68 };
+```
+
+When using UMD from a CDN, load the same version of `dist/g6-lite-layouts.min.js` after the main script. The layout extensions are available on `G6LiteLayouts`.
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite-layouts.min.js"></script>
+<script>
+  G6Lite.register('layout', 'radial', G6LiteLayouts.radial);
+</script>
+```
+
+Registered layouts run on the main thread.
+
+## Configuration and example
+
+Set the algorithm with `layout.type`. This example uses Dagre to arrange three steps from left to right.
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [{ id: 'Submit' }, { id: 'Review' }, { id: 'Publish' }],
+    edges: [
+      { source: 'Submit', target: 'Review' },
+      { source: 'Review', target: 'Publish' },
+    ],
+  },
+  layout: { type: 'dagre', rankdir: 'LR', ranksep: 80 },
+  node: { style: { label: (node) => node.id } },
+});
+
+await graph.render();
+```
+
+Use **Layout** below to compare Grid, Circular, and Dagre on the same data. See [Network layouts](/en/docs/guides/layout-networks) for force-directed layouts.
+
+<NodeDocExample id="layout-switch" locale="en" focus="layout-options" />
+
+See [Common layout options](/en/docs/guides/layout) for parameters and runtime changes, or [Custom layouts](/en/docs/guides/custom-layout) to calculate your own coordinates.

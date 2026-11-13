@@ -1,0 +1,26 @@
+---
+title: 网格、环形与层级布局
+description: 用 Grid、Circular 和 Dagre 排列节点
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 选择布局
+
+| 类型 | 描述 | 配置示例 |
+| --- | --- | --- |
+| [`grid`](/docs/guides/layout-grid) | 将节点排成两行三列。 | `{ type: 'grid', rows: 2, cols: 3 }` |
+| [`circular`](/docs/guides/layout-circular) | 沿半径为 100 的圆周排列。 | `{ type: 'circular', radius: 100 }` |
+| [`dagre`](/docs/guides/layout-dagre) | 按依赖关系从左到右分层。 | `{ type: 'dagre', rankdir: 'LR' }` |
+
+## 布局对比
+
+在 **Layout** 中切换 `grid`、`circular` 和 `dagre`，观察同一组节点的排布。关键代码列出了三种布局的完整参数。
+
+<NodeDocExample id="layout-switch" locale="zh" focus="layout-options" />
+
+## 调整层级间距
+
+Dagre 中，同一层的节点间距用 `nodesep` 设置，层与层之间的间距用 `ranksep` 设置。方向通过 `rankdir` 配置，`LR` 从左到右，`TB` 从上到下。
+
+更多参数见[布局配置参考](/docs/api/options#config-library-layout-fields)。完整的业务示例见[流程图](/docs/examples/flowchart)。

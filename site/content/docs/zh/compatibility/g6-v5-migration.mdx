@@ -3,16 +3,16 @@ title: 从 G6 v5 迁移
 description: 逐项迁移配置、数据、交互、事件和扩展，保留可回退的业务基线
 ---
 
-核对范围：G6 5.1.1 的[官方接入方式](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start)与当前 G6Lite 源码。G6Lite 不是 G6 的兼容构建；发布包与源码差异先看[稳定性](/docs/compatibility/api-stability)。
+G6Lite 和 G6 v5 使用独立的 npm 包和实现。本页以 G6 5.1.1 的接入方式为基线，对照 G6Lite 的公开 API。 [G6 快速上手](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start) · [图 API](/docs/api/graph) · [GitHub Releases](https://github.com/antvis/G6Lite/releases)
 
 ## 先判断是否应该迁移
 
-先验证最复杂的节点、交互、标签和分组。强依赖任意 DOM/React 节点、多渲染器、SSR 出图、完整动画、图算法或成熟插件集合时，先保留 G6；逐项查看[能力比较](/docs/compatibility/library-comparison)，不要只比较包大小。
+先验证最复杂的节点、交互、标签和分组。强依赖任意 DOM/React 节点、多渲染器、SSR 出图、完整动画、图算法或成熟插件集合时，先保留 G6。
 
 ## 安装与导入
 
 ```bash
-npm install @antv/g6-lite@0.1.0-beta.27
+npm install @antv/g6-lite@0.1.0
 ```
 
 所有值和类型都从 @antv/g6-lite 包根导入；不迁入 src / dist 深层路径。
@@ -56,7 +56,7 @@ export async function mountGraph(container: HTMLElement) {
 | node.style.labelText | node.style.label |
 | width / height | 容器 CSS；运行时 setSize |
 | palette / renderer / animation | 不是同名兼容配置；按样式映射或保留 G6 |
-| setOptions | updateOptions 仅 node / edge / label / theme；布局另行设置 |
+| setOptions | updateOptions 支持 node / edge / label / theme / behaviors；布局另行设置 |
 | plugins / transforms / behaviors | 重新核对注册、名称、选项与生命周期 |
 
 完整字段统一查[GraphOptions](/docs/api/options)。
@@ -65,13 +65,13 @@ export async function mountGraph(container: HTMLElement) {
 
 显式传 nodes、edges 数组，节点 id 唯一，端点引用已有节点；为边保留稳定 ID。坐标使用节点 x/y，归属使用 comboId，业务字段放 data。不要复制 G6 内部模型或依赖节点 style 原样兼容。
 
-运行时新增节点需要坐标；全量替换与增量写入语义不同。见[输入数据](/docs/api/options/data) · [数据更新](/docs/guides/data)。
+运行时新增节点需要坐标；全量替换与增量写入语义不同。见[输入数据](/docs/api/options#options-data) · [数据更新](/docs/guides/data)。
 
 ## Node、Edge 与 Combo 配置
 
 内置 circle / rect 和常用边复用 WebGL 基型；任意场景图形状不是直接替代。状态样式分别位于 node.stateStyles、edge.stateStyles 与 combo.style.stateStyles。Combo 嵌套、折叠与运行时归组仍为实验能力。
 
-[节点](/docs/api/options/node) · [边](/docs/api/options/edge) · [Combo](/docs/api/options/combo)
+[节点](/docs/guides/node#options-node) · [边](/docs/api/options#options-edge) · [Combo](/docs/api/options#options-combo)
 
 ## Behavior 映射
 
@@ -84,11 +84,11 @@ export async function mountGraph(container: HTMLElement) {
 | focus-element | focusItem |
 | zoom-canvas / click-select | 名称可相同，仍需核对选项、载荷与组合键 |
 
-省略 behaviors 使用默认缩放和平移；[] 关闭默认。逐项查[Behavior](/docs/api/options/behaviors)。
+省略 behaviors 使用默认缩放和平移；[] 关闭默认。逐项查[Behavior](/docs/api/options#options-behaviors)。
 
 ## Layout 迁移
 
-同名算法不保证参数相同。迁移 center、rankdir、迭代与距离参数时，固定数据和节点尺寸；运行时用 setLayout 后 await layout。支持情况、取消和 Worker 查[布局参考](/docs/api/graph/layout)。
+同名算法不保证参数相同。迁移 center、rankdir、迭代与距离参数时，固定数据和节点尺寸；运行时用 setLayout 后 await layout。支持情况、取消和 Worker 查[布局参考](/docs/api/graph#graph-layout)。
 
 ## 事件迁移
 
@@ -105,13 +105,13 @@ export async function mountGraph(container: HTMLElement) {
 | setElementState / getElementState | setElementStates / getItemStates |
 | hideElement / showElement | hideItem / showItem |
 | focusElement / resize | focusItem / setSize |
-| draw / render | render 与 refresh 语义不同，查生命周期 |
+| draw / render | [render 执行首次渲染](/docs/api/graph#graph-lifecycle-render)，[updateOptions 更新外观](/docs/api/graph#graph-lifecycle-updateoptions) |
 
 完整参数、返回值和缺失 ID 行为统一查[方法索引](/docs/api/graph)。新代码不使用 toData、isDestroyed 或内部 getCanvas/updateData。
 
 ## Extension、Transform 与 Plugin
 
-G6 基类不能原样迁移。先选择扩展类别，再按[扩展教程](/docs/guides/extensions)与[公开契约](/docs/api/extensions)实现。受控上下文不提供完整 Graph；插件订阅可由宿主显式注入，并在 destroy 中清理。
+G6 基类不能原样迁移。先选择扩展类别，再按[扩展教程](/docs/guides/extensions)与[公开契约](/docs/api/graph#graph-extensions)实现。受控上下文不提供完整 Graph；插件订阅可由宿主显式注入，并在 destroy 中清理。
 
 ## 当前不支持与替代方式
 

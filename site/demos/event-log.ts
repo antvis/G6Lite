@@ -34,7 +34,7 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const ui = createDemoPanel(container, '事件', '点击或拖拽节点，查看最近的公开事件。', '');
+  const ui = createDemoPanel(container, '点击或拖拽节点，查看最近的公开事件。');
   const lines: string[] = ['点击或拖拽节点'];
   const push = (line: string) => {
     lines.unshift(line);
@@ -50,7 +50,7 @@ export async function run(container: string | HTMLElement) {
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();
-      ui.panel.remove();
+      ui.destroy();
     },
   };
 }

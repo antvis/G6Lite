@@ -1,102 +1,20 @@
 ---
-title: Combo 操作方法参考
-description: 创建、移除、归属、直接成员查询和折叠展开的契约
+title: Combo 操作方法参考（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-import { NodeDocExample } from '@/components/node-doc-example';
+内容已并入 [Combo 操作](/docs/api/graph#graph-combo)。
 
-分组字段和外观见[Combo 配置](/docs/api/options/combo)，任务流程见[Combo 指南](/docs/guides/combo)。
-
-## 前提与支持边界
-
-嵌套、折叠和运行时归组仍为实验能力。首次有效 render 后调用；没有数据模型或已销毁时，结构修改直接返回，不创建或修改分组。查询方法不检查销毁状态，不能据残留值继续使用实例。
-
-写入方法返回 void，更新模型并请求绘制，不自动布局或适配相机；包围框随渲染更新，立即查询几何可能仍是旧值。使用不同且有效的节点、边、Combo ID，父级层次须无环。
-
-## 代码与操作效果
-
-先 Create temp，把 B 归入新组；Collapse temp 隐藏 B 和关联边，Expand temp 恢复。Move B 只切换归属而不移动节点；Remove temp 保留节点、边，并解除该组成员的归属。
-
-<NodeDocExample id="combo-operations" locale="zh" focus="operations" />
-
-## createCombo
-
-`graph.createCombo(combo: ComboData, childNodeIds?: string[]): void`
-
-新增分组并把已有节点加入；不创建这些节点，不移动位置。parentId 指向已有父级，归属和层级由业务校验。ID 应唯一：重复 ID 不新建分组，但成员分配仍可能执行。初始 collapsed 可影响加入节点的可见性。
-
-## removeCombo
-
-`graph.removeCombo(comboId: string): void`
-
-移除分组本身，不删除节点或边。直接节点解除归属，直接子 Combo 成为无父级分组，不自动转入祖父级。会释放被移除层级施加的折叠隐藏，保留业务显式 hidden。
-
-## addToCombo
-
-`graph.addToCombo(nodeId: string, comboId: string): void`
-
-把已有节点从原分组转入目标分组，不移动坐标或重新布局；目标折叠时按折叠层级隐藏。先校验节点和目标分组存在：无效目标当前可能解除旧归属，而不是拒绝整个操作。
-
-## removeFromCombo
-
-`graph.removeFromCombo(nodeId: string): void`
-
-解除直接归属，不删除节点；释放原归属施加的隐藏，保留业务 hidden。
-
-## getComboChildren
-
-`graph.getComboChildren(id: string): { nodes: string[]; combos: string[] }`
-
-返回直接节点和直接子分组 ID 新数组，不递归遍历后代。缺失分组或无模型时两个数组均为空，不承诺顺序。
-
-## getNodeCombo
-
-`graph.getNodeCombo(nodeId: string): string | undefined`
-
-返回节点的直接 Combo ID；未归组、缺失节点或无模型时为 undefined。
-
-## collapseCombo
-
-`graph.collapseCombo(comboId: string): void`
-
-设 collapsed=true，隐藏后代节点及其关联边，不生成虚拟边；子 Combo 边框不会随祖先自动隐藏。有效状态变化后发 combo:collapse；缺失或已折叠时不重复发事件。
-
-## expandCombo
-
-`graph.expandCombo(comboId: string): void`
-
-展开并释放本层的折叠隐藏；其他折叠祖先和业务 hidden 仍有效。有效变化后发 combo:expand；缺失或已展开时不重复发事件。
-
-## toggleCombo
-
-`graph.toggleCombo(comboId: string): void`
-
-根据当前 collapsed 调用展开或折叠；缺失分组不执行。事件沿对应 expand/collapse 路径发出。
-
-
-## 查询归属与数据模型
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-declare const graph: Graph;
-const parent = graph.getNodeCombo('B');
-const direct = graph.getComboChildren('base');
-const combo = graph.getComboData('base');
-console.log(parent, direct, combo?.collapsed);
-```
-
-getComboData 返回只读类型的 ComboModel；完整字段见[只读查询模型](/docs/api/options/combo#只读查询模型)。getData 导出当前归属、parentId 和 collapsed，不导出折叠派生 hidden。
-
-## 状态、显隐与兼容方法
-
-用 setItemState、clearItemStates、getItemStates 和 findCombosByState 处理分组状态。hidden 只隐藏分组本身，不级联折叠成员；内置 click-select 不自动选择 Combo。
-
-| 已弃用方法 | 替代方式 |
-| --- | --- |
-| setComboState(comboId, state, value): void | setItemState(comboId, state, value) |
-| clearComboStates(comboId): void | clearItemStates(comboId) |
-| getComboStates(comboId): ElementState[] | getItemStates(comboId) |
-
-兼容方法仍只针对 Combo；新代码使用统一状态方法，并确保跨类型 ID 不重名。
-
-继续阅读：[分组数据](/docs/api/options/combo#combodata) · [状态方法](/docs/api/graph/states) · [数据导出](/docs/api/graph/data#getdata)。
+- <span id="前提与支持边界" style={{ display: 'block', scrollMarginTop: '8rem' }} />[前提与支持边界](/docs/api/graph#前提与支持边界)
+- <span id="代码与操作效果" style={{ display: 'block', scrollMarginTop: '8rem' }} />[代码与操作效果](/docs/api/graph#代码与操作效果)
+- <span id="createcombo" style={{ display: 'block', scrollMarginTop: '8rem' }} />[createCombo](/docs/api/graph#createcombo)
+- <span id="removecombo" style={{ display: 'block', scrollMarginTop: '8rem' }} />[removeCombo](/docs/api/graph#removecombo)
+- <span id="addtocombo" style={{ display: 'block', scrollMarginTop: '8rem' }} />[addToCombo](/docs/api/graph#addtocombo)
+- <span id="removefromcombo" style={{ display: 'block', scrollMarginTop: '8rem' }} />[removeFromCombo](/docs/api/graph#removefromcombo)
+- <span id="getcombochildren" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getComboChildren](/docs/api/graph#getcombochildren)
+- <span id="getnodecombo" style={{ display: 'block', scrollMarginTop: '8rem' }} />[getNodeCombo](/docs/api/graph#getnodecombo)
+- <span id="collapsecombo" style={{ display: 'block', scrollMarginTop: '8rem' }} />[collapseCombo](/docs/api/graph#collapsecombo)
+- <span id="expandcombo" style={{ display: 'block', scrollMarginTop: '8rem' }} />[expandCombo](/docs/api/graph#expandcombo)
+- <span id="togglecombo" style={{ display: 'block', scrollMarginTop: '8rem' }} />[toggleCombo](/docs/api/graph#togglecombo)
+- <span id="查询归属与数据模型" style={{ display: 'block', scrollMarginTop: '8rem' }} />[查询归属与数据模型](/docs/api/graph#查询归属与数据模型)
+- <span id="状态显隐与兼容方法" style={{ display: 'block', scrollMarginTop: '8rem' }} />[Combo 状态与显隐](/docs/api/graph#combo-state-and-visibility)

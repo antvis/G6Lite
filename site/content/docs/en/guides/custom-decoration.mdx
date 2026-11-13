@@ -22,13 +22,13 @@ A has five items, B only Ready. A initially shows two items and +3. Hover its de
 3. layout: 'stack' enables vertical items; sort, maxVisible, and overflow control visibility. maxVisible includes the overflow item: 3 shows two items plus +3 here.
 4. overflowData goes to the same renderer, which must also support that input.
 
-Do not reimplement node positioning, sorting, or overflow inside the renderer. See [decoration configuration](/en/docs/api/options/node#nodedecorationconfig) for offsets, anchors, ratios, and defaults.
+Do not reimplement node positioning, sorting, or overflow inside the renderer. See [decoration configuration](/en/docs/api/options#config-node-decoration) for offsets, anchors, ratios, and defaults.
 
 ## Collisions and updates
 
 The example disables decoration collision hiding for comparison. In real data, choose by density; hideOnCollision: false can overlap and does not reserve decoration collision-grid space. minZoom is independent of label policy.
 
-Update callback-driven items through public data methods, not shared renderer state. Input node dimensions are already in screen units. This example deliberately uses fixed CSS text and converts by dpr only. See [DecorationRenderer](/en/docs/api/extensions/drawing#decorationrenderer) for units.
+Update callback-driven items through public data methods, not shared renderer state. Input node dimensions are already in screen units. This example deliberately uses fixed CSS text and converts by dpr only. See [DecorationRenderer](/en/docs/api/extensions#decorationrenderer) for units.
 
 ## Common questions
 
@@ -44,9 +44,6 @@ Culling, collision, or overflow selection can skip draw. Keep measurement pure r
 
 Yes; see [node badges](/en/docs/examples/decoration-badges). Reuse existing visuals before implementing a renderer.
 
-<details data-related-examples>
-<summary>Related runnable examples</summary>
+**Related runnable examples**
 
 - [Node badges](/en/docs/examples/decoration-badges)
-
-</details>

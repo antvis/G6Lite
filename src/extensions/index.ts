@@ -12,7 +12,7 @@ import { registerDecoration } from './decoration';
 import { registerEdge } from './edge';
 import { registerLabelRenderer } from './label';
 import { registerNode, type NodeExtensionInput } from './node';
-import { extensionFactory, registerExtension } from './registry';
+import { registerExtension } from './registry';
 
 export { BaseNode, BreathingNode, registerNode } from './node';
 export type {
@@ -21,7 +21,6 @@ export type {
   NodeExtensionInput,
   NodeOverlayDrawParams,
 } from './node';
-export { extensionFactory };
 
 export function register(type: 'node', name: string, extension: NodeExtensionInput): void;
 export function register<T = unknown>(

@@ -1,0 +1,22 @@
+---
+title: Highlight neighbors
+description: Highlight a node’s neighborhood or an edge and its endpoints on hover.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+Highlight a node’s neighborhood or an edge and its endpoints on hover.
+
+## Configuration
+
+Set the neighborhood depth with `degree` and dim other elements with `inactiveState`. Hover B to see its one-hop neighborhood.
+
+```ts
+behaviors: [{ type: 'hover-highlight', degree: 1, inactiveState: 'inactive' }],
+```
+
+## Example
+
+<NodeDocExample id="behavior-highlight" locale="en" focus="highlight" />
+
+[Run the example and view the full code](/en/docs/examples/neighbor-highlight) · [Options and defaults](/en/docs/api/options#highlighting)

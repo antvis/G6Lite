@@ -1,20 +1,19 @@
 import { Graph, type NodeConfig } from '@antv/g6-lite';
 
 export async function run(container: HTMLElement) {
+  // #region node-label
   const node: NodeConfig = {
     style: {
       size: 40,
       label: (item) => String(item.data?.name ?? item.id),
       labelPlacement: 'bottom',
       labelMaxWidth: 120,
-      labelBackground: '#fff',
+      labelBackground: (item) => item.id === 'db' ? '#fff1b8' : '#e6f4ff',
+      labelBackgroundPadding: 6,
       labelFontWeight: '600',
-      icon: 'G',
-      iconType: 'text',
-      iconFontSize: 20,
-      iconColor: '#fff',
     },
   };
+  // #endregion node-label
   const graph = new Graph({
     container,
     data: {

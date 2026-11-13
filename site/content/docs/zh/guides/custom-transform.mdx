@@ -1,42 +1,15 @@
 ---
-title: 自定义 Transform
-description: 同步转换渲染输入，处理选项、复用和清理，并验证全量与增量更新差异
+title: 自定义数据处理（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-import { NodeDocExample } from '@/components/node-doc-example';
+内容已并入[数据处理 Transform](/docs/guides/transform-overview)，可直接查看[自定义数据处理](/docs/guides/transform-overview#自定义数据处理)。
 
-Transform 在布局前规范化整份输入；它不是每次数据修改都会运行的响应式派生器。需要给业务数据补显示字段、过滤或转换时使用，先验证 ID 和端点。
-
-## 实现与激活
-
-1. 工厂内部保存当前选项；init 与 update 都从完整当前 options 恢复默认值。
-2. beforeRender 用参数 data 构造新 GraphData，保留未修改的边、Combo 与字段。
-3. 注册 transform，通过 transforms 的 type 和 options 激活。
-
-<NodeDocExample id="extension-transform" locale="zh" focus="transform" />
-
-初始 label 为 Svc: API / DB，计数 init=1、update=0、run=1。Reload data 切换 A 的输入名称，复用实例并增加 update / run；init 不重复。展开完整代码查看配置和显示计数的回调。
-
-## 全量与增量的区别
-
-Update name 只增量修改 A.data.name，已有 label 不会重新生成，run 不增加；再点 Reload data 才重新转换全量输入。需要增量派生时，在应用更新流程同时更新相关字段，或让样式回调直接读取业务值。
-
-多个 Transform 按数组顺序串联；相同名称不同配置位置仍有独立实例。beforeRender 必须同步返回 GraphData，不能返回 Promise；context.data 可能为空或是旧图，不替代当前 data。
-
-## 配置与清理
-
-options 放在 Transform 配置项的 options 内，而 Plugin 的选项在顶层。当前没有公开的 transforms setter；切换构造配置时重建 Graph，不修改私有 options 或依赖调用方对象的引用。见[配置参考](/docs/api/options/transforms-plugins#transforms)。
-
-本例没有计时器或 DOM 资源，destroy 释放回调引用。自己的资源仍需清理；抛错并不回滚已原地修改的输入，所以先验证、避免修改原记录，再返回新对象。嵌套业务对象仍由应用管理所有权。
-
-## 常见问题
-
-### 为什么刷新或重排没有执行转换？
-
-refresh、layout 与增量方法不重跑注册 Transform。render / setData 才处理整份输入。
-
-### update 的参数是差量吗？
-
-签名允许 Partial，但当前运行时传完整 options，且每次复用都会调用，即使值未变化。不能仅保留上一次缺失字段而不恢复默认值。
-
-完整签名与失败语义见[TransformExtension](/docs/api/extensions/runtime#transformextension)，更多组合见[扩展综合案例](/docs/examples/extension-system)。
+- <span id="实现与激活" style={{ scrollMarginTop: '8rem' }} />[实现与注册](/docs/guides/transform-overview#实现与激活)
+- <span id="代码示例" style={{ scrollMarginTop: '8rem' }} />[代码示例](/docs/guides/transform-overview#代码示例)
+- <span id="选项与清理" style={{ scrollMarginTop: '8rem' }} />[选项与清理](/docs/guides/transform-overview#选项与清理)
+- <span id="配置与清理" style={{ scrollMarginTop: '8rem' }} />[选项与清理](/docs/guides/transform-overview#选项与清理)
+- <span id="全量与增量的区别" style={{ scrollMarginTop: '8rem' }} />[全量与增量的区别](/docs/guides/transform-overview#执行时机)
+- <span id="为什么刷新或重排没有执行转换" style={{ scrollMarginTop: '8rem' }} />[为什么刷新或重排没有执行转换](/docs/guides/transform-overview#执行时机)
+- <span id="常见问题" style={{ scrollMarginTop: '8rem' }} />[常见问题](/docs/guides/transform-overview#自定义数据处理)
+- <span id="update-的参数是差量吗" style={{ scrollMarginTop: '8rem' }} />[update 的参数是差量吗](/docs/guides/transform-overview#选项与清理)

@@ -1,5 +1,4 @@
 import {
-  extensionFactory,
   Graph,
   register,
   type BehaviorExtension,
@@ -16,6 +15,9 @@ import {
   type PluginOptions,
   type ZoomCanvasOptions,
 } from '@antv/g6-lite';
+
+// @ts-expect-error The explicit factory marker is internal.
+import { extensionFactory } from '@antv/g6-lite';
 
 declare const options: GraphOptions;
 declare const graph: Graph;
@@ -47,13 +49,9 @@ graph.scheduleRender();
 // @ts-expect-error Low-level combo picking is internal.
 graph.pickComboAt(0, 0);
 
-register(
-  'behavior',
-  'package-smoke',
-  extensionFactory(() => ({
-    getEvents: () => ({}),
-  })),
-);
+register('behavior', 'package-smoke', () => ({
+  getEvents: () => ({}),
+}));
 
 const PACKAGE_BEHAVIOR = 'package-typed-behavior' as const;
 
@@ -91,7 +89,7 @@ function createPackageBehavior(): BehaviorExtension<
   };
 }
 
-register('behavior', PACKAGE_BEHAVIOR, extensionFactory(createPackageBehavior));
+register('behavior', PACKAGE_BEHAVIOR, createPackageBehavior);
 
 const PACKAGE_PLUGIN = 'package-typed-plugin' as const;
 
@@ -118,7 +116,7 @@ function createPackagePlugin(): PluginExtension<PackagePluginOptions> {
   };
 }
 
-register('plugin', PACKAGE_PLUGIN, extensionFactory(createPackagePlugin));
+register('plugin', PACKAGE_PLUGIN, createPackagePlugin);
 
 const typedOptions: GraphOptions = {
   container: '#container',

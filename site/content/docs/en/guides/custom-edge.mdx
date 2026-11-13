@@ -1,35 +1,35 @@
 ---
 title: Custom edges
-description: Reuse built-in edge bases with business styles, callbacks, states, and data updates
+description: Reuse built-in edge bases with data-driven styles, states, and data updates
 ---
 
 import { NodeDocExample } from '@/components/node-doc-example';
 
-Use EdgeExtension to reuse business relationship visuals; prefer [edge configuration](/en/docs/api/options/edge) for simple style differences. Descriptors select a built-in base, not arbitrary paths.
+Use an `EdgeExtension` to reuse an edge type for a class of relationships. The `base` selects the path, arrows show direction, and `edge.style.label` supplies text. To vary width or color by data in one graph, use [style functions](/en/docs/guides/edge#options-edge-style-callbacks).
 
 ## Register and activate
 
-1. Choose line / arc / polyline / cubic as base.
-2. Register a stateless descriptor whose getStyle reads source, target, and edge.
-3. Activate edge.type before render.
+Choose `arc` as the base path, use `getStyle()` to set color and width by weight, and register the type with `register('edge', ...)`.
 
-<NodeDocExample id="extension-edge" locale="en" focus="descriptor" />
+<NodeDocExample id="extension-edge" locale="en" focus="descriptor" view="code" />
 
-light has weight 1, heavy weight 4. Click an edge for purple selection. Toggle heavy weight changes business data; click empty space to clear selection before comparing base widths and colors.
+Set `edge.type` to the registered name in `new Graph()`. In this example, `light` starts with weight `1` and `heavy` with weight `4`.
+
+<NodeDocExample id="extension-edge" locale="en" focus="edge-activation" />
 
 ## Overrides and updates
 
-The button uses updateEdgeData; later style resolution reevaluates getStyle. Do not mutate query Models or modify Graph inside callbacks.
+Click **Toggle heavy weight** above. `updateEdgeData()` changes the weight and `getStyle()` updates the color and width. Click an edge to apply the purple selection style, or click empty space to restore its base style.
 
-Configured style fields override defaults, then state styles apply. The selected width of 4 is independent of weight. See [style callbacks](/en/docs/api/options/edge#style-callbacks) for whole-object function limitations.
+<NodeDocExample id="extension-edge" locale="en" focus="edge-weight-update" view="code" />
 
-Arrows, picking, and batching come from the base. polyline routing and direction restrictions still apply; see [routing](/en/docs/guides/polyline-routing).
+See [EdgeExtension](/en/docs/api/extensions#edgeextension) for style precedence and extension fields.
 
 ## Common questions
 
 ### Can I implement arbitrary drawing or shaders?
 
-EdgeExtension provides base, style, getStyle, and stateStyles, without arbitrary draw / shader hooks. See [EdgeExtension](/en/docs/api/extensions/drawing#edgeextension).
+EdgeExtension provides base, style, getStyle, and stateStyles, without arbitrary draw / shader hooks. See [EdgeExtension](/en/docs/api/extensions#edgeextension).
 
 ### Why is a label missing?
 
@@ -37,6 +37,6 @@ Descriptor defaults do not replace label activation. This example explicitly pro
 
 ### Why is an edge difficult to select?
 
-Set hitAreaWidth and enable interaction. The example uses 14 without increasing visual width; see [picking width](/en/docs/api/options/edge#picking-width).
+Set hitAreaWidth and enable interaction. The example uses 14 without increasing visual width; see [picking width](/en/docs/guides/edge#picking-width).
 
-See [registration](/en/docs/api/extensions/registration) for caching and errors.
+See [registration](/en/docs/api/graph#extension-registration) for caching and errors.

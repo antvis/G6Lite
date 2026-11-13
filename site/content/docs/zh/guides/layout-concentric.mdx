@@ -1,0 +1,45 @@
+---
+title: 同心圆布局 Concentric
+description: 按排序指标把节点分到不同圆环，指标值较大的节点靠近中心。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+按排序指标把节点分到不同圆环，指标值较大的节点靠近中心。
+
+## 使用场景
+
+适合用连接数突出枢纽节点。
+
+## 基本用法
+
+布局类型通过 `layout.type` 指定。
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'concentric' },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `sortBy` | 排序依据，`'degree'` 按节点度数排序。 | `'degree'` \| `(node) => number` | `'degree'` |
+| `maxLevelDiff` | 同一圈内排序值之差必须小于这个值。 | `number` | 自动计算 |
+| `preventOverlap` | 是否根据节点大小和间距避免重叠。 | `boolean` | `false` |
+| `nodeSpacing` | 避让重叠时预留的节点间距。 | `number` | `10` |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
+
+## 代码示例
+
+节点按连接数分圈。紫色节点有 5 条连接，排在中心。蓝色节点各有 3 条连接，围成内圈。绿色节点各有 1 条连接，围成外圈。
+
+<NodeDocExample id="built-in-layout" layoutType="concentric" locale="zh" />
+
+[对比关系网络布局](/docs/guides/layout-networks)

@@ -1,142 +1,17 @@
 ---
-title: 拖拽事件
-description: 节点、Combo 与边端点拖拽的各阶段、位移与结果
+title: 拖拽事件（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-拖拽节点或 Combo 时启用 drag-node；拖拽连线端点时启用 drag-edge。保存操作通常放在 dragend，减少移动过程中的请求。
+内容已并入 [拖拽事件明细](/docs/api/graph/events#event-drag)。
 
-## 保存节点位置
-
-```ts
-import type { Graph } from '@antv/g6-lite';
-
-declare const graph: Graph;
-graph.on('node:dragend', ({ nodeIds }) => {
-  console.log(nodeIds.map((id) => ({ id, position: graph.getNodePosition(id) })));
-});
-```
-
-选中多节点拖动时，nodeId 是 nodeIds 的第一项，不保证是实际按下的节点。接入和清理见[选择与拖拽指南](/docs/guides/events#选择与拖拽事件)。
-
-## node:dragstart
-
-拖动节点超过 3 CSS 像素阈值时触发，在首次位置写回之前。
-
-```ts
-type Payload = {
-  nodeId: string;
-  nodeIds: string[];
-  event: MouseEvent
-};
-```
-
-## node:drag
-
-本次节点位置写回后触发。dx/dy 是从手势起点累计的图坐标位移，不是逐帧增量。
-
-```ts
-type Payload = {
-  nodeId: string;
-  nodeIds: string[];
-  dx: number;
-  dy: number;
-  event: MouseEvent
-};
-```
-
-## node:dragend
-
-有效节点拖拽松开后触发，不携带原始鼠标事件。使用 nodeIds 逐个查询最终位置。
-
-```ts
-type Payload = {
-  nodeId: string;
-  nodeIds: string[]
-};
-```
-
-## combo:dragstart
-
-拖动 Combo 背景超过阈值时触发。由 drag-node 行为提供。
-
-```ts
-type Payload = {
-  comboId: string;
-  event: MouseEvent
-};
-```
-
-## combo:drag
-
-成员位置写回后触发，dx/dy 同样是累计的图坐标位移。
-
-```ts
-type Payload = {
-  comboId: string;
-  dx: number;
-  dy: number;
-  event: MouseEvent
-};
-```
-
-## combo:dragend
-
-有效 Combo 拖拽松开后触发，不携带原始鼠标事件。
-
-```ts
-type Payload = {
-  comboId: string
-};
-```
-
-## edge:dragstart
-
-在边上按下左键即触发，没有节点拖拽的移动阈值；dragEnd 表示离按下点更近的端点，相等时选择 target。
-
-```ts
-type Payload = {
-  edgeId?: string;
-  edgeIndex: number;
-  source: string;
-  target: string;
-  dragEnd: 'source' | 'target';
-  event: MouseEvent;
-};
-```
-
-## edge:drag
-
-拖动边端点期间触发。source/target 仍为原始端点，行为不会绘制临时边。
-
-```ts
-type Payload = {
-  edgeId?: string;
-  edgeIndex: number;
-  source: string;
-  target: string;
-  dragEnd: 'source' | 'target';
-  event: MouseEvent;
-};
-```
-
-## edge:dragend
-
-松开时触发。有效落点时 source/target 为提议的新端点；否则为原端点。reconnected 不代表已经写回数据，也不保证端点与原值不同。
-
-```ts
-type Payload = {
-  edgeId?: string;
-  edgeIndex: number;
-  source: string;
-  target: string;
-  originalSource: string;
-  originalTarget: string;
-  reconnected: boolean;
-  newEndpoint?: string;
-  event: MouseEvent;
-};
-```
-
-拖拽派生载荷中的 event 仍为有效字段，不是元素载荷里的弃用别名。node:dragend、combo:dragend 没有 event 或 nativeEvent。合法的边落点只产生提议，业务仍需验证并写回；完整做法见[连线编辑说明](/docs/guides/interactions#事件分发模型)。
-
-[事件 API](/docs/api/graph/events) · [事件主题](/docs/guides/events)。
+- <span id="保存节点位置" style={{ display: 'block', scrollMarginTop: '8rem' }} />[保存节点位置](/docs/api/graph/events#保存节点位置)
+- <span id="nodedragstart" style={{ display: 'block', scrollMarginTop: '8rem' }} />[node:dragstart](/docs/api/graph/events#nodedragstart)
+- <span id="nodedrag" style={{ display: 'block', scrollMarginTop: '8rem' }} />[node:drag](/docs/api/graph/events#nodedrag)
+- <span id="nodedragend" style={{ display: 'block', scrollMarginTop: '8rem' }} />[node:dragend](/docs/api/graph/events#nodedragend)
+- <span id="combodragstart" style={{ display: 'block', scrollMarginTop: '8rem' }} />[combo:dragstart](/docs/api/graph/events#combodragstart)
+- <span id="combodrag" style={{ display: 'block', scrollMarginTop: '8rem' }} />[combo:drag](/docs/api/graph/events#combodrag)
+- <span id="combodragend" style={{ display: 'block', scrollMarginTop: '8rem' }} />[combo:dragend](/docs/api/graph/events#combodragend)
+- <span id="edgedragstart" style={{ display: 'block', scrollMarginTop: '8rem' }} />[edge:dragstart](/docs/api/graph/events#edgedragstart)
+- <span id="edgedrag" style={{ display: 'block', scrollMarginTop: '8rem' }} />[edge:drag](/docs/api/graph/events#edgedrag)
+- <span id="edgedragend" style={{ display: 'block', scrollMarginTop: '8rem' }} />[edge:dragend](/docs/api/graph/events#edgedragend)

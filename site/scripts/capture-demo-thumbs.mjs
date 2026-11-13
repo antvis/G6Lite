@@ -18,6 +18,7 @@ const slow = new Set(['real-dataset', 'large', 'large-labeled', 'layout-worker',
 // menus, status text). Some demos render the graph into a nested wrapper
 // div, so only hide direct children that contain no render layer at all.
 const HIDE_CHROME_CSS =
+  '.example-preview-canvas [data-capture-ignore], ' +
   '.example-preview-canvas > *:not(canvas):not(.label-overlay):not(:has(canvas)) { display: none !important; }';
 
 async function launchBrowser() {

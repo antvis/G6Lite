@@ -1,4 +1,5 @@
 import { Graph, type Camera } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -27,8 +28,7 @@ export async function run(container: HTMLElement) {
   const restore = () => graph.setCamera(saved);
   const focus = () => graph.focusItem('B', 32);
   // #endregion saved-view
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;left:12px;top:12px;right:150px;display:flex;flex-wrap:wrap;gap:6px;z-index:20;';
+  const ui = createDemoPanel(container);
   const status = document.createElement('div');
   status.setAttribute('role', 'status');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;right:12px;padding:8px;background:white;color:#334155;font:12px/1.5 system-ui;white-space:pre-line;pointer-events:none;z-index:20;';
@@ -57,15 +57,6 @@ export async function run(container: HTMLElement) {
     ['Zoom ×1.5', zoom], ['Pan right', pan], ['Center', center], ['Fit', fit], ['Reset camera', reset],
     ['Save view', save], ['Restore view', restore], ['Focus B', focus],
   ];
-  const buttons = actions.map(([label, action]) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = label;
-    button.style.cssText = 'padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;color:#334155;font:12px system-ui;cursor:pointer;';
-    button.onclick = () => { action(); schedule(); };
-    controls.append(button);
-    return button;
-  });
   const events = ['node:pointermove', 'edge:pointermove', 'canvas:pointermove', 'canvas:pointerup', 'resize'] as const;
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
@@ -75,8 +66,7 @@ export async function run(container: HTMLElement) {
     window.removeEventListener('click', schedule);
     window.removeEventListener('wheel', schedule);
     window.removeEventListener('scroll', schedule, true);
-    for (const button of buttons) button.onclick = null;
-    controls.remove();
+    ui.destroy();
     status.remove();
     destroy();
   };
@@ -89,7 +79,10 @@ export async function run(container: HTMLElement) {
     window.addEventListener('click', schedule);
     window.addEventListener('wheel', schedule, { passive: true });
     window.addEventListener('scroll', schedule, { passive: true, capture: true });
-    container.append(controls, status);
+    for (const [label, action] of actions) {
+      ui.addAction(label, () => { action(); schedule(); });
+    }
+    container.append(status);
     update();
     return graph;
   } catch (error) {

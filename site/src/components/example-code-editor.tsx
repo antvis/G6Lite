@@ -24,10 +24,12 @@ function useIsDark(): boolean {
 export function ExampleCodeEditor({
   value,
   onChange,
+  readOnly,
   wrap,
 }: {
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
   wrap: boolean;
 }) {
   const isDark = useIsDark();
@@ -36,9 +38,15 @@ export function ExampleCodeEditor({
     <CodeMirror
       aria-label="Example source code"
       basicSetup={{ foldGutter: false, highlightActiveLine: false }}
-      extensions={[javascript({ typescript: true }), ...(wrap ? [EditorView.lineWrapping] : [])]}
+      editable={!readOnly}
+      extensions={[
+        javascript({ typescript: true }),
+        ...(readOnly ? [EditorView.contentAttributes.of({ tabindex: '0' })] : []),
+        ...(wrap ? [EditorView.lineWrapping] : []),
+      ]}
       height="100%"
       onChange={onChange}
+      readOnly={readOnly}
       theme={isDark ? 'dark' : 'light'}
       value={value}
     />

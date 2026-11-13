@@ -5,7 +5,7 @@ description: Register position calculations, handle options and cancellation, an
 
 import { NodeDocExample } from '@/components/node-doc-example';
 
-A layout takes data and returns positioned nodes, without drawing or writing internal models. Try [built-in layouts](/en/docs/guides/layout) first.
+Use a `LayoutExtension` to calculate node positions from graph data. This example arranges nodes in a row with equal spacing. See the [Layout overview](/en/docs/guides/layout-overview) for built-in layouts.
 
 ## Implement and execute
 
@@ -33,7 +33,7 @@ export async function calculate(data: GraphData) {
 }
 ```
 
-See the [runLayout example](/en/docs/api/graph/layout#runlayout) for displaying calculated results. Do not request rendering from execute; Graph applies results. context.data can be the old graph, not this execution's input.
+See the [runLayout example](/en/docs/api/graph#graph-layout-runlayout) for displaying calculated results. Do not request rendering from execute; Graph applies results. context.data can be the old graph, not this execution's input.
 
 ## Common questions
 
@@ -45,11 +45,8 @@ No. Registered extensions currently take the main-thread path. Own messages, can
 
 Cancellation invalidates old results rather than promising rejection. Keep an application generation check to prevent stale UI updates.
 
-See [LayoutExtension](/en/docs/api/extensions/runtime#layoutextension) for runtime fields and fallback, and the [two-row example](/en/docs/examples/custom-layout).
+See [LayoutExtension](/en/docs/api/extensions#layoutextension) for runtime fields and fallback, and the [two-row example](/en/docs/examples/custom-layout).
 
-<details data-related-examples>
-<summary>Related runnable examples</summary>
+**Related runnable examples**
 
 - [Custom layout](/en/docs/examples/custom-layout)
-
-</details>

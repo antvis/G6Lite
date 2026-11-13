@@ -1,14 +1,7 @@
 {
-  "title": "Graph 方法",
+  "title": "图 API",
   "pagesIndex": "../graph.mdx",
   "pages": [
-    "lifecycle",
-    "data",
-    "data-mutations",
-    "states",
-    "viewport",
-    "layout",
-    "combo",
-    "events"
+    "events.mdx"
   ]
 }

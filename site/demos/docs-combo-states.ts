@@ -23,6 +23,7 @@ export async function run(container: HTMLElement) {
       ],
     },
     node: { style: { size: 22 } },
+    // #region state-styles
     combo: { style: {
       padding: 28, label: (combo) => combo.id,
       stateStyles: {
@@ -30,6 +31,7 @@ export async function run(container: HTMLElement) {
         inactive: { opacity: 0.3 },
       },
     } },
+    // #endregion state-styles
     behaviors: [],
     autoFit: { padding: 56, maxZoom: 1 },
   });

@@ -1,0 +1,45 @@
+---
+title: Force layout
+description: Attraction pulls linked nodes together and repulsion keeps nodes apart.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Attraction pulls linked nodes together and repulsion keeps nodes apart.
+
+## When to use it
+
+Use it to explore connections in social or service dependency networks.
+
+## Basic usage
+
+Set the layout type with `layout.type`.
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'force' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `linkDistance` | Target distance between linked nodes. | `number` | `200` |
+| `nodeStrength` | Repulsion strength between nodes. | `number` | `1000` |
+| `edgeStrength` | Attraction strength along an edge. | `number` | `50` |
+| `maxIteration` | Maximum number of iterations. | `number` | Depends on node count |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
+
+## Code example
+
+The example sets the target distance between connected nodes to 100.
+
+<NodeDocExample id="built-in-layout" layoutType="force" locale="en" />
+
+[Compare network layouts](/en/docs/guides/layout-networks)

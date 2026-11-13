@@ -1,0 +1,45 @@
+---
+title: D3 force layout
+description: Use D3’s force simulation to position nodes.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Use D3’s force simulation to position nodes.
+
+## When to use it
+
+Use it when a network needs control over repulsion, link distance, or cooling speed.
+
+## Basic usage
+
+Set the layout type with `layout.type`.
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'd3-force' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `linkDistance` | Target distance between linked nodes. | `number` or function | `max(200, √nodeCount × 80)` |
+| `nodeStrength` | Force between nodes. Negative values repel. | `number` or function | `-30` |
+| `alphaDecay` | Rate at which the simulation cools on each step. | `number` | `0.1` |
+| `preventOverlap` | Whether to enable node collision detection. | `boolean` | `false` |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
+
+## Code example
+
+The target link distance is 100, and negative `nodeStrength` repels nodes.
+
+<NodeDocExample id="built-in-layout" layoutType="d3-force" locale="en" />
+
+[Compare network layouts](/en/docs/guides/layout-networks)

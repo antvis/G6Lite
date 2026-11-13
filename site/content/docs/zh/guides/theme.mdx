@@ -5,7 +5,7 @@ description: 选择预设、应用品牌色、切换主题，并排查样式覆�
 
 import { NodeDocExample as ThemeDocExample } from '@/components/node-doc-example';
 
-通过 `theme` 统一节点、边和画布的默认配色。先选 light / dark，再覆盖品牌 token；按数据着色时使用 node/edge.style 字段回调。全部字段和默认值见[主题配置参考](/docs/api/options/theme)。
+通过 `theme` 统一节点、边和画布的默认配色。先选 light / dark，再覆盖品牌 token；按数据着色时在 `node.style` 或 `edge.style` 的对应字段中配置样式函数。全部字段和默认值见[主题配置参考](/docs/api/options#options-theme)。
 
 ## 使用预设
 
@@ -30,7 +30,7 @@ const brandTheme: ThemeOption = {
 };
 ```
 
-状态表是整表替换。需要保留 disabled 等预设状态时，按参考中的[展开写法](/docs/api/options/theme#覆盖规则)构造新表。
+状态表是整表替换。需要保留 disabled 等预设状态时，按参考中的[展开写法](/docs/api/options#覆盖规则)构造新表。
 
 ## 优先级
 
@@ -56,7 +56,7 @@ graph.updateOptions({
 
 ## 默认视觉
 
-省略 theme 使用 light，默认节点尺寸为 24。标签需配置文本后才绘制，颜色不随主题自动切换。预设字段值与状态表现查[主题参考](/docs/api/options/theme#状态预设)；全部内置状态可在[默认主题与交互状态](/docs/examples/default-theme)中并排查看。
+省略 theme 使用 light，默认节点尺寸为 24。标签需配置文本后才绘制，颜色不随主题自动切换。预设字段值与状态表现查[主题参考](/docs/api/options#状态预设)；全部内置状态可在[默认主题与交互状态](/docs/examples/default-theme)中并排查看。
 
 ## 常见问题
 
@@ -74,13 +74,10 @@ graph.updateOptions({
 
 ## 相关
 
-- [主题配置参考](/docs/api/options/theme)：token、预设、覆盖规则与 resolveTheme。
+- [主题配置参考](/docs/api/options#options-theme)：token、预设、覆盖规则与 resolveTheme。
 - [节点指南](/docs/guides/node) · [边指南](/docs/guides/edge)：按数据设置外观。
 - [标签与图标](/docs/guides/label) · [Combo](/docs/guides/combo)：同步其他视觉元素。
 
-<details data-related-examples>
-<summary>相关可运行示例</summary>
+**相关可运行示例**
 
 - [默认主题与交互状态](/docs/examples/default-theme)
-
-</details>

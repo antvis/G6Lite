@@ -36,7 +36,7 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const ui = createDemoPanel(host, 'Worker 布局', '', '');
+  const ui = createDemoPanel(host);
   ui.setStatus(`force · worker requested · ${Math.round(performance.now() - started)} ms\nWorker success requires a Network/Performance check; failure may fall back.`);
 
   return {
@@ -44,7 +44,7 @@ export async function run(container: string | HTMLElement) {
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();
-      ui.panel.remove();
+      ui.destroy();
     },
   };
 }

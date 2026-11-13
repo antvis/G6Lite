@@ -7,9 +7,10 @@
  *
  * Emits on graph.eventEmitter (payloads carry the element `data` so consumers
  * need not re-query):
- *   node:pointerover / node:pointermove / node:pointerleave
+ *   node:pointerover / node:pointerenter / node:pointermove / node:pointerleave
  *   node:pointerdown / node:click / node:dblclick / node:contextmenu / node:wheel
  *   edge:* (same set, payload { edgeId, edgeIndex, source, target, data, event })
+ *   combo:pointerover / combo:pointerenter / combo:pointermove / combo:pointerleave
  *   combo:pointerdown / combo:click / combo:dblclick / combo:contextmenu
  *   canvas:pointermove / canvas:pointerdown / canvas:pointerup
  *   canvas:click / canvas:dblclick / canvas:contextmenu / canvas:wheel
@@ -25,7 +26,9 @@ import type { GraphElementEvent } from '../types';
 import { GESTURE_CONSUME_EVENT } from './gesture';
 
 type HoverTarget =
-  { kind: 'node'; id: string } | { kind: 'edge'; id: string; index: number } | null;
+  | { kind: 'node' | 'combo'; id: string }
+  | { kind: 'edge'; id: string; index: number }
+  | null;
 
 /** A node/edge/combo/canvas hit, resolved once per DOM event. */
 type Hit =
@@ -163,7 +166,7 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
         data: node?.data,
       });
       emitter.emit('node:pointerleave', payload);
-    } else {
+    } else if (lastHover.kind === 'edge') {
       const edge = renderer.getEdges()[lastHover.index];
       if (edge) {
         const edgeId = (edge as { id?: string }).id ?? String(lastHover.index);
@@ -179,6 +182,11 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
           }),
         );
       }
+    } else {
+      emitter.emit(
+        'combo:pointerleave',
+        createPayload(e, 'combo', { targetId: lastHover.id, comboId: lastHover.id }),
+      );
     }
     lastHover = null;
   };
@@ -244,8 +252,24 @@ export function attachInteraction(renderer: Renderer, graph: Graph): () => void 
       return;
     }
 
-    // combo or canvas background — leave any hovered element
-    emitLeave(e);
+    if (hit.kind === 'combo') {
+      const same = lastHover?.kind === 'combo' && lastHover.id === hit.comboId;
+      if (!same) {
+        emitLeave(e);
+        const payload = createPayload(e, 'combo', { targetId: hit.comboId, comboId: hit.comboId });
+        emitter.emit('combo:pointerover', payload);
+        emitter.emit('combo:pointerenter', payload);
+        lastHover = { kind: 'combo', id: hit.comboId };
+      }
+      emitter.emit(
+        'combo:pointermove',
+        createPayload(e, 'combo', { targetId: hit.comboId, comboId: hit.comboId }),
+      );
+    } else {
+      emitLeave(e);
+    }
+
+    // Keep the existing canvas movement stream on Combo backgrounds.
     emitter.emit('canvas:pointermove', createPayload(e, 'canvas'));
   };
 

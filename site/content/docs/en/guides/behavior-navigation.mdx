@@ -1,0 +1,22 @@
+---
+title: Zoom and pan the canvas
+description: Set wheel speed, zoom limits, and drag-to-pan gestures
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+[Drag canvas](/en/docs/guides/behavior-drag-canvas) · [Zoom canvas](/en/docs/guides/behavior-zoom-canvas)
+
+## Configuration
+
+Enable `zoom-canvas` for wheel zoom and `drag-canvas` to pan by dragging empty space. Omitting `behaviors` enables both.
+
+Set wheel speed with `sensitivity` and its limits with `minZoom` and `maxZoom`. Set `ignoreModifierKeys` to `true` to reserve modified drags for brush or lasso selection.
+
+## Example
+
+Use the wheel over the canvas and watch the current zoom in the bottom-left corner. Drag empty space with the left mouse button to pan.
+
+<NodeDocExample id="behavior-zoom-pan" locale="en" focus="navigation" />
+
+Wheel zoom stays between 0.4× and 2×. Calls to `zoomTo()` and `fitView()` use their own options. [Navigation and dragging options](/en/docs/api/options#navigation-and-dragging)

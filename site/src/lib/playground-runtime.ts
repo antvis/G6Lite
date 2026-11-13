@@ -11,14 +11,31 @@ interface SiteExampleModule {
   run(container: string | HTMLElement): Promise<SiteExampleHandle>;
 }
 
-async function loadExternals(): Promise<Record<string, unknown>> {
-  const [g6, demoPanel, tooling] = await Promise.all([
+const layoutModules = {
+  '@antv/g6-lite/layouts/mds': () => import('@antv/g6-lite/layouts/mds'),
+  '@antv/g6-lite/layouts/radial': () => import('@antv/g6-lite/layouts/radial'),
+  '@antv/g6-lite/layouts/indented': () => import('@antv/g6-lite/layouts/indented'),
+  '@antv/g6-lite/layouts/mindmap': () => import('@antv/g6-lite/layouts/mindmap'),
+  '@antv/g6-lite/layouts/fishbone': () => import('@antv/g6-lite/layouts/fishbone'),
+  '@antv/g6-lite/layouts/random': () => import('@antv/g6-lite/layouts/random'),
+};
+
+async function loadExternals(code: string): Promise<Record<string, unknown>> {
+  const [g6, demoPanel, tooling, lilGui] = await Promise.all([
     import('@antv/g6-lite'),
     import('../../demos/demo-panel.ts'),
     import('../../demos/tooling.ts'),
+    import('lil-gui'),
   ]);
+  const layouts = await Promise.all(
+    Object.entries(layoutModules)
+      .filter(([name]) => code.includes(`'${name}'`) || code.includes(`"${name}"`))
+      .map(async ([name, load]) => [name, await load()] as const),
+  );
   return {
+    ...Object.fromEntries(layouts),
     '@antv/g6-lite': g6,
+    'lil-gui': lilGui,
     './demo-panel.ts': demoPanel,
     './demo-panel': demoPanel,
     './tooling.ts': tooling,
@@ -77,7 +94,7 @@ function rewriteImports(code: string): string {
   output = output.replace(/^import\s*(["'])([^"']+)\1\s*;?$/gm, '');
 
   if (/^import[\s{*]/m.test(output)) {
-    throw new Error('Playground supports static imports of @antv/g6-lite, demo-panel, and tooling only');
+    throw new Error('Playground supports static imports of @antv/g6-lite, its optional layouts, lil-gui, demo-panel, and tooling only');
   }
   return output;
 }
@@ -91,7 +108,8 @@ export async function runPlaygroundExample(
   source: string,
   container: HTMLElement,
 ): Promise<SiteExampleHandle> {
-  const [externals, code] = await Promise.all([loadExternals(), Promise.resolve(compile(source))]);
+  const code = compile(source);
+  const externals = await loadExternals(code);
   const body = `const __ex = globalThis[${JSON.stringify(GLOBAL_KEY)}];\n${rewriteImports(code)}`;
   const url = URL.createObjectURL(new Blob([body], { type: 'text/javascript' }));
 

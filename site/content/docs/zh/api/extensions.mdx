@@ -1,35 +1,296 @@
 ---
-title: 扩展
-description: 扩展契约分类索引，注册、绘制、运行与配置的唯一查询入口
+title: 扩展参考
+description: 扩展的配置位置、上下文、绘制回调和生命周期。
 ---
 
-先按能力查契约；按步骤开发看[扩展体系](/docs/guides/extensions)。绘制类与运行类的生命周期不同，不把字段、教程和实例作用域混为一份定义。
+<span id="register" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-## `register()`
+## 扩展类型与工厂 [#extension-types]
 
-注册重载、名称约束、覆盖、兼容形式与类型见[注册与上下文](/docs/api/extensions/registration#register)。
+注册和启用示例见 [register()](/docs/api/graph#graph-extensions-register)。
 
-| 类别 | 激活位置 | 完整公共协议 |
+| 类别 | 扩展类型 | 配置位置 |
 | --- | --- | --- |
-| node | node.type | [NodeExtension](/docs/api/extensions/drawing#nodeextension) |
-| edge | edge.type | [EdgeExtension](/docs/api/extensions/drawing#edgeextension) |
-| label | node / edge.labelRenderer | [LabelRenderer](/docs/api/extensions/drawing#labelrenderer) |
-| decoration | node.decorations[].renderer | [DecorationRenderer](/docs/api/extensions/drawing#decorationrenderer) |
-| behavior | behaviors | [BehaviorExtension](/docs/api/extensions/runtime#behaviorextension) |
-| layout | layout.type | [LayoutExtension](/docs/api/extensions/runtime#layoutextension) |
-| transform | transforms | [TransformExtension](/docs/api/extensions/runtime#transformextension) |
-| plugin | plugins | [PluginExtension](/docs/api/extensions/runtime#pluginextension) |
+| `node` | [`NodeExtension`](#nodeextension) | `node.type` |
+| `edge` | [`EdgeExtension`](#edgeextension) | `edge.type` |
+| `label` | [`LabelRenderer<TData>`](#labelrenderer) | `node.labelRenderer` / `edge.labelRenderer` |
+| `decoration` | [`DecorationRenderer`](#decorationrenderer) | `node.decorations[].renderer` |
+| `behavior` | [`BehaviorExtension<TOptions, TEventMap>`](#behaviorextension) | `behaviors[].type` |
+| `layout` | [`LayoutExtension<TOptions>`](#layoutextension) | `layout.type` |
+| `transform` | [`TransformExtension<TOptions>`](#transformextension) | `transforms[].type` |
+| `plugin` | [`PluginExtension<TOptions>`](#pluginextension) | `plugins[].type` |
 
-Transform / Plugin 的配置形状、顺序与更新边界见[配置参考](/docs/api/options/transforms-plugins)。
+<span id="注册规则" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-## `extensionFactory()`
+同类别同名时，后注册的定义用于后续创建的实例。
 
-标记工厂不等于立即创建实例，也不统一每个 Graph 一次。完整签名、注册形式与缓存/实例作用域见[工厂契约](/docs/api/extensions/registration#extensionfactory)。
+<span id="extensionfactory" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-## 扩展上下文
+<span id="graph-extensions-extensionfactory" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-快照字段、数据写入、状态替换、坐标、调度和销毁状态统一定义于[ExtensionContext](/docs/api/extensions/registration#extensioncontext)。运行钩子的输入和完成时机见[运行契约](/docs/api/extensions/runtime)。
+<span id="extension-registration-extensionfactory" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-## `runLayout()`
+有状态的扩展可以直接向 `register()` 传入工厂函数。每次调用工厂时返回一个新实例。
 
-独立计算的签名、视口、取消信号和示例见[runLayout](/docs/api/graph/layout#runlayout)，已有 Graph 重排用[布局方法](/docs/api/graph/layout)。独立计算不调用 Layout.init；实现步骤见[自定义布局](/docs/guides/custom-layout)。
+<span id="runlayout" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+独立计算布局坐标见 [runLayout()](/docs/api/graph#graph-layout-runlayout)。
+
+<span id="扩展上下文" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+<span id="兼容成员" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+## ExtensionContext [#extensioncontext]
+
+扩展在 `init(context, options)` 中拿到上下文。用 `context.data` 读写业务数据、用 `context.state` 管理状态、用 `context.viewport` 转换坐标。扩展自己创建的资源在 `destroy()` 中释放。
+
+`init(context: ExtensionContext, options: Readonly<TOptions>): void` 和 `destroy(): void` 都是同步钩子。
+
+### data：读取快照与更新业务字段 [#data读取快照与更新业务字段]
+
+| 调用 | 返回值与行为 |
+| --- | --- |
+| getNode(id: string) | ExtensionNodeData 或 undefined |
+| getEdge(id: string) | ExtensionEdgeData 或 undefined |
+| getNodeIds() / getEdgeIds() | string[] 新数组，缺失模型时为空，不保证稳定顺序 |
+| updateNode(id: string, data: Record&lt;string, unknown&gt;) | void；浅合并节点业务 data，不改身份、坐标或归属 |
+| updateEdge(id: string, data: Record&lt;string, unknown&gt;) | void；浅合并边业务 data，不改端点 |
+
+参数 id 是元素 ID。缺失元素读取返回 undefined，更新跳过。写入沿用[Graph 数据方法](/docs/api/graph#graph-data-mutations)的前提：首次有效 render 后使用；销毁后不写入。
+
+**快照字段**
+
+| 字段 | 类型（字段均只读） | 所属快照 |
+| --- | --- | --- |
+| id | string | 节点与边 |
+| name? | string | 仅节点 |
+| x / y | number，图坐标 | 仅节点 |
+| source / target | string，端点节点 ID | 仅边 |
+| data? | Readonly&lt;Record&lt;string, unknown&gt;&gt; | 节点与边，可选 |
+| states | readonly ElementState[] | 节点与边，注意是数组，不是 Model 的 Set |
+
+每次读取复制元素记录、状态数组和顶层 `data`。深层对象可能共享，运行时也可能未冻结。修改顶层副本不会写回。快照只含表中字段。
+
+首次 render 的布局和 Transform 中，context.data 可能为空；替换数据时可能仍是上一版已提交数据。计算本次输入必须使用 execute(data, runtime) / beforeRender(data) 的 data 参数。
+
+### state：替换状态成员 [#state替换状态成员]
+
+| 调用 | 返回值与行为 |
+| --- | --- |
+| set(id: string, states: ElementState[]) | void；替换该元素的整份状态列表，不是增量添加 |
+| setAll(stateMap: Record&lt;string, ElementState[]&gt;) | void；替换列出 ID 的状态，未列出的元素保留原状 |
+| get(id: string) | ElementState[] 新数组；缺失元素为空 |
+| clear(id: string) | void；清空指定元素状态 |
+
+支持节点、边和 Combo，跨类型 ID 应唯一。需要叠加标记时先 get，再保留其他状态；显隐与折叠的限制、缺失 ID 行为及状态更新时机统一见[状态方法](/docs/api/graph#graph-states)。
+
+### viewport：坐标与缩放 [#viewport坐标与缩放]
+
+| 调用 | 返回值与单位 |
+| --- | --- |
+| `screenToGraph(point: { x: number; y: number })` | `{ x: number; y: number }`，客户端 CSS 坐标转图坐标 |
+| `graphToScreen(point: { x: number; y: number })` | `{ x: number; y: number }`，图坐标转客户端 CSS 坐标 |
+| getZoom() | number，相机缩放比例 |
+
+这里的 point 是对象参数；不要传 offsetX/Y 或乘以 DPR。容器偏移、坐标示例及前提见[坐标方法](/docs/api/graph#screentograph)。
+
+### requestRender 与 isDestroyed [#requestrender-与-isdestroyed]
+
+`requestRender(): void` 请求调度绘制，不执行布局、不重新挂载扩展，也不是同步绘制完成信号。普通 data / state 写入已经安排更新。
+
+`isDestroyed(): boolean` 反映所属 Graph 是否已销毁。异步回调写入前检查，同时取消扩展自己的异步任务；这个检查不会代替取消。
+
+### 清理与异常 [#清理与异常]
+
+Graph 会解绑 `getEvents()` 返回的监听。扩展自行清理资源和异步任务。`init()` 部分失败后也可能执行 `destroy()`。
+
+## 绘制扩展 [#extension-drawing]
+
+绘制类扩展是按名称缓存的无状态描述，可跨 Graph 共用；没有 init / destroy。注册与缓存规则见[注册契约](#extension-types)。样式能表达时先用配置，内容绘制才使用扩展。
+
+### NodeExtension [#nodeextension]
+
+用 register('node', name, descriptor) 注册，node.type 激活。
+
+| 字段 / 回调 | 类型与行为 |
+| --- | --- |
+| base? | 'circle' 或 'rect'；缺省 circle，复用相应 WebGL 基型与拾取 |
+| style? | Partial&lt;NodeStyleConfig&gt;，默认样式 |
+| stateStyles? | Partial&lt;Record&lt;string, NodeStateStyleOverride&gt;&gt;，默认状态样式 |
+| getStyle?(node) | GraphNode → Partial&lt;NodeStyleConfig&gt;；同步、纯函数，可多次求值 |
+| drawOverlay?(ctx, params) | CanvasRenderingContext2D、NodeOverlayDrawParams → boolean 或 void |
+| getBoundaryAnchor?(params) | NodeBoundaryAnchorParams → 点对象，x/y 为相对节点中心的屏幕偏移 |
+
+基础样式按扩展 style → 扩展 getStyle → 配置逐字段覆盖；状态优先级为主题 → 扩展 → 配置。整对象 node.style 函数有独立解析路径，不应假定它与扩展默认值或状态层自动合并；完整限制见[节点参考](/docs/guides/node#options-node)。
+
+#### NodeOverlayDrawParams [#nodeoverlaydrawparams]
+
+| 字段 | 类型与单位 |
+| --- | --- |
+| node | GraphNode 且 x/y 为 number；业务坐标仍在图空间 |
+| x / y | number，当前节点中心在覆盖画布上的 backing-store 像素 |
+| nodeSize | number，节点 size 的图坐标值，不是已经换算的屏幕直径 |
+| dpr / zoom | number，传入的 DPR 与相机缩放 |
+| camera | Camera，x/y/zoom；仅用于读取当前变换 |
+| time | number，performance.now() 的毫秒时间 |
+
+在 Canvas2D 覆盖层用传入的 `x` / `y` 定位。图尺寸乘 `zoom`，固定 CSS 尺寸乘 `dpr`。`x` / `y` 已是屏幕坐标。配对调用 `ctx.save()` / `ctx.restore()`，避免保留 `ctx` 或改动相机。
+
+返回 true 会请求继续重绘，适合动画；静态内容返回 void / false。覆盖图形不增加 WebGL 拾取热区，不会创建任意可交互场景图。隐藏或被裁剪节点可能不调用，不能把回调当业务事件。
+
+#### NodeBoundaryAnchorParams [#nodeboundaryanchorparams]
+
+| 字段 | 类型与含义 |
+| --- | --- |
+| node | GraphNode |
+| placement | 'left' / 'right' / 'top' / 'bottom' |
+| crossOffsetRatio | number，装饰配置的横向偏移比例 |
+| width / height | number，最终节点屏幕宽高，backing-store 像素 |
+| borderRadius | number，屏幕圆角半径 |
+
+返回相对中心的屏幕点；不要返回客户端坐标或再次乘 dpr / zoom。此钩子用于节点装饰定位的边界锚点，不修改边的连接端口、节点形状或拾取轮廓。抛错时回退到内置基型锚点。教程见[自定义节点](/docs/guides/custom-node)。
+
+### EdgeExtension [#edgeextension]
+
+用 register('edge', name, descriptor) 注册，edge.type 激活。
+
+| 字段 / 回调 | 类型与行为 |
+| --- | --- |
+| base? | 'line' / 'arc' / 'polyline' / 'cubic'；缺省 line |
+| style? | Partial&lt;NonNullable&lt;EdgeConfig['style']&gt;&gt; |
+| stateStyles? | Partial&lt;Record&lt;string, EdgeStateStyleOverride&gt;&gt; |
+| getStyle?(source, target, edge) | GraphNode、GraphNode、GraphEdge → 部分 EdgeConfig.style |
+
+回调必须同步返回样式，不返回路径、DOM 或 Canvas 内容；端点是节点输入视图，edge 是当前边，不是数组序号。复用内置基型的批处理、箭头和拾取；没有任意自定义 WebGL 着色器 / draw 钩子。
+
+对象式样式按配置字段覆盖扩展 getStyle 与 style，状态样式再叠加；用法见[样式函数](/docs/guides/edge#样式函数)。路由、曲率、热区和单位沿用[边配置](/docs/api/options#options-edge)，不要把 getStyle 当布局。
+
+### LabelRenderer [#labelrenderer]
+
+用 register('label', name, renderer) 注册，node.labelRenderer / edge.labelRenderer 激活。同一 renderer 可处理节点与边。
+
+- measure(params: LabelMeasureParams): LabelLayout&lt;T&gt;
+- draw(params: LabelDrawParams&lt;T&gt;): void
+
+#### 输入与输出 [#输入与输出]
+
+| 参数 | 内容 |
+| --- | --- |
+| ctx | CanvasRenderingContext2D |
+| text | string；从配置解析出的非空文本，不会仅因 data 有文字而调用 |
+| style | Readonly&lt;ResolvedLabelStyle&gt;，函数已求值，尺寸已换算为 backing-store 像素 |
+| dpr / zoom | number，当前 DPR 和缩放，已解析的 style 尺寸不要再次换算 |
+| type / item | 'node' + GraphNode，或 'edge' + GraphEdge |
+| node | 仅 type='node' 的 GraphNode |
+| edge / source / target | 仅 type='edge' 的 GraphEdge 与两端 GraphNode |
+| layout | 仅 draw；Readonly&lt;LabelLayout&lt;T&gt;&gt;，包含本次 measure 的结果 |
+
+LabelMeasureParams 是 NodeLabelParams / EdgeLabelParams 的判别联合；先按 type 分支再访问专用字段。
+
+LabelLayout&lt;T&gt; 含 width、height 和可选 data。宽高必须为有限正数，表示完整视觉包围盒；data 为本次 measure → draw 的计算缓存。measure 与 draw 不是严格一一调用：碰撞、低缩放或视口裁剪可能跳过 draw。
+
+**ResolvedLabelStyle 完整字段**
+
+labelFontSize、labelOffsetX/Y、labelBackgroundPadding、labelMaxWidth 是 number，单位为 backing-store 像素；labelMaxWidth=0 表示不限。labelFontFamily、labelFontWeight、labelColor 是 string；labelBackground 为 string 或 false；labelPlacement 为 LabelPlacement / EdgeLabelPlacement；labelAutoRotate 为 boolean。
+
+这是传给 renderer 的最终样式。自定义 renderer 自己实现背景、换行和截断，不能假定 labelMaxWidth 会自动裁切自绘文字。
+
+draw 原点已经位于标签中心，边标签旋转也已应用。内容须落在声明包围盒内；框外内容可能使碰撞判断不准，未承诺自动硬裁切。引擎管理遍历、定位、策略、碰撞和刷新，当前路径采样限制见[边标签](/docs/guides/edge#边标签)。
+
+未注册、measure / draw 抛错或宽高非法时，对当前标签回退默认单行渲染并给出诊断；碰撞或裁剪导致不显示不是错误回退。完整教程见[自定义 Label Renderer](/docs/guides/custom-label-renderer)。
+
+### DecorationRenderer [#decorationrenderer]
+
+用 register('decoration', name, renderer) 注册，node.decorations[].renderer 激活，仅用于节点装饰内容。
+
+- measure(params: DecorationMeasureParams&lt;T&gt;): LabelLayout
+- draw(params: DecorationDrawParams&lt;T&gt;): void
+
+| 参数 | 内容 |
+| --- | --- |
+| ctx / node | CanvasRenderingContext2D / GraphNode |
+| data | T；来自单项 data、stack 中的当前 item 或 overflowData，不是自动读取整个 node.data |
+| dpr / zoom | number，DPR 与相机缩放 |
+| nodeWidth / nodeHeight | number，最终节点宽高，backing-store 像素 |
+| layout | 仅 draw；Readonly&lt;LabelLayout&gt; |
+
+尺寸规则与 LabelLayout 一致；draw 原点位于当前装饰内容中心。没有 ResolvedLabelStyle，字号、颜色和业务值由 renderer 自行约定。DecorationRenderer&lt;T&gt; 的 T 描述输入 data，layout.data 当前类型仍为 unknown，需自行校验。
+
+Graph 管理装饰的定位、堆叠与碰撞。名称未知、测量无效或回调抛错时，跳过相应装饰或分组并记录诊断。 [装饰配置](/docs/api/options#config-node-decoration)
+
+## 运行时扩展 [#extension-runtime]
+
+运行时扩展通过工厂创建实例。共用的初始化、上下文和清理规则见 [ExtensionContext](#extensioncontext)。
+
+<span id="实例作用域" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+### 实例作用域与生命周期 [#生命周期速查]
+
+绘制类的缓存规则见[绘制扩展](#extension-drawing)。
+
+| 类别 | 执行顺序 | 何时复用 / 释放 |
+| --- | --- | --- |
+| Behavior | init → getEvents → 事件回调 → destroy | 每个 Graph 每次挂载时为各配置项创建实例，卸载先解绑返回的监听 |
+| Layout | init → execute → destroy | 每次执行新实例；独立 runLayout 不调用 init |
+| Transform | init → beforeRender；复用时 update → beforeRender | 按配置位置和名称复用；移除、替换、销毁时释放 |
+| Plugin | init → mount → destroy | 每个 Graph 每次挂载时为各配置项创建实例。重复 render 会重新挂载 |
+
+init、destroy、getEvents、beforeRender、update、mount 是同步钩子，不等待返回的 Promise。只有 Layout.execute 明确支持异步结果。
+
+### BehaviorExtension [#behaviorextension]
+
+TOptions 继承 BehaviorOptions，TEventMap 默认 GraphEventMap；getEvents(): BehaviorEventHandlers&lt;TEventMap&gt; 为必需方法，返回按事件名组织的可选函数映射。
+
+引擎在 init 成功后调用 getEvents，逐项绑定返回的函数；事件参数按事件映射中的参数元组推导，不能统一假定为 MouseEvent。每个 handler 的同步异常独立隔离；卸载解绑这些 handler，再调用 destroy。自建的 DOM 监听、计时器等仍由扩展清理。
+
+完整字段、配置和默认行为不重复维护，见[BehaviorExtension 契约](/docs/api/options#自定义交互契约)；实现步骤见[自定义交互](/docs/guides/custom-behavior)。
+
+### LayoutExtension [#layoutextension]
+
+execute(data: GraphData, runtime) 为必需方法，返回带坐标的 nodes 对象或该对象的 Promise。
+
+| 输入 / 输出 | 完整内容 |
+| --- | --- |
+| data | 本次 GraphData 输入；以它为计算来源，不从 context.data 重新取旧数据 |
+| runtime.width / height | number，画布 CSS 视口尺寸；独立计算未给视口时取配置或 800 / 600 |
+| runtime.signal? | AbortSignal，取消标记 |
+| runtime.options | Readonly&lt;TOptions&gt;，本次解析后的完整配置，含 type 与视口补齐；顶层复制并冻结 |
+| 结果 nodes | `Array<GraphData['nodes'][number] & { x: number; y: number }>`；x/y 为有限图坐标，保留节点 id 与业务字段 |
+
+结果不是新的 GraphData：布局只返回节点坐标，不返回边、DOM 或渲染对象。不要在 execute 中写入内部模型或发起绘制；Graph 负责结果应用与更新。重排、固定轴与取消见[布局方法](/docs/api/graph#graph-layout)。
+
+Graph 管理路径会传入 ExtensionContext 并调用 init；独立 runLayout 没有所属 Graph，跳过 init，仍执行 execute 和 destroy。需要配置时从 runtime.options 读取，不要依赖 init 必定运行。
+
+每次执行成功、失败或取消后都会调用 `destroy()`。耗时任务应分块并检查 `signal`，清理自己创建的 Worker 和计时器。注册布局优先，在主线程执行。`worker: true` 不会迁移自定义代码。
+
+创建失败时可能继续其他布局路径；已创建扩展的 init / execute 失败会诊断并返回输入坐标回退（缺省轴为 0），不再保证回退同名内置算法。取消后的 Graph 代次会放弃旧结果；Promise 正常结束不等于结果被应用。
+
+### TransformExtension [#transformextension]
+
+| 可选钩子 | 签名与调用 |
+| --- | --- |
+| beforeRender | (data: GraphData) → GraphData；同步返回完整的新输入 |
+| update | (options: Readonly&lt;Partial&lt;TOptions&gt;&gt;) → void；复用实例时调用 |
+| init / destroy | 继承 Extension&lt;TOptions&gt; |
+
+实际激活需要 beforeRender；没有该方法的注册项会被释放并跳过。按 transforms 数组顺序串联，前一项输出成为下一项输入，然后才执行布局。首次 render 与 setData 会转换；普通增量写入或 layout() 不重新跑注册 Transform。
+
+同一位置、同名的实例会复用，每次转换前调用 `update()`。参数是当前完整选项，字符串配置传 `{}`。省略字段按默认值处理。
+
+context.data 是已提交数据，可能为空或属于上一版，不能替代 beforeRender 的 data。返回值不做完整结构校验；业务自行保证 ID、端点、Combo 与字段合法，先验证再返回。输入也不承诺被递归复制；原地修改后抛错不提供回滚。
+
+beforeRender 抛错时诊断并沿用传入数据；init / update 失败时释放该实例并跳过当前项，后续可重新创建。特殊的 process-parallel-edges 不走注册 Transform 生命周期，见[配置参考](/docs/api/options#options-transforms-plugins)。
+
+### PluginExtension [#pluginextension]
+
+TOptions 继承 PluginOptions，包含 type。额外可选方法为 mount(container: HTMLElement): void；init 收到整个配置对象（type 与业务选项），不是单独的 options 子对象。
+
+container 是 Graph 的 DOM 容器，不是 Canvas。mount 在图的交互运行时建立后执行，插件自行创建独立 DOM、监听与状态；样式应限定作用域，勿覆盖或替换 Graph 子节点。无 mount 的实例仍可能收到 init / destroy。
+
+重复 render 先销毁旧插件再创建并挂载新插件；setData 和 layout 不重新挂载。没有 Plugin.update 钩子，updateOptions 不接受 plugins。变更插件列表或构造选项时重建实例，配置形状见[Plugin 配置](/docs/api/options#plugins)。
+
+未注册或创建失败的项会跳过。`init()` 失败时先销毁再跳过，`mount()` 同步抛错时记录诊断并在卸载时清理。`destroy()` 要能处理部分挂载、重复清理和异步取消。
+
+### 资源与上下文边界 [#资源与上下文边界]
+
+Graph 管理扩展实例和 Behavior 返回的事件监听。扩展通过 [ExtensionContext](#extensioncontext) 访问图，并负责释放自己创建的 DOM 监听、请求、定时器、Observer 和 Worker。

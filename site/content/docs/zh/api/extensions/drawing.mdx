@@ -1,119 +1,14 @@
 ---
-title: 绘制类扩展契约
-description: Node、Edge、Label 与 Decoration 的公共字段、回调参数、坐标、缓存与失败行为
+title: 绘制类扩展契约（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-绘制类扩展是按名称缓存的无状态描述，可跨 Graph 共用；没有 init / destroy。注册与缓存规则见[注册契约](/docs/api/extensions/registration)。样式能表达时先用配置，内容绘制才使用扩展。
+内容已并入 [绘制扩展](/docs/api/extensions#extension-drawing)。
 
-## NodeExtension
-
-用 register('node', name, descriptor) 注册，node.type 激活。
-
-| 字段 / 回调 | 类型与行为 |
-| --- | --- |
-| base? | 'circle' 或 'rect'；缺省 circle，复用相应 WebGL 基型与拾取 |
-| style? | Partial&lt;NodeStyleConfig&gt;，默认样式 |
-| stateStyles? | Partial&lt;Record&lt;string, NodeStateStyleOverride&gt;&gt;，默认状态样式 |
-| getStyle?(node) | GraphNode → Partial&lt;NodeStyleConfig&gt;；同步、纯函数，可多次求值 |
-| drawOverlay?(ctx, params) | CanvasRenderingContext2D、NodeOverlayDrawParams → boolean 或 void |
-| getBoundaryAnchor?(params) | NodeBoundaryAnchorParams → 点对象，x/y 为相对节点中心的屏幕偏移 |
-
-基础样式按扩展 style → 扩展 getStyle → 配置逐字段覆盖；状态优先级为主题 → 扩展 → 配置。整对象 node.style 函数有独立解析路径，不应假定它与扩展默认值或状态层自动合并；完整限制见[节点参考](/docs/api/options/node)。
-
-### NodeOverlayDrawParams
-
-| 字段 | 类型与单位 |
-| --- | --- |
-| node | GraphNode 且 x/y 为 number；业务坐标仍在图空间 |
-| x / y | number，当前节点中心在覆盖画布上的 backing-store 像素 |
-| nodeSize | number，节点 size 的图坐标值，不是已经换算的屏幕直径 |
-| dpr / zoom | number，传入的 DPR 与相机缩放 |
-| camera | Camera，x/y/zoom；仅用于读取当前变换 |
-| time | number，performance.now() 的毫秒时间 |
-
-覆盖绘制发生在可见节点的 Canvas2D 覆盖层，原点未自动移到节点中心，使用传入 x/y。ctx.save() / restore() 配对，不保留 ctx 或修改 camera。图尺寸转屏幕尺寸按 zoom，固定 CSS 尺寸按 dpr；不要给已经是屏幕坐标的 x/y 再乘缩放。
-
-返回 true 会请求继续重绘，适合动画；静态内容返回 void / false。覆盖图形不增加 WebGL 拾取热区，不会创建任意可交互场景图。隐藏或被裁剪节点可能不调用，不能把回调当业务事件。
-
-### NodeBoundaryAnchorParams
-
-| 字段 | 类型与含义 |
-| --- | --- |
-| node | GraphNode |
-| placement | 'left' / 'right' / 'top' / 'bottom' |
-| crossOffsetRatio | number，装饰配置的横向偏移比例 |
-| width / height | number，最终节点屏幕宽高，backing-store 像素 |
-| borderRadius | number，屏幕圆角半径 |
-
-返回相对中心的屏幕点；不要返回客户端坐标或再次乘 dpr / zoom。此钩子用于节点装饰定位的边界锚点，不修改边的连接端口、节点形状或拾取轮廓。抛错时回退到内置基型锚点。教程见[自定义节点](/docs/guides/custom-node)。
-
-## EdgeExtension
-
-用 register('edge', name, descriptor) 注册，edge.type 激活。
-
-| 字段 / 回调 | 类型与行为 |
-| --- | --- |
-| base? | 'line' / 'arc' / 'polyline' / 'cubic'；缺省 line |
-| style? | Partial&lt;NonNullable&lt;EdgeConfig['style']&gt;&gt; |
-| stateStyles? | Partial&lt;Record&lt;string, EdgeStateStyleOverride&gt;&gt; |
-| getStyle?(source, target, edge) | GraphNode、GraphNode、GraphEdge → 部分 EdgeConfig.style |
-
-回调必须同步返回样式，不返回路径、DOM 或 Canvas 内容；端点是节点输入视图，edge 是当前边，不是数组序号。复用内置基型的批处理、箭头和拾取；没有任意自定义 WebGL 着色器 / draw 钩子。
-
-对象式样式按配置字段覆盖扩展 getStyle 与 style，状态样式再叠加；整对象函数路径见[边参考](/docs/api/options/edge#样式回调)。路由、曲率、热区和单位沿用[边配置](/docs/api/options/edge)，不要把 getStyle 当布局。
-
-## LabelRenderer
-
-用 register('label', name, renderer) 注册，node.labelRenderer / edge.labelRenderer 激活。同一 renderer 可处理节点与边。
-
-- measure(params: LabelMeasureParams): LabelLayout&lt;T&gt;
-- draw(params: LabelDrawParams&lt;T&gt;): void
-
-### 输入与输出
-
-| 参数 | 内容 |
-| --- | --- |
-| ctx | CanvasRenderingContext2D |
-| text | string；从配置解析出的非空文本，不会仅因 data 有文字而调用 |
-| style | Readonly&lt;ResolvedLabelStyle&gt;，函数已求值，尺寸已换算为 backing-store 像素 |
-| dpr / zoom | number，当前 DPR 和缩放，已解析的 style 尺寸不要再次换算 |
-| type / item | 'node' + GraphNode，或 'edge' + GraphEdge |
-| node | 仅 type='node' 的 GraphNode |
-| edge / source / target | 仅 type='edge' 的 GraphEdge 与两端 GraphNode |
-| layout | 仅 draw；Readonly&lt;LabelLayout&lt;T&gt;&gt;，包含本次 measure 的结果 |
-
-LabelMeasureParams 是 NodeLabelParams / EdgeLabelParams 的判别联合；先按 type 分支再访问专用字段。
-
-LabelLayout&lt;T&gt; 含 width、height 和可选 data。宽高必须为有限正数，表示完整视觉包围盒；data 为本次 measure → draw 的计算缓存。measure 与 draw 不是严格一一调用：碰撞、低缩放或视口裁剪可能跳过 draw。
-
-<details>
-<summary>ResolvedLabelStyle 完整字段</summary>
-
-labelFontSize、labelOffsetX/Y、labelBackgroundPadding、labelMaxWidth 是 number，单位为 backing-store 像素；labelMaxWidth=0 表示不限。labelFontFamily、labelFontWeight、labelColor 是 string；labelBackground 为 string 或 false；labelPlacement 为 LabelPlacement / EdgeLabelPlacement；labelAutoRotate 为 boolean。
-
-这是传给 renderer 的最终样式。自定义 renderer 自己实现背景、换行和截断，不能假定 labelMaxWidth 会自动裁切自绘文字。
-
-</details>
-
-draw 原点已经位于标签中心，边标签旋转也已应用。内容须落在声明包围盒内；框外内容可能使碰撞判断不准，未承诺自动硬裁切。引擎管理遍历、定位、策略、碰撞和刷新，当前路径采样限制见[边标签](/docs/api/options/edge#边标签)。
-
-未注册、measure / draw 抛错或宽高非法时，对当前标签回退默认单行渲染并给出诊断；碰撞或裁剪导致不显示不是错误回退。完整教程见[自定义 Label Renderer](/docs/guides/custom-label-renderer)。
-
-## DecorationRenderer
-
-用 register('decoration', name, renderer) 注册，node.decorations[].renderer 激活，仅用于节点装饰内容。
-
-- measure(params: DecorationMeasureParams&lt;T&gt;): LabelLayout
-- draw(params: DecorationDrawParams&lt;T&gt;): void
-
-| 参数 | 内容 |
-| --- | --- |
-| ctx / node | CanvasRenderingContext2D / GraphNode |
-| data | T；来自单项 data、stack 中的当前 item 或 overflowData，不是自动读取整个 node.data |
-| dpr / zoom | number，DPR 与相机缩放 |
-| nodeWidth / nodeHeight | number，最终节点宽高，backing-store 像素 |
-| layout | 仅 draw；Readonly&lt;LabelLayout&gt; |
-
-尺寸规则与 LabelLayout 一致；draw 原点位于当前装饰内容中心。没有 ResolvedLabelStyle，字号、颜色和业务值由 renderer 自行约定。DecorationRenderer&lt;T&gt; 的 T 描述输入 data，layout.data 当前类型仍为 unknown，需自行校验。
-
-引擎负责 placement、attachment、堆叠、排序、溢出、碰撞和调度，具体配置见[节点装饰参考](/docs/api/options/node#nodedecorationconfig)。未知名称、非法测量或异常会跳过当前装饰/组并诊断，不回退成默认文字标签；不要与 Label 的回退规则混淆。
+- <span id="nodeextension" style={{ display: 'block', scrollMarginTop: '8rem' }} />[NodeExtension](/docs/api/extensions#nodeextension)
+- <span id="nodeoverlaydrawparams" style={{ display: 'block', scrollMarginTop: '8rem' }} />[NodeOverlayDrawParams](/docs/api/extensions#nodeoverlaydrawparams)
+- <span id="nodeboundaryanchorparams" style={{ display: 'block', scrollMarginTop: '8rem' }} />[NodeBoundaryAnchorParams](/docs/api/extensions#nodeboundaryanchorparams)
+- <span id="edgeextension" style={{ display: 'block', scrollMarginTop: '8rem' }} />[EdgeExtension](/docs/api/extensions#edgeextension)
+- <span id="labelrenderer" style={{ display: 'block', scrollMarginTop: '8rem' }} />[LabelRenderer](/docs/api/extensions#labelrenderer)
+- <span id="输入与输出" style={{ display: 'block', scrollMarginTop: '8rem' }} />[输入与输出](/docs/api/extensions#输入与输出)
+- <span id="decorationrenderer" style={{ display: 'block', scrollMarginTop: '8rem' }} />[DecorationRenderer](/docs/api/extensions#decorationrenderer)

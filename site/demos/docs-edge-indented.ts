@@ -1,6 +1,8 @@
-import { Graph } from '@antv/g6-lite';
+import { Graph, register } from '@antv/g6-lite';
+import indented from '@antv/g6-lite/layouts/indented';
 
 export async function run(container: HTMLElement) {
+  register('layout', 'indented', indented);
   const graph = new Graph({
     container,
     data: {

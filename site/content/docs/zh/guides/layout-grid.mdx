@@ -1,0 +1,45 @@
+---
+title: 网格布局 Grid
+description: 节点按行列排成网格。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+节点按行列排成网格。
+
+## 使用场景
+
+适合设备面板、资源列表等需要整齐对齐的图。
+
+## 基本用法
+
+布局类型通过 `layout.type` 指定。
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'grid' },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `rows` | 行数。 | `number` | 自动计算 |
+| `cols` | 列数。 | `number` | 自动计算 |
+| `width`、`height` | 网格的计算宽度和高度。 | `number` | 画布宽高 |
+| `sortBy` | `'id'` 按节点 ID 排列，`'degree'` 按节点度数排列。 | `'id'` \| `'degree'` \| 排序函数 | `'degree'` |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
+
+## 代码示例
+
+六个节点排成两行三列。
+
+<NodeDocExample id="built-in-layout" layoutType="grid" locale="zh" />
+
+[对比网格、环形与层级布局](/docs/guides/layout-arrangements)

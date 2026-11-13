@@ -1,0 +1,54 @@
+---
+title: Fishbone layout
+description: Place a problem at the end of a spine, with cause categories on either side.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Place the problem at the end of the spine. Each cause category joins the spine with a diagonal branch, and shorter horizontal lines attach individual causes to that branch.
+
+## When to use it
+
+Use it for three-level structures such as a problem, cause categories, and specific causes.
+
+## Basic usage
+
+This layout is optional. Import and register it before setting `layout.type`. For CDN usage, see [Optional layouts](/en/docs/guides/layout-overview#optional-layouts).
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import fishbone from '@antv/g6-lite/layouts/fishbone';
+
+register('layout', 'fishbone', fishbone);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'fishbone' },
+  edge: { type: 'polyline', style: { router: 'fishbone', endArrow: false } },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `categoryGap` | Gap between categories along the spine. | `number` | `180` |
+| `categoryDistance` | Vertical distance from a category to the spine. | `number` | `200` |
+| `itemHStep` | Additional horizontal offset for item nodes. | `number` | `20` |
+| `getWidth` | Node width used by the layout. Match it to the rendered width. | Function returning a width | Returns `80` |
+| `direction` | `'RL'` mirrors the `'LR'` arrangement horizontally. | `'LR'` \| `'RL'` | `'LR'` |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-tree-layout-fields)
+
+## Code example
+
+Define parent-child relationships as edges. Use the parent ID as `source` and the child ID as `target`.
+
+This diagram breaks down a late release into four categories. People, Tools, Process, and Scope each have two specific causes.
+
+<NodeDocExample id="built-in-layout" layoutType="fishbone" locale="en" />
+
+[Compare tree layouts](/en/docs/guides/layout-trees)

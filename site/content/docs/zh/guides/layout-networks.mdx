@@ -1,0 +1,25 @@
+---
+title: 关系网络布局
+description: 按连接关系、中心节点或图距离排列网络
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 选择布局
+
+| 想看到什么 | 布局 |
+| --- | --- |
+| 让相连的节点靠近 | [`force`](/docs/guides/layout-force)、[`d3-force`](/docs/guides/layout-d3-force)、[`force-atlas2`](/docs/guides/layout-force-atlas2)、[`fruchterman`](/docs/guides/layout-fruchterman) |
+| 看某个节点周围的关系 | [`radial`](/docs/guides/layout-radial)，通过 `focusNode` 选择中心节点 |
+| 按节点度数分圈 | [`concentric`](/docs/guides/layout-concentric)，通过 `sortBy: 'degree'` 按度数分层 |
+| 用平面上的距离表现图中节点的远近 | [`mds`](/docs/guides/layout-mds)，通过 `linkDistance` 调整距离尺度 |
+
+## 配置与示例
+
+示例默认使用放射布局。中心节点通过 `focusNode` 设为 `0`，圈间距通过 `unitRadius` 设为 68。用 **Layout** 切换布局，对比同一张关系图的排布。
+
+放射布局和 MDS 需要先注册。 [可选布局](/docs/guides/layout-overview#optional-layouts)
+
+<NodeDocExample id="layout-networks" locale="zh" focus="network-options" />
+
+力导向布局的常用参数见[布局配置参考](/docs/api/options#config-library-layout-fields)，后台计算见[Worker 布局指南](/docs/guides/layout-worker)。其他效果见[布局示例合集](/docs/examples/layout-gallery)。

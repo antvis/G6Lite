@@ -25,12 +25,14 @@ export async function run(container: HTMLElement) {
       ],
     },
     node: { style: { size: 22 } },
+    // #region combo-options
     combo: { style: {
       fill: 'rgba(23,131,255,0.08)', stroke: '#1783FF', strokeWidth: 2,
       opacity: 1, borderRadius: 12, padding: 40,
       label: (combo) => String(combo.data?.name ?? combo.id),
       labelFontSize: 12, labelColor: '#1e3a8a', labelPlacement: 'top',
     } },
+    // #endregion combo-options
     behaviors: [],
     autoFit: { padding: 56, maxZoom: 1 },
   });

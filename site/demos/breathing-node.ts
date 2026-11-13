@@ -21,6 +21,7 @@ export async function run(container: string | HTMLElement) {
         { id: 'edge-highlight-normal', source: 'highlight', target: 'normal' },
       ],
     },
+    // #region breathing-options
     node: {
       type: 'breathing-node',
       style: {
@@ -37,6 +38,7 @@ export async function run(container: string | HTMLElement) {
         highlight: { fill: '#2E8B57', stroke: '#1F6B43', strokeWidth: 3, haloWidth: 12 },
       },
     },
+    // #endregion breathing-options
     edge: {
       style: {
         stroke: '#d1d5db',
@@ -47,30 +49,24 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
   });
 
-  await graph.render();
-
-  const containerEl =
-    typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
-
-  const ui = createDemoPanel(
-    containerEl,
-    '呼吸节点',
-    '切换选中和高亮，观察节点呼吸动画。',
-    '<button data-action="selected">切换选中</button><button data-action="highlight">切换高亮</button>',
-  );
-  ui.controls.addEventListener('click', (event) => {
-    const action = (event.target as HTMLElement).dataset.action;
-    if (action !== 'selected' && action !== 'highlight') return;
-    const active = graph.getItemStates(action).includes(action);
-    graph.setItemState(action, action, !active);
-  });
-
-  return {
-    getData: () => graph.getData(),
-    fitView: () => graph.fitView(),
-    destroy() {
-      graph.destroy();
-      ui.panel.remove();
-    },
+  const ui = createDemoPanel(container, '切换选中和高亮，观察节点呼吸动画。');
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => {
+    ui.destroy();
+    destroy();
   };
+
+  const toggleState = (state: 'selected' | 'highlight') => {
+    const active = graph.getItemStates(state).includes(state);
+    graph.setItemState(state, state, !active);
+  };
+  try {
+    await graph.render();
+    ui.addAction('切换选中', () => toggleState('selected'));
+    ui.addAction('切换高亮', () => toggleState('highlight'));
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
 }

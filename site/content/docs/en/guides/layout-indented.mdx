@@ -1,0 +1,52 @@
+---
+title: Indented tree layout
+description: List nodes in traversal order and indent them by depth.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+List nodes in traversal order and indent them by depth.
+
+## When to use it
+
+Use it for file directories, navigation menus, and taxonomies.
+
+## Basic usage
+
+This layout is optional. Import and register it before setting `layout.type`. For CDN usage, see [Optional layouts](/en/docs/guides/layout-overview#optional-layouts).
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import indented from '@antv/g6-lite/layouts/indented';
+
+register('layout', 'indented', indented);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'indented' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `indent` | Horizontal indent per level. | `number` | `80` |
+| `rowHeight` | Vertical distance between adjacent rows. | `number` | `40` |
+| `direction` | `'LR'` indents right and `'RL'` indents left. | `'LR'` \| `'RL'` | `'LR'` |
+| `rootId` | Root node ID. | `string` | First node without a parent |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-tree-layout-fields)
+
+## Code example
+
+Define parent-child relationships as edges. Use the parent ID as `source` and the child ID as `target`.
+
+Each level indents by 72. The `indented` router draws the directory-style connectors.
+
+<NodeDocExample id="built-in-layout" layoutType="indented" locale="en" />
+
+[Compare tree layouts](/en/docs/guides/layout-trees)

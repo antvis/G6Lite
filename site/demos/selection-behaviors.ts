@@ -26,12 +26,7 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
   graph.fitView({ padding: 80 });
 
-  const ui = createDemoPanel(
-    container,
-    '选择行为组合',
-    'Shift+点击多选，Shift+拖拽框选，Ctrl/⌘+自由拖拽套索选择。',
-    '',
-  );
+  const ui = createDemoPanel(container, 'Shift+点击多选，Shift+拖拽框选，Ctrl/⌘+自由拖拽套索选择。');
 
   // Keep the modifier keys visible at all times; the event line updates as
   // the user interacts, the hint line stays.
@@ -50,7 +45,7 @@ export async function run(container: string | HTMLElement) {
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();
-      ui.panel.remove();
+      ui.destroy();
     },
   };
 }

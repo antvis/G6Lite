@@ -1,12 +1,14 @@
 import { Graph, type BehaviorName, type BuiltInBehaviorConfig } from '@antv/g6-lite';
 
 export async function run(container: HTMLElement) {
+  // #region behavior-options
   const behaviors = [
     { type: 'zoom-canvas', minZoom: 0.5, maxZoom: 2 },
     'drag-node',
     { type: 'click-select', multiple: true, trigger: 'shift' },
     { type: 'brush-select', key: null },
   ] satisfies Array<BehaviorName | BuiltInBehaviorConfig>;
+  // #endregion behavior-options
   const graph = new Graph({
     container,
     data: {

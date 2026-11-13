@@ -1,5 +1,5 @@
 import { Graph, register, type EdgeExtension } from '@antv/g6-lite';
-import { buttonStyle } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 // #region descriptor
 const weightedEdge: EdgeExtension = {
@@ -25,19 +25,24 @@ export async function run(container: HTMLElement) {
       ],
     },
     node: { style: { size: 28, label: (node) => node.id } },
+    // #region edge-activation
     edge: { type: 'docs-weighted-edge', style: { label: (_s, _t, edge) => edge.id ?? '' } },
+    // #endregion edge-activation
     behaviors: ['click-select', 'zoom-canvas', 'drag-canvas'],
     autoFit: { padding: 64, maxZoom: 1 },
   });
-  const button = document.createElement('button');
-  button.type = 'button'; button.textContent = 'Toggle heavy weight';
-  button.style.cssText = 'position:absolute;left:12px;top:12px;z-index:20;' + buttonStyle;
-  button.addEventListener('click', () => {
-    const weight = graph.getEdgeData('heavy')?.data?.weight === 4 ? 1 : 4;
-    graph.updateEdgeData('heavy', { weight });
-  });
+  const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
-  graph.destroy = () => { button.remove(); destroy(); };
-  try { await graph.render(); container.append(button); return graph; }
+  graph.destroy = () => { ui.destroy(); destroy(); };
+  try {
+    await graph.render();
+    // #region edge-weight-update
+    ui.addAction('Toggle heavy weight', () => {
+      const weight = graph.getEdgeData('heavy')?.data?.weight === 4 ? 1 : 4;
+      graph.updateEdgeData('heavy', { weight });
+    });
+    // #endregion edge-weight-update
+    return graph;
+  }
   catch (error) { graph.destroy(); throw error; }
 }

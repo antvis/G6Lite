@@ -11,22 +11,24 @@ export async function run(container: HTMLElement) {
         { id: 'wide-target', x: 440, y: 200 },
       ],
       edges: [
-        { id: 'narrow', source: 'narrow-source', target: 'narrow-target', data: { hitWidth: 2 } },
-        { id: 'wide', source: 'wide-source', target: 'wide-target', data: { hitWidth: 24 } },
+        { id: 'narrow', source: 'narrow-source', target: 'narrow-target' },
+        { id: 'wide', source: 'wide-source', target: 'wide-target' },
       ],
     },
     node: { style: { size: 20, label: (node) => String(node.data?.label ?? '') } },
+    // #region hit-area
     edge: {
       type: 'line',
       style: {
         stroke: '#64748b',
         lineWidth: 1.5,
         endArrow: false,
-        hitAreaWidth: (_source, _target, edge) => Number(edge.data?.hitWidth ?? 1.5),
+        hitAreaWidth: (_source, _target, edge) => edge.id === 'wide' ? 24 : 2,
       },
       stateStyles: { selected: { stroke: '#873bf4' } },
     },
     behaviors: ['click-select'],
+    // #endregion hit-area
     autoFit: { padding: 48, maxZoom: 1 },
   });
   try {

@@ -1,5 +1,5 @@
-import { Graph, extensionFactory, register, type GraphData, type TransformExtension } from '@antv/g6-lite';
-import { buttonStyle } from './demo-panel.ts';
+import { Graph, register, type GraphData, type TransformExtension } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 type Phase = 'init' | 'update' | 'run' | 'destroy';
 interface NormalizeOptions { prefix?: string; onPhase?: (phase: Phase) => void }
@@ -23,7 +23,7 @@ export function createNormalize(): TransformExtension<NormalizeOptions> {
     destroy() { report?.('destroy'); report = undefined; },
   };
 }
-register('transform', 'docs-normalize', extensionFactory(createNormalize));
+register('transform', 'docs-normalize', () => createNormalize());
 // #endregion transform
 
 export async function run(container: HTMLElement) {
@@ -44,25 +44,29 @@ export async function run(container: HTMLElement) {
   });
   const graph = new Graph({
     container, data: input(),
+    // #region config-transforms
     transforms: [{ type: 'docs-normalize', options: { prefix: 'Svc', onPhase: (phase: Phase) => { counters[phase]++; updateStatus(); } } }],
+    // #endregion config-transforms
     node: { style: { size: 32, label: (node) => String(node.data?.label ?? node.id) } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
     autoFit: { padding: 64, maxZoom: 1 },
   });
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;left:12px;top:12px;z-index:20;display:flex;gap:6px;';
-  for (const label of ['Reload data', 'Update name']) {
-    const button = document.createElement('button'); button.type = 'button';
-    button.textContent = label; button.style.cssText = buttonStyle;
-    button.addEventListener('click', () => {
-      if (label === 'Update name') { graph.updateNodeData('A', { name: 'Raw name' }); updateStatus(); return; }
+  const ui = createDemoPanel(container);
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => { ui.destroy(); status.remove(); destroy(); };
+  try {
+    await graph.render();
+    updateStatus();
+    ui.addAction('Reload data', () => {
       revision++;
       void graph.setData(input(), { fitView: false }).catch((error) => { status.textContent = String(error); });
     });
-    controls.append(button);
+    ui.addAction('Update name', () => {
+      graph.updateNodeData('A', { name: 'Raw name' });
+      updateStatus();
+    });
+    container.append(status);
+    return graph;
   }
-  const destroy = graph.destroy.bind(graph);
-  graph.destroy = () => { controls.remove(); status.remove(); destroy(); };
-  try { await graph.render(); updateStatus(); container.append(controls, status); return graph; }
   catch (error) { graph.destroy(); throw error; }
 }

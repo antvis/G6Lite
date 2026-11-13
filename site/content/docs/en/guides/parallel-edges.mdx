@@ -1,74 +1,17 @@
 ---
-title: Parallel and self-loop edges
-description: Separate same-direction and reverse edges, adjust spacing, update stable edge identities, and label self-loops
+title: Parallel edges and self-loops (previous URL)
+description: Find the corresponding sections at their new location
 ---
 
-import { NodeDocExample } from '@/components/node-doc-example';
+This content now lives in [Edges](/en/docs/guides/edge#parallel-edge-spacing).
 
-Separate parallel edges when several relationships share endpoints. A self-loop has identical source and target and is drawn independently. Give every edge a stable id before adjusting paths. See the [parallel-edge reference](/en/docs/api/options/edge#parallel-edges-and-self-loops) for complete fields and precedence.
-
-## Separate same-direction and reverse edges
-
-1. Use the default line or arc and set `edge.parallelEdges: { enabled: true, offset: 48, includeReverse: true }`.
-2. Enable endArrow for directed relationships. Reverse edges share the same group by default; do not negate offsets manually.
-3. Start with modest spacing and adjust for labels and the actual zoom. offset uses graph coordinates, not screen-pixel spacing.
-
-The upper pair has three A→B edges. The lower pair has C→D and an orange D→C. Click **Toggle separation** to compare overlap and separation, then **Spacing 24 / 64** to compare spacing. **Toggle reverse group** disables reverse grouping: the lower edges become separate single-edge groups and overlap again.
-
-<NodeDocExample id="parallel-workflow" locale="en" focus="separation" />
-
-An existing transform configuration can be retained:
-
-```ts
-transforms: [
-  { type: 'process-parallel-edges', options: { offset: 48, includeReverse: true } },
-]
-```
-
-Choose either entry point. Parameters belong in options; distance is not an option here. Use `edge.parallelEdges: false` to disable separation explicitly. See [configuration precedence](/en/docs/api/options/edge#entries-and-precedence) if both entry points are present.
-
-## Update after adding or removing edges
-
-Click **Add ab4** above: A→B changes from three to four edges, and existing paths are reassigned. **Remove ab4** restores three. Repeated adds do not create duplicate edge IDs.
-
-Use addEdge / removeEdge for mutations or updateOptions after the first render to change separation settings. No layout run is required. A new parallelEdges object replaces the old one; this example submits enabled, offset, includeReverse and maxOffset together to retain its settings.
-
-Stable IDs and array order reduce unnecessary changes, but adding, removing or reordering group members can still move existing paths. Do not use an arc's position as business identity. See [data mutations](/en/docs/api/graph/data-mutations) and [visual updates](/en/docs/api/graph/lifecycle) for update contracts.
-
-## Self-loops and labels
-
-Point source and target to the same node. A below has one loop and B has three, each labeled with its edge id. Loops remain nested even with `parallelEdges: false`. Drag a node to see its loops and labels follow.
-
-<NodeDocExample id="self-loops" locale="en" focus="loops" />
-
-The built-in renderer determines loop sizes and levels; offset / minOffset / maxOffset do not control them. Use edge.style.label for text, and ordinary edge styles for colors, arrows and states. See the [edge-label reference](/en/docs/api/options/edge#edge-labels) for placement and collision settings.
-
-## Usage tips
-
-- Use line or arc for automatic separation. Dedicated cubic / polyline paths do not use parallel offsets.
-- Distinguish direction with colors and arrows before adding necessary labels.
-- Store business groups in edge.data and map them to colors or text. mergeBy does not group by arbitrary business fields.
-
-## Common questions
-
-### Why do edges still overlap after setting offset?
-
-The object entry requires enabled: true and line / arc paths. Keep includeReverse: true for a reverse pair; disabling it creates two single-edge groups with zero offsets.
-
-### Why do some edges stop separating when I increase offset?
-
-Check whether maxOffset clamps outer edges. Several edges reaching the same limit can overlap. Offsets are not equal pixel gaps at curve midpoints. See [grouping and spacing](/en/docs/api/options/edge#grouping-and-spacing).
-
-### Why do separation settings not affect self-loops?
-
-Loops do not participate in parallel grouping or require process-parallel-edges. Do not duplicate nodes or manually negate reverse-edge offsets to create a loop.
-
-### Why do other paths move when I remove one edge?
-
-Offsets are recentered using the current group's array order. Stable IDs preserve relationship identity, not a permanent side or arc position.
-
-## Example entry points
-
-[Parallel and reverse edges](/en/docs/examples/parallel-edges) · [Self-loop edges](/en/docs/examples/edge-loops)
-
-[Edge guide](/en/docs/guides/edge) · [Complete parallel-edge reference](/en/docs/api/options/edge#parallel-edges-and-self-loops) · [Polyline routing](/en/docs/guides/polyline-routing)
+- <span id="separate-same-direction-and-reverse-edges" style={{ scrollMarginTop: '8rem' }} />[Separate same-direction and reverse edges](/en/docs/guides/edge#separate-same-direction-and-reverse-edges)
+- <span id="update-after-adding-or-removing-edges" style={{ scrollMarginTop: '8rem' }} />[Add or remove parallel edges](/en/docs/guides/edge#update-after-adding-or-removing-edges)
+- <span id="self-loops-and-labels" style={{ scrollMarginTop: '8rem' }} />[Self-loops and labels](/en/docs/guides/edge#self-loops-and-labels)
+- <span id="usage-tips" style={{ scrollMarginTop: '8rem' }} />[Usage tips](/en/docs/guides/edge#parallel-edge-spacing)
+- <span id="common-questions" style={{ scrollMarginTop: '8rem' }} />[Common questions](/en/docs/guides/edge#common-questions)
+- <span id="why-do-edges-still-overlap-after-setting-offset" style={{ scrollMarginTop: '8rem' }} />[Why do edges still overlap after setting offset?](/en/docs/guides/edge#why-do-parallel-edges-still-overlap)
+- <span id="why-do-some-edges-stop-separating-when-i-increase-offset" style={{ scrollMarginTop: '8rem' }} />[Why do some edges stop separating when I increase offset?](/en/docs/guides/edge#why-do-parallel-edges-still-overlap)
+- <span id="why-do-separation-settings-not-affect-self-loops" style={{ scrollMarginTop: '8rem' }} />[Why do separation settings not affect self-loops?](/en/docs/guides/edge#why-does-offset-not-resize-self-loops)
+- <span id="why-do-other-paths-move-when-i-remove-one-edge" style={{ scrollMarginTop: '8rem' }} />[Why do other paths move when I remove one edge?](/en/docs/guides/edge#update-after-adding-or-removing-edges)
+- <span id="example-entry-points" style={{ scrollMarginTop: '8rem' }} />[Example entry points](/en/docs/guides/edge#related)

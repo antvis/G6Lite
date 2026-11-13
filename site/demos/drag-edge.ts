@@ -3,7 +3,7 @@ import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFit: true,
+    autoFit: { padding: 48, maxZoom: 1 },
     container,
     data: {
       nodes: [
@@ -18,38 +18,33 @@ export async function run(container: string | HTMLElement) {
       ],
     },
     node: { style: { size: 38, label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' } },
-    edge: { style: { lineWidth: 4, endArrow: true } },
+    edge: { style: { lineWidth: 4, hitAreaWidth: 16, endArrow: true } },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-edge'],
   });
-  await graph.render();
-  graph.fitView({ padding: 90 });
-
-  const ui = createDemoPanel(
-    container,
-    '拖拽边端点',
-    '按住边靠近 source/target 的位置拖到其他节点，dragend 后更新边的 source/target。',
-    '',
-  );
+  const ui = createDemoPanel(container);
 
   graph.on('edge:dragstart', (payload: { edgeId?: string; dragEnd: string }) => {
     ui.setStatus(`dragstart ${payload.edgeId ?? '-'} (${payload.dragEnd})`);
   });
-  graph.on(
-    'edge:dragend',
-    (payload: { edgeId?: string; source: string; target: string; reconnected: boolean }) => {
-      if (payload.reconnected && payload.edgeId) {
-        graph.updateEdgeData([{ id: payload.edgeId, source: payload.source, target: payload.target }]);
-      }
-      ui.setStatus(
-        `dragend reconnected=${payload.reconnected}\n${payload.edgeId ?? '-'}: ${payload.source} → ${payload.target}`,
-      );
-    },
-  );
-  ui.setStatus('拖拽 editable-edge 或 reference-edge 的端点');
+  // #region reconnect
+  graph.on('edge:dragend', ({ edgeId, source, target, reconnected }) => {
+    if (reconnected && edgeId) {
+      graph.updateEdgeData([{ id: edgeId, source, target }]);
+    }
+    ui.setStatus(`dragend reconnected=${reconnected}\n${edgeId ?? '-'}: ${source} → ${target}`);
+  });
+  // #endregion reconnect
 
-  return {
-    getData: () => graph.getData(),
-    fitView: () => graph.fitView({ padding: 90 }),
-    destroy: () => { graph.destroy(); ui.panel.remove(); },
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => {
+    ui.destroy();
+    destroy();
   };
+  try {
+    await graph.render();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
 }

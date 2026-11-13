@@ -1,5 +1,5 @@
 import { Graph, type GraphData } from '@antv/g6-lite';
-import { buttonStyle, createDemoPanel } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 const INITIAL_DATA: GraphData = {
   nodes: [
@@ -12,9 +12,6 @@ const INITIAL_DATA: GraphData = {
     { id: 'e-a-c', source: 'a', target: 'c', data: { weight: 2 } },
   ],
 };
-
-const button = (action: string, label: string) =>
-  `<button data-action="${action}" style="${buttonStyle}">${label}</button>`;
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -44,21 +41,7 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
   graph.fitView({ padding: 80 });
 
-  const ui = createDemoPanel(
-    container,
-    '节点与边增删改',
-    '覆盖单个/批量节点与边操作，并显示 afteradditem、afterupdateitem、afterremoveitem 事件。',
-    [
-      button('add-node', 'addNode'),
-      button('add-edge', 'addEdge'),
-      button('update-node', 'updateNodeData'),
-      button('update-edge', 'updateEdgeData'),
-      button('batch-add', '批量新增'),
-      button('remove-edge', 'removeEdge'),
-      button('remove-node', 'removeNode'),
-      button('reset', '重置'),
-    ].join(''),
-  );
+  const ui = createDemoPanel(container);
 
   let lastEvent = 'ready';
   let sequence = 0;
@@ -78,43 +61,54 @@ export async function run(container: string | HTMLElement) {
     });
   }
 
-  ui.controls.addEventListener('click', async (event) => {
-    const action = (event.target as HTMLElement).dataset.action;
-    if (!action) return;
-
-    if (action === 'add-node' && !graph.hasNode('d')) {
-      graph.addNode({ id: 'd', x: 480, y: 160, data: { label: 'D', color: '#E8684A' } });
-    } else if (action === 'add-edge' && graph.hasNode('d') && !graph.hasEdge('e-c-d')) {
+  ui.addAction('addNode', () => {
+    if (!graph.hasNode('d')) graph.addNode({ id: 'd', x: 480, y: 160, data: { label: 'D', color: '#E8684A' } });
+    renderStatus();
+  });
+  ui.addAction('addEdge', () => {
+    if (graph.hasNode('d') && !graph.hasEdge('e-c-d')) {
       graph.addEdge({ id: 'e-c-d', source: 'c', target: 'd', data: { weight: 3 } });
-    } else if (action === 'update-node') {
-      sequence++;
-      graph.updateNodeData('b', {
-        label: `B${sequence}`,
-        color: sequence % 2 ? '#9270CA' : '#5AD8A6',
-      });
-    } else if (action === 'update-edge') {
-      graph.updateEdgeData([{ id: 'e-a-c', data: { weight: (sequence % 4) + 1 } }]);
-    } else if (action === 'batch-add') {
-      if (!graph.hasNode('e')) {
-        graph.addNodes([
-          { id: 'e', x: 480, y: 70, data: { label: 'E', color: '#6DC8EC' } },
-          { id: 'f', x: 480, y: 250, data: { label: 'F', color: '#FF9D4D' } },
-        ]);
-        graph.addEdges([
-          { id: 'e-b-e', source: 'b', target: 'e', data: { weight: 1 } },
-          { id: 'e-c-f', source: 'c', target: 'f', data: { weight: 1 } },
-        ]);
-      }
-    } else if (action === 'remove-edge') {
-      const edgeId = graph.hasEdge('e-c-d') ? 'e-c-d' : graph.hasEdge('e-a-c') ? 'e-a-c' : '';
-      if (edgeId) graph.removeEdge(edgeId);
-    } else if (action === 'remove-node') {
-      const nodeId = graph.hasNode('d') ? 'd' : graph.hasNode('f') ? 'f' : '';
-      if (nodeId) graph.removeNode(nodeId);
-    } else if (action === 'reset') {
-      await graph.setData(INITIAL_DATA, { fitView: { padding: 80 } });
-      lastEvent = 'datachange: reset';
     }
+    renderStatus();
+  });
+  ui.addAction('updateNodeData', () => {
+    sequence++;
+    graph.updateNodeData('b', {
+      label: `B${sequence}`,
+      color: sequence % 2 ? '#9270CA' : '#5AD8A6',
+    });
+    renderStatus();
+  });
+  ui.addAction('updateEdgeData', () => {
+    graph.updateEdgeData([{ id: 'e-a-c', data: { weight: (sequence % 4) + 1 } }]);
+    renderStatus();
+  });
+  ui.addAction('批量新增', () => {
+    if (!graph.hasNode('e')) {
+      graph.addNodes([
+        { id: 'e', x: 480, y: 70, data: { label: 'E', color: '#6DC8EC' } },
+        { id: 'f', x: 480, y: 250, data: { label: 'F', color: '#FF9D4D' } },
+      ]);
+      graph.addEdges([
+        { id: 'e-b-e', source: 'b', target: 'e', data: { weight: 1 } },
+        { id: 'e-c-f', source: 'c', target: 'f', data: { weight: 1 } },
+      ]);
+    }
+    renderStatus();
+  });
+  ui.addAction('removeEdge', () => {
+    const edgeId = graph.hasEdge('e-c-d') ? 'e-c-d' : graph.hasEdge('e-a-c') ? 'e-a-c' : '';
+    if (edgeId) graph.removeEdge(edgeId);
+    renderStatus();
+  });
+  ui.addAction('removeNode', () => {
+    const nodeId = graph.hasNode('d') ? 'd' : graph.hasNode('f') ? 'f' : '';
+    if (nodeId) graph.removeNode(nodeId);
+    renderStatus();
+  });
+  ui.addAction('重置', async () => {
+    await graph.setData(INITIAL_DATA, { fitView: { padding: 80 } });
+    lastEvent = 'datachange: reset';
     renderStatus();
   });
 
@@ -124,7 +118,7 @@ export async function run(container: string | HTMLElement) {
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();
-      ui.panel.remove();
+      ui.destroy();
     },
   };
 }

@@ -5,14 +5,29 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'docs-navigation.json'), 'utf8'));
 const refs = [manifest.overview];
-const groups = new Map();
+const anchorLinks = [];
 function visit(entry) {
   if (typeof entry === 'string') { refs.push(entry); return; }
-  if (entry.page) { refs.push(entry.page); groups.set(entry.page, entry.title); }
-  entry.children.forEach(visit);
+  if (entry.anchor) { anchorLinks.push(entry); return; }
+  if (entry.page) refs.push(entry.page);
+  entry.children?.forEach(visit);
 }
-manifest.order.forEach((id) => manifest.sections[id].children.forEach(visit));
+for (const item of manifest.order) {
+  if (typeof item === 'string') manifest.sections[item].children.forEach(visit);
+  else visit(item);
+}
 if (new Set(refs).size !== refs.length) throw new Error('Duplicate page in navigation manifest');
+const unlistedPages = manifest.unlistedPages;
+if (new Set([...refs, ...unlistedPages]).size !== refs.length + unlistedPages.length) {
+  throw new Error('Duplicate page in unlisted documentation');
+}
+const legacyPages = Object.keys(manifest.legacyPages);
+const currentPages = new Set([...refs, ...unlistedPages]);
+for (const [legacy, target] of Object.entries(manifest.legacyPages)) {
+  if (currentPages.has(legacy) || !currentPages.has(target)) {
+    throw new Error('Invalid legacy page: ' + legacy + ' → ' + target);
+  }
+}
 const catalog = JSON.parse(fs.readFileSync(path.join(root, 'demos/catalog.json'), 'utf8'));
 const external = manifest.externalCollections.flatMap((group) => [
   group.directory + '/index',
@@ -26,15 +41,23 @@ const output = {};
 for (const locale of ['zh', 'en']) {
   const base = path.join(root, 'content/docs', locale);
   const actual = files(base).map((file) => path.relative(base, file).slice(0, -4)).sort();
-  const expected = [...refs, ...external].sort();
+  const expected = [...refs, ...unlistedPages, ...external, ...legacyPages].sort();
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     throw new Error('Page coverage mismatch (' + locale + '): ' + JSON.stringify({
       unlisted: actual.filter((ref) => !expected.includes(ref)),
       missing: expected.filter((ref) => !actual.includes(ref)),
     }));
   }
+  for (const { page, anchor } of anchorLinks) {
+    if (!currentPages.has(page)) throw new Error('Missing navigation page: ' + page);
+    const content = fs.readFileSync(path.join(base, page + '.mdx'), 'utf8');
+    if (!content.includes('[#' + anchor + ']') && !content.includes('id="' + anchor + '"')) {
+      throw new Error('Missing navigation anchor (' + locale + '): ' + page + '#' + anchor);
+    }
+  }
   const dirs = new Map();
-  for (const ref of [...refs, ...external]) {
+  // Keep pages linked from topic guides in the source tree for search and export.
+  for (const ref of [...refs, ...unlistedPages, ...external]) {
     const parts = ref.split('/');
     for (let i = 0; i < parts.length; i++) {
       const directory = parts.slice(0, i).join('/');
@@ -48,7 +71,8 @@ for (const locale of ['zh', 'en']) {
     const physicalSection = manifest.physicalSections[directory];
     const collection = manifest.externalCollections.find((item) => item.directory === directory);
     if (!directory) title = manifest.rootTitle[locale];
-    else if (physicalSection) title = manifest.sections[physicalSection].title[locale];
+    else if (typeof physicalSection === 'string') title = manifest.sections[physicalSection].title[locale];
+    else if (physicalSection) title = physicalSection[locale];
     else if (collection) title = collection.title[locale];
     else {
       const file = path.join(base, directory + '.mdx');
@@ -57,7 +81,13 @@ for (const locale of ['zh', 'en']) {
       if (!title) throw new Error('Missing folder title: ' + directory);
     }
     const target = path.join(base, directory, 'meta.json');
-    output[path.relative(path.dirname(root), target)] = JSON.stringify({ title, ...(refs.includes(directory) ? { pagesIndex: '../' + path.basename(directory) + '.mdx' } : {}), pages }, null, 2) + '\n';
+    const entries = pages.map((page) => {
+      const ref = directory ? directory + '/' + page : page;
+      // A legacy-only subdirectory must not shadow its parent document.
+      const hasLegacyChildren = legacyPages.some((legacy) => legacy.startsWith(ref + '/'));
+      return !dirs.has(ref) && hasLegacyChildren ? page + '.mdx' : page;
+    });
+    output[path.relative(path.dirname(root), target)] = JSON.stringify({ title, ...(refs.includes(directory) || unlistedPages.includes(directory) ? { pagesIndex: '../' + path.basename(directory) + '.mdx' } : {}), pages: entries }, null, 2) + '\n';
   }
 }
 if (process.argv.includes('--print')) {
@@ -72,5 +102,5 @@ if (process.argv.includes('--print')) {
   } else {
     for (const [relative, body] of drift) fs.writeFileSync(path.join(path.dirname(root), relative), body);
   }
-  console.log('Navigation and metadata cover ' + refs.length + ' docs + ' + external.length + ' example pages in both languages.');
+  console.log('Navigation and metadata cover ' + refs.length + ' sidebar docs, ' + unlistedPages.length + ' linked docs, ' + external.length + ' example pages and ' + legacyPages.length + ' legacy pages in both languages.');
 }

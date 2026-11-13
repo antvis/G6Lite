@@ -1,0 +1,26 @@
+---
+title: Grid, circular, and layered layouts
+description: Arrange nodes with Grid, Circular, and Dagre
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Choose a layout
+
+| Type | Description | Example configuration |
+| --- | --- | --- |
+| [`grid`](/en/docs/guides/layout-grid) | Arrange nodes in two rows and three columns. | `{ type: 'grid', rows: 2, cols: 3 }` |
+| [`circular`](/en/docs/guides/layout-circular) | Arrange nodes in a ring with radius 100. | `{ type: 'circular', radius: 100 }` |
+| [`dagre`](/en/docs/guides/layout-dagre) | Arrange dependency layers from left to right. | `{ type: 'dagre', rankdir: 'LR' }` |
+
+## Compare layouts
+
+Use **Layout** to switch between `grid`, `circular`, and `dagre` on the same graph. The code shows the full configuration for all three.
+
+<NodeDocExample id="layout-switch" locale="en" focus="layout-options" />
+
+## Adjust layer spacing
+
+In Dagre, `nodesep` sets the spacing within a layer, and `ranksep` sets the spacing between layers. Set `rankdir` to `LR` for left to right or `TB` for top to bottom.
+
+See the [layout reference](/en/docs/api/options#config-library-layout-fields) for more parameters, or try the [flowchart example](/en/docs/examples/flowchart).

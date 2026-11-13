@@ -1,0 +1,56 @@
+---
+title: 插件总览
+description: 了解 G6Lite 的插件，以及如何配置、替换和卸载插件
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 什么是插件
+
+插件（Plugin）用来给图添加独立的功能，例如在画布旁显示统计面板或业务工具栏。
+
+## 内置插件
+
+G6Lite 目前没有内置插件。提示框由 [`tooltip` 交互](/docs/guides/behaviors#tooltip)提供，画布底色通过[主题](/docs/guides/theme)设置。需要添加自己的面板时，可以[开发自定义插件](/docs/guides/custom-plugin)。
+
+## 配置方式 [#配置插件]
+
+### 基本配置
+
+先注册插件，再把注册名填入 `plugins` 的 `type`。这里的 `createCounter` 是[自定义插件](/docs/guides/custom-plugin)中实现的工厂函数。
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+
+register('plugin', 'docs-counter', createCounter);
+
+const graph = new Graph({
+  container,
+  data,
+  plugins: [{ type: 'docs-counter' }],
+});
+
+await graph.render();
+```
+
+### 配置插件参数
+
+插件参数和 `type` 写在同一层。示例用 `caption` 设置计数器标题。点击节点或 **Plugin +1**，计数会加一。
+
+<NodeDocExample id="extension-plugin" locale="zh" focus="activate" />
+
+### 更换插件或参数
+
+`plugins` 在创建图时设置。需要更换插件或修改参数时，先销毁旧图，再用新的 `plugins` 配置创建图。
+
+### 挂载与卸载
+
+| 操作 | 插件如何变化 |
+| --- | --- |
+| `await graph.render()` | 首次渲染时挂载插件；再次调用会重新挂载。点击示例中的 **Render again**，计数会归零。 |
+| `await graph.setData(nextData)` | 只更新图数据，插件继续运行。 |
+| `graph.destroy()` | 销毁图，并调用插件的 `destroy()` 清理资源。 |
+
+## 自定义插件
+
+[自定义插件](/docs/guides/custom-plugin)用同一个计数器演示如何实现面板、监听节点点击，以及卸载时如何清理。配置字段见[插件配置参考](/docs/api/options#plugins)。

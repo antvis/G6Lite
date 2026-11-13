@@ -7,8 +7,9 @@
  *
  * 通过右上角菜单切换两种模式。
  */
-import { Graph } from '@antv/g6-lite';
-import { mountCanvasMenu } from './demo-panel.ts';
+import { Graph, register } from '@antv/g6-lite';
+import indented from '@antv/g6-lite/layouts/indented';
+import { createDemoPanel } from './demo-panel.ts';
 import { attachLabelsCanvas, type GraphInstanceWithTools } from './tooling.ts';
 
 const data = {
@@ -145,6 +146,7 @@ function configMinimal() {
 }
 
 export async function run(container: string | HTMLElement) {
+  register('layout', 'indented', indented);
   const wrapper =
     typeof container === 'string'
       ? (document.querySelector(container)! as HTMLElement)
@@ -206,19 +208,11 @@ export async function run(container: string | HTMLElement) {
     currentGraph = graph;
   }
 
-  mountCanvasMenu(wrapper, {
-    caption: '样式',
-    items: [
-      { value: 'styled', label: '有背景' },
-      { value: 'minimal', label: '无样式' },
-    ],
-    value: 'styled',
-    onSelect(value) {
-      if (value !== currentMode) void renderMode(value);
-    },
-  });
-
   await renderMode('styled');
+  const ui = createDemoPanel(wrapper);
+  ui.addChoice('样式', { 有背景: 'styled', 无样式: 'minimal' }, 'styled', (value) => {
+    if (value !== currentMode) void renderMode(value);
+  });
 
   return {
     getData: () => currentGraph?.getData(),
@@ -228,7 +222,7 @@ export async function run(container: string | HTMLElement) {
       generation++;
       cleanupLabels?.();
       if (currentGraph) currentGraph.destroy();
-      wrapper.querySelector(':scope > [data-canvas-controls]')?.remove();
+      ui.destroy();
     },
   };
 }

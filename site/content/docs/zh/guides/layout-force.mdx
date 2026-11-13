@@ -1,0 +1,45 @@
+---
+title: 力导向布局 Force
+description: 边的引力拉近相连的节点，节点间的斥力把它们分开。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+边的引力拉近相连的节点，节点间的斥力把它们分开。
+
+## 使用场景
+
+适合探索社交关系、服务依赖等网络的连接结构。
+
+## 基本用法
+
+布局类型通过 `layout.type` 指定。
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'force' },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `linkDistance` | 相连节点之间的目标距离。 | `number` | `200` |
+| `nodeStrength` | 节点间的斥力强度。 | `number` | `1000` |
+| `edgeStrength` | 边的引力强度。 | `number` | `50` |
+| `maxIteration` | 布局的最大迭代次数。 | `number` | 按节点数计算 |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
+
+## 代码示例
+
+示例将相连节点的目标距离设为 100。
+
+<NodeDocExample id="built-in-layout" layoutType="force" locale="zh" />
+
+[对比关系网络布局](/docs/guides/layout-networks)

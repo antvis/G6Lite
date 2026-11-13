@@ -64,6 +64,7 @@ export async function run(container: string | HTMLElement) {
     },
     layout: { type: 'dagre', rankdir: 'LR', nodeSize: 32, ranksep: 180 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+    // #region node-label
     node: {
       labelRenderer: 'demo-multiline',
       style: {
@@ -75,6 +76,8 @@ export async function run(container: string | HTMLElement) {
         labelBackgroundPadding: 4,
       },
     },
+    // #endregion node-label
+    // #region edge-label
     edge: {
       type: 'arc',
       labelRenderer: 'demo-multiline',
@@ -86,6 +89,7 @@ export async function run(container: string | HTMLElement) {
         labelAutoRotate: true,
       },
     },
+    // #endregion edge-label
   });
   await graph.render();
   return graph;

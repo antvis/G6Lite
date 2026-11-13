@@ -1,87 +1,37 @@
 ---
 title: React 接入
-description: 挂载、数据同步、异步清理和 StrictMode 中的 Graph 实例管理
+description: 在 React 组件中创建关系图并更新数据
 ---
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-React 负责 DOM 与业务数据，Graph 负责画布。挂载时创建一个实例，数据变化时复用，卸载时销毁。已安装项目先运行 `npm install @antv/g6-lite@0.1.0-beta.27`。Vue 项目直接看 [Vue 接入](/docs/getting-started/vue)。
-
-<QuickStartExample locale="zh" />
-
 ## 在 React 中使用
 
-将以下代码保存为 `GraphView.tsx`，在页面中使用 `<GraphView />`。组件挂载后创建图，卸载时销毁实例。
+在页面中引入 `GraphView` 组件。
+
+```tsx
+import GraphView from './GraphView';
+
+export default function App() {
+  return <GraphView />;
+}
+```
+
+<span id="准备两组数据" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+<span id="react响应数据依赖变化" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+### 定义 GraphView
+
+将下面的代码保存为 `GraphView.tsx`。组件挂载后创建图，切换数据时调用 `setData()`，卸载时销毁实例。
 
 ```tsx
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { Graph } from '@antv/g6-lite';
+import { useEffect, useRef, useState } from 'react';
+import { Graph, type GraphData } from '@antv/g6-lite';
 
-export function GraphView() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    let disposed = false;
-    const graph = new Graph({
-      container: containerRef.current,
-      data: {
-        nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-        edges: [
-          { source: 'Alice', target: 'Bob' },
-          { source: 'Alice', target: 'Carol' },
-        ],
-      },
-      node: {
-        style: {
-          size: 24,
-          label: (node) => node.id,
-          labelPlacement: 'bottom',
-        },
-      },
-      edge: { style: { endArrow: true } },
-      layout: { type: 'circular', radius: 120 },
-      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-    });
-
-    graph.render().then(() => {
-      if (!disposed) graph.fitView({ padding: 32, maxZoom: 1 });
-    }).catch((error) => {
-      if (!disposed) {
-        graph.destroy();
-        console.error(error);
-      }
-    });
-
-    return () => {
-      disposed = true;
-      graph.destroy();
-    };
-  }, []);
-
-  return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
-}
-```
-
-## 数据变化时更新图
-
-前面的示例展示组件挂载与卸载。业务数据变化时，在已有实例上调用 `setData()` 即可更新图。
-
-点击“扩展关系”会增加 David 节点和 Bob → David 连线；切回“基础关系”会移除它们。切换数据时复用同一个 Graph 实例。
-
-<QuickStartExample locale="zh" variant="framework-data" />
-
-### 准备两组数据
-
-将下面的数据保存为 `graph-data.ts`，供 React 和 Vue 示例使用。
-
-```ts
-import type { GraphData } from '@antv/g6-lite';
-
-export const basicData: GraphData = {
+const basicData: GraphData = {
   nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
   edges: [
     { source: 'Alice', target: 'Bob' },
@@ -89,114 +39,81 @@ export const basicData: GraphData = {
   ],
 };
 
-export const expandedData: GraphData = {
+const expandedData: GraphData = {
   nodes: [...basicData.nodes, { id: 'David' }],
   edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
 };
-```
 
-### React：响应数据依赖变化
+const fitView = { padding: 32, maxZoom: 1 };
 
-将下面代码保存为 `GraphDataDemo.tsx`，在页面中使用 `<GraphDataDemo />`。父组件用 state 切换数据，子组件用独立的 effect 监听 `data`，调用已有实例的 `setData()`。
-
-按照 React 官方的[控制非 React 组件](https://react.dev/reference/react/useEffect#controlling-a-non-react-widget)模式，用 ref 保存图实例：挂载时创建，数据变化时同步，卸载时销毁。G6Lite 的首次 `render()` 是异步的，`renderedRef` 保存这次渲染任务，更新数据前先等待它完成。
-
-<details>
-<summary>完整 React 数据更新示例 GraphDataDemo.tsx</summary>
-
-```tsx
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
-import { Graph, type GraphData } from '@antv/g6-lite';
-import { basicData, expandedData } from './graph-data';
-
-function GraphView({ data }: { data: GraphData }) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+export default function GraphView() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);
-  const renderedRef = useRef<Promise<void> | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const graph = new Graph({
       container: containerRef.current,
-      data: { nodes: [], edges: [] },
+      data: basicData,
       layout: { type: 'circular', radius: 120 },
       node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
       edge: { style: { endArrow: true } },
+      autoFit: fitView,
       behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
     });
-    graphRef.current = graph;
-    renderedRef.current = graph.render();
+
+    graph.render().then(() => {
+      if (graph.destroyed) return;
+      graphRef.current = graph;
+      setReady(true);
+    }).catch((error) => {
+      if (!graph.destroyed) {
+        graph.destroy();
+        console.error(error);
+      }
+    });
 
     return () => {
+      graphRef.current = null;
       graph.destroy();
-      if (graphRef.current === graph) {
-        graphRef.current = null;
-        renderedRef.current = null;
-      }
     };
   }, []);
 
-  useEffect(() => {
-    let ignore = false;
-
-    async function update() {
-      const graph = graphRef.current;
-      if (!graph) return;
-
-      await renderedRef.current;
-      if (ignore || graph.destroyed) return;
-      await graph.setData(data, {
-        fitView: { padding: 32, maxZoom: 1 },
-      });
+  async function changeData(data: GraphData) {
+    const graph = graphRef.current;
+    if (!graph) return;
+    try {
+      await graph.setData(data, { fitView });
+    } catch (error) {
+      if (!graph.destroyed) console.error(error);
     }
-
-    update().catch((error) => {
-      if (!ignore) console.error(error);
-    });
-    return () => {
-      ignore = true;
-    };
-  }, [data]);
-
-  return <div ref={containerRef} style={{ width: '100%', height: 360 }} />;
-}
-
-export default function GraphDataDemo() {
-  const [data, setData] = useState(basicData);
+  }
 
   return (
     <div>
-      <button onClick={() => setData(basicData)}>基础关系</button>
-      <button onClick={() => setData(expandedData)}>扩展关系</button>
-      <GraphView data={data} />
+      <select
+        aria-label="关系图数据"
+        defaultValue="basic"
+        disabled={!ready}
+        onChange={(event) => void changeData(event.target.value === 'expanded' ? expandedData : basicData)}
+      >
+        <option value="basic">基础关系</option>
+        <option value="expanded">扩展关系</option>
+      </select>
+      <div ref={containerRef} style={{ width: '100%', height: 360 }} />
     </div>
   );
 }
 ```
 
-</details>
+## 运行效果 [#数据变化时更新图]
 
-## StrictMode 与异步卸载
+选择「扩展关系」会添加 David 节点和 Bob → David 连线。切回「基础关系」即可恢复。
 
-开发环境的 StrictMode 会额外执行一次 setup → cleanup → setup。每次 effect 都应创建自己的 Graph，并对称销毁；不要用“已经初始化”的标记跳过第二次挂载。见 [React effect 清理规则](https://react.dev/reference/react/useEffect#my-effect-runs-twice-when-the-component-mounts)。
-
-数据更新示例先等待首次 render，effect 失效时用 ignore 放弃后续写入。正在执行的布局由 destroy 失效；业务 fetch 应另行取消，参考[异步数据接入](/docs/guides/data)。
-
-## 常见问题
-
-**为什么出现两个画布或多次响应？** 检查 effect 是否返回 destroy；监听也应配对退订，见[生命周期](/docs/api/graph/lifecycle)。
-
-**改了数组，图却没更新？** 用新 data 对象触发依赖变化；上面的 effect 按引用比较，不监听数组原地修改。
-
-**Next.js 可以在服务端创建吗？** 在客户端组件的 effect 中创建。示例中的 'use client' 用于客户端边界，容器仍需明确高度。Graph 不负责服务端出图。
-
-**希望更新后保留视野？** 使用 `setData(data, { fitView: false })`，见[视口指南](/docs/guides/viewport)。
+<QuickStartExample locale="zh" variant="framework-data" />
 
 <span id="在-vue-中使用" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
 <span id="vue用-watch-同步数据" style={{ display: 'block', scrollMarginTop: '8rem' }} />
-
-Vue 的挂载、watch、父组件和清理已移至 [Vue 接入](/docs/getting-started/vue)。

@@ -114,7 +114,7 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     id: 'basic',
     documentation: [
       { title: { zh: '数据接入与更新', en: 'Data guide' }, href: '/docs/guides/data' },
-      { title: { zh: '图数据字段', en: 'Data fields' }, href: '/docs/api/options/data' },
+      { title: { zh: '图数据字段', en: 'Data fields' }, href: '/docs/api/options#options-data' },
     ],
     file: 'basic.ts',
     category: 'getting-started',
@@ -142,7 +142,7 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     id: 'default-theme',
     documentation: [
       { title: { zh: '主题指南', en: 'Theme guide' }, href: '/docs/guides/theme' },
-      { title: { zh: '状态方法', en: 'State methods' }, href: '/docs/api/graph/states' },
+      { title: { zh: '状态方法', en: 'State methods' }, href: '/docs/api/graph#graph-states' },
     ],
     file: 'default-theme.ts',
     category: 'getting-started',
@@ -169,8 +169,9 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
   {
     id: 'data-mutations',
     documentation: [
-      { title: { zh: '写入方法', en: 'Mutation methods' }, href: '/docs/api/graph/data-mutations' },
-      { title: { zh: '查询模型', en: 'Query models' }, href: '/docs/api/graph/data' },
+      { title: { zh: '写入方法', en: 'Mutation methods' }, href: '/docs/api/graph#graph-data-mutations' },
+      { title: { zh: '查询模型', en: 'Query models' }, href: '/docs/api/graph#graph-data' },
+      { title: { zh: '数据接入与更新', en: 'Data ingestion and updates' }, href: '/docs/guides/data' },
     ],
     file: 'data-mutations.ts',
     category: 'data-and-state',
@@ -194,9 +195,9 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
   {
     id: 'queries-and-states',
     documentation: [
-      { title: { zh: '读取与邻接查询', en: 'Queries and adjacency' }, href: '/docs/api/graph/data' },
-      { title: { zh: '状态与显隐', en: 'States and visibility' }, href: '/docs/api/graph/states' },
-      { title: { zh: 'Combo 操作', en: 'Combo operations' }, href: '/docs/api/graph/combo' },
+      { title: { zh: '读取与邻接查询', en: 'Queries and adjacency' }, href: '/docs/api/graph#graph-data' },
+      { title: { zh: '状态与显隐', en: 'States and visibility' }, href: '/docs/api/graph#graph-states' },
+      { title: { zh: 'Combo 操作', en: 'Combo operations' }, href: '/docs/api/graph#graph-combo' },
     ],
     file: 'queries-and-states.ts',
     category: 'data-and-state',
@@ -221,7 +222,7 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     id: 'set-data',
     documentation: [
       { title: { zh: '数据更新流程', en: 'Data updates' }, href: '/docs/guides/data' },
-      { title: { zh: 'setData 契约', en: 'setData contract' }, href: '/docs/api/graph/data-mutations#setdata' },
+      { title: { zh: 'setData 契约', en: 'setData contract' }, href: '/docs/api/graph#graph-data-mutations-setdata' },
       { title: { zh: '视野保留', en: 'View preservation' }, href: '/docs/guides/viewport' },
     ],
     file: 'set-data.ts',
@@ -413,7 +414,7 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     file: 'edge-hit-area.ts',
     category: 'elements',
     group: { zh: '边', en: 'Edges' },
-    title: { zh: '细边交互热区', en: 'Thin-edge hit area' },
+    title: { zh: '交互热区', en: 'Hit area' },
     description: {
       zh: '保持细线外观，同时扩大直线、曲线和自环的拾取范围。',
       en: 'Keep a thin stroke while expanding the pick area of lines, curves, and loops.',
@@ -485,8 +486,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Show node labels, edge labels, and icons, and change their placement at runtime.',
     },
     interaction: {
-      zh: '标签菜单选 left，再从操作菜单切换节点图标和边标签；刷新恢复 bottom、图标及边标签。',
-      en: 'Choose left in the label menu, then toggle node icons and edge labels in Actions. Refresh restores bottom placement, icons and edge labels.',
+      zh: '在右上角面板将标签位置设为 left，再点击按钮切换节点图标和边标签。刷新可恢复默认配置。',
+      en: 'Set the label position to left in the top-right panel, then use the buttons to toggle node icons and edge labels. Refresh to restore the defaults.',
     },
     dataDescription: {
       zh: '节点带图标和标签，边带可开关的标签。',
@@ -547,8 +548,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     id: 'combo',
     documentation: [
       { title: { zh: 'Combo 指南', en: 'Combo guide' }, href: '/docs/guides/combo' },
-      { title: { zh: 'Combo 方法', en: 'Combo methods' }, href: '/docs/api/graph/combo' },
-      { title: { zh: 'Combo 配置', en: 'Combo options' }, href: '/docs/api/options/combo' },
+      { title: { zh: 'Combo 方法', en: 'Combo methods' }, href: '/docs/api/graph#graph-combo' },
+      { title: { zh: 'Combo 配置', en: 'Combo options' }, href: '/docs/api/options#options-combo' },
     ],
     file: 'combo.ts',
     category: 'elements',
@@ -559,8 +560,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Explore nested groups, collapse and expand, runtime regrouping, and data export.',
     },
     interaction: {
-      zh: '使用工具条折叠分组、移动节点归属、创建分组并导出数据。',
-      en: 'Use the toolbar to collapse groups, move memberships, create a combo, and export data.',
+      zh: '点击分组背景可折叠或展开单个分组。用画布上的按钮批量操作，在「更多」中调整节点归属、创建分组或导出数据。',
+      en: 'Click a group background to collapse or expand it. Use the canvas buttons for bulk actions and the menu to move nodes, create a combo, or export data.',
     },
     dataDescription: {
       zh: '10 个业务节点、9 条边和 4 个嵌套分组。',
@@ -598,7 +599,7 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     file: 'layout-gallery.ts',
     category: 'layouts',
     group: { zh: '布局矩阵', en: 'Layout gallery' },
-    title: { zh: '更多内置布局', en: 'More built-in layouts' },
+    title: { zh: '更多布局示例', en: 'More layout examples' },
     description: {
       zh: '比较 radial、concentric、ForceAtlas2、fruchterman、MDS 和 random。',
       en: 'Compare radial, concentric, ForceAtlas2, fruchterman, MDS, and random layouts.',
@@ -862,8 +863,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
   {
     id: 'neighbor-highlight',
     documentation: [
-      { title: { zh: '邻居查询', en: 'Neighbor queries' }, href: '/docs/api/graph/data#getneighbornodes' },
-      { title: { zh: '高亮交互', en: 'Highlight interactions' }, href: '/docs/guides/interactions' },
+      { title: { zh: '邻居查询', en: 'Neighbor queries' }, href: '/docs/api/graph#getneighbornodes' },
+      { title: { zh: '高亮交互', en: 'Highlight interactions' }, href: '/docs/guides/behaviors' },
     ],
     file: 'neighbor-highlight.ts',
     category: 'interactions',
@@ -885,7 +886,7 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     id: 'selection-behaviors',
     documentation: [
       { title: { zh: '状态使用', en: 'Using states' }, href: '/docs/guides/states' },
-      { title: { zh: '交互组合', en: 'Combine interactions' }, href: '/docs/guides/interactions' },
+      { title: { zh: '交互组合', en: 'Combine interactions' }, href: '/docs/guides/behaviors' },
     ],
     file: 'selection-behaviors.ts',
     category: 'interactions',
@@ -1121,7 +1122,7 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
     file: 'custom-behavior.ts',
     category: 'extensions',
     group: { zh: '行为扩展', en: 'Behavior extensions' },
-    title: { zh: '注册自定义 Behavior', en: 'Register a custom behavior' },
+    title: { zh: '注册自定义交互', en: 'Register a custom interaction' },
     description: {
       zh: '注册一个 Behavior：点击节点时选中它，点击画布时清除。',
       en: 'Register a behavior that selects a clicked node and clears selection on the canvas.',

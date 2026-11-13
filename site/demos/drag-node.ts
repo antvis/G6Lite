@@ -34,6 +34,7 @@ export async function run(container: string | HTMLElement) {
         labelPlacement: 'center',
         labelColor: '#fff',
       },
+      stateStyles: { selected: { fill: '#8050d2' } },
     },
     combo: {
       style: {
@@ -42,9 +43,21 @@ export async function run(container: string | HTMLElement) {
       },
     },
     edge: { style: { endArrow: true, stroke: '#99ADD1' } },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+    // #region drag-options
+    behaviors: [
+      'zoom-canvas',
+      'drag-canvas',
+      { type: 'click-select', multiple: true, trigger: 'shift' },
+      'drag-node',
+    ],
+    // #endregion drag-options
   });
-  await graph.render();
-  graph.fitView({ padding: 48 });
-  return graph;
+  try {
+    await graph.render();
+    graph.fitView({ padding: 48, maxZoom: 1 });
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
 }

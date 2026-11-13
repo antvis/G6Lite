@@ -5,7 +5,7 @@ description: Start with a click listener and connect canvas interactions to your
 
 import { NodeDocExample as EventDocExample } from '@/components/node-doc-example';
 
-Graph events tell you what was clicked or selected and which data operation completed. Start with clicks; the child pages cover selection/dragging and lifecycle timing.
+Graph events tell you what was clicked or selected and which data operation completed. Start with the click example, then follow the links below for other event use cases.
 
 ## Element events
 
@@ -33,7 +33,11 @@ Listening does not select nodes or change styles. Click a node, edge, or empty s
 - canvas is CSS pixels from the canvas top-left.
 - graph is the graph position, useful for creating or moving elements.
 
-For edges, read edgeId / source / target; for group backgrounds, read comboId. Find all fields and mouse events in [element events](/en/docs/api/graph/events/element).
+For edges, read edgeId / source / target; for group backgrounds, read comboId. Find all fields and mouse events in [element events](/en/docs/api/graph/events#event-element).
+
+### Listen for Combo hover
+
+Use `combo:pointerover` to show a group hint and `combo:pointerleave` to hide it. Moving from the group background onto one of its nodes also triggers the leave event. See [Combo events](/en/docs/api/graph/events#combos).
 
 ## Removing listeners
 
@@ -48,7 +52,7 @@ export function observeClicks(graph: Graph, onClick: () => void) {
 }
 ```
 
-Use once when you need only the next occurrence. Arm once registers the next node click; Listening controls the independent persistent subscription. See [on / off / once](/en/docs/api/graph/events#on) for parameters.
+Use once when you need only the next occurrence. Arm once registers the next node click; Listening controls the independent persistent subscription. See [on / off / once](/en/docs/api/graph#on) for parameters.
 
 ## Selection and drag events
 
@@ -60,13 +64,13 @@ Continue with [selection and dragging](/en/docs/guides/events/selection-drag): t
 
 Initial rendering, incremental changes, replacement, and relayout emit different events. afterrender does not repeat for every data update.
 
-Continue with [lifecycle and data](/en/docs/guides/events/lifecycle): compare interactive logs, then choose the completion point.
+See when to update the graph, read node positions, or respond to data replacement. [Rendering, layout, and data updates](/en/docs/guides/events/lifecycle)
 
 ## Common questions
 
 ### Why is nativeEvent undefined?
 
-Element clicks, hover, and wheel expose nativeEvent. Selection and some drag stages use event; drag completion and region selection may have no native-event field. Look up the event in the [API](/en/docs/api/graph/events).
+Element clicks, hover, and wheel expose nativeEvent. Selection and some drag stages use event; drag completion and region selection may have no native-event field. Look up the event in the [event reference](/en/docs/api/graph/events).
 
 ### Why are positions still old when layout finishes?
 
@@ -76,23 +80,13 @@ layout:end / afterlayout precede write-back. Await graph.layout() before queryin
 
 Check duplicate registration, handler identity for off, whether once was consumed, and whether the required Behavior is enabled.
 
-## Custom event typing
+## Custom events [#custom-event-typing]
 
-<details>
-<summary>TypeScript and business events</summary>
+Use `graph.emit()` to dispatch application events, such as a reset-view notification from a toolbar button. [See the custom event example](/en/docs/guides/events/custom)
 
-Ordinary handlers infer their parameters; you can start without learning GraphEventMap. See [GraphEventMap](/en/docs/api/graph/events#grapheventmap) when typing reusable functions.
+Continue with the [event reference](/en/docs/api/graph/events), [interaction combinations](/en/docs/guides/behaviors), and [event panel](/en/docs/examples/event-log).
 
-Declaring parameters for unknown names does not create business events. Graph has no public emit; use an application channel for business messages. See [Custom Behavior](/en/docs/guides/custom-behavior) for extensions.
-
-</details>
-
-Continue with the [event API](/en/docs/api/graph/events), [interaction combinations](/en/docs/guides/interactions), and [event panel](/en/docs/examples/event-log).
-
-<details data-related-examples>
-<summary>Related runnable examples</summary>
+**Related runnable examples**
 
 - [Event log](/en/docs/examples/event-log)
 - [Context menu](/en/docs/examples/context-menu)
-
-</details>

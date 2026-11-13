@@ -1,0 +1,54 @@
+---
+title: 鱼骨布局 Fishbone
+description: 问题放在主干末端，原因分类沿主干两侧展开。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+问题放在主干末端。每个原因分类用一根斜线接入主干，具体原因用水平短线接到所属分类。
+
+## 使用场景
+
+适合「问题 → 原因分类 → 具体原因」这类三层结构。
+
+## 基本用法
+
+这是可选布局。先导入并注册，再设置 `layout.type`。CDN 接入见[可选布局](/docs/guides/layout-overview#optional-layouts)。
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import fishbone from '@antv/g6-lite/layouts/fishbone';
+
+register('layout', 'fishbone', fishbone);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'fishbone' },
+  edge: { type: 'polyline', style: { router: 'fishbone', endArrow: false } },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `categoryGap` | 相邻分类沿主干方向的间距。 | `number` | `180` |
+| `categoryDistance` | 分类节点与主干之间的垂直距离。 | `number` | `200` |
+| `itemHStep` | 条目节点的额外水平偏移。 | `number` | `20` |
+| `getWidth` | 布局使用的节点宽度，建议与绘制宽度一致。 | 返回宽度的函数 | 返回 `80` |
+| `direction` | `'RL'` 将 `'LR'` 的排列水平翻转。 | `'LR'` \| `'RL'` | `'LR'` |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-tree-layout-fields)
+
+## 代码示例
+
+父子关系通过边定义，`source` 填父节点的 ID，`target` 填子节点的 ID。
+
+下图分析发布延期的原因。人员、工具、流程和范围是四个原因分类，每个分类下有两项具体原因。
+
+<NodeDocExample id="built-in-layout" layoutType="fishbone" locale="zh" />
+
+[对比树布局](/docs/guides/layout-trees)

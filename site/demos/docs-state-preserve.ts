@@ -1,4 +1,5 @@
 import { Graph, type GraphData } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -47,8 +48,7 @@ export async function run(container: HTMLElement) {
     }, { fitView: false });
   };
   // #endregion preserve-selection
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;left:12px;top:12px;display:flex;gap:6px;z-index:20;';
+  const ui = createDemoPanel(container);
   const status = document.createElement('div');
   status.setAttribute('role', 'status');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;right:12px;padding:8px;background:white;color:#334155;font:12px/1.6 system-ui;white-space:pre-line;pointer-events:none;z-index:20;';
@@ -57,40 +57,31 @@ export async function run(container: HTMLElement) {
   const update = () => {
     status.textContent = `data v${version} | selected nodes: ${graph.findNodesByState('selected').join(', ') || 'none'}\nselected edges: ${graph.findEdgesByState('selected').join(', ') || 'none'}`;
   };
-  const buttons = [false, true].map((keep) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = keep ? 'Keep selected' : 'Reload data';
-    button.style.cssText = 'padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;color:#334155;font:12px system-ui;cursor:pointer;';
-    button.onclick = async () => {
-      for (const item of buttons) item.disabled = true;
-      try {
-        await reload(keep);
-        if (!disposed) { version++; update(); }
-      } catch {
-        if (!disposed) status.textContent = 'Reload failed';
-      } finally {
-        if (!disposed) for (const item of buttons) item.disabled = false;
-      }
-    };
-    controls.append(button);
-    return button;
-  });
   const events = ['node:selectchange', 'edge:selectchange', 'selection:clear'] as const;
   for (const event of events) graph.on(event, update);
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
     disposed = true;
     for (const event of events) graph.off(event, update);
-    for (const button of buttons) button.onclick = null;
-    controls.remove();
+    ui.destroy();
     status.remove();
     destroy();
   };
   try {
     await graph.render();
     update();
-    container.append(controls, status);
+    const buttons = [false, true].map((keep) => ui.addAction(keep ? 'Keep selected' : 'Reload data', async () => {
+        for (const item of buttons) item.disable();
+        try {
+          await reload(keep);
+          if (!disposed) { version++; update(); }
+        } catch {
+          if (!disposed) status.textContent = 'Reload failed';
+        } finally {
+          if (!disposed) for (const item of buttons) item.enable();
+        }
+    }));
+    container.append(status);
     return graph;
   } catch (error) {
     graph.destroy();

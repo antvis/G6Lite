@@ -5,7 +5,7 @@ description: 注册业务节点，添加轻量覆盖绘制与装饰边界锚点�
 
 import { NodeDocExample } from '@/components/node-doc-example';
 
-把重复的业务外观封装为无状态 NodeExtension；仅有颜色或尺寸差异时先用[node 配置](/docs/api/options/node)。本例蓝色为正常、红色为异常，左侧短条是 overlay，徽章使用装饰边界锚点。
+用 `NodeExtension` 封装可复用的节点外观。颜色和尺寸也可以直接在[节点配置](/docs/guides/node#options-node)中设置。
 
 ## 适用场景
 
@@ -13,21 +13,17 @@ import { NodeDocExample } from '@/components/node-doc-example';
 2. 定义默认 style、纯函数 getStyle，首次 render 前 register。
 3. 配置 node.type 激活；运行中通过公开数据方法更新业务字段。
 
-<NodeDocExample id="extension-node" locale="zh" focus="descriptor" />
-
-单击节点查看紫色选中描边；Toggle B status 切换 B 的异常外观。业务状态与 selected 相互独立；展开完整代码查看激活配置和按钮清理。
-
 ## 覆盖绘制与边界锚点
 
-drawOverlay 使用传入的屏幕 x/y，按 zoom 换算图尺寸，并配对 save / restore。静态绘制不返回 true；动画才持续请求重绘。覆盖内容不增加拾取热区，不能把短条当成独立交互组件。
+`drawOverlay()` 在节点左侧画短条。`getBoundaryAnchor()` 将右侧徽章从节点中心向上移四分之一节点高度。点击 **Toggle B status**，可以看到 B 切换状态时短条和徽章仍跟随节点。
 
-getBoundaryAnchor 把右侧徽章上移四分之一节点高度。它返回相对中心的屏幕偏移，仅影响装饰定位，不改变边的连接端口或矩形拾取轮廓；传入宽高已换算，勿再乘 DPR。全部参数查[NodeExtension](/docs/api/extensions/drawing#nodeextension)。
-
-逐字段配置覆盖扩展默认值；整对象 node.style 函数有独立解析路径，不要假定它自动继承默认样式和状态层。
+<NodeDocExample id="extension-node" locale="zh" focus="overlay-and-anchor" />
 
 ## 内置扩展
 
-breathing-node 已内置注册，可直接用于 node.type；[呼吸节点案例](/docs/examples/breathing-node)展示动画。BaseNode 与 registerNode 保留兼容，新代码用 register('node', ...)，不导入内部 Renderer 或缓存。
+将 `node.type` 设为 `breathing-node`，节点在激活、选中或高亮时会出现呼吸动画。示例中可切换选中和高亮，与右侧普通节点对比。
+
+<NodeDocExample id="breathing-node" locale="zh" focus="breathing-options" />
 
 ## 常见问题
 
@@ -43,12 +39,9 @@ breathing-node 已内置注册，可直接用于 node.type；[呼吸节点案例
 
 检查 drawOverlay 是否始终返回 true。静态内容返回 void / false，大图不要为所有节点持续绘制。
 
-更多场景见[自定义节点与显式边 ID](/docs/examples/custom-node-extension)，注册作用域查[公共契约](/docs/api/extensions/registration)。
+更多场景见[自定义节点与显式边 ID](/docs/examples/custom-node-extension)，注册作用域查[公共契约](/docs/api/graph#extension-registration)。
 
-<details data-related-examples>
-<summary>相关可运行示例</summary>
+**相关可运行示例**
 
 - [呼吸节点](/docs/examples/breathing-node)
 - [自定义节点与显式边 ID](/docs/examples/custom-node-extension)
-
-</details>

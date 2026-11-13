@@ -1,12 +1,14 @@
 import { Graph, type LayoutConfig } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
+  // #region layout-options
   const layouts: Record<string, LayoutConfig> = {
     grid: { type: 'grid', rows: 2, cols: 3, width: 360, height: 160 },
     circular: { type: 'circular', radius: 100 },
     dagre: { type: 'dagre', rankdir: 'LR', nodesep: 64, ranksep: 96, nodeSize: 28 },
-    force: { type: 'force', worker: false, linkDistance: 100, maxIteration: 60 },
   };
+  // #endregion layout-options
   const graph = new Graph({
     container,
     data: {
@@ -22,34 +24,26 @@ export async function run(container: HTMLElement) {
     behaviors: [],
     autoFit: { padding: 56, maxZoom: 1 },
   });
-  const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';
-  const select = document.createElement('select');
-  select.setAttribute('aria-label', 'Layout');
-  for (const name of Object.keys(layouts)) select.add(new Option(name, name));
-  const status = document.createElement('span');
-  status.setAttribute('role', 'status');
-  status.textContent = ' grid ready';
+  const ui = createDemoPanel(container);
   let generation = 0;
-  select.addEventListener('change', async () => {
-    const current = ++generation;
-    status.textContent = ' running';
-    graph.setLayout(layouts[select.value]);
-    try {
-      await graph.layout();
-      if (current !== generation || graph.destroyed) return;
-      graph.fitView({ padding: 56, maxZoom: 1 });
-      status.textContent = ` ${select.value} ready`;
-    } catch {
-      if (current === generation && !graph.destroyed) status.textContent = ' layout failed';
-    }
-  });
-  controls.append('Layout ', select, status);
   const destroy = graph.destroy.bind(graph);
-  graph.destroy = () => { generation++; controls.remove(); destroy(); };
+  graph.destroy = () => { generation++; ui.destroy(); destroy(); };
   try {
     await graph.render();
-    container.append(controls);
+    ui.setStatus('grid ready');
+    ui.addChoice('Layout', Object.keys(layouts), 'grid', async (value) => {
+      const current = ++generation;
+      ui.setStatus('Running…');
+      graph.setLayout(layouts[value]);
+      try {
+        await graph.layout();
+        if (current !== generation || graph.destroyed) return;
+        graph.fitView({ padding: 56, maxZoom: 1 });
+        ui.setStatus(`${value} ready`);
+      } catch {
+        if (current === generation && !graph.destroyed) ui.setStatus('Layout failed');
+      }
+    });
     return graph;
   } catch (error) {
     graph.destroy();

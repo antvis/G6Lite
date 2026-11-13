@@ -1,45 +1,59 @@
 ---
-title: 节点
-description: 从形状、数据映射和状态，到标签、图标、装饰及运行时更新
+title: 节点通用配置项
+description: 介绍节点形状、数据映射、状态、标签、图标、装饰与动态更新
 ---
 
 import { NodeDocExample } from '@/components/node-doc-example';
 
-通过 `GraphOptions.node` 配置节点。本指南按配置业务效果的顺序介绍用法；需要查询类型、默认值、单位或覆盖规则时，进入[节点配置参考](/docs/api/options/node)。
+<span id="options-node" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-| 想实现的效果 | 从哪里开始 |
-| --- | --- |
-| 圆点、业务卡片和圆角矩形 | [选择类型](#类型) |
-| 按业务数据区分颜色和大小 | [数据映射](#样式字段) |
-| 点击选中或突出重点节点 | [状态样式](#状态样式) |
-| 显示名称、文字或图片图标 | [标签与图标](#标签与图标) |
-| 叠加计数和业务状态徽章 | [徽章装饰](#徽章装饰) |
-| 数据或配置改变后更新画面 | [运行时更新](#运行时更新) |
+通过 `GraphOptions.node` 选择形状、配置外观或接入业务节点。节点的数据结构和基本配置方法见[节点总览](/docs/elements/node)。
 
-## 基础配置
+<span id="顶层配置" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-1. 准备具有明确宽高的容器和包含唯一 `id` 的节点数据。已有坐标使用 `x`、`y`，需要自动排列时再配置布局；首次接入见[快速上手](/docs/getting-started/quick-start)。
-2. 将节点配置放在 `new Graph({ container, data, node })` 的 `node` 中，调用并等待 `graph.render()`。
-3. 首次渲染完成后，再处理业务事件和运行时更新；页面卸载时调用 `graph.destroy()` 释放实例。
+## NodeConfig [#nodeconfig]
 
-下文每组预览与“完整代码”使用同一份源码。代码导出 `run(container)`，传入容器元素并等待返回即可获得 Graph 实例；预览工具栏可以适配、缩放或重置当前示例。
+`NodeConfig` 对应 `new Graph()` 的 `node` 选项，所有字段均可省略。下面配置一个带标签的圆形节点，并用 `states` 使它在首次渲染时处于选中状态。运行前请在页面上准备一个有宽高的 `#container` 元素，详见[快速上手](/docs/getting-started/quick-start)。
 
-## 顶层配置
+```ts
+import { Graph } from '@antv/g6-lite';
 
-先根据任务确定配置位置。以下字段位于 `node` 下，与 `style` 同级；标签、图标的具体外观位于 `style` 内。
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [{ id: 'api', name: 'API', x: 100, y: 80, states: ['selected'] }],
+    edges: [],
+  },
+  node: {
+    type: 'circle',
+    style: {
+      size: 32,
+      fill: '#1783FF',
+      label: (node) => node.name ?? node.id,
+    },
+    stateStyles: {
+      selected: { stroke: '#1D39C4', strokeWidth: 2, haloWidth: 14 },
+    },
+  },
+});
 
-| 选项 | 什么时候使用 |
-| --- | --- |
-| `type` | 选择 `circle`、`rect`，或已经注册的业务节点类型 |
-| `style` | 配置基础外观、标签和图标；按数据变化的字段使用回调 |
-| `stateStyles` | 配置进入选中、高亮等状态后的外观；状态由行为或 API 激活 |
-| `labelRenderer` | 需要富标签时，选择已经注册的 label 渲染器；同时提供非空 `style.label` |
-| `decorations` | 叠加多个徽章等附属内容，使用内置徽章或已经注册的 decoration 渲染器 |
-| `autoExternalLabelPlacement` | 当前仅有类型声明，运行时未读取；位置仍需用 `style.labelPlacement` 显式设置 |
+await graph.render();
+```
 
-完整结构和支持状态见 [`NodeConfig`](/docs/api/options/node#nodeconfig)。
+| 字段 | 说明 | 类型 | 默认或回退 |
+| --- | --- | --- | --- |
+| [`type`](#类型) | 节点形状或注册名称 | `string` | `'circle'` |
+| [`style`](#样式字段) | 主图形、标签和图标的样式 | `NodeStyleConfig \| ((node: GraphNode) => Partial<NodeStyleConfig>)` | 使用主题和字段回退值 |
+| [`stateStyles`](#options-node-状态样式) | 按状态覆盖节点外观 | `Partial<Record<NodeState, NodeStateStyleOverride>>` | 使用扩展或主题的状态定义 |
+| [`labelRenderer`](#labelrenderer) | 已注册的标签渲染器名称 | `string` | 内置标签渲染器 |
+| [`decorations`](#nodedecorationconfig) | 徽章或自定义装饰 | `NodeDecorationConfig[]` | 无装饰 |
 
-## 类型
+## Type 节点类型 [#类型]
+
+<span id="基础配置" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+<span id="node-circle" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+`node.type` 接受一个字符串，为整张图选择节点类型，默认是 `circle`。可以使用内置类型或已注册的节点扩展名称。要按节点数据改变颜色、尺寸等外观，请使用 [样式函数](#样式函数)。
 
 | 形状需求 | 选择与尺寸 |
 | --- | --- |
@@ -47,76 +61,151 @@ import { NodeDocExample } from '@/components/node-doc-example';
 | 业务卡片或横向标签节点 | `type: 'rect'`，用 `width`、`height` 设置宽高，`borderRadius` 设置圆角 |
 | 复用业务节点表现形式 | 先 `register('node', name, extension)`，再将 `type` 设为该名称；见[自定义节点](/docs/guides/custom-node) |
 
-下面两个矩形都为 96×40、圆角为 8；左侧高风险节点为红色，右侧普通节点为蓝色。点击节点可查看选中描边。接下来的数据映射示例使用圆形，可结合两组代码选择尺寸字段。
+## Style 节点样式 [#样式字段]
+
+`node.style` 用于配置主图形、标签、标签背景和图标。光晕由[状态样式](#halo-style)控制，徽章通过 [`node.decorations`](#nodedecorationconfig) 配置。
+
+### 主图形样式 [#nodestyleconfig]
+
+下表是 `NodeStyleConfig` 的基础样式字段，默认值适用于内置节点的 **style 对象**，包括逐字段样式函数。省略 `theme` 时采用 light 预设，自定义主题和节点扩展可改变回退值。
+
+| 字段 | 类型 | 默认或回退 | 说明 |
+| --- | --- | --- | --- |
+| `fill` | `NodeStyleValue<string>` | `theme.nodeFill`，预设为 `'#1783FF'` | 填充颜色 |
+| `size` | `NodeStyleValue<number>` | `theme.nodeSize`，预设为 `24` | 圆形直径；矩形未单独指定宽高时的回退尺寸 |
+| `width` | `NodeStyleValue<number>` | 解析后的 `size` | 矩形宽度；不改变内置圆形的直径 |
+| `height` | `NodeStyleValue<number>` | 解析后的 `size` | 矩形高度；不改变内置圆形的直径 |
+| `stroke` | `NodeStyleValue<string>` | `theme.nodeStroke`；light 为 `'#fff'`，dark 为 `'#333'` | 描边颜色 |
+| `strokeWidth` | `NodeStyleValue<number>` | `theme.nodeStrokeWidth`，预设为 `0` | 描边宽度；为 `0` 时不显示描边 |
+| `opacity` | `NodeStyleValue<number>` | `1` | 主图形与光晕的不透明度，使用 `0` 到 `1` |
+| `borderRadius` | `NodeStyleValue<number>` | `0` | 矩形圆角；绘制时不超过宽高较小值的一半 |
+
+`size`、`width`、`height`、`strokeWidth` 和 `borderRadius` 使用图坐标长度，随相机缩放。隐藏整个节点及其标签、图标和徽章时，使用 [Graph 显隐方法](/docs/api/graph#状态显隐和定位)。
+
+矩形的宽和高分别回退到 `size`。例如，`style: { size: 40, width: 96 }` 会得到宽 `96`、高 `40` 的矩形。即使显式指定了宽高，默认标签的定位和图标的默认尺寸仍以 `size` 为基准。
+
+<span id="node-rect" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+下面的示例显式设置矩形宽 `96`、高 `40`、圆角 `8`，并按 `data.risk` 映射填充色。点击节点可查看选中描边。
 
 <NodeDocExample id="body" locale="zh" />
 
-只改颜色、尺寸或描边时，直接使用 `style`；需要把同一套业务外观封装成可复用类型时再注册节点扩展。圆形和矩形的其他组合见[图形类型示例](/docs/examples/shapes)，尺寸单位和回退规则见[基础外观参考](/docs/api/options/node#nodestyleconfig)。
+### 样式函数 [#样式函数]
 
-## 样式字段
+样式函数根据每个节点的数据计算样式，比如用数值决定节点大小，用分组决定颜色。
 
-按业务数据配置外观时，先将业务属性放入节点的 `data`，再在对应样式字段上读取它们。回调接收当前节点，不额外接收缩放或相机参数。
+<NodeDocExample id="style" locale="zh" focus="node-options" />
 
-下面将 `data.value` 的 16、28、40 映射为圆形直径；`data.group` 为 `core` 时使用蓝色，其他组使用绿色。预期 A、C 同色，B 为绿色，三个节点由小到大。点击节点还会触发下一节的选中样式。
+### 标签样式 [#标签]
 
-<NodeDocExample id="style" locale="zh" />
+以下字段均位于 `node.style`，每个字段都可以设为固定值或函数。
 
-业务数据可能缺失时，为回调设置明确回退，并在数据进入图之前校验尺寸是有限正数。优先采用 `style: { fill: 回调, size: 回调 }` 的逐字段形式，方便保留其他样式和状态效果。整对象函数 `style: (node) => ({ ... })` 当前存在不同的尺寸回退和状态处理，详见[样式函数参考](/docs/api/options/node#样式函数)。
+| 字段 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `label` | `NodeStyleValue<string \| false>` | 不绘制 | 标签文本；`false`、空字符串或未配置时均不绘制 |
+| `labelFontSize` | `NodeStyleValue<number>` | `12` | 字号，以 CSS 像素为基准，渲染时换算 DPR 与标签缩放 |
+| `labelFontFamily` | `NodeStyleValue<string>` | 系统无衬线字体栈 | Canvas 字体族 |
+| `labelFontWeight` | `NodeStyleValue<string>` | `'normal'` | Canvas 字重，例如 `'600'` |
+| `labelColor` | `NodeStyleValue<string>` | `'#333'` | 文本颜色，未配置时不自动跟随 dark 主题变白 |
+| `labelPlacement` | `NodeStyleValue<LabelPlacement>` | `'bottom'` | `'center'`、`'top'`、`'bottom'`、`'left'` 或 `'right'` |
+| `labelOffsetX` | `NodeStyleValue<number>` | `0` | 水平偏移，以 CSS 像素为基准，正值向右 |
+| `labelOffsetY` | `NodeStyleValue<number>` | `0` | 垂直偏移，以 CSS 像素为基准，正值向下 |
+| `labelMaxWidth` | `NodeStyleValue<number>` | `0` | 默认渲染器的文字宽度上限；大于 `0` 时超长文字以 `...` 截断，非正值不限宽 |
 
-## 状态样式
+默认标签按 `size` 定位，宽高不同的矩形可用 `labelOffsetX` 和 `labelOffsetY` 微调。固定屏幕字号、低缩放隐藏和碰撞隐藏见[全局标签策略](/docs/guides/label#全局标签策略)。
 
-基础外观表达节点自身的分类和数值，`stateStyles` 表达选中、高亮等交互状态。配置状态样式后，还需要由交互行为或状态 API 激活对应状态。
+下面把 API、Database 和 Cache 的标签分别放在左侧、下方和右侧。Database 没有 `name`，所以显示 `id`。最右侧的 Worker 设置了 `data.hideLabel`，因此只显示节点。
 
-上面的圆形示例同时配置了 `stateStyles.selected` 和 `click-select`：点击 B，绿色填充和直径 28 保持不变，外侧增加深色描边和光晕；点击画布空白处清除选择。业务主动选中时，对同一 Graph 实例调用 `graph.setItemState('B', 'selected', true)`；取消这个状态时将最后一个参数设为 `false`。需要清空全部状态时使用 `graph.clearItemStates('B')`。
+<NodeDocExample id="labels" locale="zh" focus="label-style" />
 
-自定义某个状态时，把希望保留的效果写在该状态对象内；不要假设主题中的同名状态会逐字段补齐。选中光晕有内置最低效果，`haloWidth: 0` 不会直接消除选中光晕。完整规则见[状态样式参考](/docs/api/options/node#状态样式)，状态、显隐和批量操作见[Graph 状态方法](/docs/api/graph#状态显隐和定位)。
+### 标签背景样式 [#label-background]
 
-六种内置状态在节点和边上的效果可继续查看[默认主题与交互状态](/docs/examples/default-theme)。
+为 `labelBackground` 设置颜色即可给文字加底色。背景内边距以 CSS 像素为基准，随标签缩放。默认碰撞检测使用文字测量框。
 
-## 标签与图标
+| 字段 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `labelBackground` | `NodeStyleValue<string \| false>` | `false` | 文字背景色；`false` 关闭背景 |
+| `labelBackgroundPadding` | `NodeStyleValue<number>` | `2` | 背景四周内边距，以 CSS 像素为基准 |
 
-1. 用 `style.label` 提供名称，常见方式是读取 `node.data`；用 `labelPlacement` 决定名称相对节点的位置。
-2. 用 `style.icon` 提供图标内容，并显式选择 `iconType`：文字或字体字符用 `'text'`，图片地址用 `'image'`；相应地配置字号或图片宽高。
-3. 检查名称与图标的空间关系。名称放在节点外、图标放在中心，可以避免两者重叠；文字缩放、隐藏和碰撞另由顶层 `label` 策略控制。
+下面给 API 和数据库标签分别加浅蓝和浅黄底色，并各留 `6` 像素内边距。数据库名称超过 `labelMaxWidth: 120` 时会截断，背景宽度也以 `120` 加两侧内边距为上限。
 
-下面三个节点共用一份配置：中央 A、D、C 来自 `data.icon`，名称分别放在左侧、下方和右侧。`labelPlacement` 只移动名称，图标仍在中心。
+<NodeDocExample id="label-options" locale="zh" focus="node-label" />
 
-<NodeDocExample id="labels" locale="zh" />
+### 图标样式 [#图标]
 
-需要组合图文或自定义测量绘制时，先 `register('label', name, renderer)`，再设置 `node.labelRenderer`，同时保留非空 `style.label`。完整步骤见[自定义 Label Renderer](/docs/guides/custom-label-renderer)。
+图标同样配置在 `node.style`，支持固定值或函数。
 
-名称限宽、背景及显示策略见[标签与图标指南](/docs/guides/label)，字段定义分别见[节点标签](/docs/api/options/node#标签)和[节点图标](/docs/api/options/node#图标)。
+| 字段 | 类型 | 默认值 | 生效条件与单位 |
+| --- | --- | --- | --- |
+| `icon` | `NodeStyleValue<string \| false>` | 不绘制 | 图片 URL 或文本；含义由 `iconType` 决定，空字符串和 `false` 不绘制 |
+| `iconType` | `NodeStyleValue<'image' \| 'text'>` | `'image'` | 图片或文字图标 |
+| `iconWidth` | `NodeStyleValue<number>` | 解析后 `size` 的 `0.6` 倍 | 仅图片图标，图坐标宽度 |
+| `iconHeight` | `NodeStyleValue<number>` | 解析后 `size` 的 `0.6` 倍 | 仅图片图标，图坐标高度 |
+| `iconFontFamily` | `NodeStyleValue<string>` | 系统无衬线字体栈 | 仅文字图标，所用字体须由应用加载 |
+| `iconFontSize` | `NodeStyleValue<number>` | 解析后 `size` 的 `0.6` 倍 | 仅文字图标，图坐标字号；渲染后不足 4 个 Canvas 像素时跳过 |
+| `iconColor` | `NodeStyleValue<string>` | `'#fff'` | 仅文字图标 |
+| `iconOffsetX` | `NodeStyleValue<number>` | `0` | 图坐标偏移，正值向右 |
+| `iconOffsetY` | `NodeStyleValue<number>` | `0` | 图坐标偏移，正值向下 |
+
+图标尺寸和偏移随相机缩放，不使用 `label.scaleWithZoom` 的文字缩放策略。图标不参加标签碰撞隐藏，也不受 `nodeMinZoom` 控制；`hidden` 节点仍会跳过绘制。图片异步加载，成功后重绘；跨域图片需允许匿名 CORS，失败后本实例不会自动重试同一 URL。
+
+<span id="标签与图标" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+下面在左侧节点绘制文字图标 `A`，在右侧节点绘制 AntV 图片。两种图标都向上偏移 `4` 个图坐标单位，节点名称留在下方。可将 `imageUrl` 换成应用中的图片地址。
+
+<NodeDocExample id="node-icons" locale="zh" focus="icon-style" />
+
+### labelRenderer [#labelrenderer]
+
+`node.labelRenderer` 用来指定标签的绘制方式。下面的 `style.label` 提供文本，`demo-multiline` 把服务名称和位置或角色画成两行。
+
+<NodeDocExample id="extension-label" locale="zh" focus="node-label" />
 
 ## 徽章装饰
 
-业务计数、告警和权限标记可以叠加在基础节点之外：
+<span id="nodedecorationconfig" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+<span id="内容与显示" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+<span id="放置与偏移" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+<span id="堆叠与溢出" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+<span id="内置徽章" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+<span id="自定义装饰渲染器" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-1. 在 `node.decorations[]` 中指定 `renderer`。`builtin-badge` 已内置注册；自定义 decoration 需要先注册。
-2. 单项内容使用 `data`；多项使用 `layout: 'stack'` 和 `items`。为不同节点提供不同徽章时，`items` 可以从当前节点的业务数据读取。
-3. 通过 `placement`、`attachment` 和 `anchor` 放置装饰；需要收起长列表时组合 `maxVisible`、`overflow` 和可见的 `overflowData`。
+在 [`node.decorations`](/docs/api/options#config-node-decoration) 中使用 `builtin-badge`，可以在节点旁显示计数、告警或权限标记。
 
-下面提供 5 项徽章，`maxVisible: 3` 初始显示计数、警告和 `···`。悬停 `···` 展开全部 5 项，移出展开区域后折叠；下方节点名称独立保留。
+<NodeDocExample id="badges" locale="zh" focus="badge-options" view="code" />
 
-<NodeDocExample id="badges" locale="zh" />
+初始显示计数、告警和 `···`。悬停 `···` 查看全部 5 枚徽章。
 
-装饰使用独立的缩放阈值和碰撞策略。需要改变堆叠定位、偏移或显示约束时，查阅[节点装饰参考](/docs/api/options/node#nodedecorationconfig)；自定义测量、绘制和注册步骤见[装饰扩展](/docs/guides/extensions#decoration-renderer)。
+<NodeDocExample id="badges" locale="zh" view="preview" />
 
-## 运行时更新
+<span id="状态样式" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-首次 `await graph.render()` 完成后，复用当前实例，根据变化来源选择操作：
+## State styles 状态样式 [#options-node-状态样式]
 
-| 变化来源 | 操作 | 对上方示例的影响 |
-| --- | --- | --- |
-| 某个节点的业务数值改变 | `graph.updateNodeData('B', { value: 40 })` | 数据映射示例中 B 的直径改为 40，仍保持原分组颜色 |
-| 所有节点改为统一填充色 | `graph.updateOptions({ node: { style: { fill: '#7262FD' } } })` | 替换颜色映射，保留原来的尺寸映射和其他样式 |
-| 业务选中某个节点 | `graph.setItemState('B', 'selected', true)` | 激活 `stateStyles.selected`，无需重建数据 |
-| 改变所有节点的名称位置 | `graph.updateOptions({ node: { style: { labelPlacement: 'top' } } })` | 将名称放到上方，图标仍留在中心 |
-| 移除当前节点装饰配置 | `graph.updateOptions({ node: { decorations: [] } })` | 清除装饰数组，基础图形和标签继续保留 |
-| 替换整张图的数据 | `await graph.setData(nextData, { fitView: false })` | 使用新数据；配置了布局时会重新布局，保留当前相机 |
+[`node.stateStyles`](/docs/api/options#config-node-state-style) 按状态设置节点外观。示例中 A 初始带有选中描边，点击 **Toggle review** 可叠加橙色填充。
 
-这些调用用于业务代码持有的 Graph 实例；正文预览的“重置示例”恢复本页对应的初始配置。节点业务更新的方法见[节点增量操作](/docs/api/graph#节点)，整图替换见 [`setData()`](/docs/api/graph#setdata)。
+<NodeDocExample id="state-concept" locale="zh" focus="state-styles" />
 
-`updateOptions()` 合并 `style` 对象字段，但传入新的 `stateStyles` 或 `decorations` 时会替换整个状态映射或装饰数组。业务维护多种状态或装饰时，提交完整集合；更新样式后通常无需再次 `render()`，也不会自动重跑布局。详见[节点运行时更新规则](/docs/api/options/node#运行时更新)及 [`updateOptions()`](/docs/api/graph#updateoptions)。
+### 光晕样式 [#halo-style]
+
+`haloWidth` 设置节点外侧光晕的宽度。示例从左到右对比默认、激活和选中三种状态，激活和选中的光晕宽度分别为 `8` 和 `22`。
+
+<NodeDocExample id="node-halo" locale="zh" focus="halo-options" />
+
+## 开发自定义节点 [#custom-node]
+
+如何用 `NodeExtension` 创建和注册可复用的节点类型，见[自定义节点](/docs/guides/custom-node)。
+
+## 动态更新节点 [#动态更新节点]
+
+<span id="运行时更新" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+<span id="options-node-运行时更新" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+渲染后可更新节点数据或全局样式。点击 **Restore DB** 修改 DB 的状态和颜色，再点击 **Labels on top** 把所有节点标签移到上方。
+
+<NodeDocExample id="node-updates" locale="zh" focus="runtime-updates" />
+
+更多操作见 [`updateNodeData()`](/docs/api/graph#updatenodedata) 和 [`updateOptions()`](/docs/api/graph#updateoptions)。
 
 ## 常见问题
 
@@ -126,7 +215,7 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 **设置了状态样式，点击却没有变化**
 
-同时配置选择行为或调用状态 API；若 `style` 使用整对象函数，先改为逐字段回调以应用状态外观。
+同时配置选择行为或调用状态 API；若 `style` 使用整对象函数，先改为逐字段配置函数以应用状态外观。
 
 **标签不显示，或缩小后消失**
 
@@ -144,33 +233,36 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 折叠时会预留溢出位置；提供 `overflowData` 显示占位项，悬停展开还需 `overflow: 'hover-expand'`。
 
-**自动外置标签没有移动**
-
-`autoExternalLabelPlacement` 当前未实现；显式配置 `labelPlacement`。
-
 **热更新后其他状态或徽章丢失**
 
 `stateStyles` 和 `decorations` 整体替换；更新时提交希望保留的完整集合。
 
 ## 性能建议
 
-- 内置圆形和矩形由 WebGL 绘制；同一种外观优先用固定值，按数据分类时使用轻量字段回调，避免在回调中请求数据或执行重计算。
+- 内置圆形和矩形由 WebGL 绘制；同一种外观优先用固定值，按数据分类时使用轻量的样式函数，避免在函数中请求数据或执行重计算。
 - 高频选中和高亮切换使用状态 API；业务字段变化采用增量更新，减少整图替换和重新布局。
 - 大图按需显示标签和装饰，结合低缩放、碰撞及数量限制；自定义标签和装饰的测量绘制保持轻量。
 
 ## 相关
 
-- [节点配置参考](/docs/api/options/node)：完整字段、单位、优先级和边界行为。
-- [标签与图标](/docs/guides/label)：标签显示策略与更多配置步骤。
-- [自定义节点](/docs/guides/custom-node)：封装可复用的业务节点。
-- [边](/docs/guides/edge)：连接方式及关联外观。
-- [示例总览](/docs/examples)：进一步修改数据、配置和交互。
+<span id="相关参考" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
-<details data-related-examples>
-<summary>相关可运行示例</summary>
+### 按效果选择示例 [#按效果选择示例]
 
-- [节点数据映射样式](/docs/examples/node-style)
-- [图形类型](/docs/examples/shapes)
+| 要验证的配置 | 可运行示例 | 操作与预期 |
+| --- | --- | --- |
+| `type` 与基础尺寸 | [图形类型](/docs/examples/shapes) | 对比圆形和矩形的轮廓、宽高 |
+| 逐字段样式函数 | [节点数据映射样式](/docs/examples/node-style) | 对比不同分组颜色和中心节点尺寸，悬停查看关联高亮 |
+| 状态覆盖 | [默认主题与状态](/docs/examples/default-theme) | 对比主题与内置状态的外观 |
+| `label*`、`icon*` 与热更新 | [标签位置与图标](/docs/examples/labels) | 切换位置、节点图标和边标签，观察它们各自变化 |
+| 全局标签显示策略 | [标签渲染策略](/docs/examples/label-rendering-options) | 切换策略并缩放，对比文字显示；这些策略不等同于图标配置 |
+| `labelRenderer` | [自定义标签渲染](/docs/examples/custom-label-renderer) | 对比自定义内容与普通文字；注册与配置过程见源码 |
+| `decorations` | [节点徽章](/docs/examples/decoration-badges) | 悬停溢出入口展开 5 项徽章，移出后折叠；修改 `maxVisible` 比较结果 |
+
+### 指南与协议 [#指南与协议]
+
+- [标签与图标](/docs/guides/label)
+- [自定义 Label Renderer](/docs/guides/custom-label-renderer)
+- [自定义节点装饰](/docs/guides/custom-decoration)
+- [边](/docs/guides/edge)
 - [节点边框与圆角](/docs/examples/node-border)
-
-</details>

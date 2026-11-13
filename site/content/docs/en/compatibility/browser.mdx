@@ -18,7 +18,20 @@ Graph runs in a real browser DOM container. It prefers WebGL2 and then tries Web
 
 ## Minimum browser versions
 
-ES2020 syntax support alone is not a complete compatibility promise. Browser/WebView, GPU drivers, and bundles determine usability. Validate creation, rendering, zoom, Worker, resizing, and cleanup on each target version. Legacy IE/EdgeHTML are not current targets.
+G6Lite does not yet have certified minimum supported browser versions. The table lists minimum versions for syntax and APIs used by the core code, as starting points for testing. These versions have not passed G6Lite compatibility acceptance.
+
+| Browser | Core syntax and API version reference | Module Worker API version reference |
+| --- | --- | --- |
+| Chrome (desktop) | 80 | 80 |
+| Edge (Chromium, desktop) | 80 | 80 |
+| Firefox (desktop) | 74 | 114 |
+| Safari (macOS) | 13.1 | 15 |
+
+The core reference takes the highest requirement among optional chaining, nullish coalescing, ResizeObserver, and AbortController. The Worker column only identifies when module Workers became available. Sources: [optional chaining](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining#browser_compatibility), [nullish coalescing](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing#browser_compatibility), [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#browser_compatibility), [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController#browser_compatibility), and [Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker#browser_compatibility).
+
+The ES2020 target controls this library's TypeScript output; it does not automatically downlevel layout dependencies. For example, current layout dependencies contain private class methods. Loading the UMD bundle containing layouts or importing the affected layouts may require newer versions than the table indicates. Check dependencies, transpilation targets, and runtime APIs in the application build. Browsers without module Worker support may fall back to the main thread; a successful fallback is not a Worker pass.
+
+Browser/WebView, GPU drivers, and bundles determine usability. Validate creation, rendering, zoom, layouts, Worker execution, resizing, and cleanup before recording the passing scope for a target version. Mobile browsers and enterprise WebViews require separate acceptance. Legacy IE/EdgeHTML are not current targets.
 
 ## Coverage reference
 
@@ -28,7 +41,7 @@ Usage-share percentages are not G6Lite device pass rates. This page does not mai
 
 ## Browser comparison with sigma.js
 
-Requirements differ by library and major version. Use the [comparison page](/en/docs/compatibility/library-comparison), and do not apply Sigma v3 conclusions to v4.
+Browser requirements vary by library and major version. Check the compatibility documentation for the version you plan to use.
 
 ## WebGL support matrix
 
@@ -42,10 +55,14 @@ regl uses dynamic function compilation, which conflicts with strict CSP that pro
 
 ## Modules, SSR, and resources
 
-Use package-root ESM imports. CommonJS applications need a suitable asynchronous client import boundary. Graph does not render during SSR or in ordinary Node.js. See [installation](/en/docs/getting-started/quick-start) for React/Vue and UMD archive differences.
+The package root provides ESM and type declarations. CommonJS applications can use `await import('@antv/g6-lite')` in asynchronous client code. Graph renders in the browser. See [Quick start](/en/docs/getting-started/quick-start) for React, Vue, and UMD setup.
+
+In React and Vue, create the graph after the component mounts on the client. Check the available APIs if you need arbitrary HTML or React node trees, server-side rendering, or full animation orchestration. See [Combo configuration](/en/docs/api/options#options-combo) for the experimental boundaries of nesting and collapse.
 
 High DPR, large containers, and concurrent graphs increase pixel and GPU costs. Context and memory limits depend on browser/device. The engine handles context lost/restored and attempts resource restoration, without guaranteeing host or application-state recovery. Call destroy when leaving.
 
 ## Test scope
 
 Local Chromium automation covers executed paths only. It does not certify Safari, Firefox, mobile, or enterprise WebViews. Record tested environments and uncovered devices, and repeat [measurement](/en/docs/metrics/performance) with business data.
+
+The current public [performance samples](/benchmarks/graph-performance.json), recorded on 2026-11-10, use headless Chromium 151.0.7922.34 on macOS with SwiftShader. They cover first draw with fixed positions, labels disabled, and no layout execution. They do not validate the older browser versions above or the Worker path.

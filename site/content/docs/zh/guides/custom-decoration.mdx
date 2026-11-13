@@ -22,13 +22,13 @@ A 有五项，B 只有 Ready；A 默认显示两项及 +3 溢出项。悬停 A �
 3. layout: 'stack' 开启纵向排列；sort、maxVisible 与 overflow 控制可见项。maxVisible 包含溢出项，本例设为 3，显示两项加 +3。
 4. overflowData 也交给同一个 renderer，确保它能处理溢出项输入。
 
-不要在 renderer 中实现自己的节点位置、排序或溢出逻辑。偏移、跨轴比例、锚点和所有默认值查[装饰配置](/docs/api/options/node#nodedecorationconfig)。
+不要在 renderer 中实现自己的节点位置、排序或溢出逻辑。偏移、跨轴比例、锚点和所有默认值查[装饰配置](/docs/api/options#config-node-decoration)。
 
 ## 碰撞与更新
 
 本例为方便比较显式关闭装饰碰撞隐藏；实际业务按密度选择。hideOnCollision: false 可能重叠，也不占用装饰碰撞网格。minZoom 控制装饰自己的阈值，不等同标签策略。
 
-内容来自 items 回调时，通过公开数据方法更新业务字段；不要修改全局 renderer 的共享状态。装饰节点尺寸已经是屏幕尺寸，不再次缩放；本例内容选择固定 CSS 字号，所以只按 dpr 换算。完整单位查[DecorationRenderer](/docs/api/extensions/drawing#decorationrenderer)。
+内容来自 items 回调时，通过公开数据方法更新业务字段；不要修改全局 renderer 的共享状态。装饰节点尺寸已经是屏幕尺寸，不再次缩放；本例内容选择固定 CSS 字号，所以只按 dpr 换算。完整单位查[DecorationRenderer](/docs/api/extensions#decorationrenderer)。
 
 ## 常见问题
 
@@ -44,9 +44,6 @@ A 有五项，B 只有 Ready；A 默认显示两项及 +3 溢出项。悬停 A �
 
 可以，见[节点徽章案例](/docs/examples/decoration-badges)。不要为已有外观重复实现底层内容。
 
-<details data-related-examples>
-<summary>相关可运行示例</summary>
+**相关可运行示例**
 
 - [节点徽章](/docs/examples/decoration-badges)
-
-</details>

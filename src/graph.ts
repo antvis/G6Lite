@@ -1578,6 +1578,7 @@ export class Graph {
         this.dataModel.getCombos(),
         this.renderer.getCamera(),
         this.options.combo,
+        this.options.label?.scaleWithZoom,
       );
     });
   }

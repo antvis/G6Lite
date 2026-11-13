@@ -451,7 +451,7 @@ graph.updateNodeData('A', { score: 80 });
 | `labelColor` | 标签颜色 | `ComboStyleValue<string>` | `'rgba(0, 0, 0, 0.65)'` |
 | `labelPlacement` | 展开标签位置；不支持回调 | `'top' \| 'bottom' \| 'inside' \| 'center'` | `'top'` |
 
-分组边框根据节点主体和子分组边框计算。标签不计入边界。展开标签随视图缩放，字号上限是配置值的 1.5 倍，小于 6 屏幕像素时隐藏。分组标签不使用节点和边的全局标签策略。
+分组边框根据节点主体和子分组边框计算。标签不计入边界。分组标签的字号由 `label.scaleWithZoom` 控制。展开标签小于 6 个 Canvas 像素时隐藏。
 
 #### 折叠与状态字段
 
@@ -513,7 +513,7 @@ graph.updateNodeData('A', { score: 80 });
 
 | 属性 | 描述 | 类型 | 默认值 |
 | --- | --- | --- | --- |
-| `scaleWithZoom` | 节点标签尺寸随相机 zoom 变化；false 保持屏幕尺寸。边标签始终保持屏幕尺寸 | `boolean` | `true` |
+| `scaleWithZoom` | 节点、边、Combo 标签、文字图标和内置文字徽标随缩放改变字号。设为 false 保持屏幕字号 | `boolean` | `true` |
 | `hideOnLowZoom` | 启用下方两个最小 zoom 阈值；false 同时绕过两者 | `boolean` | `true` |
 | `hideOnCollision` | 隐藏与先绘制标签重叠的标签；节点与边共用碰撞层 | `boolean` | `true` |
 | `nodeMinZoom` | 节点标签最小相机 zoom；达到阈值即通过检查 | `number` | `0.3` |

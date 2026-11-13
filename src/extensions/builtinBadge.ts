@@ -1,4 +1,5 @@
 import { ANTV_BADGE_PALETTE } from '../palette';
+import { getLabelScale } from '../renderer/labelStyle';
 import type { NodeBadgeItem } from '../types';
 import type { DecorationRenderer } from './contracts';
 
@@ -23,11 +24,6 @@ const DEFAULT_FILL: Record<NodeBadgeItem['kind'], string> = {
   text: BADGE_DANGER_COLOR,
   icon: BADGE_NEUTRAL_COLOR,
 };
-
-function getLabelScale(zoom: number): number {
-  if (!Number.isFinite(zoom)) return 1;
-  return Math.max(0.25, Math.min(zoom, 2));
-}
 
 function fitText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
   if (ctx.measureText(text).width <= maxWidth) return text;
@@ -99,10 +95,11 @@ function drawFavorite(ctx: CanvasRenderingContext2D, size: number, color: string
 }
 
 export const builtinBadgeRenderer: DecorationRenderer<NodeBadgeItem> = {
-  measure({ ctx, data, dpr, zoom, nodeWidth, nodeHeight }) {
-    const nodeBaseSize = Math.max(1, Math.min(nodeWidth, nodeHeight));
+  measure({ ctx, data, dpr, zoom, labelScale = getLabelScale(dpr, zoom), nodeWidth, nodeHeight }) {
+    const hasText = data.kind === 'text' || data.kind === 'count' || data.kind === 'icon';
+    const size = Math.min(nodeWidth, nodeHeight);
+    const nodeBaseSize = Math.max(1, hasText ? (size / zoom) * labelScale : size);
     const badgeSize = nodeBaseSize / 3;
-    const labelScale = dpr * getLabelScale(zoom / Math.max(dpr, Number.EPSILON));
     const fontSize = Math.min(8 * labelScale, badgeSize * 0.65);
     const color = data.color ?? '#FFFFFF';
     const fill = data.fill ?? DEFAULT_FILL[data.kind] ?? BADGE_NEUTRAL_COLOR;
@@ -119,7 +116,7 @@ export const builtinBadgeRenderer: DecorationRenderer<NodeBadgeItem> = {
     const contentFontSize = data.kind === 'icon' ? badgeSize * (2 / 3) : fontSize;
     ctx.font = `${contentFontSize}px ${fontFamily}`;
     if (data.kind === 'text') {
-      const padding = 4 * dpr;
+      const padding = 4 * labelScale;
       const maxWidth = nodeBaseSize * 1.5;
       const availableTextWidth = Math.max(0, maxWidth - padding * 2);
       const text = fitText(ctx, rawText, availableTextWidth);

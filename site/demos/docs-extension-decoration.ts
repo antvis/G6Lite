@@ -2,10 +2,10 @@ import { Graph, register, type DecorationRenderer } from '@antv/g6-lite';
 
 // #region renderer
 const pill: DecorationRenderer = {
-  measure({ ctx, data, dpr }) {
+  measure({ ctx, data, dpr, labelScale = dpr }) {
     const text = String(data ?? '');
-    ctx.font = 12 * dpr + 'px sans-serif';
-    return { width: ctx.measureText(text).width + 12 * dpr, height: 22 * dpr, data: { text, unit: dpr } };
+    ctx.font = 12 * labelScale + 'px sans-serif';
+    return { width: ctx.measureText(text).width + 12 * labelScale, height: 22 * labelScale, data: { text, unit: labelScale } };
   },
   draw({ ctx, layout }) {
     const value = layout.data as { text: string; unit: number } | undefined;

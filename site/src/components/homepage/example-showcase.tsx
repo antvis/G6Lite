@@ -10,9 +10,19 @@ import { CopyPrompt } from '@/components/ai-skill/copy-prompt';
 import { localizedPath, type Locale } from '@/lib/i18n';
 import { homepageCopy } from './content';
 import styles from './homepage.module.css';
-import { bindHomepageHighlight, showcaseOptions, type ShowcaseId } from './showcase-examples';
+import {
+  bindHomepageHighlight,
+  getShowcaseOptionalLayout,
+  showcaseOptions,
+  type ShowcaseId,
+} from './showcase-examples';
 
 type Example = { id: ShowcaseId; light: string; dark: string; lightHtml: string; darkHtml: string };
+
+const layoutLoaders = {
+  mindmap: () => import('@antv/g6-lite/layouts/mindmap'),
+  fishbone: () => import('@antv/g6-lite/layouts/fishbone'),
+};
 
 export function ExampleShowcase({ locale, examples }: { locale: Locale; examples: Example[] }) {
   const copy = homepageCopy[locale].examples;
@@ -35,8 +45,13 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
     const start = async () => {
       setStatus('loading');
       try {
-        const { Graph } = await import('../../../../src/index.ts');
+        const layout = getShowcaseOptionalLayout(active);
+        const [{ Graph, register }, layoutModule] = await Promise.all([
+          import('../../../../src/index.ts'),
+          layout && layoutLoaders[layout](),
+        ]);
         if (disposed) return;
+        if (layout && layoutModule) register('layout', layout, layoutModule.default);
         graph = new Graph({ container: mount, ...showcaseOptions(active, locale, dark) });
         graphRef.current = graph;
         await graph.render();

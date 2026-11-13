@@ -147,7 +147,7 @@ Icon fields also belong in `node.style` and accept constants or per-field style 
 | `iconOffsetX` | `NodeStyleValue<number>` | `0` | Graph-space offset; positive moves right |
 | `iconOffsetY` | `NodeStyleValue<number>` | `0` | Graph-space offset; positive moves down |
 
-Icon sizes and offsets follow camera zoom rather than the `label.scaleWithZoom` text policy. Icons do not participate in label collision hiding or `nodeMinZoom`; hidden nodes still skip drawing. Images load asynchronously and trigger a redraw when ready. Cross-origin images must permit anonymous CORS; failed URLs are not automatically retried by the instance.
+Text icon font sizes follow `label.scaleWithZoom`. Image icon sizes and all icon offsets follow camera zoom. Icons do not participate in label collision hiding or `nodeMinZoom`; hidden nodes still skip drawing. Images load asynchronously and trigger a redraw when ready. Cross-origin images must permit anonymous CORS; failed URLs are not automatically retried by the instance.
 
 <span id="labels-and-icons" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 

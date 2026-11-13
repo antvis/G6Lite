@@ -46,13 +46,12 @@ import {
 } from './labelGeometry';
 import {
   DEFAULT_FONT_FAMILY,
-  getLabelZoom,
+  getLabelScale,
   isValidLabelLayout,
   resolveEdgeLabelStyle,
   resolveEdgeValue,
   resolveNodeLabelStyle,
   resolveNodeValue,
-  toLabelScreenPx,
 } from './labelStyle';
 import { resolveNodeStyle } from './style';
 
@@ -220,7 +219,7 @@ export class LabelLayerRenderer {
     this.grid.reset(w, h);
     this.decorationGrid.reset(w, h);
     const zoom = camera.zoom;
-    const scaleWithZoom = labelOptions?.scaleWithZoom !== false;
+    const labelScale = getLabelScale(dpr, zoom, labelOptions?.scaleWithZoom);
     const hideOnLowZoom = labelOptions?.hideOnLowZoom !== false;
     const hideOnCollision = labelOptions?.hideOnCollision !== false;
     const nodeMinZoom = resolveMinZoom(labelOptions?.nodeMinZoom, NODE_LABEL_MIN_ZOOM);
@@ -238,7 +237,7 @@ export class LabelLayerRenderer {
         dpr,
         zoom,
         theme,
-        scaleWithZoom,
+        labelScale,
         hideOnCollision,
         showNodeLabels,
         getNodeDimensions,
@@ -256,6 +255,7 @@ export class LabelLayerRenderer {
         h,
         dpr,
         zoom,
+        labelScale,
         hideOnCollision,
         nodeIdToIndex,
         edgePathCache,
@@ -272,7 +272,7 @@ export class LabelLayerRenderer {
     dpr: number,
     zoom: number,
     theme: ThemeTokens,
-    scaleWithZoom: boolean,
+    labelScale: number,
     hideOnCollision: boolean,
     showNodeLabels: boolean,
     getNodeDimensions?: (id: string) => { width: number; height: number } | undefined,
@@ -362,7 +362,7 @@ export class LabelLayerRenderer {
         if (iconValue && typeof iconValue === 'string') {
           const iconType = resolveNodeValue(style.iconType, node, 'image' as 'image' | 'text');
           if (iconType === 'text') {
-            this.drawTextIcon(iconValue, px, py, node, style, zoom);
+            this.drawTextIcon(iconValue, px, py, node, style, zoom, labelScale);
           } else {
             this.drawIcon(iconValue, px, py, node, style, zoom);
           }
@@ -389,28 +389,17 @@ export class LabelLayerRenderer {
               zoom,
               w,
               h,
-              scaleWithZoom,
+              labelScale,
               hideOnCollision,
             );
           if (!renderedByCustomRenderer)
-            this.drawNodeLabel(
-              ctx,
-              text,
-              px,
-              py,
-              node,
-              style,
-              dpr,
-              zoom,
-              scaleWithZoom,
-              hideOnCollision,
-            );
+            this.drawNodeLabel(ctx, text, px, py, node, style, zoom, labelScale, hideOnCollision);
         }
       }
 
       // Decorations use their own collision layer so a node's badge cannot suppress its label.
       if (nodeConfig?.decorations?.length) {
-        this.drawNodeDecorations(ctx, node, px, py, style, nodeConfig, dpr, zoom, w, h);
+        this.drawNodeDecorations(ctx, node, px, py, style, nodeConfig, dpr, zoom, labelScale, w, h);
       }
     }
   }
@@ -441,6 +430,7 @@ export class LabelLayerRenderer {
     rawItems: unknown[],
     dpr: number,
     zoom: number,
+    labelScale: number,
     nodeWidth: number,
     nodeHeight: number,
   ): MeasuredDecorationItem[] {
@@ -449,7 +439,7 @@ export class LabelLayerRenderer {
       const data = rawItems[index];
       const layout = this.measureDecorationLayout(
         renderer,
-        { ctx, node, data, dpr, zoom, nodeWidth, nodeHeight },
+        { ctx, node, data, dpr, zoom, labelScale, nodeWidth, nodeHeight },
         `decoration:${rendererName}:measure`,
         `[G6Lite] Decoration renderer "${rendererName}" threw during measure; skipping it.`,
       );
@@ -472,6 +462,7 @@ export class LabelLayerRenderer {
     itemGap: number,
     dpr: number,
     zoom: number,
+    labelScale: number,
     nodeWidth: number,
     nodeHeight: number,
   ): boolean {
@@ -481,6 +472,7 @@ export class LabelLayerRenderer {
       data: visibleItems[0].data,
       dpr,
       zoom,
+      labelScale,
       nodeWidth,
       nodeHeight,
     };
@@ -630,7 +622,7 @@ export class LabelLayerRenderer {
       placement,
       decoration.attachment ?? 'boundary',
       decoration.anchor ?? 'center',
-      4 * dpr * getLabelZoom(zoom / Math.max(dpr, Number.EPSILON)),
+      4 * getLabelScale(dpr, zoom),
       crossOffsetRatio,
       boundaryOverlap,
       boundaryAnchor,
@@ -651,6 +643,7 @@ export class LabelLayerRenderer {
     nodeConfig: NodeConfig,
     dpr: number,
     zoom: number,
+    labelScale: number,
     viewW: number,
     viewH: number,
   ): void {
@@ -685,6 +678,7 @@ export class LabelLayerRenderer {
         rawItems,
         dpr,
         zoom,
+        labelScale,
         nodeWidth,
         nodeHeight,
       );
@@ -706,7 +700,7 @@ export class LabelLayerRenderer {
               : decoration.overflowData;
           const overflowLayout = this.measureDecorationLayout(
             renderer,
-            { ctx, node, data: overflowData, dpr, zoom, nodeWidth, nodeHeight },
+            { ctx, node, data: overflowData, dpr, zoom, labelScale, nodeWidth, nodeHeight },
             `decoration:${decoration.renderer}:overflow-measure`,
             `[G6Lite] Decoration renderer "${decoration.renderer}" threw while measuring overflow; clipping it.`,
           );
@@ -762,6 +756,7 @@ export class LabelLayerRenderer {
         itemGap,
         dpr,
         zoom,
+        labelScale,
         nodeWidth,
         nodeHeight,
       );
@@ -816,10 +811,10 @@ export class LabelLayerRenderer {
     zoom: number,
     viewW: number,
     viewH: number,
-    scaleWithZoom: boolean,
+    labelScale: number,
     hideOnCollision: boolean,
   ): boolean {
-    const resolvedStyle = resolveNodeLabelStyle(style, node, dpr, scaleWithZoom ? zoom : 1);
+    const resolvedStyle = resolveNodeLabelStyle(style, node, labelScale);
     const params: NodeLabelParams = {
       ctx,
       text,
@@ -857,7 +852,7 @@ export class LabelLayerRenderer {
     const nodeSize = resolveNodeValue(style.size, node, 8);
     const nodeWidth = resolveNodeValue(style.width, node, nodeSize) * zoom;
     const nodeHeight = resolveNodeValue(style.height, node, nodeSize) * zoom;
-    const horizontalGap = 4 * dpr * (scaleWithZoom ? getLabelZoom(zoom) : 1);
+    const horizontalGap = 4 * labelScale;
     const anchor = getCustomNodeLabelAnchor(
       px,
       py,
@@ -905,30 +900,27 @@ export class LabelLayerRenderer {
     py: number,
     node: GraphNode,
     style: NodeStyleConfig,
-    dpr: number,
     zoom: number,
-    scaleWithZoom: boolean,
+    labelScale: number,
     hideOnCollision: boolean,
   ): void {
-    const fontSize = resolveNodeValue(style.labelFontSize, node, 12);
-    const fontFamily = resolveNodeValue(style.labelFontFamily, node, DEFAULT_FONT_FAMILY);
-    const fontWeight = resolveNodeValue(style.labelFontWeight, node, 'normal');
-    const color = resolveNodeValue(style.labelColor, node, '#333');
-    const placement = resolveNodeValue(style.labelPlacement, node, 'bottom' as LabelPlacement);
-    const offsetX = resolveNodeValue(style.labelOffsetX, node, 0);
-    const offsetY = resolveNodeValue(style.labelOffsetY, node, 0);
-    const background = resolveNodeValue(style.labelBackground, node, false as string | false);
-    const bgPadding = resolveNodeValue(style.labelBackgroundPadding, node, 2);
-    const maxWidth = resolveNodeValue(style.labelMaxWidth, node, 0);
-
-    const labelZoom = scaleWithZoom ? getLabelZoom(zoom) : 1;
-    const fontSizePx = toLabelScreenPx(fontSize, dpr, scaleWithZoom ? zoom : dpr);
+    const {
+      labelFontSize: fontSizePx,
+      labelFontFamily: fontFamily,
+      labelFontWeight: fontWeight,
+      labelColor: color,
+      labelPlacement: placement,
+      labelOffsetX: offsetX,
+      labelOffsetY: offsetY,
+      labelBackground: background,
+      labelBackgroundPadding: bgPaddingPx,
+      labelMaxWidth: maxWidthPx,
+    } = resolveNodeLabelStyle(style, node, labelScale);
     ctx.font = `${fontWeight} ${fontSizePx}px ${fontFamily}`;
 
     // Measure text
     const metrics = ctx.measureText(text);
     let displayText = text;
-    const maxWidthPx = maxWidth > 0 ? maxWidth * dpr * labelZoom : 0;
     const textW = maxWidthPx > 0 ? Math.min(metrics.width, maxWidthPx) : metrics.width;
     if (maxWidthPx > 0 && metrics.width > maxWidthPx) {
       displayText = this.truncate(ctx, text, maxWidthPx);
@@ -940,8 +932,8 @@ export class LabelLayerRenderer {
     const nodeSizeScreen = nodeSize * zoom;
 
     // Position based on placement
-    let labelX = px + offsetX * dpr * labelZoom;
-    let labelY = py + offsetY * dpr * labelZoom;
+    let labelX = px + offsetX;
+    let labelY = py + offsetY;
     let textAlign: CanvasTextAlign = 'center';
     const textBaseline: CanvasTextBaseline = 'middle';
 
@@ -953,11 +945,11 @@ export class LabelLayerRenderer {
         labelY -= nodeSizeScreen / 2 + fontSizePx * 0.6;
         break;
       case 'left':
-        labelX -= nodeSizeScreen / 2 + 4 * dpr * labelZoom;
+        labelX -= nodeSizeScreen / 2 + 4 * labelScale;
         textAlign = 'right';
         break;
       case 'right':
-        labelX += nodeSizeScreen / 2 + 4 * dpr * labelZoom;
+        labelX += nodeSizeScreen / 2 + 4 * labelScale;
         textAlign = 'left';
         break;
       case 'center':
@@ -973,7 +965,6 @@ export class LabelLayerRenderer {
 
     // Draw background
     if (background && typeof background === 'string') {
-      const bgPaddingPx = bgPadding * dpr * labelZoom;
       ctx.fillStyle = background;
       ctx.fillRect(
         bboxX - bgPaddingPx,
@@ -1020,15 +1011,15 @@ export class LabelLayerRenderer {
     node: GraphNode,
     style: NodeStyleConfig,
     zoom: number,
+    labelScale: number,
   ): void {
     const nodeSize = resolveNodeValue(style.size, node, 8);
     const defaultFontSize = nodeSize * 0.6;
-    const fontSize = resolveNodeValue(style.iconFontSize, node, defaultFontSize) * zoom;
+    const fontSize = resolveNodeValue(style.iconFontSize, node, defaultFontSize) * labelScale;
     if (fontSize < 4) return;
     const fontFamily = resolveNodeValue(style.iconFontFamily, node, DEFAULT_FONT_FAMILY);
     const color = resolveNodeValue(style.iconColor, node, '#fff');
-    // Offsets are in graph units and must scale with zoom (like the font
-    // size), otherwise the icon drifts toward the node center when zooming in.
+    // Offsets stay anchored to the node in graph units.
     const offsetX = resolveNodeValue(style.iconOffsetX, node, 0) * zoom;
     const offsetY = resolveNodeValue(style.iconOffsetY, node, 0) * zoom;
 
@@ -1051,6 +1042,7 @@ export class LabelLayerRenderer {
     h: number,
     dpr: number,
     zoom: number,
+    labelScale: number,
     hideOnCollision: boolean,
     nodeIdToIndex?: Map<string, number>,
     edgePathCache?: Map<number, EdgePath>,
@@ -1083,7 +1075,7 @@ export class LabelLayerRenderer {
 
       const resolvedStyle =
         customRendererName && customRenderer
-          ? resolveEdgeLabelStyle(style, srcNode, tgtNode, edge, dpr)
+          ? resolveEdgeLabelStyle(style, srcNode, tgtNode, edge, labelScale)
           : undefined;
 
       // Compute label position
@@ -1175,11 +1167,7 @@ export class LabelLayerRenderer {
         px,
         py,
         angle,
-        srcNode,
-        tgtNode,
-        edge,
-        style,
-        dpr,
+        resolvedStyle ?? resolveEdgeLabelStyle(style, srcNode, tgtNode, edge, labelScale),
         hideOnCollision,
       );
     }
@@ -1278,31 +1266,16 @@ export class LabelLayerRenderer {
     px: number,
     py: number,
     angle: number,
-    source: GraphNode,
-    target: GraphNode,
-    edge: GraphEdge,
-    style: NonNullable<EdgeConfig['style']>,
-    dpr: number,
+    style: ResolvedLabelStyle,
     hideOnCollision: boolean,
   ): void {
-    const fontSize = resolveEdgeValue(style.labelFontSize, source, target, edge, 10);
-    const fontFamily = resolveEdgeValue(
-      style.labelFontFamily,
-      source,
-      target,
-      edge,
-      DEFAULT_FONT_FAMILY,
-    );
-    const color = resolveEdgeValue(style.labelColor, source, target, edge, '#666');
-    const background = resolveEdgeValue(
-      style.labelBackground,
-      source,
-      target,
-      edge,
-      'rgba(255,255,255,0.8)' as string | false,
-    );
-    const bgPadding = resolveEdgeValue(style.labelBackgroundPadding, source, target, edge, 2);
-    const fontSizePx = fontSize * dpr;
+    const {
+      labelFontSize: fontSizePx,
+      labelFontFamily: fontFamily,
+      labelColor: color,
+      labelBackground: background,
+      labelBackgroundPadding: bgPadding,
+    } = style;
     ctx.font = `${fontSizePx}px ${fontFamily}`;
     const textW = ctx.measureText(text).width;
     const textH = fontSizePx;
@@ -1317,10 +1290,10 @@ export class LabelLayerRenderer {
     if (background && typeof background === 'string') {
       ctx.fillStyle = background;
       ctx.fillRect(
-        -textW / 2 - bgPadding * dpr,
-        -textH / 2 - bgPadding * dpr,
-        textW + bgPadding * 2 * dpr,
-        textH + bgPadding * 2 * dpr,
+        -textW / 2 - bgPadding,
+        -textH / 2 - bgPadding,
+        textW + bgPadding * 2,
+        textH + bgPadding * 2,
       );
     }
     ctx.textAlign = 'center';

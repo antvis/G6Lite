@@ -1,0 +1,29 @@
+tests/unit/renderer/labelRenderer.test.ts
+  s_b6755afc2e50c8::t_14d9d000a320b3 87,92,96,100
+site/content/docs/zh/guides/label.mdx
+  s_b6755afc2e50c8::t_14d9d000a320b3 53
+site/content/docs/en/guides/label.mdx
+  s_b6755afc2e50c8::t_14d9d000a320b3 53
+site/content/docs/en/api/options.mdx
+  s_b6755afc2e50c8::t_14d9d000a320b3 454
+site/content/docs/zh/api/options.mdx
+  s_b6755afc2e50c8::t_14d9d000a320b3 454
+src/renderer/labelStyle.ts
+  s_b6755afc2e50c8::t_14d9d000a320b3 19,23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "854470aa167cfed80e60e7a657e7013a5dc13ca6",
+  "prompts": {},
+  "sessions": {
+    "s_b6755afc2e50c8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1d45b-9bab-79f1-9757-c29a997bc88d",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

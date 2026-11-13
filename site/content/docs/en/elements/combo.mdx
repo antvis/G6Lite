@@ -1,0 +1,33 @@
+---
+title: Combo overview
+description: Learn what combos do and how to define and configure them
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## What is a combo
+
+A combo groups related nodes, such as Web and Mobile in a Client group. A combo can also contain other combos. Its expanded outline follows the positions and sizes of its members. When collapsed, it hides member nodes and can appear as a circle or rectangle.
+
+## Data structure
+
+Define combos in `data.combos`. A node’s `comboId` identifies its combo, and a child combo’s `parentId` identifies its parent combo. Edge endpoints still use node IDs.
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | Yes | Unique combo ID |
+| `parentId` | `string` | No | Parent combo ID |
+| `collapsed` | `boolean` | No | Whether the combo starts collapsed |
+| `states` | `ElementState[]` | No | Initial states, such as `['selected']` |
+| `style` | `Partial<ComboStyleConfig>` | No | Style for this combo |
+| `data` | `Record<string, unknown>` | No | Application data, such as a group name |
+
+## Configuration
+
+Set the default style in `combo.style`. To override a field for one combo, set it in that combo’s `style`. Supply node coordinates or let a layout calculate them.
+
+Below, Web and Mobile belong to Client, which is nested in Platform. Archive starts collapsed.
+
+<NodeDocExample id="combo-data" locale="en" focus="graph-data" />
+
+See [Common combo options](/en/docs/guides/combo) for styling, collapsing, and dragging.

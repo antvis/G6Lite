@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
+import { register } from '@src/index.js';
 import { executeFishboneLayout } from '@src/layout/fishboneLayout.js';
 import { executeIndentedLayout } from '@src/layout/indentedLayout.js';
 import { executeMindmapLayout } from '@src/layout/mindmapLayout.js';
+import fishbone from '@src/layout/optional/fishbone.js';
+import indented from '@src/layout/optional/indented.js';
+import mindmap from '@src/layout/optional/mindmap.js';
 import { runLayout } from '@src/layout/runLayout.js';
 import { ANTV_CATEGORY_10 } from '@src/palette.js';
 import type { GraphData } from '@src/types.js';
 
-describe('function-based built-in layouts', () => {
+describe('optional tree layouts', () => {
   it('executes the indented layout without mutating input data', () => {
     const data: GraphData = {
       nodes: [{ id: 'root', data: { label: 'Root' } }, { id: 'child' }, { id: 'leaf' }],
@@ -103,7 +107,8 @@ describe('function-based built-in layouts', () => {
     expect(data).toEqual(original);
   });
 
-  it('keeps self-developed layouts on their executor path when worker is requested', async () => {
+  it('runs registered indented layout when worker is requested', async () => {
+    register('layout', 'indented', indented);
     const result = await runLayout(
       {
         nodes: [{ id: 'root' }, { id: 'child' }],
@@ -118,9 +123,10 @@ describe('function-based built-in layouts', () => {
     ]);
   });
 
-  it.each(['mindmap', 'fishbone'] as const)(
+  it.each(Object.entries({ mindmap, fishbone }))(
     'routes %s through the unified runLayout entry',
-    async (type) => {
+    async (type, extension) => {
+      register('layout', type, extension);
       const result = await runLayout(
         {
           nodes: [{ id: 'root' }, { id: 'child' }],

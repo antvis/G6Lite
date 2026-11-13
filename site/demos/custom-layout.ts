@@ -1,7 +1,7 @@
 /**
  * Demo: register a layout extension that places nodes in two rows.
  */
-import { extensionFactory, Graph, register, type LayoutExtension } from '@antv/g6-lite';
+import { Graph, register, type LayoutExtension } from '@antv/g6-lite';
 
 const TWO_ROW_LAYOUT = 'two-row';
 
@@ -18,7 +18,7 @@ const twoRowLayout: LayoutExtension = {
   },
 };
 
-register('layout', TWO_ROW_LAYOUT, extensionFactory(() => ({ ...twoRowLayout })));
+register('layout', TWO_ROW_LAYOUT, () => ({ ...twoRowLayout }));
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({

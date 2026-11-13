@@ -42,21 +42,11 @@ const LAYOUT_LOADERS: Record<string, LayoutLoader> = {
     import('@antv/layout/lib/algorithm/grid/index.js').then(
       ({ GridLayout }) => GridLayout as unknown as LayoutConstructor,
     ),
-  mds: () =>
-    import('@antv/layout/lib/algorithm/mds/index.js').then(
-      ({ MDSLayout }) => MDSLayout as unknown as LayoutConstructor,
-    ),
-  radial: () =>
-    import('@antv/layout/lib/algorithm/radial/index.js').then(
-      ({ RadialLayout }) => RadialLayout as unknown as LayoutConstructor,
-    ),
-  random: () =>
-    import('@antv/layout/lib/algorithm/random/index.js').then(
-      ({ RandomLayout }) => RandomLayout as unknown as LayoutConstructor,
-    ),
 };
 
-/** Load only the requested @antv/layout algorithm. Unknown types preserve the random fallback. */
-export function loadLayout(type: string): Promise<LayoutConstructor> {
-  return (LAYOUT_LOADERS[type] ?? LAYOUT_LOADERS.random)();
+/** Resolve a built-in algorithm without starting the import. */
+export function getLayoutLoader(type: string): LayoutLoader | undefined {
+  return Object.prototype.hasOwnProperty.call(LAYOUT_LOADERS, type)
+    ? LAYOUT_LOADERS[type]
+    : undefined;
 }

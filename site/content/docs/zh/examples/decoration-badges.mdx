@@ -7,3 +7,13 @@ full: true
 import { ExampleDetail } from '@/components/example-detail';
 
 <ExampleDetail id="decoration-badges" locale="zh" />
+
+## 操作与预期
+
+1. 初始时，“订单”有 5 项徽章数据，`maxVisible: 3` 使其显示计数、警告和 `···`；其余 3 项收起。“用户”的 2 项和“审计”的 1 项全部显示。
+2. 将鼠标移入“订单”右侧的 `···`，应展开全部 5 项；移出展开区域后恢复折叠。
+3. 在源码中把 `maxVisible` 改为 `5`，点击“运行”，应直接显示全部徽章；点击“重置”恢复原例。
+
+关键配置在 `node.decorations[]`：`items` 按节点读取业务数据，`anchor` 与 `boundaryOverlap` 控制边界对齐，`overflowData` 提供可悬停的占位项。徽章和节点标签分别配置。
+
+用法见[节点指南](/docs/guides/node)与[装饰扩展](/docs/guides/extensions#decoration-renderer)；完整定义见[节点装饰配置参考](/docs/api/options#config-node-decoration)。

@@ -1,0 +1,46 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E16",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "selection-behaviors",
+      "file": "selection-behaviors.ts",
+      "observations": [
+        "Click 0 then Shift-click 1 selects both, with selected=0,1 and purple nodes; Refresh clears selections",
+        "Shift brush and Ctrl/Command lasso configuration verified against source; offset-coordinate, modifier-gating and teardown regressions exercise real behavior implementations in unit tests rather than claiming a freehand browser trace"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "queries-and-states",
+      "file": "queries-and-states.ts",
+      "observations": [
+        "Root query returns n1/n2 and both adjacent edge IDs",
+        "Batch selection, per-ID replacement, Combo highlight and n2 hiding work; replacement preserves unspecified n3 state",
+        "Clear empties selected/active/Combo states; Refresh restores baseline 4 nodes / 4 edges"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "neighbor-highlight",
+      "file": "neighbor-highlight.ts",
+      "observations": [
+        "Pointer on Hub highlights Hub and A/B/C, dimming D/E/F; leaving and Refresh restore all",
+        "Graph contains 7 nodes / 7 edges matching the source"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Clarified that state replacement affects specified IDs, not the whole graph",
+    "Added gesture regression tests for Shift brush, Ctrl/Command lasso, client-to-graph coordinates and teardown"
+  ]
+}

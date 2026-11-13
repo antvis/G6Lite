@@ -1,0 +1,22 @@
+---
+title: 缩放与平移画布
+description: 设置滚轮缩放速度、范围和拖动画布的手势
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+[拖动画布](/docs/guides/behavior-drag-canvas) · [缩放画布](/docs/guides/behavior-zoom-canvas)
+
+## 配置方式
+
+滚轮缩放用 `zoom-canvas` 开启，拖动画布空白处平移用 `drag-canvas` 开启。省略 `behaviors` 时，这两项默认开启。
+
+缩放速度通过 `sensitivity` 设置，缩放范围用 `minZoom` 和 `maxZoom` 限定。要给框选或套索留出手势，将平移的 `ignoreModifierKeys` 设为 `true`。
+
+## 示例
+
+在下方画布滚动鼠标，左下角会显示当前缩放倍数。按住鼠标左键拖动空白处，可以平移整张图。
+
+<NodeDocExample id="behavior-zoom-pan" locale="zh" focus="navigation" />
+
+滚轮缩放限制在 0.4 到 2 倍。调用 `zoomTo()` 或 `fitView()` 时，缩放范围由各自的参数决定。 [导航与拖拽参数](/docs/api/options#导航与拖拽)

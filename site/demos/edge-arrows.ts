@@ -3,7 +3,7 @@
  */
 import { Graph } from '@antv/g6-lite';
 
-export async function run(container: string | HTMLElement) {
+export async function runGraph(container: string | HTMLElement) {
   const graph = new Graph({
     autoFit: true,
     container,
@@ -25,21 +25,34 @@ export async function run(container: string | HTMLElement) {
         { source: 'n4', target: 't4', data: { dir: 'forward', lw: 6 } },
       ],
     },
-    node: { type: 'circle', style: { fill: '#5B8FF9', size: 24 } },
+    node: { type: 'circle', style: { fill: '#5B8FF9', size: 24, label: (node) => node.name ?? '' } },
+    // #region arrow-options
     edge: {
       type: 'line',
       style: {
         stroke: '#99ADD1',
-        lineWidth: (_s: any, _t: any, e: any) => e.data?.lw ?? 2,
-        endArrow: (_s: any, _t: any, e: any) => e.data?.dir !== 'none',
-        startArrow: (_s: any, _t: any, e: any) => e.data?.dir === 'both',
+        lineWidth: (_source, _target, edge) => Number(edge.data?.lw ?? 2),
+        endArrow: (_source, _target, edge) => edge.data?.dir !== 'none',
+        startArrow: (_source, _target, edge) => edge.data?.dir === 'both',
       },
     },
+    // #endregion arrow-options
     theme: 'light',
   });
 
-  await graph.render();
+  try {
+    await graph.render();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+
+export async function run(container: string | HTMLElement) {
+  const graph = await runGraph(container);
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => graph.destroy(),
   };

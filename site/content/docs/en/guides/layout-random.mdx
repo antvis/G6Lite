@@ -1,0 +1,49 @@
+---
+title: Random layout
+description: Scatter nodes randomly around the layout center.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Scatter nodes randomly around the layout center.
+
+## When to use it
+
+Use it for a quick preview of graph data. Each run samples new positions.
+
+## Basic usage
+
+This layout is optional. Import and register it before setting `layout.type`. For CDN usage, see [Optional layouts](/en/docs/guides/layout-overview#optional-layouts).
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import random from '@antv/g6-lite/layouts/random';
+
+register('layout', 'random', random);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'random' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `width` | Controls the horizontal spread. | `number` | Canvas width |
+| `height` | Controls the vertical spread. | `number` | Canvas height |
+| `center` | Center of the spread in graph coordinates. | `[number, number]` | Center of the layout area |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
+
+## Code example
+
+Nodes are scattered around `[200, 120]`. Reset the example to sample new positions.
+
+<NodeDocExample id="built-in-layout" layoutType="random" locale="en" />
+
+[Browse the layout gallery](/en/docs/examples/layout-gallery)

@@ -1,0 +1,32 @@
+---
+title: Custom Plugins
+description: Implement, register, and use a click counter plugin
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+This example adds a click counter to the graph container. The count increases when you click a node or the button on the panel.
+
+## Implement the plugin [#implement-register-and-mount]
+
+Use a factory to create the plugin. Keep the count, panel, and unsubscribe callback inside the factory so each plugin instance has its own state.
+
+| Method | What it does in the example |
+| --- | --- |
+| `init(context, options)` | Reads options such as the caption. |
+| `mount(container)` | Adds the panel to the graph container and subscribes to node clicks. |
+| `destroy()` | Unsubscribes from clicks and removes the panel. Also release any timers or other resources the plugin creates here. |
+
+## Register and use the plugin
+
+Register the factory with `register('plugin', 'docs-counter', createCounter)`, then add `{ type: 'docs-counter', caption: 'Clicks' }` to `plugins`. See the [plugin overview](/en/docs/guides/plugins#configure-a-plugin) for the graph configuration.
+
+## Code example
+
+Click a node or **Plugin +1** to increment the count. Click **Render again** to reset the count to zero. The next node click still increments it by one.
+
+<NodeDocExample id="extension-plugin" locale="en" focus="plugin" />
+
+Open the full code to see how the application provides a `subscribe` option. It calls `graph.on()` and returns a function that calls `graph.off()`. If a click counts more than once after remounting, check that `destroy()` calls the unsubscribe function.
+
+See [PluginExtension](/en/docs/api/extensions#pluginextension) for the full contract.

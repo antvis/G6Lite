@@ -1,8 +1,5 @@
 import { Graph } from '@antv/g6-lite';
-import { buttonStyle, createDemoPanel } from './demo-panel.ts';
-
-const button = (action: string, label: string) =>
-  `<button data-action="${action}" style="${buttonStyle}">${label}</button>`;
+import { createDemoPanel } from './demo-panel.ts';
 
 const NODES = Array.from({ length: 18 }, (_, index) => ({
   id: `service-${index + 1}`,
@@ -67,18 +64,7 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const ui = createDemoPanel(
-    root,
-    '标签渲染策略开关',
-    '对比字号随 zoom 缩放、低 zoom 隐藏和碰撞隐藏。初始为三项全部关闭。',
-    [
-      button('all-labels', '全部标签'),
-      button('default-policy', '默认策略'),
-      button('zoom-02', 'zoom 0.2'),
-      button('zoom-04', 'zoom 0.4'),
-      button('zoom-10', 'zoom 1.0'),
-    ].join(''),
-  );
+  const ui = createDemoPanel(root);
 
   let allLabels = true;
   let zoom = 0.4;
@@ -109,22 +95,20 @@ export async function run(container: string | HTMLElement) {
     updateStatus();
   };
 
-  ui.controls.addEventListener('click', (event) => {
-    const action = (event.target as HTMLElement).dataset.action;
-    if (action === 'all-labels') setLabelPolicy(true);
-    else if (action === 'default-policy') setLabelPolicy(false);
-    else if (action === 'zoom-02') setZoom(0.2);
-    else if (action === 'zoom-04') setZoom(0.4);
-    else if (action === 'zoom-10') setZoom(1);
-  });
+  ui.addAction('全部标签', () => setLabelPolicy(true));
+  ui.addAction('默认策略', () => setLabelPolicy(false));
+  ui.addAction('zoom 0.2', () => setZoom(0.2));
+  ui.addAction('zoom 0.4', () => setZoom(0.4));
+  ui.addAction('zoom 1.0', () => setZoom(1));
 
   setZoom(zoom);
 
   return {
+    getData: () => graph.getData(),
     fitView: () => setZoom(zoom),
     destroy() {
       graph.destroy();
-      ui.panel.remove();
+      ui.destroy();
     },
   };
 }

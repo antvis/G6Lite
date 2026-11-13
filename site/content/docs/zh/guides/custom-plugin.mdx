@@ -1,0 +1,32 @@
+---
+title: 自定义插件
+description: 实现、注册并使用一个点击计数器插件
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+下面实现一个点击计数器。它在图容器里显示面板，点击节点或面板上的按钮时更新计数。
+
+## 实现插件 [#实现注册与挂载]
+
+用工厂函数创建插件。计数、面板和退订函数都保存在工厂函数内部，每个插件实例独立管理自己的状态。
+
+| 方法 | 在示例中的作用 |
+| --- | --- |
+| `init(context, options)` | 读取标题等插件参数。 |
+| `mount(container)` | 在图容器里创建面板，订阅节点点击。 |
+| `destroy()` | 退订节点点击，移除面板。插件自己创建的定时器等资源也在这里清理。 |
+
+## 注册与使用
+
+用 `register('plugin', 'docs-counter', createCounter)` 注册工厂，再在 `plugins` 中配置 `{ type: 'docs-counter', caption: 'Clicks' }`。完整的图配置见[插件总览](/docs/guides/plugins#配置插件)。
+
+## 代码示例
+
+点击节点或 **Plugin +1**，计数会加一。点击 **Render again** 后，计数归零；再次点击节点，计数仍然只加一。
+
+<NodeDocExample id="extension-plugin" locale="zh" focus="plugin" />
+
+展开「完整代码」可查看节点点击的接入方式：应用通过 `subscribe` 传入订阅函数，在里面调用 `graph.on()`，并返回调用 `graph.off()` 的退订函数。如果重挂载后一次点击加了多次，检查 `destroy()` 是否执行了退订。
+
+更多钩子见 [PluginExtension](/docs/api/extensions#pluginextension)。

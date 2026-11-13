@@ -1,0 +1,43 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E07",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "basic",
+      "file": "basic.ts",
+      "observations": [
+        "5 nodes / 5 edges visible in the rendered data; source creates the same dataset",
+        "Canvas pan and Fit graph work; Refresh returns the original five-node circular graph"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "set-data",
+      "file": "set-data.ts",
+      "observations": [
+        "Data menu A → B replaces 5 / 5 with 8 / 8 and b1–b8, verified in data tab and canvas",
+        "Layout menu grid works; Refresh restores circular layout, A and a1–a5"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "data-mutations",
+      "file": "data-mutations.ts",
+      "observations": [
+        "addNode then addEdge changes 3 / 2 → 4 / 3, with d and e-c-d visible",
+        "removeNode removes d and its adjacent edge, returning 3 / 2",
+        "Refresh restores a/b/c, 3 / 2; inspected browser run has no console errors"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": []
+}

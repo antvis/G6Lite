@@ -161,9 +161,8 @@ export function registerBehaviors(
       });
       continue;
     }
-    const fn = BEHAVIORS[name];
-    if (fn) {
-      teardowns.push(fn(renderer, graph as Graph, config));
+    if (Object.prototype.hasOwnProperty.call(BEHAVIORS, name)) {
+      teardowns.push(BEHAVIORS[name](renderer, graph as Graph, config));
     }
   }
 

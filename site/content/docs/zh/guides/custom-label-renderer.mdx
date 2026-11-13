@@ -1,70 +1,46 @@
 ---
 title: 自定义 Label Renderer
-description: 自定义节点和边的 Label 内容，并复用定位、旋转、碰撞与调度能力
+description: 为节点和边实现多行内容，复用引擎的定位、旋转、碰撞和调度
 ---
 
-G6Lite 支持注册自定义 Label Renderer。业务只负责内容的测量和绘制，节点与边遍历、函数式样式解析、定位、路径采样、自动旋转、DPR/zoom 换算、碰撞检测和刷新调度仍由 G6Lite 负责。
+import { NodeDocExample } from '@/components/node-doc-example';
 
-多行标签的绘制效果示意：节点名称与城市分行显示，边标签也可以同时包含协议与请求类型。
-
-![节点下方双行名称与城市标签，以及边上 HTTPS 和 request 双行标签的示意](/examples/docs-guide-custom-label-renderer.svg '多行标签')
-
-可运行示例：[自定义 Label Renderer](/docs/examples/custom-label-renderer)。
+需要多行、富内容或自定义截断时使用 LabelRenderer；普通文字先用[label 配置](/docs/guides/label)。下面同一个 renderer 绘制节点名称与城市，以及边的协议与类型。
 
 ## 注册与使用
 
-```ts
-import { Graph, register, type LabelRenderer } from '@antv/g6-lite';
+1. measure 设置字体，计算包含背景内边距的完整宽高，把分行结果放入 layout.data。
+2. draw 显式设置字体和颜色，在原点附近绘制，不依赖 measure 留下的 Canvas 状态。
+3. 注册 label 名称，分别配置 node.labelRenderer / edge.labelRenderer，并显式提供非空 label。
 
-const multiline: LabelRenderer<string[]> = {
-  measure({ ctx, text, style }) {
-    ctx.font = `${style.labelFontWeight} ${style.labelFontSize}px ${style.labelFontFamily}`;
-    const lines = text.split('\n');
-    return {
-      width: Math.max(...lines.map((line) => ctx.measureText(line).width)),
-      height: lines.length * style.labelFontSize * 1.2,
-      data: lines,
-    };
-  },
-  draw({ ctx, style, layout }) {
-    const lines = layout.data ?? [];
-    const lineHeight = style.labelFontSize * 1.2;
-    ctx.font = `${style.labelFontWeight} ${style.labelFontSize}px ${style.labelFontFamily}`;
-    ctx.fillStyle = style.labelColor;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    lines.forEach((line, index) => {
-      ctx.fillText(line, 0, (index - (lines.length - 1) / 2) * lineHeight);
-    });
-  },
-};
+<NodeDocExample id="extension-label" locale="zh" focus="renderer" />
 
-register('label', 'multiline', multiline);
-
-const graph = new Graph({
-  container: 'container',
-  data,
-  node: {
-    labelRenderer: 'multiline',
-    style: { label: (node) => String(node.data?.label ?? '') },
-  },
-  edge: {
-    labelRenderer: 'multiline',
-    style: {
-      label: (_source, _target, edge) => String(edge.data?.label ?? ''),
-    },
-  },
-});
-```
+拖动节点或缩放，观察两行内容与背景。展开完整代码可看到两种激活配置。业务只负责内容，位置、旋转、缩放策略和碰撞由引擎处理。
 
 ## 协议约定
 
-- `measure` 返回完整视觉包围盒的 `width` 和 `height`。
-- 尺寸和解析后的样式数值均为 Canvas backing-store px，业务不需要再次换算 DPR 或 zoom。
-- `draw` 时 Canvas 原点已经位于 Label 中心；边 Label 的旋转也已经应用。
-- `layout.data` 会从 `measure` 原样传给同一次 `draw`，可缓存分行等业务计算。
-- 自定义内容必须绘制在声明的包围盒内，否则裁剪和碰撞结果会不准确。
+传入 text、已解析的 style、ctx、dpr、zoom。type='node' 时可读 node；type='edge' 时可读 edge / source / target。先按 type 分支再访问专用字段，完整联合类型查[LabelRenderer](/docs/api/extensions#labelrenderer)。
 
-未注册的名称、非法宽高或 Renderer 异常会给出警告，并仅对当前 Label 回退到默认单行渲染，不会中断 WebGL 主图层。
+style 的字号、偏移和内边距已经是 backing-store 像素，不再乘 DPR 或 zoom。draw 原点位于标签中心，边旋转已应用，不要重复平移到节点或再次旋转。
 
-完整示例见 `site/demos/custom-label-renderer.ts`。
+measure 返回有限正数宽高，覆盖全部自绘内容；layout.data 仅缓存本次计算。碰撞或裁剪可能导致测量后不绘制，不在 measure 中修改业务状态。自绘背景和截断由 renderer 实现，labelMaxWidth 不会自动裁切自绘文字。
+
+## 常见问题
+
+### 为什么文字被跳过？
+
+先查非空 label、hidden、低缩放阈值与碰撞策略；这不一定是 renderer 异常。临时关闭策略排查，之后再恢复适合业务的密度。
+
+### 宽高错误或绘制抛错会怎样？
+
+当前标签回退默认单行渲染并诊断；不要返回 0、NaN 或无限尺寸。Decoration 的失败行为不同，见[绘制契约](/docs/api/extensions#extension-drawing)。
+
+### 边标签一定沿真实路径放置吗？
+
+当前 polyline / cubic 使用端点连线位置与旋转，不能保证贴合折线或曲线。见[边标签限制](/docs/guides/edge#边标签)。
+
+完整案例：[自定义 Label Renderer](/docs/examples/custom-label-renderer)。注册与共享缓存见[公共契约](/docs/api/graph#extension-registration)。
+
+**相关可运行示例**
+
+- [自定义标签渲染](/docs/examples/custom-label-renderer)

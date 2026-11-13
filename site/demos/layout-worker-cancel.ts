@@ -1,5 +1,5 @@
 import { Graph, type GraphData } from '@antv/g6-lite';
-import { buttonStyle, createDemoPanel } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 function createData(): GraphData {
   const nodes = Array.from({ length: 240 }, (_, index) => ({ id: String(index) }));
@@ -10,9 +10,6 @@ function createData(): GraphData {
   })).filter((edge) => edge.source !== edge.target);
   return { nodes, edges };
 }
-
-const button = (action: string, label: string) =>
-  `<button data-action="${action}" style="${buttonStyle}">${label}</button>`;
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -27,12 +24,7 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
   graph.fitView({ padding: 40 });
 
-  const ui = createDemoPanel(
-    container,
-    'Worker 布局与取消',
-    '运行 Worker ForceAtlas2，或在启动后立即取消并切换到 Grid，验证竞态保护。',
-    [button('worker', 'Worker ForceAtlas2'), button('cancel', '启动后取消'), button('grid', '恢复 Grid')].join(''),
-  );
+  const ui = createDemoPanel(container);
 
   let generation = 0;
   const runLayout = async (config: Record<string, unknown>, label: string) => {
@@ -45,24 +37,25 @@ export async function run(container: string | HTMLElement) {
     ui.setStatus(`${label}: complete`);
   };
 
-  ui.controls.addEventListener('click', (event) => {
-    const action = (event.target as HTMLElement).dataset.action;
-    if (action === 'worker') {
-      void runLayout({ type: 'force-atlas2', worker: true, maxIteration: 80, barnesHut: true, prune: false }, 'worker');
-    } else if (action === 'cancel') {
-      const pending = runLayout({ type: 'force-atlas2', worker: true, maxIteration: 200, barnesHut: true, prune: false }, 'cancel test');
-      window.setTimeout(() => {
-        generation++;
-        graph.cancelLayout();
-        void runLayout({ type: 'grid', rows: 15, cols: 16 }, 'cancelled → grid');
-      }, 20);
-      void pending;
-    } else if (action === 'grid') {
+  let cancelTimer: number | undefined;
+  ui.addAction('Worker ForceAtlas2', () => {
+    clearTimeout(cancelTimer);
+    void runLayout({ type: 'force-atlas2', worker: true, maxIteration: 80, barnesHut: true, prune: false }, 'worker');
+  });
+  ui.addAction('启动后取消', () => {
+    clearTimeout(cancelTimer);
+    void runLayout({ type: 'force-atlas2', worker: true, maxIteration: 200, barnesHut: true, prune: false }, 'cancel test');
+    cancelTimer = window.setTimeout(() => {
       graph.cancelLayout();
-      void runLayout({ type: 'grid', rows: 15, cols: 16 }, 'grid');
-    }
+      void runLayout({ type: 'grid', rows: 15, cols: 16 }, 'cancelled → grid');
+    }, 20);
+  });
+  ui.addAction('恢复 Grid', () => {
+    clearTimeout(cancelTimer);
+    graph.cancelLayout();
+    void runLayout({ type: 'grid', rows: 15, cols: 16 }, 'grid');
   });
 
   ui.setStatus('grid ready');
-  return { destroy: () => { generation++; graph.cancelLayout(); graph.destroy(); ui.panel.remove(); } };
+  return { destroy: () => { generation++; clearTimeout(cancelTimer); graph.cancelLayout(); graph.destroy(); ui.destroy(); } };
 }

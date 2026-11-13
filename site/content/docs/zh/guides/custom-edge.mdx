@@ -1,0 +1,42 @@
+---
+title: 自定义边
+description: 复用内置边基型，注册业务样式、函数映射与状态，并验证数据更新
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+用 `EdgeExtension` 为一类业务关系封装可复用的边类型。边的路径由 `base` 决定，方向由箭头表示，文字由 `edge.style.label` 提供。只需在一张图里按数据改变线宽或颜色时，可以直接用[样式函数](/docs/guides/edge#样式函数)。
+
+## 注册与启用
+
+选择 `arc` 作为路径基型，用 `getStyle()` 按权重决定颜色和线宽，再用 `register('edge', ...)` 注册类型。
+
+<NodeDocExample id="extension-edge" locale="zh" focus="descriptor" view="code" />
+
+在 `new Graph()` 中把 `edge.type` 设为注册名。下例中 `light` 的初始权重为 `1`，`heavy` 为 `4`。
+
+<NodeDocExample id="extension-edge" locale="zh" focus="edge-activation" />
+
+## 覆盖与更新
+
+在上方示例点击 **Toggle heavy weight**，`updateEdgeData()` 会更新 `heavy` 的权重，`getStyle()` 随之调整颜色和线宽。点击边可查看紫色选中样式，点击空白处可恢复基础样式。
+
+<NodeDocExample id="extension-edge" locale="zh" focus="edge-weight-update" view="code" />
+
+样式优先级和扩展字段见 [EdgeExtension](/docs/api/extensions#edgeextension)。
+
+## 常见问题
+
+### 能实现任意自定义 draw 或 WebGL shader 吗？
+
+当前 EdgeExtension 只有基型、默认样式、getStyle 与状态样式，没有任意 draw / shader 钩子。完整签名查[EdgeExtension](/docs/api/extensions#edgeextension)。
+
+### 为什么标签没有显示？
+
+扩展默认边样式不替代标签启用配置。本例在 edge.style 显式提供 label；只把文字放入 data 或扩展描述不保证激活标签遍历。
+
+### 为什么边难以选中？
+
+配置 `hitAreaWidth` 并启用交互。本例热区为 14，线宽保持原样。完整规则见[交互热区](/docs/guides/edge#交互热区)。
+
+注册、缓存和错误边界查[公共契约](/docs/api/graph#extension-registration)。

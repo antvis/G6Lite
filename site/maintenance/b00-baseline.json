@@ -1,0 +1,3760 @@
+{
+  "recorded": "2026-11-05",
+  "head": "0617eedcdd112bc105ac0c2c6acacfd42e7db6c0",
+  "scope": "Current usable baseline after B72, before B73-B79; not a reconstruction of the pre-B01 site.",
+  "frameworkDiffSha256": "2149ba839259ebf5f37e637f5fdea5791b5f1ba2b45e120dea26b2576abe66ad",
+  "frameworkFiles": {
+    "site/content/docs/en/getting-started/react.mdx": "42bc9704e43aceaacbfe6bcf6bf38972f9cb6aa6bba4a387fb010d3413e1a897",
+    "site/content/docs/zh/getting-started/react.mdx": "971bb9387c2ffed6e4743c75e74e55ace7744f79d5b5e6b5947f7826c67965a0",
+    "site/src/components/quick-start-example.module.css": "ad34e493ed4620543d7159a2a9679d53b12d344a697597bdb51c3ae86a01975b",
+    "site/src/components/quick-start-example.tsx": "053d2b4467001e9c1f29c06acdc2fddc30159d8f294ecd0ba9ab12daecc985b4",
+    "site/src/lib/quick-start.ts": "4be060e01ee6e99266ac7faf5e4fd60fa70a6b1469137e3184c1f4f336dd6c2d"
+  },
+  "verification": {
+    "buildArtifacts": 777,
+    "relatedTests": 120,
+    "previewExports": 160,
+    "focusedExports": 62,
+    "frameworkBrowser": "Basic 3 nodes / 2 edges -> Extended 4 / 3 -> Basic 3 / 2; no console errors",
+    "existingChecks": "B69-B72 typecheck, lint (one existing logo warning), production build, route / anchor checks; source state unchanged"
+  },
+  "navigation": {
+    "site/content/docs/en/api/extensions/meta.json": {
+      "title": "Extension contracts",
+      "pagesIndex": "../extensions.mdx",
+      "defaultOpen": true,
+      "pages": [
+        "registration",
+        "drawing",
+        "runtime"
+      ]
+    },
+    "site/content/docs/en/api/graph/events/meta.json": {
+      "title": "Event API",
+      "pagesIndex": "../events.mdx",
+      "pages": [
+        "element",
+        "selection",
+        "drag",
+        "lifecycle"
+      ]
+    },
+    "site/content/docs/en/api/graph/meta.json": {
+      "title": "Graph methods",
+      "pagesIndex": "../graph.mdx",
+      "defaultOpen": true,
+      "pages": [
+        "lifecycle",
+        "data",
+        "data-mutations",
+        "states",
+        "viewport",
+        "layout",
+        "combo",
+        "events"
+      ]
+    },
+    "site/content/docs/en/api/meta.json": {
+      "title": "API reference",
+      "pages": [
+        "index",
+        "graph",
+        "options",
+        "extensions",
+        "utilities"
+      ]
+    },
+    "site/content/docs/en/api/options/meta.json": {
+      "title": "GraphOptions",
+      "pagesIndex": "../options.mdx",
+      "defaultOpen": true,
+      "pages": [
+        "data",
+        "node",
+        "edge",
+        "combo",
+        "label",
+        "theme",
+        "layout",
+        "behaviors",
+        "transforms-plugins"
+      ]
+    },
+    "site/content/docs/en/compatibility/meta.json": {
+      "title": "Compatibility",
+      "pages": [
+        "index",
+        "browser",
+        "api-stability",
+        "library-comparison",
+        "g6-v5-migration"
+      ]
+    },
+    "site/content/docs/en/concepts/meta.json": {
+      "title": "Core concepts",
+      "pages": [
+        "overview",
+        "data-model",
+        "graph-lifecycle",
+        "states",
+        "viewport",
+        "architecture"
+      ]
+    },
+    "site/content/docs/en/examples/meta.json": {
+      "title": "Examples",
+      "pages": [
+        "index",
+        "basic",
+        "default-theme",
+        "data-mutations",
+        "queries-and-states",
+        "set-data",
+        "search-focus",
+        "node-style",
+        "shapes",
+        "node-border",
+        "edge-arrows",
+        "edge-types",
+        "edge-colors",
+        "edge-states",
+        "edge-hit-area",
+        "parallel-edges",
+        "edge-loops",
+        "labels",
+        "label-rendering-options",
+        "polyline-routing",
+        "combo",
+        "layouts",
+        "layout-gallery",
+        "flowchart",
+        "indented-tree",
+        "layout-worker",
+        "radial-tree",
+        "dependency-graph",
+        "relationship",
+        "org-chart",
+        "mindmap",
+        "fishbone",
+        "tooltip",
+        "hover",
+        "neighbor-highlight",
+        "selection-behaviors",
+        "drag-node",
+        "drag-edge",
+        "event-log",
+        "context-menu",
+        "viewport-controls",
+        "zoom-options",
+        "extension-system",
+        "breathing-node",
+        "custom-label-renderer",
+        "custom-node-extension",
+        "custom-behavior",
+        "custom-layout",
+        "decoration-badges",
+        "real-dataset",
+        "large",
+        "large-labeled"
+      ]
+    },
+    "site/content/docs/en/getting-started/meta.json": {
+      "title": "Quick start",
+      "pages": [
+        "quick-start",
+        "react"
+      ]
+    },
+    "site/content/docs/en/guides/events/meta.json": {
+      "title": "Events",
+      "pagesIndex": "../events.mdx",
+      "pages": [
+        "selection-drag",
+        "lifecycle"
+      ],
+      "defaultOpen": true
+    },
+    "site/content/docs/en/guides/meta.json": {
+      "title": "Configuration",
+      "pages": [
+        "data",
+        "node",
+        "edge",
+        "label",
+        "combo",
+        "theme",
+        "states",
+        "layout",
+        "layout-worker",
+        "viewport",
+        "interactions",
+        "custom-behavior",
+        "events",
+        "tooltip",
+        "parallel-edges",
+        "polyline-routing",
+        "extensions",
+        "custom-node",
+        "custom-edge",
+        "custom-label-renderer",
+        "custom-decoration",
+        "custom-layout",
+        "custom-transform",
+        "custom-plugin"
+      ]
+    },
+    "site/content/docs/en/meta.json": {
+      "title": "Documentation",
+      "pages": [
+        "index",
+        "ai",
+        "getting-started",
+        "concepts",
+        "guides",
+        "api",
+        "examples",
+        "metrics",
+        "compatibility",
+        "faq",
+        "changelog"
+      ]
+    },
+    "site/content/docs/en/metrics/meta.json": {
+      "title": "Technical metrics",
+      "pages": [
+        "performance",
+        "performance-tuning",
+        "bundle-size"
+      ]
+    },
+    "site/content/docs/zh/api/extensions/meta.json": {
+      "title": "扩展契约",
+      "pagesIndex": "../extensions.mdx",
+      "defaultOpen": true,
+      "pages": [
+        "registration",
+        "drawing",
+        "runtime"
+      ]
+    },
+    "site/content/docs/zh/api/graph/events/meta.json": {
+      "title": "事件 API",
+      "pagesIndex": "../events.mdx",
+      "pages": [
+        "element",
+        "selection",
+        "drag",
+        "lifecycle"
+      ]
+    },
+    "site/content/docs/zh/api/graph/meta.json": {
+      "title": "Graph 方法",
+      "pagesIndex": "../graph.mdx",
+      "defaultOpen": true,
+      "pages": [
+        "lifecycle",
+        "data",
+        "data-mutations",
+        "states",
+        "viewport",
+        "layout",
+        "combo",
+        "events"
+      ]
+    },
+    "site/content/docs/zh/api/meta.json": {
+      "title": "API 参考",
+      "pages": [
+        "index",
+        "graph",
+        "options",
+        "extensions",
+        "utilities"
+      ]
+    },
+    "site/content/docs/zh/api/options/meta.json": {
+      "title": "GraphOptions 配置",
+      "pagesIndex": "../options.mdx",
+      "defaultOpen": true,
+      "pages": [
+        "data",
+        "node",
+        "edge",
+        "combo",
+        "label",
+        "theme",
+        "layout",
+        "behaviors",
+        "transforms-plugins"
+      ]
+    },
+    "site/content/docs/zh/compatibility/meta.json": {
+      "title": "兼容性",
+      "pages": [
+        "index",
+        "browser",
+        "api-stability",
+        "library-comparison",
+        "g6-v5-migration"
+      ]
+    },
+    "site/content/docs/zh/concepts/meta.json": {
+      "title": "核心概念",
+      "pages": [
+        "overview",
+        "data-model",
+        "graph-lifecycle",
+        "states",
+        "viewport",
+        "architecture"
+      ]
+    },
+    "site/content/docs/zh/examples/meta.json": {
+      "title": "示例",
+      "pages": [
+        "index",
+        "basic",
+        "default-theme",
+        "data-mutations",
+        "queries-and-states",
+        "set-data",
+        "search-focus",
+        "node-style",
+        "shapes",
+        "node-border",
+        "edge-arrows",
+        "edge-types",
+        "edge-colors",
+        "edge-states",
+        "edge-hit-area",
+        "parallel-edges",
+        "edge-loops",
+        "labels",
+        "label-rendering-options",
+        "polyline-routing",
+        "combo",
+        "layouts",
+        "layout-gallery",
+        "flowchart",
+        "indented-tree",
+        "layout-worker",
+        "radial-tree",
+        "dependency-graph",
+        "relationship",
+        "org-chart",
+        "mindmap",
+        "fishbone",
+        "tooltip",
+        "hover",
+        "neighbor-highlight",
+        "selection-behaviors",
+        "drag-node",
+        "drag-edge",
+        "event-log",
+        "context-menu",
+        "viewport-controls",
+        "zoom-options",
+        "extension-system",
+        "breathing-node",
+        "custom-label-renderer",
+        "custom-node-extension",
+        "custom-behavior",
+        "custom-layout",
+        "decoration-badges",
+        "real-dataset",
+        "large",
+        "large-labeled"
+      ]
+    },
+    "site/content/docs/zh/getting-started/meta.json": {
+      "title": "快速开始",
+      "pages": [
+        "quick-start",
+        "react"
+      ]
+    },
+    "site/content/docs/zh/guides/events/meta.json": {
+      "title": "事件",
+      "pagesIndex": "../events.mdx",
+      "pages": [
+        "selection-drag",
+        "lifecycle"
+      ],
+      "defaultOpen": true
+    },
+    "site/content/docs/zh/guides/meta.json": {
+      "title": "配置指南",
+      "pages": [
+        "data",
+        "node",
+        "edge",
+        "label",
+        "combo",
+        "theme",
+        "states",
+        "layout",
+        "layout-worker",
+        "viewport",
+        "interactions",
+        "custom-behavior",
+        "events",
+        "tooltip",
+        "parallel-edges",
+        "polyline-routing",
+        "extensions",
+        "custom-node",
+        "custom-edge",
+        "custom-label-renderer",
+        "custom-decoration",
+        "custom-layout",
+        "custom-transform",
+        "custom-plugin"
+      ]
+    },
+    "site/content/docs/zh/meta.json": {
+      "title": "文档",
+      "pages": [
+        "index",
+        "ai",
+        "getting-started",
+        "concepts",
+        "guides",
+        "api",
+        "examples",
+        "metrics",
+        "compatibility",
+        "faq",
+        "changelog"
+      ]
+    },
+    "site/content/docs/zh/metrics/meta.json": {
+      "title": "技术指标",
+      "pages": [
+        "performance",
+        "performance-tuning",
+        "bundle-size"
+      ]
+    }
+  },
+  "routes": {
+    "zh": [
+      {
+        "source": "site/content/docs/zh/ai.mdx",
+        "route": "/docs/ai",
+        "anchors": [
+          "nd-page",
+          "两种使用方式",
+          "在本地使用-skill",
+          "适合交给-agent-的任务",
+          "推荐工作流",
+          "agent-需要理解的引擎",
+          "继续阅读"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/extensions/drawing.mdx",
+        "route": "/docs/api/extensions/drawing",
+        "anchors": [
+          "nd-page",
+          "nodeextension",
+          "nodeoverlaydrawparams",
+          "nodeboundaryanchorparams",
+          "edgeextension",
+          "labelrenderer",
+          "输入与输出",
+          "decorationrenderer"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/extensions/registration.mdx",
+        "route": "/docs/api/extensions/registration",
+        "anchors": [
+          "nd-page",
+          "最小注册与激活",
+          "register",
+          "extensionfactory",
+          "实例作用域",
+          "extensioncontext",
+          "data读取快照与更新业务字段",
+          "state替换状态成员",
+          "_R_23iklubsknqivb_",
+          "viewport坐标与缩放",
+          "requestrender-与-isdestroyed",
+          "清理与异常",
+          "兼容成员"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/extensions/runtime.mdx",
+        "route": "/docs/api/extensions/runtime",
+        "anchors": [
+          "nd-page",
+          "生命周期速查",
+          "behaviorextension",
+          "layoutextension",
+          "transformextension",
+          "pluginextension",
+          "资源与上下文边界"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/extensions.mdx",
+        "route": "/docs/api/extensions",
+        "anchors": [
+          "nd-page",
+          "register",
+          "extensionfactory",
+          "扩展上下文",
+          "runlayout"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/combo.mdx",
+        "route": "/docs/api/graph/combo",
+        "anchors": [
+          "nd-page",
+          "前提与支持边界",
+          "代码与操作效果",
+          "_R_diklubsknqivb_",
+          "createcombo",
+          "removecombo",
+          "addtocombo",
+          "removefromcombo",
+          "getcombochildren",
+          "getnodecombo",
+          "collapsecombo",
+          "expandcombo",
+          "togglecombo",
+          "查询归属与数据模型",
+          "状态显隐与兼容方法"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/data-mutations.mdx",
+        "route": "/docs/api/graph/data-mutations",
+        "anchors": [
+          "nd-page",
+          "共同前提与类型简写",
+          "setdata",
+          "增量更新的代码和效果",
+          "_R_riklubsknqivb_",
+          "addnode",
+          "addnodes",
+          "updatenodedata",
+          "updatenodeposition",
+          "updatenodepositions",
+          "removenode",
+          "removenodes",
+          "addedge",
+          "addedges",
+          "updateedgedata",
+          "removeedge",
+          "removeedges",
+          "批量调用示例",
+          "事件与缺失-id"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/data.mdx",
+        "route": "/docs/api/graph/data",
+        "anchors": [
+          "nd-page",
+          "查询前提与返回值",
+          "getdata",
+          "快照与查询的代码和效果",
+          "_R_niklubsknqivb_",
+          "getnodes",
+          "getnodedata",
+          "getedges",
+          "getedgedata",
+          "getcombodata",
+          "getelementdata",
+          "getnodecount",
+          "getedgecount",
+          "hasnode",
+          "hasedge",
+          "haselement",
+          "getelementposition",
+          "getneighbornodes",
+          "getadjacentedges",
+          "模型字段",
+          "兼容方法"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/events/drag.mdx",
+        "route": "/docs/api/graph/events/drag",
+        "anchors": [
+          "nd-page",
+          "保存节点位置",
+          "nodedragstart",
+          "nodedrag",
+          "nodedragend",
+          "combodragstart",
+          "combodrag",
+          "combodragend",
+          "edgedragstart",
+          "edgedrag",
+          "edgedragend"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/events/element.mdx",
+        "route": "/docs/api/graph/events/element",
+        "anchors": [
+          "nd-page",
+          "监听节点点击",
+          "读取事件参数",
+          "节点",
+          "nodepointerover",
+          "nodepointerenter",
+          "nodepointermove",
+          "nodepointerleave",
+          "nodepointerdown",
+          "nodeclick",
+          "nodedblclick",
+          "nodecontextmenu",
+          "nodewheel",
+          "边",
+          "edgepointerover",
+          "edgepointerenter",
+          "edgepointermove",
+          "edgepointerleave",
+          "edgepointerdown",
+          "edgeclick",
+          "edgedblclick",
+          "edgecontextmenu",
+          "edgewheel",
+          "combo",
+          "combopointerdown",
+          "comboclick",
+          "combodblclick",
+          "combocontextmenu",
+          "画布",
+          "canvaspointermove",
+          "canvaspointerdown",
+          "canvaspointerup",
+          "canvasclick",
+          "canvasdblclick",
+          "canvascontextmenu",
+          "canvaswheel",
+          "命中与手势"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/events/lifecycle.mdx",
+        "route": "/docs/api/graph/events/lifecycle",
+        "anchors": [
+          "nd-page",
+          "接收首次渲染事件",
+          "beforelayout",
+          "layoutstart",
+          "layoutend",
+          "afterlayout",
+          "beforerender",
+          "afterrender",
+          "resize",
+          "destroy",
+          "datachange",
+          "afteradditem",
+          "afterremoveitem",
+          "afterupdateitem",
+          "combocollapse",
+          "comboexpand",
+          "顺序与完成边界"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/events/selection.mdx",
+        "route": "/docs/api/graph/events/selection",
+        "anchors": [
+          "nd-page",
+          "读取最终选择",
+          "nodeselectchange",
+          "edgeselectchange",
+          "selectionclear",
+          "brushselect",
+          "brushend",
+          "lassoselect",
+          "lassoend"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/events.mdx",
+        "route": "/docs/api/graph/events",
+        "anchors": [
+          "nd-page",
+          "on",
+          "off",
+          "once",
+          "代码与对应效果",
+          "元素事件载荷",
+          "元素事件清单",
+          "选择事件",
+          "拖拽事件",
+          "生命周期与数据事件",
+          "顺序与完成边界",
+          "grapheventmap"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/layout.mdx",
+        "route": "/docs/api/graph/layout",
+        "anchors": [
+          "nd-page",
+          "setlayout",
+          "layout",
+          "代码与对应效果",
+          "_R_liklubsknqivb_",
+          "执行与适配时机",
+          "cancellayout",
+          "runlayout",
+          "坐标计算与展示",
+          "_R_1niklubsknqivb_"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/lifecycle.mdx",
+        "route": "/docs/api/graph/lifecycle",
+        "anchors": [
+          "nd-page",
+          "new-graph",
+          "render",
+          "updateoptions",
+          "样式更新刷新和重建的代码与效果",
+          "_R_19iklubsknqivb_",
+          "refresh",
+          "destroy",
+          "destroyed",
+          "isdestroyed"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/states.mdx",
+        "route": "/docs/api/graph/states",
+        "anchors": [
+          "nd-page",
+          "调用前提",
+          "setitemstate",
+          "增减替换与清空的区别",
+          "_R_niklubsknqivb_",
+          "setelementstates",
+          "batchsetstate",
+          "getitemstates",
+          "findnodesbystate",
+          "findedgesbystate",
+          "findcombosbystate",
+          "clearitemstates",
+          "hideitem",
+          "显隐与状态查询",
+          "_R_31iklubsknqivb_",
+          "showitem"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph/viewport.mdx",
+        "route": "/docs/api/graph/viewport",
+        "anchors": [
+          "nd-page",
+          "调用时机与单位",
+          "getcamera",
+          "setcamera",
+          "保存恢复与定位的代码和效果",
+          "_R_tiklubsknqivb_",
+          "resetcamera",
+          "getzoom",
+          "zoomto",
+          "zoomby",
+          "fitview",
+          "fitcenter",
+          "focusitem",
+          "setsize",
+          "容器变宽变窄后的适配",
+          "_R_3hiklubsknqivb_",
+          "screentograph",
+          "graphtoscreen"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/graph.mdx",
+        "route": "/docs/api/graph",
+        "anchors": [
+          "nd-page",
+          "生命周期",
+          "new-graphoptions",
+          "render",
+          "destroy",
+          "destroyed",
+          "refresh",
+          "读取数据",
+          "替换数据与样式",
+          "setdata",
+          "updateoptions",
+          "修改节点和边",
+          "节点",
+          "边",
+          "状态显隐和定位",
+          "setitemstate",
+          "setelementstates",
+          "batchsetstate",
+          "查询和清空",
+          "hideitem-与-showitem",
+          "focusitem",
+          "视口",
+          "容器尺寸变化",
+          "zoomto-与-zoomby",
+          "fitview",
+          "坐标转换",
+          "布局",
+          "combo",
+          "事件"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/index.mdx",
+        "route": "/docs/api",
+        "anchors": [
+          "nd-page",
+          "可以直接使用的入口",
+          "按领域查询类型",
+          "调用顺序",
+          "读取结果不能直接改",
+          "引擎内部方法",
+          "已有项目里的兼容入口"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/options/behaviors.mdx",
+        "route": "/docs/api/options/behaviors",
+        "anchors": [
+          "nd-page",
+          "behavioroption",
+          "挂载与更新",
+          "内置行为索引",
+          "导航与拖拽",
+          "选择",
+          "代码与对应效果",
+          "_R_1diklubsknqivb_",
+          "高亮",
+          "tooltipoptions",
+          "tooltipcontext",
+          "自定义-behavior-契约"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/options/combo.mdx",
+        "route": "/docs/api/options/combo",
+        "anchors": [
+          "nd-page",
+          "combodata",
+          "节点归属与嵌套",
+          "_R_hiklubsknqivb_",
+          "初始折叠",
+          "初始状态",
+          "只读查询模型",
+          "基础外观与局部覆盖",
+          "基础样式字段",
+          "代码与对应效果",
+          "_R_1liklubsknqivb_",
+          "字段回调与覆盖顺序",
+          "留白包围框与标签",
+          "运行时修改边界",
+          "折叠形态",
+          "_R_2hiklubsknqivb_",
+          "状态样式",
+          "_R_2viklubsknqivb_",
+          "相关入口"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/options/data.mdx",
+        "route": "/docs/api/options/data",
+        "anchors": [
+          "nd-page",
+          "graphdata",
+          "graphnode",
+          "graphedge",
+          "combodata",
+          "初始状态与导出"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/options/edge.mdx",
+        "route": "/docs/api/options/edge",
+        "anchors": [
+          "nd-page",
+          "edgeconfig",
+          "基础样式",
+          "_R_liklubsknqivb_",
+          "样式回调",
+          "虚线规则",
+          "箭头",
+          "点击热区",
+          "_R_1hiklubsknqivb_",
+          "状态样式",
+          "运行时更新",
+          "平行边与自环",
+          "分组与间距",
+          "_R_2hiklubsknqivb_",
+          "两种入口与优先级",
+          "曲线与折线路由",
+          "弧线与三次曲线",
+          "_R_37iklubsknqivb_",
+          "_R_3biklubsknqivb_",
+          "路由选择",
+          "_R_3liklubsknqivb_",
+          "缩进目标与主干",
+          "_R_3tiklubsknqivb_",
+          "边标签",
+          "_R_49iklubsknqivb_",
+          "位置与显示条件",
+          "其他配置"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/options/label.mdx",
+        "route": "/docs/api/options/label",
+        "anchors": [
+          "nd-page",
+          "labeloptions",
+          "代码与对应效果",
+          "_R_hiklubsknqivb_",
+          "缩放阈值",
+          "碰撞顺序",
+          "生效范围",
+          "运行时更新",
+          "相关入口"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/options/layout.mdx",
+        "route": "/docs/api/options/layout",
+        "anchors": [
+          "nd-page",
+          "layoutconfig",
+          "支持的布局类型",
+          "代码与对应效果",
+          "_R_niklubsknqivb_",
+          "计算默认值",
+          "函数式树布局",
+          "mindmap",
+          "indented",
+          "fishbone",
+          "worker",
+          "坐标与运行时"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/options/node.mdx",
+        "route": "/docs/api/options/node",
+        "anchors": [
+          "nd-page",
+          "_R_5iklubsknqivb_",
+          "nodeconfig",
+          "nodestyleconfig",
+          "样式函数",
+          "_R_viklubsknqivb_",
+          "标签",
+          "labelrenderer",
+          "图标",
+          "_R_21iklubsknqivb_",
+          "nodedecorationconfig",
+          "内容与显示",
+          "放置与偏移",
+          "堆叠与溢出",
+          "内置徽章",
+          "_R_37iklubsknqivb_",
+          "自定义装饰渲染器",
+          "状态样式",
+          "运行时更新",
+          "相关参考",
+          "按效果选择示例",
+          "指南与协议"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/options/theme.mdx",
+        "route": "/docs/api/options/theme",
+        "anchors": [
+          "nd-page",
+          "themeoption",
+          "themetokens",
+          "代码与对应效果",
+          "_R_niklubsknqivb_",
+          "状态预设",
+          "覆盖规则",
+          "resolvetheme",
+          "运行时更新"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/options/transforms-plugins.mdx",
+        "route": "/docs/api/options/transforms-plugins",
+        "anchors": [
+          "nd-page",
+          "transforms",
+          "plugins",
+          "调用与变更",
+          "选项与支持边界"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/options.mdx",
+        "route": "/docs/api/options",
+        "anchors": [
+          "nd-page",
+          "graphoptions",
+          "autofit",
+          "图数据",
+          "节点-graphnode",
+          "边-graphedge",
+          "combo-combodata",
+          "节点",
+          "边",
+          "combo",
+          "标签策略",
+          "布局",
+          "交互",
+          "主题",
+          "插件与转换",
+          "运行中如何更新"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/api/utilities.mdx",
+        "route": "/docs/api/utilities",
+        "anchors": [
+          "nd-page",
+          "runlayout",
+          "resolvetheme",
+          "eventemitter"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/changelog.mdx",
+        "route": "/docs/changelog",
+        "anchors": [
+          "nd-page",
+          "beta-阶段变更脉络",
+          "扩展与-behavior-类型契约2026-07-29",
+          "api扩展体系与公开边界重新基线2026-07-21--2026-07-22",
+          "交互事件统一调度2026-06-10",
+          "combo-分组2026-05-20-起含-06-10-指针事件补齐",
+          "首屏渲染与性能优化2026-05-26--06-04",
+          "数据--事件-api-升级p0--p12026-05-19",
+          "视觉升级040-里程碑2026-04-15",
+          "治理与官网2026-06-起",
+          "相关链接"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/compatibility/api-stability.mdx",
+        "route": "/docs/compatibility/api-stability",
+        "anchors": [
+          "nd-page",
+          "推荐公开入口",
+          "公开与内部边界",
+          "esm-与-commonjs",
+          "弃用兼容层",
+          "实验性能力",
+          "版本兼容预期"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/compatibility/browser.mdx",
+        "route": "/docs/compatibility/browser",
+        "anchors": [
+          "nd-page",
+          "渲染技术依赖",
+          "最低浏览器版本",
+          "覆盖率参考",
+          "与-sigmajs-的浏览器口径",
+          "webgl-支持矩阵",
+          "测试范围说明"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/compatibility/g6-v5-migration.mdx",
+        "route": "/docs/compatibility/g6-v5-migration",
+        "anchors": [
+          "nd-page",
+          "先判断是否应该迁移",
+          "安装与导入",
+          "最小配置对照",
+          "graphoptions-对照",
+          "数据字段映射",
+          "nodeedge-与-combo-配置",
+          "behavior-映射",
+          "layout-迁移",
+          "事件迁移",
+          "graph-api-映射",
+          "extensiontransform-与-plugin",
+          "当前不支持与替代方式",
+          "迁移验收清单"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/compatibility/index.mdx",
+        "route": "/docs/compatibility",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/compatibility/library-comparison.mdx",
+        "route": "/docs/compatibility/library-comparison",
+        "anchors": [
+          "nd-page",
+          "一句话结论",
+          "渲染数据与布局",
+          "元素标签与分组",
+          "交互扩展与生态",
+          "运行环境与工程形态",
+          "如何选择",
+          "公平验证清单",
+          "官方资料"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/concepts/architecture.mdx",
+        "route": "/docs/concepts/architecture",
+        "anchors": [
+          "nd-page",
+          "架构分层",
+          "g6lite-architecture-zh-title",
+          "g6lite-architecture-zh-description",
+          "g6lite-architecture-zh-arrow",
+          "g6lite-architecture-zh-extension-arrow",
+          "绘制图层",
+          "渲染与更新路径",
+          "首次渲染数据流",
+          "高频更新路径",
+          "布局与交互协作",
+          "布局与-worker",
+          "交互与-picking",
+          "扩展边界"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/concepts/data-model.mdx",
+        "route": "/docs/concepts/data-model",
+        "anchors": [
+          "nd-page",
+          "节点边与分组",
+          "数据与样式",
+          "位置与状态",
+          "输入模型与快照",
+          "_R_viklubsknqivb_",
+          "常见问题",
+          "修改导出数据为什么没生效",
+          "删除后为什么原来的下标指向其他元素",
+          "继续阅读"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/concepts/graph-lifecycle.mdx",
+        "route": "/docs/concepts/graph-lifecycle",
+        "anchors": [
+          "nd-page",
+          "生命周期总览",
+          "创建与首次渲染",
+          "运行中的更新",
+          "销毁与异步清理",
+          "完整使用示例",
+          "_R_viklubsknqivb_",
+          "常见问题",
+          "afterrender-里写数据为什么会报错",
+          "render-的-promise-返回为什么仍不能继续操作"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/concepts/overview.mdx",
+        "route": "/docs/concepts/overview",
+        "anchors": [
+          "nd-page",
+          "适合的场景",
+          "需要评估的场景",
+          "与-g6-v5-的关系",
+          "使用模型",
+          "下一步"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/concepts/states.mdx",
+        "route": "/docs/concepts/states",
+        "anchors": [
+          "nd-page",
+          "状态行为与样式",
+          "试一试状态变化",
+          "_R_diklubsknqivb_",
+          "叠加替换与清除",
+          "状态样式放在哪里",
+          "状态名称与数据",
+          "常见问题",
+          "加了状态为什么外观没变",
+          "设置-selected为什么没有选择事件",
+          "清空状态为什么元素还是隐藏"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/concepts/viewport.mdx",
+        "route": "/docs/concepts/viewport",
+        "anchors": [
+          "nd-page",
+          "图的位置与当前视野",
+          "观察缩放平移与适配",
+          "_R_diklubsknqivb_",
+          "三种坐标各自做什么",
+          "坐标怎样转换",
+          "居中适配和自动适配",
+          "常见问题",
+          "平移或缩放后要保存新的节点坐标吗",
+          "菜单为什么越缩放越偏",
+          "居中后为什么内容仍显示不全"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/basic.mdx",
+        "route": "/docs/examples/basic",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/breathing-node.mdx",
+        "route": "/docs/examples/breathing-node",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/combo.mdx",
+        "route": "/docs/examples/combo",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/context-menu.mdx",
+        "route": "/docs/examples/context-menu",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/custom-behavior.mdx",
+        "route": "/docs/examples/custom-behavior",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/custom-label-renderer.mdx",
+        "route": "/docs/examples/custom-label-renderer",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/custom-layout.mdx",
+        "route": "/docs/examples/custom-layout",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/custom-node-extension.mdx",
+        "route": "/docs/examples/custom-node-extension",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/data-mutations.mdx",
+        "route": "/docs/examples/data-mutations",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/decoration-badges.mdx",
+        "route": "/docs/examples/decoration-badges",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/default-theme.mdx",
+        "route": "/docs/examples/default-theme",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/dependency-graph.mdx",
+        "route": "/docs/examples/dependency-graph",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/drag-edge.mdx",
+        "route": "/docs/examples/drag-edge",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/drag-node.mdx",
+        "route": "/docs/examples/drag-node",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/edge-arrows.mdx",
+        "route": "/docs/examples/edge-arrows",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/edge-colors.mdx",
+        "route": "/docs/examples/edge-colors",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/edge-hit-area.mdx",
+        "route": "/docs/examples/edge-hit-area",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/edge-loops.mdx",
+        "route": "/docs/examples/edge-loops",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/edge-states.mdx",
+        "route": "/docs/examples/edge-states",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/edge-types.mdx",
+        "route": "/docs/examples/edge-types",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/event-log.mdx",
+        "route": "/docs/examples/event-log",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/extension-system.mdx",
+        "route": "/docs/examples/extension-system",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/fishbone.mdx",
+        "route": "/docs/examples/fishbone",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/flowchart.mdx",
+        "route": "/docs/examples/flowchart",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/hover.mdx",
+        "route": "/docs/examples/hover",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/indented-tree.mdx",
+        "route": "/docs/examples/indented-tree",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/index.mdx",
+        "route": "/docs/examples",
+        "anchors": [
+          "nd-page",
+          "example-categories",
+          "getting-started",
+          "data-and-state",
+          "elements",
+          "layouts",
+          "interactions",
+          "viewport",
+          "extensions",
+          "scenarios-and-performance"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/label-rendering-options.mdx",
+        "route": "/docs/examples/label-rendering-options",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/labels.mdx",
+        "route": "/docs/examples/labels",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/large-labeled.mdx",
+        "route": "/docs/examples/large-labeled",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/large.mdx",
+        "route": "/docs/examples/large",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/layout-gallery.mdx",
+        "route": "/docs/examples/layout-gallery",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/layout-worker.mdx",
+        "route": "/docs/examples/layout-worker",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/layouts.mdx",
+        "route": "/docs/examples/layouts",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/mindmap.mdx",
+        "route": "/docs/examples/mindmap",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/neighbor-highlight.mdx",
+        "route": "/docs/examples/neighbor-highlight",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/node-border.mdx",
+        "route": "/docs/examples/node-border",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/node-style.mdx",
+        "route": "/docs/examples/node-style",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/org-chart.mdx",
+        "route": "/docs/examples/org-chart",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/parallel-edges.mdx",
+        "route": "/docs/examples/parallel-edges",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/polyline-routing.mdx",
+        "route": "/docs/examples/polyline-routing",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/queries-and-states.mdx",
+        "route": "/docs/examples/queries-and-states",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/radial-tree.mdx",
+        "route": "/docs/examples/radial-tree",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/real-dataset.mdx",
+        "route": "/docs/examples/real-dataset",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/relationship.mdx",
+        "route": "/docs/examples/relationship",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/search-focus.mdx",
+        "route": "/docs/examples/search-focus",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/selection-behaviors.mdx",
+        "route": "/docs/examples/selection-behaviors",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/set-data.mdx",
+        "route": "/docs/examples/set-data",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/shapes.mdx",
+        "route": "/docs/examples/shapes",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/tooltip.mdx",
+        "route": "/docs/examples/tooltip",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/viewport-controls.mdx",
+        "route": "/docs/examples/viewport-controls",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/examples/zoom-options.mdx",
+        "route": "/docs/examples/zoom-options",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/faq.mdx",
+        "route": "/docs/faq",
+        "anchors": [
+          "nd-page",
+          "g6lite-和-g6-v5-怎么选",
+          "力导向布局首屏慢怎么办",
+          "高亮或选中卡顿怎么办",
+          "浏览器和-webgl-要求是什么",
+          "能在-nodejs-或-ssr-阶段直接运行吗",
+          "typescript-类型从哪里导入",
+          "combo-可以使用吗",
+          "示例能在线运行吗"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/getting-started/quick-start.mdx",
+        "route": "/docs/getting-started/quick-start",
+        "anchors": [
+          "nd-page",
+          "包管理器",
+          "cdn",
+          "在前端框架中使用"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/getting-started/react.mdx",
+        "route": "/docs/getting-started/react",
+        "anchors": [
+          "nd-page",
+          "在-react-中使用",
+          "在-vue-中使用",
+          "数据变化时更新图",
+          "准备两组数据",
+          "react响应数据依赖变化",
+          "vue用-watch-同步数据"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/combo.mdx",
+        "route": "/docs/guides/combo",
+        "anchors": [
+          "nd-page",
+          "声明-combo",
+          "_R_9iklubsknqivb_",
+          "combodata",
+          "样式",
+          "折叠与展开",
+          "_R_11iklubsknqivb_",
+          "动态调整归属",
+          "_R_19iklubsknqivb_",
+          "查询",
+          "整体拖拽",
+          "常见问题",
+          "为什么分组没有边框或标题",
+          "为什么隐藏或折叠父组后仍有内容",
+          "为什么展开后仍有节点看不到",
+          "为什么拖动没有改变归属或选中状态",
+          "为什么-updateoptions-不能改-combo-外观",
+          "相关"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/custom-behavior.mdx",
+        "route": "/docs/guides/custom-behavior",
+        "anchors": [
+          "nd-page",
+          "公共类型范式",
+          "推荐文件与导出",
+          "完整实现",
+          "_R_fiklubsknqivb_",
+          "注册并激活",
+          "事件类型",
+          "生命周期与清理",
+          "边界与覆盖规则"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/custom-decoration.mdx",
+        "route": "/docs/guides/custom-decoration",
+        "anchors": [
+          "nd-page",
+          "测量绘制与注册",
+          "_R_7iklubsknqivb_",
+          "定位与堆叠",
+          "碰撞与更新",
+          "常见问题",
+          "为什么装饰消失而没有默认文字",
+          "为什么测量后没有-draw",
+          "可以直接使用内置-badge-吗"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/custom-edge.mdx",
+        "route": "/docs/guides/custom-edge",
+        "anchors": [
+          "nd-page",
+          "注册与启用",
+          "_R_7iklubsknqivb_",
+          "覆盖与更新",
+          "常见问题",
+          "能实现任意自定义-draw-或-webgl-shader-吗",
+          "为什么标签没有显示",
+          "为什么边难以选中"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/custom-label-renderer.mdx",
+        "route": "/docs/guides/custom-label-renderer",
+        "anchors": [
+          "nd-page",
+          "注册与使用",
+          "_R_7iklubsknqivb_",
+          "协议约定",
+          "常见问题",
+          "为什么文字被跳过",
+          "宽高错误或绘制抛错会怎样",
+          "边标签一定沿真实路径放置吗"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/custom-layout.mdx",
+        "route": "/docs/guides/custom-layout",
+        "anchors": [
+          "nd-page",
+          "实现与执行",
+          "_R_7iklubsknqivb_",
+          "取消与资源",
+          "graph-与独立计算",
+          "常见问题",
+          "worker-true-会把自定义布局移到-worker-吗",
+          "为什么取消后-promise-仍正常结束"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/custom-node.mdx",
+        "route": "/docs/guides/custom-node",
+        "anchors": [
+          "nd-page",
+          "适用场景",
+          "_R_7iklubsknqivb_",
+          "覆盖绘制与边界锚点",
+          "内置扩展",
+          "常见问题",
+          "注册后为什么没有变化",
+          "为什么徽章移动了边端点没动",
+          "为什么动画持续重绘"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/custom-plugin.mdx",
+        "route": "/docs/guides/custom-plugin",
+        "anchors": [
+          "nd-page",
+          "实现注册与挂载",
+          "_R_7iklubsknqivb_",
+          "事件与作用域",
+          "选项与清理",
+          "常见问题",
+          "为什么多次-render-后点击增加多次",
+          "为什么-setdata-不把计数器归零"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/custom-transform.mdx",
+        "route": "/docs/guides/custom-transform",
+        "anchors": [
+          "nd-page",
+          "实现与激活",
+          "_R_7iklubsknqivb_",
+          "全量与增量的区别",
+          "配置与清理",
+          "常见问题",
+          "为什么刷新或重排没有执行转换",
+          "update-的参数是差量吗"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/data.mdx",
+        "route": "/docs/guides/data",
+        "anchors": [
+          "nd-page",
+          "接入业务数据",
+          "校验数据",
+          "选择更新方式",
+          "替换整份数据",
+          "_R_niklubsknqivb_",
+          "增量更新",
+          "_R_viklubsknqivb_",
+          "常见问题",
+          "更新后标签或颜色没变",
+          "更新后为什么视野或选择丢了",
+          "相关参考"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/edge.mdx",
+        "route": "/docs/guides/edge",
+        "anchors": [
+          "nd-page",
+          "基础配置",
+          "_R_biklubsknqivb_",
+          "类型",
+          "样式字段",
+          "细边交互热区",
+          "_R_15iklubsknqivb_",
+          "状态样式",
+          "平行边与自环",
+          "_R_1piklubsknqivb_",
+          "折线路由",
+          "_R_27iklubsknqivb_",
+          "边标签",
+          "_R_2fiklubsknqivb_",
+          "运行时更新",
+          "常见问题",
+          "为什么多条边仍然重叠",
+          "为什么改-offset-后自环大小没变",
+          "为什么细线仍然难点中",
+          "为什么看不到标签",
+          "为什么改-router-或-trunkgap-没变化",
+          "为什么边没有按预期绕开节点",
+          "为什么配置了状态却没触发",
+          "相关"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/events/lifecycle.mdx",
+        "route": "/docs/guides/events/lifecycle",
+        "anchors": [
+          "nd-page",
+          "观察事件顺序",
+          "_R_7iklubsknqivb_",
+          "选择正确的完成时机"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/events/selection-drag.mdx",
+        "route": "/docs/guides/events/selection-drag",
+        "anchors": [
+          "nd-page",
+          "选择并移动节点",
+          "_R_7iklubsknqivb_",
+          "同步选择结果",
+          "保存拖拽结果",
+          "清理与性能"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/events.mdx",
+        "route": "/docs/guides/events",
+        "anchors": [
+          "nd-page",
+          "元素事件",
+          "监听节点点击",
+          "_R_diklubsknqivb_",
+          "读取数据与位置",
+          "取消监听",
+          "选择与拖拽事件",
+          "生命周期与数据事件",
+          "常见问题",
+          "为什么-nativeevent-是-undefined",
+          "为什么布局结束时读到的坐标还是旧的",
+          "为什么监听有时重复执行有时完全不触发",
+          "自定义事件类型"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/extensions.mdx",
+        "route": "/docs/guides/extensions",
+        "anchors": [
+          "nd-page",
+          "选择入口",
+          "先使用配置",
+          "注册扩展",
+          "扩展实例",
+          "自定义-layout",
+          "decoration-renderer",
+          "职责边界"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/interactions.mdx",
+        "route": "/docs/guides/interactions",
+        "anchors": [
+          "nd-page",
+          "内置-behaviors",
+          "常用组合",
+          "_R_biklubsknqivb_",
+          "缩放手感与范围",
+          "邻域高亮",
+          "_R_riklubsknqivb_",
+          "事件分发模型",
+          "常见问题",
+          "加上-tooltip-后为什么不能缩放了",
+          "框选时为什么画布也在动",
+          "可以用-updateoptions-动态切换-behavior-吗",
+          "相关"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/label.mdx",
+        "route": "/docs/guides/label",
+        "anchors": [
+          "nd-page",
+          "节点标签",
+          "_R_9iklubsknqivb_",
+          "节点图标",
+          "长文本与背景",
+          "_R_niklubsknqivb_",
+          "边标签",
+          "_R_11iklubsknqivb_",
+          "全局标签策略",
+          "_R_1diklubsknqivb_",
+          "运行时更新",
+          "性能提示",
+          "常见问题",
+          "为什么标签没有显示",
+          "为什么文字图标或图片没有显示",
+          "为什么长文本没有截断",
+          "为什么设置颜色后文字没变",
+          "相关"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/layout-worker.mdx",
+        "route": "/docs/guides/layout-worker",
+        "anchors": [
+          "nd-page",
+          "启用方式",
+          "代码与对应效果",
+          "_R_diklubsknqivb_",
+          "传输与回退",
+          "取消与清理",
+          "部署与确认",
+          "常见问题",
+          "启用后仍然卡顿",
+          "布局回调为什么在小图正常大图不一样",
+          "cancellayout-会抛出-aborterror-吗"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/layout.mdx",
+        "route": "/docs/guides/layout",
+        "anchors": [
+          "nd-page",
+          "布局选型",
+          "支持的布局类型",
+          "效果预览",
+          "_R_fiklubsknqivb_",
+          "示例",
+          "_R_liklubsknqivb_",
+          "运行时重新布局",
+          "worker",
+          "常见问题",
+          "改了配置为什么节点没有移动",
+          "重新布局后图跑到画布外了",
+          "树节点为什么堆在原点或间距参数无效",
+          "相关"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/node.mdx",
+        "route": "/docs/guides/node",
+        "anchors": [
+          "nd-page",
+          "基础配置",
+          "顶层配置",
+          "类型",
+          "_R_piklubsknqivb_",
+          "样式字段",
+          "_R_13iklubsknqivb_",
+          "状态样式",
+          "标签与图标",
+          "_R_1niklubsknqivb_",
+          "徽章装饰",
+          "_R_25iklubsknqivb_",
+          "运行时更新",
+          "常见问题",
+          "性能建议",
+          "相关"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/parallel-edges.mdx",
+        "route": "/docs/guides/parallel-edges",
+        "anchors": [
+          "nd-page",
+          "使用建议",
+          "示例入口"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/polyline-routing.mdx",
+        "route": "/docs/guides/polyline-routing",
+        "anchors": [
+          "nd-page",
+          "选择路由",
+          "正交连接与圆角",
+          "_R_fiklubsknqivb_",
+          "目录树的缩进连接",
+          "_R_piklubsknqivb_",
+          "如何选择-indenttarget",
+          "方向与更新",
+          "常见问题",
+          "为什么边穿过了其他节点",
+          "为什么修改方向或-router-后没有变化",
+          "为什么线没有贴合节点边界",
+          "为什么标签看起来没有沿折线排列",
+          "继续阅读"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/states.mdx",
+        "route": "/docs/guides/states",
+        "anchors": [
+          "nd-page",
+          "增减业务标记保留已有选择",
+          "_R_7iklubsknqivb_",
+          "点击选择与悬停高亮一起使用",
+          "替换数据时保留选择",
+          "_R_liklubsknqivb_",
+          "批量更新与-combo",
+          "常见问题",
+          "清理高亮后为什么选中也没了",
+          "保留选择后为什么有的元素没恢复",
+          "修改状态后还要重新-render-吗"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/theme.mdx",
+        "route": "/docs/guides/theme",
+        "anchors": [
+          "nd-page",
+          "使用预设",
+          "_R_7iklubsknqivb_",
+          "覆盖-token",
+          "优先级",
+          "_R_liklubsknqivb_",
+          "切换主题",
+          "默认视觉",
+          "常见问题",
+          "改了-nodefill节点为什么没变色",
+          "切到-dark-后文字为什么看不清",
+          "只改-selected为什么-disabled-的淡化效果没了",
+          "相关"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/tooltip.mdx",
+        "route": "/docs/guides/tooltip",
+        "anchors": [
+          "nd-page",
+          "自定义内容",
+          "_R_7iklubsknqivb_",
+          "点击显示",
+          "_R_diklubsknqivb_",
+          "配置项",
+          "样式",
+          "常见问题",
+          "为什么卡片没有背景或者点击不了",
+          "为什么-combo-上没有-tooltip",
+          "更新数据后已打开的内容会立即更新吗",
+          "相关"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/guides/viewport.mdx",
+        "route": "/docs/guides/viewport",
+        "anchors": [
+          "nd-page",
+          "选择适配时机",
+          "刷新数据保留或重新适配",
+          "_R_diklubsknqivb_",
+          "容器变化与布局完成后怎么办",
+          "_R_riklubsknqivb_",
+          "转换坐标定位-dom-内容",
+          "_R_15iklubsknqivb_",
+          "常见问题",
+          "适配后为什么图仍然很小",
+          "关了-autofit刷新后为什么还会跳",
+          "手动缩放范围和滚轮范围为什么不同"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/index.mdx",
+        "route": "/docs",
+        "anchors": [
+          "nd-page",
+          "先从这里开始",
+          "按任务阅读",
+          "核心能力",
+          "选型提示"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/metrics/bundle-size.mdx",
+        "route": "/docs/metrics/bundle-size",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/metrics/performance-tuning.mdx",
+        "route": "/docs/metrics/performance-tuning",
+        "anchors": [
+          "nd-page",
+          "首屏与布局",
+          "高频更新",
+          "样式与标签",
+          "对比口径"
+        ]
+      },
+      {
+        "source": "site/content/docs/zh/metrics/performance.mdx",
+        "route": "/docs/metrics/performance",
+        "anchors": [
+          "nd-page",
+          "环境要求",
+          "当前公开口径",
+          "常用图库选型对比",
+          "如何进行数值对比"
+        ]
+      }
+    ],
+    "en": [
+      {
+        "source": "site/content/docs/en/ai.mdx",
+        "route": "/en/docs/ai",
+        "anchors": [
+          "nd-page",
+          "two-ways-to-use-it",
+          "use-the-skill-locally",
+          "good-agent-tasks",
+          "recommended-workflow",
+          "the-engine-an-agent-should-understand",
+          "continue-learning"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/extensions/drawing.mdx",
+        "route": "/en/docs/api/extensions/drawing",
+        "anchors": [
+          "nd-page",
+          "nodeextension",
+          "nodeoverlaydrawparams",
+          "nodeboundaryanchorparams",
+          "edgeextension",
+          "labelrenderer",
+          "input-and-output",
+          "decorationrenderer"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/extensions/registration.mdx",
+        "route": "/en/docs/api/extensions/registration",
+        "anchors": [
+          "nd-page",
+          "minimal-registration-and-activation",
+          "register",
+          "extensionfactory",
+          "instance-scope",
+          "extensioncontext",
+          "data-snapshots-and-business-field-updates",
+          "state-replace-state-members",
+          "_R_23iklubsknqivb_",
+          "viewport-coordinates-and-zoom",
+          "requestrender-and-isdestroyed",
+          "cleanup-and-errors",
+          "compatibility-members"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/extensions/runtime.mdx",
+        "route": "/en/docs/api/extensions/runtime",
+        "anchors": [
+          "nd-page",
+          "lifecycle-at-a-glance",
+          "behaviorextension",
+          "layoutextension",
+          "transformextension",
+          "pluginextension",
+          "resource-and-context-boundaries"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/extensions.mdx",
+        "route": "/en/docs/api/extensions",
+        "anchors": [
+          "nd-page",
+          "register",
+          "extensionfactory",
+          "extension-context",
+          "runlayout"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/combo.mdx",
+        "route": "/en/docs/api/graph/combo",
+        "anchors": [
+          "nd-page",
+          "prerequisites-and-boundaries",
+          "code-and-effect",
+          "_R_diklubsknqivb_",
+          "createcombo",
+          "removecombo",
+          "addtocombo",
+          "removefromcombo",
+          "getcombochildren",
+          "getnodecombo",
+          "collapsecombo",
+          "expandcombo",
+          "togglecombo",
+          "membership-and-models",
+          "states-visibility-and-compatibility"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/data-mutations.mdx",
+        "route": "/en/docs/api/graph/data-mutations",
+        "anchors": [
+          "nd-page",
+          "common-prerequisites-and-type-shorthand",
+          "setdata",
+          "incremental-updates-in-code-and-canvas",
+          "_R_riklubsknqivb_",
+          "addnode",
+          "addnodes",
+          "updatenodedata",
+          "updatenodeposition",
+          "updatenodepositions",
+          "removenode",
+          "removenodes",
+          "addedge",
+          "addedges",
+          "updateedgedata",
+          "removeedge",
+          "removeedges",
+          "batch-usage",
+          "events-and-missing-ids"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/data.mdx",
+        "route": "/en/docs/api/graph/data",
+        "anchors": [
+          "nd-page",
+          "query-timing-and-returned-values",
+          "getdata",
+          "snapshots-and-live-queries",
+          "_R_niklubsknqivb_",
+          "getnodes",
+          "getnodedata",
+          "getedges",
+          "getedgedata",
+          "getcombodata",
+          "getelementdata",
+          "getnodecount",
+          "getedgecount",
+          "hasnode",
+          "hasedge",
+          "haselement",
+          "getelementposition",
+          "getneighbornodes",
+          "getadjacentedges",
+          "model-fields",
+          "compatibility-methods"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/events/drag.mdx",
+        "route": "/en/docs/api/graph/events/drag",
+        "anchors": [
+          "nd-page",
+          "read-final-positions",
+          "nodedragstart",
+          "nodedrag",
+          "nodedragend",
+          "combodragstart",
+          "combodrag",
+          "combodragend",
+          "edgedragstart",
+          "edgedrag",
+          "edgedragend"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/events/element.mdx",
+        "route": "/en/docs/api/graph/events/element",
+        "anchors": [
+          "nd-page",
+          "listen-to-a-node-click",
+          "read-event-parameters",
+          "nodes",
+          "nodepointerover",
+          "nodepointerenter",
+          "nodepointermove",
+          "nodepointerleave",
+          "nodepointerdown",
+          "nodeclick",
+          "nodedblclick",
+          "nodecontextmenu",
+          "nodewheel",
+          "edges",
+          "edgepointerover",
+          "edgepointerenter",
+          "edgepointermove",
+          "edgepointerleave",
+          "edgepointerdown",
+          "edgeclick",
+          "edgedblclick",
+          "edgecontextmenu",
+          "edgewheel",
+          "combos",
+          "combopointerdown",
+          "comboclick",
+          "combodblclick",
+          "combocontextmenu",
+          "canvas",
+          "canvaspointermove",
+          "canvaspointerdown",
+          "canvaspointerup",
+          "canvasclick",
+          "canvasdblclick",
+          "canvascontextmenu",
+          "canvaswheel",
+          "picking-and-gestures"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/events/lifecycle.mdx",
+        "route": "/en/docs/api/graph/events/lifecycle",
+        "anchors": [
+          "nd-page",
+          "receive-the-first-render-event",
+          "beforelayout",
+          "layoutstart",
+          "layoutend",
+          "afterlayout",
+          "beforerender",
+          "afterrender",
+          "resize",
+          "destroy",
+          "datachange",
+          "afteradditem",
+          "afterremoveitem",
+          "afterupdateitem",
+          "combocollapse",
+          "comboexpand",
+          "ordering-and-completion"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/events/selection.mdx",
+        "route": "/en/docs/api/graph/events/selection",
+        "anchors": [
+          "nd-page",
+          "read-final-selection",
+          "nodeselectchange",
+          "edgeselectchange",
+          "selectionclear",
+          "brushselect",
+          "brushend",
+          "lassoselect",
+          "lassoend"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/events.mdx",
+        "route": "/en/docs/api/graph/events",
+        "anchors": [
+          "nd-page",
+          "on",
+          "off",
+          "once",
+          "code-and-rendered-result",
+          "element-event-payloads",
+          "element-event-inventory",
+          "selection-events",
+          "drag-events",
+          "lifecycle-and-data-events",
+          "ordering-and-completion-boundaries",
+          "grapheventmap"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/layout.mdx",
+        "route": "/en/docs/api/graph/layout",
+        "anchors": [
+          "nd-page",
+          "setlayout",
+          "layout",
+          "code-and-rendered-result",
+          "_R_liklubsknqivb_",
+          "computation-and-fitting",
+          "cancellayout",
+          "runlayout",
+          "compute-and-display-coordinates",
+          "_R_1niklubsknqivb_"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/lifecycle.mdx",
+        "route": "/en/docs/api/graph/lifecycle",
+        "anchors": [
+          "nd-page",
+          "new-graph",
+          "render",
+          "updateoptions",
+          "visual-updates-refresh-and-rebuilding",
+          "_R_19iklubsknqivb_",
+          "refresh",
+          "destroy",
+          "destroyed",
+          "isdestroyed"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/states.mdx",
+        "route": "/en/docs/api/graph/states",
+        "anchors": [
+          "nd-page",
+          "prerequisites",
+          "setitemstate",
+          "toggle-replace-and-clear",
+          "_R_niklubsknqivb_",
+          "setelementstates",
+          "batchsetstate",
+          "getitemstates",
+          "findnodesbystate",
+          "findedgesbystate",
+          "findcombosbystate",
+          "clearitemstates",
+          "hideitem",
+          "visibility-and-state-queries",
+          "_R_31iklubsknqivb_",
+          "showitem"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph/viewport.mdx",
+        "route": "/en/docs/api/graph/viewport",
+        "anchors": [
+          "nd-page",
+          "timing-and-units",
+          "getcamera",
+          "setcamera",
+          "save-restore-and-focus",
+          "_R_tiklubsknqivb_",
+          "resetcamera",
+          "getzoom",
+          "zoomto",
+          "zoomby",
+          "fitview",
+          "fitcenter",
+          "focusitem",
+          "setsize",
+          "fitting-after-a-container-narrows-or-widens",
+          "_R_3hiklubsknqivb_",
+          "screentograph",
+          "graphtoscreen"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/graph.mdx",
+        "route": "/en/docs/api/graph",
+        "anchors": [
+          "nd-page",
+          "lifecycle",
+          "new-graphoptions",
+          "render",
+          "destroy",
+          "destroyed",
+          "refresh",
+          "reading-data",
+          "replacing-data-and-styles",
+          "setdata",
+          "updateoptions",
+          "changing-nodes-and-edges",
+          "nodes",
+          "edges",
+          "state-visibility-and-focus",
+          "setitemstate",
+          "setelementstates",
+          "batchsetstate",
+          "query-and-clear",
+          "hideitem-and-showitem",
+          "focusitem",
+          "viewport",
+          "container-resize",
+          "zoomto-and-zoomby",
+          "fitview",
+          "coordinate-conversion",
+          "layout",
+          "combo",
+          "events"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/index.mdx",
+        "route": "/en/docs/api",
+        "anchors": [
+          "nd-page",
+          "entries-you-can-call",
+          "types-by-domain",
+          "call-order",
+          "query-results-are-read-only",
+          "engine-only-members",
+          "compatibility-entries"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/options/behaviors.mdx",
+        "route": "/en/docs/api/options/behaviors",
+        "anchors": [
+          "nd-page",
+          "behavioroption",
+          "mounting-and-updates",
+          "built-in-index",
+          "navigation-and-dragging",
+          "selection",
+          "code-and-rendered-result",
+          "_R_1diklubsknqivb_",
+          "highlighting",
+          "tooltipoptions",
+          "tooltipcontext",
+          "custom-behavior-contract"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/options/combo.mdx",
+        "route": "/en/docs/api/options/combo",
+        "anchors": [
+          "nd-page",
+          "combodata",
+          "membership-and-nesting",
+          "_R_hiklubsknqivb_",
+          "initial-collapse",
+          "initial-states",
+          "read-only-query-model",
+          "basic-appearance-and-local-overrides",
+          "basic-style-fields",
+          "code-and-matching-result",
+          "_R_1liklubsknqivb_",
+          "callbacks-and-precedence",
+          "padding-bounds-and-labels",
+          "runtime-updates",
+          "collapsed-appearance",
+          "_R_2hiklubsknqivb_",
+          "state-styles",
+          "_R_2viklubsknqivb_",
+          "related-entries"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/options/data.mdx",
+        "route": "/en/docs/api/options/data",
+        "anchors": [
+          "nd-page",
+          "graphdata",
+          "graphnode",
+          "graphedge",
+          "combodata",
+          "initial-states-and-export"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/options/edge.mdx",
+        "route": "/en/docs/api/options/edge",
+        "anchors": [
+          "nd-page",
+          "edgeconfig",
+          "basic-styles",
+          "_R_liklubsknqivb_",
+          "style-callbacks",
+          "dash-rules",
+          "arrows",
+          "picking-width",
+          "_R_1hiklubsknqivb_",
+          "state-styles",
+          "runtime-updates",
+          "parallel-edges-and-self-loops",
+          "grouping-and-spacing",
+          "_R_2hiklubsknqivb_",
+          "entries-and-precedence",
+          "curves-and-polyline-routing",
+          "arcs-and-cubic-curves",
+          "_R_37iklubsknqivb_",
+          "_R_3biklubsknqivb_",
+          "choosing-a-router",
+          "_R_3liklubsknqivb_",
+          "indented-targets-and-trunks",
+          "_R_3tiklubsknqivb_",
+          "edge-labels",
+          "_R_49iklubsknqivb_",
+          "position-and-visibility",
+          "other-configuration"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/options/label.mdx",
+        "route": "/en/docs/api/options/label",
+        "anchors": [
+          "nd-page",
+          "labeloptions",
+          "code-and-matching-result",
+          "_R_hiklubsknqivb_",
+          "zoom-thresholds",
+          "collision-order",
+          "scope",
+          "runtime-updates",
+          "related-entries"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/options/layout.mdx",
+        "route": "/en/docs/api/options/layout",
+        "anchors": [
+          "nd-page",
+          "layoutconfig",
+          "supported-layouts",
+          "code-and-rendered-result",
+          "_R_niklubsknqivb_",
+          "computation-defaults",
+          "functional-tree-layouts",
+          "mindmap",
+          "indented",
+          "fishbone",
+          "worker",
+          "coordinates-and-runtime"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/options/node.mdx",
+        "route": "/en/docs/api/options/node",
+        "anchors": [
+          "nd-page",
+          "_R_5iklubsknqivb_",
+          "nodeconfig",
+          "nodestyleconfig",
+          "style-callbacks",
+          "_R_viklubsknqivb_",
+          "labels",
+          "labelrenderer",
+          "icons",
+          "_R_21iklubsknqivb_",
+          "nodedecorationconfig",
+          "content-and-visibility",
+          "placement-and-offsets",
+          "stacks-and-overflow",
+          "built-in-badges",
+          "_R_37iklubsknqivb_",
+          "custom-decoration-renderers",
+          "state-styles",
+          "runtime-updates",
+          "related-references",
+          "choose-an-example-by-effect",
+          "guides-and-protocols"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/options/theme.mdx",
+        "route": "/en/docs/api/options/theme",
+        "anchors": [
+          "nd-page",
+          "themeoption",
+          "themetokens",
+          "code-and-rendered-result",
+          "_R_niklubsknqivb_",
+          "state-presets",
+          "precedence",
+          "resolvetheme",
+          "runtime-updates"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/options/transforms-plugins.mdx",
+        "route": "/en/docs/api/options/transforms-plugins",
+        "anchors": [
+          "nd-page",
+          "transforms",
+          "plugins",
+          "calls-and-changes",
+          "options-and-support-boundaries"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/options.mdx",
+        "route": "/en/docs/api/options",
+        "anchors": [
+          "nd-page",
+          "graphoptions",
+          "autofit",
+          "graph-data",
+          "node-graphnode",
+          "edge-graphedge",
+          "combo-combodata",
+          "node",
+          "edge",
+          "combo",
+          "label-policy",
+          "layout",
+          "interactions",
+          "theme",
+          "plugins-and-transforms",
+          "runtime-changes"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/api/utilities.mdx",
+        "route": "/en/docs/api/utilities",
+        "anchors": [
+          "nd-page",
+          "runlayout",
+          "resolvetheme",
+          "eventemitter"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/changelog.mdx",
+        "route": "/en/docs/changelog",
+        "anchors": [
+          "nd-page",
+          "extension-and-behavior-contracts--2026-07-29"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/compatibility/api-stability.mdx",
+        "route": "/en/docs/compatibility/api-stability",
+        "anchors": [
+          "nd-page",
+          "public-and-internal-boundaries",
+          "esm-and-commonjs",
+          "deprecated-compatibility-entries",
+          "experimental-capabilities"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/compatibility/browser.mdx",
+        "route": "/en/docs/compatibility/browser",
+        "anchors": [
+          "nd-page",
+          "minimum-versions",
+          "coverage-reference",
+          "comparison-with-sigmajs"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/compatibility/g6-v5-migration.mdx",
+        "route": "/en/docs/compatibility/g6-v5-migration",
+        "anchors": [
+          "nd-page",
+          "decide-whether-to-migrate",
+          "installation-and-imports",
+          "minimal-configuration-side-by-side",
+          "graphoptions-mapping",
+          "data-field-mapping",
+          "node-edge-and-combo-configuration",
+          "behavior-mapping",
+          "layout-migration",
+          "event-migration",
+          "graph-api-mapping",
+          "extension-transform-and-plugin-migration",
+          "unsupported-capabilities-and-alternatives",
+          "migration-acceptance-checklist"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/compatibility/index.mdx",
+        "route": "/en/docs/compatibility",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/compatibility/library-comparison.mdx",
+        "route": "/en/docs/compatibility/library-comparison",
+        "anchors": [
+          "nd-page",
+          "short-recommendation",
+          "rendering-data-and-layout",
+          "elements-labels-and-grouping",
+          "interaction-extension-and-ecosystem",
+          "runtime-and-package-shape",
+          "how-to-choose",
+          "fair-validation-checklist",
+          "official-sources"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/concepts/architecture.mdx",
+        "route": "/en/docs/concepts/architecture",
+        "anchors": [
+          "nd-page",
+          "architecture-layers",
+          "g6lite-architecture-en-title",
+          "g6lite-architecture-en-description",
+          "g6lite-architecture-en-arrow",
+          "g6lite-architecture-en-extension-arrow",
+          "drawing-layers",
+          "rendering-and-update-paths",
+          "first-render-data-flow",
+          "frequent-update-paths",
+          "layout-and-interaction-collaboration",
+          "layout-and-worker",
+          "interaction-and-picking",
+          "extension-boundary"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/concepts/data-model.mdx",
+        "route": "/en/docs/concepts/data-model",
+        "anchors": [
+          "nd-page",
+          "nodes-edges-and-groups",
+          "data-and-appearance",
+          "positions-and-states",
+          "input-models-and-snapshots",
+          "_R_viklubsknqivb_",
+          "common-questions",
+          "why-did-editing-exported-data-not-update-the-graph",
+          "why-does-an-old-index-identify-another-element-after-removal",
+          "read-next"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/concepts/graph-lifecycle.mdx",
+        "route": "/en/docs/concepts/graph-lifecycle",
+        "anchors": [
+          "nd-page",
+          "lifecycle-overview",
+          "creation-and-first-render",
+          "updates-during-use",
+          "destruction-and-asynchronous-cleanup",
+          "complete-example",
+          "_R_viklubsknqivb_",
+          "common-questions",
+          "why-can-data-writes-fail-inside-afterrender",
+          "why-can-an-operation-still-be-unavailable-after-render-fulfills"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/concepts/overview.mdx",
+        "route": "/en/docs/concepts/overview",
+        "anchors": [
+          "nd-page",
+          "good-fits",
+          "evaluate-carefully",
+          "usage-model",
+          "next-steps"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/concepts/states.mdx",
+        "route": "/en/docs/concepts/states",
+        "anchors": [
+          "nd-page",
+          "states-behaviors-and-styles",
+          "try-state-changes",
+          "_R_diklubsknqivb_",
+          "add-replace-and-clear",
+          "where-state-styles-belong",
+          "names-and-data",
+          "common-questions",
+          "why-did-adding-a-state-not-change-appearance",
+          "why-did-setting-selected-emit-no-selection-event",
+          "why-is-an-element-still-hidden-after-clearing-states"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/concepts/viewport.mdx",
+        "route": "/en/docs/concepts/viewport",
+        "anchors": [
+          "nd-page",
+          "graph-positions-and-the-current-view",
+          "observe-zooming-panning-and-fitting",
+          "_R_diklubsknqivb_",
+          "three-coordinate-spaces",
+          "convert-coordinates",
+          "centering-fitting-and-auto-fit",
+          "common-questions",
+          "should-i-save-new-node-positions-after-panning-or-zooming",
+          "why-does-a-menu-drift-as-i-zoom",
+          "why-does-centered-content-still-not-fit"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/basic.mdx",
+        "route": "/en/docs/examples/basic",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/breathing-node.mdx",
+        "route": "/en/docs/examples/breathing-node",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/combo.mdx",
+        "route": "/en/docs/examples/combo",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/context-menu.mdx",
+        "route": "/en/docs/examples/context-menu",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/custom-behavior.mdx",
+        "route": "/en/docs/examples/custom-behavior",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/custom-label-renderer.mdx",
+        "route": "/en/docs/examples/custom-label-renderer",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/custom-layout.mdx",
+        "route": "/en/docs/examples/custom-layout",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/custom-node-extension.mdx",
+        "route": "/en/docs/examples/custom-node-extension",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/data-mutations.mdx",
+        "route": "/en/docs/examples/data-mutations",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/decoration-badges.mdx",
+        "route": "/en/docs/examples/decoration-badges",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/default-theme.mdx",
+        "route": "/en/docs/examples/default-theme",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/dependency-graph.mdx",
+        "route": "/en/docs/examples/dependency-graph",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/drag-edge.mdx",
+        "route": "/en/docs/examples/drag-edge",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/drag-node.mdx",
+        "route": "/en/docs/examples/drag-node",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/edge-arrows.mdx",
+        "route": "/en/docs/examples/edge-arrows",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/edge-colors.mdx",
+        "route": "/en/docs/examples/edge-colors",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/edge-hit-area.mdx",
+        "route": "/en/docs/examples/edge-hit-area",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/edge-loops.mdx",
+        "route": "/en/docs/examples/edge-loops",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/edge-states.mdx",
+        "route": "/en/docs/examples/edge-states",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/edge-types.mdx",
+        "route": "/en/docs/examples/edge-types",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/event-log.mdx",
+        "route": "/en/docs/examples/event-log",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/extension-system.mdx",
+        "route": "/en/docs/examples/extension-system",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/fishbone.mdx",
+        "route": "/en/docs/examples/fishbone",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/flowchart.mdx",
+        "route": "/en/docs/examples/flowchart",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/hover.mdx",
+        "route": "/en/docs/examples/hover",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/indented-tree.mdx",
+        "route": "/en/docs/examples/indented-tree",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/index.mdx",
+        "route": "/en/docs/examples",
+        "anchors": [
+          "nd-page",
+          "example-categories",
+          "getting-started",
+          "data-and-state",
+          "elements",
+          "layouts",
+          "interactions",
+          "viewport",
+          "extensions",
+          "scenarios-and-performance"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/label-rendering-options.mdx",
+        "route": "/en/docs/examples/label-rendering-options",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/labels.mdx",
+        "route": "/en/docs/examples/labels",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/large-labeled.mdx",
+        "route": "/en/docs/examples/large-labeled",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/large.mdx",
+        "route": "/en/docs/examples/large",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/layout-gallery.mdx",
+        "route": "/en/docs/examples/layout-gallery",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/layout-worker.mdx",
+        "route": "/en/docs/examples/layout-worker",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/layouts.mdx",
+        "route": "/en/docs/examples/layouts",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/mindmap.mdx",
+        "route": "/en/docs/examples/mindmap",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/neighbor-highlight.mdx",
+        "route": "/en/docs/examples/neighbor-highlight",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/node-border.mdx",
+        "route": "/en/docs/examples/node-border",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/node-style.mdx",
+        "route": "/en/docs/examples/node-style",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/org-chart.mdx",
+        "route": "/en/docs/examples/org-chart",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/parallel-edges.mdx",
+        "route": "/en/docs/examples/parallel-edges",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/polyline-routing.mdx",
+        "route": "/en/docs/examples/polyline-routing",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/queries-and-states.mdx",
+        "route": "/en/docs/examples/queries-and-states",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/radial-tree.mdx",
+        "route": "/en/docs/examples/radial-tree",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/real-dataset.mdx",
+        "route": "/en/docs/examples/real-dataset",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/relationship.mdx",
+        "route": "/en/docs/examples/relationship",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/search-focus.mdx",
+        "route": "/en/docs/examples/search-focus",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/selection-behaviors.mdx",
+        "route": "/en/docs/examples/selection-behaviors",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/set-data.mdx",
+        "route": "/en/docs/examples/set-data",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/shapes.mdx",
+        "route": "/en/docs/examples/shapes",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/tooltip.mdx",
+        "route": "/en/docs/examples/tooltip",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/viewport-controls.mdx",
+        "route": "/en/docs/examples/viewport-controls",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/examples/zoom-options.mdx",
+        "route": "/en/docs/examples/zoom-options",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/faq.mdx",
+        "route": "/en/docs/faq",
+        "anchors": [
+          "nd-page",
+          "should-i-use-g6lite-or-g6-v5",
+          "why-is-first-render-slow-with-a-force-layout",
+          "can-g6lite-run-during-ssr",
+          "where-do-typescript-types-come-from",
+          "are-combos-stable"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/getting-started/quick-start.mdx",
+        "route": "/en/docs/getting-started/quick-start",
+        "anchors": [
+          "nd-page",
+          "package-manager",
+          "cdn",
+          "use-in-frontend-frameworks"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/getting-started/react.mdx",
+        "route": "/en/docs/getting-started/react",
+        "anchors": [
+          "nd-page",
+          "use-with-react",
+          "use-with-vue",
+          "update-the-graph-when-data-changes",
+          "prepare-two-datasets",
+          "react-respond-to-data-dependency-changes",
+          "vue-synchronize-data-with-watch"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/combo.mdx",
+        "route": "/en/docs/guides/combo",
+        "anchors": [
+          "nd-page",
+          "declare-combos",
+          "_R_9iklubsknqivb_",
+          "combodata",
+          "style",
+          "collapse-and-expand",
+          "_R_11iklubsknqivb_",
+          "change-membership",
+          "_R_19iklubsknqivb_",
+          "queries",
+          "drag-groups",
+          "common-questions",
+          "why-is-there-no-group-outline-or-title",
+          "why-does-content-remain-after-hiding-or-collapsing-a-parent",
+          "why-do-some-nodes-stay-hidden-after-expanding",
+          "why-does-dragging-not-change-membership-or-selection",
+          "why-can-updateoptions-not-change-combo-appearance",
+          "related"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/custom-behavior.mdx",
+        "route": "/en/docs/guides/custom-behavior",
+        "anchors": [
+          "nd-page",
+          "public-type-pattern",
+          "recommended-exports",
+          "complete-implementation",
+          "_R_fiklubsknqivb_",
+          "register-and-activate",
+          "event-typing",
+          "lifecycle-and-cleanup",
+          "boundaries-and-replacement"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/custom-decoration.mdx",
+        "route": "/en/docs/guides/custom-decoration",
+        "anchors": [
+          "nd-page",
+          "measure-draw-and-register",
+          "_R_7iklubsknqivb_",
+          "position-and-stack",
+          "collisions-and-updates",
+          "common-questions",
+          "why-is-there-no-fallback-text",
+          "why-did-measurement-not-lead-to-drawing",
+          "can-i-use-the-built-in-badge-instead"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/custom-edge.mdx",
+        "route": "/en/docs/guides/custom-edge",
+        "anchors": [
+          "nd-page",
+          "register-and-activate",
+          "_R_7iklubsknqivb_",
+          "overrides-and-updates",
+          "common-questions",
+          "can-i-implement-arbitrary-drawing-or-shaders",
+          "why-is-a-label-missing",
+          "why-is-an-edge-difficult-to-select"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/custom-label-renderer.mdx",
+        "route": "/en/docs/guides/custom-label-renderer",
+        "anchors": [
+          "nd-page",
+          "register-and-activate",
+          "_R_7iklubsknqivb_",
+          "protocol",
+          "common-questions",
+          "why-was-text-skipped",
+          "what-happens-for-invalid-dimensions-or-drawing-errors",
+          "do-edge-labels-always-follow-the-rendered-path"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/custom-layout.mdx",
+        "route": "/en/docs/guides/custom-layout",
+        "anchors": [
+          "nd-page",
+          "implement-and-execute",
+          "_R_7iklubsknqivb_",
+          "cancellation-and-resources",
+          "graph-versus-standalone-execution",
+          "common-questions",
+          "does-worker-true-move-a-custom-layout-to-a-worker",
+          "why-can-cancellation-still-fulfill-the-promise"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/custom-node.mdx",
+        "route": "/en/docs/guides/custom-node",
+        "anchors": [
+          "nd-page",
+          "use-cases",
+          "_R_7iklubsknqivb_",
+          "overlays-and-boundary-anchors",
+          "built-in-extension",
+          "common-questions",
+          "why-did-registration-have-no-effect",
+          "why-did-the-badge-move-without-changing-edge-endpoints",
+          "why-does-the-animation-redraw-continuously"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/custom-plugin.mdx",
+        "route": "/en/docs/guides/custom-plugin",
+        "anchors": [
+          "nd-page",
+          "implement-register-and-mount",
+          "_R_7iklubsknqivb_",
+          "events-and-instance-scope",
+          "options-and-cleanup",
+          "common-questions",
+          "why-do-clicks-increment-multiple-times-after-render",
+          "why-did-setdata-not-reset-the-counter"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/custom-transform.mdx",
+        "route": "/en/docs/guides/custom-transform",
+        "anchors": [
+          "nd-page",
+          "implement-and-activate",
+          "_R_7iklubsknqivb_",
+          "full-versus-incremental-updates",
+          "configuration-and-cleanup",
+          "common-questions",
+          "why-did-refresh-or-layout-not-run-the-transform",
+          "is-update-a-patch"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/data.mdx",
+        "route": "/en/docs/guides/data",
+        "anchors": [
+          "nd-page",
+          "map-application-data",
+          "validate-data",
+          "choose-an-update-path",
+          "replace-all-data",
+          "_R_niklubsknqivb_",
+          "incremental-updates",
+          "_R_viklubsknqivb_",
+          "common-questions",
+          "why-did-labels-or-colors-not-change",
+          "why-did-refreshing-lose-the-view-or-selection",
+          "related-references"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/edge.mdx",
+        "route": "/en/docs/guides/edge",
+        "anchors": [
+          "nd-page",
+          "basic-configuration",
+          "_R_biklubsknqivb_",
+          "types",
+          "style-fields",
+          "thin-edge-hit-areas",
+          "_R_15iklubsknqivb_",
+          "state-styles",
+          "parallel-edge-spacing",
+          "_R_1piklubsknqivb_",
+          "polyline-routing",
+          "_R_27iklubsknqivb_",
+          "edge-labels",
+          "_R_2fiklubsknqivb_",
+          "runtime-updates",
+          "common-questions",
+          "why-do-parallel-edges-still-overlap",
+          "why-does-offset-not-resize-self-loops",
+          "why-is-a-thin-line-still-difficult-to-select",
+          "why-is-a-label-missing",
+          "why-do-router-or-trunkgap-changes-do-nothing",
+          "why-does-an-edge-cross-another-node",
+          "why-does-a-configured-state-not-activate",
+          "related"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/events/lifecycle.mdx",
+        "route": "/en/docs/guides/events/lifecycle",
+        "anchors": [
+          "nd-page",
+          "observe-the-sequence",
+          "_R_7iklubsknqivb_",
+          "choose-the-right-completion-point"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/events/selection-drag.mdx",
+        "route": "/en/docs/guides/events/selection-drag",
+        "anchors": [
+          "nd-page",
+          "select-and-move-nodes",
+          "_R_7iklubsknqivb_",
+          "synchronize-selection",
+          "persist-drag-results",
+          "cleanup-and-performance"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/events.mdx",
+        "route": "/en/docs/guides/events",
+        "anchors": [
+          "nd-page",
+          "element-events",
+          "listen-to-a-node-click",
+          "_R_diklubsknqivb_",
+          "read-data-and-positions",
+          "removing-listeners",
+          "selection-and-drag-events",
+          "lifecycle-and-data-events",
+          "common-questions",
+          "why-is-nativeevent-undefined",
+          "why-are-positions-still-old-when-layout-finishes",
+          "why-does-a-listener-fire-repeatedly-or-never-fire",
+          "custom-event-typing"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/extensions.mdx",
+        "route": "/en/docs/guides/extensions",
+        "anchors": [
+          "nd-page",
+          "choosing-a-category",
+          "registration-and-activation",
+          "lifecycle-by-category",
+          "public-capability-boundary",
+          "decoration-visibility"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/interactions.mdx",
+        "route": "/en/docs/guides/interactions",
+        "anchors": [
+          "nd-page",
+          "built-in-behaviors",
+          "common-combinations",
+          "_R_biklubsknqivb_",
+          "zoom-feel-and-bounds",
+          "neighborhood-highlighting",
+          "_R_riklubsknqivb_",
+          "event-dispatch",
+          "common-questions",
+          "why-did-adding-tooltip-disable-zoom",
+          "why-does-brushing-also-move-the-canvas",
+          "can-updateoptions-switch-behaviors",
+          "related"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/label.mdx",
+        "route": "/en/docs/guides/label",
+        "anchors": [
+          "nd-page",
+          "node-labels",
+          "_R_9iklubsknqivb_",
+          "node-icons",
+          "long-text-and-backgrounds",
+          "_R_niklubsknqivb_",
+          "edge-labels",
+          "_R_11iklubsknqivb_",
+          "global-label-policies",
+          "_R_1diklubsknqivb_",
+          "runtime-updates",
+          "performance-tips",
+          "common-questions",
+          "why-is-a-label-missing",
+          "why-is-a-text-icon-or-image-missing",
+          "why-is-long-text-not-truncated",
+          "why-did-the-text-color-not-change",
+          "related"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/layout-worker.mdx",
+        "route": "/en/docs/guides/layout-worker",
+        "anchors": [
+          "nd-page",
+          "enable-a-worker",
+          "code-and-rendered-result",
+          "_R_diklubsknqivb_",
+          "transfer-and-fallback",
+          "cancellation-and-cleanup",
+          "deploy-and-verify",
+          "common-questions",
+          "why-does-the-page-still-stall",
+          "why-do-callbacks-behave-differently-on-small-and-large-graphs",
+          "does-cancellayout-throw-aborterror"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/layout.mdx",
+        "route": "/en/docs/guides/layout",
+        "anchors": [
+          "nd-page",
+          "choose-a-layout",
+          "supported-layout-types",
+          "preview",
+          "_R_fiklubsknqivb_",
+          "tree-example",
+          "_R_liklubsknqivb_",
+          "rerun-layout-at-runtime",
+          "worker",
+          "common-questions",
+          "why-did-configuration-changes-leave-nodes-in-place",
+          "why-did-the-graph-move-outside-the-canvas",
+          "why-do-tree-nodes-overlap-at-the-origin-or-ignore-spacing",
+          "related"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/node.mdx",
+        "route": "/en/docs/guides/node",
+        "anchors": [
+          "nd-page",
+          "basic-configuration",
+          "top-level-configuration",
+          "types",
+          "_R_piklubsknqivb_",
+          "data-mapping-and-selected-styles",
+          "_R_13iklubsknqivb_",
+          "state-styles",
+          "labels-and-icons",
+          "_R_1niklubsknqivb_",
+          "badge-decorations",
+          "_R_25iklubsknqivb_",
+          "runtime-updates",
+          "common-questions",
+          "performance",
+          "related-resources"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/parallel-edges.mdx",
+        "route": "/en/docs/guides/parallel-edges",
+        "anchors": [
+          "nd-page",
+          "usage-tips"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/polyline-routing.mdx",
+        "route": "/en/docs/guides/polyline-routing",
+        "anchors": [
+          "nd-page",
+          "choose-a-router",
+          "orthogonal-connections-and-rounding",
+          "_R_fiklubsknqivb_",
+          "indented-directory-connections",
+          "_R_piklubsknqivb_",
+          "choose-indenttarget",
+          "direction-and-updates",
+          "common-questions",
+          "why-does-an-edge-cross-another-node",
+          "why-did-changing-direction-or-router-have-no-effect",
+          "why-does-a-line-miss-the-node-boundary",
+          "why-does-the-label-not-follow-the-polyline",
+          "continue-reading"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/states.mdx",
+        "route": "/en/docs/guides/states",
+        "anchors": [
+          "nd-page",
+          "add-business-flags-without-losing-selection",
+          "_R_7iklubsknqivb_",
+          "combine-click-selection-and-hover-highlighting",
+          "preserve-selection-when-replacing-data",
+          "_R_liklubsknqivb_",
+          "batch-changes-and-combos",
+          "common-questions",
+          "why-did-clearing-highlighting-also-remove-selection",
+          "why-were-some-selected-elements-not-restored",
+          "do-state-updates-need-another-render"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/theme.mdx",
+        "route": "/en/docs/guides/theme",
+        "anchors": [
+          "nd-page",
+          "use-a-preset",
+          "_R_7iklubsknqivb_",
+          "override-tokens",
+          "precedence",
+          "_R_liklubsknqivb_",
+          "switch-themes",
+          "default-visual-semantics",
+          "common-questions",
+          "why-did-changing-nodefill-leave-the-nodes-unchanged",
+          "why-is-text-hard-to-read-after-switching-to-dark",
+          "why-did-disabled-lose-its-dimming-when-i-changed-only-selected",
+          "related"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/tooltip.mdx",
+        "route": "/en/docs/guides/tooltip",
+        "anchors": [
+          "nd-page",
+          "custom-content",
+          "_R_7iklubsknqivb_",
+          "click-to-show",
+          "_R_diklubsknqivb_",
+          "options",
+          "styling",
+          "common-questions",
+          "why-is-the-card-unstyled-or-unclickable",
+          "why-does-a-combo-show-no-tooltip",
+          "does-an-open-card-update-immediately-after-data-changes",
+          "related"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/guides/viewport.mdx",
+        "route": "/en/docs/guides/viewport",
+        "anchors": [
+          "nd-page",
+          "choose-when-to-fit",
+          "refresh-data-with-or-without-fitting",
+          "_R_diklubsknqivb_",
+          "handle-resizing-and-completed-layouts",
+          "_R_riklubsknqivb_",
+          "convert-coordinates-to-position-dom-content",
+          "_R_15iklubsknqivb_",
+          "common-questions",
+          "why-is-the-graph-still-small-after-fitting",
+          "why-does-refreshing-move-the-view-with-autofit-disabled",
+          "why-do-method-and-wheel-zoom-limits-differ"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/index.mdx",
+        "route": "/en/docs",
+        "anchors": [
+          "nd-page",
+          "start-here",
+          "documentation-structure",
+          "core-capabilities",
+          "choosing-g6lite"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/metrics/bundle-size.mdx",
+        "route": "/en/docs/metrics/bundle-size",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/metrics/performance-tuning.mdx",
+        "route": "/en/docs/metrics/performance-tuning",
+        "anchors": [
+          "nd-page"
+        ]
+      },
+      {
+        "source": "site/content/docs/en/metrics/performance.mdx",
+        "route": "/en/docs/metrics/performance",
+        "anchors": [
+          "nd-page",
+          "selecting-a-graph-library",
+          "rules-for-numerical-comparisons"
+        ]
+      }
+    ]
+  }
+}

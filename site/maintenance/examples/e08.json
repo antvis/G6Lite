@@ -1,0 +1,46 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E08",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "shapes",
+      "file": "shapes.ts",
+      "observations": [
+        "Rect/arc view has 6 nodes / 6 edges; circle/thick-line view has 5 / 5",
+        "Fit and Refresh recreate exactly two views; enlarged shapes remain distinguishable in the split preview; exported views match"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "node-style",
+      "file": "node-style.ts",
+      "observations": [
+        "Rendered snapshot has 5 nodes / 5 edges; cluster=a blue and cluster=b green; id=0 is larger",
+        "Moving pointer onto a node highlights connected paths and dims unrelated nodes; Refresh restores baseline"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "node-border",
+      "file": "node-border.ts",
+      "observations": [
+        "Upper row compares 4 circle strokes and lower row 4 rectangle corner radii; no edges",
+        "Exported views each contain 4 nodes / 0 edges; Refresh restores both rows"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Corrected hub wording to id=0 and circle-stroke vs rectangle-radius descriptions in both locales",
+    "Added complete two-view data export and owned-container cleanup",
+    "Reduced shape layout radius and enlarged bodies for legible comparison"
+  ]
+}

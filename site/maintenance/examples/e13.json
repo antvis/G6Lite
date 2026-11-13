@@ -1,0 +1,46 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E13",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "layouts",
+      "file": "layouts.ts",
+      "observations": [
+        "Grid and Dagre visibly produce different positions for the same 10 nodes / 11 edges; Force can be selected",
+        "Refresh restores Circular; ownership of the active Graph is local to each run"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "layout-gallery",
+      "file": "layout-gallery.ts",
+      "observations": [
+        "Concentric, ForceAtlas2, Fruchterman, MDS, Random and Radial each report completion",
+        "All modes retain 18 nodes / 17 edges; Refresh restores Radial"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "layout-worker",
+      "file": "layout-worker.ts",
+      "observations": [
+        "worker:true requested force layout returns 80 positioned nodes / 79 edges; Fit and Refresh work",
+        "Text now distinguishes requesting a Worker from certifying its execution thread; this visual audit does not certify off-main-thread performance"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Added live snapshots for all three cases",
+    "Moved the layout-switch graph handle out of module-global scope",
+    "Removed unconditional Worker execution claims; a directory inline-script React warning is tracked for E24"
+  ]
+}

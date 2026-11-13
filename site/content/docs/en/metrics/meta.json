@@ -1,4 +1,6 @@
 {
-  "title": "Technical metrics",
-  "pages": ["performance", "performance-tuning", "bundle-size"]
+  "title": "Performance and internals",
+  "pages": [
+    "performance"
+  ]
 }

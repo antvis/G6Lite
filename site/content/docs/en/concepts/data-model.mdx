@@ -1,36 +1,15 @@
 ---
-title: Graph data model
-description: Nodes, edges, optional groups, and the relationship between data and appearance
+title: Connect and update data (previous URL)
+description: Find the corresponding sections at their new location
 ---
 
-import { GraphDataModelDiagram } from '@/components/graph-data-model-diagram';
+This content now lives in [Connect and update data](/en/docs/guides/data).
 
-A graph consists of nodes and edges connecting them, with optional Combo groups. G6Lite receives these through `GraphData`. Your use case determines what the nodes and connections mean.
-
-## Nodes, edges, and groups
-
-This graph has 6 nodes and 8 edges. A, B, and C belong to the same group:
-
-<GraphDataModelDiagram locale="en" />
-
-- **Nodes, `nodes`**: points in the graph, distinguished by `id`.
-- **Edges, `edges`**: connections between two nodes. Their `source` and `target` specify the endpoint node ids.
-- **Combos, `combos`**: optional node groups. Nodes join through `comboId`; a group does not automatically create connections.
-
-## Data and appearance
-
-Nodes and edges can carry custom `data` fields. These hold information you want to attach to the graph, with meanings defined by your application.
-
-Appearance options such as `node` and `edge` control colors, sizes, and labels. They can also map values from `data`. Changing appearance does not change the connections between nodes. See [Nodes](/en/docs/guides/node) and [Edges](/en/docs/guides/edge) for configuration.
-
-## Positions and states
-
-**Positions** determine where nodes are drawn. Their `x` / `y` values can come from a layout or be supplied directly. Moving a node does not change which nodes it connects to.
-
-**States** express current interactions such as selection or highlighting. A node can have several states at once, with visual effects configured through `stateStyles`.
-
-## Read next
-
-- [Data ingestion and updates](/en/docs/guides/data): prepare data and choose full replacement or incremental updates.
-- [Graph data fields](/en/docs/api/options#graph-data): field types, required values, and constraints.
-- [Combo configuration](/en/docs/guides/combo): group appearance and usage.
+- <span id="nodes-edges-and-groups" style={{ scrollMarginTop: '8rem' }} />[Nodes, edges, and groups](/en/docs/guides/data#nodes-edges-and-groups)
+- <span id="data-and-appearance" style={{ scrollMarginTop: '8rem' }} />[Data and appearance](/en/docs/guides/data#data-and-appearance)
+- <span id="positions-and-states" style={{ scrollMarginTop: '8rem' }} />[Positions and states](/en/docs/guides/data#positions-and-states)
+- <span id="input-models-and-snapshots" style={{ scrollMarginTop: '8rem' }} />[Input, models, and snapshots](/en/docs/guides/data#input-models-and-snapshots)
+- <span id="common-questions" style={{ scrollMarginTop: '8rem' }} />[Common questions](/en/docs/guides/data#common-questions)
+- <span id="why-did-editing-exported-data-not-update-the-graph" style={{ scrollMarginTop: '8rem' }} />[Why did editing exported data not update the graph?](/en/docs/guides/data#why-did-editing-exported-data-not-update-the-graph)
+- <span id="why-does-an-old-index-identify-another-element-after-removal" style={{ scrollMarginTop: '8rem' }} />[Why does an old index identify another element after removal?](/en/docs/guides/data#why-does-an-old-index-identify-another-element-after-removal)
+- <span id="read-next" style={{ scrollMarginTop: '8rem' }} />[Read next](/en/docs/guides/data#related-references)

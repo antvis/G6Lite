@@ -29,6 +29,7 @@ import {
   resolveParallelEdgesConfig,
 } from './transforms/processParallelEdges';
 import type {
+  BehaviorOption,
   ComboData,
   ComboModel,
   EdgeDataUpdate,
@@ -80,6 +81,8 @@ export class Graph {
   private dataModel: DataModel | null = null;
   private scheduler: RenderScheduler | null = null;
   private behaviorTeardown: (() => void) | null = null;
+  private mountingBehaviors = false;
+  private behaviorUpdatePending = false;
   private interactionTeardown: (() => void) | null = null;
   private pluginTeardowns: Array<() => void> = [];
   private transformInstances = new Map<string, TransformInstanceRecord>();
@@ -223,10 +226,16 @@ export class Graph {
     });
   }
 
-  /** Update node, edge, label, and theme visual options, then fully re-process styles. */
-  updateOptions(opts: Partial<Pick<GraphOptions, 'node' | 'edge' | 'label' | 'theme'>>): void {
+  /** Update visual options or replace the active behavior list. */
+  updateOptions(
+    opts: Partial<Pick<GraphOptions, 'node' | 'edge' | 'label' | 'theme' | 'behaviors'>>,
+  ): void {
     const runtime = this.getRuntime();
     if (!runtime) return;
+    if (opts.behaviors !== undefined && !opts.node && !opts.edge && !opts.label && !opts.theme) {
+      this.setBehaviors(opts.behaviors);
+      return;
+    }
     if (opts.node) {
       const previousStyle = this.options.node?.style;
       const nextStyle = opts.node.style;
@@ -261,10 +270,32 @@ export class Graph {
     analyzeEdgeConfig(this.options.edge, themeTokens);
     this.applyTransforms();
     runtime.scheduler.forceFlush(RefreshLevel.FULL_PROCESS);
+    if (opts.behaviors !== undefined) this.setBehaviors(opts.behaviors);
+  }
+
+  /** Replace all behaviors. Use [] to disable them or omit the list to restore defaults. */
+  setBehaviors(behaviors?: readonly BehaviorOption[]): void {
+    if (this._destroyed) return;
+    this.options = {
+      ...this.options,
+      behaviors: behaviors === undefined ? undefined : [...behaviors],
+    };
+    if (!this.interactionTeardown) return;
+
+    if (this.eventEmitter.emitting || this.mountingBehaviors) {
+      if (this.behaviorUpdatePending) return;
+      this.behaviorUpdatePending = true;
+      queueMicrotask(() => {
+        if (this.behaviorUpdatePending) this.mountBehaviors();
+      });
+      return;
+    }
+    this.mountBehaviors();
   }
 
   /**
-   * Force a full re-render. Use sparingly — the scheduler handles this automatically.
+   * Synchronously reprocess styles and redraw the current graph.
+   * @deprecated Pass updated visual options or style inputs to updateOptions().
    */
   refresh(): void {
     if (this._destroyed) return;
@@ -1118,6 +1149,15 @@ export class Graph {
     this.eventEmitter.once(event, handler);
   }
 
+  /** Synchronously dispatch an event to this graph's listeners. */
+  emit<K extends string>(
+    event: K,
+    ...args: K extends keyof GraphEventMap ? GraphEventMap[K] : unknown[]
+  ): void {
+    if (this._destroyed) return;
+    this.eventEmitter.emit(event, ...args);
+  }
+
   // ──── Internal integration bridge ────
 
   /** @internal Layout runtime snapshot used by engine integrations. */
@@ -1328,10 +1368,11 @@ export class Graph {
 
   /** Release resources that are recreated by render(). */
   private teardownRenderRuntime(): void {
-    this.behaviorTeardown?.();
-    this.behaviorTeardown = null;
-    this.interactionTeardown?.();
+    const detachInteraction = this.interactionTeardown;
     this.interactionTeardown = null;
+    this.behaviorUpdatePending = false;
+    this.unmountBehaviors();
+    detachInteraction?.();
     this.pluginTeardowns.forEach((teardown) => teardown());
     this.pluginTeardowns = [];
     this.scheduler?.destroy();
@@ -1430,14 +1471,37 @@ export class Graph {
 
   private mountInteractionRuntime(generation: number): boolean {
     this.interactionTeardown = attachInteraction(this.renderer, this);
-    const behaviors = resolveBehaviorOptions(this.options.behaviors);
-    const teardown = behaviors.length ? registerBehaviors(this.renderer, behaviors, this) : null;
+    this.mountBehaviors();
     if (!this.isGenerationCurrent(generation)) {
-      teardown?.();
+      this.unmountBehaviors();
       return false;
     }
-    this.behaviorTeardown = teardown;
     return true;
+  }
+
+  private unmountBehaviors(): void {
+    const teardown = this.behaviorTeardown;
+    this.behaviorTeardown = null;
+    teardown?.();
+  }
+
+  private mountBehaviors(): void {
+    const interaction = this.interactionTeardown;
+    this.behaviorUpdatePending = false;
+    if (!interaction) return;
+    this.mountingBehaviors = true;
+    try {
+      this.unmountBehaviors();
+      if (this.interactionTeardown !== interaction) return;
+      // A replacement requested during teardown is included in this mount.
+      this.behaviorUpdatePending = false;
+      const behaviors = resolveBehaviorOptions(this.options.behaviors);
+      const teardown = behaviors.length ? registerBehaviors(this.renderer, behaviors, this) : null;
+      if (this.interactionTeardown === interaction) this.behaviorTeardown = teardown;
+      else teardown?.();
+    } finally {
+      this.mountingBehaviors = false;
+    }
   }
 
   private mountOverlayRuntime(dataModel: DataModel): void {

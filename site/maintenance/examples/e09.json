@@ -1,0 +1,45 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E09",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "decoration-badges",
+      "file": "decoration-badges.ts",
+      "observations": [
+        "Orders initially shows two badges and overflow; pointer on overflow expands all five; leaving collapses",
+        "Refresh recreates exactly one badge set"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "labels",
+      "file": "labels.ts",
+      "observations": [
+        "Left placement menu moves node text; icon and edge-label menu items hide their respective content",
+        "8 nodes / 9 edges exported; Refresh restores bottom placement and both label/icon layers"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "label-rendering-options",
+      "file": "label-rendering-options.ts",
+      "observations": [
+        "Default policy at zoom 0.2 hides labels; switching to all labels at the same zoom shows text again",
+        "Refresh restores all-label mode at zoom 0.4; snapshot 18 nodes / 17 edges; no console errors"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Made bilingual operation instructions specify expected effects and refresh defaults",
+    "Added live data export for label and policy custom handles"
+  ]
+}

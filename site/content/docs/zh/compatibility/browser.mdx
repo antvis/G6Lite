@@ -1,72 +1,64 @@
 ---
 title: 浏览器与运行环境
-description: G6Lite 的 WebGL 支持矩阵、最低浏览器版本与已知问题
+description: 实际能力、ESM、Worker、CSP、SSR 和设备验收边界
 ---
 
-G6Lite 优先使用 **WebGL 2.0**，不可用时回退 **WebGL 1.0**，并辅以 **Canvas 2D** 绘制文本标签与 Combo。运行环境还必须支持当前 ESM / ES2020 发布产物，因此最低版本由 WebGL 与 JavaScript 语法支持共同决定。
+Graph 在真实浏览器 DOM 容器中运行，WebGL2 优先，失败后尝试 WebGL1；文字和 Combo 还需要 Canvas 2D。构建工具的 Node.js 要求不是浏览器渲染支持。
 
 ## 渲染技术依赖
 
-| 能力                       | 用途                                                   | API                                      |
-| -------------------------- | ------------------------------------------------------ | ---------------------------------------- |
-| WebGL 2.0 / 1.0            | 节点 / 边的 GPU 渲染主管线                             | `getContext('webgl2')` → `getContext('webgl')` |
-| `OES_standard_derivatives` | 抗锯齿等片元着色器导数计算（可选扩展，缺失时优雅降级） | `gl.getExtension(...)`       |
-| Canvas 2D                  | 文本标签、Combo 包围框绘制                             | `canvas.getContext('2d')`    |
-
-> G6Lite **不强依赖 WebGL 2.0**，WebGL 1.0 仍是支持下限；WebGL2 用于优先获得更完整的设备能力。
+| 能力 | 要求与用途 |
+| --- | --- |
+| DOM / Canvas 2D | 必需；容器、文字、信息层 |
+| WebGL2 / WebGL1 | 至少一种能实际创建上下文；GPU 黑名单或远程环境可能使 API 存在但创建失败 |
+| ResizeObserver / requestAnimationFrame | 尺寸观察与调度；宿主需要提供这些浏览器 API |
+| ESM / dynamic import / AbortController | 模块加载、按需布局与取消；取决于实际发布产物和业务构建目标 |
 
 ## 最低浏览器版本
 
-下表是当前未额外转译产物的语法下限，主要由 optional chaining、nullish coalescing、原生 ESM 与 WebGL 1.0 的共同支持范围决定：
+目前尚未认证 G6Lite 的最低支持版本。下表是核心代码使用的语法与 API 的最低版本参考，供确定测试起点；这些版本尚未完成 G6Lite 兼容性验收。
 
-| 浏览器                   | 最低版本        | 发布年份 | WebGL 1.0 | 主要限制来源                          |
-| ------------------------ | --------------- | -------- | --------- | ------------------------------------- |
-| Chrome                   | 80+             | 2020     | ✅        | ES2020 语法、原生 ESM；推荐最新稳定版 |
-| Firefox                  | 74+             | 2020     | ✅        | ES2020 语法、原生 ESM；推荐最新稳定版 |
-| Safari（macOS）          | 13.1+           | 2020     | ✅        | ES2020 语法下限                       |
-| Safari（iOS）            | 13.4+           | 2020     | ✅        | ES2020 语法下限；移动端需注意显存     |
-| Edge                     | 80+（Chromium） | 2020     | ✅        | Chromium 内核；EdgeHTML 不支持        |
-| Android WebView / Chrome | 80+             | 2020     | ✅        | ES2020 语法；低端机需控制渲染规模     |
+| 浏览器 | 核心语法与 API 下限参考 | Module Worker API 下限参考 |
+| --- | --- | --- |
+| Chrome（桌面） | 80 | 80 |
+| Edge（Chromium，桌面） | 80 | 80 |
+| Firefox（桌面） | 74 | 114 |
+| Safari（macOS） | 13.1 | 15 |
 
-G6Lite **不支持 Internet Explorer**，也不支持旧版 EdgeHTML。上述版本是语法与平台能力下限，不等于完整真机认证矩阵。当前包根为 ESM-only；如需兼容更老环境，业务侧需要自行转译并补齐所需 polyfill。
+核心列版本依据核心代码使用的可选链、空值合并、ResizeObserver 和 AbortController，取各项要求的最高版本；Worker 列仅表示浏览器支持模块 Worker 的起始版本。依据：[可选链](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining#browser_compatibility)、[空值合并](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing#browser_compatibility)、[ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#browser_compatibility)、[AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController#browser_compatibility)、[Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker#browser_compatibility)。
 
-版本依据可交叉查看 [Can I Use：Optional chaining](https://caniuse.com/mdn-javascript_operators_optional_chaining)、[Chrome 80](https://developer.chrome.com/blog/new-in-chrome-80)、[Firefox 74](https://www.mozilla.org/firefox/74.0/releasenotes/) 和 [Safari 13.1](https://webkit.org/blog/10247/new-webkit-features-in-safari-13-1/)。
+构建目标 ES2020 只约束自身 TypeScript 的输出，不会自动降低布局依赖的语法要求。例如当前布局依赖包含私有类方法，直接加载含布局的 UMD 或按需加载相关布局时，要求可能高于上表；业务构建需要同时检查依赖、转译目标与运行时 API。未达到 Module Worker 要求时可能回退主线程，不能把回退成功记为 Worker 通过。
+
+浏览器、WebView、GPU 驱动和打包结果共同决定是否可用。在目标版本中验证创建、渲染、缩放、布局、Worker、尺寸变化和卸载后，才能记录该版本的通过范围。移动端和企业 WebView 需要单独验收；旧 IE/EdgeHTML 不是当前目标环境。
 
 ## 覆盖率参考
 
-按 **2026-07-29** 获取的 `caniuse-lite@1.0.30001806` 全球使用数据估算：
-
-- 上表明确列出的浏览器家族及最低版本约覆盖 **90.4%** 的全球浏览器使用量。
-- 在 Can I Use 收录的全部浏览器中，同时具备 WebGL 1.0 与原生 ESM 的版本约覆盖 **94.8%**。
-
-计算来源为 [Can I Use：WebGL](https://caniuse.com/webgl)、[Can I Use：JavaScript modules](https://caniuse.com/es6-module) 和 [caniuse-lite](https://github.com/browserslist/caniuse-lite)。这些数字会随统计样本变化，只用于早期选型；它们不是 G6Lite 的真机通过率，也不能替代目标地区、企业内网、WebView 和低端设备测试。
+旧使用率百分比不能表示 G6Lite 真机通过率。本页不维护无法持续复现的全球覆盖率；记录项目实际浏览器、系统、GPU、DPR 和验证日期。
 
 ## 与 sigma.js 的浏览器口径
 
-sigma.js v3 的官方 README 将产品描述为基于 WebGL、面向数千节点和边的图渲染库，并要求搭配 Graphology；其 `sigma@3.0.3` 包同时提供 ESM 和 CommonJS 构建。核对其 [README](https://github.com/jacomyal/sigma.js#readme) 与 [package.json](https://github.com/jacomyal/sigma.js/blob/main/packages/sigma/package.json) 时，官方没有给出类似本页的最低浏览器版本矩阵。
-
-因此不能把“未写最低版本”理解为支持旧浏览器。两者都依赖 WebGL 和现代 JavaScript 工具链；区别是 G6Lite 在此明确公布未转译包的语法下限，而 sigma.js 需要使用方结合自身构建目标验证。
+不同图库和主版本的浏览器要求各异。选型时以目标版本的官方兼容性说明为准。
 
 ## WebGL 支持矩阵
 
-| 特性                       | G6Lite 是否需要 | 说明                                                   |
-| -------------------------- | -------------- | ------------------------------------------------------ |
-| WebGL 1.0                  | **必需**       | 不支持则抛出 `WebGL not supported`，需业务侧捕获并降级 |
-| WebGL 2.0                  | 可选、优先     | 可用时优先创建，不可用时自动回退 WebGL1                |
-| `OES_standard_derivatives` | 可选           | 缺失时渲染仍可进行，部分边缘抗锯齿效果略有差异         |
-| 硬件加速                   | 推荐           | 软件渲染（如禁用 GPU）下大规模图性能会明显下降         |
+WebGL1 是当前回退路径，WebGL2 不是强制要求。硬件加速、可选扩展和资源上限影响效果与吞吐，不能仅凭 WebGL 版本推算可支持的节点数。
 
-<Callout type="warn" title="已知问题与注意事项">
+## Worker、CSP 与部署
 
-- **CSP**：底层 `regl` 会通过动态函数编译 WebGL command。启用 Content Security Policy 时，`script-src` 需要允许 `'unsafe-eval'`；只允许 `'wasm-unsafe-eval'` 不足以运行当前版本。不允许该策略的宿主暂不在支持范围内。
-- **WebGL 不可用时**：当浏览器禁用硬件加速、显卡进黑名单、或在无 GPU 的环境（部分远程桌面 / 虚拟机）中，WebGL2 和 WebGL1 context 都创建失败时，G6Lite 会抛出初始化错误。建议在初始化处 `try/catch` 并向用户提示。
-- **Safari 颜色管理**：Safari 对 WebGL 画布存在色彩管理（color profile）差异，同一颜色在 Safari 与 Chrome 间可能有肉眼可辨的细微偏差，属浏览器行为，非 G6Lite bug。
-- **移动端显存**：iOS / 低端 Android 设备显存与纹理尺寸上限较低，超大规模图（数十万节点）可能触发上下文丢失（context lost）。G6Lite 会监听 context lost/restored 并恢复 GPU 资源，但业务侧仍应控制单屏渲染规模。
-- **高 DPR 屏幕**：在 Retina 等高 devicePixelRatio 屏幕上，画布像素数成倍增长，需权衡清晰度与性能。
-- **多实例 WebGL 上下文**：浏览器对单页面活动 WebGL 上下文数量有限制（通常 8–16 个）。同一页面创建过多 Graph 实例可能导致最早的上下文被回收。
+ESM 包通过模块 Worker URL 加载布局资源。验证部署子路径、Worker 文件、Content-Type、跨域和宿主 CSP；开启 worker: true 不证明 Worker 已运行。克隆或加载失败可能回退主线程，详见[Worker 指南](/docs/guides/layout-worker)。
 
-</Callout>
+底层 regl 的动态函数编译与禁止 eval 的严格 CSP 存在冲突；只允许 wasm-unsafe-eval 不能解决。先与宿主安全策略确认支持范围，不把放宽站点策略当成通用修复。
+
+## 模块、SSR 与资源
+
+包根提供 ESM 和类型声明。CommonJS 应用可在客户端异步调用 `await import('@antv/g6-lite')`。Graph 在浏览器端出图。React、Vue 和 UMD 的接入步骤见[快速上手](/docs/getting-started/quick-start)。
+
+React、Vue 等框架应在组件挂载到客户端后创建图。需求涉及任意 HTML 或 React 节点树、服务端出图或完整动画编排时，应先验证所需能力。Combo 嵌套与折叠的实验性边界见[Combo 配置](/docs/api/options#options-combo)。
+
+高 DPR、大容器与多实例增加像素和 GPU 资源开销；上下文数量与显存上限由浏览器/设备决定。引擎监听 context lost/restored 并尝试恢复资源，但不保证宿主或业务状态自动恢复。离开页面调用 destroy。
 
 ## 测试范围说明
 
-当前兼容性数据以 **Chrome / Firefox / Safari / Edge 的最新稳定版**为主要测试目标，移动端以 iOS Safari 与 Android Chrome 为参考。尚未执行的 BrowserStack 扩展矩阵不作为当前版本承诺。
+本地 Chromium 自动化只能说明所执行路径；不能视为 Safari、Firefox、移动端或企业 WebView 认证。报告需列明实际环境与未覆盖设备，按[测量记录](/docs/metrics/performance)复测业务数据。
+
+当前公开的[性能样本](/benchmarks/graph-performance.json)记录于 2026-11-10，使用 macOS 上的无头 Chromium 151.0.7922.34 和 SwiftShader，仅覆盖固定坐标、关闭标签且不运行布局的首绘场景，未验证上表中的旧版浏览器或 Worker 路径。

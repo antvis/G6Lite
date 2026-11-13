@@ -1,0 +1,97 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E24",
+  "baseline": "8a674c2b",
+  "status": "passed",
+  "scope": "E06–E24: 19 independent commits; 17 groups audit all 51 existing site examples exactly once.",
+  "browser": {
+    "engine": "CUA in-app browser",
+    "desktop": "1280×720",
+    "mobile": "390×844",
+    "cases": "51 case-specific browser receipts in e07.json–e23.json; snapshots and core actions including refresh",
+    "directory": [
+      "51 cards / 8 categories",
+      "keyword search, empty result and reset",
+      "category navigation, saved expansion after reload, search then restore",
+      "Chinese to English navigation",
+      "mobile directory search and case link, fit view, document width equals 390",
+      "fresh task tab console: no warn/error entries"
+    ],
+    "limits": [
+      "Freehand brush/lasso geometry and modifiers verified by four real behavior tests; browser verified Shift-click, not manual freehand traces.",
+      "Worker example requests Worker execution; this audit does not certify execution thread or compare performance.",
+      "Combo nesting and collapse remain experimental.",
+      "Viewport emulation is not real-device or cross-browser certification."
+    ]
+  },
+  "fixes": [
+    "Use one exact executable source reader for editor and Markdown/LLM exports; eliminate ExampleDetail placeholders.",
+    "Use canonical bilingual descriptions in both example center components.",
+    "Restore saved directory expansion in pre-paint layout effect; remove client inline script warning; retain current-category server fallback.",
+    "Prevent mobile preview toolbar shrink/clipping; preserve room for canvas and operation text.",
+    "Refresh ten thumbnails for cases whose visual results changed."
+  ],
+  "verification": {
+    "types": "passed",
+    "lint": "passed, existing antv-logo img warning",
+    "unitTests": 175,
+    "unitTestFiles": 11,
+    "staticOutputs": 789,
+    "bilingualRoutes": 258,
+    "legacyRoutes": 254,
+    "missingPublicAnchors": 0,
+    "caseSourceExports": 51,
+    "inlinePreviewExports": 164,
+    "focusedPreviewExports": 66,
+    "auditCoverage": "17 groups, 51 cases, exactly once",
+    "engineChanges": false,
+    "b00RuntimeStyleHashes": "three unchanged",
+    "buildWarnings": "OG generation reported dynamic external-font fetch timeouts; static builds exited 0 and assets exported.",
+    "urlTests": 5,
+    "totalRelatedTests": 180,
+    "subpath": "/G6Lite build, routes, public anchors, case sources and inline preview exports passed",
+    "defaultBuildRestored": true,
+    "localService": "http://localhost:3000/docs/examples"
+  },
+  "commits": {
+    "E06": "136756ec",
+    "E07": "f51986b7",
+    "E08": "685c74e3",
+    "E09": "d9655156",
+    "E10": "efb1c611",
+    "E11": "8bd0b603",
+    "E12": "0381b7e9",
+    "E13": "5c740f68",
+    "E14": "b3eec3db",
+    "E15": "8bec5137",
+    "E16": "68d284c4",
+    "E17": "d2096b06",
+    "E18": "eed8cbcd",
+    "E19": "679a1529",
+    "E20": "f63c64d8",
+    "E21": "ae1a1a19",
+    "E22": "30fb5352",
+    "E23": "2ad82c52"
+  },
+  "evidence": {
+    "types": "/tmp/g6lite-e24-types-final.log",
+    "lint": "/tmp/g6lite-e24-lint-final.log",
+    "tests": "/tmp/g6lite-e24-tests.log",
+    "build": "/tmp/g6lite-e24-build.log",
+    "output": "/tmp/g6lite-e24-output.log",
+    "previews": "/tmp/g6lite-e24-exports.log",
+    "screenshots": [
+      "/tmp/g6lite-e24-center.png",
+      "/tmp/g6lite-e24-mobile.png",
+      "/tmp/g6lite-e22-real-final.png",
+      "/tmp/g6lite-e22-large-readable.png",
+      "/tmp/g6lite-e23-theme-final.png"
+    ],
+    "subpathBuild": "/tmp/g6lite-e24-subpath-build.log",
+    "subpathOutput": "/tmp/g6lite-e24-subpath-output.log",
+    "subpathPreviewExports": "/tmp/g6lite-e24-subpath-exports.log",
+    "urlTests": "/tmp/g6lite-e24-url-tests.log",
+    "restoreBuild": "/tmp/g6lite-e24-restore-build.log",
+    "restoreOutput": "/tmp/g6lite-e24-restore-output.log"
+  }
+}

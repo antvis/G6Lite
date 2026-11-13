@@ -1,0 +1,42 @@
+---
+title: Custom edges
+description: Reuse built-in edge bases with data-driven styles, states, and data updates
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+Use an `EdgeExtension` to reuse an edge type for a class of relationships. The `base` selects the path, arrows show direction, and `edge.style.label` supplies text. To vary width or color by data in one graph, use [style functions](/en/docs/guides/edge#options-edge-style-callbacks).
+
+## Register and activate
+
+Choose `arc` as the base path, use `getStyle()` to set color and width by weight, and register the type with `register('edge', ...)`.
+
+<NodeDocExample id="extension-edge" locale="en" focus="descriptor" view="code" />
+
+Set `edge.type` to the registered name in `new Graph()`. In this example, `light` starts with weight `1` and `heavy` with weight `4`.
+
+<NodeDocExample id="extension-edge" locale="en" focus="edge-activation" />
+
+## Overrides and updates
+
+Click **Toggle heavy weight** above. `updateEdgeData()` changes the weight and `getStyle()` updates the color and width. Click an edge to apply the purple selection style, or click empty space to restore its base style.
+
+<NodeDocExample id="extension-edge" locale="en" focus="edge-weight-update" view="code" />
+
+See [EdgeExtension](/en/docs/api/extensions#edgeextension) for style precedence and extension fields.
+
+## Common questions
+
+### Can I implement arbitrary drawing or shaders?
+
+EdgeExtension provides base, style, getStyle, and stateStyles, without arbitrary draw / shader hooks. See [EdgeExtension](/en/docs/api/extensions#edgeextension).
+
+### Why is a label missing?
+
+Descriptor defaults do not replace label activation. This example explicitly provides edge.style.label; data or descriptor text alone does not guarantee label traversal.
+
+### Why is an edge difficult to select?
+
+Set hitAreaWidth and enable interaction. The example uses 14 without increasing visual width; see [picking width](/en/docs/guides/edge#picking-width).
+
+See [registration](/en/docs/api/graph#extension-registration) for caching and errors.

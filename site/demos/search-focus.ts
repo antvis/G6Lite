@@ -2,7 +2,7 @@
  * Demo: search nodes by name, highlight matches, and focus the viewport.
  */
 import { Graph } from '@antv/g6-lite';
-import { mountCanvasControl } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 const PEOPLE = [
   'Alice',
@@ -49,23 +49,12 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const box = document.createElement('label');
-  box.style.cssText =
-    'display:inline-flex;gap:8px;align-items:center;color:#64748b;font:500 12px/1 system-ui,sans-serif;';
-  const input = document.createElement('input');
-  input.type = 'search';
-  input.placeholder = '搜索节点，例如 al';
-  input.setAttribute('aria-label', '搜索节点');
-  input.style.cssText =
-    'width:180px;height:28px;padding:0 10px;border:0;border-radius:8px;background:rgba(255,255,255,.96);color:#334155;box-shadow:0 1px 2px rgba(15,23,42,.08);';
-  const status = document.createElement('span');
-  box.append(input, status);
-  mountCanvasControl(host, box);
-
+  const hint = '输入名称片段，例如 al';
+  const ui = createDemoPanel(host, hint);
   let highlighted: string[] = [];
-  const search = () => {
+  ui.gui.add({ query: '' }, 'query').name('搜索节点').onChange((value: string) => {
     for (const id of highlighted) graph.clearItemStates(id);
-    const query = input.value.trim().toLowerCase();
+    const query = value.trim().toLowerCase();
     highlighted = query
       ? graph
           .getNodes()
@@ -74,16 +63,15 @@ export async function run(container: string | HTMLElement) {
       : [];
     for (const id of highlighted) graph.setItemState(id, 'highlight', true);
     if (highlighted.length > 0) graph.focusItem(highlighted, 48);
-    status.textContent = query ? `${highlighted.length} 个匹配` : '输入名称片段';
-  };
-  input.addEventListener('input', search);
-  status.textContent = '输入名称片段';
+    ui.setStatus(query ? `${highlighted.length} 个匹配` : hint);
+  });
 
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();
-      host.querySelector(':scope > [data-canvas-controls]')?.remove();
+      ui.destroy();
     },
   };
 }

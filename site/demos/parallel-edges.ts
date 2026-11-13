@@ -25,7 +25,6 @@ export async function run(container: string | HTMLElement) {
         { id: 'single', source: 'singleA', target: 'singleB', data: { label: 'single edge' } },
       ],
     },
-    transforms: ['process-parallel-edges'],
     node: {
       type: 'circle',
       style: {
@@ -82,6 +81,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => graph.destroy(),
   };

@@ -1,0 +1,41 @@
+{
+  "checked": "2026-11-05",
+  "publicRegistryTags": {
+    "latest": "0.1.0-beta.1",
+    "beta": "0.1.0-beta.27"
+  },
+  "releases": [
+    {
+      "html_url": "https://github.com/antvis/G6Lite/releases/tag/v0.1.0-beta.24",
+      "published_at": "2026-08-04T07:05:02Z",
+      "tag_name": "v0.1.0-beta.24"
+    }
+  ],
+  "npmBeta27Published": "2026-08-13T11:52:41.000Z",
+  "development": [
+    {
+      "commit": "dd3c7b94",
+      "date": "2026-10-30",
+      "pr": 60,
+      "scope": "UMD build and autoFit naming in source"
+    },
+    {
+      "commit": "6fec8e82",
+      "date": "2026-11-03",
+      "pr": 62,
+      "scope": "Build simplification"
+    },
+    {
+      "commit": "c7d746ed",
+      "date": "2026-11-03",
+      "pr": 63,
+      "scope": "Demo fixes"
+    },
+    {
+      "commit": "fdab736b",
+      "date": "2026-11-03",
+      "pr": 64,
+      "scope": "Mobile menu and code panel"
+    }
+  ]
+}

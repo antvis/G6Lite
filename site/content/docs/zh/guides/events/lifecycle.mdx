@@ -1,0 +1,42 @@
+---
+title: 渲染、布局与数据更新
+description: 了解何时可以更新图、读取布局坐标或处理数据替换。
+---
+
+import { NodeDocExample as EventDocExample } from '@/components/node-doc-example';
+
+## 操作完成后怎么继续 [#选择正确的完成时机]
+
+| 要做什么 | 写法 |
+| --- | --- |
+| 首次渲染后更新图 | 等待 `await graph.render()`，再修改数据或状态。 |
+| 重新布局后读取坐标 | 等待 `await graph.layout()`，再调用 `getNodePosition()`。 |
+| 在每次整图数据替换后更新业务界面 | 监听 `datachange`，回调会收到更新后的节点数和边数。 |
+
+```ts
+await graph.render();
+
+graph.on('datachange', ({ nodeCount, edgeCount }) => {
+  console.log('数据已替换', nodeCount, edgeCount);
+});
+await graph.setData(nextData);
+
+await graph.layout();
+const position = graph.getNodePosition('A');
+```
+
+如果要收到首次渲染通知，在调用 `render()` 前注册 `graph.once('afterrender', handler)`。`layout:end` 和 `afterlayout` 在坐标写回前触发，读取最终坐标请等待 `graph.layout()` 完成。
+
+## 观察事件顺序
+
+示例加载时，日志会显示首次布局和渲染的事件。再点击画布右上角的按钮，查看对应操作触发了哪些事件。
+
+| 示例按钮 | 日志里会出现什么 |
+| --- | --- |
+| **Update A**、**Add D**、**Remove D** | 分别触发 `afterupdateitem`、`afteradditem`、`afterremoveitem`。先添加 D，再试删除。 |
+| **Replace data** | 示例配置了布局，因此先触发布局事件，再触发 `datachange`。 |
+| **Layout** | 触发布局事件。 |
+
+<EventDocExample id="events-lifecycle" locale="zh" focus="lifecycle" />
+
+完整事件顺序、回调参数和取消时的行为见[事件 API 参考](/docs/api/graph/events#event-lifecycle)。卸载时的清理方法见[图的生命周期](/docs/api/graph#graph-lifecycle)。

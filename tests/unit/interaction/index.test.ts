@@ -48,6 +48,7 @@ function setup(initialPick: Pick = null) {
   };
   const graph = {
     eventEmitter: new EventEmitter(),
+    pickComboAt: vi.fn<() => string | null>(() => null),
     getItemStates: vi.fn((id: string) => (selectedNodeIds.has(id) ? ['selected'] : [])),
     findNodesByState: vi.fn((state: string) => (state === 'selected' ? [...selectedNodeIds] : [])),
     findEdgesByState: vi.fn(() => [] as string[]),
@@ -178,6 +179,65 @@ describe('InteractionDispatcher — hover state machine', () => {
 
     expect(leave).toHaveBeenCalledTimes(1);
     expect(leave.mock.calls[0][0].nodeId).toBe('a');
+    t.teardown();
+  });
+
+  it('tracks Combo hover transitions and keeps canvas move and wheel events', () => {
+    const t = setup(null);
+    const events: string[] = [];
+    const over = vi.fn();
+    const leave = vi.fn();
+    const wheel = vi.fn();
+    for (const name of [
+      'combo:pointerover',
+      'combo:pointerenter',
+      'combo:pointermove',
+      'combo:pointerleave',
+      'canvas:pointermove',
+      'node:pointerover',
+      'node:pointerleave',
+    ]) {
+      t.emitter.on(name, () => events.push(name));
+    }
+    t.emitter.on('combo:pointerover', over);
+    t.emitter.on('combo:pointerleave', leave);
+    t.emitter.on('canvas:wheel', wheel);
+    t.graph.pickComboAt.mockReturnValue('group');
+
+    const nativeEvent = fire(t.canvas, 'mousemove');
+    expect(over.mock.calls[0]?.[0]).toMatchObject({
+      targetType: 'combo',
+      targetId: 'group',
+      comboId: 'group',
+      nativeEvent,
+      canvas: { x: 50, y: 50 },
+    });
+    fire(t.canvas, 'mousemove');
+    fire(t.canvas, 'wheel');
+    expect(wheel).toHaveBeenCalledTimes(1);
+
+    t.setPick({ type: 'node', id: 'a' });
+    fire(t.canvas, 'mousemove');
+    t.setPick(null);
+    fire(t.canvas, 'mousemove');
+    fire(t.canvas, 'mouseleave');
+    expect(events).toEqual([
+      'combo:pointerover',
+      'combo:pointerenter',
+      'combo:pointermove',
+      'canvas:pointermove',
+      'combo:pointermove',
+      'canvas:pointermove',
+      'combo:pointerleave',
+      'node:pointerover',
+      'node:pointerleave',
+      'combo:pointerover',
+      'combo:pointerenter',
+      'combo:pointermove',
+      'canvas:pointermove',
+      'combo:pointerleave',
+    ]);
+    expect(leave).toHaveBeenCalledTimes(2);
     t.teardown();
   });
 });

@@ -6,7 +6,7 @@ description: 图运行时、绘制图层、渲染调度与布局交互如何协�
 import { ArchitectureDiagram } from '@/components/architecture-diagram';
 import { FirstRenderFlow } from '@/components/first-render-flow';
 
-本页解释 G6Lite 各模块的职责及协作方式，适合需要理解渲染原理、性能路径和扩展边界的读者。初始化与卸载的调用顺序见 [Graph 生命周期](/docs/concepts/graph-lifecycle)。
+本页解释 G6Lite 各模块的职责及协作方式，适合需要理解渲染原理、性能路径和扩展边界的读者。初始化与卸载的调用顺序见 [Graph 生命周期方法](/docs/api/graph#graph-lifecycle)。
 
 ## 架构分层
 
@@ -36,7 +36,7 @@ G6Lite 使用 WebGL 批量绘制节点和边，并用 Canvas 2D 处理文本测�
 
 <FirstRenderFlow locale="zh" />
 
-异步布局或扩展初始化返回时，Graph 会检查当前渲染代次和销毁状态，避免旧结果覆盖新数据。渲染代次是内部取消与结果提交机制，业务通过公开生命周期方法管理实例即可。
+异步布局返回时，Graph 检查渲染代次和销毁状态，避免过期结果写回。render Promise 表示当前初始化/提交路径完成，不是 GPU 完成计时；插件挂载等边界按[生命周期参考](/docs/api/graph#graph-lifecycle)查询。渲染代次是内部取消与结果提交机制，业务通过公开生命周期方法管理实例即可。
 
 ### 高频更新路径
 
@@ -51,7 +51,7 @@ RenderScheduler 根据变更级别选择处理路径：
 | 相机平移与缩放 | 更新 uniform 后重新 draw，不重建图数据 Buffer |
 | 完整数据替换或结构变化 | 更新 DataModel，完整或部分处理渲染数据与 Buffer |
 
-因此选择、高亮和拖拽应通过状态、位置和批量 API 更新现有实例。业务侧如何选择更新方法见[数据指南](/docs/guides/data)，性能实践见[性能调优](/docs/metrics/performance-tuning)。
+因此选择、高亮和拖拽应通过状态、位置和批量 API 更新现有实例。业务侧如何选择更新方法见[数据指南](/docs/guides/data)，性能实践见[性能调优](/docs/metrics/performance#performance-tuning)。
 
 ## 布局与交互协作
 
@@ -71,7 +71,7 @@ InteractionDispatcher 统一处理指针事件与命中检测，将规范化事�
 
 节点和边优先使用 GPU Picking；命中缓冲不可用时回退 CPU 检测。Combo 使用自身的几何命中路径。Picking 缓冲按需维护，无需每次绘制都执行拾取。
 
-交互产生的变更重新进入更新调度路径，Behavior 无需直接操作 framebuffer。使用方式见[交互配置](/docs/guides/interactions)和[事件](/docs/guides/events)。
+交互产生的变更重新进入更新调度路径，Behavior 无需直接操作 framebuffer。使用方式见[交互配置](/docs/guides/behaviors)和[事件](/docs/guides/events)。
 
 ## 扩展边界
 
@@ -79,4 +79,16 @@ G6Lite 支持 node、edge、label、decoration、layout、behavior、transform �
 
 有状态扩展通过 `ExtensionContext` 的 data、state、viewport 和 `requestRender()` 能力协作，不应持有内部 DataModel、Renderer、WebGL context 或 GPU Buffer。
 
-注册方式、实例作用域与清理规则见[扩展体系](/docs/guides/extensions)；公开契约的稳定性见 [API 稳定性](/docs/compatibility/api-stability)。
+注册方式、实例作用域与清理规则见[扩展体系](/docs/guides/extensions)。签名与类型见[扩展 API](/docs/api/graph#graph-extensions)。
+
+## 资源归属与释放
+
+| 资源 | 负责方 | 释放时机 |
+| --- | --- | --- |
+| DOM 容器、业务 fetch 与外部订阅 | 应用 | 页面卸载或请求失效 |
+| 图画布、调度、尺寸观察和交互 | Graph | destroy |
+| Worker / 布局请求 | 布局运行时 | 完成、取消或销毁 |
+| 插件 DOM 与订阅 | 扩展实例 | 扩展 destroy |
+| WebGL buffer / framebuffer | 内部渲染器 | 对应运行时销毁/资源恢复 |
+
+这些是实现职责，不是新的业务 API。实例清理见[React](/docs/getting-started/react)、[Vue](/docs/getting-started/vue)，扩展只依赖[公开上下文](/docs/api/graph#extension-registration)。context lost 恢复受浏览器与设备影响，不承诺业务状态或页面环境自动恢复。

@@ -10,13 +10,7 @@
 // ──── Core ────
 export { EventEmitter } from './events';
 export type { Handler } from './events';
-export {
-  BaseNode,
-  BreathingNode,
-  extensionFactory,
-  register,
-  registerNode,
-} from './extensions/index';
+export { BaseNode, BreathingNode, register, registerNode } from './extensions/index';
 export type {
   BehaviorEventHandlers,
   BehaviorExtension,
@@ -25,16 +19,11 @@ export type {
   DecorationRenderer,
   EdgeExtension,
   Extension,
-  ExtensionCategory,
   ExtensionConstructor,
   ExtensionContext,
-  ExtensionDataContext,
   ExtensionEdgeData,
-  ExtensionFactory,
   ExtensionInput,
   ExtensionNodeData,
-  ExtensionStateContext,
-  ExtensionViewportContext,
   EventArguments,
   LayoutExtension,
   NodeBoundaryAnchorParams,

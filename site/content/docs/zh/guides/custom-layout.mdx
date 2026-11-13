@@ -1,0 +1,52 @@
+---
+title: 自定义布局
+description: 注册坐标计算，处理配置、取消信号和清理，并区分 Graph 执行与独立计算
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+需要按业务规则安排节点时，可以注册 `LayoutExtension`。它接收图数据，返回节点坐标。本例把节点等距排成一行。内置算法见[布局总览](/docs/guides/layout-overview)。
+
+## 实现与执行
+
+`execute()` 接收本次图数据和运行参数。节点的 ID 和业务数据原样返回，位置用计算出的 `x`、`y`。示例从 `options.gap` 读取间距。
+
+<NodeDocExample id="extension-layout" locale="zh" focus="layout" />
+
+初始的六个节点排成一行。点 **Layout again** 可以重新计算。点 **Slow layout** 后再点 **Cancel + grid**，可以取消计算并切换到网格。
+
+## 取消与资源
+
+本例等待函数在取消时清理 timer，并在正常结束时移除 abort 监听；循环每步检查 signal / isDestroyed。真实耗时计算也要分块让出主线程，否则点击取消无法被处理。
+
+Graph 在成功、失败或取消后调用 destroy。init 可能未完成，因此清理应支持部分初始化。错误可能被布局回退吸收，不能只凭 await 正常返回判定结果已应用；按钮用自己的代次检查保护状态提示与适配。
+
+## Graph 与独立计算
+
+Graph.render / layout / setData 路径执行 init → execute → destroy；独立 runLayout 不调用 init，仍执行 execute / destroy。本例配置只依赖 runtime.options，因此两条路径均可用。
+
+```ts
+import { runLayout, type GraphData } from '@antv/g6-lite';
+export async function calculate(data: GraphData) {
+  // 需先注册上述 docs-column；结果只是坐标，不会创建或更新 Graph。
+  return runLayout(data, { type: 'docs-column', gap: 100 }, { width: 640, height: 320 });
+}
+```
+
+独立计算的结果展示方式见[runLayout 示例](/docs/api/graph#graph-layout-runlayout)。Graph 中无需从 execute 调用 requestRender，结果由 Graph 写回；context.data 可能是旧图，不能作为本次布局输入。
+
+## 常见问题
+
+### worker: true 会把自定义布局移到 Worker 吗？
+
+不会自动搬迁注册扩展代码；当前扩展路径优先在主线程。需要自己的 Worker 时管理消息、取消与释放，见[Worker 指南](/docs/guides/layout-worker)。
+
+### 为什么取消后 Promise 仍正常结束？
+
+取消表示旧结果失效，不承诺抛错。保留业务代次检查，避免旧任务完成后继续更新界面。
+
+完整 runtime 字段、回退和返回类型查[LayoutExtension](/docs/api/extensions#layoutextension)；另一个布局案例见[自定义两行布局](/docs/examples/custom-layout)。
+
+**相关可运行示例**
+
+- [自定义布局](/docs/examples/custom-layout)

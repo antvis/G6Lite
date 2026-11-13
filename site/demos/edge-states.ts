@@ -27,7 +27,7 @@ export async function run(container: string | HTMLElement) {
       const x = startX + col * gapX;
       const y = startY + row * gapY;
 
-      nodes.push({ id: srcId, name: '', x, y });
+      nodes.push({ id: srcId, name: [row === 0 ? state : '', col === 0 ? `${lineWidths[row]}px` : ''].filter(Boolean).join(' / '), x, y });
       nodes.push({ id: tgtId, name: '', x: x + edgeLen, y });
 
       edges.push({
@@ -48,6 +48,8 @@ export async function run(container: string | HTMLElement) {
       style: {
         fill: '#5B8FF9',
         size: 24,
+        label: (node) => node.name ?? '',
+        labelPlacement: 'top',
       },
     },
     edge: {
@@ -66,6 +68,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy: () => graph.destroy(),
   };

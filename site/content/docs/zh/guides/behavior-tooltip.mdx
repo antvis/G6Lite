@@ -1,0 +1,22 @@
+---
+title: 提示框 Tooltip
+description: 悬停或点击节点和边时，显示它们的详细信息。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+悬停或点击节点和边时，显示它们的详细信息。
+
+## 配置方式
+
+触发方式通过 `trigger` 设置，内容通过 `getContent` 返回。点击触发时，再次点击同一元素或点击空白处可关闭提示框。
+
+```ts
+behaviors: [{ type: 'tooltip', trigger: 'hover', delay: 120 }],
+```
+
+## 示例
+
+<NodeDocExample id="behavior-tooltip-hover" locale="zh" focus="tooltip" />
+
+[运行示例与完整代码](/docs/examples/tooltip) · [参数与默认值](/docs/api/options#tooltipoptions) · [查看点击触发与样式配置](/docs/guides/behaviors#tooltip)

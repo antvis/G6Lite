@@ -1,0 +1,48 @@
+---
+title: 多维尺度布局 MDS
+description: 多维尺度分析（MDS）用平面距离近似表示图中节点的最短路径距离。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+多维尺度分析（MDS）用平面距离近似表示图中节点的最短路径距离。
+
+## 使用场景
+
+适合观察网络中节点的相对远近。
+
+## 基本用法
+
+这是可选布局。先导入并注册，再设置 `layout.type`。CDN 接入见[可选布局](/docs/guides/layout-overview#optional-layouts)。
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import mds from '@antv/g6-lite/layouts/mds';
+
+register('layout', 'mds', mds);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'mds' },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `linkDistance` | 用于缩放图距离的参考长度。 | `number` | `50` |
+| `center` | 布局中心的图坐标。 | `[number, number]` | 布局范围的中心 |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
+
+## 代码示例
+
+示例用 80 作为距离尺度，图上相距较远的节点通常也会排得更远。
+
+<NodeDocExample id="built-in-layout" layoutType="mds" locale="zh" />
+
+[对比关系网络布局](/docs/guides/layout-networks)

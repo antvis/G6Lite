@@ -1,76 +1,294 @@
 ---
-title: 数据
-description: 将业务数据转换为 GraphData，并选择整份替换或增量更新
+title: 数据 Data
+description: 了解图数据结构、节点与边的增删改查、分组和远程数据加载
 ---
 
-本页介绍数据接入与运行时更新。节点、边和 Combo 的关系见[数据模型](/docs/concepts/data-model)，完整字段见[配置参考](/docs/api/options#图数据)。
+import { GraphDataModelDiagram } from '@/components/graph-data-model-diagram';
+import { NodeDocExample } from '@/components/node-doc-example';
 
-## 接入业务数据
+## 概述
 
-将业务实体映射为节点，将实体之间的关系映射为边。业务字段放入 `data`，供样式函数、Tooltip 和业务逻辑读取：
+图数据由节点、边和可选的 Combo 分组组成。将业务对象映射为节点、对象之间的关系映射为边，再把数据传给 `Graph`。图已经渲染时，可以替换整份数据，也可以只修改变化的元素。
+
+## 数据结构
+
+### 图数据（GraphData） [#节点边与分组]
+
+下图中，A、B、C 属于同一个 Combo，边用两端节点的 ID 建立连接。
+
+<GraphDataModelDiagram locale="zh" />
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+| --- | --- | --- | --- | --- |
+| `nodes` | [`GraphNode[]`](#graphnode) | 是 | — | 节点列表。创建空图时传 `[]`。 |
+| `edges` | [`GraphEdge[]`](#graphedge) | 是 | — | 边列表。没有边时传 `[]`。 |
+| `combos` | [`ComboData[]`](#combodata) | 否 | 无分组 | 分组列表。节点通过 `comboId` 引用其中的分组。 |
+
+<span id="位置与状态" />
+
+### 节点数据（GraphNode） [#graphnode]
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `string` | 是 | — | 节点的唯一 ID。边通过它指定端点，也可以用它查询和更新节点。 |
+| `name` | `string` | 否 | — | 节点名称，可在 `node.style.label` 回调中读取并显示。 |
+| `data` | [`NodeData`](/docs/api/options#config-node-data-fields) | 否 | — | 自定义业务数据，例如 `{ score: 80 }`。其中 `cluster` 如有设置，需为字符串。 |
+| `x` | `number` | 否 | 无布局时为 `0` | 节点在图坐标系中的横坐标。配置布局后，最终位置由布局计算，可用 `fx` 固定横坐标。 |
+| `y` | `number` | 否 | 无布局时为 `0` | 节点在图坐标系中的纵坐标。配置布局后，最终位置由布局计算，可用 `fy` 固定纵坐标。 |
+| `fx` | `number` | 否 | 不固定横坐标 | 布局计算完成后，将节点的横坐标设为此值。 |
+| `fy` | `number` | 否 | 不固定纵坐标 | 布局计算完成后，将节点的纵坐标设为此值。 |
+| `comboId` | `string` | 否 | 不属于分组 | 所属 Combo 的 ID，需引用 `combos` 中已声明的分组。 |
+| `states` | `NodeState[]` | 否 | `[]` | 节点的初始状态，例如 `['selected']`。通过 `node.stateStyles` 配置对应外观。 |
+
+### 边数据（GraphEdge） [#graphedge]
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `string` | 否 | 自动生成 | 边的唯一 ID。需要在整图替换前后识别同一条边时，显式传入稳定 ID。 |
+| `source` | `string` | 是 | — | 起点节点的 ID，需引用 `nodes` 中的节点。 |
+| `target` | `string` | 是 | — | 终点节点的 ID，需引用 `nodes` 中的节点。与 `source` 相同会形成自环。 |
+| `data` | `EdgeData` | 否 | — | 自定义业务数据，类型为 `Record<string, unknown>`，例如 `{ weight: 2 }`。 |
+| `states` | `EdgeState[]` | 否 | `[]` | 边的初始状态，例如 `['selected']`。通过 `edge.stateStyles` 配置对应外观。 |
+
+### 分组数据（ComboData） [#combodata]
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `string` | 是 | — | 分组的唯一 ID。节点通过 `comboId` 引用它，子分组通过 `parentId` 引用它。 |
+| `parentId` | `string` | 否 | 无父分组 | 父分组的 ID，需引用同一 `combos` 列表中的分组。父子关系不能成环。 |
+| `collapsed` | `boolean` | 否 | `false` | 设为 `true` 时初始折叠分组，隐藏后代节点及其关联边。 |
+| `style` | `Partial<ComboStyleConfig>` | 否 | 使用图级分组样式 | 为当前分组覆盖指定的样式字段，例如 `{ fill: '#e6f4ff' }`。 [分组样式配置](/docs/api/options#options-combo) |
+| `data` | `Record<string, unknown>` | 否 | — | 自定义业务数据，例如 `{ department: 'engineering' }`。 |
+| `states` | `ElementState[]` | 否 | `[]` | 分组的初始状态，例如 `['selected']`。通过 `combo.stateStyles` 配置对应外观。 |
+
+## 数据操作
+
+### 数据初始化
+
+将 `data` 传入 `new Graph()`，等待首次 `render()` 完成，再调用数据写入方法。示例中的 `#container` 需要已挂载并具有宽高。
 
 ```ts
-import type { GraphData } from '@antv/g6-lite';
+import { Graph } from '@antv/g6-lite';
 
-const users = [
-  { id: 'alice', name: 'Alice', team: 'design' },
-  { id: 'bob', name: 'Bob', team: 'engineering' },
-];
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'B', x: 120, y: 0 }],
+    edges: [{ id: 'A-B', source: 'A', target: 'B' }],
+  },
+});
 
-const data: GraphData = {
-  nodes: users.map((user) => ({
-    id: user.id,
-    data: { name: user.name, team: user.team },
-  })),
-  edges: [{ source: 'alice', target: 'bob' }],
-};
+await graph.render();
 ```
 
-将转换后的数据作为 `new Graph({ container, data })` 的 `data` 选项。首次创建与渲染的完整代码见[快速上手](/docs/getting-started/quick-start)。
+### 选择更新方式
 
-## 校验数据
+| 变化 | 方法 | 保留或重算 |
+| --- | --- | --- |
+| 切换数据集 / 全量返回 | setData | 替换全图，有配置就布局；默认适配 |
+| 少量业务字段变化 | updateNodeData / updateEdgeData | 浅合并 data，不重布局 |
+| 新增或删除元素 | addNode(s) / addEdge(s) / remove… | 新增节点提供坐标，删除节点连带删除边 |
+| 位置变化 | updateNodePosition(s) | 图坐标变化，不改变身份 |
+| 选择、隐藏、归组 | 状态 / Combo 方法 | 按所属主题修改，不必全量替换 |
 
-- 节点 `id` 在图内唯一，后续更新时保持稳定。
-- 边的 `source` 和 `target` 必须对应已有节点。
-- 使用 Combo 时，节点的 `comboId` 应对应已声明的分组。
-- 未配置布局时，应提供节点的 `x` / `y`，避免所有节点落在缺省坐标。
-- 修改图数据应通过公开方法完成，不要直接改写查询返回的 Model。
+### 替换整份数据
 
-## 替换整份数据
-
-以下操作都应在首次 `await graph.render()` 完成后执行。
-
-筛选条件变化、切换数据集或请求返回完整结果时，使用 `setData()`：
-
-```ts
-await graph.setData(nextData);
-```
-
-配置了布局时会重新计算坐标；默认会重新适配视口。如果希望保留用户当前的缩放和平移：
+准备好完整的 `GraphData` 后调用 `setData()`。它会按当前配置重新布局，默认重新适配画布。传入 `fitView: false` 可以保留用户当前的缩放和平移。
 
 ```ts
 await graph.setData(nextData, { fitView: false });
 ```
 
-这里的 `fitView` 控制本次数据替换后的适配；容器尺寸变化后的适配由 [`autoFit`](/docs/api/options#autofit) 控制。
+新数据决定初始选中状态。要保留选择，按仍存在的稳定 ID 恢复。 [保留选择](/docs/guides/states) · [视野保留示例](/docs/guides/viewport)
 
-## 增量更新
+### 增量更新
 
-只修改少量元素时，使用增删改方法：
+下面接着使用初始化示例的图。先添加节点 C 和边 B-C，再更新它们的业务字段。
 
 ```ts
-graph.addNode({ id: 'carol', x: 120, y: 80, data: { name: 'Carol' } });
-graph.addEdge({ source: 'alice', target: 'carol' });
-graph.updateNodeData('carol', { name: 'Carol Chen' });
-graph.removeNode('bob');
+graph.addNode({ id: 'C', x: 240, y: 0 });
+graph.addEdge({ id: 'B-C', source: 'B', target: 'C' });
+
+graph.updateNodeData('C', { score: 80 });
+graph.updateEdgeData('B-C', { weight: 2 });
 ```
 
-新增节点需要提供坐标，增量方法不会自动重新布局。需要重新排列时，按[布局指南](/docs/guides/layout#运行时重新布局)调用 `layout()`；更新多个元素时，可使用批量方法减少重复刷新。
+删除边时会保留端点。删除节点时会一起移除关联边。
 
-选中、高亮、隐藏等变化使用[状态与显隐 API](/docs/api/graph#状态显隐和定位)，无需替换整份数据。
+```ts
+graph.removeEdge('B-C');
+graph.removeNode('C');
+```
 
-## 相关参考
+在下面的示例中，可以查询 A、修改分数，或添加和删除节点 D。
 
-- [Graph 生命周期](/docs/concepts/graph-lifecycle)：初始化完成后更新，卸载时销毁。
-- [Graph 数据 API](/docs/api/graph#修改节点和边)：元素增删改、批量操作及参数。
-- [节点配置](/docs/guides/node)：将业务字段映射为颜色、尺寸与标签。
+<NodeDocExample id="data-workflow" locale="zh" focus="mutation" />
+
+增量方法会调度重绘。多个元素优先使用批量方法。业务字段按顶层键浅合并，嵌套对象整体替换。
+
+### 查询数据
+
+用 `getNodes()` 和 `getEdges()` 读取列表，用 `getNodeData(id)` 和 `getEdgeData(id)` 按 ID 查询单个元素。
+
+```ts
+const nodes = graph.getNodes();
+const edges = graph.getEdges();
+const node = graph.getNodeData('B');
+const edge = graph.getEdgeData('A-B');
+```
+
+#### 输入、模型与快照 [#输入模型与快照]
+
+| 形式 | 用途 | 修改方式 |
+| --- | --- | --- |
+| GraphData 输入 | 声明节点、边和 Combo | 交给 new Graph / setData |
+| 查询 Model | 读取当前工作图，states 是集合 | 通过 Graph 方法修改 |
+| getData 快照 | 导出当前坐标、归属与状态 | 修改后显式 setData；嵌套对象可能共享 |
+
+稳定 ID 表示业务身份，数组顺序和坐标都不表示身份。相同端点可以有多条不同 ID 的边；跨刷新保留边选择时显式提供稳定 ID。
+
+Model 是 Graph 持有的实时视图。数据替换或删除后重新查询。首次渲染前，各查询方法返回相应的空值，`getData()` 则返回构造数据的快照。查询可能在销毁后仍有返回值，可用 [destroyed](/docs/api/graph#graph-lifecycle-destroyed) 检查实例。
+
+`getData()` 在渲染后导出当前坐标、实际边 ID、归属和状态。快照省略折叠派生的 `hidden`，固定轴 `fx` / `fy` 和布局配置需另存。
+
+##### 查询返回类型 [#模型字段]
+
+| 返回类型 | 字段 |
+| --- | --- |
+| `NodeModel` | `id`、`name?`、`x`、`y`、`data?`、`states` |
+| `EdgeModel` | `id`、`source`、`target`、`data?`、`states` |
+| [ComboModel](/docs/guides/combo#只读查询模型) | 分组坐标、尺寸、成员、折叠状态等 |
+| `ElementModel` | `NodeModel \| EdgeModel \| ComboModel` |
+
+字段均为只读，`?` 表示可选。节点的 `x`、`y` 是图坐标，`data` 的类型是 `Readonly<Record<string, unknown>>`，`states` 的类型是 `ReadonlySet<ElementState>`。
+
+```ts
+const element = graph.getElementData('A-B');
+if (element && 'source' in element) {
+  console.log(element.source, element.target);
+}
+const selected = graph.getNodeData('A')?.states.has('selected');
+```
+
+### 复杂数据结构
+
+**嵌套分组。** 初始数据通过 `parentId` 表示分组的父子关系，通过节点的 `comboId` 声明归属。运行中可以创建分组、移动已有节点和切换折叠状态。下面把已存在的 B 加入 Storage，再将 Storage 折叠。
+
+```ts
+graph.createCombo({ id: 'platform' });
+graph.createCombo({ id: 'storage', parentId: 'platform' }, ['B']);
+graph.collapseCombo('storage');
+```
+
+**树形数据。** 将树展平为 `nodes` 和 `edges`。每条边从父节点指向子节点，例如 `{ source: 'root', target: 'child' }`。将这份数据交给 `mindmap`、`indented` 等树布局。 [Combo 用法](/docs/guides/combo) · [树布局示例](/docs/api/options#config-tree-layout-fields)
+
+<span id="接入业务数据" />
+<span id="校验数据" />
+
+## 使用远程数据
+
+接口返回完整图数据时，可以先创建并渲染空图，再加载 JSON。下面假设接口已经返回符合 `GraphData` 的数据。如果接口返回的是业务对象，先转换并校验 ID、边端点和分组归属。
+
+```ts
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: '#container',
+  data: { nodes: [], edges: [] },
+  layout: { type: 'grid' },
+});
+await graph.render();
+
+const response = await fetch('/data/graph.json');
+if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+const data: GraphData = await response.json();
+if (!graph.destroyed) await graph.setData(data);
+```
+
+### 取消旧请求并清理图实例
+
+下面的辅助函数拥有此页面 Graph 的清理职责。load 接受 AbortSignal；调用 refresh 时处理失败提示，退出时调用 dispose。
+
+```ts
+import type { Graph, GraphData } from '@antv/g6-lite';
+export function createLoader(graph: Graph, load: (signal: AbortSignal) => Promise<GraphData>) {
+  let version = 0;
+  let disposed = false;
+  let controller: AbortController | undefined;
+  return {
+    async refresh() {
+      const request = ++version;
+      controller?.abort();
+      const current = new AbortController();
+      controller = current;
+      try {
+        const next = await load(current.signal);
+        if (disposed || graph.destroyed || request !== version) return;
+        await graph.setData(next, { fitView: false });
+      } catch (error) {
+        if (!current.signal.aborted && !disposed) throw error;
+      }
+    },
+    dispose() {
+      disposed = true;
+      version++;
+      controller?.abort();
+      graph.destroy();
+    },
+  };
+}
+```
+
+## API 与示例 [#相关参考]
+
+**读取数据**
+
+- [`getData()`](/docs/api/graph#getdata)
+- [`getNodes()`](/docs/api/graph#getnodes)
+- [`getNodeData()`](/docs/api/graph#getnodedata)
+- [`getEdges()`](/docs/api/graph#getedges)
+- [`getEdgeData()`](/docs/api/graph#getedgedata)
+- [`getComboData()`](/docs/api/graph#getcombodata)
+
+**替换与更新**
+
+- [`setData()`](/docs/api/graph#graph-data-mutations-setdata)
+- [`updateNodeData()`](/docs/api/graph#updatenodedata)
+- [`updateEdgeData()`](/docs/api/graph#updateedgedata)
+
+**添加与删除**
+
+- [`addNode()`](/docs/api/graph#addnode)
+- [`addEdge()`](/docs/api/graph#addedge)
+- [`createCombo()`](/docs/api/graph#createcombo)
+- [`removeNode()`](/docs/api/graph#removenode)
+- [`removeEdge()`](/docs/api/graph#removeedge)
+- [`removeCombo()`](/docs/api/graph#removecombo)
+
+**运行示例**
+
+- [最简关系图](/docs/examples/basic)
+- [全量替换](/docs/examples/set-data)
+- [增删改](/docs/examples/data-mutations)
+- [人物关系网络](/docs/examples/relationship)
+
+## 常见问题
+
+### 修改导出数据为什么没生效？
+
+getData 不自动写回；少量变化用增量方法，整图替换才显式 setData，并选择视野策略。
+
+### 删除后为什么原来的下标指向其他元素？
+
+数组顺序可能变化。用 ID 查询，分别匹配节点和边，不保存数组下标作为身份。
+
+<span id="数据与样式" />
+
+### 更新后标签或颜色没变？
+
+确认字段写在 data，样式函数读取同名字段；修改导出副本或直接改 Model 不会按公开流程更新。
+
+### 更新后为什么视野或选择丢了？
+
+setData 默认适配，状态按新输入建立。保留相机用 fitView: false，保留选择则按稳定 ID 显式恢复。

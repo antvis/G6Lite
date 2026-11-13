@@ -1,0 +1,18 @@
+---
+title: 拖动边端点
+description: 拖动已有边的端点，松开时通过事件获取重连目标。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+拖动已有边的端点，松开时通过事件获取重连目标。
+
+## 配置方式
+
+从靠近端点的位置开始拖动。松开后，`edge:dragend` 返回重连建议，确认后调用 `updateEdgeData()` 写回。
+
+## 示例
+
+<NodeDocExample id="behavior-drag-edge" locale="zh" focus="reconnect" />
+
+[参数与默认值](/docs/api/options#导航与拖拽)

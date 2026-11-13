@@ -1,3 +1,4 @@
+import exampleDocumentation from '../../example-documentation.json';
 import type { Locale } from './i18n';
 import { localizedPath } from './i18n';
 
@@ -32,6 +33,7 @@ export interface SiteExampleDefinition {
   dataDescription: LocalizedText;
   tags: string[];
   metrics: SiteExampleMetric[];
+  documentation?: Array<{ title: LocalizedText; href: string }>;
 }
 
 export interface SiteExampleCategory {
@@ -107,9 +109,13 @@ export const siteExampleCategories: readonly SiteExampleCategory[] = [
   },
 ];
 
-export const siteExamples: readonly SiteExampleDefinition[] = [
+const exampleDefinitions: readonly SiteExampleDefinition[] = [
   {
     id: 'basic',
+    documentation: [
+      { title: { zh: '数据接入与更新', en: 'Data guide' }, href: '/docs/guides/data' },
+      { title: { zh: '图数据字段', en: 'Data fields' }, href: '/docs/api/options#options-data' },
+    ],
     file: 'basic.ts',
     category: 'getting-started',
     group: { zh: '基础图', en: 'Basic graph' },
@@ -134,6 +140,10 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'default-theme',
+    documentation: [
+      { title: { zh: '主题指南', en: 'Theme guide' }, href: '/docs/guides/theme' },
+      { title: { zh: '状态方法', en: 'State methods' }, href: '/docs/api/graph#graph-states' },
+    ],
     file: 'default-theme.ts',
     category: 'getting-started',
     group: { zh: '默认体验', en: 'Default experience' },
@@ -158,6 +168,11 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'data-mutations',
+    documentation: [
+      { title: { zh: '写入方法', en: 'Mutation methods' }, href: '/docs/api/graph#graph-data-mutations' },
+      { title: { zh: '查询模型', en: 'Query models' }, href: '/docs/api/graph#graph-data' },
+      { title: { zh: '数据接入与更新', en: 'Data ingestion and updates' }, href: '/docs/guides/data' },
+    ],
     file: 'data-mutations.ts',
     category: 'data-and-state',
     group: { zh: '数据生命周期', en: 'Data lifecycle' },
@@ -167,8 +182,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Demonstrate individual and batch node and edge additions, updates, and removals.',
     },
     interaction: {
-      zh: '使用预览区工具条执行不同的数据变更并观察事件结果。',
-      en: 'Use the preview toolbar to perform data mutations and observe event results.',
+      zh: '先 addNode 再 addEdge；节点数由 3 变为 4，边数由 2 变为 3。removeNode 同时移除关联边，重置恢复初始数据。',
+      en: 'Choose addNode then addEdge: counts change from 3/2 to 4/3. removeNode also removes its adjacent edge; reset restores initial data.',
     },
     dataDescription: {
       zh: '在一份小型业务关系数据上持续执行增量更新。',
@@ -179,6 +194,11 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'queries-and-states',
+    documentation: [
+      { title: { zh: '读取与邻接查询', en: 'Queries and adjacency' }, href: '/docs/api/graph#graph-data' },
+      { title: { zh: '状态与显隐', en: 'States and visibility' }, href: '/docs/api/graph#graph-states' },
+      { title: { zh: 'Combo 操作', en: 'Combo operations' }, href: '/docs/api/graph#graph-combo' },
+    ],
     file: 'queries-and-states.ts',
     category: 'data-and-state',
     group: { zh: '查询与状态', en: 'Queries and states' },
@@ -188,8 +208,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Inspect elements, adjacency, and states while controlling batch states and visibility.',
     },
     interaction: {
-      zh: '通过工具条运行查询、设置状态、隐藏元素并清理结果。',
-      en: 'Run queries, set states, hide elements, and clear results from the toolbar.',
+      zh: '查询 root 应得到 n1、n2 两个邻居和两条关联边。再对比批量增减、按指定 ID 替换状态、Combo 高亮与隐藏；未指定的 ID 保留原状态，全部清理恢复空状态。',
+      en: 'Query root for neighbors n1/n2 and two adjacent edges. Compare batch toggles, replacing states for specified IDs, Combo highlighting and hiding. Unspecified IDs retain their states; clear restores empty states.',
     },
     dataDescription: {
       zh: '使用带邻接关系的数据验证 Graph 查询模型。',
@@ -200,6 +220,11 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'set-data',
+    documentation: [
+      { title: { zh: '数据更新流程', en: 'Data updates' }, href: '/docs/guides/data' },
+      { title: { zh: 'setData 契约', en: 'setData contract' }, href: '/docs/api/graph#graph-data-mutations-setdata' },
+      { title: { zh: '视野保留', en: 'View preservation' }, href: '/docs/guides/viewport' },
+    ],
     file: 'set-data.ts',
     category: 'data-and-state',
     group: { zh: '数据替换', en: 'Data replacement' },
@@ -209,8 +234,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Replace the whole graph with setData, then switch layouts.',
     },
     interaction: {
-      zh: '使用工具条替换数据、切换布局、隐藏节点并聚焦。',
-      en: 'Replace data, switch layouts, hide a node, and focus it from the toolbar.',
+      zh: '数据 A/B 分别显示 5/8 个节点。切换后再尝试布局、隐藏与聚焦；这是全量替换，不保留旧数据集的元素。',
+      en: 'Data A/B show 5/8 nodes. Then try layout, hiding, and focus. Replacement does not retain elements from the previous dataset.',
     },
     dataDescription: {
       zh: '工具条会替换整份节点和边，再重新布局。',
@@ -255,8 +280,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Hover nodes or edges to inspect relationship highlighting.',
     },
     dataDescription: {
-      zh: '节点通过 cluster 字段映射颜色，中心节点使用更大尺寸。',
-      en: 'Nodes map the cluster field to color while the hub uses a larger size.',
+      zh: 'cluster=a 映射蓝色、cluster=b 映射绿色；id=0 的节点尺寸为 16，其他节点为 12。',
+      en: 'cluster=a maps to blue and cluster=b to green. Node id=0 has size 16; the others have size 12.',
     },
     tags: ['node.style', 'data mapping', 'highlight-node'],
     metrics: [
@@ -297,8 +322,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     },
     interaction: { zh: '查看不同描边宽度和圆角。', en: 'Inspect stroke widths and corner radii.' },
     dataDescription: {
-      zh: '矩形节点使用不同线宽和圆角。',
-      en: 'Rectangle nodes use different stroke widths and radii.',
+      zh: '上图圆节点对比描边宽度与颜色；下图矩形对比 0、4、8、14 的圆角，数据按两个视图导出。',
+      en: 'The upper circles compare stroke widths and colors; lower rectangles compare radii 0, 4, 8 and 14. Data is exported for both views.',
     },
     tags: ['node.stroke', 'node.border-radius'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '2' }],
@@ -331,18 +356,18 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     group: { zh: '边', en: 'Edges' },
     title: { zh: '边类型', en: 'Edge types' },
     description: {
-      zh: '展示直线、虚线、弧线和曲线。',
-      en: 'Show line, dashed, arc, and cubic edges.',
+      zh: '对比实线、虚线和两种弧线曲率。',
+      en: 'Compare solid lines, dashed lines and two arc curvatures.',
     },
     interaction: {
-      zh: '对比直线、虚线、弧线和曲线。',
-      en: 'Compare line, dashed, arc, and cubic edges.',
+      zh: '上排对比实线与虚线，下排对比 curvature 0.3 与 0.6；适应画布或刷新后保留这两组对照。',
+      en: 'Compare solid and dashed lines above, then curvature 0.3 and 0.6 below. Fit or refresh retains both comparisons.',
     },
     dataDescription: {
-      zh: '四张小图分别展示一种边。',
-      en: 'Four small graphs each show one edge type.',
+      zh: '两个视图各有 4 个节点、2 条边；下排两条边均为 arc，不是 cubic。',
+      en: 'Two views each have 4 nodes and 2 edges. Both lower edges use arc, not cubic.',
     },
-    tags: ['edge.line', 'edge.arc', 'edge.cubic', 'edge.dash'],
+    tags: ['edge.line', 'edge.arc', 'edge.curvature', 'edge.dash'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '4' }],
   },
   {
@@ -389,7 +414,7 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     file: 'edge-hit-area.ts',
     category: 'elements',
     group: { zh: '边', en: 'Edges' },
-    title: { zh: '细边交互热区', en: 'Thin-edge hit area' },
+    title: { zh: '交互热区', en: 'Hit area' },
     description: {
       zh: '保持细线外观，同时扩大直线、曲线和自环的拾取范围。',
       en: 'Keep a thin stroke while expanding the pick area of lines, curves, and loops.',
@@ -461,8 +486,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Show node labels, edge labels, and icons, and change their placement at runtime.',
     },
     interaction: {
-      zh: '切换标签位置，或隐藏边标签。',
-      en: 'Change label placement or hide edge labels.',
+      zh: '在右上角面板将标签位置设为 left，再点击按钮切换节点图标和边标签。刷新可恢复默认配置。',
+      en: 'Set the label position to left in the top-right panel, then use the buttons to toggle node icons and edge labels. Refresh to restore the defaults.',
     },
     dataDescription: {
       zh: '节点带图标和标签，边带可开关的标签。',
@@ -482,8 +507,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Compare fixed size, low-zoom drawing, and collision hiding.',
     },
     interaction: {
-      zh: '切换标签策略，并在不同缩放下比较结果。',
-      en: 'Switch the label policy and compare it at different zoom levels.',
+      zh: '初始为全部标签、zoom 0.4。选择默认策略和 zoom 0.2，文字隐藏；同一缩放切回全部标签，文字重新出现。刷新恢复初始设置。',
+      en: 'Starts with all labels at zoom 0.4. Choose the default policy and zoom 0.2 to hide text; switch back to all labels at the same zoom to show it again. Refresh restores the initial settings.',
     },
     dataDescription: {
       zh: '同一张图在默认策略和全部显示之间切换。',
@@ -509,8 +534,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Connect a left-to-right flow with rounded orthogonal polylines.',
     },
     interaction: {
-      zh: '缩放和平移，查看正交折线如何绕开节点。',
-      en: 'Zoom and pan to see how orthogonal routes pass around nodes.',
+      zh: '缩放和平移，观察正交圆角折线连接端点边界；该路由不是全图避障算法，刷新恢复初始视野。',
+      en: 'Zoom and pan to inspect rounded orthogonal routes at endpoint boundaries. This is not a global obstacle-avoidance algorithm. Refresh restores the initial view.',
     },
     dataDescription: {
       zh: '5 个矩形节点用正交圆角折线连接。',
@@ -521,6 +546,11 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'combo',
+    documentation: [
+      { title: { zh: 'Combo 指南', en: 'Combo guide' }, href: '/docs/guides/combo' },
+      { title: { zh: 'Combo 方法', en: 'Combo methods' }, href: '/docs/api/graph#graph-combo' },
+      { title: { zh: 'Combo 配置', en: 'Combo options' }, href: '/docs/api/options#options-combo' },
+    ],
     file: 'combo.ts',
     category: 'elements',
     group: { zh: 'Combo', en: 'Combos' },
@@ -530,8 +560,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Explore nested groups, collapse and expand, runtime regrouping, and data export.',
     },
     interaction: {
-      zh: '使用工具条折叠分组、移动节点归属、创建分组并导出数据。',
-      en: 'Use the toolbar to collapse groups, move memberships, create a combo, and export data.',
+      zh: '点击分组背景可折叠或展开单个分组。用画布上的按钮批量操作，在「更多」中调整节点归属、创建分组或导出数据。',
+      en: 'Click a group background to collapse or expand it. Use the canvas buttons for bulk actions and the menu to move nodes, create a combo, or export data.',
     },
     dataDescription: {
       zh: '10 个业务节点、9 条边和 4 个嵌套分组。',
@@ -569,7 +599,7 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     file: 'layout-gallery.ts',
     category: 'layouts',
     group: { zh: '布局矩阵', en: 'Layout gallery' },
-    title: { zh: '更多内置布局', en: 'More built-in layouts' },
+    title: { zh: '更多布局示例', en: 'More layout examples' },
     description: {
       zh: '比较 radial、concentric、ForceAtlas2、fruchterman、MDS 和 random。',
       en: 'Compare radial, concentric, ForceAtlas2, fruchterman, MDS, and random layouts.',
@@ -631,16 +661,16 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     group: { zh: '布局运行', en: 'Layout runtime' },
     title: { zh: 'Worker 布局', en: 'Worker layout' },
     description: {
-      zh: '把力导向计算放到 Web Worker，避免挡住主线程。',
-      en: 'Run force layout in a Web Worker so the main thread stays responsive.',
+      zh: '请求 Worker 计算力导向布局，并展示返回的节点坐标。',
+      en: 'Request a worker force layout and display the returned node positions.',
     },
     interaction: {
       zh: '等待力导向布局结束后再拖拽画布。',
       en: 'Pan the canvas after the force layout finishes.',
     },
     dataDescription: {
-      zh: '80 个节点的力导向布局在 Worker 中计算。',
-      en: 'A force layout of 80 nodes runs in a worker.',
+      zh: '80 个节点、79 条边，配置 worker: true 请求后台计算；是否真正使用 Worker 需在 Network/Performance 中确认，失败可能回退。',
+      en: '80 nodes and 79 edges request background computation with worker: true. Verify actual worker execution in Network/Performance; failures may fall back.',
     },
     tags: ['layout.worker', 'layout.force'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '2' }],
@@ -689,6 +719,11 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'relationship',
+    documentation: [
+      { title: { zh: '业务数据映射', en: 'Business data mapping' }, href: '/docs/guides/data' },
+      { title: { zh: '节点映射', en: 'Node mapping' }, href: '/docs/guides/node' },
+      { title: { zh: '边配置', en: 'Edge configuration' }, href: '/docs/guides/edge' },
+    ],
     file: 'relationship.ts',
     category: 'scenarios-and-performance',
     group: { zh: '关系网络', en: 'Relationship networks' },
@@ -827,6 +862,10 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
   },
   {
     id: 'neighbor-highlight',
+    documentation: [
+      { title: { zh: '邻居查询', en: 'Neighbor queries' }, href: '/docs/api/graph#getneighbornodes' },
+      { title: { zh: '高亮交互', en: 'Highlight interactions' }, href: '/docs/guides/behaviors' },
+    ],
     file: 'neighbor-highlight.ts',
     category: 'interactions',
     group: { zh: '悬停', en: 'Hover' },
@@ -837,14 +876,18 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     },
     interaction: { zh: '悬停节点或边。', en: 'Hover a node or an edge.' },
     dataDescription: {
-      zh: '中心节点和一层分支用于观察邻居高亮。',
-      en: 'A center node and one ring of branches show neighbor highlighting.',
+      zh: 'hub 与两级分支共 7 个节点、7 条边，用于观察一度邻接高亮。',
+      en: 'Seven nodes and seven edges form a hub with two branch levels for one-hop highlighting.',
     },
     tags: ['behavior.highlight-node', 'behavior.highlight-edge'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '2' }],
   },
   {
     id: 'selection-behaviors',
+    documentation: [
+      { title: { zh: '状态使用', en: 'Using states' }, href: '/docs/guides/states' },
+      { title: { zh: '交互组合', en: 'Combine interactions' }, href: '/docs/guides/behaviors' },
+    ],
     file: 'selection-behaviors.ts',
     category: 'interactions',
     group: { zh: '选择', en: 'Selection' },
@@ -1018,16 +1061,16 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     group: { zh: '节点扩展', en: 'Node extensions' },
     title: { zh: '呼吸节点', en: 'Breathing node' },
     description: {
-      zh: '用自定义节点动画表现选中和高亮状态。',
-      en: 'Show selected and highlight states with a custom node animation.',
+      zh: '用内置 breathing-node 的呼吸效果对比选中、高亮和普通状态。',
+      en: 'Compare selected, highlight and normal states with the built-in breathing-node effect.',
     },
     interaction: {
       zh: '切换选中和高亮，观察节点动画。',
       en: 'Toggle selected and highlight to see the node animation.',
     },
     dataDescription: {
-      zh: '一个自定义节点响应选中和高亮。',
-      en: 'One custom node responds to selected and highlight.',
+      zh: '3 个内置 breathing-node 节点、2 条边，对比初始 selected、highlight 和普通状态。',
+      en: '3 built-in breathing-node nodes and 2 edges compare initial selected, highlight and normal states.',
     },
     tags: ['extension.node', 'state.selected', 'state.highlight'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '3' }],
@@ -1079,7 +1122,7 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
     file: 'custom-behavior.ts',
     category: 'extensions',
     group: { zh: '行为扩展', en: 'Behavior extensions' },
-    title: { zh: '注册自定义 Behavior', en: 'Register a custom behavior' },
+    title: { zh: '注册自定义交互', en: 'Register a custom interaction' },
     description: {
       zh: '注册一个 Behavior：点击节点时选中它，点击画布时清除。',
       en: 'Register a behavior that selects a clicked node and clears selection on the canvas.',
@@ -1127,8 +1170,8 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Stack count, status, and text badges on a node boundary.',
     },
     interaction: {
-      zh: '悬停超出数量的徽章入口，展开被收起的徽章。',
-      en: 'Hover the overflow marker to expand hidden badges.',
+      zh: '订单节点有 5 项，初始显示两项与溢出入口；悬停 ··· 展开全部 5 项，移开恢复。刷新后仍只有一套徽章。',
+      en: 'Orders has 5 badges, initially two plus an overflow marker. Hover ··· to expand all 5; leave to collapse. Refresh keeps a single set of badges.',
     },
     dataDescription: {
       zh: '三个节点在边界上堆叠内置徽章。',
@@ -1197,13 +1240,19 @@ export const siteExamples: readonly SiteExampleDefinition[] = [
       en: 'Zoom out for the whole graph, then zoom in to read labels.',
     },
     dataDescription: {
-      zh: '合成网络包含 5000 个节点，并绘制节点标签。',
-      en: 'The synthetic network has 5,000 nodes and draws node labels.',
+      zh: '合成网络包含 5000 个节点、15000 条边；内置 Canvas 标签在低缩放隐藏并避让碰撞，放大后逐步阅读。',
+      en: 'The synthetic network has 5,000 nodes and 15,000 edges. Built-in Canvas labels hide at low zoom and avoid collisions; zoom in to read them.',
     },
     tags: ['scale.synthetic-large', 'label.canvas'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '2' }],
   },
 ];
+const topicIndex: Record<string, { title: LocalizedText; href: string }> = exampleDocumentation.topics;
+const exampleLinks: Record<string, string[]> = exampleDocumentation.examples;
+export const siteExamples: readonly SiteExampleDefinition[] = exampleDefinitions.map((example) => ({
+  ...example,
+  documentation: example.documentation ?? exampleLinks[example.id]?.map((id) => topicIndex[id]),
+}));
 const exampleById = new Map(siteExamples.map((example) => [example.id, example]));
 
 export function localizedText(text: LocalizedText, locale: Locale): string {

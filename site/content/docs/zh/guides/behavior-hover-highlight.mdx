@@ -1,0 +1,22 @@
+---
+title: 邻域高亮
+description: 悬停时高亮节点的邻域，或高亮边及其两端节点。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+悬停时高亮节点的邻域，或高亮边及其两端节点。
+
+## 配置方式
+
+邻域范围用 `degree` 设置，其余元素可通过 `inactiveState` 弱化。悬停 B 可看到它的一度邻域。
+
+```ts
+behaviors: [{ type: 'hover-highlight', degree: 1, inactiveState: 'inactive' }],
+```
+
+## 示例
+
+<NodeDocExample id="behavior-highlight" locale="zh" focus="highlight" />
+
+[运行示例与完整代码](/docs/examples/neighbor-highlight) · [参数与默认值](/docs/api/options#高亮)

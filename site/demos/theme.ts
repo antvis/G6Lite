@@ -2,7 +2,7 @@
  * Demo: 主题 — light / dark 及 token 覆盖
  */
 import { Graph } from '@antv/g6-lite';
-import { mountCanvasMenu } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 const data = {
   nodes: [{ id: '0' }, { id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }],
@@ -42,27 +42,18 @@ export async function run(container: string | HTMLElement) {
     await currentGraph.render();
   }
 
-  mountCanvasMenu(host, {
-    caption: '主题',
-    items: [
-      { value: 'light', label: 'Light' },
-      { value: 'dark', label: 'Dark' },
-      { value: 'light-override', label: 'Light + 覆盖' },
-    ],
-    value: 'light',
-    onSelect: (value) => {
-      void renderTheme(value as ThemeChoice);
-    },
-  });
-
   await renderTheme('light');
+  const ui = createDemoPanel(host);
+  ui.addChoice<ThemeChoice>('主题', { Light: 'light', Dark: 'dark', 'Light + 覆盖': 'light-override' }, 'light', (value) => {
+    void renderTheme(value);
+  });
 
   return {
     fitView: () => currentGraph?.fitView(),
     destroy: () => {
       currentGraph?.destroy();
       currentGraph = null;
-      host.querySelector(':scope > [data-canvas-controls]')?.remove();
+      ui.destroy();
     },
   };
 }

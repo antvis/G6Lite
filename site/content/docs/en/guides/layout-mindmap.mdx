@@ -1,0 +1,52 @@
+---
+title: Mind map layout
+description: Expand branches to one or both sides of a central topic.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Expand branches to one or both sides of a central topic.
+
+## When to use it
+
+Use it to organize ideas, knowledge, and categories.
+
+## Basic usage
+
+This layout is optional. Import and register it before setting `layout.type`. For CDN usage, see [Optional layouts](/en/docs/guides/layout-overview#optional-layouts).
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import mindmap from '@antv/g6-lite/layouts/mindmap';
+
+register('layout', 'mindmap', mindmap);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'mindmap' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `direction` | `'LR'` goes right, `'RL'` goes left, and `'H'` uses `getSide`. | `'H'` \| `'LR'` \| `'RL'` | `'H'` |
+| `getSide` | Select a side using the node, its branch index, and its parent’s side. | Function returning `'left'` or `'right'` | Returns `'right'` |
+| `levelGap` | Horizontal gap between a parent and its child. | `number` | `120` |
+| `nodeGap` | Vertical gap between siblings on the same side. | `number` | `30` |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-tree-layout-fields)
+
+## Code example
+
+Define parent-child relationships as edges. Use the parent ID as `source` and the child ID as `target`.
+
+`getSide` places branches A and C on the left and B and D on the right.
+
+<NodeDocExample id="built-in-layout" layoutType="mindmap" locale="en" />
+
+[Compare tree layouts](/en/docs/guides/layout-trees)

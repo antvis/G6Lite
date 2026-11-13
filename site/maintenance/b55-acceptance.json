@@ -1,0 +1,68 @@
+{
+  "recorded": "2026-11-05",
+  "baseline": "b8a587c8",
+  "batch": "B55",
+  "scope": "Bilingual parallel-edge and self-loop task guide; existing routes and old public headings preserved",
+  "supersedes": "B97 acceptance recorded B55 as pending at its baseline. B55 is now completed by this delivery.",
+  "pages": [
+    "/docs/guides/parallel-edges",
+    "/en/docs/guides/parallel-edges"
+  ],
+  "examples": [
+    {
+      "id": "parallel-workflow",
+      "source": "site/demos/docs-parallel-workflow.ts",
+      "focus": "separation",
+      "browser": [
+        "Separation on → off → on changes arcs to overlapping lines and back",
+        "Spacing 48 → 24 → 64",
+        "Reverse grouping true → false → true",
+        "Add ab4 changes A→B 3 → 4; repeated add remains 4; remove returns 3",
+        "Reset restores enabled true / offset 48 / includeReverse true / A→B 3"
+      ]
+    },
+    {
+      "id": "self-loops",
+      "source": "site/demos/docs-self-loops.ts",
+      "focus": "loops",
+      "browser": [
+        "A renders 1 loop; B renders 3 nested loops with separation disabled",
+        "Labels a1 and b1/b2/b3 visible",
+        "Dragging B moves all its loops and labels together"
+      ]
+    }
+  ],
+  "verification": {
+    "typecheck": true,
+    "lint": {
+      "errors": 0,
+      "existingLogoWarnings": 1
+    },
+    "parallelTransformTests": 8,
+    "staticBuild": 789,
+    "docsRoutes": 258,
+    "baselineRoutes": 254,
+    "legacyMissing": [],
+    "duplicateArticleIds": [],
+    "linkErrors": [],
+    "caseAssociations": 51,
+    "exports": {
+      "previews": 164,
+      "focused": 66,
+      "formats": [
+        "HTML",
+        "Markdown",
+        "LLM"
+      ],
+      "exactRuntimeSource": true
+    },
+    "browser": {
+      "chinese": true,
+      "english": true,
+      "consoleErrors": 0
+    },
+    "originalRuntimeAndStyleBaselinesPreserved": 3,
+    "engineFilesChanged": 0
+  },
+  "remainingScope": "Dedicated E-series full visual walkthroughs stay separately tracked."
+}

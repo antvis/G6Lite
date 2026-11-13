@@ -5,16 +5,14 @@ description: 安装 G6Lite，创建第一个可交互的关系图
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-下面用 6 个节点展示一个简单的协作关系图，通过颜色和大小区分成员。试着拖拽节点或悬停查看关联高亮。
+选择一种接入方式。两种方式都用 6 个节点和 7 条边创建同一张团队协作图。
 
-<QuickStartExample locale="zh" variant="network" />
-
-可以通过以下两种方式运行这个示例：
-
-- [包管理器](#包管理器)
-- [CDN](#cdn)
+- [包管理器](#包管理器)适合使用 Vite、Webpack 等构建工具的项目。安装后从 `@antv/g6-lite` 导入 `Graph`。
+- [CDN](#cdn)适合直接在 HTML 中使用。通过 `<script type="module">` 导入 `Graph`。
 
 ## 包管理器
+
+### 安装
 
 在使用 Vite、Webpack 等构建工具的项目中，选择一种包管理器安装：
 
@@ -22,25 +20,27 @@ import { QuickStartExample } from '@/components/quick-start-example';
 
 ```bash
 # npm
-npm install @antv/g6-lite
+npm install @antv/g6-lite@0.1.0
 ```
 
 ```bash
 # pnpm
-pnpm add @antv/g6-lite
+pnpm add @antv/g6-lite@0.1.0
 ```
 
 ```bash
 # Yarn
-yarn add @antv/g6-lite
+yarn add @antv/g6-lite@0.1.0
 ```
 
 </div>
 
+### 创建关系图
+
 安装后，在页面中添加一个有明确宽高的容器：
 
 ```html
-<div id="container" style="height: 360px"></div>
+<div id="container" style="width: 100%; height: 360px"></div>
 ```
 
 然后在 JavaScript 或 TypeScript 入口中创建关系图。容器需要先挂载到页面，`await` 应在 ES 模块或 `async` 函数中使用。
@@ -89,20 +89,31 @@ const graph = new Graph({
     nodeStrength: -400,
     collideRadius: 32,
   },
-  autoFit: { padding: 48, maxZoom: 1.2 },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
 
-await graph.render();
+try {
+  await graph.render();
+  graph.fitView({ padding: 48, maxZoom: 1.2 });
+} catch (error) {
+  graph.destroy();
+  throw error;
+}
 ```
 
-示例使用力导向布局自动排列节点，并通过节点数据映射颜色和大小。`behaviors` 启用缩放、平移、节点拖拽和悬停高亮。包中已包含 TypeScript 类型。
+包中已包含 TypeScript 类型。
+
+移除容器或卸载组件前，调用 `graph.destroy()` 释放资源。
 
 ## CDN
 
-UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使用 `new G6Lite.Graph()`。
+```js
+import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
+```
 
-下面是完整的 HTML 示例。UMD 文件已包含运行时依赖和布局算法，无需再加载其他脚本：
+### 创建关系图
+
+将下面的 HTML 保存为 `index.html`，用浏览器打开。
 
 ```html
 <!doctype html>
@@ -114,8 +125,9 @@ UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使�
   </head>
   <body>
     <div id="container" style="height: 360px"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@beta/dist/g6-lite.min.js"></script>
-    <script>
+    <script type="module">
+      import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
+
       const data = {
         nodes: [
           { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
@@ -136,7 +148,7 @@ UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使�
         ],
       };
 
-      const graph = new G6Lite.Graph({
+      const graph = new Graph({
         container: '#container',
         data,
         node: {
@@ -157,17 +169,32 @@ UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使�
           nodeStrength: -400,
           collideRadius: 32,
         },
-        autoFit: { padding: 48, maxZoom: 1.2 },
         behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
       });
 
-      graph.render().catch(console.error);
+      graph.render().then(() => {
+        graph.fitView({ padding: 48, maxZoom: 1.2 });
+      }).catch((error) => {
+        graph.destroy();
+        console.error(error);
+      });
+      window.addEventListener('pagehide', () => graph.destroy(), { once: true });
     </script>
   </body>
 </html>
 ```
 
-生产环境使用 CDN 时，应锁定包含 UMD 文件的确切版本号。ESM 入口按需加载布局，UMD 则包含布局算法，两者的下载体积不同，详见[包体积](/docs/metrics/bundle-size)。
+单页示例在 `pagehide` 时销毁图实例。浏览器从往返缓存恢复页面时，需要重新创建实例。
+
+<span id="验证效果与清理" style={{ scrollMarginTop: '8rem' }} />
+
+## 运行效果
+
+两种接入方式都会生成下方的团队协作图，包含 6 个带标签的节点和 7 条边。拖动空白处可平移画布。
+
+<QuickStartExample locale="zh" variant="network" />
+
+图没有显示时，检查容器宽高、浏览器 WebGL 和控制台错误。
 
 ## 在前端框架中使用
 
@@ -177,9 +204,7 @@ UMD 构建通过 `window.G6Lite` 暴露公开 API，可以直接在 HTML 中使�
   <Card title="在 React 中使用" href="/docs/getting-started/react#在-react-中使用">
     在 effect 中挂载关系图，更新数据，并处理组件卸载。
   </Card>
-  <Card title="在 Vue 中使用" href="/docs/getting-started/react#在-vue-中使用">
+  <Card title="在 Vue 中使用" href="/docs/getting-started/vue">
     通过模板 ref 和生命周期钩子管理图实例。
   </Card>
 </Cards>
-
-Next.js、Nuxt 等框架应只在客户端创建 `Graph`，不要在服务端渲染阶段访问 DOM。

@@ -1,0 +1,116 @@
+.example {
+  margin-block: 20px;
+  min-width: 0;
+}
+
+:global(.docs-brand-layout) :global(#nd-page) .preview {
+  max-width: none;
+  margin: 0 0 16px;
+}
+
+.code {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 10px;
+}
+
+:global(.docs-brand-layout) :global(#nd-page) .code :global(figure.shiki) {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+/* These blocks already have a title bar with a copy button. */
+:global(.docs-brand-layout) :global(#nd-page) .code :global(figure.shiki)::before,
+:global(.docs-brand-layout) :global(#nd-page) .code :global(figure.shiki)::after {
+  display: none;
+}
+
+.code :global(figure.shiki) > div:has(> figcaption) {
+  border-color: var(--editor-line);
+  background: var(--editor-header);
+  color: var(--editor-icon);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+:global(.docs-brand-layout) :global(#nd-page) .code :global(figure.shiki) > [role='region'] {
+  max-height: 20rem;
+  padding-block: 0.65rem;
+}
+
+.codeToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-inline: 0.55rem;
+  border-bottom: 1px solid var(--color-fd-border);
+  background: var(--color-fd-card);
+}
+
+.codeTabList {
+  display: flex;
+  gap: 0.25rem;
+  padding-block: 0.35rem;
+}
+
+.codeTab {
+  min-height: 30px;
+  padding-inline: 0.65rem;
+  border-radius: 6px;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.codeTab[data-state='active'] {
+  background: color-mix(in srgb, var(--color-fd-primary) 10%, var(--color-fd-card));
+  color: var(--color-fd-primary);
+}
+
+.codeTab[data-state='inactive']:hover {
+  color: var(--color-fd-foreground);
+}
+
+.copyCode {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 5rem;
+  min-height: 32px;
+  padding-inline: 0.5rem;
+  border-radius: 5px;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.copyCode svg {
+  width: 14px;
+  height: 14px;
+}
+
+.copyCode:hover {
+  background: var(--color-fd-muted);
+  color: var(--color-fd-foreground);
+}
+
+:global(.docs-brand-layout) :global(#nd-page) .codeTab:focus-visible,
+:global(.docs-brand-layout) :global(#nd-page) .copyCode:focus-visible {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: -2px;
+}
+
+:global(.docs-brand-layout) :global(#nd-page) .codeTabs :global(figure.shiki) > [role='region'] {
+  background: transparent;
+}
+
+:global(.docs-brand-layout) :global(#nd-page) .codeTabs :global(figure.shiki) :global(.line)::before {
+  background: var(--editor-canvas);
+}

@@ -6,11 +6,12 @@ import type {
   ExtensionContext,
   TransformExtension,
 } from '@src/extensions/contracts.js';
-import { extensionFactory, register } from '@src/extensions/index.js';
+import { register } from '@src/extensions/index.js';
 import {
   createExtension,
   createExtensionContext,
   destroyExtension,
+  extensionFactory,
   initializeExtension,
   updateExtension,
 } from '@src/extensions/registry.js';

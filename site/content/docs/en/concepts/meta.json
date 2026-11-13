@@ -1,4 +1,6 @@
 {
-  "title": "Core concepts",
-  "pages": ["overview", "data-model", "graph-lifecycle", "architecture"]
+  "title": "Getting started",
+  "pages": [
+    "architecture"
+  ]
 }

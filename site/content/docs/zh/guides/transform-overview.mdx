@@ -1,0 +1,96 @@
+---
+title: 数据处理 Transform
+description: 了解 Transform 的执行时机，配置平行边和自定义数据处理
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 什么是数据处理
+
+数据处理（Transform）可以在图接收整份数据时统一整理输入，例如给节点生成标签，或筛选要绘制的节点和边。它适合把重复的数据处理逻辑封装成可复用的函数。
+
+## 执行时机
+
+自定义 Transform 在 `render()` 和 `setData()` 处理整份输入时执行。G6Lite 按 `transforms` 的顺序调用每个 `beforeRender(data)`，再用处理后的数据计算布局和绘制。
+
+单独调用 `layout()` 或 `updateNodeData()` 时，图沿用当前数据。需要标签跟随节点字段实时变化时，可以在 `node.style.label` 的样式函数中直接读取该字段。
+
+## 内置数据处理
+
+| 类型 | 描述 | 配置示例 |
+| --- | --- | --- |
+| `process-parallel-edges` | 将同一对节点之间重叠的 `line` 或 `arc` 边分开。 | [平行边配置与示例](/docs/guides/edge#两种入口与优先级) |
+
+平行边在图数据写入后计算偏移。开启后，添加或删除边也会重新分配同组边的位置。
+
+## 配置方式
+
+### 基本配置
+
+在创建图时，通过 `transforms` 指定要启用的数据处理。内置的平行边处理可以直接使用名称，自定义项需先注册。
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  transforms: ['process-parallel-edges'],
+});
+
+await graph.render();
+```
+
+### 配置参数
+
+有参数时使用对象写法。`type` 指定名称，参数放在 `options` 中。下面用 `offset` 调整平行边的间距。
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  transforms: [{ type: 'process-parallel-edges', options: { offset: 48 } }],
+});
+
+await graph.render();
+```
+
+### 更换或移除数据处理
+
+更换或移除自定义 Transform、修改参数时，先销毁旧图，再用新的 `transforms` 创建图。平行边的间距和开关可以在运行时通过 `updateOptions()` 更新。 [平行边配置](/docs/guides/edge#分组与间距)
+
+## 自定义数据处理
+
+下面实现一个 `docs-normalize` Transform，把节点名称转换成带前缀的标签，例如把 `API` 转成 `Svc: API`。
+
+### 实现与注册 [#实现与激活]
+
+在工厂函数中实现 `beforeRender(data)`。从传入的 `GraphData` 读取节点，同步返回处理后的整份数据。示例只为节点补充 `data.label`，并保留原有的边、分组和其他字段。
+
+用 `register('transform', 'docs-normalize', createNormalize)` 注册工厂，再将它加入图的配置。
+
+```ts
+transforms: [
+  { type: 'docs-normalize', options: { prefix: 'Svc' } },
+],
+node: {
+  style: { label: (node) => String(node.data?.label ?? node.id) },
+},
+```
+
+### 代码示例
+
+点击 **Update name** 只修改节点名称，已生成的标签和 `run` 次数保持原样。点击 **Reload data** 会调用 `setData()`，标签随新数据更新，`run` 加一。
+
+<NodeDocExample id="extension-transform" locale="zh" focus="transform" />
+
+### 选项与清理
+
+| 方法 | 在示例中的作用 |
+| --- | --- |
+| `init(context, options)` | 首次创建时读取 `prefix`，默认用 `Svc`。 |
+| `update(options)` | 后续 `render()` 或 `setData()` 复用同一位置、同名的实例时，重新读取完整选项。 |
+| `beforeRender(data)` | 根据本次输入生成标签，并返回处理后的数据。 |
+| `destroy()` | 图销毁时释放回调引用。Transform 自己创建的计时器等资源也在这里清理。 |
+
+转换时用新对象保存修改后的记录。过滤节点时同时处理关联边和分组引用，确保返回的数据仍然有效。
+
+配置字段与扩展接口见 [TransformOption](/docs/api/options#transforms) 和 [TransformExtension](/docs/api/extensions#transformextension)。

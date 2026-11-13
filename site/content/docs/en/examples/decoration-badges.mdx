@@ -7,3 +7,13 @@ full: true
 import { ExampleDetail } from '@/components/example-detail';
 
 <ExampleDetail id="decoration-badges" locale="en" />
+
+## Steps and expected results
+
+1. The 订单 (orders) node has 5 badge items. With `maxVisible: 3`, it initially shows a count, a warning, and `···`, with 3 items hidden. The 用户 (users) node shows both items; 审计 (audit) shows its single item.
+2. Move the pointer over `···` beside orders to expand all 5 items. Leave the expanded region to fold them again.
+3. Change `maxVisible` to `5` in the source and click Run: all badges should appear immediately. Reset restores the original example.
+
+The key options are in `node.decorations[]`: `items` reads each node's business data, `anchor` and `boundaryOverlap` control boundary alignment, and `overflowData` provides the hover target. Badges and node labels are configured separately.
+
+See the [node guide](/en/docs/guides/node) and [decoration usage](/en/docs/guides/extensions#decoration-visibility); consult the [decoration reference](/en/docs/api/options#config-node-decoration) for complete definitions.

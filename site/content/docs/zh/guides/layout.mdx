@@ -1,103 +1,182 @@
 ---
-title: 布局配置
-description: 内置布局类型、选型建议、常用参数与 Worker 支持
+title: 布局通用配置项
+description: 选择网络或树布局，复用已有坐标，并在运行时重新排列
 ---
 
-通过 `layout` 配置布局。多数算法基于 [@antv/layout](https://github.com/antvis/layout)，选项会透传到底层算法。
+import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-example';
 
-```ts
-layout: { type: 'force', linkDistance: 100 }
-```
+布局通过 `new Graph()` 的 `layout` 配置。先在[布局总览](/docs/guides/layout-overview)选择类型，再按下表调整参数。
 
-所有官方布局都可以直接通过 `type` 使用。G6Lite 会在内部按需加载对应算法，不需要额外导入或调用启用函数。
+<span id="布局选型" />
 
-## 布局选型
+## LayoutConfig [#layoutconfig]
 
-| 目标               | 推荐布局                                              | 说明                          |
-| ------------------ | ----------------------------------------------------- | ----------------------------- |
-| 快速展示无层级关系 | `circular` / `grid` / `random`                        | 稳定、可预期、成本低          |
-| 网络关系探索       | `force` / `d3-force` / `force-atlas2` / `fruchterman` | 大图需关注耗时，可启用 worker |
-| 层级 DAG           | `dagre`                                               | 适合流程、依赖和调用链        |
-| 树与组织结构       | `mindmap` / `indented` / `fishbone`                   | 适合业务结构图                |
-| 大规模首屏         | 预计算坐标或轻量布局                                  | 避免把首屏瓶颈放在布局计算    |
+| 字段 | 用途 |
+| --- | --- |
+| `type` | 指定布局算法，例如 `dagre` |
+| `width`、`height` | 设置计算范围，默认取画布宽高 |
+| `center` | 设置布局中心，默认取计算范围的中心，由算法决定是否使用 |
+| `worker` | 设置是否尝试在 Worker 中计算 |
 
-## 支持的布局类型
+方向、间距等参数按布局类型设置。完整类型与默认值见[布局配置参考](/docs/api/options#options-layout)。
 
-| type           | 说明               | 常用参数                        |
-| -------------- | ------------------ | ------------------------------- |
-| `force`        | 力导向             | `linkDistance`, `nodeStrength`  |
-| `d3-force`     | D3 力导向          | `linkDistance`, `charge`        |
-| `force-atlas2` | ForceAtlas2 力导向 | `kr`, `kg`                      |
-| `fruchterman`  | Fruchterman 力导向 | `gravity`, `speed`              |
-| `circular`     | 环形               | `radius`, `center`              |
-| `concentric`   | 同心圆             | `center`, `minNodeSpacing`      |
-| `radial`       | 辐射               | `center`, `unitRadius`          |
-| `grid`         | 网格               | `rows`, `cols`                  |
-| `dagre`        | 有向无环图 / 层级  | `rankdir`, `nodesep`, `ranksep` |
-| `mds`          | 多维标度           | `linkDistance`                  |
-| `random`       | 随机               | `center`                        |
-| `mindmap`      | 脑图               | `direction`, `hGap`, `vGap`     |
-| `indented`     | 缩进树             | `indent`, `rowHeight`           |
-| `fishbone`     | 鱼骨图             | `direction`                     |
+## 布局效果与参数 [#支持的布局类型]
 
-## 效果预览
+下表的 11 种布局用同一份数据生成缩略图。想试用其中一种，可以打开[布局示例合集](/docs/examples/layout-gallery)。完整算法参数见 [AntV Layout 文档](https://layout.antv.vision/)。
 
-以下为不同布局的渲染预览。可在 [布局总览](/docs/examples/layout-gallery) 中切换算法并查看实际效果。
+标为「可选」的布局需先导入并注册，见[可选布局](/docs/guides/layout-overview#optional-layouts)。
 
-<div className="docs-example-gallery" data-columns="3">
+<div className="effect-table">
 
-![通过节点间的作用力组织网络关系。](/layouts/force.png 'force · 力导向')
-
-![将节点沿圆周排列。](/layouts/circular.png 'circular · 环形')
-
-![围绕中心按层次向外排列节点。](/layouts/radial.png 'radial · 辐射')
-
-![按有向关系排列层级，适合流程与依赖图。](/layouts/dagre.png 'dagre · 层级')
-
-![以规则行列排列节点。](/layouts/grid.png 'grid · 网格')
-
-![以树形分支呈现中心主题及其子主题。](/layouts/mindmap.png 'mindmap · 脑图')
+| type | 效果 | 用途 | 常用算法参数 |
+| --- | --- | --- | --- |
+| [`circular`](/docs/guides/layout-circular) | ![节点沿圆周均匀排列](/layouts/reference/circular.svg) | 圆周或螺旋排列 | radius、startRadius、endRadius、startAngle、endAngle、clockwise |
+| [`concentric`](/docs/guides/layout-concentric) | ![节点按度数从中心向外分圈](/layouts/reference/concentric.svg) | 按重要程度分圈 | sortBy、maxLevelDiff、nodeSize、nodeSpacing、preventOverlap |
+| [`grid`](/docs/guides/layout-grid) | ![节点对齐到规则行列](/layouts/reference/grid.svg) | 规则行列 | rows、cols、begin、sortBy、nodeSize、nodeSpacing、preventOverlap |
+| [`random`](/docs/guides/layout-random) | ![节点散布在画布上](/layouts/reference/random.svg) | **可选。** 随机位置 | width、height、center |
+| [`dagre`](/docs/guides/layout-dagre) | ![有向图从左到右分层排列](/layouts/reference/dagre.svg) | 有向分层 | rankdir: TB/BT/LR/RL，nodesep、ranksep、edgesep、nodeSize、ranker |
+| [`force`](/docs/guides/layout-force) | ![相连节点在力模拟中聚拢](/layouts/reference/force.svg) | 力导向网络 | linkDistance、nodeStrength、edgeStrength、maxIteration、minMovement |
+| [`d3-force`](/docs/guides/layout-d3-force) | ![D3 力模拟生成的节点排布](/layouts/reference/d3-force.svg) | D3 力模拟 | linkDistance、nodeStrength、alphaDecay、alphaMin；使用 nodeStrength，不是 charge |
+| [`force-atlas2`](/docs/guides/layout-force-atlas2) | ![ForceAtlas2 生成的节点排布](/layouts/reference/force-atlas2.svg) | ForceAtlas2 网络 | kr、kg、barnesHut、prune、maxIteration |
+| [`fruchterman`](/docs/guides/layout-fruchterman) | ![Fruchterman 生成的节点排布](/layouts/reference/fruchterman.svg) | Fruchterman 网络 | gravity、speed、maxIteration、minMovement |
+| [`radial`](/docs/guides/layout-radial) | ![节点按到焦点的距离向外分层](/layouts/reference/radial.svg) | **可选。** 围绕焦点的同心层 | focusNode、unitRadius、linkDistance、preventOverlap |
+| [`mds`](/docs/guides/layout-mds) | ![节点按图距离映射到二维平面](/layouts/reference/mds.svg) | **可选。** 按图距离求二维位置 | linkDistance、center |
 
 </div>
 
-## 示例
+节点间距取决于布局计算使用的尺寸。需要避免重叠时，把节点实际尺寸传给算法支持的 `nodeSize` 等参数，再调整 `nodeSpacing`。
 
-```ts
-layout: { type: 'circular', radius: 150 }
-```
+### 计算默认值 [#计算默认值]
 
-```ts
-layout: { type: 'dagre', rankdir: 'TB', nodesep: 40, ranksep: 60 }
-```
+以下由 G6Lite 注入或改写，用户显式值优先；仅适用于上面的库布局，不用于三个函数式树布局。
 
-```ts
-layout: { type: 'force', linkDistance: 100, worker: true }
-```
+| 算法 / 选项 | 默认或规则 |
+| --- | --- |
+| 全部库布局 `animate` | 省略时 false；Graph 在计算完成后写回坐标，不提供逐帧布局绘制 |
+| `iterations` | 若有此字段且无 maxIteration，映射到 maxIteration；随后删除 iterations。不要把它当作所有算法通用的迭代开关 |
+| force / fruchterman，节点数 < 1000 | maxIteration: 100，minMovement: 1 |
+| force / fruchterman，1000–5000 个节点 | maxIteration: 200，minMovement: 1.5 |
+| force / fruchterman，节点数 > 5000 | maxIteration: 50，minMovement: 2 |
+| force-atlas2 | barnesHut: true；节点数 > 200 时默认 prune: false；maxIteration 默认 100，节点数 > 5000 时 50 |
+| d3-force | alphaDecay: 0.1；linkDistance: max(200, √节点数 × 80) |
 
-## Worker
+主线程 d3-force 由封装手动 tick，最多 300 次，并检查 alphaMin（默认 0.001）；Worker 路径等待算法结束，两条执行路径不保证逐点相同。算法内部其他默认值以安装版本为准，不与 G6Lite 的注入值混用。
 
-`layout.worker: true` 会将布局计算放到 Web Worker 中，避免阻塞主线程。G6Lite 会对大图的 force 系布局自动启用 worker。
+<span id="效果预览" />
 
-`mindmap`、`indented`、`fishbone` 是 O(V+E) 的内置函数式树布局，始终在主线程执行；即使配置 `worker: true` 也不会退化为其他布局。
+## 切换布局示例 [#options-layout-代码与对应效果]
 
-```ts
-layout: {
-  type: 'force',
-  worker: true,
-}
-```
+用 **Layout** 切换网格、环形和 Dagre 布局。下方代码列出了三种布局的参数。
+
+<LayoutDocExample id="layout-switch" locale="zh" focus="layout-options" />
+
+## 树布局示例 [#示例]
+
+树的父子关系写在 `edges` 里，`source` 是父节点，`target` 是子节点。可在[树布局示例](/docs/guides/layout-trees#配置与示例)里切换脑图、缩进树和鱼骨图。
+
+### 树布局类型 [#函数式树布局]
+
+树布局适合只有一个根、节点彼此连通且没有环的数据。
+
+<div className="effect-table">
+
+| type | 效果 | 用途 |
+| --- | --- | --- |
+| [`mindmap`](/docs/guides/layout-mindmap) | ![子树分布在根节点两侧](/layouts/reference/mindmap.svg) | **可选。** 按左右分支组织层级 |
+| [`indented`](/docs/guides/layout-indented) | ![子节点按深度缩进并逐行排列](/layouts/reference/indented.svg) | **可选。** 逐行展示树形列表 |
+| [`fishbone`](/docs/guides/layout-fishbone) | ![分类沿水平主干交替分布，条目挂在斜支线上](/layouts/reference/fishbone.svg) | **可选。** 沿主干展示分类和条目 |
+
+</div>
+
+#### mindmap [#mindmap]
+
+| 选项 | 类型 | 默认 / 行为 |
+| --- | --- | --- |
+| `direction` | `'H' \| 'LR' \| 'RL'` | H；LR 全右、RL 全左；H 通过 getSide 决定左右，默认也返回 right |
+| `levelGap` | `number` | 120，父子节点边界间的水平距离 |
+| `nodeGap` | `number` | 30，同侧相邻子节点间距 |
+| `branchColors` | `string[]` | 内置 10 色；结果写入节点 data._branchColor，需样式函数读取才会着色 |
+| `getWidth` | `(node: GraphNode) => number` | 返回 100 |
+| `getHeight` | `(node: GraphNode) => number` | 返回 40 |
+| `getSide` | `(node: GraphNode, index: number, parentSide?: 'left' \| 'right') => 'left' \| 'right'` | 返回 right；node 仅包含 id 和 data |
+
+根取输入中第一个无父节点；没有时取第一个节点，根坐标 (0, 0)。不支持旧写法 hGap/vGap，使用 levelGap/nodeGap。
+
+#### indented [#indented]
+
+| 选项 | 类型 | 默认 / 行为 |
+| --- | --- | --- |
+| `indent` | `number` | 80，每深入一层的水平偏移 |
+| `rowHeight` | `number` | 40，DFS 顺序下相邻行的距离 |
+| `direction` | `'LR' \| 'RL'` | LR；RL 使用负的水平坐标 |
+| `rootId` | `string` | 优先指定根，否则取第一个无父节点，再回退第一个节点 |
+| `nodeColors` | `string[]` | 省略不写色值；传非空色板后按深度写 data._nodeColor |
+| `edgeColors` | `string[]` | 省略不写色值；传非空色板后按深度写节点 data._edgeColor，边样式需从节点读取 |
+
+遍历到的节点还会得到 data.depth 与 data._isRoot；根坐标 (0, 0)。这些是布局产生的数据，不会自动改变节点或边样式。
+
+#### fishbone [#fishbone]
+
+用于根 → 分类 → 条目的三层结构，更深节点没有完整的位置分配。
+
+| 选项 | 类型 | 默认 / 行为 |
+| --- | --- | --- |
+| `direction` | `'LR' \| 'RL'` | LR；RL 镜像水平位置 |
+| `categoryGap` | `number` | 180，分类在主干上的间距 |
+| `categoryDistance` | `number` | 200，分类与主干的偏移尺度 |
+| `itemHStep` | `number` | 20，条目的额外水平偏移 |
+| `getWidth` | `(node: GraphNode) => number` | 返回 80，参与根和条目的定位 |
+| `getHeight` | `(node: GraphNode) => number` | 返回 30；当前会被调用，但保存的高度不参与坐标计算 |
+| `itemGap` | `number` | 当前只有类型声明，运行时不读取，不应依赖其调整间距 |
+
+<span id="坐标与运行时" />
 
 ## 运行时重新布局
 
+首次渲染后，布局配置通过 `setLayout()` 替换，节点位置在 `layout()` 完成后更新。需要让整张图重新进入视野时，再调用 `fitView()`。
+
 ```ts
-graph.setLayout({ type: 'grid', cols: 6 });
+graph.setLayout({ type: 'dagre', rankdir: 'LR', nodesep: 32, ranksep: 64 });
 await graph.layout();
+graph.fitView({ padding: 48, maxZoom: 1 });
 ```
 
-不传 `layout` 时，G6Lite 会使用节点自带的 `x` / `y`，缺省为 0。
+需要保留当前视野时，省略最后一行。用 `setData()` 替换整批数据时会重新布局。逐项更新节点后，可以按需调用 `layout()`。
+
+已有 x/y 在布局执行后可能改变。Graph 的 fx/fy 可固定最终写回的对应轴，但不保证计算过程把它们作为算法约束。
+
+## Worker
+
+库布局可通过 `worker: true` 尝试在后台线程计算。图达到 1000 个节点时默认尝试启用。算法参数包含函数时，可设置 `worker: false` 在主线程计算。启用、回退和取消示例见 [Worker 布局指南](/docs/guides/layout-worker)。
+
+## 常见问题
+
+### 改了配置，为什么节点没有移动？
+
+setLayout 只存配置，之后需 await graph.layout()；updateOptions 不更新布局。layout 需在首次 render 完成后调用。
+
+### 重新布局后图跑到画布外了？
+
+layout 不自动适配相机。需要展示全图时，在完成后显式调用 fitView；图坐标 center 不能代替相机适配。
+
+### 树节点为什么堆在原点，或间距参数无效？
+
+先检查根、边方向和连通性。mindmap 使用 levelGap/nodeGap；hGap/vGap 不生效，fishbone 的 itemGap 当前也不生效。
 
 ## 相关
 
-- [性能调优](/docs/metrics/performance-tuning)
-- [示例总览](/docs/examples)
-- [API: LayoutConfig](/docs/api)
+- [布局配置参考](/docs/api/options#options-layout)：字段、默认值与算法边界。
+- [Graph 布局方法](/docs/api/graph#graph-layout)：重排与取消。
+- [布局总览](/docs/guides/layout-overview) · [性能调优](/docs/metrics/performance#performance-tuning)。
+
+**相关可运行示例**
+
+- [常用布局切换](/docs/examples/layouts)
+- [更多布局示例](/docs/examples/layout-gallery)
+- [流程图](/docs/examples/flowchart)
+- [缩进树](/docs/examples/indented-tree)
+- [辐射树](/docs/examples/radial-tree)
+- [调用链](/docs/examples/dependency-graph)
+- [组织架构图](/docs/examples/org-chart)
+- [思维导图](/docs/examples/mindmap)
+- [鱼骨图](/docs/examples/fishbone)

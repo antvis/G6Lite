@@ -1,7 +1,8 @@
 /**
  * Demo: 鱼骨图 (Fishbone/Ishikawa Diagram) — 盈利未达预期分析
  */
-import { Graph, type GraphEdge, type GraphNode } from '@antv/g6-lite';
+import { Graph, register, type GraphEdge, type GraphNode } from '@antv/g6-lite';
+import fishbone from '@antv/g6-lite/layouts/fishbone';
 import { attachLabelsCanvas, type GraphInstanceWithTools } from './tooling.ts';
 
 const CATEGORY_COLORS = ['#E8684A', '#5B8FF9', '#5AD8A6', '#F6BD16', '#6F5EF9', '#5D7092'];
@@ -105,6 +106,7 @@ function getEdgeColor(_source: GraphNode, _target: GraphNode, edge: GraphEdge) {
 }
 
 export async function run(container: string | HTMLElement) {
+  register('layout', 'fishbone', fishbone);
   const wrapper = typeof container === 'string' ? document.querySelector(container)! as HTMLElement : container;
   wrapper.style.position = 'relative';
 
@@ -141,6 +143,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => { cleanupLabels(); graph.destroy(); },
   };

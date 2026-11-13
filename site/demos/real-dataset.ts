@@ -21,9 +21,13 @@ const PALETTE = [
 
 export async function run(container: string | HTMLElement) {
   const data: GraphData = await fetch(DATASET).then((r) => r.json());
+  // Uniformly rescale the precomputed layout to keep node bodies visible at fit.
+  // Relative positions and the original network topology remain unchanged.
+  data.nodes = data.nodes.map((node) => ({ ...node, x: (node.x ?? 0) * 0.02, y: (node.y ?? 0) * 0.02 }));
+  const fitOptions = { padding: 32 };
 
   const graph = new Graph({
-    autoFit: true,
+    autoFit: fitOptions,
     container,
     data,
     node: {
@@ -46,5 +50,9 @@ export async function run(container: string | HTMLElement) {
   });
 
   await graph.render();
-  return graph;
+  return {
+    getData: () => graph.getData(),
+    fitView: () => graph.fitView(fitOptions),
+    destroy: () => graph.destroy(),
+  };
 }

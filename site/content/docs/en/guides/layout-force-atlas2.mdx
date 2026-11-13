@@ -1,0 +1,45 @@
+---
+title: ForceAtlas2 layout
+description: Connected nodes attract while repulsion and gravity shape the network.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Connected nodes attract while repulsion and gravity shape the network.
+
+## When to use it
+
+Use it to see densely connected groups and the links between them.
+
+## Basic usage
+
+Set the layout type with `layout.type`.
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'force-atlas2' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `kr` | Repulsion coefficient between nodes. | `number` | `5` |
+| `kg` | Gravity coefficient that pulls nodes toward the center. | `number` | `1` |
+| `barnesHut` | Whether to approximate repulsion with Barnes–Hut. | `boolean` | `true` |
+| `maxIteration` | Maximum number of iterations. | `number` | `100`, or `50` above 5,000 nodes |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
+
+## Code example
+
+Stronger repulsion and gravity reveal three connected groups.
+
+<NodeDocExample id="built-in-layout" layoutType="force-atlas2" locale="en" />
+
+[Compare network layouts](/en/docs/guides/layout-networks)

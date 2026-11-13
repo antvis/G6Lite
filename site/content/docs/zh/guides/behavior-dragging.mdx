@@ -1,0 +1,22 @@
+---
+title: 拖动节点、分组与边
+description: 移动节点和分组，或拖动边的端点并保存重连结果
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+[拖动节点与分组](/docs/guides/behavior-drag-node) · [拖动边端点](/docs/guides/behavior-drag-edge)
+
+## 拖动节点和分组
+
+节点拖动用 `drag-node` 开启。拖动已选节点时，其他已选节点也会移动。拖动分组里的空白处，可以移动整个分组。
+
+<NodeDocExample id="behavior-drag-node" locale="zh" focus="drag-options" />
+
+节点的分组归属通过分组 API 更新。 [分组方法](/docs/guides/combo#动态调整归属)
+
+## 拖动边的端点
+
+边端点拖动用 `drag-edge` 开启。松开后，`edge:dragend` 会报告新的起点和终点。业务确认可以重连后，用 `updateEdgeData()` 保存。
+
+<NodeDocExample id="behavior-drag-edge" locale="zh" focus="reconnect" />

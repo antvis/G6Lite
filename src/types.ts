@@ -173,6 +173,10 @@ export interface GraphEventMap {
   'edge:contextmenu': [event: EdgeGraphEvent<Record<string, unknown>, MouseEvent>];
   'edge:wheel': [event: EdgeGraphEvent<Record<string, unknown>, WheelEvent>];
 
+  'combo:pointerover': [event: ComboGraphEvent];
+  'combo:pointerenter': [event: ComboGraphEvent];
+  'combo:pointermove': [event: ComboGraphEvent];
+  'combo:pointerleave': [event: ComboGraphEvent];
   'combo:pointerdown': [event: ComboGraphEvent];
   'combo:click': [event: ComboGraphEvent];
   'combo:dblclick': [event: ComboGraphEvent];
@@ -534,8 +538,6 @@ export interface NodeConfig {
   /** Registered custom label renderer name. */
   labelRenderer?: string;
   decorations?: NodeDecorationConfig[];
-  /** Keeps the default node label below decorated nodes unless labelPlacement is explicit. */
-  autoExternalLabelPlacement?: boolean;
   style?: NodeStyleConfig | ((node: GraphNode) => Partial<NodeStyleConfig>);
   stateStyles?: Partial<Record<NodeState, NodeStateStyleOverride>>;
 }
@@ -574,7 +576,6 @@ export interface EdgeConfig {
     radius?: EdgeStyleValue<number>; // polyline corner radius
     router?: 'orth' | 'tree' | 'indented' | 'fishbone'; // polyline routing mode
     indentTarget?: 'left' | 'right'; // indented routing: edge end at child left or right edge
-    trunkGap?: number; // indented routing: gap from trunk to child left edge
     // Label
     label?: EdgeStyleValue<string | false>;
     labelFontSize?: EdgeStyleValue<number>;
@@ -739,6 +740,7 @@ export interface InternalCombo {
 
 /** Full graph options. */
 export interface GraphOptions {
+  /** CSS selector (for example, '#container') or an existing HTML element. */
   container: string | HTMLElement;
   data: GraphData;
   /**

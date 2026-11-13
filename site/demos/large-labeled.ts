@@ -2,7 +2,6 @@
  * Demo: 5000 节点 + 标签 — 性能与标签验证
  */
 import { Graph } from '@antv/g6-lite';
-import { attachLabelsCanvas } from './tooling.ts';
 
 function generateData(nodeCount: number, degree: number) {
   const nodes = Array.from({ length: nodeCount }, (_, i) => ({
@@ -43,19 +42,19 @@ export async function run(container: string | HTMLElement) {
           return c === 'a' ? '#5B8FF9' : c === 'b' ? '#61DDAA' : '#F6BD16';
         },
         size: 4,
+        label: (node) => node.name ?? node.id,
+        labelPlacement: 'bottom',
+        labelFontSize: 12,
       },
     },
     edge: { type: 'line', style: { lineWidth: 0.5 } },
+    label: { scaleWithZoom: false, hideOnLowZoom: true, hideOnCollision: true },
     layout: { type: 'force', linkDistance: 25 },
     behaviors: ['zoom-canvas', 'drag-canvas'],
     theme: 'light',
   });
 
   await graph.render();
-
-  attachLabelsCanvas(wrap, graph as any, {
-    nodeLabel: (n) => n.name ?? n.id,
-  });
 
   return graph;
 }

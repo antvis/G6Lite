@@ -1,0 +1,85 @@
+---
+title: Graph overview
+description: Learn about the Graph lifecycle, options, and instance properties, and run a complete example
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## What is a Graph?
+
+A graph describes objects as nodes and relationships as edges. A G6Lite `Graph` instance draws that data in a container and provides methods to query elements, adjust the viewport, and listen for interactions.
+
+A graph instance typically goes through four steps.
+
+1. **Create.** Call `new Graph(options)` to bind the container and initialize rendering resources.
+2. **Render.** Await `graph.render()` to complete the initial layout and draw the graph.
+3. **Update.** Reuse the instance. Call `setData()` to replace graph data and `updateOptions()` to change supported options.
+4. **Destroy.** Call `graph.destroy()` when leaving the page or unmounting the component to release the canvas and listeners.
+
+<span id="working-with-a-graph" />
+
+## Use G6Lite Graph
+
+Follow the [quick start](/en/docs/getting-started/quick-start) to install `@antv/g6-lite`. Mount a container with nonzero width and height, then create and render the graph.
+
+```html
+<div id="container" style="width: 100%; height: 320px"></div>
+```
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [
+      { id: 'browser', x: 0, y: 0 },
+      { id: 'api', x: 120, y: 0 },
+    ],
+    edges: [{ source: 'browser', target: 'api' }],
+  },
+});
+
+await graph.render();
+```
+
+After the first render, you can focus a node or update the data. For method timing and cleanup, see the [Graph lifecycle API](/en/docs/api/graph#graph-lifecycle).
+
+<span id="container-and-options" />
+
+## Graph options
+
+`GraphOptions` is the configuration object passed to the constructor. See the [GraphOptions API](/en/docs/api/options#graphoptions) for the full type definitions and details.
+
+| Option | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `container` | `string \| HTMLElement` | Required | Mounts the graph. String values are CSS selectors. |
+| `data` | `GraphData` | Required | Supplies nodes, edges, and optional Combo groups. |
+| `autoFit` | `boolean \| number \| FitViewOptions` | `false` | Controls refitting on container resize. The first render fits the graph automatically. |
+| `node` | `NodeConfig` | Circle nodes | Sets node shapes, styles, and states. |
+| `edge` | `EdgeConfig` | Straight edges | Sets edge shapes, arrowheads, and states. |
+| `combo` | `ComboConfig` | Built-in styles | Sets group appearance, labels, and collapsed shapes. |
+| `label` | `LabelOptions` | Built-in policy | Controls label scaling and visibility. |
+| `layout` | `LayoutConfig` | Input coordinates | Chooses the algorithm and options for positioning nodes. |
+| `behaviors` | `BehaviorOption[]` | Canvas zoom and drag | Configures interactions such as zooming, dragging, and selection. |
+| `theme` | `ThemeOption` | `'light'` | Sets default styles for the canvas and elements. |
+| `transforms` | `TransformOption[]` | None | Processes input data in order before layout. |
+| `plugins` | `PluginOption[]` | None | Mounts registered plugins. |
+
+The container sets the initial canvas dimensions. See [Viewport and coordinates](/en/docs/guides/viewport) for fitting and resizing.
+
+## Graph properties
+
+| Property | Type | Description |
+| --- | --- | --- |
+| [`graph.destroyed`](/en/docs/api/graph#graph-lifecycle-destroyed) | `boolean` | Read-only. Becomes `true` when destruction begins. Check it before using the graph after an asynchronous request. |
+
+Use `await graph.render()` to wait for the initial render.
+
+## Example
+
+### Complete creation and configuration example
+
+The example uses Dagre to lay out the dependencies from left to right and groups Cache and Database in a Combo. Click a node to see its selected style, or drag and zoom the canvas.
+
+<NodeDocExample id="graph-options" locale="en" />

@@ -1,4 +1,6 @@
 {
-  "title": "技术指标",
-  "pages": ["performance", "performance-tuning", "bundle-size"]
+  "title": "性能与原理",
+  "pages": [
+    "performance"
+  ]
 }

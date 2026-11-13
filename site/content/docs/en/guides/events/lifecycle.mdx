@@ -1,0 +1,42 @@
+---
+title: Rendering, layout, and data updates
+description: Know when to update the graph, read node positions, or respond to data replacement.
+---
+
+import { NodeDocExample as EventDocExample } from '@/components/node-doc-example';
+
+## When can I continue? [#choose-the-right-completion-point]
+
+| Task | What to do |
+| --- | --- |
+| Update the graph after its first render | Wait for `await graph.render()`, then change data or states. |
+| Read positions after running a layout | Wait for `await graph.layout()`, then call `getNodePosition()`. |
+| Update the application after each data replacement | Listen for `datachange` to receive the new node and edge counts. |
+
+```ts
+await graph.render();
+
+graph.on('datachange', ({ nodeCount, edgeCount }) => {
+  console.log('Data replaced', nodeCount, edgeCount);
+});
+await graph.setData(nextData);
+
+await graph.layout();
+const position = graph.getNodePosition('A');
+```
+
+To receive a notification for the first render, register `graph.once('afterrender', handler)` before calling `render()`. The `layout:end` and `afterlayout` events fire before positions are written back. Await `graph.layout()` before reading final positions.
+
+## Observe the sequence
+
+The log shows the initial layout and render events when the example loads. Use the buttons in the top-right corner to see which events each operation triggers.
+
+| Button | What to look for |
+| --- | --- |
+| **Update A**, **Add D**, **Remove D** | `afterupdateitem`, `afteradditem`, and `afterremoveitem`, respectively. Add D before trying to remove it. |
+| **Replace data** | Layout events followed by `datachange`, since this graph has a layout configured. |
+| **Layout** | Layout events. |
+
+<EventDocExample id="events-lifecycle" locale="en" focus="lifecycle" />
+
+See the [event API reference](/en/docs/api/graph/events#event-lifecycle) for event order, callback arguments, and cancellation behavior. See the [graph lifecycle](/en/docs/api/graph#graph-lifecycle) for cleanup on unmount.

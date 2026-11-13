@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getLabelRenderer, registerLabelRenderer } from '@src/extensions/label.js';
-import { extensionFactory, register, type LabelRenderer } from '@src/index.js';
+import { register, type LabelRenderer } from '@src/index.js';
 
 function renderer(width: number): LabelRenderer {
   return {
@@ -19,11 +19,7 @@ describe('label extension registry', () => {
   });
 
   it('registers label renderer factories through register()', () => {
-    register(
-      'label',
-      'registry-label-factory',
-      extensionFactory(() => renderer(24)),
-    );
+    register('label', 'registry-label-factory', () => renderer(24));
 
     expect(getLabelRenderer('registry-label-factory')?.measure({} as never).width).toBe(24);
   });

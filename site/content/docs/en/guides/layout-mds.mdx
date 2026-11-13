@@ -1,0 +1,48 @@
+---
+title: MDS layout
+description: Multidimensional scaling (MDS) approximates shortest-path distances in two dimensions.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Multidimensional scaling (MDS) approximates shortest-path distances in two dimensions.
+
+## When to use it
+
+Use it to examine how close or far apart nodes are in a network.
+
+## Basic usage
+
+This layout is optional. Import and register it before setting `layout.type`. For CDN usage, see [Optional layouts](/en/docs/guides/layout-overview#optional-layouts).
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import mds from '@antv/g6-lite/layouts/mds';
+
+register('layout', 'mds', mds);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'mds' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `linkDistance` | Reference length used to scale graph distances. | `number` | `50` |
+| `center` | Center of the layout in graph coordinates. | `[number, number]` | Center of the layout area |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
+
+## Code example
+
+The example uses a scale of 80. Nodes farther apart in the network generally appear farther apart on the canvas.
+
+<NodeDocExample id="built-in-layout" layoutType="mds" locale="en" />
+
+[Compare network layouts](/en/docs/guides/layout-networks)

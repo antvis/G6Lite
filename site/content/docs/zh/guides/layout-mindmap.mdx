@@ -1,0 +1,52 @@
+---
+title: 思维导图布局 Mindmap
+description: 分支从中心主题向一侧或两侧展开。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+分支从中心主题向一侧或两侧展开。
+
+## 使用场景
+
+适合梳理主题、知识点和分类层级。
+
+## 基本用法
+
+这是可选布局。先导入并注册，再设置 `layout.type`。CDN 接入见[可选布局](/docs/guides/layout-overview#optional-layouts)。
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import mindmap from '@antv/g6-lite/layouts/mindmap';
+
+register('layout', 'mindmap', mindmap);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'mindmap' },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `direction` | `'LR'` 向右，`'RL'` 向左，`'H'` 通过 `getSide` 分配分支。 | `'H'` \| `'LR'` \| `'RL'` | `'H'` |
+| `getSide` | 指定分支在左侧还是右侧。函数可读取节点、分支索引和父节点所在侧。 | 返回 `'left'` 或 `'right'` 的函数 | 返回 `'right'` |
+| `levelGap` | 父子节点之间的水平留白。 | `number` | `120` |
+| `nodeGap` | 同侧相邻子节点之间的垂直留白。 | `number` | `30` |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-tree-layout-fields)
+
+## 代码示例
+
+父子关系通过边定义，`source` 填父节点的 ID，`target` 填子节点的 ID。
+
+`getSide` 将 A、C 分支排在左侧，B、D 分支排在右侧。
+
+<NodeDocExample id="built-in-layout" layoutType="mindmap" locale="zh" />
+
+[对比树布局](/docs/guides/layout-trees)

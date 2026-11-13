@@ -1,0 +1,45 @@
+---
+title: Concentric layout
+description: Place nodes in rings by a ranking metric, with higher values near the center.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Place nodes in rings by a ranking metric, with higher values near the center.
+
+## When to use it
+
+Use it to emphasize hubs by their number of connections.
+
+## Basic usage
+
+Set the layout type with `layout.type`.
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'concentric' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `sortBy` | Ranking metric. `'degree'` ranks by node degree. | `'degree'` \| `(node) => number` | `'degree'` |
+| `maxLevelDiff` | Ranking values in the same ring differ by less than this threshold. | `number` | Computed automatically |
+| `preventOverlap` | Whether to space nodes to avoid overlap. | `boolean` | `false` |
+| `nodeSpacing` | Gap reserved between nodes when preventing overlap. | `number` | `10` |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
+
+## Code example
+
+Nodes are grouped by degree. The purple hub has five connections and sits at the center. Each blue node has three connections and sits on the inner ring. Each green node has one connection and sits on the outer ring.
+
+<NodeDocExample id="built-in-layout" layoutType="concentric" locale="en" />
+
+[Compare network layouts](/en/docs/guides/layout-networks)

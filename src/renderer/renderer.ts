@@ -169,7 +169,6 @@ export class Renderer {
   private layoutDirection: 'TB' | 'LR' | 'BT' | 'RL' = 'TB';
   private polylineRouter: 'orth' | 'tree' | 'indented' | 'fishbone' = 'orth';
   private indentTarget: 'left' | 'right' = 'left';
-  private trunkGap: number = 0;
 
   // Camera
   private camera: Camera = createCamera();
@@ -348,7 +347,6 @@ export class Renderer {
     this.layoutDirection = renderData.layoutDirection ?? 'TB';
     this.polylineRouter = renderData.polylineRouter ?? 'orth';
     this.indentTarget = renderData.edgeConfig?.style?.indentTarget ?? 'left';
-    this.trunkGap = renderData.edgeConfig?.style?.trunkGap ?? 0;
     this.nodes = renderData.nodes as typeof this.nodes;
     this.edges = renderData.edges as typeof this.edges;
     this.nodeIdToIndex.clear();
@@ -811,7 +809,7 @@ export class Renderer {
       }
       const routes =
         this.polylineRouter === 'indented'
-          ? computeIndentedRoutes(edgeRects, this.layoutDirection, this.indentTarget, this.trunkGap)
+          ? computeIndentedRoutes(edgeRects, this.layoutDirection, this.indentTarget)
           : computeTreeRoutes(edgeRects, this.layoutDirection, 'cubic');
       for (const [index, rawRoute] of routes) {
         const radius = radiusByIndex.get(index) ?? 0;

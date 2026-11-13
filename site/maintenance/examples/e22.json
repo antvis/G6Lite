@@ -1,0 +1,44 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E22",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "large",
+      "file": "large.ts",
+      "observations": [
+        "Rendered 200 nodes and 800 edges; visible graph, pan/wheel, fit and refresh passed."
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "large-labeled",
+      "file": "large-labeled.ts",
+      "observations": [
+        "Rendered data reports 5000 nodes and 15000 edges; overview hides labels and zoom reveals readable built-in Canvas labels with collision avoidance.",
+        "Refresh returns a single graph; observed layout initialization around 4.4–5.2 seconds on this machine, not a performance guarantee."
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "real-dataset",
+      "file": "real-dataset.ts",
+      "observations": [
+        "Rendered data reports 8798 nodes and 71077 edges; pan, zoom, fit and refresh passed.",
+        "Uniformly scaled precomputed positions preserve layout shape and topology; screenshot confirms colored full overview rather than clipped grey edges. No runtime layout or comparative performance claim."
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Replace always-visible helper label overlay with built-in low-zoom/collision label policy.",
+    "Uniformly rescale preset coordinates so node bodies remain visible at fit; use consistent fit options for toolbar and initialization."
+  ]
+}

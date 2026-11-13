@@ -1,0 +1,52 @@
+---
+title: 缩进树布局 Indented
+description: 节点按树的遍历顺序逐行排列，子节点随层级加深而缩进。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+节点按树的遍历顺序逐行排列，子节点随层级加深而缩进。
+
+## 使用场景
+
+适合文件目录、导航菜单和分类列表。
+
+## 基本用法
+
+这是可选布局。先导入并注册，再设置 `layout.type`。CDN 接入见[可选布局](/docs/guides/layout-overview#optional-layouts)。
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import indented from '@antv/g6-lite/layouts/indented';
+
+register('layout', 'indented', indented);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'indented' },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `indent` | 每深入一层的水平缩进。 | `number` | `80` |
+| `rowHeight` | 相邻两行之间的垂直距离。 | `number` | `40` |
+| `direction` | `'LR'` 向右缩进，`'RL'` 向左缩进。 | `'LR'` \| `'RL'` | `'LR'` |
+| `rootId` | 根节点的 ID。 | `string` | 首个无父节点 |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-tree-layout-fields)
+
+## 代码示例
+
+父子关系通过边定义，`source` 填父节点的 ID，`target` 填子节点的 ID。
+
+子节点在下一层缩进 72，边通过 `router: 'indented'` 按目录树的方式连接。
+
+<NodeDocExample id="built-in-layout" layoutType="indented" locale="zh" />
+
+[对比树布局](/docs/guides/layout-trees)

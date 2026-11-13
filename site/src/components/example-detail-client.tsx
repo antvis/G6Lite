@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { Maximize, Minimize, RotateCcw, Scan } from 'lucide-react';
 import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -24,6 +25,8 @@ import {
   siteExamples,
 } from '@/lib/site-examples';
 import { withBasePath } from '@/lib/shared';
+import { ExampleStackBlitz } from './example-stackblitz';
+import canvasStyles from './quick-start-example.module.css';
 
 type DetailTab = 'source' | 'data' | 'guide';
 type PreviewStatus = 'loading' | 'ready' | 'error';
@@ -80,10 +83,12 @@ export function ExampleDetailClient({
   id,
   locale,
   initialSource,
+  helperFile,
 }: {
   id: string;
   locale: Locale;
   initialSource: string;
+  helperFile?: { name: string; source: string };
 }) {
   const example = getSiteExample(id);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -96,6 +101,8 @@ export function ExampleDetailClient({
   const resizeFrameRef = useRef<number | null>(null);
   const splitRatioRef = useRef(DEFAULT_WORKSPACE_SPLIT);
   const [revision, setRevision] = useState(0);
+  // Snapshot effects follow the installed handle, not the restart request.
+  const [handleRevision, setHandleRevision] = useState(0);
   const [status, setStatus] = useState<PreviewStatus>('loading');
   const [error, setError] = useState('');
   const [renderDuration, setRenderDuration] = useState<number | null>(null);
@@ -103,6 +110,7 @@ export function ExampleDetailClient({
   // The editor draft starts from the build-time inlined source; full-page
   // navigation remounts this component, so one draft per page is enough.
   const [draft, setDraft] = useState(initialSource);
+  const [showHelper, setShowHelper] = useState(false);
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
   const [liveData, setLiveData] = useState({ display: '', full: '', unavailable: false });
   const [highlightedData, setHighlightedData] = useState({ source: '', html: '' });
@@ -166,6 +174,7 @@ export function ExampleDetailClient({
           return;
         }
         activeHandleRef.current = nextHandle;
+        setHandleRevision((value) => value + 1);
         setRenderDuration(performance.now() - startedAt);
         setStatus('ready');
       })
@@ -184,11 +193,8 @@ export function ExampleDetailClient({
     };
   }, [example, revision]);
 
-  // Runs after React hydrates. The inline script in the directory nav has
-  // already restored sessionStorage and opened the current category, so this
-  // effect repeats that state and then owns later `toggle` events. Both are
-  // required: the script avoids a collapsed flash, and this effect keeps the
-  // saved set in sync after React takes over.
+  // Restore the saved categories before the first hydrated paint, then own
+  // later toggle events. The nav stays hidden until this layout effect is done.
   useLayoutEffect(() => {
     const nav = directoryNavRef.current;
     if (!nav || !example) return;
@@ -253,7 +259,7 @@ export function ExampleDetailClient({
       full: json,
       unavailable: false,
     });
-  }, [activeTab, status, revision, locale]);
+  }, [activeTab, status, handleRevision, locale]);
 
   // Highlights the live JSON on demand with shiki; the source tab renders
   // through the editor instead, so this only serves the data tab.
@@ -326,6 +332,8 @@ export function ExampleDetailClient({
 
   // The server component inlines this source at build time.
   const source = initialSource;
+  const displayedHelper = showHelper ? helperFile : undefined;
+  const displayedSource = displayedHelper?.source ?? draft;
   const dirty = source.length > 0 && draft !== source;
   const highlightedJson =
     highlightedData.source === liveData.display ? highlightedData.html : '';
@@ -355,6 +363,10 @@ export function ExampleDetailClient({
           dataContext: '数据背景',
           capabilities: '关键能力',
           copy: '复制源码',
+          copyFile: '复制当前文件',
+          sourceFiles: '源码文件',
+          readOnly: '只读',
+          stackBlitz: '在 StackBlitz 中打开',
           copyData: '复制数据',
           copied: '已复制',
           run: '运行',
@@ -393,6 +405,10 @@ export function ExampleDetailClient({
           dataContext: 'Data context',
           capabilities: 'Key capabilities',
           copy: 'Copy source',
+          copyFile: 'Copy file',
+          sourceFiles: 'Source files',
+          readOnly: 'Read only',
+          stackBlitz: 'Open in StackBlitz',
           copyData: 'Copy data',
           copied: 'Copied',
           run: 'Run',
@@ -421,8 +437,8 @@ export function ExampleDetailClient({
         };
 
   async function copySource() {
-    if (!draft) return;
-    await navigator.clipboard.writeText(draft);
+    if (!displayedSource) return;
+    await navigator.clipboard.writeText(displayedSource);
     setCopyState('copied');
     window.setTimeout(() => setCopyState('idle'), 1600);
   }
@@ -451,6 +467,7 @@ export function ExampleDetailClient({
         return;
       }
       activeHandleRef.current = handle;
+      setHandleRevision((value) => value + 1);
       setRenderDuration(performance.now() - startedAt);
       setStatus('ready');
     } catch (reason: unknown) {
@@ -563,7 +580,7 @@ export function ExampleDetailClient({
     updateWorkspaceSplit(currentWidth + (event.key === 'ArrowRight' ? 24 : -24), true);
   }
 
-  const sourceLineCount = draft ? draft.replace(/\n$/, '').split('\n').length : 0;
+  const sourceLineCount = displayedSource ? displayedSource.replace(/\n$/, '').split('\n').length : 0;
   const workspaceStyle = {
     '--example-preview-fr': `${splitRatio}fr`,
     '--example-code-fr': `${100 - splitRatio}fr`,
@@ -615,6 +632,7 @@ export function ExampleDetailClient({
                   <details
                     key={category.id}
                     data-example-category={category.id}
+                    open={category.id === example.category}
                     suppressHydrationWarning
                   >
                     <summary
@@ -646,18 +664,6 @@ export function ExampleDetailClient({
                   </details>
                 );
               })}
-              {/*
-                Runs while the nav is parsed, before hydration. Restores the
-                categories stored in sessionStorage and opens the current
-                example category. `example.category` comes from static site
-                data and is inserted with JSON.stringify. The useLayoutEffect
-                above repeats this after React mounts. Do not delete either.
-              */}
-              <script
-                dangerouslySetInnerHTML={{
-                  __html: `(()=>{var nav=document.currentScript&&document.currentScript.parentElement;try{var key=${JSON.stringify(DIRECTORY_OPEN_STORAGE_KEY)};var parsed=JSON.parse(sessionStorage.getItem(key)||"[]");var ids=new Set(Array.isArray(parsed)?parsed.filter(function(item){return typeof item==="string";}):[]);ids.add(${JSON.stringify(example.category)});sessionStorage.setItem(key,JSON.stringify(Array.from(ids)));if(nav){nav.querySelectorAll("[data-example-category]").forEach(function(el){if(ids.has(el.getAttribute("data-example-category")))el.open=true;});}}catch(e){}if(nav)nav.setAttribute("data-directory-ready","");})();`,
-                }}
-              />
             </nav>
           </div>
         </div>
@@ -702,36 +708,8 @@ export function ExampleDetailClient({
                   {status === 'loading' ? copy.loading : status === 'ready' ? copy.ready : error}
                 </small>
               </div>
-              <div className="example-preview-actions">
-                <button
-                  className="example-utility-button"
-                  disabled={status !== 'ready'}
-                  onClick={() => void fitPreview()}
-                  type="button"
-                >
-                  <span aria-hidden="true">◎</span>
-                  {copy.fit}
-                </button>
-                <button
-                  className="example-utility-button"
-                  onClick={() => setRevision((value) => value + 1)}
-                  type="button"
-                >
-                  <span aria-hidden="true">↻</span>
-                  {status === 'error' ? copy.retry : copy.refresh}
-                </button>
-                <button
-                  aria-pressed={previewExpanded}
-                  className="example-utility-button"
-                  onClick={() => setPreviewExpanded((value) => !value)}
-                  type="button"
-                >
-                  <span aria-hidden="true">⛶</span>
-                  {previewExpanded ? copy.exitFullscreen : copy.fullscreen}
-                </button>
-              </div>
             </div>
-            <div className="example-preview-stage">
+            <div className={`example-preview-stage ${canvasStyles.viewport}`}>
               <div className="example-preview-canvas" ref={previewRef} />
               {status === 'loading' ? (
                 <div className="example-preview-overlay">
@@ -745,6 +723,34 @@ export function ExampleDetailClient({
                   <span>{error}</span>
                 </div>
               ) : null}
+              <div className={canvasStyles.tools} role="toolbar" aria-label={copy.preview}>
+                <button
+                  aria-label={copy.fit}
+                  disabled={status !== 'ready'}
+                  onClick={() => void fitPreview()}
+                  title={copy.fit}
+                  type="button"
+                >
+                  <Scan aria-hidden="true" />
+                </button>
+                <button
+                  aria-label={status === 'error' ? copy.retry : copy.refresh}
+                  onClick={() => setRevision((value) => value + 1)}
+                  title={status === 'error' ? copy.retry : copy.refresh}
+                  type="button"
+                >
+                  <RotateCcw aria-hidden="true" />
+                </button>
+                <button
+                  aria-label={previewExpanded ? copy.exitFullscreen : copy.fullscreen}
+                  aria-pressed={previewExpanded}
+                  onClick={() => setPreviewExpanded((value) => !value)}
+                  title={previewExpanded ? copy.exitFullscreen : copy.fullscreen}
+                  type="button"
+                >
+                  {previewExpanded ? <Minimize aria-hidden="true" /> : <Maximize aria-hidden="true" />}
+                </button>
+              </div>
             </div>
             <footer className="example-preview-footer">
               <span>
@@ -823,7 +829,7 @@ export function ExampleDetailClient({
                 <div className="example-code-actions">
                   <button
                     className={`example-utility-button${dirty ? ' is-dirty' : ''}`}
-                    disabled={!source}
+                    disabled={!source || !!displayedHelper}
                     onClick={() => void runEditedSource()}
                     type="button"
                   >
@@ -832,7 +838,7 @@ export function ExampleDetailClient({
                   </button>
                   <button
                     className="example-utility-button"
-                    disabled={!dirty}
+                    disabled={!dirty || !!displayedHelper}
                     onClick={resetEditedSource}
                     type="button"
                   >
@@ -850,7 +856,7 @@ export function ExampleDetailClient({
                   </button>
                   <button className="example-utility-button" onClick={copySource} type="button">
                     <span aria-hidden="true">⧉</span>
-                    {copyState === 'copied' ? copy.copied : copy.copy}
+                    {copyState === 'copied' ? copy.copied : helperFile ? copy.copyFile : copy.copy}
                   </button>
                 </div>
               ) : activeTab === 'data' ? (
@@ -867,8 +873,35 @@ export function ExampleDetailClient({
                 </div>
               ) : null}
             </div>
+            {activeTab === 'source' && helperFile ? (
+              <div className="example-source-files">
+                <div className="example-source-file-switch" role="group" aria-label={copy.sourceFiles}>
+                  {[example.file, helperFile.name].map((name) => (
+                    <button
+                      aria-pressed={name === (displayedHelper?.name ?? example.file)}
+                      className="example-utility-button"
+                      key={name}
+                      onClick={() => {
+                        setShowHelper(name === helperFile.name);
+                        setCopyState('idle');
+                      }}
+                      type="button"
+                    >
+                      {name}
+                      {name === helperFile.name && <span className="example-source-file-note">{copy.readOnly}</span>}
+                    </button>
+                  ))}
+                </div>
+                <ExampleStackBlitz
+                  entry={{ name: example.file, source: draft }}
+                  helper={helperFile}
+                  label={copy.stackBlitz}
+                  title={localizedText(example.title, locale)}
+                />
+              </div>
+            ) : null}
             <div className="example-code-content">
-              {activeTab === 'guide' ? (
+              <div hidden={activeTab !== 'guide'}>
                 <article className="example-guide-panel">
                   <header>
                     <span>{localizedText(example.group, locale)}</span>
@@ -891,14 +924,35 @@ export function ExampleDetailClient({
                       ))}
                     </div>
                   </section>
+                  {example.documentation?.length ? (
+                    <section>
+                      <h3>{locale === 'zh' ? '继续阅读' : 'Related documentation'}</h3>
+                      <ul>
+                        {example.documentation.map((link) => (
+                          <li key={link.href}>
+                            <a href={withBasePath(localizedPath(link.href, locale))}>
+                              {localizedText(link.title, locale)}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
                 </article>
-              ) : activeTab === 'source' ? (
+              </div>
+              {activeTab === 'source' ? (
                 source ? (
-                  <CodeEditor value={draft} onChange={setDraft} wrap={wrapSource} />
+                  <CodeEditor
+                    key={displayedHelper?.name ?? example.file}
+                    onChange={displayedHelper ? undefined : setDraft}
+                    readOnly={!!displayedHelper}
+                    value={displayedSource}
+                    wrap={wrapSource}
+                  />
                 ) : (
                   <div className="example-panel-message">{copy.sourceError}</div>
                 )
-              ) : (
+              ) : activeTab === 'data' ? (
                 <div className="example-data-panel">
                   <div>
                     <h2>{copy.dataTitle}</h2>
@@ -918,7 +972,7 @@ export function ExampleDetailClient({
                     </pre>
                   )}
                 </div>
-              )}
+              ) : null}
             </div>
             {activeTab === 'guide' ? null : (
               <footer className="example-code-footer">
@@ -927,7 +981,7 @@ export function ExampleDetailClient({
                     <span>
                       TypeScript · ESM{sourceLineCount ? ` · ${sourceLineCount} ${copy.lines}` : ''}
                     </span>
-                    <span>{example.file}</span>
+                    <span>{displayedHelper?.name ?? example.file}</span>
                   </>
                 ) : (
                   <>

@@ -1,0 +1,97 @@
+---
+title: Node overview
+description: Learn about built-in and custom nodes, node data, styling, and states in G6Lite
+---
+
+import { ElementStyleGallery } from '@/components/element-style-gallery';
+
+## What is a node?
+
+A node represents an object or concept in a graph, such as a user, device, or service. Each node has a unique `id`. Edges refer to node IDs through `source` and `target` to represent relationships.
+
+## Node types
+
+### Built-in nodes
+
+Set `node.type` to use a built-in G6Lite node. The previews show filled and outlined circles, along with square and rounded rectangle corners.
+
+<ElementStyleGallery element="node" locale="en" />
+
+| Node type | Type name | Use and dimensions |
+| --- | --- | --- |
+| Circle | `circle` | Default type for markers such as users or devices. Set the diameter with `size`. |
+| Rectangle | `rect` | Useful for service names or cards. Set the shape with `width`, `height`, and `borderRadius`. |
+
+See [Node body styles](/en/docs/guides/node#nodestyleconfig) for size and corner radius defaults.
+
+### Custom nodes
+
+Use a `NodeExtension` with a `circle` or `rect` base to package a reusable node. For example, fill a service node according to its health and use `drawOverlay()` to add an alert marker. Call `register('node', name, extension)`, then assign the registered name to `node.type`. See [Custom nodes](/en/docs/guides/custom-node).
+
+## Data structure
+
+List nodes in `data.nodes`. Each entry is a [`GraphNode`](/en/docs/guides/data#graphnode).
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `id` | `string` | Yes | Unique ID for connecting, querying, and updating the node |
+| `name` | `string` | No | Name available to label callbacks |
+| `data` | `NodeData` | No | Application data available to style functions |
+| `x`, `y` | `number` | No | Position in graph coordinates when no layout is configured |
+| `fx`, `fy` | `number` | No | Coordinates fixed after layout |
+| `comboId` | `string` | No | ID of a group declared in `data.combos` |
+| `states` | `NodeState[]` | No | Initial states, such as `['selected']` |
+
+```ts
+const data = {
+  nodes: [
+    { id: 'api', name: 'API', x: 80, y: 100, data: { health: 'ok' } },
+    { id: 'db', name: 'Database', x: 220, y: 100, data: { health: 'warning' } },
+  ],
+  edges: [{ source: 'api', target: 'db' }],
+};
+```
+
+## Configuration methods
+
+### Configure all nodes at creation
+
+Pass `node` to `new Graph()`. A constant style value applies to every node, such as the diameter of `32` below.
+
+### Map styles from node data
+
+Assign a function to a field in `node.style`. This example uses each node's `data.health` for its fill and `name` for its label. The `#container` element needs to exist and have a width and height.
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: '#container',
+  data,
+  node: {
+    type: 'circle',
+    style: {
+      size: 32,
+      fill: (node) => node.data?.health === 'warning' ? '#F59E0B' : '#1783FF',
+      label: (node) => node.name ?? node.id,
+    },
+  },
+});
+
+await graph.render();
+```
+
+Style fields resolve in this order: `node.style`, the extension's `getStyle()`, the extension's default styles, then the theme or built-in fallbacks. See [Common node options](/en/docs/guides/node#nodeconfig) for the full list of fields and how to configure them.
+
+### Update nodes after rendering
+
+Use `graph.updateNodeData()` to change one node's application data. Use `graph.updateOptions()` to change the graph's node configuration. Style objects merge by field. The example below gives the database node its healthy color and changes both circles to a diameter of `40`.
+
+```ts
+graph.updateNodeData('db', { health: 'ok' });
+graph.updateOptions({ node: { style: { size: 40 } } });
+```
+
+## Node states
+
+Set initial states in the node's `states` array. After rendering, call `graph.setItemState('db', 'selected', true)` to select the node. Pass `false` as the last argument to clear the selection. Set `node.stateStyles.selected` to customize the selection stroke, fill, or halo. See [Element states](/en/docs/guides/states) and [node state styles](/en/docs/guides/node#options-node-state-styles).

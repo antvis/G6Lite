@@ -17,7 +17,7 @@ type RegistryEntry =
 const registries = new Map<ExtensionCategory, Map<string, RegistryEntry>>();
 const explicitFactories = new WeakSet<ExtensionFactory>();
 
-/** Marks a function as the preferred extension factory form. */
+/** Marks a function as a factory, bypassing legacy constructor detection. */
 export function extensionFactory<T>(factory: ExtensionFactory<T>): ExtensionFactory<T> {
   explicitFactories.add(factory as ExtensionFactory);
   return factory;
@@ -89,7 +89,7 @@ function isLegacyConstructor(input: unknown): input is ExtensionConstructor {
 
 /**
  * Best-effort compatibility cloning for legacy instance registrations.
- * Stateful extensions that require guaranteed isolation should use extensionFactory().
+ * Stateful extensions that require isolation should register a factory that returns a fresh instance.
  */
 function cloneExtension<T>(input: T, seen = new WeakMap<object, unknown>()): T {
   if (typeof input !== 'object' || input === null) return input;
@@ -122,7 +122,7 @@ function cloneExtension<T>(input: T, seen = new WeakMap<object, unknown>()): T {
       return clone as T;
     } catch {
       // A legacy instance whose constructor requires arguments remains usable, but
-      // only extensionFactory() can guarantee an isolated replacement for it.
+      // a factory can create a fresh instance with the required arguments.
     }
   }
 

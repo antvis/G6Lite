@@ -79,7 +79,11 @@ export async function run(container: string | HTMLElement) {
   graphs.push(g2);
 
   return {
+    getData: () => ({ views: graphs.map((graph) => graph.getData()) }),
     fitView: () => graphs.forEach((graph) => graph.fitView()),
-    destroy: () => graphs.forEach((graph) => graph.destroy()),
+    destroy: () => {
+      graphs.forEach((graph) => graph.destroy());
+      lineDiv.remove(); arcDiv.remove();
+    },
   };
 }

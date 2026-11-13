@@ -31,18 +31,6 @@ const stageIcons = [Database, Network, Cpu, MousePointer2];
 export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
   const copy = homepageCopy[locale];
   const aiPrompt = `${locale === 'zh' ? '使用' : 'Use'} $${skillName}\n${copy.performance.aiRequest}`;
-  const baseline = bundleMeasurement.baseline;
-  const sizeVsBaseline = baseline
-    ? copy.performance.vsG6
-        .replace('{name}', baseline.name)
-        .replace(
-          '{percent}',
-          (
-            ((baseline.gzippedBytes - bundleMeasurement.initialBytes) / baseline.gzippedBytes) *
-            100
-          ).toFixed(1),
-        )
-    : null;
 
   return (
     <main
@@ -62,7 +50,7 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
             {copy.workflow.description}{' '}
             <Link
               className={styles.workflowLifecycleLink}
-              href={localizedPath('/docs/concepts/graph-lifecycle', locale)}
+              href={localizedPath('/docs/api/graph#graph-lifecycle', locale)}
             >
               {copy.workflow.lifecycle} <ArrowRight aria-hidden="true" />
             </Link>
@@ -101,27 +89,21 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
                 <div className={styles.measuredSize}>
                   <span>{copy.performance.measured}</span>
                   <strong>
-                    {(bundleMeasurement.initialBytes / bundleMeasurement.unitBytes).toFixed(1)}
+                    {(bundleMeasurement.gzipBytes / bundleMeasurement.unitBytes).toFixed(1)}
                     <small>kB</small>
-                    {sizeVsBaseline ? (
-                      <span className={styles.sizeVsBaseline}>{sizeVsBaseline}</span>
-                    ) : null}
                   </strong>
                   <span>
-                    {bundleMeasurement.compression} · {copy.performance.noLayouts}
+                    {bundleMeasurement.compression} · {copy.performance.umdScope}
                   </span>
                 </div>
-                <div className={styles.loadParts}>
-                  <span>{copy.performance.core}</span>
-                  <span>{copy.performance.lazyLayouts}</span>
-                </div>
+                <code className={styles.bundleArtifact}>{bundleMeasurement.entry}</code>
                 <span className={styles.visualCaption}>
                   v{bundleMeasurement.version} · {bundleMeasurement.measuredAt}
                 </span>
               </div>
               <Link
                 className={styles.advantageLink}
-                href={localizedPath('/docs/metrics/bundle-size', locale)}
+                href={localizedPath('/docs/metrics/performance#bundle-size', locale)}
               >
                 {copy.performance.sizeLink} <ArrowRight aria-hidden="true" />
               </Link>
@@ -298,6 +280,27 @@ function HeroStage({ locale }: { locale: Locale }) {
           <div className={styles.heroCanvas}>
             <HeroLiveGraph locale={locale} />
           </div>
+          <p className={styles.graphAttribution}>
+            {copy.graph.dataset}
+            {' · '}
+            {copy.graph.source}
+            <a
+              href="https://github.com/jacomyal/sigma.js/tree/main/packages/website/public/data"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Sigma.js
+            </a>
+            {' · '}
+            {copy.graph.license}
+            <a
+              href="https://github.com/jacomyal/sigma.js/blob/main/LICENSE.txt"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              MIT
+            </a>
+          </p>
         </div>
       </div>
     </section>

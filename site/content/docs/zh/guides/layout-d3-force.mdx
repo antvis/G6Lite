@@ -1,0 +1,45 @@
+---
+title: D3 力导向布局
+description: D3 的力模拟根据节点间的作用力计算位置。
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## 概述
+
+D3 的力模拟根据节点间的作用力计算位置。
+
+## 使用场景
+
+适合需要调整斥力、边长或收敛速度的关系图。
+
+## 基本用法
+
+布局类型通过 `layout.type` 指定。
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'd3-force' },
+});
+```
+
+## 配置项
+
+| 参数 | 描述 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `linkDistance` | 相连节点之间的目标距离。 | `number` 或函数 | `max(200, √节点数 × 80)` |
+| `nodeStrength` | 节点间的作用力。负值表示斥力。 | `number` 或函数 | `-30` |
+| `alphaDecay` | 每步降低模拟热度的速率。 | `number` | `0.1` |
+| `preventOverlap` | 是否启用节点碰撞检测。 | `boolean` | `false` |
+
+[布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
+
+## 代码示例
+
+边长目标设为 100，节点间用负的 `nodeStrength` 产生斥力。
+
+<NodeDocExample id="built-in-layout" layoutType="d3-force" locale="zh" />
+
+[对比关系网络布局](/docs/guides/layout-networks)

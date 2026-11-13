@@ -1,15 +1,47 @@
 ---
 title: Custom nodes
-description: Register functional NodeExtension implementations through the public package API
+description: Register business nodes, add lightweight overlays and decoration anchors, and verify updates
 ---
 
-```ts
-import { register } from '@antv/g6-lite';
+import { NodeDocExample } from '@/components/node-doc-example';
 
-register('node', 'status-node', {
-  type: 'rect',
-  style: { width: 96, height: 34, borderRadius: 8 },
-});
-```
+Use `NodeExtension` to package a reusable node appearance. You can also set colors and sizes directly in [node configuration](/en/docs/guides/node#options-node).
 
-Prefer `node.style` and `stateStyles` when only color, size, stroke, label, or state appearance changes. `BaseNode` and `registerNode()` remain beta compatibility APIs; new extensions should use `register('node', ...)`.
+## Use cases
+
+1. Choose circle / rect to retain built-in rendering and picking.
+2. Define default style and pure getStyle; register before first render.
+3. Activate node.type and use public data methods for business updates.
+
+## Overlays and boundary anchors
+
+`drawOverlay()` draws the stripe on the left. `getBoundaryAnchor()` places the right badge a quarter of the node’s height above its center. Click **Toggle B status** to see the stripe and badge stay in place as B changes appearance.
+
+<NodeDocExample id="extension-node" locale="en" focus="overlay-and-anchor" />
+
+## Built-in extension
+
+Set `node.type` to `breathing-node` to add a pulse to active, selected, or highlighted nodes. Toggle selection or highlighting in the example and compare with the normal node on the right.
+
+<NodeDocExample id="breathing-node" locale="en" focus="breathing-options" />
+
+## Common questions
+
+### Why did registration have no effect?
+
+Check the name, node.type, registration order, and configured overrides. Descriptors are cached by name, not owned mutable state for each Graph.
+
+### Why did the badge move without changing edge endpoints?
+
+The anchor hook positions decorations. Arbitrary shapes and picking outlines are outside the current contract.
+
+### Why does the animation redraw continuously?
+
+Check whether drawOverlay always returns true. Static content returns void / false; avoid continuous per-node drawing on large graphs.
+
+See [custom nodes and explicit edge IDs](/en/docs/examples/custom-node-extension) and [registration](/en/docs/api/graph#extension-registration).
+
+**Related runnable examples**
+
+- [Breathing node](/en/docs/examples/breathing-node)
+- [Custom nodes and explicit edge IDs](/en/docs/examples/custom-node-extension)

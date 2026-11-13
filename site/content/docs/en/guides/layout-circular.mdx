@@ -1,0 +1,53 @@
+---
+title: Circular layout
+description: Arrange nodes around a circle or vary the radius to form a spiral.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Arrange nodes around a circle or vary the radius to form a spiral.
+
+## When to use it
+
+Use a circle for networks without a hierarchy, or a spiral for ordered nodes.
+
+## Basic usage
+
+Set the layout type with `layout.type`.
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'circular' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `radius` | Fixed circle radius. Set only the start and end radii to make a spiral. | `number` | Half the smaller layout dimension |
+| `startRadius`, `endRadius` | Spiral start and end radii, used when `radius` is omitted. | `number` | — |
+| `clockwise` | Whether to arrange nodes clockwise. | `boolean` | `true` |
+| `ordering` | Node order by topology, directed topology, or degree. | `'topology'` \| `'topology-directed'` \| `'degree'` | Input order |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
+
+## Code example
+
+Eight nodes sit on a circle with a radius of 100.
+
+<NodeDocExample id="built-in-layout" layoutType="circular" locale="en" />
+
+### Spiral arrangement
+
+Set `startRadius` and `endRadius` to different values and omit `radius`.
+
+```ts
+const layout = { type: 'circular', startRadius: 30, endRadius: 140 };
+```
+
+[Compare Grid, Circular, and Dagre](/en/docs/guides/layout-arrangements)

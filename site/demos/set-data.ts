@@ -3,7 +3,7 @@
  * 测试运行时整体数据替换和布局切换
  */
 import { Graph } from '@antv/g6-lite';
-import { mountCanvasMenu } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 const DATA_A = {
   nodes: [
@@ -74,78 +74,46 @@ export async function run(container: string | HTMLElement) {
   graph.on('layout:start', () => log('layout:start'));
   graph.on('layout:end', (e: any) => log(`layout:end: ${e.duration.toFixed(1)}ms`));
 
-  mountCanvasMenu(el, {
-    caption: '数据',
-    items: [
-      { value: 'a', label: 'A · 5 节点' },
-      { value: 'b', label: 'B · 8 节点' },
-    ],
-    value: 'a',
-    onSelect(value) {
-      const next = value === 'b' ? DATA_B : DATA_A;
-      log(`setData → DATA_${value.toUpperCase()}`);
-      void graph.setData(next).then(() => {
-        graph.fitView();
-        log(`done. nodeCount=${graph.getNodeCount()}`);
-      });
-    },
+  const ui = createDemoPanel(el);
+  ui.addChoice('数据', { 'A · 5 节点': 'a', 'B · 8 节点': 'b' }, 'a', async (value) => {
+    const next = value === 'b' ? DATA_B : DATA_A;
+    log(`setData → DATA_${value.toUpperCase()}`);
+    await graph.setData(next);
+    graph.fitView();
+    log(`done. nodeCount=${graph.getNodeCount()}`);
   });
 
-  mountCanvasMenu(el, {
-    caption: '布局',
-    items: [
-      { value: 'circular', label: 'circular' },
-      { value: 'grid', label: 'grid' },
-      { value: 'force', label: 'force' },
-    ],
-    value: 'circular',
-    onSelect(value) {
-      const apply = async () => {
-        log(`setLayout(${value}) + layout()`);
-        if (value === 'grid') graph.setLayout({ type: 'grid' });
-        else if (value === 'force') graph.setLayout({ type: 'd3-force' });
-        else graph.setLayout({ type: 'circular', radius: 150 });
-        await graph.layout();
-        graph.fitView();
-        log(`${value} done`);
-      };
-      void apply();
-    },
+  ui.addChoice('布局', ['circular', 'grid', 'force'], 'circular', async (value) => {
+    log(`setLayout(${value}) + layout()`);
+    if (value === 'grid') graph.setLayout({ type: 'grid' });
+    else if (value === 'force') graph.setLayout({ type: 'd3-force' });
+    else graph.setLayout({ type: 'circular', radius: 150 });
+    await graph.layout();
+    graph.fitView();
+    log(`${value} done`);
   });
 
-  mountCanvasMenu(el, {
-    caption: '操作',
-    action: true,
-    items: [
-      { value: 'hide', label: 'hideItem' },
-      { value: 'show', label: 'showItem' },
-      { value: 'focus', label: 'focusItem' },
-    ],
-    value: '',
-    onSelect(value) {
-      if (value === 'focus') {
-        const id = graph.hasNode('b8') ? 'b8' : 'a5';
-        log(`focusItem(${id})`);
-        graph.focusItem(id);
-        return;
-      }
-      const id = graph.hasNode('b1') ? 'b1' : 'a1';
-      if (value === 'hide') {
-        log(`hideItem(${id})`);
-        graph.hideItem(id);
-      } else {
-        log(`showItem(${id})`);
-        graph.showItem(id);
-      }
-      log(`states after ${value}: ${JSON.stringify(graph.getItemStates(id))}`);
-    },
+  const updateVisibility = (action: 'hide' | 'show') => {
+    const id = graph.hasNode('b1') ? 'b1' : 'a1';
+    log(`${action}Item(${id})`);
+    if (action === 'hide') graph.hideItem(id);
+    else graph.showItem(id);
+    log(`states after ${action}: ${JSON.stringify(graph.getItemStates(id))}`);
+  };
+  ui.addAction('hideItem', () => updateVisibility('hide'));
+  ui.addAction('showItem', () => updateVisibility('show'));
+  ui.addAction('focusItem', () => {
+    const id = graph.hasNode('b8') ? 'b8' : 'a5';
+    log(`focusItem(${id})`);
+    graph.focusItem(id);
   });
 
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();
-      el.querySelector(':scope > [data-canvas-controls]')?.remove();
+      ui.destroy();
     },
   };
 }

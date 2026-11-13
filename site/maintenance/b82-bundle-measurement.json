@@ -1,0 +1,31 @@
+{
+  "sourceCommit": "6fec8e82",
+  "measured": "2026-11-05",
+  "node": "v22.15.1",
+  "gzipLevel": 9,
+  "dependencies": {
+    "@antv/layout": "2.0.0",
+    "regl": "2.1.1",
+    "rollup": "4.67.5",
+    "terser": "5.51.2"
+  },
+  "artifacts": {
+    "index.js": {
+      "bytes": 499413,
+      "gzipBytes": 95787,
+      "sha256": "19eacadef86d6c8e9c2bf728a06253e0e126a74f17b953cd2573904531114e5f",
+      "minifiedBytes": 202460,
+      "minifiedGzipBytes": 53204
+    },
+    "layoutWorker.js": {
+      "bytes": 1375,
+      "gzipBytes": 628,
+      "sha256": "a518822b7025b997d27c456da902c0a31eebe064b4ef0e09141871644f877984"
+    },
+    "g6-lite.min.js": {
+      "bytes": 583784,
+      "gzipBytes": 171162,
+      "sha256": "49a51c31bf11016adeb5886a2ff2b5b8cab558864f9695914d7ce535f0a06856"
+    }
+  }
+}

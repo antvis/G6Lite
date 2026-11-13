@@ -39,8 +39,8 @@ export async function run(container: string | HTMLElement) {
       type: 'rect',
       style: {
         fill: (d) => ['#5B8FF9', '#5AD8A6', '#F6BD16', '#E86452', '#6DC8EC', '#945FB9'][parseInt(d.id) % 6],
-        width: 20,
-        height: 12,
+        width: 32,
+        height: 20,
       },
     },
     edge: {
@@ -50,7 +50,7 @@ export async function run(container: string | HTMLElement) {
         curvature: 0.25,
       },
     },
-    layout: { type: 'circular', radius: 120 },
+    layout: { type: 'circular', radius: 48 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
     theme: 'light',
   });
@@ -83,7 +83,7 @@ export async function run(container: string | HTMLElement) {
     },
     node: {
       type: 'circle',
-      style: { fill: '#E86452', size: 12 },
+      style: { fill: '#E86452', size: 24 },
     },
     edge: {
       type: 'line',
@@ -92,13 +92,14 @@ export async function run(container: string | HTMLElement) {
         lineWidth: 3,
       },
     },
-    layout: { type: 'circular', radius: 100 },
+    layout: { type: 'circular', radius: 48 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
     theme: 'light',
   });
   await graph2.render();
 
   return {
+    getData: () => ({ views: [graph1.getData(), graph2.getData()] }),
     fitView() {
       graph1.fitView();
       graph2.fitView();
@@ -106,6 +107,8 @@ export async function run(container: string | HTMLElement) {
     destroy() {
       graph1.destroy();
       graph2.destroy();
+      rectContainer.remove();
+      thickContainer.remove();
     },
   };
 }

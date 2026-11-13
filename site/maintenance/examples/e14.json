@@ -1,0 +1,47 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E14",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "indented-tree",
+      "file": "indented-tree.ts",
+      "observations": [
+        "Styled/minimal menu changes backgrounds and label placement for 17 nodes / 16 edges",
+        "Repeated style switches and Refresh leave exactly one label-canvas overlay with the renderer canvases",
+        "Live data reflects the currently installed graph"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "radial-tree",
+      "file": "radial-tree.ts",
+      "observations": [
+        "10 nodes / 9 edges show the topic tree with readable bodies and labels after correcting excessive viewport padding",
+        "Pan/Fit and Refresh work and restore the tree"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "mindmap",
+      "file": "mindmap.ts",
+      "observations": [
+        "12 nodes / 11 edges display left/right topic branches and level colors",
+        "Pan/Fit and Refresh restore the complete map; live snapshot matches"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Added snapshots to indented-tree and mindmap handles",
+    "Added owned label cleanup and generation guards for asynchronous mode switches",
+    "Replaced excessive radial-tree padding with 32px auto-fit"
+  ]
+}

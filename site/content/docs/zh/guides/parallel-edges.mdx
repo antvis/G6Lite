@@ -1,47 +1,17 @@
 ---
-title: 平行边与自环处理
-description: 处理多条同源同目标边和自环边的展示
+title: 平行边与自环（旧入口）
+description: 原有章节迁移后的对应入口
 ---
 
-同一对节点之间存在多条边时，默认直线会重叠。可以启用 `process-parallel-edges` transform 让平行边自动错开。
+内容已迁至 [边](/docs/guides/edge#平行边与自环)。
 
-处理前后与自环的效果示意：多条边从重叠变为可区分的路径，自环连接同一个节点。
-
-![三条平行边处理前重叠、处理后错开及多个自环的示意](/examples/docs-guide-parallel-edges.svg '平行边与自环')
-
-可运行示例：[平行边](/docs/examples/parallel-edges)、[自环](/docs/examples/edge-loops)。
-
-```ts
-const graph = new Graph({
-  container: 'container',
-  data,
-  edge: {
-    type: 'arc',
-    style: {
-      endArrow: true,
-      lineWidth: 2,
-    },
-  },
-  transforms: [
-    {
-      type: 'process-parallel-edges',
-      distance: 18,
-    },
-  ],
-});
-```
-
-## 使用建议
-
-- 平行边较多时，优先使用 `arc` 或 `cubic`。
-- 有方向语义时开启 `endArrow`。
-- 标签较多时，避免所有平行边同时显示标签。
-- 若业务侧有边分组语义，可以把分组信息放在 `edge.data` 中，用颜色或标签区分。
-
-## 示例入口
-
-- `site/demos/parallel-edges.ts`
-- `site/demos/edge-loops.ts`
-- `site/demos/edge-arrows.ts`
-
-见 [示例总览](/docs/examples)。
+- <span id="分离同向与反向边" style={{ scrollMarginTop: '8rem' }} />[分离同向与反向边](/docs/guides/edge#分离同向与反向边)
+- <span id="增删边后更新" style={{ scrollMarginTop: '8rem' }} />[添加或删除平行边](/docs/guides/edge#增删边后更新)
+- <span id="自环与标签" style={{ scrollMarginTop: '8rem' }} />[自环与标签](/docs/guides/edge#自环与标签)
+- <span id="使用建议" style={{ scrollMarginTop: '8rem' }} />[使用建议](/docs/guides/edge#平行边与自环)
+- <span id="常见问题" style={{ scrollMarginTop: '8rem' }} />[常见问题](/docs/guides/edge#常见问题)
+- <span id="配了-offset为什么还是重叠" style={{ scrollMarginTop: '8rem' }} />[配了 offset，为什么还是重叠？](/docs/guides/edge#为什么多条边仍然重叠)
+- <span id="增大-offset为什么有些边没有继续分开" style={{ scrollMarginTop: '8rem' }} />[增大 offset，为什么有些边没有继续分开？](/docs/guides/edge#为什么多条边仍然重叠)
+- <span id="为什么自环不受平行边开关或间距影响" style={{ scrollMarginTop: '8rem' }} />[为什么自环不受平行边开关或间距影响？](/docs/guides/edge#为什么改-offset-后自环大小没变)
+- <span id="为什么删了一条边其他边的位置也变了" style={{ scrollMarginTop: '8rem' }} />[为什么删了一条边，其他边的位置也变了？](/docs/guides/edge#增删边后更新)
+- <span id="示例入口" style={{ scrollMarginTop: '8rem' }} />[示例入口](/docs/guides/edge#相关)

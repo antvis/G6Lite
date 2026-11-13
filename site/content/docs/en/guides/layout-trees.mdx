@@ -1,0 +1,26 @@
+---
+title: Tree layouts
+description: Show parent-child relationships with mind maps, indented trees, and fishbone diagrams
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Choose a layout
+
+Express parent-child relationships as edges with the parent as `source` and the child as `target`. Use one connected tree with a single root and no cycles.
+
+| Goal | Layout and common options |
+| --- | --- |
+| Mind map branches | [`mindmap`](/en/docs/guides/layout-mindmap), with `levelGap` between levels and `nodeGap` between neighbors on the same side |
+| Directory listing | [`indented`](/en/docs/guides/layout-indented), with `indent` for indentation and `rowHeight` for row spacing |
+| Root, categories, and items | [`fishbone`](/en/docs/guides/layout-fishbone), with `categoryGap` between categories along the spine |
+
+## Configuration and example
+
+Use **Tree layout** to compare the three arrangements. The example also changes the edge routing. Indented trees use elbow connectors, while the fishbone layout uses angled branches.
+
+Register each tree layout before using it. [Optional layouts](/en/docs/guides/layout-overview#optional-layouts)
+
+<NodeDocExample id="layout-tree" locale="en" focus="tree-layouts" />
+
+See the [tree layout reference](/en/docs/api/options#config-tree-layout-fields) for defaults and other options.

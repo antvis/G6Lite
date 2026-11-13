@@ -1,0 +1,47 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E11",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "edge-hit-area",
+      "file": "edge-hit-area.ts",
+      "observations": [
+        "All four line/arc/cubic/polyline tiles are visible at the normal split size",
+        "Clicks several pixels from each visible path select edge-0/1/2/3 and turn each purple; Refresh clears selection",
+        "Snapshot exports four views with edge counts 2/1/1/1"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "edge-states",
+      "file": "edge-states.ts",
+      "observations": [
+        "7 widths × 6 states form 42 edges / 84 nodes; column state and row width labels match the displayed matrix",
+        "Refresh recreates the same matrix"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "edge-loops",
+      "file": "edge-loops.ts",
+      "observations": [
+        "Three nodes render 1, 3 and 5 nested loops; snapshot contains 9 edges",
+        "Fit and Refresh retain the nesting; no console errors"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Removed fixed 210px tile minima that clipped the lower interaction tiles",
+    "Added state/width labels to make the matrix readable",
+    "Added live snapshots to all three handles"
+  ]
+}

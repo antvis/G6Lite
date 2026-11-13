@@ -1,0 +1,50 @@
+---
+title: Radial layout
+description: Place nodes in rings by shortest-path distance from a focal node.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Place nodes in rings by shortest-path distance from a focal node.
+
+## When to use it
+
+Use it to see the direct and indirect relationships of an account, service, or device.
+
+## Basic usage
+
+This layout is optional. Import and register it before setting `layout.type`. For CDN usage, see [Optional layouts](/en/docs/guides/layout-overview#optional-layouts).
+
+```ts
+import { Graph, register } from '@antv/g6-lite';
+import radial from '@antv/g6-lite/layouts/radial';
+
+register('layout', 'radial', radial);
+
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'radial' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `focusNode` | ID of the focal node. | `string` | First node |
+| `unitRadius` | Distance between neighboring rings. | `number` | Computed automatically |
+| `linkDistance` | Reference edge length used by the layout. | `number` | `50` |
+| `preventOverlap` | Whether to try to prevent nodes in a ring from overlapping. | `boolean` | `false` |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
+
+## Code example
+
+The purple node `0` sits at the center, with 68 units between rings.
+
+<NodeDocExample id="built-in-layout" layoutType="radial" locale="en" />
+
+[Compare network layouts](/en/docs/guides/layout-networks)

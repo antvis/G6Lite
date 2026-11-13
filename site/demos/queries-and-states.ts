@@ -1,5 +1,5 @@
 import { Graph, type GraphData } from '@antv/g6-lite';
-import { buttonStyle, createDemoPanel } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 const DATA: GraphData = {
   nodes: [
@@ -19,9 +19,6 @@ const DATA: GraphData = {
     { id: 'right', data: { label: '状态分组' } },
   ],
 };
-
-const button = (action: string, label: string) =>
-  `<button data-action="${action}" style="${buttonStyle}">${label}</button>`;
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -48,19 +45,7 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
   graph.fitView({ padding: 80 });
 
-  const ui = createDemoPanel(
-    container,
-    '查询、批量状态与可见性',
-    '集中验证元素查询、邻接查询、批量状态替换、状态搜索和清理。',
-    [
-      button('query', '查询 root'),
-      button('batch', '批量设状态'),
-      button('replace', '替换状态'),
-      button('combo', 'Combo 状态'),
-      button('hide', '隐藏 n2'),
-      button('clear', '全部清理'),
-    ].join(''),
-  );
+  const ui = createDemoPanel(container);
 
   const showStateSummary = (prefix: string) => {
     ui.setStatus(
@@ -70,50 +55,53 @@ export async function run(container: string | HTMLElement) {
     );
   };
 
-  ui.controls.addEventListener('click', (event) => {
-    const action = (event.target as HTMLElement).dataset.action;
-    if (action === 'query') {
-      const element = graph.getElementData('root');
-      const position = graph.getElementPosition('root');
-      ui.setStatus(
-        `hasNode=${graph.hasNode('root')} hasEdge=${graph.hasEdge('e-root-n1')} hasElement=${graph.hasElement('right')}\n` +
-          `element=${element?.id} position=${position?.x},${position?.y}\n` +
-          `neighbors=${graph.getNeighborNodes('root').join(', ')}\n` +
-          `adjacent=${graph.getAdjacentEdges('root').map((edge) => edge.id).join(', ')}`,
-      );
-    } else if (action === 'batch') {
-      graph.batchSetState([
-        { id: 'root', state: 'selected', value: true },
-        { id: 'n3', state: 'selected', value: true },
-        { id: 'e-root-n1', state: 'active', value: true },
-      ]);
-      showStateSummary('batchSetState');
-    } else if (action === 'replace') {
-      graph.setElementStates({ root: ['highlight'], n1: ['selected'], 'e-root-n2': ['active'] });
-      showStateSummary('setElementStates');
-    } else if (action === 'combo') {
-      graph.setComboState('right', 'highlight', true);
-      const children = graph.getComboChildren('right');
-      ui.setStatus(`combo=${graph.getComboData('right')?.id}\nchildren=${children.nodes.join(', ')}\nstates=${graph.getComboStates('right').join(', ')}`);
-    } else if (action === 'hide') {
-      const hidden = graph.getItemStates('n2').includes('hidden');
-      if (hidden) graph.showItem('n2');
-      else graph.hideItem('n2');
-      ui.setStatus(`n2 states=${graph.getItemStates('n2').join(', ') || '-'}`);
-    } else if (action === 'clear') {
-      for (const node of graph.getNodes()) graph.clearItemStates(node.id);
-      for (const edge of graph.getEdges()) graph.clearItemStates(edge.id);
-      for (const comboId of ['left', 'right']) graph.clearComboStates(comboId);
-      showStateSummary('clearItemStates / clearComboStates');
-    }
+  ui.addAction('查询 root', () => {
+    const element = graph.getElementData('root');
+    const position = graph.getElementPosition('root');
+    ui.setStatus(
+      `hasNode=${graph.hasNode('root')} hasEdge=${graph.hasEdge('e-root-n1')} hasElement=${graph.hasElement('right')}\n` +
+        `element=${element?.id} position=${position?.x},${position?.y}\n` +
+        `neighbors=${graph.getNeighborNodes('root').join(', ')}\n` +
+        `adjacent=${graph.getAdjacentEdges('root').map((edge) => edge.id).join(', ')}`,
+    );
+  });
+  ui.addAction('批量设状态', () => {
+    graph.batchSetState([
+      { id: 'root', state: 'selected', value: true },
+      { id: 'n3', state: 'selected', value: true },
+      { id: 'e-root-n1', state: 'active', value: true },
+    ]);
+    showStateSummary('batchSetState');
+  });
+  ui.addAction('替换状态', () => {
+    graph.setElementStates({ root: ['highlight'], n1: ['selected'], 'e-root-n2': ['active'] });
+    showStateSummary('setElementStates');
+  });
+  ui.addAction('Combo 状态', () => {
+    graph.setItemState('right', 'highlight', true);
+    const children = graph.getComboChildren('right');
+    ui.setStatus(`combo=${graph.getComboData('right')?.id}\nchildren=${children.nodes.join(', ')}\nstates=${graph.getItemStates('right').join(', ')}`);
+  });
+  ui.addAction('隐藏 n2', () => {
+    const hidden = graph.getItemStates('n2').includes('hidden');
+    if (hidden) graph.showItem('n2');
+    else graph.hideItem('n2');
+    ui.setStatus(`n2 states=${graph.getItemStates('n2').join(', ') || '-'}`);
+  });
+  ui.addAction('全部清理', () => {
+    for (const node of graph.getNodes()) graph.clearItemStates(node.id);
+    for (const edge of graph.getEdges()) graph.clearItemStates(edge.id);
+    for (const comboId of ['left', 'right']) graph.clearItemStates(comboId);
+    showStateSummary('clearItemStates');
   });
 
   showStateSummary('ready');
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
       graph.destroy();
-      ui.panel.remove();
+      ui.destroy();
     },
   };
 }

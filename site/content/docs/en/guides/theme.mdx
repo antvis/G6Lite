@@ -1,33 +1,83 @@
 ---
 title: Themes
-description: Use light and dark presets or override G6Lite theme tokens
+description: Choose a preset, apply brand colors, switch themes, and troubleshoot style overrides
 ---
 
-```ts
-theme: 'dark';
-```
+import { NodeDocExample as ThemeDocExample } from '@/components/node-doc-example';
 
-Override only the tokens your product needs:
+Use `theme` for default node, edge, and canvas colors. Choose light / dark, then override brand tokens; assign style functions to fields in `node.style` or `edge.style` for data-driven colors. All fields and defaults are in the [Theme reference](/en/docs/api/options#options-theme).
+
+## Use a preset
+
+The complete code below renders the canvas above it. Choose light, dark, or brand to compare backgrounds, node sizes, and selection. Reset restores light. Switching calls updateOptions on the same graph instance.
+
+<ThemeDocExample id="theme-switch" locale="en" />
+
+## Override tokens
+
+Map application brand colors to a ThemeOption and pass it as new Graph's theme. Include only tokens you need to change:
 
 ```ts
-theme: {
+import type { ThemeOption } from '@antv/g6-lite';
+
+const brandTheme: ThemeOption = {
   type: 'light',
-  nodeFill: '#1783FF',
-  edgeStroke: '#AAB7C4',
-  canvasBackground: '#F7F9FC',
-}
+  nodeFill: '#00A876',
+  nodeSize: 36,
+  edgeStroke: '#00A876',
+  edgeLineWidth: 2,
+  canvasBackground: '#F1F8F5',
+};
 ```
 
-Explicit node and edge styles take precedence over theme defaults. Keep application design tokens in one place and map them to G6Lite theme tokens.
+State maps are replaced in full. To retain preset states such as disabled, construct a new map using the [spread pattern](/en/docs/api/options#precedence).
+
+## Precedence
+
+Both nodes' explicit green fill overrides the theme's blue. Selected uses the orange outline from node.stateStyles.selected. That entire state object is chosen, without filling in the theme's purple selected fill, so the node stays green.
+
+<ThemeDocExample id="theme-precedence" locale="en" />
+
+## Switch themes
+
+Update the theme and label colors together on an existing graph instance:
+
+```ts
+graph.updateOptions({
+  theme: 'dark',
+  node: { style: { labelColor: '#E2E8F0' } },
+  edge: { style: { labelColor: '#E2E8F0' } },
+});
+```
+
+Each theme replaces the previous theme option. To retain brand tokens, pass `{ ...brandTheme, type: 'dark', canvasBackground: '#1a1a1a' }`; those explicit brand tokens will also continue to override the dark preset.
+
+Switching refreshes styles while preserving graph data, states, and the camera. It does not rerun layout or fit the graph. Synchronize system dark mode, page CSS, and Combo styles in the application; check contrast for label backgrounds, icons, and decorations too.
 
 ## Default visual semantics
 
-G6Lite uses the light preset when `theme` is omitted:
+Omitting theme selects light, with default node size 24. Labels require configured text, and their colors do not automatically follow the theme. See the [Theme reference](/en/docs/api/options#state-presets) for defaults and state styles, or compare all built-in states in [Default themes and interaction states](/en/docs/examples/default-theme).
 
-- The default node size is `24` and the primary AntV color is `#1783FF`.
-- The light canvas is white with low-contrast blue-gray edges. The dark canvas is `#1a1a1a` with brighter blue-gray edges.
-- `active`, `selected`, and `highlight` use emphasis colors, outlines, or halos without changing node size or base edge width.
-- `inactive` and `disabled` reduce opacity while preserving graph context.
-- Labels are opt-in and render only when `node.style.label` or `edge.style.label` is configured.
+## Common questions
 
-Open [Default themes and interaction states](/en/docs/examples/default-theme) to inspect both presets and all six built-in states side by side.
+### Why did changing nodeFill leave the nodes unchanged?
+
+Check node.style.fill and custom extension defaults first: they take precedence over theme defaults. For selected or other states, also check that state's fill.
+
+### Why is text hard to read after switching to dark?
+
+Themes have no label-color token. Update node/edge.style.labelColor too; custom labels and backgrounds also need colors suitable for the dark canvas.
+
+### Why did disabled lose its dimming when I changed only selected?
+
+Passing nodeStateStyles replaces the entire preset map. Spread the original map before changing selected. Do not mutate shared state objects in the resolveTheme result.
+
+## Related
+
+- [Theme reference](/en/docs/api/options#options-theme): tokens, presets, precedence, and resolveTheme.
+- [Nodes](/en/docs/guides/node) · [Edges](/en/docs/guides/edge): data-driven appearance.
+- [Labels and icons](/en/docs/guides/label) · [Combos](/en/docs/guides/combo): coordinate other visual elements.
+
+**Related runnable examples**
+
+- [Default themes and interaction states](/en/docs/examples/default-theme)

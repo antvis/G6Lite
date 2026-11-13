@@ -1,5 +1,5 @@
 import { Graph } from '@antv/g6-lite';
-import { buttonStyle, createDemoPanel } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 const CLOSE_DATA = {
   nodes: [
@@ -34,14 +34,7 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const ui = createDemoPanel(
-    container,
-    'setData 视口策略',
-    '分别验证 maxZoom 上限和 fitView:false 保留 camera。',
-    `<button data-action="limited" style="${buttonStyle}">maxZoom = 1.2</button>
-     <button data-action="preserve" style="${buttonStyle}">fitView = false</button>
-     <button data-action="race" style="${buttonStyle}">连续替换数据</button>`,
-  );
+  const ui = createDemoPanel(container, '分别验证 maxZoom 上限和 fitView:false 保留 camera。');
   let requestedVersion = 0;
   let completedVersion = 0;
   const render = (strategy: string) => {
@@ -50,13 +43,13 @@ export async function run(container: string | HTMLElement) {
       `策略: ${strategy}\n请求版本: ${requestedVersion}\n完成版本: ${completedVersion}\nzoom: ${zoom.toFixed(3)}\n${strategy.includes('maxZoom') ? `判定: ${zoom <= 1.200001 ? 'PASS' : 'FAIL'}` : ''}`,
     );
   };
-  ui.controls.querySelector('[data-action="limited"]')!.addEventListener('click', async () => {
+  ui.addAction('maxZoom = 1.2', async () => {
     const version = ++requestedVersion;
     await graph.setData(CLOSE_DATA, { fitView: { padding: 24, maxZoom: 1.2 } });
     completedVersion = version;
     render('maxZoom 1.2');
   });
-  ui.controls.querySelector('[data-action="preserve"]')!.addEventListener('click', async () => {
+  ui.addAction('fitView = false', async () => {
     graph.zoomTo(0.7);
     const before = graph.getZoom();
     const version = ++requestedVersion;
@@ -64,7 +57,7 @@ export async function run(container: string | HTMLElement) {
     completedVersion = version;
     render(`fitView false；之前 ${before.toFixed(3)}`);
   });
-  ui.controls.querySelector('[data-action="race"]')!.addEventListener('click', () => {
+  ui.addAction('连续替换数据', () => {
     const first = ++requestedVersion;
     void graph.setData(CLOSE_DATA, { fitView: { maxZoom: 1.2 } }).then(() => {
       if (first === requestedVersion) completedVersion = first;
@@ -78,5 +71,5 @@ export async function run(container: string | HTMLElement) {
   });
   render('等待操作');
 
-  return { destroy: () => { graph.destroy(); ui.panel.remove(); } };
+  return { destroy: () => { graph.destroy(); ui.destroy(); } };
 }

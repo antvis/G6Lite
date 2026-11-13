@@ -2,15 +2,15 @@
   "title": "Documentation",
   "pages": [
     "index",
-    "ai",
     "getting-started",
-    "concepts",
-    "guides",
+    "ai",
     "api",
-    "examples",
+    "graph",
+    "guides",
+    "elements",
     "metrics",
+    "concepts",
     "compatibility",
-    "faq",
-    "changelog"
+    "examples"
   ]
 }

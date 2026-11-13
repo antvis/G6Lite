@@ -2,7 +2,6 @@
  * Demo: register a behavior that selects the clicked node.
  */
 import {
-  extensionFactory,
   Graph,
   register,
   type BehaviorExtension,
@@ -42,7 +41,7 @@ function createPinBehavior(): BehaviorExtension<PinBehaviorOptions> {
   };
 }
 
-register('behavior', PIN_BEHAVIOR, extensionFactory(createPinBehavior));
+register('behavior', PIN_BEHAVIOR, () => createPinBehavior());
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({

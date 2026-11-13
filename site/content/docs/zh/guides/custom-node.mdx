@@ -1,60 +1,47 @@
 ---
 title: 自定义节点
-description: 使用统一 register 和函数式 NodeExtension 扩展节点表现形式
+description: 注册业务节点，添加轻量覆盖绘制与装饰边界锚点，并验证更新
 ---
 
-G6Lite 推荐通过统一的 `register()` 注册函数式节点扩展，不要求继承引擎内部基类。
+import { NodeDocExample } from '@/components/node-doc-example';
 
-```ts
-import { register, type NodeExtension } from '@antv/g6-lite';
-
-const statusNode: NodeExtension = {
-  base: 'rect',
-  style: { width: 96, height: 34, borderRadius: 8 },
-  getStyle(node) {
-    return node.data?.status === 'error'
-      ? { fill: '#fff2f0', stroke: '#ff4d4f' }
-      : { fill: '#e6f4ff', stroke: '#1677ff' };
-  },
-};
-
-register('node', 'status-node', statusNode);
-```
-
-上方 `status-node` 的配色效果示意：同一个节点扩展根据 `data.status` 返回不同填充与描边；图中文字用于标注状态。
-
-![status-node 对普通状态使用蓝色，对 error 状态使用红色的对比示意](/examples/docs-guide-custom-node.svg '业务节点状态')
-
-可运行示例：[自定义节点与显式边 ID](/docs/examples/custom-node-extension)、[呼吸节点](/docs/examples/breathing-node)。
+用 `NodeExtension` 封装可复用的节点外观。颜色和尺寸也可以直接在[节点配置](/docs/guides/node#options-node)中设置。
 
 ## 适用场景
 
-- 需要复用一类业务节点视觉。
-- 需要在 WebGL 节点之外增加轻量 overlay。
-- 需要对节点样式或动画做统一封装。
+1. 选 circle / rect 基型，保留内置绘制和拾取。
+2. 定义默认 style、纯函数 getStyle，首次 render 前 register。
+3. 配置 node.type 激活；运行中通过公开数据方法更新业务字段。
+
+## 覆盖绘制与边界锚点
+
+`drawOverlay()` 在节点左侧画短条。`getBoundaryAnchor()` 将右侧徽章从节点中心向上移四分之一节点高度。点击 **Toggle B status**，可以看到 B 切换状态时短条和徽章仍跟随节点。
+
+<NodeDocExample id="extension-node" locale="zh" focus="overlay-and-anchor" />
 
 ## 内置扩展
 
-`breathing-node` 已由 G6Lite 内置注册，可以直接在配置中使用：
+将 `node.type` 设为 `breathing-node`，节点在激活、选中或高亮时会出现呼吸动画。示例中可切换选中和高亮，与右侧普通节点对比。
 
-```ts
-const graph = new Graph({
-  node: { type: 'breathing-node' },
-});
-```
+<NodeDocExample id="breathing-node" locale="zh" focus="breathing-options" />
 
-具体可参考：
+## 常见问题
 
-- `src/extensions/node.ts`
-- `site/demos/breathing-node.ts`
+### 注册后为什么没有变化？
 
-<Callout type="warn" title="注意事项">
+检查名称与 node.type、注册顺序，以及配置是否覆盖了需要观察的字段。描述按名称缓存，不持有单个 Graph 的可变状态。
 
-- 自定义节点应避免破坏 WebGL 批量渲染优势。
-- 大图中不要给所有节点叠加昂贵的自定义绘制。
-- 如果只是颜色、尺寸、描边、标签变化，优先使用 `node.style` 和 `stateStyles`。
-- `BaseNode` 与 `registerNode` 仅用于 beta 兼容，新增扩展应使用 `register('node', ...)`。
+### 为什么徽章移动了，边端点没动？
 
-</Callout>
+锚点钩子仅供装饰定位。任意自定义形状和拾取轮廓不在当前能力范围。
 
-更多类型见 [API 总览](/docs/api)。
+### 为什么动画持续重绘？
+
+检查 drawOverlay 是否始终返回 true。静态内容返回 void / false，大图不要为所有节点持续绘制。
+
+更多场景见[自定义节点与显式边 ID](/docs/examples/custom-node-extension)，注册作用域查[公共契约](/docs/api/graph#extension-registration)。
+
+**相关可运行示例**
+
+- [呼吸节点](/docs/examples/breathing-node)
+- [自定义节点与显式边 ID](/docs/examples/custom-node-extension)

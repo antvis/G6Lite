@@ -2,6 +2,8 @@
 
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { SidebarTrigger } from 'fumadocs-ui/components/sidebar/base';
+import { ListTree } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
@@ -31,6 +33,12 @@ export function DocsRouteLayout({
         className: isExamplesRoute ? 'examples-route-layout' : 'docs-brand-layout',
       }}
     >
+      {!isExamplesRoute && (
+        <SidebarTrigger className="docs-mobile-directory" aria-label={locale === 'zh' ? '打开文档目录' : 'Open documentation navigation'}>
+          <ListTree size={18} aria-hidden="true" />
+          {locale === 'zh' ? '文档目录' : 'Docs navigation'}
+        </SidebarTrigger>
+      )}
       {children}
     </DocsLayout>
   );

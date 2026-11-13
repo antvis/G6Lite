@@ -1,0 +1,45 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E17",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "drag-node",
+      "file": "drag-node.ts",
+      "observations": [
+        "Dragging API changes its position while edge connections follow",
+        "Dragging the Combo background moves Web and App together; exported Web coordinates change from 160/150 to 188.53/166.30",
+        "Refresh restores the original 5 nodes / 4 edges and group positions"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "drag-edge",
+      "file": "drag-edge.ts",
+      "observations": [
+        "Dragging editable-edge near B onto C emits reconnected=true and updates a→b to a→c",
+        "Canvas and exported data show the new connection; Refresh restores a→b"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "hover",
+      "file": "hover.ts",
+      "observations": [
+        "Pointer over Central highlights its neighbors and incident edges while unrelated elements dim",
+        "Refresh restores the 12-node / 17-edge graph; snapshot matches"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Added snapshots to edge-reconnection and hover custom handles"
+  ]
+}

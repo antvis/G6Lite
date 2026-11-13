@@ -2,7 +2,7 @@
  * Demo: 节点标签 / 边标签 / 节点图标
  */
 import { Graph, type GraphEdge, type GraphNode, type LabelPlacement } from '@antv/g6-lite';
-import { mountCanvasMenu } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 const DATA = {
   nodes: [
@@ -28,6 +28,9 @@ const DATA = {
   ],
 };
 
+// Text icons use the first letter of each node's business type.
+const iconForNode = (node: GraphNode) => String(node.data?.type ?? '').slice(0, 1).toUpperCase();
+
 export async function run(container: string | HTMLElement) {
   const el = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
 
@@ -43,6 +46,10 @@ export async function run(container: string | HTMLElement) {
       style: {
         size: 20,
         fill: '#5B8FF9',
+        icon: iconForNode,
+        iconType: 'text',
+        iconFontSize: 12,
+        iconColor: '#fff',
         label: (n) => (n.data?.name as string | undefined) ?? n.id,
         labelPlacement: 'bottom',
         labelFontSize: 12,
@@ -61,56 +68,42 @@ export async function run(container: string | HTMLElement) {
   });
   await graph.render();
 
-  const placements: LabelPlacement[] = ['bottom', 'center', 'top', 'right'];
-  mountCanvasMenu(el, {
-    caption: '标签',
-    items: placements.map((placement) => ({ value: placement, label: placement })),
-    value: 'bottom',
-    onSelect(value) {
-      graph.updateOptions({ node: { style: { labelPlacement: value as LabelPlacement } } });
-    },
+  const ui = createDemoPanel(el);
+  ui.addChoice<LabelPlacement>('标签', ['bottom', 'center', 'top', 'left', 'right'], 'bottom', (value) => {
+    graph.updateOptions({ node: { style: { labelPlacement: value } } });
   });
 
   let edgeLabelsVisible = true;
-  mountCanvasMenu(el, {
-    caption: '操作',
-    action: true,
-    items: [
-      { value: 'edge-labels', label: '切换边标签' },
-      { value: 'circular', label: 'circular' },
-      { value: 'force', label: 'force' },
-    ],
-    value: '',
-    onSelect(value) {
-      if (value === 'edge-labels') {
-        edgeLabelsVisible = !edgeLabelsVisible;
-        graph.updateOptions({
-          edge: {
-            style: {
-              label: edgeLabelsVisible
-                ? ((_source: GraphNode, _target: GraphNode, edge: GraphEdge) =>
-                    (edge.data?.label as string | undefined) ?? '')
-                : false,
-            },
-          },
-        });
-        return;
-      }
-      const applyLayout = async () => {
-        if (value === 'circular') graph.setLayout({ type: 'circular', radius: 180 });
-        else graph.setLayout({ type: 'd3-force' });
-        await graph.layout();
-        graph.fitView();
-      };
-      void applyLayout();
-    },
+  let iconsVisible = true;
+  ui.addAction('切换边标签', () => {
+    edgeLabelsVisible = !edgeLabelsVisible;
+    graph.updateOptions({
+      edge: {
+        style: {
+          label: edgeLabelsVisible
+            ? ((_source: GraphNode, _target: GraphNode, edge: GraphEdge) =>
+                (edge.data?.label as string | undefined) ?? '')
+            : false,
+        },
+      },
+    });
+  });
+  ui.addAction('切换节点图标', () => {
+    iconsVisible = !iconsVisible;
+    graph.updateOptions({ node: { style: { icon: iconsVisible ? iconForNode : false } } });
+  });
+  ui.addChoice('布局', ['circular', 'force'], 'circular', async (value) => {
+    graph.setLayout(value === 'circular' ? { type: 'circular', radius: 180 } : { type: 'd3-force' });
+    await graph.layout();
+    graph.fitView();
   });
 
   return {
+    getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
       graph.destroy();
-      el.querySelector(':scope > [data-canvas-controls]')?.remove();
+      ui.destroy();
     },
   };
 }

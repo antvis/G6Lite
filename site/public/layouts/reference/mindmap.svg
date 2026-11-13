@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" width="160" height="96">
+  <path d="M80 48L45 31.4 M80 48L115 31.4 M80 48L45 64.6 M80 48L115 64.6 M45 31.4L10 22.6 M45 31.4L10 40.1 M115 31.4L150 22.6 M115 31.4L150 40.1 M45 64.6L10 55.9 M45 64.6L10 73.4 M115 64.6L150 55.9 M115 64.6L150 73.4" fill="none" stroke="#8a9db7" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#4c78db">
+    <circle cx="80" cy="48" r="4" fill="#9860cf"/>
+    <circle cx="45" cy="31.4" r="2.8"/>
+    <circle cx="115" cy="31.4" r="2.8"/>
+    <circle cx="45" cy="64.6" r="2.8"/>
+    <circle cx="115" cy="64.6" r="2.8"/>
+    <circle cx="10" cy="22.6" r="2.8"/>
+    <circle cx="10" cy="40.1" r="2.8"/>
+    <circle cx="150" cy="22.6" r="2.8"/>
+    <circle cx="150" cy="40.1" r="2.8"/>
+    <circle cx="10" cy="55.9" r="2.8"/>
+    <circle cx="10" cy="73.4" r="2.8"/>
+    <circle cx="150" cy="55.9" r="2.8"/>
+    <circle cx="150" cy="73.4" r="2.8"/>
+  </g>
+</svg>

@@ -1,4 +1,8 @@
 {
-  "title": "Compatibility",
-  "pages": ["index", "browser", "api-stability", "library-comparison", "g6-v5-migration"]
+  "title": "Troubleshooting and upgrades",
+  "pages": [
+    "browser",
+    "g6-v5-migration",
+    "troubleshooting"
+  ]
 }

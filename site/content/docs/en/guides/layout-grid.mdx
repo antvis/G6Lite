@@ -1,0 +1,45 @@
+---
+title: Grid layout
+description: Arrange nodes in a grid of rows and columns.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Arrange nodes in a grid of rows and columns.
+
+## When to use it
+
+Use it for device panels or resource lists that need aligned nodes.
+
+## Basic usage
+
+Set the layout type with `layout.type`.
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'grid' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `rows` | Number of rows. | `number` | Computed automatically |
+| `cols` | Number of columns. | `number` | Computed automatically |
+| `width`, `height` | Width and height of the layout area. | `number` | Canvas dimensions |
+| `sortBy` | Sort nodes by ID or degree, or supply a comparator. | `'id'` \| `'degree'` \| comparator | `'degree'` |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
+
+## Code example
+
+Six nodes form two rows of three.
+
+<NodeDocExample id="built-in-layout" layoutType="grid" locale="en" />
+
+[Compare Grid, Circular, and Dagre](/en/docs/guides/layout-arrangements)

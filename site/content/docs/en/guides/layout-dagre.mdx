@@ -1,0 +1,45 @@
+---
+title: Dagre layout
+description: Arrange nodes in layers based on directed edges.
+---
+
+import { NodeDocExample } from '@/components/node-doc-example';
+
+## Overview
+
+Arrange nodes in layers based on directed edges.
+
+## When to use it
+
+Use it for workflows, call chains, and dependency graphs.
+
+## Basic usage
+
+Set the layout type with `layout.type`.
+
+```ts
+const graph = new Graph({
+  container,
+  data,
+  layout: { type: 'dagre' },
+});
+```
+
+## Options
+
+| Option | Description | Type | Default |
+| --- | --- | --- | --- |
+| `rankdir` | Layer direction. `'LR'` goes left to right and `'TB'` goes top to bottom. | `'TB'` \| `'BT'` \| `'LR'` \| `'RL'` | `'TB'` |
+| `nodesep` | Gap between nodes on the same layer. | `number` | `50` |
+| `ranksep` | Gap between layers. | `number` | `50` |
+| `nodeSize` | Node dimensions used by the layout. | `number` \| `[number, number]` | `[0, 0]` |
+
+[Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
+
+## Code example
+
+The workflow runs left to right, with Review and Check on the same layer.
+
+<NodeDocExample id="built-in-layout" layoutType="dagre" locale="en" />
+
+[Compare Grid, Circular, and Dagre](/en/docs/guides/layout-arrangements)

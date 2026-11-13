@@ -2,19 +2,51 @@
   margin-block: 24px;
 }
 
+.dataControls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  max-width: calc(100% - 24px);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.dataPanel {
+  pointer-events: auto;
+}
+
+.dataPanel,
+.dataPanel > :global(.lil-gui) {
+  max-width: 100%;
+}
+
+.dataPanel > :global(.lil-gui) {
+  --name-width: 30%;
+}
+
+.dataControls > span {
+  color: var(--color-fd-muted-foreground);
+}
+
 :global(.docs-brand-layout) :global(#nd-page) .preview {
   max-width: none;
 }
 
 .tools {
   position: absolute;
-  top: 12px;
   right: 12px;
+  bottom: 12px;
   z-index: 2;
   display: flex;
   align-items: center;
   gap: 4px;
   color: #64748b;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 90%);
 }
 
 .tools svg {
@@ -26,8 +58,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: var(--canvas-tool-size);
+  height: var(--canvas-tool-size);
   padding: 0;
   border: 0;
   border-radius: 6px;
@@ -51,16 +83,29 @@
   outline-offset: 2px;
 }
 
-@media (pointer: coarse) {
-  .tools button {
-    width: 44px;
-    height: 44px;
-  }
-}
-
 .viewport {
+  --canvas-tool-size: 32px;
+  --canvas-toolbar-width: calc(4 * var(--canvas-tool-size) + 12px);
   position: relative;
   overflow: hidden;
+}
+
+.viewport:has(.tools > :only-child) {
+  --canvas-toolbar-width: var(--canvas-tool-size);
+}
+
+.viewport:has(.tools > :nth-child(3):last-child) {
+  --canvas-toolbar-width: calc(3 * var(--canvas-tool-size) + 8px);
+}
+
+.canvas > [role='status'] {
+  margin-inline-end: calc(var(--canvas-toolbar-width) + 12px);
+}
+
+@media (pointer: coarse) {
+  .viewport {
+    --canvas-tool-size: 44px;
+  }
 }
 
 :global(.docs-brand-layout) :global(#nd-page) .preview > .viewport {

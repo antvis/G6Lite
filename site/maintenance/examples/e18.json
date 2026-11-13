@@ -1,0 +1,44 @@
+{
+  "recorded": "2026-11-05",
+  "batch": "E18",
+  "method": "CUA in-app browser against localhost:3000; visible controls, canvas screenshots and rendered data; no hidden Graph state access",
+  "status": "passed",
+  "cases": [
+    {
+      "id": "tooltip",
+      "file": "tooltip.ts",
+      "observations": [
+        "Pointer on Alice displays Alice / 产品经理 and related highlight; leaving hides the tooltip",
+        "5 nodes / 5 edges exported; Refresh clears floating content"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "context-menu",
+      "file": "context-menu.ts",
+      "observations": [
+        "Right-click Review opens the graph context menu; Highlight selects Review and closes the menu",
+        "Refresh clears selection and menu; snapshot restores 3 nodes / 2 edges"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    },
+    {
+      "id": "event-log",
+      "file": "event-log.ts",
+      "observations": [
+        "Click A records node:click a and node:selectchange a true; dragging B records node:dragend b",
+        "Refresh clears history back to the initial prompt with one panel"
+      ],
+      "runtime": "passed",
+      "refresh": "passed",
+      "bilingualMetadataAndLinks": "present; whole-site export/link verification consolidated in E24"
+    }
+  ],
+  "fixes": [
+    "Added live snapshots for Tooltip, context menu and event log handles"
+  ]
+}

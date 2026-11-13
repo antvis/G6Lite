@@ -7,7 +7,7 @@ import {
   type EdgeState,
   type NodeState,
 } from '@antv/g6-lite';
-import { mountGroupedChoices } from './demo-panel.ts';
+import { createDemoPanel } from './demo-panel.ts';
 
 type NodeType = 'circle' | 'rect';
 type EdgeType = 'line' | 'arc' | 'cubic' | 'polyline';
@@ -106,6 +106,7 @@ export async function run(container: string | HTMLElement) {
         node: {
           type: nodeType,
           style: {
+            size: 44,
             opacity: (node) => (node.data?.sampleAnchor === true ? 0 : 1),
             label: (node) =>
               node.data?.sampleAnchor === true ? false : String(node.data?.label ?? node.id),
@@ -127,17 +128,18 @@ export async function run(container: string | HTMLElement) {
               theme === 'light' ? 'rgba(255,255,255,0.9)' : 'rgba(26,26,26,0.9)',
           },
         },
+        label: { scaleWithZoom: false, hideOnLowZoom: false },
         behaviors: ['zoom-canvas', 'drag-canvas'],
         theme,
       });
       await graph.render();
-      graph.fitView({ padding: 56 });
+      graph.fitView({ padding: 24 });
       graphs.push(graph);
     }
   };
 
   const fitGraphs = () => {
-    graphs.forEach((graph) => graph.fitView({ padding: 56 }));
+    graphs.forEach((graph) => graph.fitView({ padding: 24 }));
   };
 
   const updateView = (view: string) => {
@@ -148,41 +150,26 @@ export async function run(container: string | HTMLElement) {
     grid.style.gridTemplateColumns = view === 'light + dark' ? '1fr 1fr' : '1fr';
   };
 
-  mountGroupedChoices(root, [
-    {
-      label: 'Node',
-      values: ['circle', 'rect'],
-      selected: 'circle',
-      onChange(value) {
-        nodeType = value as NodeType;
-        void renderGraphs();
-      },
-    },
-    {
-      label: 'Edge',
-      values: ['line', 'arc', 'cubic', 'polyline'],
-      selected: 'line',
-      onChange(value) {
-        edgeType = value as EdgeType;
-        void renderGraphs();
-      },
-    },
-    {
-      label: 'View',
-      values: ['light + dark', 'light', 'dark'],
-      selected: 'light + dark',
-      onChange: updateView,
-    },
-  ]);
-
   await renderGraphs();
   updateView('light + dark');
+  const ui = createDemoPanel(root);
+  ui.addChoice<NodeType>('Node', ['circle', 'rect'], nodeType, (value) => {
+    nodeType = value;
+    void renderGraphs();
+  });
+  ui.addChoice<EdgeType>('Edge', ['line', 'arc', 'cubic', 'polyline'], edgeType, (value) => {
+    edgeType = value;
+    void renderGraphs();
+  });
+  ui.addChoice('View', ['light + dark', 'light', 'dark'], 'light + dark', updateView);
 
   return {
+    getData: () => ({ views: graphs.map((graph) => graph.getData()) }),
     fitView() {
       fitGraphs();
     },
     destroy() {
+      ui.destroy();
       graphs.forEach((graph) => graph.destroy());
       graphs = [];
       root.replaceChildren();

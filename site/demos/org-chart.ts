@@ -76,8 +76,7 @@ export async function run(container: string | HTMLElement) {
       const dpr = Math.min(2, window.devicePixelRatio || 1);
       return { width: NODE_W / dpr, height: NODE_H / dpr };
     },
-    // Camera zoom is measured in physical pixels; the overlay expects CSS pixels.
-    fontSize: () => 13 * graph.getCamera().zoom / Math.min(2, window.devicePixelRatio || 1),
+    fontSize: 13,
     color: '#fff',
     secondaryColor: 'rgba(255,255,255,0.8)',
   });

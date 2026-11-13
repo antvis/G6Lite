@@ -110,7 +110,6 @@ describe('LabelRenderer zoom scaling helpers', () => {
       },
       { id: 'n1' },
       2,
-      1,
     );
 
     expect(resolved).toMatchObject({
@@ -513,7 +512,7 @@ describe('custom label helpers', () => {
       labelPlacement: 'top',
     };
 
-    const resolved = resolveNodeLabelStyle(style, node, 2, 0.5);
+    const resolved = resolveNodeLabelStyle(style, node, 1);
 
     expect(resolved.labelFontSize).toBe(14);
     expect(resolved.labelOffsetX).toBe(3);
@@ -1386,11 +1385,13 @@ describe('LabelLayerRenderer custom lifecycle', () => {
       node: nodes[0],
       dpr: 2,
       zoom: 1,
-      style: { labelFontSize: 24 },
+      style: { labelFontSize: 12 },
     });
     expect(draw).toHaveBeenCalledTimes(1);
     expect(draw.mock.calls[0][0].layout.data).toEqual(['cached']);
-    expect(ctx.translate).toHaveBeenCalledWith(100, 122.4);
+    const [x, y] = vi.mocked(ctx.translate).mock.calls[0];
+    expect(x).toBe(100);
+    expect(y).toBeCloseTo(121.2);
     layer.destroy();
   });
 
@@ -1533,7 +1534,7 @@ describe('LabelLayerRenderer custom lifecycle', () => {
       target: nodes[1],
       dpr: 2,
       zoom: 1.5,
-      style: { labelFontSize: 20, labelPlacement: 'start', labelAutoRotate: true },
+      style: { labelFontSize: 15, labelPlacement: 'start', labelAutoRotate: true },
     });
     expect(draw).toHaveBeenCalledTimes(1);
     const [translateX, translateY] = vi.mocked(ctx.translate).mock.calls[0];

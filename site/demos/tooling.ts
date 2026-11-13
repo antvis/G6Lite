@@ -1,4 +1,5 @@
 import type { Graph, NodeModel } from '@antv/g6-lite';
+import { getLabelScale } from '../../src/renderer/labelStyle';
 
 export type GraphInstanceWithTools = Graph;
 
@@ -35,6 +36,7 @@ export function attachLabels(
   graph: GraphInstanceWithTools,
   opts?: {
     nodeLabel?: (node: NodeModel) => string;
+    scaleWithZoom?: boolean;
   }
 ): () => void {
   const canvas = getMainCanvas(container);
@@ -48,9 +50,8 @@ export function attachLabels(
 
     overlay.innerHTML = '';
 
-    const fontBase = 10;
-    const camZoom = graph.getCamera().zoom;
-    const fontSize = Math.max(6, Math.min(18, fontBase * camZoom));
+    const dpr = canvas.width / (rect.width || 1) || 1;
+    const fontSize = 10 * getLabelScale(dpr, graph.getZoom(), opts?.scaleWithZoom) / dpr;
 
     nodes.forEach((node) => {
       const label =
@@ -128,8 +129,9 @@ export function attachLabelsCanvas(
     position?: 'inside' | 'above' | 'below' | 'right' | 'right-edge' | ((node: NodeModel) => 'inside' | 'above' | 'below' | 'right' | 'right-edge');
     /** Return node size in graph coordinates for inside-node text layout. */
     nodeSize?: (node: NodeModel) => { width: number; height: number };
-    /** Font size in CSS pixels at zoom=1. Default: 10 for outside, 11 for inside. */
+    /** Base font size in CSS pixels. Default: 10 for outside, 11 for inside. */
     fontSize?: number | ((node: NodeModel) => number);
+    scaleWithZoom?: boolean;
     /** Font family. Default: sans-serif. */
     fontFamily?: string;
     /** Text color — string or per-node function. Default: '#333'. */
@@ -159,12 +161,8 @@ export function attachLabelsCanvas(
   const positionOpt = opts?.position ?? 'above';
   const getPosition = typeof positionOpt === 'function' ? positionOpt : () => positionOpt;
   const FONT_FAMILY = opts?.fontFamily ?? '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-  const fontSizeOpt = opts?.fontSize;
-  const isFontSizeFunction = typeof fontSizeOpt === 'function';
-  const FONT_BASE_CSS = isFontSizeFunction ? 14 : (fontSizeOpt ?? (positionOpt === 'inside' ? 11 : 10));
-  const FONT_SIZE_MIN = fontSizeOpt ? 4 : 8;
-  const FONT_SIZE_MAX = fontSizeOpt ? 72 : 24;
-  const getNodeFontSize = isFontSizeFunction ? fontSizeOpt : () => FONT_BASE_CSS;
+  const fontSize = opts?.fontSize ?? (positionOpt === 'inside' ? 11 : 10);
+  const getNodeFontSize = typeof fontSize === 'function' ? fontSize : () => fontSize;
   const LABEL_BATCH = 500;
   const MIN_DRAW_INTERVAL_MS = 40;
   const colorOpt = opts?.color ?? '#333333';
@@ -209,10 +207,7 @@ export function attachLabelsCanvas(
     const { w, h } = syncCanvasSize();
     const dpr = getDprFromSrc();
 
-    const fontSizeCss = fontSizeOpt && !isFontSizeFunction
-      ? FONT_BASE_CSS
-      : Math.max(FONT_SIZE_MIN, Math.min(FONT_SIZE_MAX, FONT_BASE_CSS * cam.zoom));
-    const lineHeight = fontSizeCss * dpr * 1.3;
+    const labelScale = getLabelScale(dpr, cam.zoom, opts?.scaleWithZoom);
 
     ctx.clearRect(0, 0, w, h);
     ctx.textBaseline = 'middle';
@@ -249,8 +244,8 @@ export function attachLabelsCanvas(
         const nodePos = getPosition(node);
 
         // Compute per-node font size
-        const nodeFontSize = isFontSizeFunction ? getNodeFontSize(node) : fontSizeCss;
-        const fontSizeDevice = nodeFontSize * dpr;
+        const fontSizeDevice = getNodeFontSize(node) * labelScale;
+        const lineHeight = fontSizeDevice * 1.3;
         const useHalo = nodePos !== 'inside' && nodePos !== 'right';
 
         const lines = label.split('\n');
@@ -464,6 +459,7 @@ export function attachEdgeLabelsCanvas(
   opts?: {
     edgeLabel?: (edge: { source: string; target: string; data?: Record<string, unknown> }) => string | undefined;
     fontSize?: number;
+    scaleWithZoom?: boolean;
     color?: string;
     /** Badge background color. Default: 'rgba(255,255,255,0.9)'. Use function for per-edge color. */
     bgColor?: string | ((edge: { source: string; target: string; data?: Record<string, unknown> }, label: string) => string);
@@ -529,8 +525,8 @@ export function attachEdgeLabelsCanvas(
     for (const n of layoutNodes) nodeMap.set(n.id, n);
 
     const dpr = getDpr();
-    const fontSizeCss = Math.max(6, Math.min(16, FONT_BASE_CSS * cam.zoom));
-    const fontSizeDevice = fontSizeCss * dpr;
+    const labelScale = getLabelScale(dpr, cam.zoom, opts?.scaleWithZoom);
+    const fontSizeDevice = FONT_BASE_CSS * labelScale;
 
     const labelPos = opts?.position ?? 'center';
     const labelAlign = opts?.align ?? 'center';
@@ -601,7 +597,7 @@ export function attachEdgeLabelsCanvas(
       // Draw rounded-rect badge background (only if showBg)
       if (showBg) {
         const metrics = ctx.measureText(label);
-        const pad = (opts?.padding ?? 4) * dpr;
+        const pad = (opts?.padding ?? 4) * labelScale;
         const badgeW = metrics.width + pad * 2;
         const badgeH = fontSizeDevice + pad * 2;
         let badgeX: number;

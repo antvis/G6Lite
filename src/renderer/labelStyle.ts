@@ -19,8 +19,13 @@ export function getLabelZoom(zoom: number): number {
   return Math.max(0.25, Math.min(zoom, 2));
 }
 
+export function getLabelScale(dpr: number, zoom: number, scaleWithZoom = true): number {
+  // Camera zoom maps graph units to canvas pixels. Normalize it to CSS pixels before clamping.
+  return scaleWithZoom ? dpr * getLabelZoom(zoom / dpr) : dpr;
+}
+
 export function toLabelScreenPx(value: number, dpr: number, zoom: number): number {
-  return value * dpr * getLabelZoom(zoom / Math.max(dpr, Number.EPSILON));
+  return value * getLabelScale(dpr, zoom);
 }
 
 export function resolveNodeValue<T>(
@@ -61,10 +66,8 @@ export function isValidLabelLayout(layout: unknown): layout is LabelLayout {
 export function resolveNodeLabelStyle(
   style: NodeStyleConfig,
   node: GraphNode,
-  dpr: number,
-  zoom: number,
+  scale: number,
 ): ResolvedLabelStyle {
-  const scale = dpr * getLabelZoom(zoom);
   const maxWidth = resolveNodeValue(style.labelMaxWidth, node, 0);
   return {
     labelFontSize: resolveNodeValue(style.labelFontSize, node, 12) * scale,
@@ -86,10 +89,10 @@ export function resolveEdgeLabelStyle(
   source: GraphNode,
   target: GraphNode,
   edge: GraphEdge,
-  dpr: number,
+  scale: number,
 ): ResolvedLabelStyle {
   return {
-    labelFontSize: resolveEdgeValue(style.labelFontSize, source, target, edge, 10) * dpr,
+    labelFontSize: resolveEdgeValue(style.labelFontSize, source, target, edge, 10) * scale,
     labelFontFamily: resolveEdgeValue(
       style.labelFontFamily,
       source,
@@ -116,7 +119,7 @@ export function resolveEdgeLabelStyle(
       'rgba(255,255,255,0.8)' as string | false,
     ),
     labelBackgroundPadding:
-      resolveEdgeValue(style.labelBackgroundPadding, source, target, edge, 2) * dpr,
+      resolveEdgeValue(style.labelBackgroundPadding, source, target, edge, 2) * scale,
     labelMaxWidth: 0,
     labelAutoRotate: resolveEdgeValue(style.labelAutoRotate, source, target, edge, true),
   };

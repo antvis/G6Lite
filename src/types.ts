@@ -385,11 +385,11 @@ export type EdgeLabelPlacement = 'start' | 'center' | 'end';
 /** Label owner type shared by node and edge label renderers. */
 export type LabelType = 'node' | 'edge';
 
-/** Engine-managed rendering policies shared by node and edge labels. */
+/** Engine-managed text scaling and label visibility policies. */
 export interface LabelOptions {
   /**
-   * Whether engine-managed label dimensions scale with camera zoom.
-   * Defaults to true. Edge labels already use fixed screen-space dimensions.
+   * Whether node, edge, and combo labels, text icons, and built-in text badges scale with zoom.
+   * Defaults to true. Set false to keep their screen size fixed.
    */
   scaleWithZoom?: boolean;
   /**

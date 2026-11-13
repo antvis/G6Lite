@@ -173,9 +173,7 @@ export async function run(container: string | HTMLElement) {
     },
     fontSize: (n) => {
       const level = n.data?.level as string;
-      const size = level === NODE_LEVELS.ROOT ? 20 : level === NODE_LEVELS.LEVEL1 ? 16 : 14;
-      // Camera zoom is measured in physical pixels; the overlay expects CSS pixels.
-      return size * graph.getCamera().zoom / Math.min(2, window.devicePixelRatio || 1);
+      return level === NODE_LEVELS.ROOT ? 20 : level === NODE_LEVELS.LEVEL1 ? 16 : 14;
     },
     color: (n) => getNodeLabelColor(n),
   });

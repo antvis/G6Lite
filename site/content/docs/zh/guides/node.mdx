@@ -147,7 +147,7 @@ await graph.render();
 | `iconOffsetX` | `NodeStyleValue<number>` | `0` | 图坐标偏移，正值向右 |
 | `iconOffsetY` | `NodeStyleValue<number>` | `0` | 图坐标偏移，正值向下 |
 
-图标尺寸和偏移随相机缩放，不使用 `label.scaleWithZoom` 的文字缩放策略。图标不参加标签碰撞隐藏，也不受 `nodeMinZoom` 控制；`hidden` 节点仍会跳过绘制。图片异步加载，成功后重绘；跨域图片需允许匿名 CORS，失败后本实例不会自动重试同一 URL。
+文字图标的字号由 `label.scaleWithZoom` 控制。图片尺寸和所有图标的偏移随相机缩放。图标不参加标签碰撞隐藏，也不受 `nodeMinZoom` 控制；`hidden` 节点仍会跳过绘制。图片异步加载，成功后重绘；跨域图片需允许匿名 CORS，失败后本实例不会自动重试同一 URL。
 
 <span id="标签与图标" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 

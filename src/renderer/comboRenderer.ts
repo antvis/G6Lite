@@ -12,6 +12,7 @@ import type {
 } from '../types';
 import type { Camera } from './camera';
 import { graphToNDC } from './camera';
+import { getLabelScale } from './labelStyle';
 
 type ComboSize = number | [number, number];
 
@@ -53,7 +54,10 @@ export class ComboRenderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
 
-  constructor(container: HTMLElement, mainCanvas: HTMLCanvasElement) {
+  constructor(
+    container: HTMLElement,
+    private readonly mainCanvas: HTMLCanvasElement,
+  ) {
     this.canvas = document.createElement('canvas');
     this.canvas.style.position = 'absolute';
     this.canvas.style.left = '0';
@@ -82,13 +86,21 @@ export class ComboRenderer {
     return { w, h, dpr };
   }
 
-  draw(combos: InternalCombo[], camera: Camera, config?: ComboConfig): void {
+  draw(
+    combos: InternalCombo[],
+    camera: Camera,
+    config?: ComboConfig,
+    scaleWithZoom?: boolean,
+  ): void {
     const { w, h, dpr } = this.syncSize();
     const ctx = this.ctx;
     ctx.clearRect(0, 0, w, h);
 
     if (!combos.length) return;
 
+    const graphWidth = this.mainCanvas.getBoundingClientRect().width;
+    const graphDpr = (graphWidth && this.mainCanvas.width / graphWidth) || dpr;
+    const labelScale = (getLabelScale(graphDpr, camera.zoom, scaleWithZoom) / graphDpr) * dpr;
     // Sort combos: parent first, children on top (render order)
     const sorted = this.sortByDepth(combos);
     const comboMap = new Map(combos.map((combo) => [combo.id, combo]));
@@ -107,9 +119,9 @@ export class ComboRenderer {
         this.hasStateStyle(combo, config, 'highlight');
 
       if (combo.collapsed) {
-        this.drawCollapsed(ctx, combo, camera, style, comboMap, w, h, dpr);
+        this.drawCollapsed(ctx, combo, camera, style, comboMap, w, h, dpr, labelScale);
       } else {
-        this.drawExpanded(ctx, combo, camera, style, w, h, dpr);
+        this.drawExpanded(ctx, combo, camera, style, w, h, dpr, labelScale);
       }
 
       this.drawStateOverlay(
@@ -176,6 +188,7 @@ export class ComboRenderer {
     w: number,
     h: number,
     dpr: number,
+    labelScale: number,
   ): void {
     // Compute screen-space bounding box
     const halfW = combo.width / 2;
@@ -211,7 +224,7 @@ export class ComboRenderer {
     }
 
     if (style.label) {
-      this.drawLabel(ctx, style.label, sx, sy, sw, sh, style, dpr, camera.zoom);
+      this.drawLabel(ctx, style.label, sx, sy, sw, sh, style, dpr, labelScale);
     }
 
     ctx.restore();
@@ -226,6 +239,7 @@ export class ComboRenderer {
     w: number,
     h: number,
     dpr: number,
+    labelScale: number,
   ): void {
     const [px, py] = this.graphToScreen(combo.x, combo.y, camera, w, h);
     const [cw, ch] = this.getCollapsedScreenSize(style, camera, dpr);
@@ -256,7 +270,7 @@ export class ComboRenderer {
 
     const text = this.getCollapsedText(combo, comboMap, style);
     if (text && radius > 8) {
-      const fontSize = Math.max(10 * dpr, Math.min(style.labelFontSize * dpr, radius * 0.7));
+      const fontSize = style.labelFontSize * labelScale;
       ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.fillStyle = style.labelColor;
       ctx.textAlign = 'center';
@@ -370,10 +384,10 @@ export class ComboRenderer {
     _sh: number,
     style: ResolvedComboStyle,
     dpr: number,
-    zoom: number,
+    labelScale: number,
   ): void {
     const placement = style.labelPlacement;
-    const fontSize = style.labelFontSize * dpr * Math.min(zoom, 1.5);
+    const fontSize = style.labelFontSize * labelScale;
     const color = style.labelColor;
 
     if (fontSize < 6) return; // Too small to read

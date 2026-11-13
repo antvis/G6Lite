@@ -141,6 +141,8 @@ export interface DecorationMeasureParams<T = unknown> {
   data: T;
   dpr: number;
   zoom: number;
+  /** Canvas pixels per configured text unit, including the graph's label scaling policy. */
+  labelScale?: number;
   /** Final node dimensions in Canvas backing-store pixels. */
   nodeWidth: number;
   /** Final node dimensions in Canvas backing-store pixels. */

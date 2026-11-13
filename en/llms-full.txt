@@ -2476,7 +2476,7 @@ These fields apply to `combo.style` and `data.combos[].style`. `ComboStyleValue<
 | `labelColor`     | Text color                                                           | `ComboStyleValue<string>`                    | `'rgba(0, 0, 0, 0.65)'`       |
 | `labelPlacement` | Expanded text location; fixed value only                             | `'top' \| 'bottom' \| 'inside' \| 'center'`  | `'top'`                       |
 
-Combo bounds are computed from node shapes and child combo outlines. Labels do not contribute to bounds. Expanded labels scale up to 1.5 times their configured size and are hidden below 6 screen pixels. Global label settings for nodes and edges do not apply to combo labels.
+Combo bounds are computed from node shapes and child combo outlines. Labels do not contribute to bounds. Combo font sizes follow `label.scaleWithZoom`. Expanded labels are hidden below 6 Canvas pixels.
 
 #### Collapse and state fields [#collapse-and-state-fields]
 
@@ -2607,13 +2607,13 @@ See the [Combo guide](/en/docs/guides/combo) for detailed fields and more exampl
 
 <span id="labeloptions" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-| Property          | Description                                                                                                        | Type      | Default |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------ | --------- | ------- |
-| `scaleWithZoom`   | Node-label dimensions follow camera zoom; false keeps screen dimensions. Edge labels always keep screen dimensions | `boolean` | `true`  |
-| `hideOnLowZoom`   | Enables both minimum-zoom thresholds below; false bypasses both                                                    | `boolean` | `true`  |
-| `hideOnCollision` | Hides labels overlapping earlier labels; nodes and edges share a collision layer                                   | `boolean` | `true`  |
-| `nodeMinZoom`     | Minimum camera zoom for node labels; equality passes                                                               | `number`  | `0.3`   |
-| `edgeMinZoom`     | Minimum camera zoom for edge labels; equality passes                                                               | `number`  | `0.5`   |
+| Property          | Description                                                                                                                   | Type      | Default |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
+| `scaleWithZoom`   | Scales node, edge, and Combo labels, text icons, and built-in text badges with zoom. Set to false to keep a fixed screen size | `boolean` | `true`  |
+| `hideOnLowZoom`   | Enables both minimum-zoom thresholds below; false bypasses both                                                               | `boolean` | `true`  |
+| `hideOnCollision` | Hides labels overlapping earlier labels; nodes and edges share a collision layer                                              | `boolean` | `true`  |
+| `nodeMinZoom`     | Minimum camera zoom for node labels; equality passes                                                                          | `number`  | `0.3`   |
+| `edgeMinZoom`     | Minimum camera zoom for edge labels; equality passes                                                                          | `number`  | `0.5`   |
 
 ### Usage example [#config-example-label]
 
@@ -7844,12 +7844,12 @@ import {
 } from '@antv/g6-lite';
 
 const externalNameRenderer: DecorationRenderer<string> = {
-  measure({ ctx, data }) {
-    ctx.font = 'bold 11px sans-serif';
-    return { width: ctx.measureText(data).width, height: 14 };
+  measure({ ctx, data, dpr, labelScale = dpr }) {
+    ctx.font = `bold ${11 * labelScale}px sans-serif`;
+    return { width: ctx.measureText(data).width, height: 14 * labelScale };
   },
-  draw({ ctx, data }) {
-    ctx.font = 'bold 11px sans-serif';
+  draw({ ctx, data, dpr, labelScale = dpr }) {
+    ctx.font = `bold ${11 * labelScale}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#1f1f1f';
@@ -8250,9 +8250,7 @@ export async function run(container: string | HTMLElement) {
     },
     fontSize: (n) => {
       const level = n.data?.level as string;
-      const size = level === NODE_LEVELS.HEAD ? 16 : level === NODE_LEVELS.CATEGORY ? 14 : 12;
-      // Camera zoom is measured in physical pixels; the overlay expects CSS pixels.
-      return size * graph.getCamera().zoom / Math.min(2, window.devicePixelRatio || 1);
+      return level === NODE_LEVELS.HEAD ? 16 : level === NODE_LEVELS.CATEGORY ? 14 : 12;
     },
     color: (n) => getNodeLabelColor(n),
   });
@@ -9697,9 +9695,7 @@ export async function run(container: string | HTMLElement) {
     },
     fontSize: (n) => {
       const level = n.data?.level as string;
-      const size = level === NODE_LEVELS.ROOT ? 20 : level === NODE_LEVELS.LEVEL1 ? 16 : 14;
-      // Camera zoom is measured in physical pixels; the overlay expects CSS pixels.
-      return size * graph.getCamera().zoom / Math.min(2, window.devicePixelRatio || 1);
+      return level === NODE_LEVELS.ROOT ? 20 : level === NODE_LEVELS.LEVEL1 ? 16 : 14;
     },
     color: (n) => getNodeLabelColor(n),
   });
@@ -10059,8 +10055,7 @@ export async function run(container: string | HTMLElement) {
       const dpr = Math.min(2, window.devicePixelRatio || 1);
       return { width: NODE_W / dpr, height: NODE_H / dpr };
     },
-    // Camera zoom is measured in physical pixels; the overlay expects CSS pixels.
-    fontSize: () => 13 * graph.getCamera().zoom / Math.min(2, window.devicePixelRatio || 1),
+    fontSize: 13,
     color: '#fff',
     secondaryColor: 'rgba(255,255,255,0.8)',
   });
@@ -14250,10 +14245,10 @@ measure returns full finite positive bounds. This example converts a fixed CSS f
 
 ```ts
 const pill: DecorationRenderer = {
-  measure({ ctx, data, dpr }) {
+  measure({ ctx, data, dpr, labelScale = dpr }) {
     const text = String(data ?? '');
-    ctx.font = 12 * dpr + 'px sans-serif';
-    return { width: ctx.measureText(text).width + 12 * dpr, height: 22 * dpr, data: { text, unit: dpr } };
+    ctx.font = 12 * labelScale + 'px sans-serif';
+    return { width: ctx.measureText(text).width + 12 * labelScale, height: 22 * labelScale, data: { text, unit: labelScale } };
   },
   draw({ ctx, layout }) {
     const value = layout.data as { text: string; unit: number } | undefined;
@@ -14276,10 +14271,10 @@ import { Graph, register, type DecorationRenderer } from '@antv/g6-lite';
 
 // #region renderer
 const pill: DecorationRenderer = {
-  measure({ ctx, data, dpr }) {
+  measure({ ctx, data, dpr, labelScale = dpr }) {
     const text = String(data ?? '');
-    ctx.font = 12 * dpr + 'px sans-serif';
-    return { width: ctx.measureText(text).width + 12 * dpr, height: 22 * dpr, data: { text, unit: dpr } };
+    ctx.font = 12 * labelScale + 'px sans-serif';
+    return { width: ctx.measureText(text).width + 12 * labelScale, height: 22 * labelScale, data: { text, unit: labelScale } };
   },
   draw({ ctx, layout }) {
     const value = layout.data as { text: string; unit: number } | undefined;
@@ -17386,7 +17381,7 @@ Set the background with `labelBackground` and its padding with `labelBackgroundP
 
 ### Position and visibility [#position-and-visibility]
 
-Labels on `cubic` and `polyline` edges use the line between endpoints for position and rotation. Font size stays fixed. Visibility follows [global label policies](/en/docs/guides/label#global-label-policies) and the `hidden` state of the edge and its endpoints.
+Labels on `cubic` and `polyline` edges use the line between endpoints for position and rotation. Font size and visibility follow [global label policies](/en/docs/guides/label#global-label-policies). The `hidden` state of the edge and its endpoints also affects visibility.
 
 ### labelRenderer [#edge-label-renderer]
 
@@ -18079,7 +18074,7 @@ The left node below uses a text icon, and the right node uses an image icon.
 * Text/font icons: set `iconType: 'text'`, then iconFontSize and iconColor. Load the font in your application.
 * Images: set `iconType: 'image'` and an image URL, then iconWidth/Height. Loading is asynchronous; cross-origin resources need anonymous CORS.
 
-Icons scale with nodes and do not follow global label threshold/collision hiding. See the [icon reference](/en/docs/guides/node#icons) for fields.
+Text icons follow the global font-size policy. Image icons scale with their nodes. Neither uses the label visibility thresholds or collision rules. See the [icon reference](/en/docs/guides/node#icons) for fields.
 
 
 
@@ -18256,13 +18251,13 @@ export async function run(container: HTMLElement) {
 
 
 
-Keep default visibility policies where appropriate. Edge text retains screen dimensions; see [position and visibility](/en/docs/guides/edge#position-and-visibility) for curved/polyline limitations.
+See [position and visibility](/en/docs/guides/edge#position-and-visibility) for label positioning limitations on curved and polyline edges.
 
 ## Global label policies [#global-label-policies]
 
 Configure the top-level Graph `label` option for your goal:
 
-* Keep text at a fixed screen size: set `scaleWithZoom: false`. This affects node labels; edge labels always keep screen dimensions.
+* Set `scaleWithZoom: false` to keep node, edge, and Combo labels, text icons, and built-in text badges at a fixed screen size. When enabled, text grows with the graph and stays at or above 0.25× its base size when zooming out.
 * Adjust when labels appear: set nodeMinZoom and edgeMinZoom. Set one threshold to 0 to bypass it independently.
 * Diagnose hidden/overlapping labels: temporarily disable hideOnCollision or hideOnLowZoom, then restore the policies you need.
 
@@ -18411,12 +18406,12 @@ Each frame processes node labels before edge labels, following rendering-data or
 
 Built-in labels use unrotated text rectangles, excluding extra background padding. Custom labelRenderer bounds come from measure's width/height. The policy hides overlaps without moving labels or avoiding node bodies.
 
-Custom node/edge labelRenderers also pass low-zoom and collision checks; sizing policy affects the engine-provided style. Renderers computing their own dimensions from zoom must keep them consistent. Node-label scaling has internal limits and is not indefinitely linear at extreme zoom.
+Custom node and edge label renderers also pass low-zoom and collision checks. The supplied style already includes font scaling and the device pixel ratio. Custom decorations can use `labelScale` to convert a base font size to Canvas pixels.
 
 ### Scope [#scope]
 
 * Labels need nonempty text; `label: false` or an empty string draws nothing. Business data alone does not create labels.
-* Node icons, decorations/badges, and Combo labels use separate rules, unaffected by these five fields.
+* Low-zoom and collision policies apply to node and edge labels. Text icons, built-in text badges, and Combo labels share the font-size policy and control their own visibility.
 * Element hidden states, hidden edge endpoints, and viewport culling still affect visibility. Disabling both hiding policies does not guarantee every label appears.
 
 See [node labels](/en/docs/guides/node#labels), [edge labels](/en/docs/guides/edge#edge-labels), or [Combo labels](/en/docs/guides/combo#padding-bounds-and-labels) for content and appearance.
@@ -21783,7 +21778,7 @@ Icon fields also belong in `node.style` and accept constants or per-field style 
 | `iconOffsetX`    | `NodeStyleValue<number>`            | `0`                     | Graph-space offset; positive moves right                                          |
 | `iconOffsetY`    | `NodeStyleValue<number>`            | `0`                     | Graph-space offset; positive moves down                                           |
 
-Icon sizes and offsets follow camera zoom rather than the `label.scaleWithZoom` text policy. Icons do not participate in label collision hiding or `nodeMinZoom`; hidden nodes still skip drawing. Images load asynchronously and trigger a redraw when ready. Cross-origin images must permit anonymous CORS; failed URLs are not automatically retried by the instance.
+Text icon font sizes follow `label.scaleWithZoom`. Image icon sizes and all icon offsets follow camera zoom. Icons do not participate in label collision hiding or `nodeMinZoom`; hidden nodes still skip drawing. Images load asynchronously and trigger a redraw when ready. Cross-origin images must permit anonymous CORS; failed URLs are not automatically retried by the instance.
 
 <span id="labels-and-icons" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 

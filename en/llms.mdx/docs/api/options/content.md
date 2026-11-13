@@ -874,7 +874,7 @@ These fields apply to `combo.style` and `data.combos[].style`. `ComboStyleValue<
 | `labelColor`     | Text color                                                           | `ComboStyleValue<string>`                    | `'rgba(0, 0, 0, 0.65)'`       |
 | `labelPlacement` | Expanded text location; fixed value only                             | `'top' \| 'bottom' \| 'inside' \| 'center'`  | `'top'`                       |
 
-Combo bounds are computed from node shapes and child combo outlines. Labels do not contribute to bounds. Expanded labels scale up to 1.5 times their configured size and are hidden below 6 screen pixels. Global label settings for nodes and edges do not apply to combo labels.
+Combo bounds are computed from node shapes and child combo outlines. Labels do not contribute to bounds. Combo font sizes follow `label.scaleWithZoom`. Expanded labels are hidden below 6 Canvas pixels.
 
 #### Collapse and state fields [#collapse-and-state-fields]
 
@@ -1005,13 +1005,13 @@ See the [Combo guide](/en/docs/guides/combo) for detailed fields and more exampl
 
 <span id="labeloptions" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-| Property          | Description                                                                                                        | Type      | Default |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------ | --------- | ------- |
-| `scaleWithZoom`   | Node-label dimensions follow camera zoom; false keeps screen dimensions. Edge labels always keep screen dimensions | `boolean` | `true`  |
-| `hideOnLowZoom`   | Enables both minimum-zoom thresholds below; false bypasses both                                                    | `boolean` | `true`  |
-| `hideOnCollision` | Hides labels overlapping earlier labels; nodes and edges share a collision layer                                   | `boolean` | `true`  |
-| `nodeMinZoom`     | Minimum camera zoom for node labels; equality passes                                                               | `number`  | `0.3`   |
-| `edgeMinZoom`     | Minimum camera zoom for edge labels; equality passes                                                               | `number`  | `0.5`   |
+| Property          | Description                                                                                                                   | Type      | Default |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
+| `scaleWithZoom`   | Scales node, edge, and Combo labels, text icons, and built-in text badges with zoom. Set to false to keep a fixed screen size | `boolean` | `true`  |
+| `hideOnLowZoom`   | Enables both minimum-zoom thresholds below; false bypasses both                                                               | `boolean` | `true`  |
+| `hideOnCollision` | Hides labels overlapping earlier labels; nodes and edges share a collision layer                                              | `boolean` | `true`  |
+| `nodeMinZoom`     | Minimum camera zoom for node labels; equality passes                                                                          | `number`  | `0.3`   |
+| `edgeMinZoom`     | Minimum camera zoom for edge labels; equality passes                                                                          | `number`  | `0.5`   |
 
 ### Usage example [#config-example-label]
 

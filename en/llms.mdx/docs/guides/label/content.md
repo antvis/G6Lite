@@ -65,7 +65,7 @@ The left node below uses a text icon, and the right node uses an image icon.
 * Text/font icons: set `iconType: 'text'`, then iconFontSize and iconColor. Load the font in your application.
 * Images: set `iconType: 'image'` and an image URL, then iconWidth/Height. Loading is asynchronous; cross-origin resources need anonymous CORS.
 
-Icons scale with nodes and do not follow global label threshold/collision hiding. See the [icon reference](/en/docs/guides/node#icons) for fields.
+Text icons follow the global font-size policy. Image icons scale with their nodes. Neither uses the label visibility thresholds or collision rules. See the [icon reference](/en/docs/guides/node#icons) for fields.
 
 
 
@@ -242,13 +242,13 @@ export async function run(container: HTMLElement) {
 
 
 
-Keep default visibility policies where appropriate. Edge text retains screen dimensions; see [position and visibility](/en/docs/guides/edge#position-and-visibility) for curved/polyline limitations.
+See [position and visibility](/en/docs/guides/edge#position-and-visibility) for label positioning limitations on curved and polyline edges.
 
 ## Global label policies [#global-label-policies]
 
 Configure the top-level Graph `label` option for your goal:
 
-* Keep text at a fixed screen size: set `scaleWithZoom: false`. This affects node labels; edge labels always keep screen dimensions.
+* Set `scaleWithZoom: false` to keep node, edge, and Combo labels, text icons, and built-in text badges at a fixed screen size. When enabled, text grows with the graph and stays at or above 0.25× its base size when zooming out.
 * Adjust when labels appear: set nodeMinZoom and edgeMinZoom. Set one threshold to 0 to bypass it independently.
 * Diagnose hidden/overlapping labels: temporarily disable hideOnCollision or hideOnLowZoom, then restore the policies you need.
 
@@ -397,12 +397,12 @@ Each frame processes node labels before edge labels, following rendering-data or
 
 Built-in labels use unrotated text rectangles, excluding extra background padding. Custom labelRenderer bounds come from measure's width/height. The policy hides overlaps without moving labels or avoiding node bodies.
 
-Custom node/edge labelRenderers also pass low-zoom and collision checks; sizing policy affects the engine-provided style. Renderers computing their own dimensions from zoom must keep them consistent. Node-label scaling has internal limits and is not indefinitely linear at extreme zoom.
+Custom node and edge label renderers also pass low-zoom and collision checks. The supplied style already includes font scaling and the device pixel ratio. Custom decorations can use `labelScale` to convert a base font size to Canvas pixels.
 
 ### Scope [#scope]
 
 * Labels need nonempty text; `label: false` or an empty string draws nothing. Business data alone does not create labels.
-* Node icons, decorations/badges, and Combo labels use separate rules, unaffected by these five fields.
+* Low-zoom and collision policies apply to node and edge labels. Text icons, built-in text badges, and Combo labels share the font-size policy and control their own visibility.
 * Element hidden states, hidden edge endpoints, and viewport culling still affect visibility. Disabling both hiding policies does not guarantee every label appears.
 
 See [node labels](/en/docs/guides/node#labels), [edge labels](/en/docs/guides/edge#edge-labels), or [Combo labels](/en/docs/guides/combo#padding-bounds-and-labels) for content and appearance.

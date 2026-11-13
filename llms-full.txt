@@ -2476,7 +2476,7 @@ export async function run(container: HTMLElement) {
 | `labelColor`     | 标签颜色                             | `ComboStyleValue<string>`                    | `'rgba(0, 0, 0, 0.65)'`       |
 | `labelPlacement` | 展开标签位置；不支持回调                     | `'top' \| 'bottom' \| 'inside' \| 'center'`  | `'top'`                       |
 
-分组边框根据节点主体和子分组边框计算。标签不计入边界。展开标签随视图缩放，字号上限是配置值的 1.5 倍，小于 6 屏幕像素时隐藏。分组标签不使用节点和边的全局标签策略。
+分组边框根据节点主体和子分组边框计算。标签不计入边界。分组标签的字号由 `label.scaleWithZoom` 控制。展开标签小于 6 个 Canvas 像素时隐藏。
 
 #### 折叠与状态字段 [#折叠与状态字段]
 
@@ -2607,13 +2607,13 @@ export async function run(container: HTMLElement) {
 
 <span id="labeloptions" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-| 属性                | 描述                                         | 类型        | 默认值    |
-| ----------------- | ------------------------------------------ | --------- | ------ |
-| `scaleWithZoom`   | 节点标签尺寸随相机 zoom 变化；false 保持屏幕尺寸。边标签始终保持屏幕尺寸 | `boolean` | `true` |
-| `hideOnLowZoom`   | 启用下方两个最小 zoom 阈值；false 同时绕过两者              | `boolean` | `true` |
-| `hideOnCollision` | 隐藏与先绘制标签重叠的标签；节点与边共用碰撞层                    | `boolean` | `true` |
-| `nodeMinZoom`     | 节点标签最小相机 zoom；达到阈值即通过检查                    | `number`  | `0.3`  |
-| `edgeMinZoom`     | 边标签最小相机 zoom；达到阈值即通过检查                     | `number`  | `0.5`  |
+| 属性                | 描述                                               | 类型        | 默认值    |
+| ----------------- | ------------------------------------------------ | --------- | ------ |
+| `scaleWithZoom`   | 节点、边、Combo 标签、文字图标和内置文字徽标随缩放改变字号。设为 false 保持屏幕字号 | `boolean` | `true` |
+| `hideOnLowZoom`   | 启用下方两个最小 zoom 阈值；false 同时绕过两者                    | `boolean` | `true` |
+| `hideOnCollision` | 隐藏与先绘制标签重叠的标签；节点与边共用碰撞层                          | `boolean` | `true` |
+| `nodeMinZoom`     | 节点标签最小相机 zoom；达到阈值即通过检查                          | `number`  | `0.3`  |
+| `edgeMinZoom`     | 边标签最小相机 zoom；达到阈值即通过检查                           | `number`  | `0.5`  |
 
 ### 使用示例 [#config-example-label]
 
@@ -7836,12 +7836,12 @@ import {
 } from '@antv/g6-lite';
 
 const externalNameRenderer: DecorationRenderer<string> = {
-  measure({ ctx, data }) {
-    ctx.font = 'bold 11px sans-serif';
-    return { width: ctx.measureText(data).width, height: 14 };
+  measure({ ctx, data, dpr, labelScale = dpr }) {
+    ctx.font = `bold ${11 * labelScale}px sans-serif`;
+    return { width: ctx.measureText(data).width, height: 14 * labelScale };
   },
-  draw({ ctx, data }) {
-    ctx.font = 'bold 11px sans-serif';
+  draw({ ctx, data, dpr, labelScale = dpr }) {
+    ctx.font = `bold ${11 * labelScale}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#1f1f1f';
@@ -8242,9 +8242,7 @@ export async function run(container: string | HTMLElement) {
     },
     fontSize: (n) => {
       const level = n.data?.level as string;
-      const size = level === NODE_LEVELS.HEAD ? 16 : level === NODE_LEVELS.CATEGORY ? 14 : 12;
-      // Camera zoom is measured in physical pixels; the overlay expects CSS pixels.
-      return size * graph.getCamera().zoom / Math.min(2, window.devicePixelRatio || 1);
+      return level === NODE_LEVELS.HEAD ? 16 : level === NODE_LEVELS.CATEGORY ? 14 : 12;
     },
     color: (n) => getNodeLabelColor(n),
   });
@@ -9689,9 +9687,7 @@ export async function run(container: string | HTMLElement) {
     },
     fontSize: (n) => {
       const level = n.data?.level as string;
-      const size = level === NODE_LEVELS.ROOT ? 20 : level === NODE_LEVELS.LEVEL1 ? 16 : 14;
-      // Camera zoom is measured in physical pixels; the overlay expects CSS pixels.
-      return size * graph.getCamera().zoom / Math.min(2, window.devicePixelRatio || 1);
+      return level === NODE_LEVELS.ROOT ? 20 : level === NODE_LEVELS.LEVEL1 ? 16 : 14;
     },
     color: (n) => getNodeLabelColor(n),
   });
@@ -10051,8 +10047,7 @@ export async function run(container: string | HTMLElement) {
       const dpr = Math.min(2, window.devicePixelRatio || 1);
       return { width: NODE_W / dpr, height: NODE_H / dpr };
     },
-    // Camera zoom is measured in physical pixels; the overlay expects CSS pixels.
-    fontSize: () => 13 * graph.getCamera().zoom / Math.min(2, window.devicePixelRatio || 1),
+    fontSize: 13,
     color: '#fff',
     secondaryColor: 'rgba(255,255,255,0.8)',
   });
@@ -14242,10 +14237,10 @@ measure 返回完整的有限正数宽高；本例用 DPR 换算固定 CSS 字�
 
 ```ts
 const pill: DecorationRenderer = {
-  measure({ ctx, data, dpr }) {
+  measure({ ctx, data, dpr, labelScale = dpr }) {
     const text = String(data ?? '');
-    ctx.font = 12 * dpr + 'px sans-serif';
-    return { width: ctx.measureText(text).width + 12 * dpr, height: 22 * dpr, data: { text, unit: dpr } };
+    ctx.font = 12 * labelScale + 'px sans-serif';
+    return { width: ctx.measureText(text).width + 12 * labelScale, height: 22 * labelScale, data: { text, unit: labelScale } };
   },
   draw({ ctx, layout }) {
     const value = layout.data as { text: string; unit: number } | undefined;
@@ -14268,10 +14263,10 @@ import { Graph, register, type DecorationRenderer } from '@antv/g6-lite';
 
 // #region renderer
 const pill: DecorationRenderer = {
-  measure({ ctx, data, dpr }) {
+  measure({ ctx, data, dpr, labelScale = dpr }) {
     const text = String(data ?? '');
-    ctx.font = 12 * dpr + 'px sans-serif';
-    return { width: ctx.measureText(text).width + 12 * dpr, height: 22 * dpr, data: { text, unit: dpr } };
+    ctx.font = 12 * labelScale + 'px sans-serif';
+    return { width: ctx.measureText(text).width + 12 * labelScale, height: 22 * labelScale, data: { text, unit: labelScale } };
   },
   draw({ ctx, layout }) {
     const value = layout.data as { text: string; unit: number } | undefined;
@@ -17380,7 +17375,7 @@ export async function run(container: HTMLElement) {
 
 ### 位置与显示条件 [#位置与显示条件]
 
-`cubic` 和 `polyline` 标签按两端连线定位和旋转。标签字号固定，显隐受[全局标签策略](/docs/guides/label#全局标签策略)以及边和端点的 `hidden` 状态控制。
+`cubic` 和 `polyline` 标签按两端连线定位和旋转。字号和显隐遵循[全局标签策略](/docs/guides/label#全局标签策略)，边和端点的 `hidden` 状态也影响显隐。
 
 ### labelRenderer [#edge-label-renderer]
 
@@ -18079,7 +18074,7 @@ export async function run(container: HTMLElement) {
 * 文字或字体图标：设置 `iconType: 'text'`，用 iconFontSize、iconColor 调整；字体须由应用加载。
 * 图片图标：设置 `iconType: 'image'` 和图片 URL，用 iconWidth/Height 调整。图片异步加载，跨域资源需允许匿名 CORS。
 
-图标随节点缩放，不受全局标签的低缩放或碰撞隐藏控制。完整字段见[图标参考](/docs/guides/node#图标)。
+文字图标遵循全局字号策略，图片图标随节点缩放。两类图标均不受标签的低缩放或碰撞隐藏控制。完整字段见[图标参考](/docs/guides/node#图标)。
 
 
 
@@ -18256,13 +18251,13 @@ export async function run(container: HTMLElement) {
 
 
 
-业务中可保留默认显示策略。边标签保持屏幕字号；曲线、折线路径的定位限制见[位置与显示条件](/docs/guides/edge#位置与显示条件)。
+曲线、折线路径的标签定位限制见[位置与显示条件](/docs/guides/edge#位置与显示条件)。
 
 ## 全局标签策略 [#全局标签策略]
 
 配置 Graph 顶层 `label`，按目标选择：
 
-* 保持文字屏幕大小：设置 `scaleWithZoom: false`；该开关影响节点标签，边标签始终保持屏幕尺寸。
+* 设置 `scaleWithZoom: false` 可让节点、边、Combo 标签、文字图标和内置文字徽标保持屏幕字号。开启时，文字随画布放大，缩小时字号最低为基础字号的 0.25 倍。
 * 调整出现时机：设置 nodeMinZoom、edgeMinZoom；只关闭一种阈值时将对应值设为 0。
 * 检查重叠或隐藏原因：暂时关闭 hideOnCollision 或 hideOnLowZoom，确认后再恢复需要的策略。
 
@@ -18411,12 +18406,12 @@ export function createDemoPanel(container: string | HTMLElement, description = '
 
 内置标签按未旋转的文字矩形检测，不额外包含背景内边距；自定义 labelRenderer 使用 measure 返回的宽高。该策略隐藏重叠标签，不负责移动标签或避让节点主体。
 
-自定义节点、边 labelRenderer 也经过低缩放与碰撞检查；尺寸策略作用于引擎提供的 style。若渲染器自行根据 zoom 绘制尺寸，需自行保持一致。节点标签缩放有内部限幅，极端 zoom 下并非无限线性变化。
+自定义节点、边 labelRenderer 也经过低缩放与碰撞检查。引擎传入的 style 已包含字号缩放和屏幕像素比。自定义 decoration 可用参数 `labelScale` 将基础字号换算成 Canvas 像素。
 
 ### 生效范围 [#生效范围]
 
 * 标签须有非空文本；`label: false` 或空串不绘制。业务 data 本身不会生成标签。
-* 节点图标、decorations 徽章和 Combo 标签使用各自规则，不受这 5 个字段控制。
+* 低缩放与碰撞隐藏策略作用于节点和边标签。文字图标、内置文字徽标与 Combo 标签也遵循字号策略，各自控制显隐。
 * hidden 元素、隐藏端点关联的边标签和视口裁剪仍会影响显示；关闭两种隐藏策略不保证所有文本都可见。
 
 内容、位置和字号的完整定义见[节点标签](/docs/guides/node#标签)、[边标签](/docs/guides/edge#边标签)；Combo 的规则见[分组标签](/docs/guides/combo#留白包围框与标签)。
@@ -21779,7 +21774,7 @@ export async function run(container: HTMLElement) {
 | `iconOffsetX`    | `NodeStyleValue<number>`            | `0`                  | 图坐标偏移，正值向右                                     |
 | `iconOffsetY`    | `NodeStyleValue<number>`            | `0`                  | 图坐标偏移，正值向下                                     |
 
-图标尺寸和偏移随相机缩放，不使用 `label.scaleWithZoom` 的文字缩放策略。图标不参加标签碰撞隐藏，也不受 `nodeMinZoom` 控制；`hidden` 节点仍会跳过绘制。图片异步加载，成功后重绘；跨域图片需允许匿名 CORS，失败后本实例不会自动重试同一 URL。
+文字图标的字号由 `label.scaleWithZoom` 控制。图片尺寸和所有图标的偏移随相机缩放。图标不参加标签碰撞隐藏，也不受 `nodeMinZoom` 控制；`hidden` 节点仍会跳过绘制。图片异步加载，成功后重绘；跨域图片需允许匿名 CORS，失败后本实例不会自动重试同一 URL。
 
 <span id="标签与图标" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 

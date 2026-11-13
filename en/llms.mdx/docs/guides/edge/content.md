@@ -1213,7 +1213,7 @@ Set the background with `labelBackground` and its padding with `labelBackgroundP
 
 ### Position and visibility [#position-and-visibility]
 
-Labels on `cubic` and `polyline` edges use the line between endpoints for position and rotation. Font size stays fixed. Visibility follows [global label policies](/en/docs/guides/label#global-label-policies) and the `hidden` state of the edge and its endpoints.
+Labels on `cubic` and `polyline` edges use the line between endpoints for position and rotation. Font size and visibility follow [global label policies](/en/docs/guides/label#global-label-policies). The `hidden` state of the edge and its endpoints also affects visibility.
 
 ### labelRenderer [#edge-label-renderer]
 

@@ -38,12 +38,12 @@ import {
 } from '@antv/g6-lite';
 
 const externalNameRenderer: DecorationRenderer<string> = {
-  measure({ ctx, data }) {
-    ctx.font = 'bold 11px sans-serif';
-    return { width: ctx.measureText(data).width, height: 14 };
+  measure({ ctx, data, dpr, labelScale = dpr }) {
+    ctx.font = `bold ${11 * labelScale}px sans-serif`;
+    return { width: ctx.measureText(data).width, height: 14 * labelScale };
   },
-  draw({ ctx, data }) {
-    ctx.font = 'bold 11px sans-serif';
+  draw({ ctx, data, dpr, labelScale = dpr }) {
+    ctx.font = `bold ${11 * labelScale}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#1f1f1f';

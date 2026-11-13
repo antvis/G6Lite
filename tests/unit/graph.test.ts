@@ -988,7 +988,10 @@ describe('Graph behavior replacement', () => {
     vi.useFakeTimers();
     const { graph, canvas, setHighlight } = createGraph();
     const hover = () =>
-      graph.eventEmitter.emit('node:pointerover', { nodeId: 'a', event: new MouseEvent('mousemove') });
+      graph.eventEmitter.emit('node:pointerover', {
+        nodeId: 'a',
+        event: new MouseEvent('mousemove'),
+      });
     try {
       graph.setBehaviors(['highlight-node', { type: 'tooltip', className: 'switch-tooltip' }]);
       hover();

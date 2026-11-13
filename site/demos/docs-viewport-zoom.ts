@@ -37,6 +37,7 @@ async function run(container: HTMLElement, label: string, changeZoom: (graph: Gr
     },
     node: { style: { size: 14, label: (node) => node.id } },
     behaviors: [],
+    autoFit: false,
   });
 
   const panel = createDemoPanel(container);

@@ -1,7 +1,7 @@
-import { Graph, type GraphOptions } from '@antv/g6-lite';
+import { Graph } from '@antv/g6-lite';
 
 export async function run(container: HTMLElement) {
-  const options: GraphOptions = {
+  const graph = new Graph({
     container,
     data: {
       nodes: [
@@ -59,9 +59,7 @@ export async function run(container: HTMLElement) {
     label: { hideOnLowZoom: false, scaleWithZoom: false },
     behaviors: ['click-select', 'drag-canvas', 'zoom-canvas'],
     autoFit: { padding: 36, maxZoom: 1 },
-  };
-
-  const graph = new Graph(options);
+  });
   try {
     await graph.render();
     return graph;

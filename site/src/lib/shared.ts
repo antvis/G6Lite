@@ -1,5 +1,4 @@
-import type { Locale } from './i18n';
-import { localizedPath } from './i18n';
+import { localizedPath, type Locale } from './localized-path';
 import { siteConfig } from './site-config';
 
 export const appName = siteConfig.name;

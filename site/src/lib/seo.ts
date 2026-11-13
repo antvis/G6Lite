@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 
-import type { Locale } from './i18n';
-import { localizedDocsPath, localizedPath } from './i18n';
+import { localizedDocsPath, localizedPath, type Locale } from './localized-path';
 import { siteConfig } from './site-config';
 import { withBasePath } from './shared';
 

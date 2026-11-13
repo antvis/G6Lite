@@ -50,7 +50,7 @@ See [position and visibility](/en/docs/guides/edge#position-and-visibility) for 
 
 Configure the top-level Graph `label` option for your goal:
 
-- Set `scaleWithZoom: false` to keep node, edge, and Combo labels, text icons, and built-in text badges at a fixed screen size. When enabled, the screen-space scale is clamped to 0.25× through 2×.
+- Set `scaleWithZoom: false` to keep node, edge, and Combo labels, text icons, and built-in text badges at a fixed screen size. When enabled, text grows with the graph and stays at or above 0.25× its base size when zooming out.
 - Adjust when labels appear: set nodeMinZoom and edgeMinZoom. Set one threshold to 0 to bypass it independently.
 - Diagnose hidden/overlapping labels: temporarily disable hideOnCollision or hideOnLowZoom, then restore the policies you need.
 

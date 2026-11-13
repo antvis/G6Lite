@@ -16,11 +16,11 @@ export const DEFAULT_FONT_FAMILY =
 
 export function getLabelZoom(zoom: number): number {
   if (!Number.isFinite(zoom)) return 1;
-  return Math.max(0.25, Math.min(zoom, 2));
+  return Math.max(0.25, zoom);
 }
 
 export function getLabelScale(dpr: number, zoom: number, scaleWithZoom = true): number {
-  // Camera zoom maps graph units to canvas pixels. Normalize it to CSS pixels before clamping.
+  // Camera zoom maps graph units to canvas pixels. Apply the minimum in CSS pixels.
   return scaleWithZoom ? dpr * getLabelZoom(zoom / dpr) : dpr;
 }
 

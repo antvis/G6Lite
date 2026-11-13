@@ -84,19 +84,20 @@ describe('LabelLayerRenderer construction', () => {
 });
 
 describe('LabelRenderer zoom scaling helpers', () => {
-  it('clamps label zoom to a readable screen-space range', () => {
+  it('keeps a minimum label scale and continues scaling above 2×', () => {
     expect(getLabelZoom(0.1)).toBe(0.25);
     expect(getLabelZoom(0.5)).toBe(0.5);
     expect(getLabelZoom(1)).toBe(1);
     expect(getLabelZoom(1.5)).toBe(1.5);
-    expect(getLabelZoom(4)).toBe(2);
+    expect(getLabelZoom(4)).toBe(4);
     expect(getLabelZoom(Number.NaN)).toBe(1);
   });
 
-  it('converts label dimensions through dpr and clamped zoom', () => {
+  it('converts label dimensions through DPR and zoom', () => {
     expect(toLabelScreenPx(12, 2, 1)).toBe(12);
     expect(toLabelScreenPx(12, 2, 2)).toBe(24);
     expect(toLabelScreenPx(12, 2, 4)).toBe(48);
+    expect(toLabelScreenPx(12, 2, 8)).toBe(96);
     expect(toLabelScreenPx(12, 2, 0.1)).toBe(6);
   });
 

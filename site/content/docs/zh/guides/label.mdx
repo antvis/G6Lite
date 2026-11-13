@@ -50,7 +50,7 @@ import { NodeDocExample as LabelDocExample } from '@/components/node-doc-example
 
 配置 Graph 顶层 `label`，按目标选择：
 
-- 设置 `scaleWithZoom: false` 可让节点、边、Combo 标签、文字图标和内置文字徽标保持屏幕字号。开启时，按屏幕坐标换算后的缩放倍率限制在 0.25 到 2 倍。
+- 设置 `scaleWithZoom: false` 可让节点、边、Combo 标签、文字图标和内置文字徽标保持屏幕字号。开启时，文字随画布放大，缩小时字号最低为基础字号的 0.25 倍。
 - 调整出现时机：设置 nodeMinZoom、edgeMinZoom；只关闭一种阈值时将对应值设为 0。
 - 检查重叠或隐藏原因：暂时关闭 hideOnCollision 或 hideOnLowZoom，确认后再恢复需要的策略。
 

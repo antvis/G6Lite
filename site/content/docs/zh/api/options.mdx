@@ -451,7 +451,7 @@ graph.updateNodeData('A', { score: 80 });
 | `labelColor` | 标签颜色 | `ComboStyleValue<string>` | `'rgba(0, 0, 0, 0.65)'` |
 | `labelPlacement` | 展开标签位置；不支持回调 | `'top' \| 'bottom' \| 'inside' \| 'center'` | `'top'` |
 
-分组边框根据节点主体和子分组边框计算。标签不计入边界。展开标签随视图缩放，字号上限是配置值的 1.5 倍，小于 6 屏幕像素时隐藏。分组标签不使用节点和边的全局标签策略。
+分组边框根据节点主体和子分组边框计算。标签不计入边界。分组标签的字号由 `label.scaleWithZoom` 控制。展开标签小于 6 个 Canvas 像素时隐藏。
 
 #### 折叠与状态字段
 

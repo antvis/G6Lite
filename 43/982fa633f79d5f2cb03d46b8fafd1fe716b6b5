@@ -1,0 +1,25 @@
+site/demos/docs-viewport-zoom.ts
+  s_584ca1892a3157::t_8d744afe9898ce 40
+tests/unit/graph.test.ts
+  s_584ca1892a3157::t_024e41735fd2da 991-994
+site/demos/docs-graph-options.ts
+  s_584ca1892a3157::t_8d744afe9898ce 1,4,62
+src/interaction/dispatcher.ts
+  s_584ca1892a3157::t_024e41735fd2da 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "43982fa633f79d5f2cb03d46b8fafd1fe716b6b5",
+  "prompts": {},
+  "sessions": {
+    "s_584ca1892a3157": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1cf7b-c7c3-72b2-a849-b662c1a4f2c2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

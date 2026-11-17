@@ -1233,11 +1233,11 @@ export class Graph {
   pickComboAt(screenX: number, screenY: number): string | null {
     if (this._destroyed || !this.comboRenderer || !this.dataModel?.hasCombos()) return null;
     const rect = this.canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    const x = (screenX - rect.left) * dpr;
-    const y = (screenY - rect.top) * dpr;
+    if (rect.width <= 0 || rect.height <= 0) return null;
     const w = this.canvas.width;
     const h = this.canvas.height;
+    const x = ((screenX - rect.left) * w) / rect.width;
+    const y = ((screenY - rect.top) * h) / rect.height;
     return this.comboRenderer.pickAt(
       x,
       y,

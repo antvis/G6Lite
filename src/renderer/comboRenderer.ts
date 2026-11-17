@@ -73,12 +73,9 @@ export class ComboRenderer {
   }
 
   private syncSize(): { w: number; h: number; dpr: number } {
-    const rect = this.canvas.parentElement?.getBoundingClientRect();
-    const cssW = rect?.width || 800;
-    const cssH = rect?.height || 600;
-    const dpr = window.devicePixelRatio || 1;
-    const w = Math.round(cssW * dpr);
-    const h = Math.round(cssH * dpr);
+    const { width: w, height: h } = this.mainCanvas;
+    const cssWidth = this.mainCanvas.getBoundingClientRect().width;
+    const dpr = cssWidth > 0 ? w / cssWidth : 1;
     if (this.canvas.width !== w || this.canvas.height !== h) {
       this.canvas.width = w;
       this.canvas.height = h;
@@ -98,9 +95,7 @@ export class ComboRenderer {
 
     if (!combos.length) return;
 
-    const graphWidth = this.mainCanvas.getBoundingClientRect().width;
-    const graphDpr = (graphWidth && this.mainCanvas.width / graphWidth) || dpr;
-    const labelScale = (getLabelScale(graphDpr, camera.zoom, scaleWithZoom) / graphDpr) * dpr;
+    const labelScale = getLabelScale(dpr, camera.zoom, scaleWithZoom);
     // Sort combos: parent first, children on top (render order)
     const sorted = this.sortByDepth(combos);
     const comboMap = new Map(combos.map((combo) => [combo.id, combo]));
@@ -242,7 +237,7 @@ export class ComboRenderer {
     labelScale: number,
   ): void {
     const [px, py] = this.graphToScreen(combo.x, combo.y, camera, w, h);
-    const [cw, ch] = this.getCollapsedScreenSize(style, camera, dpr);
+    const [cw, ch] = this.getCollapsedScreenSize(style, camera);
     const radius = Math.min(cw, ch) / 2;
 
     // Skip if outside viewport
@@ -318,7 +313,7 @@ export class ComboRenderer {
     ctx.beginPath();
     if (combo.collapsed) {
       const [px, py] = this.graphToScreen(combo.x, combo.y, camera, w, h);
-      const [cw, ch] = this.getCollapsedScreenSize(style, camera, dpr);
+      const [cw, ch] = this.getCollapsedScreenSize(style, camera);
       if (style.collapsedType === 'rect') {
         this.roundRect(ctx, px - cw / 2, py - ch / 2, cw, ch, Math.min(8 * dpr, cw / 2, ch / 2));
       } else {
@@ -364,15 +359,12 @@ export class ComboRenderer {
     return visit(combo);
   }
 
-  private getCollapsedScreenSize(
-    style: ResolvedComboStyle,
-    camera: Camera,
-    dpr: number,
-  ): [number, number] {
+  private getCollapsedScreenSize(style: ResolvedComboStyle, camera: Camera): [number, number] {
     const size = style.collapsedSize;
     const width = Array.isArray(size) ? size[0] : size;
     const height = Array.isArray(size) ? size[1] : size;
-    return [width * dpr * camera.zoom, height * dpr * camera.zoom];
+    // Camera zoom already projects graph units to backing pixels.
+    return [width * camera.zoom, height * camera.zoom];
   }
 
   private drawLabel(
@@ -501,13 +493,12 @@ export class ComboRenderer {
   ): string | null {
     // Check from deepest to shallowest
     const sorted = this.sortByDepth(combos).reverse();
-    const dpr = window.devicePixelRatio || 1;
     for (const combo of sorted) {
       if (combo.states.has('hidden')) continue;
       const style = this.resolveStyle(combo, config);
       if (combo.collapsed) {
         const [px, py] = this.graphToScreen(combo.x, combo.y, camera, w, h);
-        const [cw, ch] = this.getCollapsedScreenSize(style, camera, dpr);
+        const [cw, ch] = this.getCollapsedScreenSize(style, camera);
         const dx = screenX - px;
         const dy = screenY - py;
         if (style.collapsedType === 'rect') {

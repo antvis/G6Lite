@@ -97,6 +97,7 @@ export async function run(container: string | HTMLElement) {
 
   showStateSummary('ready');
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {

@@ -21,7 +21,7 @@ export async function run(container: HTMLElement) {
     } },
     combo: { style: { padding: 40, strokeWidth: 2 } },
     behaviors: ['drag-node', 'drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   // #region change-membership
   graph.on('node:click', ({ nodeId }) => {

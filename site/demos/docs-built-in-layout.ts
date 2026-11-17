@@ -25,10 +25,26 @@ const layouts = {
   'd3-force': { type: 'd3-force', linkDistance: 100, nodeStrength: -120, preventOverlap: true, nodeSize: 24 },
   // #endregion layout-d3-force-config
   // #region layout-force-atlas2-config
-  'force-atlas2': { type: 'force-atlas2', kr: 8, kg: 2 },
+  'force-atlas2': {
+    type: 'force-atlas2',
+    center: [240, 150],
+    kr: 12,
+    kg: 0.5,
+    preventOverlap: true,
+    nodeSize: 24,
+    maxIteration: 200,
+  },
   // #endregion layout-force-atlas2-config
   // #region layout-fruchterman-config
-  'fruchterman': { type: 'fruchterman', gravity: 12 },
+  'fruchterman': {
+    type: 'fruchterman',
+    width: 560,
+    height: 300,
+    center: [240, 150],
+    gravity: 4,
+    maxIteration: 250,
+    minMovement: 0.05,
+  },
   // #endregion layout-fruchterman-config
   // #region layout-radial-config
   'radial': { type: 'radial', focusNode: '0', unitRadius: 68 },
@@ -123,9 +139,26 @@ function network(type: string): ExampleOptions {
     [2, 5], [2, 6], [3, 7], [3, 8], [3, 9],
     [7, 8], [8, 9], [4, 10], [4, 11], [10, 11],
   ];
+  const showClusters = type === 'force-atlas2' || type === 'fruchterman';
+  // Seed the three groups around distinct centers so rerunning starts from the same layout.
+  const clusters = [
+    { ids: [3, 7, 8, 9], x: 90, y: 120, color: '#2468d8' },
+    { ids: [0, 1, 5, 2, 6], x: 240, y: 205, color: '#7755c7' },
+    { ids: [4, 10, 11], x: 390, y: 120, color: '#0c8177' },
+  ];
+  const nodes = showClusters
+    ? clusters.flatMap(({ ids, x, y, color }, clusterIndex) => {
+        const startAngle = type === 'fruchterman' && clusterIndex === 1 ? 3 * Math.PI / 2 : 0;
+        return ids.map((id, index) => {
+          const angle = startAngle + 2 * Math.PI * index / ids.length;
+          return { id: String(id), x: x + 34 * Math.cos(angle), y: y + 34 * Math.sin(angle), data: { color } };
+        });
+      })
+    : Array.from({ length: 12 }, (_, index) => ({ id: String(index) }));
+
   return {
     data: {
-      nodes: Array.from({ length: 12 }, (_, index) => ({ id: String(index) })),
+      nodes,
       edges: links.map(([source, target]) => ({ source: String(source), target: String(target) })),
     },
     node: {
@@ -134,10 +167,10 @@ function network(type: string): ExampleOptions {
         label: (node) => node.id,
         labelColor: '#fff',
         labelPlacement: 'center',
-        fill: (node) => type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff',
+        fill: (node) => String(node.data?.color ?? (type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff')),
       },
     },
-    edge: { style: { lineWidth: 2 } },
+    edge: { style: showClusters ? { lineWidth: 1.6, stroke: '#8494b0', endArrow: false } : { lineWidth: 2 } },
   };
 }
 // #endregion network
@@ -253,7 +286,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();

@@ -190,6 +190,7 @@ export async function DocsPageContent({ slug, locale }: { slug?: string[]; local
   const RelativeLink = createRelativeLink(source, page);
 
   if (isExamplesRoute) {
+    const content = <MDX components={getMDXComponents({ a: RelativeLink })} />;
     return (
       <>
         <StructuredData
@@ -201,11 +202,11 @@ export async function DocsPageContent({ slug, locale }: { slug?: string[]; local
             image,
           })}
         />
-        <DocsPage toc={[]} full footer={{ enabled: false }}>
-          <DocsBody className="examples-docs-body">
-            <MDX components={getMDXComponents({ a: RelativeLink })} />
-          </DocsBody>
-        </DocsPage>
+        {page.slugs.length === 2 ? content : (
+          <DocsPage toc={[]} full footer={{ enabled: false }}>
+            <DocsBody className="examples-docs-body">{content}</DocsBody>
+          </DocsPage>
+        )}
       </>
     );
   }

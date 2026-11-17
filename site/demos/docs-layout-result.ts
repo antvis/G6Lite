@@ -16,7 +16,7 @@ export async function run(container: HTMLElement) {
     data: { ...data, nodes: result.nodes },
     node: { style: { size: 28, label: (node) => node.id, labelOffsetY: 8 } },
     behaviors: [],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();

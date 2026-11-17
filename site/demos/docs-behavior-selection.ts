@@ -22,7 +22,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { fill: '#873BF4', stroke: '#5B21B6', strokeWidth: 2, haloWidth: 12 } },
     },
     behaviors,
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: { padding: 60 },
   });
   const status = document.createElement('div');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';

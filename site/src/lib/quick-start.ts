@@ -59,7 +59,7 @@ export function quickStartNetworkOptions(): Omit<GraphOptions, 'container'> {
       nodeStrength: -400,
       collideRadius: 32,
     },
-    autoFit: { padding: 48, maxZoom: 1.2 },
+    autoFit: { padding: 48 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
   };
 }
@@ -77,7 +77,7 @@ export function quickStartOptions(): Omit<GraphOptions, 'container'> {
     },
     edge: { style: { endArrow: true } },
     layout: { type: 'circular', radius: 120 },
-    autoFit: { padding: 32, maxZoom: 1 },
+    autoFit: { padding: 32 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
   };
 }

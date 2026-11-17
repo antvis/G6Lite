@@ -27,7 +27,7 @@ export async function run(container: HTMLElement) {
       }],
       // #endregion badge-options
     },
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
     behaviors: [],
   });
   try {

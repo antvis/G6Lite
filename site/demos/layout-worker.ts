@@ -40,6 +40,7 @@ export async function run(container: string | HTMLElement) {
   ui.setStatus(`force · worker requested · ${Math.round(performance.now() - started)} ms\nWorker success requires a Network/Performance check; failure may fall back.`);
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {

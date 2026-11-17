@@ -26,7 +26,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion routing
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();

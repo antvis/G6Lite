@@ -1,14 +1,12 @@
 'use client';
 
-import Image from 'next/image';
-import { Maximize, Minimize, RotateCcw, Scan } from 'lucide-react';
+import Link from 'next/link';
+import { Maximize2, Minimize2, RotateCcw, Scan } from 'lucide-react';
 import {
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   useEffect,
-  useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -44,40 +42,6 @@ const MAX_DATA_PREVIEW_LENGTH = 100_000;
 const WORKSPACE_RESIZER_WIDTH = 12;
 // Start with equal panes instead of restoring ratios saved for the previous layout.
 const WORKSPACE_SPLIT_STORAGE_KEY = 'g6lite-example-workspace-split-v2';
-const DIRECTORY_OPEN_STORAGE_KEY = 'g6lite-example-directory-open';
-
-function readOpenCategories(): string[] {
-  try {
-    const raw = window.sessionStorage.getItem(DIRECTORY_OPEN_STORAGE_KEY);
-    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
-    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === 'string') : [];
-  } catch {
-    return [];
-  }
-}
-
-function storeOpenCategories(ids: readonly string[]) {
-  try {
-    window.sessionStorage.setItem(DIRECTORY_OPEN_STORAGE_KEY, JSON.stringify(ids));
-  } catch {
-    // Ignore private-mode storage failures and keep the in-memory list.
-  }
-}
-
-function DirectoryThumb({ id, eager }: { id: string; eager: boolean }) {
-  return (
-    <span className="example-directory-thumb">
-      <Image
-        src={withBasePath(`/examples/${id}.png`)}
-        alt=""
-        fill
-        sizes="3.5rem"
-        loading={eager ? 'eager' : 'lazy'}
-        unoptimized
-      />
-    </span>
-  );
-}
 
 export function ExampleDetailClient({
   id,
@@ -92,6 +56,7 @@ export function ExampleDetailClient({
 }) {
   const example = getSiteExample(id);
   const previewRef = useRef<HTMLDivElement>(null);
+  const previewToolbarRef = useRef<HTMLDivElement>(null);
   const previewPanelRef = useRef<HTMLDivElement>(null);
   const workspaceRef = useRef<HTMLElement>(null);
   const activeHandleRef = useRef<SiteExampleHandle | null>(null);
@@ -107,18 +72,13 @@ export function ExampleDetailClient({
   const [error, setError] = useState('');
   const [renderDuration, setRenderDuration] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<DetailTab>('source');
-  // The editor draft starts from the build-time inlined source; full-page
-  // navigation remounts this component, so one draft per page is enough.
+  // Each example starts with its own build-time source.
   const [draft, setDraft] = useState(initialSource);
   const [showHelper, setShowHelper] = useState(false);
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
   const [liveData, setLiveData] = useState({ display: '', full: '', unavailable: false });
   const [highlightedData, setHighlightedData] = useState({ source: '', html: '' });
   const [wrapSource, setWrapSource] = useState(false);
-  const [query, setQuery] = useState('');
-  const directoryNavRef = useRef<HTMLElement>(null);
-  const directorySyncingRef = useRef(false);
-  const [directoryOpen, setDirectoryOpen] = useState(false);
   const [previewExpanded, setPreviewExpanded] = useState(false);
   const [splitRatio, setSplitRatio] = useState(DEFAULT_WORKSPACE_SPLIT);
   const [workspaceResizing, setWorkspaceResizing] = useState(false);
@@ -126,23 +86,6 @@ export function ExampleDetailClient({
   const currentIndex = siteExamples.findIndex((item) => item.id === id);
   const previous = currentIndex > 0 ? siteExamples[currentIndex - 1] : undefined;
   const next = currentIndex >= 0 ? siteExamples[currentIndex + 1] : undefined;
-
-  const filteredExamples = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase();
-    if (!normalized) return siteExamples;
-
-    return siteExamples.filter((item) => {
-      const haystack = [
-        localizedText(item.title, locale),
-        localizedText(item.description, locale),
-        localizedText(item.group, locale),
-        ...item.tags,
-      ]
-        .join(' ')
-        .toLocaleLowerCase();
-      return haystack.includes(normalized);
-    });
-  }, [locale, query]);
 
   useEffect(() => {
     if (!example) return;
@@ -153,23 +96,29 @@ export function ExampleDetailClient({
     if (!example) return;
 
     let cancelled = false;
-    let handle: SiteExampleHandle | undefined;
+    let pendingHandle: SiteExampleHandle | undefined;
     const container = previewRef.current;
     if (!container) return;
 
     activeHandleRef.current = null;
     container.replaceChildren();
-    playgroundTokenRef.current += 1;
+    const token = ++playgroundTokenRef.current;
     setStatus('loading');
     setError('');
     setRenderDuration(null);
     const startedAt = performance.now();
 
-    void runSiteExample(example.id, container)
+    void runSiteExample(example.id, container, previewToolbarRef.current)
       .then(async (nextHandle) => {
-        handle = nextHandle;
+        if (cancelled || token !== playgroundTokenRef.current) {
+          nextHandle.destroy();
+          return;
+        }
+        pendingHandle = nextHandle;
         await nextHandle.ready;
-        if (cancelled) {
+        if (cancelled) return;
+        pendingHandle = undefined;
+        if (token !== playgroundTokenRef.current) {
           nextHandle.destroy();
           return;
         }
@@ -180,6 +129,9 @@ export function ExampleDetailClient({
       })
       .catch((reason: unknown) => {
         if (cancelled) return;
+        pendingHandle?.destroy();
+        pendingHandle = undefined;
+        if (token !== playgroundTokenRef.current) return;
         container.replaceChildren();
         setError(reason instanceof Error ? reason.message : String(reason));
         setStatus('error');
@@ -187,46 +139,14 @@ export function ExampleDetailClient({
 
     return () => {
       cancelled = true;
-      if (activeHandleRef.current === handle) activeHandleRef.current = null;
-      handle?.destroy();
+      playgroundTokenRef.current += 1;
+      pendingHandle?.destroy();
+      activeHandleRef.current?.destroy();
+      activeHandleRef.current = null;
       container.replaceChildren();
     };
   }, [example, revision]);
 
-  // Restore the saved categories before the first hydrated paint, then own
-  // later toggle events. The nav stays hidden until this layout effect is done.
-  useLayoutEffect(() => {
-    const nav = directoryNavRef.current;
-    if (!nav || !example) return;
-
-    const searching = query.trim().length > 0;
-    const openIds = new Set(searching ? [] : readOpenCategories());
-    if (!searching) openIds.add(example.category);
-
-    directorySyncingRef.current = true;
-    for (const details of nav.querySelectorAll<HTMLDetailsElement>('details')) {
-      const categoryId = details.dataset.exampleCategory;
-      if (!categoryId) continue;
-      const nextOpen = searching || openIds.has(categoryId);
-      if (details.open !== nextOpen) details.open = nextOpen;
-    }
-    directorySyncingRef.current = false;
-    if (!searching) storeOpenCategories([...openIds]);
-    nav.dataset.directoryReady = '';
-
-    const onToggle = (event: Event) => {
-      if (directorySyncingRef.current || searching) return;
-      const target = event.target;
-      if (!(target instanceof HTMLDetailsElement) || !nav.contains(target)) return;
-      const ids = [...nav.querySelectorAll<HTMLDetailsElement>('details')]
-        .filter((details) => details.open)
-        .map((details) => details.dataset.exampleCategory)
-        .filter((categoryId): categoryId is string => Boolean(categoryId));
-      storeOpenCategories(ids);
-    };
-    nav.addEventListener('toggle', onToggle, true);
-    return () => nav.removeEventListener('toggle', onToggle, true);
-  }, [example, query]);
 
   // Serializes the live graph data from the running example whenever the data
   // tab is opened, so the panel always shows the real dataset in the preview.
@@ -352,9 +272,7 @@ export function ExampleDetailClient({
   const copy =
     locale === 'zh'
       ? {
-          back: '示例总览',
           directory: '示例目录',
-          search: '搜索示例、能力或 API',
           source: '源码',
           data: '数据',
           guide: '说明',
@@ -389,14 +307,10 @@ export function ExampleDetailClient({
           previous: '上一个示例',
           next: '下一个示例',
           sourceError: '示例运行出错',
-          browseDirectory: '浏览示例目录',
-          closeDirectory: '收起示例目录',
           resizeWorkspace: '调整画布和源码宽度',
         }
       : {
-          back: 'All examples',
           directory: 'Example directory',
-          search: 'Search examples, capabilities, or APIs',
           source: 'Source',
           data: 'Data',
           guide: 'Guide',
@@ -431,8 +345,6 @@ export function ExampleDetailClient({
           previous: 'Previous example',
           next: 'Next example',
           sourceError: 'Example failed to run',
-          browseDirectory: 'Browse directory',
-          closeDirectory: 'Close directory',
           resizeWorkspace: 'Resize preview and source panels',
         };
 
@@ -587,87 +499,6 @@ export function ExampleDetailClient({
   } as CSSProperties;
 
   return (
-    <main className="example-detail-page not-prose">
-      <aside className="example-directory">
-        <div className="example-directory-sticky">
-          <div className="example-directory-header">
-            <a
-              className="example-directory-back"
-              href={withBasePath(localizedPath('/docs/examples', locale))}
-            >
-              <span aria-hidden="true">←</span>
-              {copy.back}
-            </a>
-            <button
-              aria-expanded={directoryOpen}
-              className="example-directory-toggle"
-              onClick={() => setDirectoryOpen((value) => !value)}
-              type="button"
-            >
-              {directoryOpen ? copy.closeDirectory : copy.browseDirectory}
-            </button>
-          </div>
-          <div className={`example-directory-body${directoryOpen ? ' is-open' : ''}`}>
-            <h2>{copy.directory}</h2>
-            <label className="example-directory-search">
-              <span aria-hidden="true">⌕</span>
-              <input
-                aria-label={copy.search}
-                placeholder={copy.search}
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </label>
-            <noscript>
-              <style>{'.example-directory nav { visibility: visible !important; }'}</style>
-            </noscript>
-            <nav aria-label={copy.directory} ref={directoryNavRef} suppressHydrationWarning>
-              {siteExampleCategories.map((category) => {
-                const entries = filteredExamples.filter((item) => item.category === category.id);
-                if (entries.length === 0) return null;
-                const searching = query.trim().length > 0;
-
-                return (
-                  <details
-                    key={category.id}
-                    data-example-category={category.id}
-                    open={category.id === example.category}
-                    suppressHydrationWarning
-                  >
-                    <summary
-                      onClick={(event) => {
-                        if (searching) event.preventDefault();
-                      }}
-                    >
-                      <span>{localizedText(category.title, locale)}</span>
-                      <small>{entries.length}</small>
-                    </summary>
-                    <div>
-                      {entries.map((item) => (
-                        <a
-                          aria-current={item.id === example.id ? 'page' : undefined}
-                          href={withBasePath(localizedExamplePath(item.id, locale))}
-                          key={item.id}
-                        >
-                          <DirectoryThumb
-                            id={item.id}
-                            eager={item.id === example.id}
-                          />
-                          <span>
-                            <strong>{localizedText(item.title, locale)}</strong>
-                            <small>{localizedText(item.group, locale)}</small>
-                          </span>
-                        </a>
-                      ))}
-                    </div>
-                  </details>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
-      </aside>
 
       <article className="example-detail-content">
         <header className="example-detail-header">
@@ -723,7 +554,7 @@ export function ExampleDetailClient({
                   <span>{error}</span>
                 </div>
               ) : null}
-              <div className={canvasStyles.tools} role="toolbar" aria-label={copy.preview}>
+              <div ref={previewToolbarRef} className={canvasStyles.tools} role="toolbar" aria-label={copy.preview}>
                 <button
                   aria-label={copy.fit}
                   disabled={status !== 'ready'}
@@ -748,7 +579,7 @@ export function ExampleDetailClient({
                   title={previewExpanded ? copy.exitFullscreen : copy.fullscreen}
                   type="button"
                 >
-                  {previewExpanded ? <Minimize aria-hidden="true" /> : <Maximize aria-hidden="true" />}
+                  {previewExpanded ? <Minimize2 aria-hidden="true" /> : <Maximize2 aria-hidden="true" />}
                 </button>
               </div>
             </div>
@@ -996,21 +827,20 @@ export function ExampleDetailClient({
 
         <nav className="example-detail-pagination" aria-label={copy.directory}>
           {previous ? (
-            <a href={withBasePath(localizedExamplePath(previous.id, locale))}>
+            <Link href={localizedExamplePath(previous.id, locale)} prefetch={false}>
               <small>{copy.previous}</small>
               <strong>{localizedText(previous.title, locale)}</strong>
-            </a>
+            </Link>
           ) : (
             <span />
           )}
           {next ? (
-            <a href={withBasePath(localizedExamplePath(next.id, locale))}>
+            <Link href={localizedExamplePath(next.id, locale)} prefetch={false}>
               <small>{copy.next}</small>
               <strong>{localizedText(next.title, locale)}</strong>
-            </a>
+            </Link>
           ) : null}
         </nav>
       </article>
-    </main>
   );
 }

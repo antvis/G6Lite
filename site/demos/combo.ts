@@ -14,7 +14,7 @@ const NODE_COLORS: Record<string, string> = {
   observability: '#9299A8',
 };
 
-export async function run(container: string | HTMLElement) {
+export async function run(container: string | HTMLElement, fitPreview?: (graph: Graph) => void) {
   const containerEl =
     typeof container === 'string'
       ? (document.querySelector(container) as HTMLElement)
@@ -133,8 +133,9 @@ export async function run(container: string | HTMLElement) {
           data: { name: '业务平台' },
           style: {
             fill: 'rgba(112, 132, 160, 0.045)',
-            stroke: 'rgba(112, 132, 160, 0.28)',
-            padding: 24,
+            stroke: 'rgba(112, 132, 160, 0.55)',
+            padding: 28,
+            labelPlacement: 'top',
             labelFontSize: 13,
           },
         },
@@ -163,7 +164,7 @@ export async function run(container: string | HTMLElement) {
     node: {
       type: 'circle',
       style: {
-        size: 18,
+        size: 24,
         fill: (node) => NODE_COLORS[String(node.data?.layer)] ?? '#9CA3AF',
         stroke: '#FFFFFF',
         strokeWidth: 2,
@@ -189,13 +190,15 @@ export async function run(container: string | HTMLElement) {
     combo: {
       style: {
         borderRadius: 12,
-        label: (combo) =>
-          (combo.data as Record<string, string> | undefined)?.name ?? combo.id,
+        label: (combo) => {
+          const name = String(combo.data?.name ?? combo.id);
+          return combo.collapsed ? `${name} · ${countNodes(combo.id)}` : name;
+        },
         labelPlacement: 'inside',
         labelFontSize: 12,
-        labelColor: '#526071',
+        labelColor: '#334155',
         collapsedType: 'rect',
-        collapsedSize: [72, 38],
+        collapsedSize: [146, 54],
         count: false,
         stateStyles: {
           selected: { stroke: '#3B82F6', strokeWidth: 2 },
@@ -204,6 +207,26 @@ export async function run(container: string | HTMLElement) {
       },
     },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+  });
+
+  function countNodes(comboId: string): number {
+    const { nodes, combos } = graph.getComboChildren(comboId);
+    return nodes.length + combos.reduce((total, id) => total + countNodes(id), 0);
+  }
+
+  // The example hides child outlines behind the parent's collapsed summary.
+  const hiddenOnCollapse = new Set<string>();
+  graph.on('combo:collapse', ({ comboId }) => {
+    for (const id of graph.getComboChildren(comboId).combos) {
+      if (graph.getItemStates(id).includes('hidden')) continue;
+      hiddenOnCollapse.add(id);
+      graph.hideItem(id);
+    }
+  });
+  graph.on('combo:expand', ({ comboId }) => {
+    for (const id of graph.getComboChildren(comboId).combos) {
+      if (hiddenOnCollapse.delete(id)) graph.showItem(id);
+    }
   });
 
   await graph.render();
@@ -247,10 +270,12 @@ export async function run(container: string | HTMLElement) {
     graph.expandCombo('service-layer');
     if (consoleInService) {
       graph.addToCombo('console', 'client-apps');
+      graph.updateNodePosition('console', 100, 360);
       consoleButton.name('控制台加入服务层');
       ui.setStatus('运营控制台已回到客户端');
     } else {
       graph.addToCombo('console', 'service-layer');
+      graph.updateNodePosition('console', 335, 360);
       consoleButton.name('控制台回到客户端');
       ui.setStatus('运营控制台已加入服务层');
     }
@@ -263,13 +288,13 @@ export async function run(container: string | HTMLElement) {
       {
         id: 'logs',
         x: 570,
-        y: 455,
+        y: 500,
         data: { layer: 'observability', label: '日志采集' },
       },
       {
         id: 'metrics',
         x: 720,
-        y: 455,
+        y: 500,
         data: { layer: 'observability', label: '指标监控' },
       },
     ]);
@@ -281,11 +306,10 @@ export async function run(container: string | HTMLElement) {
           fill: 'rgba(134, 126, 176, 0.08)',
           stroke: 'rgba(134, 126, 176, 0.42)',
           padding: 32,
-          label: '可观测性',
           labelPlacement: 'inside',
           labelColor: '#645F83',
           collapsedType: 'rect',
-          collapsedSize: [84, 38],
+          collapsedSize: [146, 54],
           count: false,
         },
       },
@@ -293,8 +317,9 @@ export async function run(container: string | HTMLElement) {
     );
     runtimeCreated = true;
     runtimeButton.name('已创建可观测分组').disable();
-    graph.fitView(0.78);
     ui.setStatus('createCombo() 已执行');
+    if (fitPreview) fitPreview(graph);
+    else graph.fitView({ padding: 64 });
   }, more);
 
   ui.addAction('导出数据', () => {
@@ -309,7 +334,10 @@ export async function run(container: string | HTMLElement) {
     ui.setStatus(`${data.nodes.length} 节点 · ${data.combos?.length ?? 0} 分组`);
   }, more);
 
+  if (containerEl.clientWidth < 500) ui.gui.close();
+
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy() {

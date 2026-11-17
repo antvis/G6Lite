@@ -12,7 +12,7 @@ import styles from './quick-start-example.module.css';
 
 function frameworkDataFit(container: HTMLElement | null): FitViewOptions {
   // Leave room for the dataset panel and toolbar on narrow canvases.
-  return { padding: container && container.clientWidth < 480 ? [116, 24, 68, 24] : 32, maxZoom: 1 };
+  return { padding: container && container.clientWidth < 480 ? [116, 24, 68, 24] : 32 };
 }
 
 export function QuickStartExample({
@@ -24,6 +24,7 @@ export function QuickStartExample({
 }) {
   const mountRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);
+  const fitOptionsRef = useRef<FitViewOptions | number | undefined>(undefined);
   const dataControlsRef = useRef<HTMLDivElement>(null);
   const dataController = useRef<Controller | null>(null);
   const dataSettings = useRef({ dataset: 'basic' });
@@ -126,10 +127,13 @@ export function QuickStartExample({
             : variant === 'data-model'
               ? dataModelExampleOptions()
               : quickStartOptions();
+        const autoFit = variant === 'framework-data' ? frameworkDataFit(mount) : options.autoFit;
+        fitOptionsRef.current =
+          typeof autoFit === 'object' || typeof autoFit === 'number' ? autoFit : undefined;
         graph = new Graph({
           container: mount,
           ...options,
-          autoFit: variant === 'framework-data' ? frameworkDataFit(mount) : options.autoFit,
+          autoFit,
         });
         const canvas = mount.querySelector('canvas');
         if (canvas) canvas.dataset.previewLayer = 'graph';
@@ -189,7 +193,7 @@ export function QuickStartExample({
 
   function fitPreview() {
     graphRef.current?.fitView(
-      variant === 'framework-data' ? frameworkDataFit(mountRef.current) : { padding: 32 },
+      variant === 'framework-data' ? frameworkDataFit(mountRef.current) : fitOptionsRef.current,
     );
   }
 

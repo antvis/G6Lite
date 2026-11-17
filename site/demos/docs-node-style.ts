@@ -1,14 +1,18 @@
-import { Graph } from '@antv/g6-lite';
+import { Graph, type FitViewOptions } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: 40, maxZoom: 1.5 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
     container,
     data: {
       nodes: [
-        { id: 'A', x: 80, y: 100, data: { value: 16, group: 'core' } },
+        { id: 'A', x: 128, y: 100, data: { value: 16, group: 'core' } },
         { id: 'B', x: 240, y: 100, data: { value: 28, group: 'other' } },
-        { id: 'C', x: 400, y: 100, data: { value: 40, group: 'core' } },
+        { id: 'C', x: 352, y: 100, data: { value: 40, group: 'core' } },
       ],
       edges: [{ source: 'A', target: 'B' }, { source: 'B', target: 'C' }],
     },
@@ -28,7 +32,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion node-options
     edge: { style: { stroke: '#94a3b8' } },
-    autoFit: { padding: 40, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: ['click-select'],
   });
   const ui = createDemoPanel(container);

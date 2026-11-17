@@ -17,7 +17,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { fill: '#8050d2', haloWidth: 10 } },
     },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 55, maxZoom: 1 },
+    autoFit: { padding: 55 },
   });
 
   const ui = createDemoPanel(container);

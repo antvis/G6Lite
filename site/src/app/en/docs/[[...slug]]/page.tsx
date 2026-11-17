@@ -7,7 +7,9 @@ export default async function Page(props: PageProps<'/en/docs/[[...slug]]'>) {
 }
 
 export function generateStaticParams() {
-  return source.getPages('en').map((page) => ({ slug: page.slugs }));
+  return source.getPages('en')
+    .filter(({ slugs }) => slugs[0] !== 'examples' || slugs.length !== 2)
+    .map(({ slugs }) => ({ slug: slugs }));
 }
 
 export async function generateMetadata(props: PageProps<'/en/docs/[[...slug]]'>) {

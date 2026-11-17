@@ -1,7 +1,7 @@
 import { Graph } from '@antv/g6-lite';
 
 export async function run(container: HTMLElement) {
-  const groups = [{ id: 'circle', x: 100 }, { id: 'rect', x: 300 }, { id: 'label', x: 500 }];
+  const groups = [{ id: 'circle', x: 100 }, { id: 'rect', x: 244 }, { id: 'label', x: 408 }];
   const graph = new Graph({
     container,
     data: {
@@ -29,7 +29,7 @@ export async function run(container: HTMLElement) {
       collapsedType: 'circle', collapsedSize: 64, count: true,
     } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   graph.on('combo:click', ({ comboId }) => graph.toggleCombo(comboId));
   try {

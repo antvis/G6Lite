@@ -5,7 +5,7 @@ import { Graph } from '@antv/g6-lite';
 
 export async function runGraph(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFit: true,
+    autoFit: { padding: 32 },
     container,
     data: {
       nodes: [
@@ -52,6 +52,7 @@ export async function runGraph(container: string | HTMLElement) {
 export async function run(container: string | HTMLElement) {
   const graph = await runGraph(container);
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => graph.destroy(),

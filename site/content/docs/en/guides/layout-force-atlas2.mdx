@@ -31,6 +31,8 @@ const graph = new Graph({
 | --- | --- | --- | --- |
 | `kr` | Repulsion coefficient between nodes. | `number` | `5` |
 | `kg` | Gravity coefficient that pulls nodes toward the center. | `number` | `1` |
+| `preventOverlap` | Account for node size when calculating repulsion to reduce overlap. | `boolean` | `false` |
+| `nodeSize` | Node size used to calculate collisions. | `number` | `10` |
 | `barnesHut` | Whether to approximate repulsion with Barnes–Hut. | `boolean` | `true` |
 | `maxIteration` | Maximum number of iterations. | `number` | `100`, or `50` above 5,000 nodes |
 
@@ -38,7 +40,7 @@ const graph = new Graph({
 
 ## Code example
 
-Stronger repulsion and gravity reveal three connected groups.
+The example fixes the initial positions, increases repulsion, weakens gravity, and uses node sizes to reduce overlap. Colors identify the three connected groups.
 
 <NodeDocExample id="built-in-layout" layoutType="force-atlas2" locale="en" />
 

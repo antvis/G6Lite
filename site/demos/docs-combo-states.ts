@@ -33,7 +33,7 @@ export async function run(container: HTMLElement) {
     } },
     // #endregion state-styles
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   graph.on('combo:click', ({ comboId }) => {
     const selected = graph.getComboData(comboId)?.states.has('selected') ?? false;

@@ -32,12 +32,13 @@ const graph = new Graph({
 | `gravity` | 向布局中心聚拢的强度。 | `number` | `10` |
 | `speed` | 模拟中节点移动的速度系数。 | `number` | `5` |
 | `maxIteration` | 布局的最大迭代次数。 | `number` | 按节点数计算 |
+| `minMovement` | 用于判断布局是否可以提前停止的位移阈值。 | `number` | 按节点数计算 |
 
 [布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
 
 ## 代码示例
 
-示例将中心引力设为 12。
+示例固定初始坐标，将中心引力设为 4，并降低停止迭代的位移阈值，让节点有时间展开。三种颜色标记图中的三个群组。
 
 <NodeDocExample id="built-in-layout" layoutType="fruchterman" locale="zh" />
 

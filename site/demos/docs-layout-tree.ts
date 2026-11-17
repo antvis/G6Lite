@@ -68,7 +68,7 @@ export async function run(container: HTMLElement) {
     },
     label: { hideOnLowZoom: false },
     behaviors: [],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   const ui = createDemoPanel(container);
   let generation = 0;

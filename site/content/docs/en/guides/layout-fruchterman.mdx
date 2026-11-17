@@ -32,12 +32,13 @@ const graph = new Graph({
 | `gravity` | Strength of the pull toward the layout center. | `number` | `10` |
 | `speed` | Speed factor for node movement in the simulation. | `number` | `5` |
 | `maxIteration` | Maximum number of iterations. | `number` | Depends on node count |
+| `minMovement` | Movement threshold used to decide when the layout can stop early. | `number` | Depends on node count |
 
 [Common layout options](/en/docs/guides/layout) · [Layout reference](/en/docs/api/options#config-library-layout-fields)
 
 ## Code example
 
-The example sets gravity to 12.
+The example fixes the initial positions, sets gravity to 4, and lowers the movement threshold to give nodes time to spread out. Colors identify the three groups.
 
 <NodeDocExample id="built-in-layout" layoutType="fruchterman" locale="en" />
 

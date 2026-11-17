@@ -6,9 +6,9 @@ export async function run(container: HTMLElement) {
     data: {
       nodes: [
         { id: 'api', name: 'API', x: 100, y: 100, data: { placement: 'left' } },
-        { id: 'Database', x: 260, y: 100 },
-        { id: 'cache', name: 'Cache', x: 420, y: 100, data: { placement: 'right' } },
-        { id: 'worker', name: 'Worker', x: 580, y: 100, data: { hideLabel: true } },
+        { id: 'Database', x: 220, y: 100 },
+        { id: 'cache', name: 'Cache', x: 340, y: 100, data: { placement: 'right' } },
+        { id: 'worker', name: 'Worker', x: 460, y: 100, data: { hideLabel: true } },
       ],
       edges: [],
     },
@@ -24,7 +24,7 @@ export async function run(container: HTMLElement) {
       },
     },
     // #endregion label-style
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 64 },
     behaviors: [],
   });
   try {

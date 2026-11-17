@@ -58,7 +58,7 @@ export function dataModelExampleOptions(): Omit<GraphOptions, 'container'> {
         count: false,
       },
     },
-    autoFit: { padding: 40, maxZoom: 1.1 },
+    autoFit: { padding: 40 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
   };
 }

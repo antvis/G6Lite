@@ -6,6 +6,7 @@ import { ExampleDetailClient } from './example-detail-client';
 export function ExampleDetail({ id, locale }: { id: string; locale: Locale }) {
   return (
     <ExampleDetailClient
+      key={id}
       id={id}
       locale={locale}
       initialSource={readSiteExampleSource(id)}

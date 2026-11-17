@@ -26,7 +26,8 @@ export async function run(container: HTMLElement) {
       { type: 'click-select', multiple: true, trigger: 'shift' },
       { type: 'hover-highlight', degree: 1 },
     ],
-    autoFit: { padding: 60, maxZoom: 1 },
+    // Reserve vertical room for the controls, node labels, and selection status.
+    autoFit: { padding: [88, 60, 112, 60] },
   });
   const nextData = (): GraphData => ({
     nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'C', x: 320, y: 0 }, { id: 'D', x: 160, y: 80 }],

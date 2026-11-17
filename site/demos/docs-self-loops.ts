@@ -25,7 +25,7 @@ export async function run(container: HTMLElement) {
       },
     },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   try {
     await graph.render();

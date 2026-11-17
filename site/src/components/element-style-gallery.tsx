@@ -19,6 +19,7 @@ const blueTint = '#e8efff';
 
 function nodeExample(type: 'circle' | 'rect'): PreviewOptions {
   return {
+    autoFit: { padding: [32, 20, 32, 20] },
     data: { nodes: [{ id: 'solid', x: 0, y: 0 }, { id: 'outline', x: 82, y: 0 }], edges: [] },
     node: {
       type,
@@ -168,12 +169,18 @@ const examples = {
     {
       title: { zh: '节点下方的标签', en: 'Label below a node' },
       field: "labelPlacement: 'bottom'",
-      options: nodeLabelExample({ labelPlacement: 'bottom', labelOffsetY: 6 }),
+      options: {
+        ...nodeLabelExample({ labelPlacement: 'bottom', labelOffsetY: 6 }),
+        autoFit: { padding: [12, 20, 46, 20] },
+      },
     },
     {
       title: { zh: '带底色的节点标签', en: 'Node label with a background' },
       field: 'labelBackground',
-      options: nodeLabelExample({ labelPlacement: 'right', labelOffsetX: 8, labelBackground: blueTint, labelBackgroundPadding: 4 }),
+      options: {
+        ...nodeLabelExample({ labelPlacement: 'right', labelOffsetX: 8, labelBackground: blueTint, labelBackgroundPadding: 4 }),
+        autoFit: { padding: [20, 90, 20, 12] },
+      },
     },
     {
       title: { zh: '沿边方向旋转的标签', en: 'Rotated edge label' },
@@ -196,6 +203,7 @@ const examples = {
       title: { zh: '节点主体、图标、标签与徽章', en: 'Node body, icon, label, and badge' },
       field: 'node.decorations',
       options: {
+        autoFit: { padding: [12, 20, 46, 20] },
         data: { nodes: [{ id: 'api', x: 0, y: 0 }], edges: [] },
         node: {
           type: 'rect',
@@ -258,8 +266,8 @@ function ExampleCard({ example, locale }: { example: Example; locale: Locale }) 
         if (current !== preview) return;
         const graph = new Graph({
           container: mount,
+          autoFit: { padding: 20 },
           ...example.options,
-          autoFit: { padding: 20, maxZoom: 1 },
           label: { hideOnLowZoom: false, hideOnCollision: false },
           behaviors: [],
         });

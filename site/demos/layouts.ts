@@ -61,6 +61,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => currentGraph ? [currentGraph] : [],
     getData: () => currentGraph?.getData(),
     fitView: () => currentGraph?.fitView({ padding: 64 }),
     destroy: () => {

@@ -2,7 +2,8 @@
 
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Minus, Plus, RotateCcw, Scan } from 'lucide-react';
-import type { Graph } from '../../../src/index.ts';
+import type { FitViewOptions, Graph } from '../../../src/index.ts';
+import { fitDemoView } from '../lib/demo-fit';
 import type { BuiltInLayoutExample } from '../../demos/docs-built-in-layout.ts';
 import type { Locale } from '@/lib/i18n';
 import type { NodeDocExampleId } from '@/lib/node-doc-example-source';
@@ -94,6 +95,29 @@ const loaders = {
   'dependency-graph': () => import('../../demos/dependency-graph.ts'),
 };
 
+// These previews teach a particular camera, resize, or low-zoom behavior.
+const cameraExamples = new Set<NodeDocExampleId>([
+  'viewport-zoom-to', 'viewport-zoom-by', 'viewport-concept', 'viewport-resize',
+  'viewport-preserve', 'behavior-zoom-pan', 'label-policy',
+]);
+
+// Layout examples use the available space even when the teaching dataset is small.
+const layoutExamples = new Set<NodeDocExampleId>([
+  'built-in-layout', 'layout-switch', 'layout-networks', 'layout-tree',
+  'layout-worker', 'extension-layout', 'dependency-graph',
+]);
+
+function fitNodeDocPreview(
+  id: NodeDocExampleId,
+  graph: Graph,
+  toolbar: HTMLElement | null,
+  options?: FitViewOptions,
+) {
+  const compact = !cameraExamples.has(id) && !layoutExamples.has(id)
+    && graph.getNodeCount() <= 8 && graph.getEdgeCount() <= 8;
+  fitDemoView(graph, toolbar, { compact, options });
+}
+
 export function NodeDocPreview({ id, locale, layoutType, children }: {
   id: NodeDocExampleId;
   locale: Locale;
@@ -101,7 +125,9 @@ export function NodeDocPreview({ id, locale, layoutType, children }: {
   children?: ReactNode;
 }) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);
+  const fitRef = useRef<(() => void) | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const labelId = useId();
@@ -187,7 +213,7 @@ export function NodeDocPreview({ id, locale, layoutType, children }: {
     : id === 'behavior-drag-node'
     ? (zh ? '拖动节点，或拖动分组内的空白处。按住 Shift 点击可追加选择。' : 'Drag a node or the background inside a combo. Shift-click to add to the selection.')
     : id === 'behavior-drag-edge'
-    ? (zh ? '从 A 到 B 的边靠近 B 的位置开始拖动，在 C 上松开。' : 'Start on the A–B edge near B, then release on C.')
+    ? (zh ? '按住 A → B 边上靠近 B 的圆点手柄，拖到 C 上松开。' : 'Drag the round handle on the A → B edge near B and release it on C.')
     : id === 'layout-result'
     ? (zh ? '先用 runLayout 计算坐标，再创建未配置 layout 的 Graph 展示结果' : 'Compute positions with runLayout, then display them in a Graph without a layout option')
     : id === 'layout-worker'
@@ -259,6 +285,7 @@ export function NodeDocPreview({ id, locale, layoutType, children }: {
     if (!mount) return;
     let disposed = false;
     let graph: Graph | undefined;
+    let removeFitListener: (() => void) | undefined;
     const start = async () => {
       try {
         const load = id === 'built-in-layout'
@@ -268,7 +295,10 @@ export function NodeDocPreview({ id, locale, layoutType, children }: {
               return { run: (container: HTMLElement) => run(container, layoutType) };
             }
           : loaders[id];
-        const exampleModule = await load();
+        const exampleModule: {
+          run(container: HTMLElement): Promise<Graph>;
+          getFitOptions?(container: HTMLElement): FitViewOptions;
+        } = await load();
         if (disposed) return;
         const result = await exampleModule.run(mount);
         if (disposed) {
@@ -277,6 +307,13 @@ export function NodeDocPreview({ id, locale, layoutType, children }: {
         }
         graph = result;
         graphRef.current = result;
+        const fit = () => fitNodeDocPreview(id, result, toolbarRef.current, exampleModule.getFitOptions?.(mount));
+        fitRef.current = fit;
+        if (!cameraExamples.has(id)) {
+          fit();
+          result.on('resize', fit);
+          removeFitListener = () => result.off('resize', fit);
+        }
         result.getCanvas().dataset.previewLayer = 'graph';
         setStatus('ready');
       } catch {
@@ -292,8 +329,12 @@ export function NodeDocPreview({ id, locale, layoutType, children }: {
     return () => {
       disposed = true;
       observer.disconnect();
+      removeFitListener?.();
       graph?.destroy();
-      if (graphRef.current === graph) graphRef.current = null;
+      if (graphRef.current === graph) {
+        graphRef.current = null;
+        fitRef.current = null;
+      }
     };
   }, [id, attempt, layoutType]);
 
@@ -304,10 +345,10 @@ export function NodeDocPreview({ id, locale, layoutType, children }: {
           <div ref={mountRef} className={canvasStyles.canvas} aria-label={zh ? '上文配置的实际渲染效果' : 'Rendered result of the configuration'} />
           {status !== 'ready' && <div className={canvasStyles.message} role="status">{status === 'error' ? copy.error : copy.loading}</div>}
           {status === 'ready' && <span className="sr-only" role="status">{copy.running}</span>}
-          <div className={canvasStyles.tools} role="toolbar" aria-label={copy.toolbar}>
+          <div ref={toolbarRef} className={canvasStyles.tools} role="toolbar" aria-label={copy.toolbar}>
             {!isZoomExample && (
               <>
-                <button type="button" onClick={() => graphRef.current?.fitView({ padding: 48, maxZoom: 1 })} disabled={status !== 'ready'} aria-label={copy.fit} title={copy.fit}>
+                <button type="button" onClick={() => fitRef.current?.()} disabled={status !== 'ready'} aria-label={copy.fit} title={copy.fit}>
                   <Scan aria-hidden="true" />
                 </button>
                 <button type="button" onClick={() => graphRef.current?.zoomBy(1.6)} disabled={status !== 'ready'} aria-label={copy.zoomIn} title={copy.zoomIn}>

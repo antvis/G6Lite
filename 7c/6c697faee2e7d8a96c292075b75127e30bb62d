@@ -1,0 +1,356 @@
+site/demos/indented-tree.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 219
+  s_21d5936032d796::t_5b1cd5a2f6c138 161,178,221
+site/src/components/example-detail-client.tsx
+  s_49953f9fa7b22b::t_39c2d762a557f3 4,582
+  s_21d5936032d796::t_397f6fa232aa3c 3,75,830,833,838,841
+  s_21d5936032d796::t_98e0b7ba919a63 59,111,557
+  s_21d5936032d796::t_0bbd51f7247d5a 99,105,113-117,119-121,132-134,142-145
+site/demos/docs-behavior-switch.ts
+  s_21d5936032d796::t_0691c82ec3f85d 20
+site/demos/docs-state-visibility.ts
+  s_21d5936032d796::t_0691c82ec3f85d 17
+site/content/docs/en/guides/layout-overview.mdx
+  s_21d5936032d796::t_d62d13fc6fa8eb 21
+  s_21d5936032d796::t_4c924e0a6d7eac 22
+site/demos/edge-states.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 71
+site/demos/labels.ts
+  s_21d5936032d796::t_88e4afecc2834f 102
+site/src/components/example-detail.tsx
+  s_21d5936032d796::t_904b89fdfbd3a3 9
+site/demos/hover.ts
+  s_21d5936032d796::t_88e4afecc2834f 85
+site/demos/docs-behavior-custom.ts
+  s_21d5936032d796::t_0691c82ec3f85d 59
+site/content/docs/en/getting-started/vue.mdx
+  s_21d5936032d796::t_0691c82ec3f85d 48
+site/demos/real-dataset.ts
+  s_21d5936032d796::t_d0ec729655b49a 54
+site/demos/docs-viewport-concept.ts
+  s_21d5936032d796::t_922a3dcedaf645 7,72,95
+  s_21d5936032d796::t_35fe03e4112ea4 4-6,19,28,91,93-94
+  s_21d5936032d796::t_88e4afecc2834f 1,8-9
+site/demos/zoom-options.ts
+  s_21d5936032d796::t_1e5e3488b51106 33,51,55-56,58,69,72,75,77-78,80-82,84-87,90,98-101,103-106
+  s_21d5936032d796::t_c4b18ef21889c4 76,79,83
+  s_21d5936032d796::t_d0ec729655b49a 4,22-23
+  s_21d5936032d796::t_69093502b29fe2 37-38,50,70-71,73-74
+  s_21d5936032d796::t_2b203b2217e996 7-10,14-21,39-40,49
+  s_21d5936032d796::t_57601bfb9fde84 11-13,102
+site/demos/parallel-edges.ts
+  s_21d5936032d796::t_98e0b7ba919a63 84
+site/src/components/element-style-gallery.tsx
+  s_21d5936032d796::t_9dc1b826e05ac2 172-175,180-181,183,206
+  s_21d5936032d796::t_da65c10b03f2da 182
+  s_21d5936032d796::t_0691c82ec3f85d 269
+  s_21d5936032d796::t_66697c827720e4 22
+site/demos/edge-loops.ts
+  s_21d5936032d796::t_98e0b7ba919a63 46
+site/demos/docs-behavior-tooltip-hover.ts
+  s_21d5936032d796::t_0691c82ec3f85d 38
+site/demos/docs-combo-data.ts
+  s_21d5936032d796::t_0691c82ec3f85d 39
+site/demos/docs-edge-labels.ts
+  s_21d5936032d796::t_0691c82ec3f85d 34
+site/demos/docs-graph-lifecycle.ts
+  s_21d5936032d796::t_922a3dcedaf645 17-20
+site/demos/docs-state-concept.ts
+  s_21d5936032d796::t_cd58073584dc0c 1,4-5,7-8,27
+  s_21d5936032d796::t_5bb32747e7d6cf 6
+site/src/app/(zh)/docs/examples/(detail)/[id]/page.tsx
+  s_21d5936032d796::t_904b89fdfbd3a3 1-18
+site/demos/docs-edge-style.ts
+  s_21d5936032d796::t_0691c82ec3f85d 38
+site/demos/edge-hit-area.ts
+  s_21d5936032d796::t_98e0b7ba919a63 86
+site/content/docs/zh/getting-started/quick-start.mdx
+  s_21d5936032d796::t_0691c82ec3f85d 97,176
+site/demos/layout-gallery.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 48
+site/demos/docs-combo-states.ts
+  s_21d5936032d796::t_0691c82ec3f85d 36
+site/demos/docs-extension-node.ts
+  s_21d5936032d796::t_0691c82ec3f85d 48
+site/demos/docs-layout-switch.ts
+  s_21d5936032d796::t_9ceb481bf06aff 1,4-7,29,45
+site/demos/docs-extension-transform.ts
+  s_21d5936032d796::t_0691c82ec3f85d 52
+site/demos/docs-parallel-workflow.ts
+  s_21d5936032d796::t_0691c82ec3f85d 42
+site/demos/docs-individual-behaviors.ts
+  s_21d5936032d796::t_0691c82ec3f85d 53
+site/demos/docs-layout-networks.ts
+  s_21d5936032d796::t_d62d13fc6fa8eb 15
+  s_21d5936032d796::t_0691c82ec3f85d 51,72
+  s_21d5936032d796::t_5433489a3d10a2 16-24
+site/content/docs/en/getting-started/react.mdx
+  s_21d5936032d796::t_0691c82ec3f85d 47
+site/content/docs/en/guides/behavior-drag-edge.mdx
+  s_21d5936032d796::t_dc665a5dcd681f 12
+site/src/app/(zh)/docs/examples/(detail)/layout.tsx
+  s_21d5936032d796::t_904b89fdfbd3a3 1-6
+site/demos/g6-v5-compat.ts
+  s_21d5936032d796::t_98e0b7ba919a63 121
+site/demos/docs-extension-layout.ts
+  s_21d5936032d796::t_0691c82ec3f85d 41,55
+site/demos/docs-node-halo.ts
+  s_21d5936032d796::t_9dc1b826e05ac2 23
+site/content/docs/zh/getting-started/vue.mdx
+  s_21d5936032d796::t_0691c82ec3f85d 48
+site/demos/docs-node-badges.ts
+  s_21d5936032d796::t_0691c82ec3f85d 30
+site/src/components/example-directory.tsx
+  s_21d5936032d796::t_5811754d47ddce 1-135
+site/demos/drag-edge.ts
+  s_21d5936032d796::t_0691c82ec3f85d 8
+  s_21d5936032d796::t_dc665a5dcd681f 1,5-6,22-38,42-48,50-75,78-83,95
+site/demos/docs-events-listen.ts
+  s_21d5936032d796::t_0691c82ec3f85d 14
+site/demos/edge-arrows.ts
+  s_21d5936032d796::t_88e4afecc2834f 55
+  s_21d5936032d796::t_9dc1b826e05ac2 8
+site/demos/docs-node-body.ts
+  s_21d5936032d796::t_923b3fcd9c1b30 1-5,27-28,33
+site/content/docs/zh/compatibility/g6-v5-migration.mdx
+  s_21d5936032d796::t_0691c82ec3f85d 40
+site/demos/drag-node.ts
+  s_21d5936032d796::t_9dbad482511cd2 8
+site/demos/shapes.ts
+  s_21d5936032d796::t_98e0b7ba919a63 102
+site/src/lib/data-model-example.ts
+  s_21d5936032d796::t_0691c82ec3f85d 61
+site/demos/docs-layout-tree.ts
+  s_21d5936032d796::t_0691c82ec3f85d 71
+site/demos/docs-theme-switch.ts
+  s_21d5936032d796::t_0691c82ec3f85d 32
+site/demos/docs-behavior-selection.ts
+  s_21d5936032d796::t_0691c82ec3f85d 25
+site/demos/docs-behavior-highlight.ts
+  s_21d5936032d796::t_0691c82ec3f85d 25
+site/demos/docs-edge-dashes.ts
+  s_21d5936032d796::t_0691c82ec3f85d 38
+site/demos/mindmap.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 182
+site/demos/docs-edge-curves.ts
+  s_21d5936032d796::t_0691c82ec3f85d 25
+site/demos/edge-colors.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 37
+site/demos/docs-layout-worker.ts
+  s_21d5936032d796::t_0691c82ec3f85d 18,30
+site/content/docs/en/guides/layout-fruchterman.mdx
+  s_21d5936032d796::t_5433489a3d10a2 35,41
+site/src/app/en/docs/examples/(detail)/layout.tsx
+  s_21d5936032d796::t_904b89fdfbd3a3 1-6
+site/demos/node-style.ts
+  s_21d5936032d796::t_f6c20300e66c2f 12-16,30-33,36-37
+site/demos/flowchart.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 108
+site/content/docs/zh/guides/layout-fruchterman.mdx
+  s_21d5936032d796::t_5433489a3d10a2 35,41
+site/demos/docs-viewport-preserve.ts
+  s_21d5936032d796::t_88e4afecc2834f 4-7,9
+site/demos/layout-worker.ts
+  s_21d5936032d796::t_88e4afecc2834f 43
+site/demos/set-data.ts
+  s_21d5936032d796::t_a45643d3777f7c 113
+  s_21d5936032d796::t_86d1f0dc3291d8 5,53-55,57,84,94
+  s_21d5936032d796::t_98e0b7ba919a63 116
+  s_21d5936032d796::t_9dffa9766fbc37 114
+site/demos/docs-edge-cubic.ts
+  s_21d5936032d796::t_0691c82ec3f85d 21
+site/demos/docs-edge-indented.ts
+  s_21d5936032d796::t_0691c82ec3f85d 29
+site/demos/docs-edge-state-styles.ts
+  s_21d5936032d796::t_0691c82ec3f85d 27
+site/demos/docs-node-label-options.ts
+  s_21d5936032d796::t_88e4afecc2834f 1-5,32
+  s_21d5936032d796::t_5bb32747e7d6cf 14,26-27
+site/demos/docs-combo-operations.ts
+  s_21d5936032d796::t_0691c82ec3f85d 15
+site/demos/default-theme.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 167
+site/demos/edge-types.ts
+  s_21d5936032d796::t_98e0b7ba919a63 82
+site/demos/queries-and-states.ts
+  s_21d5936032d796::t_98e0b7ba919a63 100
+site/demos/docs-self-loops.ts
+  s_21d5936032d796::t_0691c82ec3f85d 28
+site/content/docs/zh/guides/layout-overview.mdx
+  s_21d5936032d796::t_d62d13fc6fa8eb 21
+  s_21d5936032d796::t_4c924e0a6d7eac 22
+site/src/app/(zh)/docs/[[...slug]]/page.tsx
+  s_21d5936032d796::t_904b89fdfbd3a3 10-12
+site/demos/docs-node-updates.ts
+  s_21d5936032d796::t_0691c82ec3f85d 26
+site/demos/relationship.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 94
+site/demos/tooltip.ts
+  s_21d5936032d796::t_98e0b7ba919a63 60
+  s_21d5936032d796::t_2e2bf0233df225 16-20,32,34-35
+site/demos/docs-extension-decoration.ts
+  s_21d5936032d796::t_88e4afecc2834f 1-6,49
+site/content/docs/zh/guides/layout-force-atlas2.mdx
+  s_21d5936032d796::t_d62d13fc6fa8eb 34-35,43
+site/demos/layouts.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 64
+site/demos/event-log.ts
+  s_21d5936032d796::t_98e0b7ba919a63 49
+site/demos/viewport-controls.ts
+  s_21d5936032d796::t_35fe03e4112ea4 5-11,14,35,50,63-64,70
+  s_21d5936032d796::t_5b1cd5a2f6c138 1,12,69,71-72
+  s_21d5936032d796::t_922a3dcedaf645 65,74
+site/demos/docs-node-icons.ts
+  s_21d5936032d796::t_9dc1b826e05ac2 32
+site/demos/docs-edge-updates.ts
+  s_21d5936032d796::t_0691c82ec3f85d 27
+site/demos/docs-theme-precedence.ts
+  s_21d5936032d796::t_9dc1b826e05ac2 22
+site/src/components/quick-start-example.tsx
+  s_21d5936032d796::t_0691c82ec3f85d 15
+  s_21d5936032d796::t_9dbad482511cd2 27,130-132,136,196
+site/demos/combo.ts
+  s_21d5936032d796::t_d0ec729655b49a 340
+  s_21d5936032d796::t_8e340be60715fa 17,136-138,167,193-196,199,201,212-231,273,278,291,297,312,321-322
+  s_21d5936032d796::t_1fd445310ee26b 337
+  s_21d5936032d796::t_4b08309ba2aabb 338
+site/demos/docs-events-lifecycle.ts
+  s_21d5936032d796::t_5b1cd5a2f6c138 1,9-12
+site/demos/docs-built-in-layout.ts
+  s_21d5936032d796::t_0691c82ec3f85d 289
+  s_21d5936032d796::t_5433489a3d10a2 46,151
+  s_21d5936032d796::t_4c924e0a6d7eac 39-45,47,142,149-150,152-156,173
+  s_21d5936032d796::t_d7a213035bc8ba 146
+  s_21d5936032d796::t_d62d13fc6fa8eb 28-36,143-145,147-148,157-158,161,170
+site/src/lib/example-runtime.ts
+  s_21d5936032d796::t_a45643d3777f7c 103,105-108
+  s_21d5936032d796::t_e3c66bcf1f7943 73-74,76,79-95,97-102,109-114,117-123,128-144,146-157,161-164,187-188
+  s_21d5936032d796::t_88e4afecc2834f 185
+  s_21d5936032d796::t_98e0b7ba919a63 4-5,10,72,75,77-78,169,186
+  s_21d5936032d796::t_71094e0bd99d82 115-116,158-160
+  s_21d5936032d796::t_06786dbd6439ef 96,124-127
+  s_21d5936032d796::t_f234308332c12f 3,15,175-177
+  s_21d5936032d796::t_def3cc2976ada6 104,145
+  s_21d5936032d796::t_a1897b0b30a400 165
+site/src/components/node-doc-preview.tsx
+  s_21d5936032d796::t_35fe03e4112ea4 107
+  s_21d5936032d796::t_dc665a5dcd681f 216
+  s_21d5936032d796::t_e5896b6904959d 288,311,313-316,332
+  s_21d5936032d796::t_fd4fa76612ec03 6,98-106,108-109,111-119,312
+  s_21d5936032d796::t_88e4afecc2834f 110,300,310
+  s_21d5936032d796::t_cd58073584dc0c 5,130,298-299,301,334-337,351
+  s_21d5936032d796::t_af252b923e080e 128,348
+  s_21d5936032d796::t_1470d3cd5d2d15 120
+site/demos/docs-edge-parallel.ts
+  s_21d5936032d796::t_0691c82ec3f85d 39
+site/demos/docs-combo-collapsed.ts
+  s_21d5936032d796::t_21b5e7cccb7a1c 4
+  s_21d5936032d796::t_0691c82ec3f85d 32
+site/demos/docs-layout-result.ts
+  s_21d5936032d796::t_0691c82ec3f85d 19
+site/demos/data-mutations.ts
+  s_21d5936032d796::t_98e0b7ba919a63 120
+  s_21d5936032d796::t_86d1f0dc3291d8 1,17-20,22,113
+site/demos/docs-behavior-tooltip.ts
+  s_21d5936032d796::t_0691c82ec3f85d 38
+site/src/components/docs-page.tsx
+  s_21d5936032d796::t_904b89fdfbd3a3 193,205-209
+site/content/docs/zh/guides/behavior-drag-edge.mdx
+  s_21d5936032d796::t_dc665a5dcd681f 12
+site/demos/docs-extension-plugin.ts
+  s_21d5936032d796::t_86d1f0dc3291d8 54
+site/demos/docs-viewport-resize.ts
+  s_21d5936032d796::t_0691c82ec3f85d 16
+site/demos/org-chart.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 85
+site/content/docs/en/getting-started/quick-start.mdx
+  s_21d5936032d796::t_0691c82ec3f85d 97,176
+site/src/app/en/docs/examples/(detail)/[id]/page.tsx
+  s_21d5936032d796::t_904b89fdfbd3a3 1-18
+site/demos/docs-graph-options.ts
+  s_21d5936032d796::t_0691c82ec3f85d 61
+site/content/docs/en/compatibility/g6-v5-migration.mdx
+  s_21d5936032d796::t_0691c82ec3f85d 42
+site/src/lib/quick-start.ts
+  s_21d5936032d796::t_0691c82ec3f85d 62,80
+site/demos/docs-data-workflow.ts
+  s_21d5936032d796::t_0691c82ec3f85d 19
+site/demos/search-focus.ts
+  s_21d5936032d796::t_88e4afecc2834f 70
+site/content/docs/zh/getting-started/react.mdx
+  s_21d5936032d796::t_0691c82ec3f85d 47
+site/demos/docs-polyline-orth.ts
+  s_21d5936032d796::t_0691c82ec3f85d 33
+site/demos/label-rendering-options.ts
+  s_21d5936032d796::t_d0ec729655b49a 29,116
+  s_21d5936032d796::t_8866232937000d 8,76-77
+  s_21d5936032d796::t_e8212dad41856f 84
+  s_21d5936032d796::t_f234308332c12f 1,4-5,7,10-11,15-16,18-20,23-26,31,35-37,41,47,58,70-72,81-83,85-89,93-97,114,117-126,130,132-135
+site/demos/custom-label-renderer.ts
+  s_21d5936032d796::t_9dc1b826e05ac2 52
+site/demos/docs-combo-style.ts
+  s_21d5936032d796::t_0691c82ec3f85d 37
+site/demos/fishbone.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 144
+site/demos/node-border.ts
+  s_21d5936032d796::t_98e0b7ba919a63 77
+site/demos/docs-extension-edge.ts
+  s_21d5936032d796::t_0691c82ec3f85d 32
+site/demos/context-menu.ts
+  s_21d5936032d796::t_98e0b7ba919a63 84
+site/demos/docs-combo-membership.ts
+  s_21d5936032d796::t_0691c82ec3f85d 24
+site/src/lib/site-examples.ts
+  s_21d5936032d796::t_8e340be60715fa 510-511,563-564
+  s_21d5936032d796::t_dc665a5dcd681f 942-943
+  s_21d5936032d796::t_1e5e3488b51106 1030-1031
+  s_21d5936032d796::t_f6c20300e66c2f 283-284
+site/demos/docs-state-preserve.ts
+  s_21d5936032d796::t_af252b923e080e 29-30
+site/content/docs/en/guides/layout-force-atlas2.mdx
+  s_21d5936032d796::t_d62d13fc6fa8eb 34-35,43
+site/demos/docs-edge-hit-area.ts
+  s_21d5936032d796::t_0691c82ec3f85d 32
+site/src/components/example-detail-layout.tsx
+  s_21d5936032d796::t_5811754d47ddce 1-17
+site/demos/docs-node-style.ts
+  s_21d5936032d796::t_923b3fcd9c1b30 1,4-7,13,15,35
+site/src/lib/demo-fit.ts
+  s_21d5936032d796::t_6521ac6987b763 3-4,32,44,62-74,76-81
+  s_21d5936032d796::t_86d1f0dc3291d8 40,42-43,45,59
+  s_21d5936032d796::t_d74367c82e83b3 84-91
+  s_21d5936032d796::t_e3c66bcf1f7943 21-25,36
+  s_21d5936032d796::t_fd4fa76612ec03 1-2,18-20,26-31,33-35,37-39,46-58,60-61,75,82-83,92-101
+  s_21d5936032d796::t_def3cc2976ada6 5-17,41
+site/src/app/en/docs/[[...slug]]/page.tsx
+  s_21d5936032d796::t_904b89fdfbd3a3 10-12
+site/demos/docs-node-labels.ts
+  s_21d5936032d796::t_5bb32747e7d6cf 9-11
+  s_21d5936032d796::t_9dc1b826e05ac2 27
+site/demos/selection-behaviors.ts
+  s_21d5936032d796::t_e3c66bcf1f7943 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7c6c697faee2e7d8a96c292075b75127e30bb62d",
+  "prompts": {},
+  "sessions": {
+    "s_21d5936032d796": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e35f-ea5c-7fb1-80da-390d9d17c765",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    },
+    "s_49953f9fa7b22b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e94b-33e1-7bd3-af68-39aa844a37d5",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

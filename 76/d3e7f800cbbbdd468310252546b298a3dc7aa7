@@ -1,0 +1,25 @@
+tests/unit/renderer/comboRenderer.test.ts
+  s_21d5936032d796::t_223f8e56b62b39 8,12,55-58
+  s_21d5936032d796::t_6320f9b9fa648f 1-7,9-11,13-54,59-70
+src/graph.ts
+  s_21d5936032d796::t_21b5e7cccb7a1c 1236,1239-1240
+src/renderer/comboRenderer.ts
+  s_21d5936032d796::t_21b5e7cccb7a1c 76-78,98,240,316,366-367,501
+  s_21d5936032d796::t_fac3904d5eb9b7 362
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "76d3e7f800cbbbdd468310252546b298a3dc7aa7",
+  "prompts": {},
+  "sessions": {
+    "s_21d5936032d796": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e35f-ea5c-7fb1-80da-390d9d17c765",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

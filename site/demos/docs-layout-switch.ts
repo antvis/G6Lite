@@ -1,5 +1,9 @@
-import { Graph, type LayoutConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type LayoutConfig } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: [56, 48, 76, 48] };
+}
 
 export async function run(container: HTMLElement) {
   // #region layout-options
@@ -22,7 +26,7 @@ export async function run(container: HTMLElement) {
     layout: layouts.grid,
     node: { style: { size: 28, label: (node) => node.id, labelOffsetY: 8 } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   const ui = createDemoPanel(container);
   let generation = 0;
@@ -38,7 +42,7 @@ export async function run(container: HTMLElement) {
       try {
         await graph.layout();
         if (current !== generation || graph.destroyed) return;
-        graph.fitView({ padding: 56, maxZoom: 1 });
+        graph.fitView(getFitOptions());
         ui.setStatus(`${value} ready`);
       } catch {
         if (current === generation && !graph.destroyed) ui.setStatus('Layout failed');

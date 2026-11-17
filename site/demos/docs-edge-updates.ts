@@ -24,7 +24,7 @@ export async function run(container: HTMLElement) {
         labelAutoRotate: false,
       },
     },
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
     behaviors: [],
   });
   const panel = createDemoPanel(container);

@@ -35,7 +35,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion edge-options
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();

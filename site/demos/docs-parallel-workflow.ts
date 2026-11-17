@@ -39,7 +39,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 26, label: (node) => node.id, labelPlacement: 'bottom' } },
     edge,
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
-    autoFit: { padding: [90, 64, 64, 64], maxZoom: 1 },
+    autoFit: { padding: [90, 64, 64, 64] },
   });
   const ui = createDemoPanel(container);
   const status = document.createElement('div');

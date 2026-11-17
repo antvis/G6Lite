@@ -23,7 +23,7 @@ export async function run(container: HTMLElement) {
         labelOffsetY: 4,
       },
     },
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
     behaviors: [],
   });
   const ui = createDemoPanel(container);

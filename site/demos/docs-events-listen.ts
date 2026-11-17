@@ -11,7 +11,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 8 } },
     edge: { style: { hitAreaWidth: 12 } },
     behaviors: [],
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: { padding: 60 },
   });
   const ui = createDemoPanel(container);
   const status = document.createElement('div');

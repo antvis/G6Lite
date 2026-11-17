@@ -31,6 +31,8 @@ const graph = new Graph({
 | --- | --- | --- | --- |
 | `kr` | 节点间的斥力系数。 | `number` | `5` |
 | `kg` | 将节点拉向中心的引力系数。 | `number` | `1` |
+| `preventOverlap` | 按节点尺寸计算斥力，减少重叠。 | `boolean` | `false` |
+| `nodeSize` | 碰撞计算使用的节点尺寸。 | `number` | `10` |
 | `barnesHut` | 是否用 Barnes–Hut 近似计算斥力。 | `boolean` | `true` |
 | `maxIteration` | 布局的最大迭代次数。 | `number` | `100`，超过 5000 个节点时为 `50` |
 
@@ -38,7 +40,7 @@ const graph = new Graph({
 
 ## 代码示例
 
-示例提高斥力和中心引力，展示三个相连的群组。
+示例使用固定的初始坐标，增强斥力、减弱中心引力，并按节点尺寸减少重叠。颜色标记三个相连的群组。
 
 <NodeDocExample id="built-in-layout" layoutType="force-atlas2" locale="zh" />
 

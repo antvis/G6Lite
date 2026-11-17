@@ -164,6 +164,7 @@ export async function run(container: string | HTMLElement) {
   ui.addChoice('View', ['light + dark', 'light', 'dark'], 'light + dark', updateView);
 
   return {
+    getGraphs: () => graphs,
     getData: () => ({ views: graphs.map((graph) => graph.getData()) }),
     fitView() {
       fitGraphs();

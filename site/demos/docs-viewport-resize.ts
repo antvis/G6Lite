@@ -13,7 +13,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 10 } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
     // #region auto-fit
-    autoFit: { padding: [84, 40, 100, 40], maxZoom: 1 },
+    autoFit: { padding: [84, 40, 100, 40] },
     // #endregion auto-fit
   });
   // ResizeObserver detects these CSS width changes; no setSize or render call.

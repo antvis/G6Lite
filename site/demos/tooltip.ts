@@ -13,11 +13,11 @@ export async function run(container: string | HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: 'alice', data: { label: 'Alice', role: '产品经理' } },
-        { id: 'bob', data: { label: 'Bob', role: '前端工程师' } },
-        { id: 'carol', data: { label: 'Carol', role: '后端工程师' } },
-        { id: 'dave', data: { label: 'Dave', role: '设计师' } },
-        { id: 'erin', data: { label: 'Erin', role: '测试' } },
+        { id: 'alice', x: 110, y: 76, data: { label: 'Alice', role: '产品经理' } },
+        { id: 'bob', x: 290, y: 76, data: { label: 'Bob', role: '前端工程师' } },
+        { id: 'carol', x: 200, y: 157, data: { label: 'Carol', role: '后端工程师' } },
+        { id: 'dave', x: 0, y: 125, data: { label: 'Dave', role: '设计师' } },
+        { id: 'erin', x: 400, y: 125, data: { label: 'Erin', role: '测试' } },
       ],
       edges: [
         { source: 'alice', target: 'bob', data: { rel: '协作' } },
@@ -29,10 +29,10 @@ export async function run(container: string | HTMLElement) {
     },
     node: {
       type: 'circle',
-      style: { fill: '#5B8FF9', size: 18, label: (node) => String(node.data?.label ?? node.id) },
+      style: { fill: '#5B8FF9', size: 26, label: (node) => String(node.data?.label ?? node.id) },
     },
-    edge: { type: 'line', style: { stroke: '#C0C0C0', lineWidth: 2 } },
-    layout: { type: 'force', maxIteration: 300 },
+    label: { scaleWithZoom: false },
+    edge: { type: 'line', style: { stroke: '#8b9ec2', lineWidth: 3, hitAreaWidth: 14 } },
     behaviors: [
       'zoom-canvas',
       'drag-canvas',
@@ -57,6 +57,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => graph.destroy(),

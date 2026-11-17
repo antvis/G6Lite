@@ -1,4 +1,9 @@
-import { Graph, register, type DecorationRenderer } from '@antv/g6-lite';
+import { Graph, register, type DecorationRenderer, type FitViewOptions } from '@antv/g6-lite';
+
+export function getFitOptions(container: HTMLElement): FitViewOptions {
+  const width = container.clientWidth;
+  return { padding: [36, Math.min(160, width * 0.24), 48, Math.min(48, width * 0.1)] };
+}
 
 // #region renderer
 const pill: DecorationRenderer = {
@@ -41,7 +46,7 @@ export async function run(container: HTMLElement) {
       // #endregion placement
     },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 96, maxZoom: 1 },
+    autoFit: getFitOptions(container),
   });
   try { await graph.render(); return graph; }
   catch (error) { graph.destroy(); throw error; }

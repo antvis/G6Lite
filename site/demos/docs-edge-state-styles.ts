@@ -24,7 +24,7 @@ export async function run(container: HTMLElement) {
     },
     behaviors: ['click-select'],
     // #endregion state-styles
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();

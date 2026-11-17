@@ -1,9 +1,17 @@
-import { Graph } from '@antv/g6-lite';
+import { Graph, type FitViewOptions } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: string | HTMLElement) {
+  const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+  const getFitOptions = (): FitViewOptions => {
+    const panel = host.querySelector<HTMLElement>('.g6lite-demo-controls');
+    return {
+      padding: [32, panel && panel.offsetHeight > 60 ? panel.offsetWidth + 26 : 28, 78, 28],
+      maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1),
+    };
+  };
   const graph = new Graph({
-    autoFit: true,
+    autoFit: getFitOptions(),
     container,
     data: {
       nodes: [
@@ -22,9 +30,9 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas'],
   });
   await graph.render();
-  graph.fitView({ padding: 80 });
 
   const ui = createDemoPanel(container);
+  const fit = () => graph.fitView(getFitOptions());
 
   const showCamera = (prefix: string) => {
     const camera = graph.getCamera();
@@ -39,7 +47,7 @@ export async function run(container: string | HTMLElement) {
   };
   addCameraAction('zoomBy +', 'zoom-in', () => graph.zoomBy(1.25));
   addCameraAction('zoomBy −', 'zoom-out', () => graph.zoomBy(0.8));
-  addCameraAction('fitView', 'fit', () => graph.fitView({ padding: 64 }));
+  addCameraAction('fitView', 'fit', fit);
   addCameraAction('fitCenter', 'center', () => graph.fitCenter());
   addCameraAction('focus C', 'focus', () => graph.focusItem('c'));
   addCameraAction('setCamera', 'camera', () => graph.setCamera({ zoom: 1.1, x: 80, y: 40 }));
@@ -52,11 +60,18 @@ export async function run(container: string | HTMLElement) {
     ui.setStatus(`graph=(${position.x.toFixed(1)}, ${position.y.toFixed(1)})\nscreen=(${screen.x.toFixed(1)}, ${screen.y.toFixed(1)})\nrestored=(${restored.x.toFixed(1)}, ${restored.y.toFixed(1)})`);
   });
 
+  if (host.clientWidth < 500) ui.gui.close();
+  fit();
+  graph.on('resize', fit);
   showCamera('ready');
   return {
     getData: () => graph.getData(),
-    fitView: () => graph.fitView({ padding: 64 }),
+    fitView() {
+      fit();
+      showCamera('fit');
+    },
     destroy: () => {
+      graph.off('resize', fit);
       graph.destroy();
       ui.destroy();
     },

@@ -1,8 +1,12 @@
 import { Graph, type FitViewOptions, type GraphData } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
+export function getFitOptions(): FitViewOptions {
+  return { padding: [96, 48, 112, 48], maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1) };
+}
+
 export async function run(container: HTMLElement) {
-  const fit: FitViewOptions = { padding: [76, 48, 100, 48], maxZoom: 1 };
+  const fit = getFitOptions();
   const data = (wide: boolean): GraphData => ({
     nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'B', x: wide ? 800 : 240, y: 0 }],
     edges: [{ id: 'A-B', source: 'A', target: 'B' }],

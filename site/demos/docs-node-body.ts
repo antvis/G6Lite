@@ -1,4 +1,8 @@
-import { Graph, type NodeConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type NodeConfig } from '@antv/g6-lite';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: 40, maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const node: NodeConfig = {
@@ -20,13 +24,13 @@ export async function run(container: HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: 'high-risk', x: 120, y: 100, data: { risk: 'high' } },
-        { id: 'normal-risk', x: 360, y: 100, data: { risk: 'normal' } },
+        { id: 'high-risk', x: 160, y: 100, data: { risk: 'high' } },
+        { id: 'normal-risk', x: 320, y: 100, data: { risk: 'normal' } },
       ],
       edges: [],
     },
     node,
-    autoFit: { padding: 40, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: ['click-select'],
   });
   try {

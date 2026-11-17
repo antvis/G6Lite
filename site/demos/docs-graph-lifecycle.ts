@@ -14,7 +14,10 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#6D28D9', strokeWidth: 3 } },
     },
     behaviors: [],
-    autoFit: { padding: [84, 50, 130, 50], maxZoom: 1 },
+    autoFit: {
+      padding: [84, 50, 130, 50],
+      maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1),
+    },
   });
   const ui = createDemoPanel(container);
   const status = document.createElement('div');

@@ -34,7 +34,7 @@ export async function run(container: HTMLElement) {
     } },
     // #endregion combo-options
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();

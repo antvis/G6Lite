@@ -35,7 +35,7 @@ export async function run(container: HTMLElement) {
       ...edge,
       style: { ...edge.style, label: (_source, _target, edge) => edge.id ?? '', labelFontSize: 12 },
     },
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
     behaviors: [],
   });
   try {

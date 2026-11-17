@@ -16,7 +16,7 @@ export async function run(container: HTMLElement) {
       label: (node) => node.id === 'A' ? `A: ${node.data?.score}` : node.id, labelOffsetY: 10,
     } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: [76, 48, 120, 48], maxZoom: 1 },
+    autoFit: { padding: [76, 48, 120, 48] },
   });
   // #region query
   const inspect = () => ({

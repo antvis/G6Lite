@@ -1,5 +1,11 @@
-import { Graph, type Camera } from '@antv/g6-lite';
+import { Graph, type Camera, type FitViewOptions } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+
+export function getFitOptions(container: HTMLElement): FitViewOptions {
+  const controls = container.querySelector<HTMLElement>('.g6lite-demo-controls');
+  const right = container.clientWidth < 500 && (controls?.offsetHeight ?? 0) > 60 ? 184 : 36;
+  return { padding: [56, right, 116, 36], maxZoom: Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -10,7 +16,7 @@ export async function run(container: HTMLElement) {
     },
     node: { style: { size: 32, label: (node) => node.id === 'A' ? 'A (0, 0)' : 'B (240, 80)', labelOffsetY: 10 } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: [70, 50, 110, 50], maxZoom: 1 },
+    autoFit: getFitOptions(container),
   });
   // #region camera
   const zoom = () => graph.zoomBy(1.5, { maxZoom: 4 });
@@ -19,7 +25,7 @@ export async function run(container: HTMLElement) {
     graph.setCamera({ x: camera.x + 80 });
   };
   const center = () => graph.fitCenter();
-  const fit = () => graph.fitView({ padding: [70, 50, 110, 50], maxZoom: 1 });
+  const fit = () => graph.fitView(getFitOptions(container));
   const reset = () => graph.resetCamera();
   // #endregion camera
   let saved: Camera;
@@ -63,6 +69,7 @@ export async function run(container: HTMLElement) {
     disposed = true;
     cancelAnimationFrame(frame);
     for (const event of events) graph.off(event, schedule);
+    graph.off('resize', fit);
     window.removeEventListener('click', schedule);
     window.removeEventListener('wheel', schedule);
     window.removeEventListener('scroll', schedule, true);
@@ -73,7 +80,6 @@ export async function run(container: HTMLElement) {
   try {
     await graph.render();
     if (graph.destroyed) return graph;
-    save();
     for (const event of events) graph.on(event, schedule);
     // Refresh after interaction and page scrolling, including the shared toolbar.
     window.addEventListener('click', schedule);
@@ -82,7 +88,11 @@ export async function run(container: HTMLElement) {
     for (const [label, action] of actions) {
       ui.addAction(label, () => { action(); schedule(); });
     }
+    if (container.clientWidth < 500) ui.gui.close();
     container.append(status);
+    fit();
+    save();
+    graph.on('resize', fit);
     update();
     return graph;
   } catch (error) {

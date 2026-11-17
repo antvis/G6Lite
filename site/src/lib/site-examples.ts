@@ -280,8 +280,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Hover nodes or edges to inspect relationship highlighting.',
     },
     dataDescription: {
-      zh: 'cluster=a 映射蓝色、cluster=b 映射绿色；id=0 的节点尺寸为 16，其他节点为 12。',
-      en: 'cluster=a maps to blue and cluster=b to green. Node id=0 has size 16; the others have size 12.',
+      zh: 'cluster=a 映射蓝色，cluster=b 映射绿色。主节点 A 的 role 为 lead，尺寸为 36，其他节点为 24。',
+      en: 'cluster=a maps to blue and cluster=b to green. The lead node A has size 36, and the other nodes have size 24.',
     },
     tags: ['node.style', 'data mapping', 'highlight-node'],
     metrics: [
@@ -507,8 +507,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Compare fixed size, low-zoom drawing, and collision hiding.',
     },
     interaction: {
-      zh: '初始为全部标签、zoom 0.4。选择默认策略和 zoom 0.2，文字隐藏；同一缩放切回全部标签，文字重新出现。刷新恢复初始设置。',
-      en: 'Starts with all labels at zoom 0.4. Choose the default policy and zoom 0.2 to hide text; switch back to all labels at the same zoom to show it again. Refresh restores the initial settings.',
+      zh: '首屏适应画布并自动避让标签。点 zoom 0.2 可观察默认策略隐藏文字，再切换「全部标签」查看关闭隐藏与避让的效果。',
+      en: 'The preview starts fitted with label collision avoidance. Select zoom 0.2 to see the default policy hide labels, then switch to Show all labels to compare without hiding or collision avoidance.',
     },
     dataDescription: {
       zh: '同一张图在默认策略和全部显示之间切换。',
@@ -560,8 +560,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Explore nested groups, collapse and expand, runtime regrouping, and data export.',
     },
     interaction: {
-      zh: '点击分组背景可折叠或展开单个分组。用画布上的按钮批量操作，在「更多」中调整节点归属、创建分组或导出数据。',
-      en: 'Click a group background to collapse or expand it. Use the canvas buttons for bulk actions and the menu to move nodes, create a combo, or export data.',
+      zh: '点分组背景可折叠，点带节点数的摘要卡片可展开。用右上角按钮批量操作，在「更多」中调整节点归属、创建分组或导出数据。',
+      en: 'Click a group background to collapse it, then click its summary with the node count to expand it. Use the preview controls for bulk actions, regrouping, combo creation, and data export.',
     },
     dataDescription: {
       zh: '10 个业务节点、9 条边和 4 个嵌套分组。',
@@ -939,8 +939,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Drag an edge endpoint onto another node to reconnect it.',
     },
     interaction: {
-      zh: '按住边靠近端点的位置，拖到另一个节点上松开。',
-      en: 'Drag near an endpoint and release it on another node.',
+      zh: '按住 A → B 边上靠近 B 的圆点手柄，拖到 C 上松开。',
+      en: 'Drag the round handle on the A → B edge near B and release it on C.',
     },
     dataDescription: {
       zh: '两条带端点的边可以拖到其他节点上。',
@@ -1027,8 +1027,8 @@ const exampleDefinitions: readonly SiteExampleDefinition[] = [
       en: 'Zoom with the wheel, or jump to the minimum, 1x, and maximum zoom.',
     },
     dataDescription: {
-      zh: '滚轮缩放被限制在 0.4 到 2 之间。',
-      en: 'Wheel zoom is limited to the range 0.4–2.',
+      zh: '此预览以适应画布后的最大显示比例为 2 倍，滚轮可在 0.4 到 2 倍之间缩放。',
+      en: 'This preview treats the largest fitted view as 2× and limits wheel zoom to 0.4×–2×.',
     },
     tags: ['behavior.zoom-canvas-options'],
     metrics: [{ label: { zh: '能力', en: 'Capabilities' }, value: '1' }],

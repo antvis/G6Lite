@@ -30,7 +30,7 @@ export async function run(container: HTMLElement) {
     layout,
     edge,
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);

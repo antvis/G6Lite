@@ -1,5 +1,10 @@
-import { Graph, type ElementState } from '@antv/g6-lite';
+import { Graph, type ElementState, type FitViewOptions } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+
+export function getFitOptions(): FitViewOptions {
+  // Keep this two-node comparison comfortably sized on wide and high-DPI displays.
+  return { padding: [96, 60, 96, 60], maxZoom: 1.6 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -19,7 +24,7 @@ export async function run(container: HTMLElement) {
       // #endregion state-styles
     },
     behaviors: [],
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   // #region states
   const toggle = (state: ElementState) => {

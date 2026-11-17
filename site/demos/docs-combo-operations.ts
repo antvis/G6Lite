@@ -12,7 +12,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 28, label: (node) => node.id, labelOffsetY: 10 } },
     combo: { style: { padding: 24, label: (combo) => combo.id, collapsedType: 'rect', collapsedSize: [72, 36] } },
     behaviors: [],
-    autoFit: { padding: [84, 60, 120, 60], maxZoom: 1 },
+    autoFit: { padding: [84, 60, 120, 60] },
   });
   // #region operations
   const create = () => {

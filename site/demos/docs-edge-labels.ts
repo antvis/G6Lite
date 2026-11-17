@@ -31,7 +31,7 @@ export async function run(container: HTMLElement) {
     // #endregion edge-label-options
     label: { hideOnCollision: false, hideOnLowZoom: false },
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();

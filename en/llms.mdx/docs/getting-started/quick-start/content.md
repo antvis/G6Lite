@@ -91,7 +91,7 @@ const graph = new Graph({
 
 try {
   await graph.render();
-  graph.fitView({ padding: 48, maxZoom: 1.2 });
+  graph.fitView({ padding: 48 });
 } catch (error) {
   graph.destroy();
   throw error;
@@ -170,7 +170,7 @@ Save the HTML below as `index.html` and open it in your browser.
       });
 
       graph.render().then(() => {
-        graph.fitView({ padding: 48, maxZoom: 1.2 });
+        graph.fitView({ padding: 48 });
       }).catch((error) => {
         graph.destroy();
         console.error(error);

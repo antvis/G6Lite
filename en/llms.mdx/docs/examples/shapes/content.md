@@ -118,6 +118,7 @@ export async function run(container: string | HTMLElement) {
   await graph2.render();
 
   return {
+    getGraphs: () => [graph1, graph2],
     getData: () => ({ views: [graph1.getData(), graph2.getData()] }),
     fitView() {
       graph1.fitView();

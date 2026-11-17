@@ -102,7 +102,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#873bf4' } },
     },
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -143,7 +143,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#873bf4' } },
     },
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -243,7 +243,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion edge-options
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -319,7 +319,7 @@ export async function run(container: HTMLElement) {
       ...edge,
       style: { ...edge.style, label: (_source, _target, edge) => edge.id ?? '', labelFontSize: 12 },
     },
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
     behaviors: [],
   });
   try {
@@ -364,7 +364,7 @@ import { Graph } from '@antv/g6-lite';
 
 export async function runGraph(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFit: true,
+    autoFit: { padding: 32 },
     container,
     data: {
       nodes: [
@@ -411,6 +411,7 @@ export async function runGraph(container: string | HTMLElement) {
 export async function run(container: string | HTMLElement) {
   const graph = await runGraph(container);
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => graph.destroy(),
@@ -480,7 +481,7 @@ export async function run(container: HTMLElement) {
     },
     behaviors: ['click-select'],
     // #endregion hit-area
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -543,7 +544,7 @@ export async function run(container: HTMLElement) {
     },
     behaviors: ['click-select'],
     // #endregion state-styles
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -632,7 +633,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 26, label: (node) => node.id, labelPlacement: 'bottom' } },
     edge,
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
-    autoFit: { padding: [90, 64, 64, 64], maxZoom: 1 },
+    autoFit: { padding: [90, 64, 64, 64] },
   });
   const ui = createDemoPanel(container);
   const status = document.createElement('div');
@@ -854,7 +855,7 @@ export async function run(container: HTMLElement) {
       },
     },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   try {
     await graph.render();
@@ -941,7 +942,7 @@ export async function run(container: HTMLElement) {
     layout,
     edge,
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -1080,7 +1081,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion routing
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -1182,7 +1183,7 @@ export async function run(container: HTMLElement) {
     // #endregion edge-label-options
     label: { hideOnCollision: false, hideOnLowZoom: false },
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -1289,7 +1290,7 @@ export async function run(container: string | HTMLElement) {
   const graph = new Graph({
     // Labels are two lines and hang below nodes (labelPlacement: 'bottom');
     // the bottom padding reserves their height so they stay inside the view.
-    autoFit: { padding: [24, 48, 64, 48] },
+    autoFit: { padding: [24, 64, 64, 64] },
     container,
     data: {
       nodes: [
@@ -1392,7 +1393,7 @@ export async function run(container: HTMLElement) {
         labelAutoRotate: false,
       },
     },
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
     behaviors: [],
   });
   const panel = createDemoPanel(container);

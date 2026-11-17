@@ -35,15 +35,21 @@ const pan = () => {
   graph.setCamera({ x: camera.x + 80 });
 };
 const center = () => graph.fitCenter();
-const fit = () => graph.fitView({ padding: [70, 50, 110, 50], maxZoom: 1 });
+const fit = () => graph.fitView(getFitOptions(container));
 const reset = () => graph.resetCamera();
 ```
 
 **完整运行代码**
 
 ```ts
-import { Graph, type Camera } from '@antv/g6-lite';
+import { Graph, type Camera, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(container: HTMLElement): FitViewOptions {
+  const controls = container.querySelector<HTMLElement>('.g6lite-demo-controls');
+  const right = container.clientWidth < 500 && (controls?.offsetHeight ?? 0) > 60 ? 184 : 36;
+  return { padding: [56, right, 116, 36], maxZoom: Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -54,7 +60,7 @@ export async function run(container: HTMLElement) {
     },
     node: { style: { size: 32, label: (node) => node.id === 'A' ? 'A (0, 0)' : 'B (240, 80)', labelOffsetY: 10 } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: [70, 50, 110, 50], maxZoom: 1 },
+    autoFit: getFitOptions(container),
   });
   // #region camera
   const zoom = () => graph.zoomBy(1.5, { maxZoom: 4 });
@@ -63,7 +69,7 @@ export async function run(container: HTMLElement) {
     graph.setCamera({ x: camera.x + 80 });
   };
   const center = () => graph.fitCenter();
-  const fit = () => graph.fitView({ padding: [70, 50, 110, 50], maxZoom: 1 });
+  const fit = () => graph.fitView(getFitOptions(container));
   const reset = () => graph.resetCamera();
   // #endregion camera
   let saved: Camera;
@@ -107,6 +113,7 @@ export async function run(container: HTMLElement) {
     disposed = true;
     cancelAnimationFrame(frame);
     for (const event of events) graph.off(event, schedule);
+    graph.off('resize', fit);
     window.removeEventListener('click', schedule);
     window.removeEventListener('wheel', schedule);
     window.removeEventListener('scroll', schedule, true);
@@ -117,7 +124,6 @@ export async function run(container: HTMLElement) {
   try {
     await graph.render();
     if (graph.destroyed) return graph;
-    save();
     for (const event of events) graph.on(event, schedule);
     // Refresh after interaction and page scrolling, including the shared toolbar.
     window.addEventListener('click', schedule);
@@ -126,7 +132,11 @@ export async function run(container: HTMLElement) {
     for (const [label, action] of actions) {
       ui.addAction(label, () => { action(); schedule(); });
     }
+    if (container.clientWidth < 500) ui.gui.close();
     container.append(status);
+    fit();
+    save();
+    graph.on('resize', fit);
     update();
     return graph;
   } catch (error) {
@@ -224,8 +234,12 @@ await graph.setData(data(next), {
 import { Graph, type FitViewOptions, type GraphData } from '@antv/g6-lite';
 import GUI from 'lil-gui';
 
+export function getFitOptions(): FitViewOptions {
+  return { padding: [96, 48, 112, 48], maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1) };
+}
+
 export async function run(container: HTMLElement) {
-  const fit: FitViewOptions = { padding: [76, 48, 100, 48], maxZoom: 1 };
+  const fit = getFitOptions();
   const data = (wide: boolean): GraphData => ({
     nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'B', x: wide ? 800 : 240, y: 0 }],
     edges: [{ id: 'A-B', source: 'A', target: 'B' }],
@@ -392,7 +406,7 @@ export function createDemoPanel(container: string | HTMLElement, description = '
 
 
 ```ts
-autoFit: { padding: [84, 40, 100, 40], maxZoom: 1 },
+autoFit: { padding: [84, 40, 100, 40] },
 ```
 
 **完整运行代码**
@@ -413,7 +427,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 10 } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
     // #region auto-fit
-    autoFit: { padding: [84, 40, 100, 40], maxZoom: 1 },
+    autoFit: { padding: [84, 40, 100, 40] },
     // #endregion auto-fit
   });
   // ResizeObserver detects these CSS width changes; no setSize or render call.

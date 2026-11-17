@@ -105,7 +105,7 @@ export async function run(container: HTMLElement) {
     } satisfies CounterOptions],
     // #endregion activate
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64, maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1) },
   });
   try { await graph.render(); return graph; }
   catch (error) { graph.destroy(); throw error; }

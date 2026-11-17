@@ -85,7 +85,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();

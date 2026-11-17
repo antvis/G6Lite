@@ -130,7 +130,7 @@ export async function run(container: HTMLElement) {
     layout: { type: 'dagre', rankdir: 'LR', ranksep: 84, nodesep: 16, nodeSize: 96 },
     label: { hideOnLowZoom: false, scaleWithZoom: false },
     behaviors: ['click-select', 'drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -228,7 +228,7 @@ export async function run(container: HTMLElement) {
       },
     },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();
@@ -479,17 +479,21 @@ node: {
 **Complete runnable code**
 
 ```ts
-import { Graph } from '@antv/g6-lite';
+import { Graph, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: 40, maxZoom: 1.5 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
     container,
     data: {
       nodes: [
-        { id: 'A', x: 80, y: 100, data: { value: 16, group: 'core' } },
+        { id: 'A', x: 128, y: 100, data: { value: 16, group: 'core' } },
         { id: 'B', x: 240, y: 100, data: { value: 28, group: 'other' } },
-        { id: 'C', x: 400, y: 100, data: { value: 40, group: 'core' } },
+        { id: 'C', x: 352, y: 100, data: { value: 40, group: 'core' } },
       ],
       edges: [{ source: 'A', target: 'B' }, { source: 'B', target: 'C' }],
     },
@@ -509,7 +513,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion node-options
     edge: { style: { stroke: '#94a3b8' } },
-    autoFit: { padding: 40, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: ['click-select'],
   });
   const ui = createDemoPanel(container);
@@ -787,7 +791,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion edge-options
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -955,7 +959,7 @@ export async function run(container: HTMLElement) {
     } },
     // #endregion combo-options
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();
@@ -1297,8 +1301,12 @@ const layouts: Record<string, LayoutConfig> = {
 **Complete runnable code**
 
 ```ts
-import { Graph, type LayoutConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type LayoutConfig } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: [56, 48, 76, 48] };
+}
 
 export async function run(container: HTMLElement) {
   // #region layout-options
@@ -1321,7 +1329,7 @@ export async function run(container: HTMLElement) {
     layout: layouts.grid,
     node: { style: { size: 28, label: (node) => node.id, labelOffsetY: 8 } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   const ui = createDemoPanel(container);
   let generation = 0;
@@ -1337,7 +1345,7 @@ export async function run(container: HTMLElement) {
       try {
         await graph.layout();
         if (current !== generation || graph.destroyed) return;
-        graph.fitView({ padding: 56, maxZoom: 1 });
+        graph.fitView(getFitOptions());
         ui.setStatus(`${value} ready`);
       } catch {
         if (current === generation && !graph.destroyed) ui.setStatus('Layout failed');
@@ -1507,7 +1515,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { fill: '#873BF4', stroke: '#5B21B6', strokeWidth: 2, haloWidth: 12 } },
     },
     behaviors,
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: { padding: 60 },
   });
   const status = document.createElement('div');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';
@@ -1743,7 +1751,7 @@ export async function run(container: HTMLElement) {
     },
     node: { style: { label: (node) => node.id, labelColor: '#334155', labelOffsetY: 8 } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -1964,7 +1972,7 @@ export async function run(container: HTMLElement) {
     // #endregion config-transforms
     node: { style: { size: 32, label: (node) => String(node.data?.label ?? node.id) } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -2154,7 +2162,7 @@ export async function run(container: HTMLElement) {
     } satisfies CounterOptions],
     // #endregion activate
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64, maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1) },
   });
   try { await graph.render(); return graph; }
   catch (error) { graph.destroy(); throw error; }

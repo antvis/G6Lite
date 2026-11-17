@@ -91,7 +91,7 @@ const graph = new Graph({
 
 try {
   await graph.render();
-  graph.fitView({ padding: 48, maxZoom: 1.2 });
+  graph.fitView({ padding: 48 });
 } catch (error) {
   graph.destroy();
   throw error;
@@ -170,7 +170,7 @@ import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
       });
 
       graph.render().then(() => {
-        graph.fitView({ padding: 48, maxZoom: 1.2 });
+        graph.fitView({ padding: 48 });
       }).catch((error) => {
         graph.destroy();
         console.error(error);

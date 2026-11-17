@@ -62,6 +62,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy: () => graph.destroy(),

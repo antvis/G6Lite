@@ -26,17 +26,18 @@ const graph = new Graph({
 
 ## 配置项 [#配置项]
 
-| 参数             | 描述            | 类型       | 默认值    |
-| -------------- | ------------- | -------- | ------ |
-| `gravity`      | 向布局中心聚拢的强度。   | `number` | `10`   |
-| `speed`        | 模拟中节点移动的速度系数。 | `number` | `5`    |
-| `maxIteration` | 布局的最大迭代次数。    | `number` | 按节点数计算 |
+| 参数             | 描述                   | 类型       | 默认值    |
+| -------------- | -------------------- | -------- | ------ |
+| `gravity`      | 向布局中心聚拢的强度。          | `number` | `10`   |
+| `speed`        | 模拟中节点移动的速度系数。        | `number` | `5`    |
+| `maxIteration` | 布局的最大迭代次数。           | `number` | 按节点数计算 |
+| `minMovement`  | 用于判断布局是否可以提前停止的位移阈值。 | `number` | 按节点数计算 |
 
 [布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
 
 ## 代码示例 [#代码示例]
 
-示例将中心引力设为 12。
+示例固定初始坐标，将中心引力设为 4，并降低停止迭代的位移阈值，让节点有时间展开。三种颜色标记图中的三个群组。
 
 
 
@@ -51,9 +52,26 @@ function network(type: string): ExampleOptions {
     [2, 5], [2, 6], [3, 7], [3, 8], [3, 9],
     [7, 8], [8, 9], [4, 10], [4, 11], [10, 11],
   ];
+  const showClusters = type === 'force-atlas2' || type === 'fruchterman';
+  // Seed the three groups around distinct centers so rerunning starts from the same layout.
+  const clusters = [
+    { ids: [3, 7, 8, 9], x: 90, y: 120, color: '#2468d8' },
+    { ids: [0, 1, 5, 2, 6], x: 240, y: 205, color: '#7755c7' },
+    { ids: [4, 10, 11], x: 390, y: 120, color: '#0c8177' },
+  ];
+  const nodes = showClusters
+    ? clusters.flatMap(({ ids, x, y, color }, clusterIndex) => {
+        const startAngle = type === 'fruchterman' && clusterIndex === 1 ? 3 * Math.PI / 2 : 0;
+        return ids.map((id, index) => {
+          const angle = startAngle + 2 * Math.PI * index / ids.length;
+          return { id: String(id), x: x + 34 * Math.cos(angle), y: y + 34 * Math.sin(angle), data: { color } };
+        });
+      })
+    : Array.from({ length: 12 }, (_, index) => ({ id: String(index) }));
+
   return {
     data: {
-      nodes: Array.from({ length: 12 }, (_, index) => ({ id: String(index) })),
+      nodes,
       edges: links.map(([source, target]) => ({ source: String(source), target: String(target) })),
     },
     node: {
@@ -62,10 +80,10 @@ function network(type: string): ExampleOptions {
         label: (node) => node.id,
         labelColor: '#fff',
         labelPlacement: 'center',
-        fill: (node) => type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff',
+        fill: (node) => String(node.data?.color ?? (type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff')),
       },
     },
-    edge: { style: { lineWidth: 2 } },
+    edge: { style: showClusters ? { lineWidth: 1.6, stroke: '#8494b0', endArrow: false } : { lineWidth: 2 } },
   };
 }
 
@@ -75,7 +93,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -87,7 +105,15 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
 }
 
 export function run(container: HTMLElement) {
-  const layout: LayoutConfig = { type: 'fruchterman', gravity: 12 };
+  const layout: LayoutConfig = {
+    type: 'fruchterman',
+    width: 560,
+    height: 300,
+    center: [240, 150],
+    gravity: 4,
+    maxIteration: 250,
+    minMovement: 0.05,
+  };
   return render(container, layout, network(layout.type));
 }
 ```

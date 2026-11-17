@@ -59,7 +59,7 @@ export async function run(container: HTMLElement) {
     edge: { type: 'docs-weighted-edge', style: { label: (_s, _t, edge) => edge.id ?? '' } },
     // #endregion edge-activation
     behaviors: ['click-select', 'zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -184,7 +184,7 @@ export async function run(container: HTMLElement) {
     edge: { type: 'docs-weighted-edge', style: { label: (_s, _t, edge) => edge.id ?? '' } },
     // #endregion edge-activation
     behaviors: ['click-select', 'zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -314,7 +314,7 @@ export async function run(container: HTMLElement) {
     edge: { type: 'docs-weighted-edge', style: { label: (_s, _t, edge) => edge.id ?? '' } },
     // #endregion edge-activation
     behaviors: ['click-select', 'zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);

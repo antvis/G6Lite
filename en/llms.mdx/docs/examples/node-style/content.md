@@ -12,7 +12,7 @@ Hover nodes or edges to inspect relationship highlighting.
 
 ## Data
 
-cluster=a maps to blue and cluster=b to green. Node id=0 has size 16; the others have size 12.
+cluster=a maps to blue and cluster=b to green. The lead node A has size 36, and the other nodes have size 24.
 
 ## Complete runnable code
 
@@ -28,11 +28,11 @@ export async function run(container: string | HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: '0', name: 'A', data: { cluster: 'a' } },
-        { id: '1', name: 'B', data: { cluster: 'b' } },
-        { id: '2', name: 'C', data: { cluster: 'a' } },
-        { id: '3', name: 'D', data: { cluster: 'b' } },
-        { id: '4', name: 'E', data: { cluster: 'a' } },
+        { id: '0', name: 'A', x: 0, y: 96, data: { cluster: 'a', role: 'lead' } },
+        { id: '1', name: 'B', x: 124, y: 26, data: { cluster: 'b' } },
+        { id: '2', name: 'C', x: 190, y: 160, data: { cluster: 'a' } },
+        { id: '3', name: 'D', x: 254, y: 26, data: { cluster: 'b' } },
+        { id: '4', name: 'E', x: 380, y: 96, data: { cluster: 'a' } },
       ],
       edges: [
         { source: '0', target: '1' },
@@ -46,11 +46,14 @@ export async function run(container: string | HTMLElement) {
       type: 'circle',
       style: {
         fill: (d) => (d.data?.cluster === 'a' ? '#5B8FF9' : '#61DDAA'),
-        size: (d) => (d.id === '0' ? 16 : 12),
+        size: (d) => (d.data?.role === 'lead' ? 36 : 24),
+        label: (d) => d.name ?? d.id,
+        labelPlacement: 'bottom',
+        labelFontSize: 13,
       },
     },
-    edge: { type: 'line', style: { lineWidth: 2 } },
-    layout: { type: 'circular', radius: 150 },
+    label: { scaleWithZoom: false },
+    edge: { type: 'line', style: { lineWidth: 3, stroke: '#8b9ec2' } },
     behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
     theme: 'light',
   });

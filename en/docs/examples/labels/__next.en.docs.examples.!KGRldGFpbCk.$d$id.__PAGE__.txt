@@ -1,0 +1,125 @@
+1:"$Sreact.fragment"
+2:I[266110,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"ExampleDetailClient"]
+a:I[221132,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"Heading"]
+b:I[951315,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"default"]
+c:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
+d:"$Sreact.suspense"
+3:Tf3e,// Local presentation helpers in this repository are used only for the example controls.
+/**
+ * Demo: 节点标签 / 边标签 / 节点图标
+ */
+import { Graph, type GraphEdge, type GraphNode, type LabelPlacement } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+const DATA = {
+  nodes: [
+    { id: 'server', data: { name: 'API Server', type: 'server' } },
+    { id: 'db', data: { name: 'Database', type: 'database' } },
+    { id: 'cache', data: { name: 'Redis Cache', type: 'cache' } },
+    { id: 'queue', data: { name: 'Message Queue', type: 'queue' } },
+    { id: 'worker', data: { name: 'Worker', type: 'worker' } },
+    { id: 'gateway', data: { name: 'API Gateway', type: 'gateway' } },
+    { id: 'client', data: { name: 'Client App', type: 'client' } },
+    { id: 'monitor', data: { name: 'Monitor', type: 'monitor' } },
+  ],
+  edges: [
+    { source: 'client', target: 'gateway', data: { label: 'HTTPS' } },
+    { source: 'gateway', target: 'server', data: { label: 'gRPC' } },
+    { source: 'server', target: 'db', data: { label: 'SQL' } },
+    { source: 'server', target: 'cache', data: { label: 'TCP' } },
+    { source: 'server', target: 'queue', data: { label: 'AMQP' } },
+    { source: 'queue', target: 'worker', data: { label: 'consume' } },
+    { source: 'worker', target: 'db', data: { label: 'write' } },
+    { source: 'monitor', target: 'server', data: { label: 'metrics' } },
+    { source: 'monitor', target: 'gateway', data: { label: 'health' } },
+  ],
+};
+
+// Text icons use the first letter of each node's business type.
+const iconForNode = (node: GraphNode) => String(node.data?.type ?? '').slice(0, 1).toUpperCase();
+
+export async function run(container: string | HTMLElement) {
+  const el = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+
+  el.style.position = 'relative';
+
+  const graph = new Graph({
+    autoFit: true,
+    container: el,
+    data: DATA,
+    layout: { type: 'circular', radius: 180 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+    node: {
+      style: {
+        size: 20,
+        fill: '#5B8FF9',
+        icon: iconForNode,
+        iconType: 'text',
+        iconFontSize: 12,
+        iconColor: '#fff',
+        label: (n) => (n.data?.name as string | undefined) ?? n.id,
+        labelPlacement: 'bottom',
+        labelFontSize: 12,
+        labelColor: '#333',
+      },
+    },
+    edge: {
+      style: {
+        label: (s, t, e) => (e.data?.label as string) ?? '',
+        labelFontSize: 10,
+        labelColor: '#666',
+        labelAutoRotate: true,
+      },
+    },
+    theme: 'light',
+  });
+  await graph.render();
+
+  const ui = createDemoPanel(el);
+  ui.addChoice<LabelPlacement>('标签', ['bottom', 'center', 'top', 'left', 'right'], 'bottom', (value) => {
+    graph.updateOptions({ node: { style: { labelPlacement: value } } });
+  });
+
+  let edgeLabelsVisible = true;
+  let iconsVisible = true;
+  ui.addAction('切换边标签', () => {
+    edgeLabelsVisible = !edgeLabelsVisible;
+    graph.updateOptions({
+      edge: {
+        style: {
+          label: edgeLabelsVisible
+            ? ((_source: GraphNode, _target: GraphNode, edge: GraphEdge) =>
+                (edge.data?.label as string | undefined) ?? '')
+            : false,
+        },
+      },
+    });
+  });
+  ui.addAction('切换节点图标', () => {
+    iconsVisible = !iconsVisible;
+    graph.updateOptions({ node: { style: { icon: iconsVisible ? iconForNode : false } } });
+  });
+  ui.addChoice('布局', ['circular', 'force'], 'circular', async (value) => {
+    graph.setLayout(value === 'circular' ? { type: 'circular', radius: 180 } : { type: 'd3-force' });
+    await graph.layout();
+    graph.fitView();
+  });
+
+  return {
+    getGraphs: () => [graph],
+    getData: () => graph.getData(),
+    fitView: () => graph.fitView(),
+    destroy() {
+      graph.destroy();
+      ui.destroy();
+    },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Label placement and icons\",\"description\":\"Show node labels, edge labels, and icons, and change their placement at runtime.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/labels\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/labels\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/labels/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Label placement and icons\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/labels\"}]}]}"}}],[[["$","$L2","labels",{"id":"labels","locale":"en","initialSource":"$3"}]],"\n","$L4","\n","$L5","\n","$L6","\n","$L7"]],["$L8"],"$L9"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"S7XSqoamkCc5GeDMtHoaG"}
+4:["$","$La",null,{"as":"h2","id":"steps-and-expected-results","children":"Steps and expected results"}]
+5:["$","ol",null,{"children":["\n",["$","li",null,{"children":["White letters at node centers are ",["$","code",null,{"children":"iconType: 'text'"}]," icons derived from each business ",["$","code",null,{"children":"type"}],". Node names start below the nodes; edge labels show protocol names."]}],"\n",["$","li",null,{"children":["In the 标签 (label) menu at the top right of the canvas, choose ",["$","code",null,{"children":"top"}],", ",["$","code",null,{"children":"left"}],", or ",["$","code",null,{"children":"right"}],". Names move to that side while icons remain centered. Choosing ",["$","code",null,{"children":"center"}]," may overlap labels and icons because they share the center."]}],"\n",["$","li",null,{"children":"In the panel, click 切换节点图标 (toggle node icons). The letters disappear while names remain. Click again to restore the letters. 切换边标签 (toggle edge labels) affects protocol names only."}],"\n"]}]
+6:["$","p",null,{"children":["The panel calls ",["$","code",null,{"children":"graph.updateOptions()"}]," to update icons, node labels, and edge labels independently. Use the 布局 (layout) dropdown to compare labels across layouts."]}]
+7:["$","p",null,{"children":["See the ",["$","$Lb",null,{"href":"/en/docs/guides/label","children":"label and icon guide"}],", ",["$","$Lb",null,{"href":"/en/docs/guides/node#labels","children":"node label fields"}],", and ",["$","$Lb",null,{"href":"/en/docs/guides/node#icons","children":"icon fields"}],". For global scaling and collision behavior, try ",["$","$Lb",null,{"href":"/en/docs/examples/label-rendering-options","children":"label rendering policy"}],"."]}]
+8:["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]
+9:["$","$Lc",null,{"children":["$","$d",null,{"name":"Next.MetadataOutlet","children":"$@e"}]}]
+e:null

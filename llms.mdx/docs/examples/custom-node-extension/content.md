@@ -138,6 +138,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {

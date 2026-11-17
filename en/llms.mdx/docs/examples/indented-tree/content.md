@@ -178,6 +178,7 @@ export async function run(container: string | HTMLElement) {
   let generation = 0;
   let disposed = false;
   let currentMode = 'styled';
+  const fit = { padding: [64, 28, 64, 28] as [number, number, number, number] };
 
   async function renderMode(mode: string) {
     const token = ++generation;
@@ -194,7 +195,7 @@ export async function run(container: string | HTMLElement) {
     const cfg = mode === 'styled' ? configStyled() : configMinimal();
 
     const graph = new Graph({
-      autoFit: true,
+      autoFit: fit,
       container: wrapper,
       data: JSON.parse(JSON.stringify(data)),
       node: cfg.node as any,
@@ -235,8 +236,9 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => currentGraph ? [currentGraph] : [],
     getData: () => currentGraph?.getData(),
-    fitView: () => currentGraph?.fitView(),
+    fitView: () => currentGraph?.fitView(fit),
     destroy: () => {
       disposed = true;
       generation++;

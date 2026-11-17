@@ -1,0 +1,104 @@
+1:"$Sreact.fragment"
+3:I[266110,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"ExampleDetailClient"]
+7:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+2:T40a,{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Custom label renderer","description":"Share one custom label renderer between nodes and edges.","url":"https://g6lite.antv.vision/en/docs/examples/custom-label-renderer","mainEntityOfPage":"https://g6lite.antv.vision/en/docs/examples/custom-label-renderer","image":"https://g6lite.antv.vision/en/og/docs/examples/custom-label-renderer/image.png","inLanguage":"en","author":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"publisher":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"isPartOf":{"@id":"https://g6lite.antv.vision/#website"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://g6lite.antv.vision/en"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://g6lite.antv.vision/en/docs"},{"@type":"ListItem","position":3,"name":"Custom label renderer","item":"https://g6lite.antv.vision/en/docs/examples/custom-label-renderer"}]}]}4:Tcce,/**
+ * Demo: unified custom node/edge LabelRenderer lifecycle.
+ * The multiline behavior lives entirely in this demo, not in G6Lite core.
+ */
+import { Graph, register, type LabelRenderer } from '@antv/g6-lite';
+
+interface MultilineLayoutData {
+  lines: string[];
+  lineHeight: number;
+  contentWidth: number;
+}
+
+// #region renderer
+const multilineRenderer: LabelRenderer<MultilineLayoutData> = {
+  measure({ ctx, text, style }) {
+    ctx.font = `${style.labelFontWeight} ${style.labelFontSize}px ${style.labelFontFamily}`;
+    const lines = text.split('\n');
+    const lineHeight = style.labelFontSize * 1.2;
+    const contentWidth = Math.max(...lines.map((line) => ctx.measureText(line).width));
+    const padding = style.labelBackgroundPadding;
+    return {
+      width: contentWidth + padding * 2,
+      height: lines.length * lineHeight + padding * 2,
+      data: { lines, lineHeight, contentWidth },
+    };
+  },
+  draw({ ctx, style, layout }) {
+    const data = layout.data;
+    if (!data) return;
+    if (style.labelBackground) {
+      ctx.fillStyle = style.labelBackground;
+      ctx.fillRect(-layout.width / 2, -layout.height / 2, layout.width, layout.height);
+    }
+    ctx.font = `${style.labelFontWeight} ${style.labelFontSize}px ${style.labelFontFamily}`;
+    ctx.fillStyle = style.labelColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    data.lines.forEach((line, index) => {
+      const y = (index - (data.lines.length - 1) / 2) * data.lineHeight;
+      ctx.fillText(line, 0, y);
+    });
+  },
+};
+
+register('label', 'demo-multiline', multilineRenderer);
+// #endregion renderer
+
+export async function run(container: string | HTMLElement) {
+  const graph = new Graph({
+    // Labels are two lines and hang below nodes (labelPlacement: 'bottom');
+    // the bottom padding reserves their height so they stay inside the view.
+    autoFit: { padding: [24, 64, 64, 64] },
+    container,
+    data: {
+      nodes: [
+        { id: 'source', data: { label: 'Source Service\nShanghai' } },
+        { id: 'gateway', data: { label: 'API Gateway\nPrimary' } },
+        { id: 'target', data: { label: 'Target Store\nHangzhou' } },
+      ],
+      edges: [
+        { source: 'source', target: 'gateway', data: { label: 'HTTPS\nrequest' } },
+        { source: 'gateway', target: 'target', data: { label: 'RPC\nresponse' } },
+      ],
+    },
+    layout: { type: 'dagre', rankdir: 'LR', nodeSize: 32, ranksep: 180 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+    // #region node-label
+    node: {
+      labelRenderer: 'demo-multiline',
+      style: {
+        size: 32,
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'bottom',
+        labelFontSize: 12,
+        labelBackground: 'rgba(255,255,255,0.92)',
+        labelBackgroundPadding: 4,
+      },
+    },
+    // #endregion node-label
+    // #region edge-label
+    edge: {
+      type: 'arc',
+      labelRenderer: 'demo-multiline',
+      style: {
+        label: (_source, _target, edge) => String(edge.data?.label ?? ''),
+        labelFontSize: 10,
+        labelBackground: 'rgba(255,255,255,0.9)',
+        labelBackgroundPadding: 3,
+        labelAutoRotate: true,
+      },
+    },
+    // #endregion edge-label
+  });
+  await graph.render();
+  return graph;
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],[["$","$L3","custom-label-renderer",{"id":"custom-label-renderer","locale":"en","initialSource":"$4"}]]],["$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"S7XSqoamkCc5GeDMtHoaG"}
+5:["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

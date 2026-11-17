@@ -25,9 +25,9 @@ export async function run(container: HTMLElement) {
     data: {
       nodes: [
         { id: 'api', name: 'API', x: 100, y: 100, data: { placement: 'left' } },
-        { id: 'Database', x: 260, y: 100 },
-        { id: 'cache', name: 'Cache', x: 420, y: 100, data: { placement: 'right' } },
-        { id: 'worker', name: 'Worker', x: 580, y: 100, data: { hideLabel: true } },
+        { id: 'Database', x: 220, y: 100 },
+        { id: 'cache', name: 'Cache', x: 340, y: 100, data: { placement: 'right' } },
+        { id: 'worker', name: 'Worker', x: 460, y: 100, data: { hideLabel: true } },
       ],
       edges: [],
     },
@@ -43,7 +43,7 @@ export async function run(container: HTMLElement) {
       },
     },
     // #endregion label-style
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 64 },
     behaviors: [],
   });
   try {
@@ -121,7 +121,7 @@ export async function run(container: HTMLElement) {
       },
     },
     // #endregion icon-style
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: [48, 48, 88, 48] },
     behaviors: [],
   });
   try {
@@ -143,7 +143,11 @@ export async function run(container: HTMLElement) {
 
 
 ```ts
-import { Graph, type NodeConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type NodeConfig } from '@antv/g6-lite';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: [36, 60, 64, 42] };
+}
 
 export async function run(container: HTMLElement) {
   // #region node-label
@@ -152,6 +156,7 @@ export async function run(container: HTMLElement) {
       size: 40,
       label: (item) => String(item.data?.name ?? item.id),
       labelPlacement: 'bottom',
+      labelOffsetY: 8,
       labelMaxWidth: 120,
       labelBackground: (item) => item.id === 'db' ? '#fff1b8' : '#e6f4ff',
       labelBackgroundPadding: 6,
@@ -163,13 +168,13 @@ export async function run(container: HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: 'api', x: 120, y: 100, data: { name: 'API Server' } },
-        { id: 'db', x: 360, y: 100, data: { name: 'Database with a very long name' } },
+        { id: 'api', x: 160, y: 100, data: { name: 'API Server' } },
+        { id: 'db', x: 324, y: 100, data: { name: 'Database with a very long name' } },
       ],
       edges: [],
     },
     node,
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: [],
   });
   try {
@@ -228,7 +233,7 @@ export async function run(container: HTMLElement) {
     // #endregion edge-label-options
     label: { hideOnCollision: false, hideOnLowZoom: false },
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();

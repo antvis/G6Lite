@@ -103,6 +103,7 @@ export async function run(container: string | HTMLElement) {
 
   ui.setStatus('move near a thin edge');
   return {
+    getGraphs: () => graphs,
     getData: () => ({ views: graphs.map((graph) => graph.getData()) }),
     fitView: () => graphs.forEach((graph) => graph.fitView()),
     destroy: () => {

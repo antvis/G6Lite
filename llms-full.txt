@@ -1732,7 +1732,7 @@ export async function run(container: HTMLElement) {
     layout: { type: 'dagre', rankdir: 'LR', ranksep: 84, nodesep: 16, nodeSize: 96 },
     label: { hideOnLowZoom: false, scaleWithZoom: false },
     behaviors: ['click-select', 'drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -1830,7 +1830,7 @@ export async function run(container: HTMLElement) {
       },
     },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();
@@ -2081,17 +2081,21 @@ node: {
 **完整运行代码**
 
 ```ts
-import { Graph } from '@antv/g6-lite';
+import { Graph, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: 40, maxZoom: 1.5 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
     container,
     data: {
       nodes: [
-        { id: 'A', x: 80, y: 100, data: { value: 16, group: 'core' } },
+        { id: 'A', x: 128, y: 100, data: { value: 16, group: 'core' } },
         { id: 'B', x: 240, y: 100, data: { value: 28, group: 'other' } },
-        { id: 'C', x: 400, y: 100, data: { value: 40, group: 'core' } },
+        { id: 'C', x: 352, y: 100, data: { value: 40, group: 'core' } },
       ],
       edges: [{ source: 'A', target: 'B' }, { source: 'B', target: 'C' }],
     },
@@ -2111,7 +2115,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion node-options
     edge: { style: { stroke: '#94a3b8' } },
-    autoFit: { padding: 40, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: ['click-select'],
   });
   const ui = createDemoPanel(container);
@@ -2389,7 +2393,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion edge-options
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -2557,7 +2561,7 @@ export async function run(container: HTMLElement) {
     } },
     // #endregion combo-options
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();
@@ -2899,8 +2903,12 @@ const layouts: Record<string, LayoutConfig> = {
 **完整运行代码**
 
 ```ts
-import { Graph, type LayoutConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type LayoutConfig } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: [56, 48, 76, 48] };
+}
 
 export async function run(container: HTMLElement) {
   // #region layout-options
@@ -2923,7 +2931,7 @@ export async function run(container: HTMLElement) {
     layout: layouts.grid,
     node: { style: { size: 28, label: (node) => node.id, labelOffsetY: 8 } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   const ui = createDemoPanel(container);
   let generation = 0;
@@ -2939,7 +2947,7 @@ export async function run(container: HTMLElement) {
       try {
         await graph.layout();
         if (current !== generation || graph.destroyed) return;
-        graph.fitView({ padding: 56, maxZoom: 1 });
+        graph.fitView(getFitOptions());
         ui.setStatus(`${value} ready`);
       } catch {
         if (current === generation && !graph.destroyed) ui.setStatus('Layout failed');
@@ -3109,7 +3117,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { fill: '#873BF4', stroke: '#5B21B6', strokeWidth: 2, haloWidth: 12 } },
     },
     behaviors,
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: { padding: 60 },
   });
   const status = document.createElement('div');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';
@@ -3345,7 +3353,7 @@ export async function run(container: HTMLElement) {
     },
     node: { style: { label: (node) => node.id, labelColor: '#334155', labelOffsetY: 8 } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -3566,7 +3574,7 @@ export async function run(container: HTMLElement) {
     // #endregion config-transforms
     node: { style: { size: 32, label: (node) => String(node.data?.label ?? node.id) } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -3756,7 +3764,7 @@ export async function run(container: HTMLElement) {
     } satisfies CounterOptions],
     // #endregion activate
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64, maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1) },
   });
   try { await graph.render(); return graph; }
   catch (error) { graph.destroy(); throw error; }
@@ -3996,7 +4004,7 @@ export async function mountGraph(container: HTMLElement) {
   });
   try {
     await graph.render();
-    graph.fitView({ padding: 32, maxZoom: 1 });
+    graph.fitView({ padding: 32 });
     return () => graph.destroy();
   } catch (error) {
     graph.destroy();
@@ -4377,7 +4385,7 @@ export async function run(container: HTMLElement) {
       },
     },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();
@@ -4710,7 +4718,7 @@ export async function run(container: HTMLElement) {
     layout: { type: 'dagre', rankdir: 'LR', ranksep: 84, nodesep: 16, nodeSize: 96 },
     label: { hideOnLowZoom: false, scaleWithZoom: false },
     behaviors: ['click-select', 'drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -4732,607 +4740,6 @@ export async function run(container: HTMLElement) {
 * [自定义边](/docs/guides/custom-edge)根据边权重设置弧线颜色和线宽。
 * [自定义节点装饰](/docs/guides/custom-decoration)在节点旁绘制并堆叠状态徽章。
 * [自定义标签渲染](/docs/guides/custom-label-renderer)为节点和边绘制多行文字。
-
-
-# 快速上手 (/docs/getting-started/quick-start)
-
-
-
-
-
-选择一种接入方式。两种方式都用 6 个节点和 7 条边创建同一张团队协作图。
-
-* [包管理器](#包管理器)适合使用 Vite、Webpack 等构建工具的项目。安装后从 `@antv/g6-lite` 导入 `Graph`。
-* [CDN](#cdn)适合直接在 HTML 中使用。通过 `<script type="module">` 导入 `Graph`。
-
-## 包管理器 [#包管理器]
-
-### 安装 [#安装]
-
-在使用 Vite、Webpack 等构建工具的项目中，选择一种包管理器安装：
-
-<div className="quick-start-install">
-  ```bash
-  # npm
-  npm install @antv/g6-lite@0.1.0
-  ```
-
-  ```bash
-  # pnpm
-  pnpm add @antv/g6-lite@0.1.0
-  ```
-
-  ```bash
-  # Yarn
-  yarn add @antv/g6-lite@0.1.0
-  ```
-</div>
-
-### 创建关系图 [#创建关系图]
-
-安装后，在页面中添加一个有明确宽高的容器：
-
-```html
-<div id="container" style="width: 100%; height: 360px"></div>
-```
-
-然后在 JavaScript 或 TypeScript 入口中创建关系图。容器需要先挂载到页面，`await` 应在 ES 模块或 `async` 函数中使用。
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const data = {
-  nodes: [
-    { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
-    { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
-    { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
-    { id: 'David', data: { color: '#61DDAA', size: 40 } },
-    { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
-    { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
-  ],
-  edges: [
-    { source: 'Alice', target: 'Bob' },
-    { source: 'Alice', target: 'Carol' },
-    { source: 'David', target: 'Eva' },
-    { source: 'David', target: 'Frank' },
-    { source: 'Alice', target: 'David' },
-    { source: 'Bob', target: 'Eva' },
-    { source: 'Carol', target: 'Frank' },
-  ],
-};
-
-const graph = new Graph({
-  container: '#container',
-  data,
-  node: {
-    style: {
-      size: (node) => Number(node.data?.size ?? 26),
-      fill: (node) => String(node.data?.color ?? '#5B8FF9'),
-      stroke: '#fff',
-      strokeWidth: 2,
-      label: (node) => node.id,
-      labelPlacement: 'bottom',
-      labelColor: '#334155',
-    },
-  },
-  edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
-  layout: {
-    type: 'd3-force',
-    linkDistance: 100,
-    nodeStrength: -400,
-    collideRadius: 32,
-  },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-});
-
-try {
-  await graph.render();
-  graph.fitView({ padding: 48, maxZoom: 1.2 });
-} catch (error) {
-  graph.destroy();
-  throw error;
-}
-```
-
-包中已包含 TypeScript 类型。
-
-移除容器或卸载组件前，调用 `graph.destroy()` 释放资源。
-
-## CDN [#cdn]
-
-```js
-import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
-```
-
-### 创建关系图 [#创建关系图-1]
-
-将下面的 HTML 保存为 `index.html`，用浏览器打开。
-
-```html
-<!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>G6Lite 团队协作关系图</title>
-  </head>
-  <body>
-    <div id="container" style="height: 360px"></div>
-    <script type="module">
-      import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
-
-      const data = {
-        nodes: [
-          { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
-          { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
-          { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
-          { id: 'David', data: { color: '#61DDAA', size: 40 } },
-          { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
-          { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
-        ],
-        edges: [
-          { source: 'Alice', target: 'Bob' },
-          { source: 'Alice', target: 'Carol' },
-          { source: 'David', target: 'Eva' },
-          { source: 'David', target: 'Frank' },
-          { source: 'Alice', target: 'David' },
-          { source: 'Bob', target: 'Eva' },
-          { source: 'Carol', target: 'Frank' },
-        ],
-      };
-
-      const graph = new Graph({
-        container: '#container',
-        data,
-        node: {
-          style: {
-            size: (node) => Number(node.data?.size ?? 26),
-            fill: (node) => String(node.data?.color ?? '#5B8FF9'),
-            stroke: '#fff',
-            strokeWidth: 2,
-            label: (node) => node.id,
-            labelPlacement: 'bottom',
-            labelColor: '#334155',
-          },
-        },
-        edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
-        layout: {
-          type: 'd3-force',
-          linkDistance: 100,
-          nodeStrength: -400,
-          collideRadius: 32,
-        },
-        behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-      });
-
-      graph.render().then(() => {
-        graph.fitView({ padding: 48, maxZoom: 1.2 });
-      }).catch((error) => {
-        graph.destroy();
-        console.error(error);
-      });
-      window.addEventListener('pagehide', () => graph.destroy(), { once: true });
-    </script>
-  </body>
-</html>
-```
-
-单页示例在 `pagehide` 时销毁图实例。浏览器从往返缓存恢复页面时，需要重新创建实例。
-
-<span id="验证效果与清理" style="{ scrollMarginTop: '8rem' }" />
-
-## 运行效果 [#运行效果]
-
-两种接入方式都会生成下方的团队协作图，包含 6 个带标签的节点和 7 条边。拖动空白处可平移画布。
-
-<QuickStartExample locale="zh" variant="network" />
-
-图没有显示时，检查容器宽高、浏览器 WebGL 和控制台错误。
-
-## 在前端框架中使用 [#在前端框架中使用]
-
-在 React / Vue 中，通过 ref 获取真实 DOM，在客户端挂载后创建实例，并在组件卸载时调用 `graph.destroy()` 释放资源。
-
-<Cards>
-  <Card title="在 React 中使用" href="/docs/getting-started/react#在-react-中使用">
-    在 effect 中挂载关系图，更新数据，并处理组件卸载。
-  </Card>
-
-  <Card title="在 Vue 中使用" href="/docs/getting-started/vue">
-    通过模板 ref 和生命周期钩子管理图实例。
-  </Card>
-</Cards>
-
-
-# React 接入 (/docs/getting-started/react)
-
-
-
-
-
-## 在 React 中使用 [#在-react-中使用]
-
-在页面中引入 `GraphView` 组件。
-
-```tsx
-import GraphView from './GraphView';
-
-export default function App() {
-  return <GraphView />;
-}
-```
-
-<span id="准备两组数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="react响应数据依赖变化" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-### 定义 GraphView [#定义-graphview]
-
-将下面的代码保存为 `GraphView.tsx`。组件挂载后创建图，切换数据时调用 `setData()`，卸载时销毁实例。
-
-```tsx
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
-import { Graph, type GraphData } from '@antv/g6-lite';
-
-const basicData: GraphData = {
-  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-  edges: [
-    { source: 'Alice', target: 'Bob' },
-    { source: 'Alice', target: 'Carol' },
-  ],
-};
-
-const expandedData: GraphData = {
-  nodes: [...basicData.nodes, { id: 'David' }],
-  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
-};
-
-const fitView = { padding: 32, maxZoom: 1 };
-
-export default function GraphView() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const graphRef = useRef<Graph | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const graph = new Graph({
-      container: containerRef.current,
-      data: basicData,
-      layout: { type: 'circular', radius: 120 },
-      node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
-      edge: { style: { endArrow: true } },
-      autoFit: fitView,
-      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-    });
-
-    graph.render().then(() => {
-      if (graph.destroyed) return;
-      graphRef.current = graph;
-      setReady(true);
-    }).catch((error) => {
-      if (!graph.destroyed) {
-        graph.destroy();
-        console.error(error);
-      }
-    });
-
-    return () => {
-      graphRef.current = null;
-      graph.destroy();
-    };
-  }, []);
-
-  async function changeData(data: GraphData) {
-    const graph = graphRef.current;
-    if (!graph) return;
-    try {
-      await graph.setData(data, { fitView });
-    } catch (error) {
-      if (!graph.destroyed) console.error(error);
-    }
-  }
-
-  return (
-    <div>
-      <select
-        aria-label="关系图数据"
-        defaultValue="basic"
-        disabled={!ready}
-        onChange={(event) => void changeData(event.target.value === 'expanded' ? expandedData : basicData)}
-      >
-        <option value="basic">基础关系</option>
-        <option value="expanded">扩展关系</option>
-      </select>
-      <div ref={containerRef} style={{ width: '100%', height: 360 }} />
-    </div>
-  );
-}
-```
-
-## 运行效果 [#数据变化时更新图]
-
-选择「扩展关系」会添加 David 节点和 Bob → David 连线。切回「基础关系」即可恢复。
-
-<QuickStartExample locale="zh" variant="framework-data" />
-
-<span id="在-vue-中使用" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="vue用-watch-同步数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-
-# Vue 接入 (/docs/getting-started/vue)
-
-
-
-
-
-## 在 Vue 中使用 [#在-vue-中使用]
-
-在页面中引入 `GraphView` 组件。
-
-```vue
-<script setup lang="ts">
-import GraphView from './GraphView.vue';
-</script>
-
-<template>
-  <GraphView />
-</template>
-```
-
-<span id="准备两组数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="vue用-watch-同步数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-### 定义 GraphView [#定义-graphview]
-
-将下面的代码保存为 `GraphView.vue`。组件挂载后创建图，切换数据时调用 `setData()`，卸载时销毁实例。
-
-```vue
-<script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { Graph, type GraphData } from '@antv/g6-lite';
-
-const basicData: GraphData = {
-  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-  edges: [
-    { source: 'Alice', target: 'Bob' },
-    { source: 'Alice', target: 'Carol' },
-  ],
-};
-
-const expandedData: GraphData = {
-  nodes: [...basicData.nodes, { id: 'David' }],
-  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
-};
-
-const fitView = { padding: 32, maxZoom: 1 };
-const containerRef = ref<HTMLDivElement | null>(null);
-const ready = ref(false);
-let graph: Graph | undefined;
-
-onMounted(async () => {
-  if (!containerRef.value) return;
-
-  const instance = new Graph({
-    container: containerRef.value,
-    data: basicData,
-    layout: { type: 'circular', radius: 120 },
-    node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
-    edge: { style: { endArrow: true } },
-    autoFit: fitView,
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-  });
-  graph = instance;
-
-  try {
-    await instance.render();
-    if (!instance.destroyed) ready.value = true;
-  } catch (error) {
-    if (!instance.destroyed) {
-      instance.destroy();
-      console.error(error);
-    }
-  }
-});
-
-onBeforeUnmount(() => graph?.destroy());
-
-async function changeData(event: Event) {
-  const instance = graph;
-  if (!ready.value || !instance || instance.destroyed) return;
-
-  const { value } = event.target as HTMLSelectElement;
-  const data = value === 'expanded' ? expandedData : basicData;
-  try {
-    await instance.setData(data, { fitView });
-  } catch (error) {
-    if (!instance.destroyed) console.error(error);
-  }
-}
-</script>
-
-<template>
-  <div>
-    <select aria-label="关系图数据" :disabled="!ready" @change="changeData">
-      <option value="basic">基础关系</option>
-      <option value="expanded">扩展关系</option>
-    </select>
-    <div ref="containerRef" style="width: 100%; height: 360px" />
-  </div>
-</template>
-```
-
-## 运行效果 [#数据变化时更新图]
-
-选择「扩展关系」会添加 David 节点和 Bob → David 连线。切回「基础关系」即可恢复。
-
-<QuickStartExample locale="zh" variant="framework-data" />
-
-
-# 图总览 (/docs/graph/overview)
-
-
-
-
-
-## 什么是 Graph [#什么是-graph]
-
-图由表示对象的节点和表示关系的边组成。G6Lite 的 `Graph` 实例把这些数据绘制到容器中，并提供查询元素、调整视口和监听交互的方法。
-
-一个图实例通常经历以下步骤。
-
-1. **创建。** 用 `new Graph(options)` 绑定容器并初始化渲染资源。
-2. **渲染。** 调用并等待 `graph.render()`，完成首次布局和绘制。
-3. **更新。** 复用同一个实例，用 `setData()` 更新图数据，用 `updateOptions()` 更新支持的配置。
-4. **销毁。** 页面离开或组件卸载时调用 `graph.destroy()`，释放画布和监听器等资源。
-
-<span id="使用图实例" />
-
-## 使用 G6Lite Graph [#使用-g6lite-graph]
-
-按[快速上手](/docs/getting-started/quick-start)安装 `@antv/g6-lite`。先在页面上准备一个已挂载、宽高非零的容器，再创建实例并渲染。
-
-```html
-<div id="container" style="width: 100%; height: 320px"></div>
-```
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const graph = new Graph({
-  container: '#container',
-  data: {
-    nodes: [
-      { id: 'browser', x: 0, y: 0 },
-      { id: 'api', x: 120, y: 0 },
-    ],
-    edges: [{ source: 'browser', target: 'api' }],
-  },
-});
-
-await graph.render();
-```
-
-首次渲染完成后，就可以定位节点或更新数据。调用时序和资源清理见 [Graph 生命周期 API](/docs/api/graph#graph-lifecycle)。
-
-<span id="容器与配置" />
-
-## 图配置项 [#图配置项]
-
-`GraphOptions` 是传给构造函数的配置对象。完整类型和字段细节见 [GraphOptions API](/docs/api/options#graphoptions)。
-
-| 配置项          | 类型                                    | 默认值       | 用途                           |
-| ------------ | ------------------------------------- | --------- | ---------------------------- |
-| `container`  | `string \| HTMLElement`               | 必填        | 指定挂载容器。字符串使用 CSS 选择器。        |
-| `data`       | `GraphData`                           | 必填        | 提供节点、边和可选的 Combo 分组。         |
-| `autoFit`    | `boolean \| number \| FitViewOptions` | `false`   | 控制容器尺寸变化时是否重新适配视图。首次渲染会自动适配。 |
-| `node`       | `NodeConfig`                          | 圆形节点      | 配置节点形状、样式和状态。                |
-| `edge`       | `EdgeConfig`                          | 直线边       | 配置线型、箭头和状态。                  |
-| `combo`      | `ComboConfig`                         | 内置样式      | 配置分组外观、标签和折叠形态。              |
-| `label`      | `LabelOptions`                        | 内置策略      | 控制标签的缩放和可见性。                 |
-| `layout`     | `LayoutConfig`                        | 使用数据坐标    | 指定布局算法及参数，由布局计算节点位置。         |
-| `behaviors`  | `BehaviorOption[]`                    | 缩放、拖动画布   | 配置缩放、拖拽、选择等交互。               |
-| `theme`      | `ThemeOption`                         | `'light'` | 设置画布和元素的默认样式。                |
-| `transforms` | `TransformOption[]`                   | 无         | 按顺序处理布局前的输入数据。               |
-| `plugins`    | `PluginOption[]`                      | 无         | 挂载已注册的插件。                    |
-
-画布初始宽高由容器决定。适配方式和运行时尺寸调整见[视口与坐标](/docs/guides/viewport)。
-
-## 图属性 [#图属性]
-
-| 属性                                                             | 类型        | 说明                                      |
-| -------------------------------------------------------------- | --------- | --------------------------------------- |
-| [`graph.destroyed`](/docs/api/graph#graph-lifecycle-destroyed) | `boolean` | 只读。开始销毁后变为 `true`，可在异步数据返回后用它判断实例是否仍可用。 |
-
-需要等待首次渲染时，使用 `await graph.render()`。
-
-## 参考示例 [#参考示例]
-
-### 完整的创建和配置示例 [#完整的创建和配置示例]
-
-示例用 Dagre 将调用关系从左到右排列，将 Cache 和 Database 放进同一个 Combo。可以点击节点查看选中样式，也可以拖动或缩放画布。
-
-
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-export async function run(container: HTMLElement) {
-  const graph = new Graph({
-    container,
-    data: {
-      nodes: [
-        { id: 'web', name: 'Browser' },
-        { id: 'api', name: 'API' },
-        { id: 'cache', name: 'Cache', comboId: 'storage' },
-        { id: 'db', name: 'Database', comboId: 'storage' },
-      ],
-      edges: [
-        { source: 'web', target: 'api', data: { protocol: 'HTTPS' } },
-        { source: 'api', target: 'cache', data: { protocol: 'GET' } },
-        { source: 'api', target: 'db', data: { protocol: 'SQL' } },
-      ],
-      combos: [{ id: 'storage' }],
-    },
-    // #region element-options
-    node: {
-      type: 'rect',
-      style: {
-        width: 96,
-        height: 38,
-        borderRadius: 8,
-        fill: '#eef2ff',
-        stroke: '#6366f1',
-        strokeWidth: 1,
-        label: (node) => node.name ?? node.id,
-        labelPlacement: 'center',
-        labelColor: '#1e293b',
-      },
-      stateStyles: { selected: { stroke: '#4338ca', strokeWidth: 3 } },
-    },
-    edge: {
-      style: {
-        stroke: '#64748b',
-        endArrow: true,
-        label: (_source, _target, edge) => String(edge.data?.protocol ?? ''),
-        labelColor: '#334155',
-        labelBackground: '#fff',
-        labelBackgroundPadding: 4,
-      },
-    },
-    combo: {
-      style: {
-        label: 'Storage',
-        labelPlacement: 'top',
-        labelColor: '#065f46',
-        padding: 20,
-        borderRadius: 12,
-        fill: 'rgba(16,185,129,0.08)',
-        stroke: '#6ee7b7',
-      },
-    },
-    // #endregion element-options
-    layout: { type: 'dagre', rankdir: 'LR', ranksep: 84, nodesep: 16, nodeSize: 96 },
-    label: { hideOnLowZoom: false, scaleWithZoom: false },
-    behaviors: ['click-select', 'drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
-  });
-  try {
-    await graph.render();
-    return graph;
-  } catch (error) {
-    graph.destroy();
-    throw error;
-  }
-}
-```
-
-
 
 
 # 最简关系图 (/docs/examples/basic)
@@ -5504,7 +4911,7 @@ export async function run(container: string | HTMLElement) {
 
 ## 如何体验
 
-点击分组背景可折叠或展开单个分组。用画布上的按钮批量操作，在「更多」中调整节点归属、创建分组或导出数据。
+点分组背景可折叠，点带节点数的摘要卡片可展开。用右上角按钮批量操作，在「更多」中调整节点归属、创建分组或导出数据。
 
 ## 数据说明
 
@@ -5530,7 +4937,7 @@ const NODE_COLORS: Record<string, string> = {
   observability: '#9299A8',
 };
 
-export async function run(container: string | HTMLElement) {
+export async function run(container: string | HTMLElement, fitPreview?: (graph: Graph) => void) {
   const containerEl =
     typeof container === 'string'
       ? (document.querySelector(container) as HTMLElement)
@@ -5649,8 +5056,9 @@ export async function run(container: string | HTMLElement) {
           data: { name: '业务平台' },
           style: {
             fill: 'rgba(112, 132, 160, 0.045)',
-            stroke: 'rgba(112, 132, 160, 0.28)',
-            padding: 24,
+            stroke: 'rgba(112, 132, 160, 0.55)',
+            padding: 28,
+            labelPlacement: 'top',
             labelFontSize: 13,
           },
         },
@@ -5679,7 +5087,7 @@ export async function run(container: string | HTMLElement) {
     node: {
       type: 'circle',
       style: {
-        size: 18,
+        size: 24,
         fill: (node) => NODE_COLORS[String(node.data?.layer)] ?? '#9CA3AF',
         stroke: '#FFFFFF',
         strokeWidth: 2,
@@ -5705,13 +5113,15 @@ export async function run(container: string | HTMLElement) {
     combo: {
       style: {
         borderRadius: 12,
-        label: (combo) =>
-          (combo.data as Record<string, string> | undefined)?.name ?? combo.id,
+        label: (combo) => {
+          const name = String(combo.data?.name ?? combo.id);
+          return combo.collapsed ? `${name} · ${countNodes(combo.id)}` : name;
+        },
         labelPlacement: 'inside',
         labelFontSize: 12,
-        labelColor: '#526071',
+        labelColor: '#334155',
         collapsedType: 'rect',
-        collapsedSize: [72, 38],
+        collapsedSize: [146, 54],
         count: false,
         stateStyles: {
           selected: { stroke: '#3B82F6', strokeWidth: 2 },
@@ -5720,6 +5130,26 @@ export async function run(container: string | HTMLElement) {
       },
     },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+  });
+
+  function countNodes(comboId: string): number {
+    const { nodes, combos } = graph.getComboChildren(comboId);
+    return nodes.length + combos.reduce((total, id) => total + countNodes(id), 0);
+  }
+
+  // The example hides child outlines behind the parent's collapsed summary.
+  const hiddenOnCollapse = new Set<string>();
+  graph.on('combo:collapse', ({ comboId }) => {
+    for (const id of graph.getComboChildren(comboId).combos) {
+      if (graph.getItemStates(id).includes('hidden')) continue;
+      hiddenOnCollapse.add(id);
+      graph.hideItem(id);
+    }
+  });
+  graph.on('combo:expand', ({ comboId }) => {
+    for (const id of graph.getComboChildren(comboId).combos) {
+      if (hiddenOnCollapse.delete(id)) graph.showItem(id);
+    }
   });
 
   await graph.render();
@@ -5763,10 +5193,12 @@ export async function run(container: string | HTMLElement) {
     graph.expandCombo('service-layer');
     if (consoleInService) {
       graph.addToCombo('console', 'client-apps');
+      graph.updateNodePosition('console', 100, 360);
       consoleButton.name('控制台加入服务层');
       ui.setStatus('运营控制台已回到客户端');
     } else {
       graph.addToCombo('console', 'service-layer');
+      graph.updateNodePosition('console', 335, 360);
       consoleButton.name('控制台回到客户端');
       ui.setStatus('运营控制台已加入服务层');
     }
@@ -5779,13 +5211,13 @@ export async function run(container: string | HTMLElement) {
       {
         id: 'logs',
         x: 570,
-        y: 455,
+        y: 500,
         data: { layer: 'observability', label: '日志采集' },
       },
       {
         id: 'metrics',
         x: 720,
-        y: 455,
+        y: 500,
         data: { layer: 'observability', label: '指标监控' },
       },
     ]);
@@ -5797,11 +5229,10 @@ export async function run(container: string | HTMLElement) {
           fill: 'rgba(134, 126, 176, 0.08)',
           stroke: 'rgba(134, 126, 176, 0.42)',
           padding: 32,
-          label: '可观测性',
           labelPlacement: 'inside',
           labelColor: '#645F83',
           collapsedType: 'rect',
-          collapsedSize: [84, 38],
+          collapsedSize: [146, 54],
           count: false,
         },
       },
@@ -5809,8 +5240,9 @@ export async function run(container: string | HTMLElement) {
     );
     runtimeCreated = true;
     runtimeButton.name('已创建可观测分组').disable();
-    graph.fitView(0.78);
     ui.setStatus('createCombo() 已执行');
+    if (fitPreview) fitPreview(graph);
+    else graph.fitView({ padding: 64 });
   }, more);
 
   ui.addAction('导出数据', () => {
@@ -5825,7 +5257,10 @@ export async function run(container: string | HTMLElement) {
     ui.setStatus(`${data.nodes.length} 节点 · ${data.combos?.length ?? 0} 分组`);
   }, more);
 
+  if (containerEl.clientWidth < 500) ui.gui.close();
+
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy() {
@@ -5945,6 +5380,7 @@ export async function run(container: string | HTMLElement) {
   graph.on('canvas:click', close);
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 80 }),
     destroy() {
@@ -6139,7 +5575,7 @@ export async function run(container: string | HTMLElement) {
   const graph = new Graph({
     // Labels are two lines and hang below nodes (labelPlacement: 'bottom');
     // the bottom padding reserves their height so they stay inside the view.
-    autoFit: { padding: [24, 48, 64, 48] },
+    autoFit: { padding: [24, 64, 64, 64] },
     container,
     data: {
       nodes: [
@@ -6416,6 +5852,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
@@ -6452,7 +5889,7 @@ export async function run(container: string | HTMLElement) {
 
 ```ts
 // Local presentation helpers in this repository are used only for the example controls.
-import { Graph, type GraphData } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type GraphData } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
 const INITIAL_DATA: GraphData = {
@@ -6468,8 +5905,12 @@ const INITIAL_DATA: GraphData = {
 };
 
 export async function run(container: string | HTMLElement) {
+  const fit: FitViewOptions = {
+    padding: [56, 28, 76, 28],
+    maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1),
+  };
   const graph = new Graph({
-    autoFit: true,
+    autoFit: fit,
     container,
     data: INITIAL_DATA,
     node: {
@@ -6493,7 +5934,6 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
   });
   await graph.render();
-  graph.fitView({ padding: 80 });
 
   const ui = createDemoPanel(container);
 
@@ -6561,13 +6001,14 @@ export async function run(container: string | HTMLElement) {
     renderStatus();
   });
   ui.addAction('重置', async () => {
-    await graph.setData(INITIAL_DATA, { fitView: { padding: 80 } });
+    await graph.setData(INITIAL_DATA, { fitView: fit });
     lastEvent = 'datachange: reset';
     renderStatus();
   });
 
   renderStatus();
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
@@ -6875,6 +6316,7 @@ export async function run(container: string | HTMLElement) {
   ui.addChoice('View', ['light + dark', 'light', 'dark'], 'light + dark', updateView);
 
   return {
+    getGraphs: () => graphs,
     getData: () => ({ views: graphs.map((graph) => graph.getData()) }),
     fitView() {
       fitGraphs();
@@ -6981,7 +6423,7 @@ export async function run(container: string | HTMLElement) {
 
 ## 如何体验
 
-按住边靠近端点的位置，拖到另一个节点上松开。
+按住 A → B 边上靠近 B 的圆点手柄，拖到 C 上松开。
 
 ## 数据说明
 
@@ -6991,12 +6433,14 @@ export async function run(container: string | HTMLElement) {
 
 ```ts
 // Local presentation helpers in this repository are used only for the example controls.
-import { Graph } from '@antv/g6-lite';
+import { Graph, type GraphEventMap } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: string | HTMLElement) {
+  const nodeSize = 38;
+  const activeColor = '#5366ad';
   const graph = new Graph({
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
     container,
     data: {
       nodes: [
@@ -7010,14 +6454,67 @@ export async function run(container: string | HTMLElement) {
         { id: 'reference-edge', source: 'c', target: 'd' },
       ],
     },
-    node: { style: { size: 38, label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' } },
-    edge: { style: { lineWidth: 4, hitAreaWidth: 16, endArrow: true } },
+    node: { style: { size: nodeSize, label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' } },
+    label: { hideOnLowZoom: false },
+    edge: {
+      style: {
+        stroke: (_source, _target, edge) => edge.id === 'editable-edge' ? activeColor : '#94a3b8',
+        lineWidth: 4,
+        hitAreaWidth: 36,
+        endArrow: true,
+        label: (_source, _target, edge) => edge.id === 'editable-edge' ? '●' : false,
+        labelPlacement: 'end',
+        labelFontSize: 18,
+        labelColor: activeColor,
+        labelBackground: false,
+        labelAutoRotate: false,
+      },
+      stateStyles: { inactive: { opacity: 0.25 } },
+    },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-edge'],
   });
   const ui = createDemoPanel(container);
+  const canvas = graph.getCanvas();
+  const preview = document.createElement('div');
+  preview.dataset.edgeDragPreview = '';
+  preview.setAttribute('aria-hidden', 'true');
+  preview.hidden = true;
+  preview.style.cssText = `position:absolute;pointer-events:none;z-index:1;height:0;border-top:2px dashed ${activeColor};transform-origin:left center;`;
+  canvas.parentElement!.append(preview);
 
-  graph.on('edge:dragstart', (payload: { edgeId?: string; dragEnd: string }) => {
+  const drawPreview = ({ source, target, dragEnd, event }: GraphEventMap['edge:drag'][0]) => {
+    const stationary = graph.getNodePosition(dragEnd === 'source' ? target : source);
+    if (!stationary) return;
+    const { x, y } = graph.graphToScreen(stationary.x, stationary.y);
+    const dx = event.clientX - x;
+    const dy = event.clientY - y;
+    const length = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx);
+    const radius = graph.graphToScreen(stationary.x + nodeSize / 2, stationary.y).x - x;
+    const bounds = canvas.getBoundingClientRect();
+    preview.style.left = `${x + radius * Math.cos(angle) - bounds.left}px`;
+    preview.style.top = `${y + radius * Math.sin(angle) - bounds.top}px`;
+    preview.style.width = `${Math.max(0, length - radius)}px`;
+    preview.style.transform = `rotate(${angle}rad)`;
+    preview.hidden = false;
+  };
+  graph.on('edge:pointerenter', () => {
+    if (preview.hidden) canvas.style.cursor = 'grab';
+  });
+  graph.on('edge:pointerleave', () => {
+    if (preview.hidden) canvas.style.cursor = '';
+  });
+  graph.on('edge:dragstart', (payload) => {
+    canvas.style.cursor = 'grabbing';
+    if (payload.edgeId) graph.setItemState(payload.edgeId, 'inactive', true);
+    drawPreview(payload);
     ui.setStatus(`dragstart ${payload.edgeId ?? '-'} (${payload.dragEnd})`);
+  });
+  graph.on('edge:drag', drawPreview);
+  graph.on('edge:dragend', ({ edgeId }) => {
+    preview.hidden = true;
+    canvas.style.cursor = '';
+    if (edgeId) graph.setItemState(edgeId, 'inactive', false);
   });
   // #region reconnect
   graph.on('edge:dragend', ({ edgeId, source, target, reconnected }) => {
@@ -7030,6 +6527,7 @@ export async function run(container: string | HTMLElement) {
 
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
+    preview.remove();
     ui.destroy();
     destroy();
   };
@@ -7075,7 +6573,7 @@ import { Graph } from '@antv/g6-lite';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFit: true,
+    autoFit: { padding: 48 },
     container,
     data: {
       nodes: [
@@ -7124,7 +6622,6 @@ export async function run(container: string | HTMLElement) {
   });
   try {
     await graph.render();
-    graph.fitView({ padding: 48, maxZoom: 1 });
     return graph;
   } catch (error) {
     graph.destroy();
@@ -7165,7 +6662,7 @@ import { Graph } from '@antv/g6-lite';
 
 export async function runGraph(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFit: true,
+    autoFit: { padding: 32 },
     container,
     data: {
       nodes: [
@@ -7212,6 +6709,7 @@ export async function runGraph(container: string | HTMLElement) {
 export async function run(container: string | HTMLElement) {
   const graph = await runGraph(container);
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => graph.destroy(),
@@ -7280,6 +6778,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy: () => graph.destroy(),
@@ -7398,6 +6897,7 @@ export async function run(container: string | HTMLElement) {
 
   ui.setStatus('move near a thin edge');
   return {
+    getGraphs: () => graphs,
     getData: () => ({ views: graphs.map((graph) => graph.getData()) }),
     fitView: () => graphs.forEach((graph) => graph.fitView()),
     destroy: () => {
@@ -7479,6 +6979,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy: () => graph.destroy(),
@@ -7581,6 +7082,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy: () => graph.destroy(),
@@ -7694,6 +7196,7 @@ export async function run(container: string | HTMLElement) {
   graphs.push(g2);
 
   return {
+    getGraphs: () => graphs,
     getData: () => ({ views: graphs.map((graph) => graph.getData()) }),
     fitView: () => graphs.forEach((graph) => graph.fitView()),
     destroy: () => {
@@ -7778,6 +7281,7 @@ export async function run(container: string | HTMLElement) {
   ui.setStatus(lines[0]);
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
@@ -8248,6 +7752,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => { cleanupLabels(); graph.destroy(); },
@@ -8388,6 +7893,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy: () => { cleanupNodeLabels(); cleanupEdgeLabels(); graph.destroy(); },
@@ -8504,6 +8010,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy: () => graph.destroy(),
@@ -8697,6 +8204,7 @@ export async function run(container: string | HTMLElement) {
   let generation = 0;
   let disposed = false;
   let currentMode = 'styled';
+  const fit = { padding: [64, 28, 64, 28] as [number, number, number, number] };
 
   async function renderMode(mode: string) {
     const token = ++generation;
@@ -8713,7 +8221,7 @@ export async function run(container: string | HTMLElement) {
     const cfg = mode === 'styled' ? configStyled() : configMinimal();
 
     const graph = new Graph({
-      autoFit: true,
+      autoFit: fit,
       container: wrapper,
       data: JSON.parse(JSON.stringify(data)),
       node: cfg.node as any,
@@ -8754,8 +8262,9 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => currentGraph ? [currentGraph] : [],
     getData: () => currentGraph?.getData(),
-    fitView: () => currentGraph?.fitView(),
+    fitView: () => currentGraph?.fitView(fit),
     destroy: () => {
       disposed = true;
       generation++;
@@ -8792,7 +8301,7 @@ export async function run(container: string | HTMLElement) {
 
 ## 如何体验
 
-初始为全部标签、zoom 0.4。选择默认策略和 zoom 0.2，文字隐藏；同一缩放切回全部标签，文字重新出现。刷新恢复初始设置。
+首屏适应画布并自动避让标签。点 zoom 0.2 可观察默认策略隐藏文字，再切换「全部标签」查看关闭隐藏与避让的效果。
 
 ## 数据说明
 
@@ -8802,52 +8311,53 @@ export async function run(container: string | HTMLElement) {
 
 ```ts
 // Local presentation helpers in this repository are used only for the example controls.
-import { Graph } from '@antv/g6-lite';
+import { Graph, type FitViewOptions } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
-const NODES = Array.from({ length: 18 }, (_, index) => ({
+const COLUMNS = 4;
+const NODES = Array.from({ length: 12 }, (_, index) => ({
   id: `service-${index + 1}`,
-  x: (index % 6) * 160,
-  y: Math.floor(index / 6) * 180,
+  x: (index % COLUMNS) * 160,
+  y: Math.floor(index / COLUMNS) * 110,
   data: {
-    label: `Service ${String(index + 1).padStart(2, '0')}`,
-    fill: ['#5B8FF9', '#5AD8A6', '#F6BD16'][Math.floor(index / 6)],
+    label: `S${String(index + 1).padStart(2, '0')}`,
+    fill: ['#5B8FF9', '#5AD8A6', '#F6BD16'][Math.floor(index / COLUMNS)],
   },
 }));
 
-const EDGES = NODES.slice(1).map((node, index) => ({
+const ROUTE = [0, 1, 2, 3, 7, 6, 5, 4, 8, 9, 10, 11];
+const EDGES = ROUTE.slice(1).map((nodeIndex, index) => ({
   id: `route-${index + 1}`,
-  source: NODES[index].id,
-  target: node.id,
-  data: { label: `route ${index + 1}` },
+  source: NODES[ROUTE[index]].id,
+  target: NODES[nodeIndex].id,
+  data: { label: `R${String(index + 1).padStart(2, '0')}` },
 }));
 
-export async function run(container: string | HTMLElement) {
+export async function run(
+  container: string | HTMLElement,
+  fitPreview?: (graph: Graph, options: FitViewOptions) => void,
+) {
   const root =
     typeof container === 'string' ? (document.querySelector(container)! as HTMLElement) : container;
-  // Reserve left room for the bottom-left status block. Scale the reservation
-  // with the container so narrow hosts (e.g. the docs site preview) are not
-  // squeezed against the right edge while wide canvases keep the full gap.
-  const leftReserve = Math.round(Math.min(360, Math.max(160, root.clientWidth * 0.28)));
-  const viewPadding: [number, number, number, number] = [90, 70, 70, leftReserve];
+  const compact = root.clientWidth < 500;
   const graph = new Graph({
-    autoFit: { padding: viewPadding, maxZoom: 0.4 },
+    autoFit: { padding: 40 },
     container: root,
     data: { nodes: NODES, edges: EDGES },
     label: {
-      scaleWithZoom: false,
-      hideOnLowZoom: false,
-      hideOnCollision: false,
+      scaleWithZoom: true,
+      hideOnLowZoom: true,
+      hideOnCollision: true,
     },
     node: {
       style: {
-        size: 30,
+        size: 34,
         fill: (node) => String(node.data?.fill ?? '#5B8FF9'),
         stroke: '#fff',
         strokeWidth: 2,
         label: (node) => String(node.data?.label ?? node.id),
         labelPlacement: 'bottom',
-        labelFontSize: 12,
+        labelFontSize: 15,
         labelColor: '#1e293b',
         labelBackground: 'rgba(255,255,255,0.9)',
         labelBackgroundPadding: 3,
@@ -8858,7 +8368,7 @@ export async function run(container: string | HTMLElement) {
         stroke: '#94a3b8',
         endArrow: true,
         label: (_source, _target, edge) => String(edge.data?.label ?? edge.id ?? ''),
-        labelFontSize: 10,
+        labelFontSize: 13,
         labelColor: '#475569',
         labelBackground: 'rgba(255,255,255,0.88)',
         labelBackgroundPadding: 2,
@@ -8870,21 +8380,32 @@ export async function run(container: string | HTMLElement) {
 
   const ui = createDemoPanel(root);
 
-  let allLabels = true;
-  let zoom = 0.4;
+  let allLabels = false;
+  let zoomPreset: number | undefined;
+  let wheelFrame = 0;
 
   const updateStatus = () => {
     ui.setStatus(
-      `${allLabels ? '全部标签：三项策略关闭' : '默认策略：三项策略开启'}\n` +
-        `zoom=${zoom.toFixed(1)}\n` +
-        `${allLabels ? '固定字号 · 不做低 zoom 隐藏 · 不做碰撞隐藏' : '字号随 zoom · 节点<0.3/边<0.5 隐藏 · 碰撞隐藏'}`,
+      `${allLabels ? '全部标签' : '默认策略'} · zoom=${graph.getZoom().toFixed(2)}` +
+        (allLabels && graph.getZoom() < 0.5 ? '\n低缩放时文字可能重叠' : ''),
     );
   };
 
-  const setZoom = (nextZoom: number) => {
-    zoom = nextZoom;
-    graph.fitView({ padding: viewPadding, minZoom: zoom, maxZoom: zoom });
+  const fit = () => {
+    const options: FitViewOptions = zoomPreset === undefined
+      ? {}
+      : { maxZoom: zoomPreset };
+    if (fitPreview) {
+      fitPreview(graph, options);
+    } else {
+      graph.fitView({ padding: [ui.gui.domElement.offsetHeight + 20, 36, 84, 36], ...options });
+    }
     updateStatus();
+  };
+
+  const setZoom = (nextZoom?: number) => {
+    zoomPreset = nextZoom;
+    fit();
   };
 
   const setLabelPolicy = (showAll: boolean) => {
@@ -8903,14 +8424,28 @@ export async function run(container: string | HTMLElement) {
   ui.addAction('默认策略', () => setLabelPolicy(false));
   ui.addAction('zoom 0.2', () => setZoom(0.2));
   ui.addAction('zoom 0.4', () => setZoom(0.4));
-  ui.addAction('zoom 1.0', () => setZoom(1));
+  ui.addAction('适应画布', () => setZoom());
 
-  setZoom(zoom);
+  if (compact) ui.gui.close();
+  fit();
+  const observer = new ResizeObserver(fit);
+  observer.observe(ui.gui.domElement);
+  graph.on('resize', fit);
+  const canvas = graph.getCanvas();
+  const onWheel = () => {
+    cancelAnimationFrame(wheelFrame);
+    wheelFrame = requestAnimationFrame(updateStatus);
+  };
+  canvas.addEventListener('wheel', onWheel, { passive: true });
 
   return {
     getData: () => graph.getData(),
-    fitView: () => setZoom(zoom),
+    fitView: () => setZoom(),
     destroy() {
+      observer.disconnect();
+      graph.off('resize', fit);
+      canvas.removeEventListener('wheel', onWheel);
+      cancelAnimationFrame(wheelFrame);
       graph.destroy();
       ui.destroy();
     },
@@ -9045,6 +8580,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
@@ -9298,6 +8834,7 @@ export async function run(container: string | HTMLElement) {
 
   ui.setStatus('Radial complete');
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
@@ -9376,6 +8913,7 @@ export async function run(container: string | HTMLElement) {
   ui.setStatus(`force · worker requested · ${Math.round(performance.now() - started)} ms\nWorker success requires a Network/Performance check; failure may fall back.`);
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
@@ -9475,6 +9013,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => currentGraph ? [currentGraph] : [],
     getData: () => currentGraph?.getData(),
     fitView: () => currentGraph?.fitView({ padding: 64 }),
     destroy: () => {
@@ -9693,6 +9232,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => { cleanupLabels(); graph.destroy(); },
@@ -9866,6 +9406,7 @@ export async function run(container: string | HTMLElement) {
   graphs.push(g2);
 
   return {
+    getGraphs: () => graphs,
     getData: () => ({ views: graphs.map((graph) => graph.getData()) }),
     fitView: () => graphs.forEach((graph) => graph.fitView()),
     destroy: () => {
@@ -9896,7 +9437,7 @@ export async function run(container: string | HTMLElement) {
 
 ## 数据说明
 
-cluster=a 映射蓝色、cluster=b 映射绿色；id=0 的节点尺寸为 16，其他节点为 12。
+cluster=a 映射蓝色，cluster=b 映射绿色。主节点 A 的 role 为 lead，尺寸为 36，其他节点为 24。
 
 ## 完整运行代码
 
@@ -9912,11 +9453,11 @@ export async function run(container: string | HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: '0', name: 'A', data: { cluster: 'a' } },
-        { id: '1', name: 'B', data: { cluster: 'b' } },
-        { id: '2', name: 'C', data: { cluster: 'a' } },
-        { id: '3', name: 'D', data: { cluster: 'b' } },
-        { id: '4', name: 'E', data: { cluster: 'a' } },
+        { id: '0', name: 'A', x: 0, y: 96, data: { cluster: 'a', role: 'lead' } },
+        { id: '1', name: 'B', x: 124, y: 26, data: { cluster: 'b' } },
+        { id: '2', name: 'C', x: 190, y: 160, data: { cluster: 'a' } },
+        { id: '3', name: 'D', x: 254, y: 26, data: { cluster: 'b' } },
+        { id: '4', name: 'E', x: 380, y: 96, data: { cluster: 'a' } },
       ],
       edges: [
         { source: '0', target: '1' },
@@ -9930,11 +9471,14 @@ export async function run(container: string | HTMLElement) {
       type: 'circle',
       style: {
         fill: (d) => (d.data?.cluster === 'a' ? '#5B8FF9' : '#61DDAA'),
-        size: (d) => (d.id === '0' ? 16 : 12),
+        size: (d) => (d.data?.role === 'lead' ? 36 : 24),
+        label: (d) => d.name ?? d.id,
+        labelPlacement: 'bottom',
+        labelFontSize: 13,
       },
     },
-    edge: { type: 'line', style: { lineWidth: 2 } },
-    layout: { type: 'circular', radius: 150 },
+    label: { scaleWithZoom: false },
+    edge: { type: 'line', style: { lineWidth: 3, stroke: '#8b9ec2' } },
     behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
     theme: 'light',
   });
@@ -10053,6 +9597,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => { cleanupLabels(); graph.destroy(); },
@@ -10168,6 +9713,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => graph.destroy(),
@@ -10380,6 +9926,7 @@ export async function run(container: string | HTMLElement) {
 
   showStateSummary('ready');
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
@@ -10539,6 +10086,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(fitOptions),
     destroy: () => graph.destroy(),
@@ -10665,6 +10213,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(fitOptions),
     destroy: () => { cleanupNodeLabels(); cleanupEdgeLabels(); graph.destroy(); },
@@ -10768,6 +10317,7 @@ export async function run(container: string | HTMLElement) {
   });
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
@@ -10847,6 +10397,7 @@ export async function run(container: string | HTMLElement) {
   render('ready');
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {
@@ -10887,7 +10438,7 @@ export async function run(container: string | HTMLElement) {
  * Demo: setData + layout() 端到端验证
  * 测试运行时整体数据替换和布局切换
  */
-import { Graph } from '@antv/g6-lite';
+import { Graph, type FitViewOptions } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
 const DATA_A = {
@@ -10935,8 +10486,11 @@ export async function run(container: string | HTMLElement) {
 
   el.style.position = 'relative';
 
+  const fit: FitViewOptions = {
+    padding: [72, 28, 60, 28],
+  };
   const graph = new Graph({
-    autoFit: true,
+    autoFit: fit,
     container: el,
     data: DATA_A,
     layout: { type: 'circular', radius: 120 },
@@ -10963,8 +10517,7 @@ export async function run(container: string | HTMLElement) {
   ui.addChoice('数据', { 'A · 5 节点': 'a', 'B · 8 节点': 'b' }, 'a', async (value) => {
     const next = value === 'b' ? DATA_B : DATA_A;
     log(`setData → DATA_${value.toUpperCase()}`);
-    await graph.setData(next);
-    graph.fitView();
+    await graph.setData(next, { fitView: fit });
     log(`done. nodeCount=${graph.getNodeCount()}`);
   });
 
@@ -10974,7 +10527,7 @@ export async function run(container: string | HTMLElement) {
     else if (value === 'force') graph.setLayout({ type: 'd3-force' });
     else graph.setLayout({ type: 'circular', radius: 150 });
     await graph.layout();
-    graph.fitView();
+    graph.fitView(fit);
     log(`${value} done`);
   });
 
@@ -10993,7 +10546,10 @@ export async function run(container: string | HTMLElement) {
     graph.focusItem(id);
   });
 
+  if (el.clientWidth < 480) ui.gui.close();
+
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {
@@ -11131,6 +10687,7 @@ export async function run(container: string | HTMLElement) {
   await graph2.render();
 
   return {
+    getGraphs: () => [graph1, graph2],
     getData: () => ({ views: [graph1.getData(), graph2.getData()] }),
     fitView() {
       graph1.fitView();
@@ -11186,11 +10743,11 @@ export async function run(container: string | HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: 'alice', data: { label: 'Alice', role: '产品经理' } },
-        { id: 'bob', data: { label: 'Bob', role: '前端工程师' } },
-        { id: 'carol', data: { label: 'Carol', role: '后端工程师' } },
-        { id: 'dave', data: { label: 'Dave', role: '设计师' } },
-        { id: 'erin', data: { label: 'Erin', role: '测试' } },
+        { id: 'alice', x: 110, y: 76, data: { label: 'Alice', role: '产品经理' } },
+        { id: 'bob', x: 290, y: 76, data: { label: 'Bob', role: '前端工程师' } },
+        { id: 'carol', x: 200, y: 157, data: { label: 'Carol', role: '后端工程师' } },
+        { id: 'dave', x: 0, y: 125, data: { label: 'Dave', role: '设计师' } },
+        { id: 'erin', x: 400, y: 125, data: { label: 'Erin', role: '测试' } },
       ],
       edges: [
         { source: 'alice', target: 'bob', data: { rel: '协作' } },
@@ -11202,10 +10759,10 @@ export async function run(container: string | HTMLElement) {
     },
     node: {
       type: 'circle',
-      style: { fill: '#5B8FF9', size: 18, label: (node) => String(node.data?.label ?? node.id) },
+      style: { fill: '#5B8FF9', size: 26, label: (node) => String(node.data?.label ?? node.id) },
     },
-    edge: { type: 'line', style: { stroke: '#C0C0C0', lineWidth: 2 } },
-    layout: { type: 'force', maxIteration: 300 },
+    label: { scaleWithZoom: false },
+    edge: { type: 'line', style: { stroke: '#8b9ec2', lineWidth: 3, hitAreaWidth: 14 } },
     behaviors: [
       'zoom-canvas',
       'drag-canvas',
@@ -11230,6 +10787,7 @@ export async function run(container: string | HTMLElement) {
 
   await graph.render();
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => graph.destroy(),
@@ -11263,12 +10821,20 @@ export async function run(container: string | HTMLElement) {
 
 ```ts
 // Local presentation helpers in this repository are used only for the example controls.
-import { Graph } from '@antv/g6-lite';
+import { Graph, type FitViewOptions } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: string | HTMLElement) {
+  const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
+  const getFitOptions = (): FitViewOptions => {
+    const panel = host.querySelector<HTMLElement>('.g6lite-demo-controls');
+    return {
+      padding: [32, panel && panel.offsetHeight > 60 ? panel.offsetWidth + 26 : 28, 78, 28],
+      maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1),
+    };
+  };
   const graph = new Graph({
-    autoFit: true,
+    autoFit: getFitOptions(),
     container,
     data: {
       nodes: [
@@ -11287,9 +10853,9 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas'],
   });
   await graph.render();
-  graph.fitView({ padding: 80 });
 
   const ui = createDemoPanel(container);
+  const fit = () => graph.fitView(getFitOptions());
 
   const showCamera = (prefix: string) => {
     const camera = graph.getCamera();
@@ -11304,7 +10870,7 @@ export async function run(container: string | HTMLElement) {
   };
   addCameraAction('zoomBy +', 'zoom-in', () => graph.zoomBy(1.25));
   addCameraAction('zoomBy −', 'zoom-out', () => graph.zoomBy(0.8));
-  addCameraAction('fitView', 'fit', () => graph.fitView({ padding: 64 }));
+  addCameraAction('fitView', 'fit', fit);
   addCameraAction('fitCenter', 'center', () => graph.fitCenter());
   addCameraAction('focus C', 'focus', () => graph.focusItem('c'));
   addCameraAction('setCamera', 'camera', () => graph.setCamera({ zoom: 1.1, x: 80, y: 40 }));
@@ -11317,11 +10883,18 @@ export async function run(container: string | HTMLElement) {
     ui.setStatus(`graph=(${position.x.toFixed(1)}, ${position.y.toFixed(1)})\nscreen=(${screen.x.toFixed(1)}, ${screen.y.toFixed(1)})\nrestored=(${restored.x.toFixed(1)}, ${restored.y.toFixed(1)})`);
   });
 
+  if (host.clientWidth < 500) ui.gui.close();
+  fit();
+  graph.on('resize', fit);
   showCamera('ready');
   return {
     getData: () => graph.getData(),
-    fitView: () => graph.fitView({ padding: 64 }),
+    fitView() {
+      fit();
+      showCamera('fit');
+    },
     destroy: () => {
+      graph.off('resize', fit);
       graph.destroy();
       ui.destroy();
     },
@@ -11349,7 +10922,7 @@ export async function run(container: string | HTMLElement) {
 
 ## 数据说明
 
-滚轮缩放被限制在 0.4 到 2 之间。
+此预览以适应画布后的最大显示比例为 2 倍，滚轮可在 0.4 到 2 倍之间缩放。
 
 ## 完整运行代码
 
@@ -11358,8 +10931,25 @@ export async function run(container: string | HTMLElement) {
 /**
  * Demo: constrain wheel zoom with sensitivity, minZoom, and maxZoom.
  */
-import { Graph, type BuiltInBehaviorConfig } from '@antv/g6-lite';
+import { Graph, type BuiltInBehaviorConfig, type FitViewOptions } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+
+const NODE_SIZE = 11;
+const SPAN_X = 108;
+const SPAN_Y = 44;
+
+export function getFitOptions(container?: HTMLElement): FitViewOptions {
+  const controls = container?.querySelector<HTMLElement>('.g6lite-demo-controls');
+  const top = Math.max(48, (controls?.offsetHeight ?? 0) + 26);
+  const below: FitViewOptions = { padding: [top, 32, 64, 32] };
+  if (!container || !controls) return below;
+
+  const right = controls.offsetWidth + 26;
+  const { clientWidth: width, clientHeight: height } = container;
+  const scaleBelow = Math.min((width - 64) / (SPAN_X + NODE_SIZE), (height - top - 64) / (SPAN_Y + NODE_SIZE));
+  const scaleBeside = Math.min((width - right - 32) / (SPAN_X + NODE_SIZE), (height - 112) / (SPAN_Y + NODE_SIZE));
+  return scaleBeside > scaleBelow ? { padding: [48, right, 64, 32] } : below;
+}
 
 export async function run(container: string | HTMLElement) {
   // #region navigation
@@ -11370,14 +10960,14 @@ export async function run(container: string | HTMLElement) {
   // #endregion navigation
   const [{ minZoom, maxZoom }] = behaviors;
   const graph = new Graph({
-    autoFit: true,
+    autoFit: false,
     container,
     data: {
       nodes: [
-        { id: 'a', x: 180, y: 180 },
-        { id: 'b', x: 340, y: 120 },
-        { id: 'c', x: 340, y: 250 },
-        { id: 'd', x: 500, y: 180 },
+        { id: 'a', x: 0, y: 22 },
+        { id: 'b', x: 54, y: 0 },
+        { id: 'c', x: 54, y: SPAN_Y },
+        { id: 'd', x: SPAN_X, y: 22 },
       ],
       edges: [
         { source: 'a', target: 'b' },
@@ -11386,12 +10976,16 @@ export async function run(container: string | HTMLElement) {
         { source: 'c', target: 'd' },
       ],
     },
-    node: { style: { size: 28, fill: '#5B8FF9' } },
+    node: { style: { size: NODE_SIZE, fill: '#5B8FF9', label: (node) => node.id.toUpperCase(), labelPlacement: 'center', labelColor: '#fff' } },
+    label: { scaleWithZoom: false },
+    edge: { style: { lineWidth: 3, stroke: '#8b9ec2' } },
     behaviors,
   });
   const ui = createDemoPanel(container);
+  let referenceZoom = 1;
+  const getScale = () => graph.getZoom() / referenceZoom;
   const report = () => {
-    ui.setStatus(`Zoom ${graph.getZoom().toFixed(2)}× · ${minZoom}–${maxZoom}×`);
+    ui.setStatus(`Zoom ${getScale().toFixed(2)}× · ${minZoom}–${maxZoom}×`);
   };
   const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
   let reportFrame: number | undefined;
@@ -11402,11 +10996,28 @@ export async function run(container: string | HTMLElement) {
   host.addEventListener('wheel', onWheel, { passive: true });
 
   const fitView = graph.fitView.bind(graph);
-  graph.fitView = (options) => { fitView(options); report(); };
-  const zoomTo = graph.zoomTo.bind(graph);
-  graph.zoomTo = (zoom, options) => { zoomTo(zoom, options); report(); };
+  const fitAtScale = (options: number | FitViewOptions, scale: number) => {
+    // Base the demo's 2× preset on the fitted camera. On larger displays,
+    // cap the reference so these four nodes stay comfortably sized.
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const maxCssPixelsPerGraphUnit = 6;
+    fitView(typeof options === 'number' ? options : { ...options, maxZoom: maxCssPixelsPerGraphUnit * dpr });
+    referenceZoom = graph.getZoom() / maxZoom;
+    const zoomLimits = { minZoom: minZoom * referenceZoom, maxZoom: maxZoom * referenceZoom };
+    graph.updateOptions({
+      behaviors: [
+        { ...behaviors[0], ...zoomLimits },
+        behaviors[1],
+      ],
+    });
+    if (scale < maxZoom) graph.zoomTo(scale * referenceZoom, zoomLimits);
+    report();
+  };
+  const fitCurrentScale = () => fitAtScale(getFitOptions(host), getScale());
+  const panelObserver = new ResizeObserver(fitCurrentScale);
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
+    panelObserver.disconnect();
     host.removeEventListener('wheel', onWheel);
     if (reportFrame !== undefined) cancelAnimationFrame(reportFrame);
     ui.destroy();
@@ -11414,10 +11025,15 @@ export async function run(container: string | HTMLElement) {
   };
   try {
     await graph.render();
-    ui.addAction(`${minZoom}×`, () => graph.zoomTo(minZoom));
-    ui.addAction('1×', () => graph.zoomTo(1));
-    ui.addAction(`${maxZoom}×`, () => graph.zoomTo(maxZoom));
-    report();
+    const setScale = (scale: number) => fitAtScale(getFitOptions(host), scale);
+    ui.addAction(`${minZoom}×`, () => setScale(minZoom));
+    ui.addAction('1×', () => setScale(1));
+    ui.addAction(`${maxZoom}×`, () => setScale(maxZoom));
+    if (host.clientWidth < 500) ui.gui.close();
+    setScale(1.8);
+    graph.fitView = (options = getFitOptions(host)) => fitAtScale(options, maxZoom);
+    graph.on('resize', fitCurrentScale);
+    panelObserver.observe(ui.gui.domElement);
     return graph;
   } catch (error) {
     graph.destroy();
@@ -11432,70 +11048,605 @@ export async function run(container: string | HTMLElement) {
 - [视口指南](/docs/guides/viewport)
 - [视口方法](/docs/api/graph#graph-viewport)
 
-# 性能对比 (/docs/metrics/performance)
+# 快速上手 (/docs/getting-started/quick-start)
 
 
 
-本页比较 G6Lite、G6、Sigma.js 和 ECharts 的 Graph 系列。首绘使用同一份预置坐标数据，包体积使用同一种构建方式。测试于 2026-11-13 完成，G6Lite 使用本地打包的 `0.1.0`。
 
-<span id="常用图库选型对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-<span id="当前公开口径" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+选择一种接入方式。两种方式都用 6 个节点和 7 条边创建同一张团队协作图。
 
-## 首绘耗时 [#render-time]
+* [包管理器](#包管理器)适合使用 Vite、Webpack 等构建工具的项目。安装后从 `@antv/g6-lite` 导入 `Graph`。
+* [CDN](#cdn)适合直接在 HTML 中使用。通过 `<script type="module">` 导入 `Graph`。
 
-表中是从创建图到渲染 API 完成后再经过两帧的中位耗时，单位为毫秒。本轮使用无头 Chromium，WebGL 由 SwiftShader 软件渲染。
+## 包管理器 [#包管理器]
 
-| npm 包                               | 渲染器       | 1,000 节点 / 3,000 边（ms） | 5,000 节点 / 15,000 边（ms） |
-| ----------------------------------- | --------- | ---------------------: | ----------------------: |
-| `@antv/g6-lite@0.1.0`               | WebGL     |                  134.1 |                   146.1 |
-| `@antv/g6@5.1.1`                    | Canvas 2D |                  297.4 |                 1,502.2 |
-| `sigma@4.0.4` + `graphology@0.26.0` | WebGL 2   |                  466.1 |                   748.4 |
-| `echarts@6.1.0`                     | Canvas 2D |                   56.6 |                   236.3 |
+### 安装 [#安装]
 
-<span id="环境要求" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+在使用 Vite、Webpack 等构建工具的项目中，选择一种包管理器安装：
 
-<span id="如何进行数值对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+<div className="quick-start-install">
+  ```bash
+  # npm
+  npm install @antv/g6-lite@0.1.0
+  ```
 
-### 测试条件 [#benchmark-method]
+  ```bash
+  # pnpm
+  pnpm add @antv/g6-lite@0.1.0
+  ```
 
-* Apple M3 Pro，macOS（Darwin 25.2.0），无头 Chromium 151.0.7922.34。画布 900 × 600 CSS 像素，DPR 1。WebGL 渲染器为 `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`。
-* 数据使用相同节点、边和固定坐标，绘制圆形节点与直线边，关闭标签和动画，不运行布局。每个规模下，每个库预热 3 次后交错测量 20 次，测完销毁实例。
-* 库在计时前已加载。计时包含图实例和内部模型的创建、首次渲染与两次帧回调。Sigma.js 包含 Graphology 建图。该指标反映本场景的首绘等待，GPU 执行时间、布局和交互需分别测量。 [下载原始样本](/benchmarks/graph-performance.json)
+  ```bash
+  # Yarn
+  yarn add @antv/g6-lite@0.1.0
+  ```
+</div>
 
-本轮结果只适用于上述测试环境，不代表最低浏览器版本认证。各浏览器的能力版本参考与尚未覆盖的验收范围见[最低浏览器版本](/docs/compatibility/browser#最低浏览器版本)。
+### 创建关系图 [#创建关系图]
 
-## 浏览器包体积 [#bundle-size]
+安装后，在页面中添加一个有明确宽高的容器：
 
-使用 esbuild 0.21.5 将各库的 npm 入口和依赖打包为单个浏览器脚本，并进行代码压缩。G6Lite 测量默认入口，可选布局按需引入。ECharts 只引入 GraphChart 和 CanvasRenderer，Sigma.js 包含 Graphology。体积以 KiB 计，不含 source map。
+```html
+<div id="container" style="width: 100%; height: 360px"></div>
+```
 
-| npm 包                               | 代码压缩后（KiB） | gzip -9（KiB） |
-| ----------------------------------- | ---------: | -----------: |
-| `@antv/g6-lite@0.1.0`               |      511.3 |        159.5 |
-| `@antv/g6@5.1.1`                    |    1,435.3 |        413.4 |
-| `sigma@4.0.4` + `graphology@0.26.0` |      438.4 |        110.7 |
-| `echarts@6.1.0`                     |      386.3 |        130.2 |
+然后在 JavaScript 或 TypeScript 入口中创建关系图。容器需要先挂载到页面，`await` 应在 ES 模块或 `async` 函数中使用。
 
-### G6Lite CDN 文件体积 [#umd-size]
+```ts
+import { Graph } from '@antv/g6-lite';
 
-CDN 文件使用 `gzip -9` 分别测量，1 kB = 1,000 字节。首页展示默认脚本的体积。
+const data = {
+  nodes: [
+    { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
+    { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
+    { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
+    { id: 'David', data: { color: '#61DDAA', size: 40 } },
+    { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
+    { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
+  ],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+    { source: 'David', target: 'Eva' },
+    { source: 'David', target: 'Frank' },
+    { source: 'Alice', target: 'David' },
+    { source: 'Bob', target: 'Eva' },
+    { source: 'Carol', target: 'Frank' },
+  ],
+};
 
-| 发布文件                     | 内容                | gzip -9（kB） |
-| ------------------------ | ----------------- | ----------: |
-| `g6-lite.min.js`         | 默认脚本，包含渲染、交互和内置布局 |       150.2 |
-| `g6-lite-layouts.min.js` | 六种可选布局，使用时额外加载    |        29.1 |
+const graph = new Graph({
+  container: '#container',
+  data,
+  node: {
+    style: {
+      size: (node) => Number(node.data?.size ?? 26),
+      fill: (node) => String(node.data?.color ?? '#5B8FF9'),
+      stroke: '#fff',
+      strokeWidth: 2,
+      label: (node) => node.id,
+      labelPlacement: 'bottom',
+      labelColor: '#334155',
+    },
+  },
+  edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
+  layout: {
+    type: 'd3-force',
+    linkDistance: 100,
+    nodeStrength: -400,
+    collideRadius: 32,
+  },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+});
 
-需要使用可选布局时，加载附加脚本后注册对应的布局。 [可选布局用法](/docs/guides/layout-overview#optional-layouts)
+try {
+  await graph.render();
+  graph.fitView({ padding: 48 });
+} catch (error) {
+  graph.destroy();
+  throw error;
+}
+```
 
-## 业务图怎么测 [#performance-tuning]
+包中已包含 TypeScript 类型。
 
-用真实数据和目标设备分别记录布局、首绘和交互。首屏慢先拆开布局与绘制，再评估 Worker。更新卡顿时，复用图实例，通过增量 API 更新数据或状态。缩放掉帧时，逐项对比标签、装饰和视口尺寸。反复挂载后检查销毁与监听清理。 [Worker 布局](/docs/guides/layout-worker) · [数据写入](/docs/api/graph#graph-data-mutations) · [标签策略](/docs/api/options#options-label)
+移除容器或卸载组件前，调用 `graph.destroy()` 释放资源。
 
-**相关可运行示例**
+## CDN [#cdn]
 
-* [200 节点](/docs/examples/large)
-* [5000 节点与标签](/docs/examples/large-labeled)
-* [AI Papers 大规模关系图](/docs/examples/real-dataset)
+```js
+import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
+```
+
+### 创建关系图 [#创建关系图-1]
+
+将下面的 HTML 保存为 `index.html`，用浏览器打开。
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>G6Lite 团队协作关系图</title>
+  </head>
+  <body>
+    <div id="container" style="height: 360px"></div>
+    <script type="module">
+      import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
+
+      const data = {
+        nodes: [
+          { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
+          { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
+          { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
+          { id: 'David', data: { color: '#61DDAA', size: 40 } },
+          { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
+          { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
+        ],
+        edges: [
+          { source: 'Alice', target: 'Bob' },
+          { source: 'Alice', target: 'Carol' },
+          { source: 'David', target: 'Eva' },
+          { source: 'David', target: 'Frank' },
+          { source: 'Alice', target: 'David' },
+          { source: 'Bob', target: 'Eva' },
+          { source: 'Carol', target: 'Frank' },
+        ],
+      };
+
+      const graph = new Graph({
+        container: '#container',
+        data,
+        node: {
+          style: {
+            size: (node) => Number(node.data?.size ?? 26),
+            fill: (node) => String(node.data?.color ?? '#5B8FF9'),
+            stroke: '#fff',
+            strokeWidth: 2,
+            label: (node) => node.id,
+            labelPlacement: 'bottom',
+            labelColor: '#334155',
+          },
+        },
+        edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
+        layout: {
+          type: 'd3-force',
+          linkDistance: 100,
+          nodeStrength: -400,
+          collideRadius: 32,
+        },
+        behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+      });
+
+      graph.render().then(() => {
+        graph.fitView({ padding: 48 });
+      }).catch((error) => {
+        graph.destroy();
+        console.error(error);
+      });
+      window.addEventListener('pagehide', () => graph.destroy(), { once: true });
+    </script>
+  </body>
+</html>
+```
+
+单页示例在 `pagehide` 时销毁图实例。浏览器从往返缓存恢复页面时，需要重新创建实例。
+
+<span id="验证效果与清理" style="{ scrollMarginTop: '8rem' }" />
+
+## 运行效果 [#运行效果]
+
+两种接入方式都会生成下方的团队协作图，包含 6 个带标签的节点和 7 条边。拖动空白处可平移画布。
+
+<QuickStartExample locale="zh" variant="network" />
+
+图没有显示时，检查容器宽高、浏览器 WebGL 和控制台错误。
+
+## 在前端框架中使用 [#在前端框架中使用]
+
+在 React / Vue 中，通过 ref 获取真实 DOM，在客户端挂载后创建实例，并在组件卸载时调用 `graph.destroy()` 释放资源。
+
+<Cards>
+  <Card title="在 React 中使用" href="/docs/getting-started/react#在-react-中使用">
+    在 effect 中挂载关系图，更新数据，并处理组件卸载。
+  </Card>
+
+  <Card title="在 Vue 中使用" href="/docs/getting-started/vue">
+    通过模板 ref 和生命周期钩子管理图实例。
+  </Card>
+</Cards>
+
+
+# React 接入 (/docs/getting-started/react)
+
+
+
+
+
+## 在 React 中使用 [#在-react-中使用]
+
+在页面中引入 `GraphView` 组件。
+
+```tsx
+import GraphView from './GraphView';
+
+export default function App() {
+  return <GraphView />;
+}
+```
+
+<span id="准备两组数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="react响应数据依赖变化" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### 定义 GraphView [#定义-graphview]
+
+将下面的代码保存为 `GraphView.tsx`。组件挂载后创建图，切换数据时调用 `setData()`，卸载时销毁实例。
+
+```tsx
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+
+const fitView = { padding: 32 };
+
+export default function GraphView() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const graphRef = useRef<Graph | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: basicData,
+      layout: { type: 'circular', radius: 120 },
+      node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
+      edge: { style: { endArrow: true } },
+      autoFit: fitView,
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+    });
+
+    graph.render().then(() => {
+      if (graph.destroyed) return;
+      graphRef.current = graph;
+      setReady(true);
+    }).catch((error) => {
+      if (!graph.destroyed) {
+        graph.destroy();
+        console.error(error);
+      }
+    });
+
+    return () => {
+      graphRef.current = null;
+      graph.destroy();
+    };
+  }, []);
+
+  async function changeData(data: GraphData) {
+    const graph = graphRef.current;
+    if (!graph) return;
+    try {
+      await graph.setData(data, { fitView });
+    } catch (error) {
+      if (!graph.destroyed) console.error(error);
+    }
+  }
+
+  return (
+    <div>
+      <select
+        aria-label="关系图数据"
+        defaultValue="basic"
+        disabled={!ready}
+        onChange={(event) => void changeData(event.target.value === 'expanded' ? expandedData : basicData)}
+      >
+        <option value="basic">基础关系</option>
+        <option value="expanded">扩展关系</option>
+      </select>
+      <div ref={containerRef} style={{ width: '100%', height: 360 }} />
+    </div>
+  );
+}
+```
+
+## 运行效果 [#数据变化时更新图]
+
+选择「扩展关系」会添加 David 节点和 Bob → David 连线。切回「基础关系」即可恢复。
+
+<QuickStartExample locale="zh" variant="framework-data" />
+
+<span id="在-vue-中使用" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="vue用-watch-同步数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+
+# Vue 接入 (/docs/getting-started/vue)
+
+
+
+
+
+## 在 Vue 中使用 [#在-vue-中使用]
+
+在页面中引入 `GraphView` 组件。
+
+```vue
+<script setup lang="ts">
+import GraphView from './GraphView.vue';
+</script>
+
+<template>
+  <GraphView />
+</template>
+```
+
+<span id="准备两组数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="vue用-watch-同步数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### 定义 GraphView [#定义-graphview]
+
+将下面的代码保存为 `GraphView.vue`。组件挂载后创建图，切换数据时调用 `setData()`，卸载时销毁实例。
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+
+const fitView = { padding: 32 };
+const containerRef = ref<HTMLDivElement | null>(null);
+const ready = ref(false);
+let graph: Graph | undefined;
+
+onMounted(async () => {
+  if (!containerRef.value) return;
+
+  const instance = new Graph({
+    container: containerRef.value,
+    data: basicData,
+    layout: { type: 'circular', radius: 120 },
+    node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
+    edge: { style: { endArrow: true } },
+    autoFit: fitView,
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+  graph = instance;
+
+  try {
+    await instance.render();
+    if (!instance.destroyed) ready.value = true;
+  } catch (error) {
+    if (!instance.destroyed) {
+      instance.destroy();
+      console.error(error);
+    }
+  }
+});
+
+onBeforeUnmount(() => graph?.destroy());
+
+async function changeData(event: Event) {
+  const instance = graph;
+  if (!ready.value || !instance || instance.destroyed) return;
+
+  const { value } = event.target as HTMLSelectElement;
+  const data = value === 'expanded' ? expandedData : basicData;
+  try {
+    await instance.setData(data, { fitView });
+  } catch (error) {
+    if (!instance.destroyed) console.error(error);
+  }
+}
+</script>
+
+<template>
+  <div>
+    <select aria-label="关系图数据" :disabled="!ready" @change="changeData">
+      <option value="basic">基础关系</option>
+      <option value="expanded">扩展关系</option>
+    </select>
+    <div ref="containerRef" style="width: 100%; height: 360px" />
+  </div>
+</template>
+```
+
+## 运行效果 [#数据变化时更新图]
+
+选择「扩展关系」会添加 David 节点和 Bob → David 连线。切回「基础关系」即可恢复。
+
+<QuickStartExample locale="zh" variant="framework-data" />
+
+
+# 图总览 (/docs/graph/overview)
+
+
+
+
+
+## 什么是 Graph [#什么是-graph]
+
+图由表示对象的节点和表示关系的边组成。G6Lite 的 `Graph` 实例把这些数据绘制到容器中，并提供查询元素、调整视口和监听交互的方法。
+
+一个图实例通常经历以下步骤。
+
+1. **创建。** 用 `new Graph(options)` 绑定容器并初始化渲染资源。
+2. **渲染。** 调用并等待 `graph.render()`，完成首次布局和绘制。
+3. **更新。** 复用同一个实例，用 `setData()` 更新图数据，用 `updateOptions()` 更新支持的配置。
+4. **销毁。** 页面离开或组件卸载时调用 `graph.destroy()`，释放画布和监听器等资源。
+
+<span id="使用图实例" />
+
+## 使用 G6Lite Graph [#使用-g6lite-graph]
+
+按[快速上手](/docs/getting-started/quick-start)安装 `@antv/g6-lite`。先在页面上准备一个已挂载、宽高非零的容器，再创建实例并渲染。
+
+```html
+<div id="container" style="width: 100%; height: 320px"></div>
+```
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [
+      { id: 'browser', x: 0, y: 0 },
+      { id: 'api', x: 120, y: 0 },
+    ],
+    edges: [{ source: 'browser', target: 'api' }],
+  },
+});
+
+await graph.render();
+```
+
+首次渲染完成后，就可以定位节点或更新数据。调用时序和资源清理见 [Graph 生命周期 API](/docs/api/graph#graph-lifecycle)。
+
+<span id="容器与配置" />
+
+## 图配置项 [#图配置项]
+
+`GraphOptions` 是传给构造函数的配置对象。完整类型和字段细节见 [GraphOptions API](/docs/api/options#graphoptions)。
+
+| 配置项          | 类型                                    | 默认值       | 用途                           |
+| ------------ | ------------------------------------- | --------- | ---------------------------- |
+| `container`  | `string \| HTMLElement`               | 必填        | 指定挂载容器。字符串使用 CSS 选择器。        |
+| `data`       | `GraphData`                           | 必填        | 提供节点、边和可选的 Combo 分组。         |
+| `autoFit`    | `boolean \| number \| FitViewOptions` | `false`   | 控制容器尺寸变化时是否重新适配视图。首次渲染会自动适配。 |
+| `node`       | `NodeConfig`                          | 圆形节点      | 配置节点形状、样式和状态。                |
+| `edge`       | `EdgeConfig`                          | 直线边       | 配置线型、箭头和状态。                  |
+| `combo`      | `ComboConfig`                         | 内置样式      | 配置分组外观、标签和折叠形态。              |
+| `label`      | `LabelOptions`                        | 内置策略      | 控制标签的缩放和可见性。                 |
+| `layout`     | `LayoutConfig`                        | 使用数据坐标    | 指定布局算法及参数，由布局计算节点位置。         |
+| `behaviors`  | `BehaviorOption[]`                    | 缩放、拖动画布   | 配置缩放、拖拽、选择等交互。               |
+| `theme`      | `ThemeOption`                         | `'light'` | 设置画布和元素的默认样式。                |
+| `transforms` | `TransformOption[]`                   | 无         | 按顺序处理布局前的输入数据。               |
+| `plugins`    | `PluginOption[]`                      | 无         | 挂载已注册的插件。                    |
+
+画布初始宽高由容器决定。适配方式和运行时尺寸调整见[视口与坐标](/docs/guides/viewport)。
+
+## 图属性 [#图属性]
+
+| 属性                                                             | 类型        | 说明                                      |
+| -------------------------------------------------------------- | --------- | --------------------------------------- |
+| [`graph.destroyed`](/docs/api/graph#graph-lifecycle-destroyed) | `boolean` | 只读。开始销毁后变为 `true`，可在异步数据返回后用它判断实例是否仍可用。 |
+
+需要等待首次渲染时，使用 `await graph.render()`。
+
+## 参考示例 [#参考示例]
+
+### 完整的创建和配置示例 [#完整的创建和配置示例]
+
+示例用 Dagre 将调用关系从左到右排列，将 Cache 和 Database 放进同一个 Combo。可以点击节点查看选中样式，也可以拖动或缩放画布。
+
+
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+export async function run(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'web', name: 'Browser' },
+        { id: 'api', name: 'API' },
+        { id: 'cache', name: 'Cache', comboId: 'storage' },
+        { id: 'db', name: 'Database', comboId: 'storage' },
+      ],
+      edges: [
+        { source: 'web', target: 'api', data: { protocol: 'HTTPS' } },
+        { source: 'api', target: 'cache', data: { protocol: 'GET' } },
+        { source: 'api', target: 'db', data: { protocol: 'SQL' } },
+      ],
+      combos: [{ id: 'storage' }],
+    },
+    // #region element-options
+    node: {
+      type: 'rect',
+      style: {
+        width: 96,
+        height: 38,
+        borderRadius: 8,
+        fill: '#eef2ff',
+        stroke: '#6366f1',
+        strokeWidth: 1,
+        label: (node) => node.name ?? node.id,
+        labelPlacement: 'center',
+        labelColor: '#1e293b',
+      },
+      stateStyles: { selected: { stroke: '#4338ca', strokeWidth: 3 } },
+    },
+    edge: {
+      style: {
+        stroke: '#64748b',
+        endArrow: true,
+        label: (_source, _target, edge) => String(edge.data?.protocol ?? ''),
+        labelColor: '#334155',
+        labelBackground: '#fff',
+        labelBackgroundPadding: 4,
+      },
+    },
+    combo: {
+      style: {
+        label: 'Storage',
+        labelPlacement: 'top',
+        labelColor: '#065f46',
+        padding: 20,
+        borderRadius: 12,
+        fill: 'rgba(16,185,129,0.08)',
+        stroke: '#6ee7b7',
+      },
+    },
+    // #endregion element-options
+    layout: { type: 'dagre', rankdir: 'LR', ranksep: 84, nodesep: 16, nodeSize: 96 },
+    label: { hideOnLowZoom: false, scaleWithZoom: false },
+    behaviors: ['click-select', 'drag-canvas', 'zoom-canvas'],
+    autoFit: { padding: 36 },
+  });
+  try {
+    await graph.render();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+```
+
+
 
 
 # 框选 (/docs/guides/behavior-brush-select)
@@ -11555,7 +11706,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#8050d2', lineWidth: 4 } },
     },
     behaviors,
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -11629,7 +11780,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#8050d2', lineWidth: 4 } },
     },
     behaviors,
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -11703,7 +11854,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#8050d2', lineWidth: 4 } },
     },
     behaviors,
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -11730,7 +11881,7 @@ export async function run(container: HTMLElement) {
 
 ## 配置方式 [#配置方式]
 
-从靠近端点的位置开始拖动。松开后，`edge:dragend` 返回重连建议，确认后调用 `updateEdgeData()` 写回。
+从边上靠近端点的位置开始拖动。示例用 `edge:drag` 绘制跟随指针的预览虚线。松开后，`edge:dragend` 返回重连建议，确认后调用 `updateEdgeData()` 写回。
 
 ## 示例 [#示例]
 
@@ -11748,12 +11899,14 @@ graph.on('edge:dragend', ({ edgeId, source, target, reconnected }) => {
 **完整运行代码**
 
 ```ts
-import { Graph } from '@antv/g6-lite';
+import { Graph, type GraphEventMap } from '@antv/g6-lite';
 import GUI from 'lil-gui';
 
 export async function run(container: string | HTMLElement) {
+  const nodeSize = 38;
+  const activeColor = '#5366ad';
   const graph = new Graph({
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
     container,
     data: {
       nodes: [
@@ -11767,14 +11920,67 @@ export async function run(container: string | HTMLElement) {
         { id: 'reference-edge', source: 'c', target: 'd' },
       ],
     },
-    node: { style: { size: 38, label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' } },
-    edge: { style: { lineWidth: 4, hitAreaWidth: 16, endArrow: true } },
+    node: { style: { size: nodeSize, label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' } },
+    label: { hideOnLowZoom: false },
+    edge: {
+      style: {
+        stroke: (_source, _target, edge) => edge.id === 'editable-edge' ? activeColor : '#94a3b8',
+        lineWidth: 4,
+        hitAreaWidth: 36,
+        endArrow: true,
+        label: (_source, _target, edge) => edge.id === 'editable-edge' ? '●' : false,
+        labelPlacement: 'end',
+        labelFontSize: 18,
+        labelColor: activeColor,
+        labelBackground: false,
+        labelAutoRotate: false,
+      },
+      stateStyles: { inactive: { opacity: 0.25 } },
+    },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-edge'],
   });
   const ui = createDemoPanel(container);
+  const canvas = graph.getCanvas();
+  const preview = document.createElement('div');
+  preview.dataset.edgeDragPreview = '';
+  preview.setAttribute('aria-hidden', 'true');
+  preview.hidden = true;
+  preview.style.cssText = `position:absolute;pointer-events:none;z-index:1;height:0;border-top:2px dashed ${activeColor};transform-origin:left center;`;
+  canvas.parentElement!.append(preview);
 
-  graph.on('edge:dragstart', (payload: { edgeId?: string; dragEnd: string }) => {
+  const drawPreview = ({ source, target, dragEnd, event }: GraphEventMap['edge:drag'][0]) => {
+    const stationary = graph.getNodePosition(dragEnd === 'source' ? target : source);
+    if (!stationary) return;
+    const { x, y } = graph.graphToScreen(stationary.x, stationary.y);
+    const dx = event.clientX - x;
+    const dy = event.clientY - y;
+    const length = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx);
+    const radius = graph.graphToScreen(stationary.x + nodeSize / 2, stationary.y).x - x;
+    const bounds = canvas.getBoundingClientRect();
+    preview.style.left = `${x + radius * Math.cos(angle) - bounds.left}px`;
+    preview.style.top = `${y + radius * Math.sin(angle) - bounds.top}px`;
+    preview.style.width = `${Math.max(0, length - radius)}px`;
+    preview.style.transform = `rotate(${angle}rad)`;
+    preview.hidden = false;
+  };
+  graph.on('edge:pointerenter', () => {
+    if (preview.hidden) canvas.style.cursor = 'grab';
+  });
+  graph.on('edge:pointerleave', () => {
+    if (preview.hidden) canvas.style.cursor = '';
+  });
+  graph.on('edge:dragstart', (payload) => {
+    canvas.style.cursor = 'grabbing';
+    if (payload.edgeId) graph.setItemState(payload.edgeId, 'inactive', true);
+    drawPreview(payload);
     ui.setStatus(`dragstart ${payload.edgeId ?? '-'} (${payload.dragEnd})`);
+  });
+  graph.on('edge:drag', drawPreview);
+  graph.on('edge:dragend', ({ edgeId }) => {
+    preview.hidden = true;
+    canvas.style.cursor = '';
+    if (edgeId) graph.setItemState(edgeId, 'inactive', false);
   });
   // #region reconnect
   graph.on('edge:dragend', ({ edgeId, source, target, reconnected }) => {
@@ -11787,6 +11993,7 @@ export async function run(container: string | HTMLElement) {
 
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
+    preview.remove();
     ui.destroy();
     destroy();
   };
@@ -11902,7 +12109,7 @@ import { Graph } from '@antv/g6-lite';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFit: true,
+    autoFit: { padding: 48 },
     container,
     data: {
       nodes: [
@@ -11951,7 +12158,6 @@ export async function run(container: string | HTMLElement) {
   });
   try {
     await graph.render();
-    graph.fitView({ padding: 48, maxZoom: 1 });
     return graph;
   } catch (error) {
     graph.destroy();
@@ -11998,7 +12204,7 @@ import { Graph } from '@antv/g6-lite';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFit: true,
+    autoFit: { padding: 48 },
     container,
     data: {
       nodes: [
@@ -12047,7 +12253,6 @@ export async function run(container: string | HTMLElement) {
   });
   try {
     await graph.render();
-    graph.fitView({ padding: 48, maxZoom: 1 });
     return graph;
   } catch (error) {
     graph.destroy();
@@ -12078,12 +12283,14 @@ graph.on('edge:dragend', ({ edgeId, source, target, reconnected }) => {
 **完整运行代码**
 
 ```ts
-import { Graph } from '@antv/g6-lite';
+import { Graph, type GraphEventMap } from '@antv/g6-lite';
 import GUI from 'lil-gui';
 
 export async function run(container: string | HTMLElement) {
+  const nodeSize = 38;
+  const activeColor = '#5366ad';
   const graph = new Graph({
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
     container,
     data: {
       nodes: [
@@ -12097,14 +12304,67 @@ export async function run(container: string | HTMLElement) {
         { id: 'reference-edge', source: 'c', target: 'd' },
       ],
     },
-    node: { style: { size: 38, label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' } },
-    edge: { style: { lineWidth: 4, hitAreaWidth: 16, endArrow: true } },
+    node: { style: { size: nodeSize, label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' } },
+    label: { hideOnLowZoom: false },
+    edge: {
+      style: {
+        stroke: (_source, _target, edge) => edge.id === 'editable-edge' ? activeColor : '#94a3b8',
+        lineWidth: 4,
+        hitAreaWidth: 36,
+        endArrow: true,
+        label: (_source, _target, edge) => edge.id === 'editable-edge' ? '●' : false,
+        labelPlacement: 'end',
+        labelFontSize: 18,
+        labelColor: activeColor,
+        labelBackground: false,
+        labelAutoRotate: false,
+      },
+      stateStyles: { inactive: { opacity: 0.25 } },
+    },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-edge'],
   });
   const ui = createDemoPanel(container);
+  const canvas = graph.getCanvas();
+  const preview = document.createElement('div');
+  preview.dataset.edgeDragPreview = '';
+  preview.setAttribute('aria-hidden', 'true');
+  preview.hidden = true;
+  preview.style.cssText = `position:absolute;pointer-events:none;z-index:1;height:0;border-top:2px dashed ${activeColor};transform-origin:left center;`;
+  canvas.parentElement!.append(preview);
 
-  graph.on('edge:dragstart', (payload: { edgeId?: string; dragEnd: string }) => {
+  const drawPreview = ({ source, target, dragEnd, event }: GraphEventMap['edge:drag'][0]) => {
+    const stationary = graph.getNodePosition(dragEnd === 'source' ? target : source);
+    if (!stationary) return;
+    const { x, y } = graph.graphToScreen(stationary.x, stationary.y);
+    const dx = event.clientX - x;
+    const dy = event.clientY - y;
+    const length = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx);
+    const radius = graph.graphToScreen(stationary.x + nodeSize / 2, stationary.y).x - x;
+    const bounds = canvas.getBoundingClientRect();
+    preview.style.left = `${x + radius * Math.cos(angle) - bounds.left}px`;
+    preview.style.top = `${y + radius * Math.sin(angle) - bounds.top}px`;
+    preview.style.width = `${Math.max(0, length - radius)}px`;
+    preview.style.transform = `rotate(${angle}rad)`;
+    preview.hidden = false;
+  };
+  graph.on('edge:pointerenter', () => {
+    if (preview.hidden) canvas.style.cursor = 'grab';
+  });
+  graph.on('edge:pointerleave', () => {
+    if (preview.hidden) canvas.style.cursor = '';
+  });
+  graph.on('edge:dragstart', (payload) => {
+    canvas.style.cursor = 'grabbing';
+    if (payload.edgeId) graph.setItemState(payload.edgeId, 'inactive', true);
+    drawPreview(payload);
     ui.setStatus(`dragstart ${payload.edgeId ?? '-'} (${payload.dragEnd})`);
+  });
+  graph.on('edge:drag', drawPreview);
+  graph.on('edge:dragend', ({ edgeId }) => {
+    preview.hidden = true;
+    canvas.style.cursor = '';
+    if (edgeId) graph.setItemState(edgeId, 'inactive', false);
   });
   // #region reconnect
   graph.on('edge:dragend', ({ edgeId, source, target, reconnected }) => {
@@ -12117,6 +12377,7 @@ export async function run(container: string | HTMLElement) {
 
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
+    preview.remove();
     ui.destroy();
     destroy();
   };
@@ -12252,7 +12513,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#8050d2', lineWidth: 4 } },
     },
     behaviors,
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -12326,7 +12587,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#8050d2', lineWidth: 4 } },
     },
     behaviors,
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -12394,7 +12655,7 @@ export async function run(container: HTMLElement) {
     // #region highlight
     behaviors: ['zoom-canvas', 'drag-canvas', { type: 'hover-highlight', degree: 1, inactiveState: 'inactive' }],
     // #endregion highlight
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: { padding: 60 },
   });
   const status = document.createElement('div');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';
@@ -12482,7 +12743,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#8050d2', lineWidth: 4 } },
     },
     behaviors,
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -12532,8 +12793,25 @@ const behaviors = [
 /**
  * Demo: constrain wheel zoom with sensitivity, minZoom, and maxZoom.
  */
-import { Graph, type BuiltInBehaviorConfig } from '@antv/g6-lite';
+import { Graph, type BuiltInBehaviorConfig, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+const NODE_SIZE = 11;
+const SPAN_X = 108;
+const SPAN_Y = 44;
+
+export function getFitOptions(container?: HTMLElement): FitViewOptions {
+  const controls = container?.querySelector<HTMLElement>('.g6lite-demo-controls');
+  const top = Math.max(48, (controls?.offsetHeight ?? 0) + 26);
+  const below: FitViewOptions = { padding: [top, 32, 64, 32] };
+  if (!container || !controls) return below;
+
+  const right = controls.offsetWidth + 26;
+  const { clientWidth: width, clientHeight: height } = container;
+  const scaleBelow = Math.min((width - 64) / (SPAN_X + NODE_SIZE), (height - top - 64) / (SPAN_Y + NODE_SIZE));
+  const scaleBeside = Math.min((width - right - 32) / (SPAN_X + NODE_SIZE), (height - 112) / (SPAN_Y + NODE_SIZE));
+  return scaleBeside > scaleBelow ? { padding: [48, right, 64, 32] } : below;
+}
 
 export async function run(container: string | HTMLElement) {
   // #region navigation
@@ -12544,14 +12822,14 @@ export async function run(container: string | HTMLElement) {
   // #endregion navigation
   const [{ minZoom, maxZoom }] = behaviors;
   const graph = new Graph({
-    autoFit: true,
+    autoFit: false,
     container,
     data: {
       nodes: [
-        { id: 'a', x: 180, y: 180 },
-        { id: 'b', x: 340, y: 120 },
-        { id: 'c', x: 340, y: 250 },
-        { id: 'd', x: 500, y: 180 },
+        { id: 'a', x: 0, y: 22 },
+        { id: 'b', x: 54, y: 0 },
+        { id: 'c', x: 54, y: SPAN_Y },
+        { id: 'd', x: SPAN_X, y: 22 },
       ],
       edges: [
         { source: 'a', target: 'b' },
@@ -12560,12 +12838,16 @@ export async function run(container: string | HTMLElement) {
         { source: 'c', target: 'd' },
       ],
     },
-    node: { style: { size: 28, fill: '#5B8FF9' } },
+    node: { style: { size: NODE_SIZE, fill: '#5B8FF9', label: (node) => node.id.toUpperCase(), labelPlacement: 'center', labelColor: '#fff' } },
+    label: { scaleWithZoom: false },
+    edge: { style: { lineWidth: 3, stroke: '#8b9ec2' } },
     behaviors,
   });
   const ui = createDemoPanel(container);
+  let referenceZoom = 1;
+  const getScale = () => graph.getZoom() / referenceZoom;
   const report = () => {
-    ui.setStatus(`Zoom ${graph.getZoom().toFixed(2)}× · ${minZoom}–${maxZoom}×`);
+    ui.setStatus(`Zoom ${getScale().toFixed(2)}× · ${minZoom}–${maxZoom}×`);
   };
   const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
   let reportFrame: number | undefined;
@@ -12576,11 +12858,28 @@ export async function run(container: string | HTMLElement) {
   host.addEventListener('wheel', onWheel, { passive: true });
 
   const fitView = graph.fitView.bind(graph);
-  graph.fitView = (options) => { fitView(options); report(); };
-  const zoomTo = graph.zoomTo.bind(graph);
-  graph.zoomTo = (zoom, options) => { zoomTo(zoom, options); report(); };
+  const fitAtScale = (options: number | FitViewOptions, scale: number) => {
+    // Base the demo's 2× preset on the fitted camera. On larger displays,
+    // cap the reference so these four nodes stay comfortably sized.
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const maxCssPixelsPerGraphUnit = 6;
+    fitView(typeof options === 'number' ? options : { ...options, maxZoom: maxCssPixelsPerGraphUnit * dpr });
+    referenceZoom = graph.getZoom() / maxZoom;
+    const zoomLimits = { minZoom: minZoom * referenceZoom, maxZoom: maxZoom * referenceZoom };
+    graph.updateOptions({
+      behaviors: [
+        { ...behaviors[0], ...zoomLimits },
+        behaviors[1],
+      ],
+    });
+    if (scale < maxZoom) graph.zoomTo(scale * referenceZoom, zoomLimits);
+    report();
+  };
+  const fitCurrentScale = () => fitAtScale(getFitOptions(host), getScale());
+  const panelObserver = new ResizeObserver(fitCurrentScale);
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
+    panelObserver.disconnect();
     host.removeEventListener('wheel', onWheel);
     if (reportFrame !== undefined) cancelAnimationFrame(reportFrame);
     ui.destroy();
@@ -12588,10 +12887,15 @@ export async function run(container: string | HTMLElement) {
   };
   try {
     await graph.render();
-    ui.addAction(`${minZoom}×`, () => graph.zoomTo(minZoom));
-    ui.addAction('1×', () => graph.zoomTo(1));
-    ui.addAction(`${maxZoom}×`, () => graph.zoomTo(maxZoom));
-    report();
+    const setScale = (scale: number) => fitAtScale(getFitOptions(host), scale);
+    ui.addAction(`${minZoom}×`, () => setScale(minZoom));
+    ui.addAction('1×', () => setScale(1));
+    ui.addAction(`${maxZoom}×`, () => setScale(maxZoom));
+    if (host.clientWidth < 500) ui.gui.close();
+    setScale(1.8);
+    graph.fitView = (options = getFitOptions(host)) => fitAtScale(options, maxZoom);
+    graph.on('resize', fitCurrentScale);
+    panelObserver.observe(ui.gui.domElement);
     return graph;
   } catch (error) {
     graph.destroy();
@@ -12759,7 +13063,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { fill: '#873BF4', stroke: '#5B21B6', strokeWidth: 2, haloWidth: 12 } },
     },
     behaviors,
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: { padding: 60 },
   });
   const status = document.createElement('div');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';
@@ -12877,7 +13181,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { fill: '#873BF4', stroke: '#5B21B6', strokeWidth: 2, haloWidth: 12 } },
     },
     behaviors,
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: { padding: 60 },
   });
   const status = document.createElement('div');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';
@@ -12986,7 +13290,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 8 } },
     edge: { style: { hitAreaWidth: 12 } },
     behaviors: [tooltip],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();
@@ -13032,8 +13336,25 @@ const behaviors = [
 /**
  * Demo: constrain wheel zoom with sensitivity, minZoom, and maxZoom.
  */
-import { Graph, type BuiltInBehaviorConfig } from '@antv/g6-lite';
+import { Graph, type BuiltInBehaviorConfig, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+const NODE_SIZE = 11;
+const SPAN_X = 108;
+const SPAN_Y = 44;
+
+export function getFitOptions(container?: HTMLElement): FitViewOptions {
+  const controls = container?.querySelector<HTMLElement>('.g6lite-demo-controls');
+  const top = Math.max(48, (controls?.offsetHeight ?? 0) + 26);
+  const below: FitViewOptions = { padding: [top, 32, 64, 32] };
+  if (!container || !controls) return below;
+
+  const right = controls.offsetWidth + 26;
+  const { clientWidth: width, clientHeight: height } = container;
+  const scaleBelow = Math.min((width - 64) / (SPAN_X + NODE_SIZE), (height - top - 64) / (SPAN_Y + NODE_SIZE));
+  const scaleBeside = Math.min((width - right - 32) / (SPAN_X + NODE_SIZE), (height - 112) / (SPAN_Y + NODE_SIZE));
+  return scaleBeside > scaleBelow ? { padding: [48, right, 64, 32] } : below;
+}
 
 export async function run(container: string | HTMLElement) {
   // #region navigation
@@ -13044,14 +13365,14 @@ export async function run(container: string | HTMLElement) {
   // #endregion navigation
   const [{ minZoom, maxZoom }] = behaviors;
   const graph = new Graph({
-    autoFit: true,
+    autoFit: false,
     container,
     data: {
       nodes: [
-        { id: 'a', x: 180, y: 180 },
-        { id: 'b', x: 340, y: 120 },
-        { id: 'c', x: 340, y: 250 },
-        { id: 'd', x: 500, y: 180 },
+        { id: 'a', x: 0, y: 22 },
+        { id: 'b', x: 54, y: 0 },
+        { id: 'c', x: 54, y: SPAN_Y },
+        { id: 'd', x: SPAN_X, y: 22 },
       ],
       edges: [
         { source: 'a', target: 'b' },
@@ -13060,12 +13381,16 @@ export async function run(container: string | HTMLElement) {
         { source: 'c', target: 'd' },
       ],
     },
-    node: { style: { size: 28, fill: '#5B8FF9' } },
+    node: { style: { size: NODE_SIZE, fill: '#5B8FF9', label: (node) => node.id.toUpperCase(), labelPlacement: 'center', labelColor: '#fff' } },
+    label: { scaleWithZoom: false },
+    edge: { style: { lineWidth: 3, stroke: '#8b9ec2' } },
     behaviors,
   });
   const ui = createDemoPanel(container);
+  let referenceZoom = 1;
+  const getScale = () => graph.getZoom() / referenceZoom;
   const report = () => {
-    ui.setStatus(`Zoom ${graph.getZoom().toFixed(2)}× · ${minZoom}–${maxZoom}×`);
+    ui.setStatus(`Zoom ${getScale().toFixed(2)}× · ${minZoom}–${maxZoom}×`);
   };
   const host = typeof container === 'string' ? document.querySelector<HTMLElement>(container)! : container;
   let reportFrame: number | undefined;
@@ -13076,11 +13401,28 @@ export async function run(container: string | HTMLElement) {
   host.addEventListener('wheel', onWheel, { passive: true });
 
   const fitView = graph.fitView.bind(graph);
-  graph.fitView = (options) => { fitView(options); report(); };
-  const zoomTo = graph.zoomTo.bind(graph);
-  graph.zoomTo = (zoom, options) => { zoomTo(zoom, options); report(); };
+  const fitAtScale = (options: number | FitViewOptions, scale: number) => {
+    // Base the demo's 2× preset on the fitted camera. On larger displays,
+    // cap the reference so these four nodes stay comfortably sized.
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const maxCssPixelsPerGraphUnit = 6;
+    fitView(typeof options === 'number' ? options : { ...options, maxZoom: maxCssPixelsPerGraphUnit * dpr });
+    referenceZoom = graph.getZoom() / maxZoom;
+    const zoomLimits = { minZoom: minZoom * referenceZoom, maxZoom: maxZoom * referenceZoom };
+    graph.updateOptions({
+      behaviors: [
+        { ...behaviors[0], ...zoomLimits },
+        behaviors[1],
+      ],
+    });
+    if (scale < maxZoom) graph.zoomTo(scale * referenceZoom, zoomLimits);
+    report();
+  };
+  const fitCurrentScale = () => fitAtScale(getFitOptions(host), getScale());
+  const panelObserver = new ResizeObserver(fitCurrentScale);
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
+    panelObserver.disconnect();
     host.removeEventListener('wheel', onWheel);
     if (reportFrame !== undefined) cancelAnimationFrame(reportFrame);
     ui.destroy();
@@ -13088,10 +13430,15 @@ export async function run(container: string | HTMLElement) {
   };
   try {
     await graph.render();
-    ui.addAction(`${minZoom}×`, () => graph.zoomTo(minZoom));
-    ui.addAction('1×', () => graph.zoomTo(1));
-    ui.addAction(`${maxZoom}×`, () => graph.zoomTo(maxZoom));
-    report();
+    const setScale = (scale: number) => fitAtScale(getFitOptions(host), scale);
+    ui.addAction(`${minZoom}×`, () => setScale(minZoom));
+    ui.addAction('1×', () => setScale(1));
+    ui.addAction(`${maxZoom}×`, () => setScale(maxZoom));
+    if (host.clientWidth < 500) ui.gui.close();
+    setScale(1.8);
+    graph.fitView = (options = getFitOptions(host)) => fitAtScale(options, maxZoom);
+    graph.on('resize', fitCurrentScale);
+    panelObserver.observe(ui.gui.domElement);
     return graph;
   } catch (error) {
     graph.destroy();
@@ -13238,7 +13585,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { fill: '#8050d2', haloWidth: 10 } },
     },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 55, maxZoom: 1 },
+    autoFit: { padding: 55 },
   });
 
   const ui = createDemoPanel(container);
@@ -13388,7 +13735,7 @@ export async function run(container: HTMLElement) {
     // #region highlight
     behaviors: ['zoom-canvas', 'drag-canvas', { type: 'hover-highlight', degree: 1, inactiveState: 'inactive' }],
     // #endregion highlight
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: { padding: 60 },
   });
   const status = document.createElement('div');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';
@@ -13485,7 +13832,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 8 } },
     edge: { style: { hitAreaWidth: 12 } },
     behaviors: [tooltip],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();
@@ -13564,7 +13911,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 8 } },
     edge: { style: { hitAreaWidth: 12 } },
     behaviors: [tooltip],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();
@@ -13752,7 +14099,7 @@ export async function run(container: HTMLElement) {
     } },
     // #endregion combo-options
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();
@@ -13822,7 +14169,7 @@ export async function run(container: HTMLElement) {
     } },
     // #endregion state-styles
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   graph.on('combo:click', ({ comboId }) => {
     const selected = graph.getComboData(comboId)?.states.has('selected') ?? false;
@@ -13882,7 +14229,7 @@ combos: [
 import { Graph } from '@antv/g6-lite';
 
 export async function run(container: HTMLElement) {
-  const groups = [{ id: 'circle', x: 100 }, { id: 'rect', x: 300 }, { id: 'label', x: 500 }];
+  const groups = [{ id: 'circle', x: 100 }, { id: 'rect', x: 244 }, { id: 'label', x: 408 }];
   const graph = new Graph({
     container,
     data: {
@@ -13910,7 +14257,7 @@ export async function run(container: HTMLElement) {
       collapsedType: 'circle', collapsedSize: 64, count: true,
     } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   graph.on('combo:click', ({ comboId }) => graph.toggleCombo(comboId));
   try {
@@ -13971,7 +14318,7 @@ export async function run(container: HTMLElement) {
     } },
     combo: { style: { padding: 40, strokeWidth: 2 } },
     behaviors: ['drag-node', 'drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   // #region change-membership
   graph.on('node:click', ({ nodeId }) => {
@@ -14152,7 +14499,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { active: { fill: '#F08F56', stroke: '#914C1D', strokeWidth: 2 } },
     },
     behaviors: [{ type: BUSINESS_SELECT, state: 'active' } satisfies BusinessSelectOptions],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   const status = document.createElement('div');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';
@@ -14259,7 +14606,12 @@ register('decoration', 'docs-pill', pill);
 **完整运行代码**
 
 ```ts
-import { Graph, register, type DecorationRenderer } from '@antv/g6-lite';
+import { Graph, register, type DecorationRenderer, type FitViewOptions } from '@antv/g6-lite';
+
+export function getFitOptions(container: HTMLElement): FitViewOptions {
+  const width = container.clientWidth;
+  return { padding: [36, Math.min(160, width * 0.24), 48, Math.min(48, width * 0.1)] };
+}
 
 // #region renderer
 const pill: DecorationRenderer = {
@@ -14302,7 +14654,7 @@ export async function run(container: HTMLElement) {
       // #endregion placement
     },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 96, maxZoom: 1 },
+    autoFit: getFitOptions(container),
   });
   try { await graph.render(); return graph; }
   catch (error) { graph.destroy(); throw error; }
@@ -14408,7 +14760,7 @@ export async function run(container: HTMLElement) {
     edge: { type: 'docs-weighted-edge', style: { label: (_s, _t, edge) => edge.id ?? '' } },
     // #endregion edge-activation
     behaviors: ['click-select', 'zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -14533,7 +14885,7 @@ export async function run(container: HTMLElement) {
     edge: { type: 'docs-weighted-edge', style: { label: (_s, _t, edge) => edge.id ?? '' } },
     // #endregion edge-activation
     behaviors: ['click-select', 'zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -14663,7 +15015,7 @@ export async function run(container: HTMLElement) {
     edge: { type: 'docs-weighted-edge', style: { label: (_s, _t, edge) => edge.id ?? '' } },
     // #endregion edge-activation
     behaviors: ['click-select', 'zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -14870,7 +15222,7 @@ export async function run(container: string | HTMLElement) {
   const graph = new Graph({
     // Labels are two lines and hang below nodes (labelPlacement: 'bottom');
     // the bottom padding reserves their height so they stay inside the view.
-    autoFit: { padding: [24, 48, 64, 48] },
+    autoFit: { padding: [24, 64, 64, 64] },
     container,
     data: {
       nodes: [
@@ -15028,7 +15380,7 @@ export async function run(container: HTMLElement) {
     layout: { type: 'docs-column', gap: 100 },
     node: { style: { size: 30, label: (node) => node.id } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   let revision = 0;
   const ui = createDemoPanel(container);
@@ -15042,7 +15394,7 @@ export async function run(container: HTMLElement) {
     graph.setLayout(mode === 'grid' ? { type: 'grid' } : { type: 'docs-column', gap: 100, delay: mode === 'slow' ? 180 : 0 });
     await graph.layout();
     if (graph.destroyed || request !== revision) return;
-    graph.fitView({ padding: 56, maxZoom: 1 });
+    graph.fitView({ padding: 56 });
     status.textContent = mode === 'grid' ? 'Canceled old run; grid' : 'Column layout complete';
   };
   const destroy = graph.destroy.bind(graph);
@@ -15249,7 +15601,7 @@ export async function run(container: HTMLElement) {
     },
     edge: { style: { endArrow: true } },
     behaviors: ['click-select', 'zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -15630,7 +15982,7 @@ export async function run(container: HTMLElement) {
     } satisfies CounterOptions],
     // #endregion activate
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64, maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1) },
   });
   try { await graph.render(); return graph; }
   catch (error) { graph.destroy(); throw error; }
@@ -15863,7 +16215,7 @@ export async function run(container: HTMLElement) {
       label: (node) => node.id === 'A' ? `A: ${node.data?.score}` : node.id, labelOffsetY: 10,
     } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: [76, 48, 120, 48], maxZoom: 1 },
+    autoFit: { padding: [76, 48, 120, 48] },
   });
   // #region query
   const inspect = () => ({
@@ -16262,7 +16614,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#873bf4' } },
     },
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -16303,7 +16655,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#873bf4' } },
     },
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -16405,7 +16757,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion edge-options
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -16481,7 +16833,7 @@ export async function run(container: HTMLElement) {
       ...edge,
       style: { ...edge.style, label: (_source, _target, edge) => edge.id ?? '', labelFontSize: 12 },
     },
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
     behaviors: [],
   });
   try {
@@ -16526,7 +16878,7 @@ import { Graph } from '@antv/g6-lite';
 
 export async function runGraph(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFit: true,
+    autoFit: { padding: 32 },
     container,
     data: {
       nodes: [
@@ -16573,6 +16925,7 @@ export async function runGraph(container: string | HTMLElement) {
 export async function run(container: string | HTMLElement) {
   const graph = await runGraph(container);
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => graph.destroy(),
@@ -16642,7 +16995,7 @@ export async function run(container: HTMLElement) {
     },
     behaviors: ['click-select'],
     // #endregion hit-area
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -16705,7 +17058,7 @@ export async function run(container: HTMLElement) {
     },
     behaviors: ['click-select'],
     // #endregion state-styles
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -16792,7 +17145,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 26, label: (node) => node.id, labelPlacement: 'bottom' } },
     edge,
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
-    autoFit: { padding: [90, 64, 64, 64], maxZoom: 1 },
+    autoFit: { padding: [90, 64, 64, 64] },
   });
   const ui = createDemoPanel(container);
   const status = document.createElement('div');
@@ -17014,7 +17367,7 @@ export async function run(container: HTMLElement) {
       },
     },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   try {
     await graph.render();
@@ -17103,7 +17456,7 @@ export async function run(container: HTMLElement) {
     layout,
     edge,
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -17242,7 +17595,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion routing
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -17344,7 +17697,7 @@ export async function run(container: HTMLElement) {
     // #endregion edge-label-options
     label: { hideOnCollision: false, hideOnLowZoom: false },
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -17451,7 +17804,7 @@ export async function run(container: string | HTMLElement) {
   const graph = new Graph({
     // Labels are two lines and hang below nodes (labelPlacement: 'bottom');
     // the bottom padding reserves their height so they stay inside the view.
-    autoFit: { padding: [24, 48, 64, 48] },
+    autoFit: { padding: [24, 64, 64, 64] },
     container,
     data: {
       nodes: [
@@ -17554,7 +17907,7 @@ export async function run(container: HTMLElement) {
         labelAutoRotate: false,
       },
     },
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
     behaviors: [],
   });
   const panel = createDemoPanel(container);
@@ -17764,7 +18117,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 8 } },
     edge: { style: { hitAreaWidth: 12 } },
     behaviors: [],
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: { padding: 60 },
   });
   const ui = createDemoPanel(container);
   const status = document.createElement('div');
@@ -18034,9 +18387,9 @@ export async function run(container: HTMLElement) {
     data: {
       nodes: [
         { id: 'api', name: 'API', x: 100, y: 100, data: { placement: 'left' } },
-        { id: 'Database', x: 260, y: 100 },
-        { id: 'cache', name: 'Cache', x: 420, y: 100, data: { placement: 'right' } },
-        { id: 'worker', name: 'Worker', x: 580, y: 100, data: { hideLabel: true } },
+        { id: 'Database', x: 220, y: 100 },
+        { id: 'cache', name: 'Cache', x: 340, y: 100, data: { placement: 'right' } },
+        { id: 'worker', name: 'Worker', x: 460, y: 100, data: { hideLabel: true } },
       ],
       edges: [],
     },
@@ -18052,7 +18405,7 @@ export async function run(container: HTMLElement) {
       },
     },
     // #endregion label-style
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 64 },
     behaviors: [],
   });
   try {
@@ -18130,7 +18483,7 @@ export async function run(container: HTMLElement) {
       },
     },
     // #endregion icon-style
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: [48, 48, 88, 48] },
     behaviors: [],
   });
   try {
@@ -18152,7 +18505,11 @@ export async function run(container: HTMLElement) {
 
 
 ```ts
-import { Graph, type NodeConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type NodeConfig } from '@antv/g6-lite';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: [36, 60, 64, 42] };
+}
 
 export async function run(container: HTMLElement) {
   // #region node-label
@@ -18161,6 +18518,7 @@ export async function run(container: HTMLElement) {
       size: 40,
       label: (item) => String(item.data?.name ?? item.id),
       labelPlacement: 'bottom',
+      labelOffsetY: 8,
       labelMaxWidth: 120,
       labelBackground: (item) => item.id === 'db' ? '#fff1b8' : '#e6f4ff',
       labelBackgroundPadding: 6,
@@ -18172,13 +18530,13 @@ export async function run(container: HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: 'api', x: 120, y: 100, data: { name: 'API Server' } },
-        { id: 'db', x: 360, y: 100, data: { name: 'Database with a very long name' } },
+        { id: 'api', x: 160, y: 100, data: { name: 'API Server' } },
+        { id: 'db', x: 324, y: 100, data: { name: 'Database with a very long name' } },
       ],
       edges: [],
     },
     node,
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: [],
   });
   try {
@@ -18237,7 +18595,7 @@ export async function run(container: HTMLElement) {
     // #endregion edge-label-options
     label: { hideOnCollision: false, hideOnLowZoom: false },
     behaviors: ['click-select'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   try {
     await graph.render();
@@ -18502,8 +18860,12 @@ const layouts: Record<string, LayoutConfig> = {
 **完整运行代码**
 
 ```ts
-import { Graph, type LayoutConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type LayoutConfig } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: [56, 48, 76, 48] };
+}
 
 export async function run(container: HTMLElement) {
   // #region layout-options
@@ -18526,7 +18888,7 @@ export async function run(container: HTMLElement) {
     layout: layouts.grid,
     node: { style: { size: 28, label: (node) => node.id, labelOffsetY: 8 } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   const ui = createDemoPanel(container);
   let generation = 0;
@@ -18542,7 +18904,7 @@ export async function run(container: HTMLElement) {
       try {
         await graph.layout();
         if (current !== generation || graph.destroyed) return;
-        graph.fitView({ padding: 56, maxZoom: 1 });
+        graph.fitView(getFitOptions());
         ui.setStatus(`${value} ready`);
       } catch {
         if (current === generation && !graph.destroyed) ui.setStatus('Layout failed');
@@ -18714,7 +19076,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -18821,7 +19183,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -18904,9 +19266,26 @@ function network(type: string): ExampleOptions {
     [2, 5], [2, 6], [3, 7], [3, 8], [3, 9],
     [7, 8], [8, 9], [4, 10], [4, 11], [10, 11],
   ];
+  const showClusters = type === 'force-atlas2' || type === 'fruchterman';
+  // Seed the three groups around distinct centers so rerunning starts from the same layout.
+  const clusters = [
+    { ids: [3, 7, 8, 9], x: 90, y: 120, color: '#2468d8' },
+    { ids: [0, 1, 5, 2, 6], x: 240, y: 205, color: '#7755c7' },
+    { ids: [4, 10, 11], x: 390, y: 120, color: '#0c8177' },
+  ];
+  const nodes = showClusters
+    ? clusters.flatMap(({ ids, x, y, color }, clusterIndex) => {
+        const startAngle = type === 'fruchterman' && clusterIndex === 1 ? 3 * Math.PI / 2 : 0;
+        return ids.map((id, index) => {
+          const angle = startAngle + 2 * Math.PI * index / ids.length;
+          return { id: String(id), x: x + 34 * Math.cos(angle), y: y + 34 * Math.sin(angle), data: { color } };
+        });
+      })
+    : Array.from({ length: 12 }, (_, index) => ({ id: String(index) }));
+
   return {
     data: {
-      nodes: Array.from({ length: 12 }, (_, index) => ({ id: String(index) })),
+      nodes,
       edges: links.map(([source, target]) => ({ source: String(source), target: String(target) })),
     },
     node: {
@@ -18915,10 +19294,10 @@ function network(type: string): ExampleOptions {
         label: (node) => node.id,
         labelColor: '#fff',
         labelPlacement: 'center',
-        fill: (node) => type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff',
+        fill: (node) => String(node.data?.color ?? (type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff')),
       },
     },
-    edge: { style: { lineWidth: 2 } },
+    edge: { style: showClusters ? { lineWidth: 1.6, stroke: '#8494b0', endArrow: false } : { lineWidth: 2 } },
   };
 }
 
@@ -18928,7 +19307,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -19037,7 +19416,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -19161,7 +19540,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -19219,18 +19598,20 @@ const graph = new Graph({
 
 ## 配置项 [#配置项]
 
-| 参数             | 描述                     | 类型        | 默认值                      |
-| -------------- | ---------------------- | --------- | ------------------------ |
-| `kr`           | 节点间的斥力系数。              | `number`  | `5`                      |
-| `kg`           | 将节点拉向中心的引力系数。          | `number`  | `1`                      |
-| `barnesHut`    | 是否用 Barnes–Hut 近似计算斥力。 | `boolean` | `true`                   |
-| `maxIteration` | 布局的最大迭代次数。             | `number`  | `100`，超过 5000 个节点时为 `50` |
+| 参数               | 描述                     | 类型        | 默认值                      |
+| ---------------- | ---------------------- | --------- | ------------------------ |
+| `kr`             | 节点间的斥力系数。              | `number`  | `5`                      |
+| `kg`             | 将节点拉向中心的引力系数。          | `number`  | `1`                      |
+| `preventOverlap` | 按节点尺寸计算斥力，减少重叠。        | `boolean` | `false`                  |
+| `nodeSize`       | 碰撞计算使用的节点尺寸。           | `number`  | `10`                     |
+| `barnesHut`      | 是否用 Barnes–Hut 近似计算斥力。 | `boolean` | `true`                   |
+| `maxIteration`   | 布局的最大迭代次数。             | `number`  | `100`，超过 5000 个节点时为 `50` |
 
 [布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
 
 ## 代码示例 [#代码示例]
 
-示例提高斥力和中心引力，展示三个相连的群组。
+示例使用固定的初始坐标，增强斥力、减弱中心引力，并按节点尺寸减少重叠。颜色标记三个相连的群组。
 
 
 
@@ -19245,9 +19626,26 @@ function network(type: string): ExampleOptions {
     [2, 5], [2, 6], [3, 7], [3, 8], [3, 9],
     [7, 8], [8, 9], [4, 10], [4, 11], [10, 11],
   ];
+  const showClusters = type === 'force-atlas2' || type === 'fruchterman';
+  // Seed the three groups around distinct centers so rerunning starts from the same layout.
+  const clusters = [
+    { ids: [3, 7, 8, 9], x: 90, y: 120, color: '#2468d8' },
+    { ids: [0, 1, 5, 2, 6], x: 240, y: 205, color: '#7755c7' },
+    { ids: [4, 10, 11], x: 390, y: 120, color: '#0c8177' },
+  ];
+  const nodes = showClusters
+    ? clusters.flatMap(({ ids, x, y, color }, clusterIndex) => {
+        const startAngle = type === 'fruchterman' && clusterIndex === 1 ? 3 * Math.PI / 2 : 0;
+        return ids.map((id, index) => {
+          const angle = startAngle + 2 * Math.PI * index / ids.length;
+          return { id: String(id), x: x + 34 * Math.cos(angle), y: y + 34 * Math.sin(angle), data: { color } };
+        });
+      })
+    : Array.from({ length: 12 }, (_, index) => ({ id: String(index) }));
+
   return {
     data: {
-      nodes: Array.from({ length: 12 }, (_, index) => ({ id: String(index) })),
+      nodes,
       edges: links.map(([source, target]) => ({ source: String(source), target: String(target) })),
     },
     node: {
@@ -19256,10 +19654,10 @@ function network(type: string): ExampleOptions {
         label: (node) => node.id,
         labelColor: '#fff',
         labelPlacement: 'center',
-        fill: (node) => type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff',
+        fill: (node) => String(node.data?.color ?? (type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff')),
       },
     },
-    edge: { style: { lineWidth: 2 } },
+    edge: { style: showClusters ? { lineWidth: 1.6, stroke: '#8494b0', endArrow: false } : { lineWidth: 2 } },
   };
 }
 
@@ -19269,7 +19667,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -19281,7 +19679,15 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
 }
 
 export function run(container: HTMLElement) {
-  const layout: LayoutConfig = { type: 'force-atlas2', kr: 8, kg: 2 };
+  const layout: LayoutConfig = {
+    type: 'force-atlas2',
+    center: [240, 150],
+    kr: 12,
+    kg: 0.5,
+    preventOverlap: true,
+    nodeSize: 24,
+    maxIteration: 200,
+  };
   return render(container, layout, network(layout.type));
 }
 ```
@@ -19345,9 +19751,26 @@ function network(type: string): ExampleOptions {
     [2, 5], [2, 6], [3, 7], [3, 8], [3, 9],
     [7, 8], [8, 9], [4, 10], [4, 11], [10, 11],
   ];
+  const showClusters = type === 'force-atlas2' || type === 'fruchterman';
+  // Seed the three groups around distinct centers so rerunning starts from the same layout.
+  const clusters = [
+    { ids: [3, 7, 8, 9], x: 90, y: 120, color: '#2468d8' },
+    { ids: [0, 1, 5, 2, 6], x: 240, y: 205, color: '#7755c7' },
+    { ids: [4, 10, 11], x: 390, y: 120, color: '#0c8177' },
+  ];
+  const nodes = showClusters
+    ? clusters.flatMap(({ ids, x, y, color }, clusterIndex) => {
+        const startAngle = type === 'fruchterman' && clusterIndex === 1 ? 3 * Math.PI / 2 : 0;
+        return ids.map((id, index) => {
+          const angle = startAngle + 2 * Math.PI * index / ids.length;
+          return { id: String(id), x: x + 34 * Math.cos(angle), y: y + 34 * Math.sin(angle), data: { color } };
+        });
+      })
+    : Array.from({ length: 12 }, (_, index) => ({ id: String(index) }));
+
   return {
     data: {
-      nodes: Array.from({ length: 12 }, (_, index) => ({ id: String(index) })),
+      nodes,
       edges: links.map(([source, target]) => ({ source: String(source), target: String(target) })),
     },
     node: {
@@ -19356,10 +19779,10 @@ function network(type: string): ExampleOptions {
         label: (node) => node.id,
         labelColor: '#fff',
         labelPlacement: 'center',
-        fill: (node) => type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff',
+        fill: (node) => String(node.data?.color ?? (type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff')),
       },
     },
-    edge: { style: { lineWidth: 2 } },
+    edge: { style: showClusters ? { lineWidth: 1.6, stroke: '#8494b0', endArrow: false } : { lineWidth: 2 } },
   };
 }
 
@@ -19369,7 +19792,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -19419,17 +19842,18 @@ const graph = new Graph({
 
 ## 配置项 [#配置项]
 
-| 参数             | 描述            | 类型       | 默认值    |
-| -------------- | ------------- | -------- | ------ |
-| `gravity`      | 向布局中心聚拢的强度。   | `number` | `10`   |
-| `speed`        | 模拟中节点移动的速度系数。 | `number` | `5`    |
-| `maxIteration` | 布局的最大迭代次数。    | `number` | 按节点数计算 |
+| 参数             | 描述                   | 类型       | 默认值    |
+| -------------- | -------------------- | -------- | ------ |
+| `gravity`      | 向布局中心聚拢的强度。          | `number` | `10`   |
+| `speed`        | 模拟中节点移动的速度系数。        | `number` | `5`    |
+| `maxIteration` | 布局的最大迭代次数。           | `number` | 按节点数计算 |
+| `minMovement`  | 用于判断布局是否可以提前停止的位移阈值。 | `number` | 按节点数计算 |
 
 [布局通用配置项](/docs/guides/layout) · [布局参数参考](/docs/api/options#config-library-layout-fields)
 
 ## 代码示例 [#代码示例]
 
-示例将中心引力设为 12。
+示例固定初始坐标，将中心引力设为 4，并降低停止迭代的位移阈值，让节点有时间展开。三种颜色标记图中的三个群组。
 
 
 
@@ -19444,9 +19868,26 @@ function network(type: string): ExampleOptions {
     [2, 5], [2, 6], [3, 7], [3, 8], [3, 9],
     [7, 8], [8, 9], [4, 10], [4, 11], [10, 11],
   ];
+  const showClusters = type === 'force-atlas2' || type === 'fruchterman';
+  // Seed the three groups around distinct centers so rerunning starts from the same layout.
+  const clusters = [
+    { ids: [3, 7, 8, 9], x: 90, y: 120, color: '#2468d8' },
+    { ids: [0, 1, 5, 2, 6], x: 240, y: 205, color: '#7755c7' },
+    { ids: [4, 10, 11], x: 390, y: 120, color: '#0c8177' },
+  ];
+  const nodes = showClusters
+    ? clusters.flatMap(({ ids, x, y, color }, clusterIndex) => {
+        const startAngle = type === 'fruchterman' && clusterIndex === 1 ? 3 * Math.PI / 2 : 0;
+        return ids.map((id, index) => {
+          const angle = startAngle + 2 * Math.PI * index / ids.length;
+          return { id: String(id), x: x + 34 * Math.cos(angle), y: y + 34 * Math.sin(angle), data: { color } };
+        });
+      })
+    : Array.from({ length: 12 }, (_, index) => ({ id: String(index) }));
+
   return {
     data: {
-      nodes: Array.from({ length: 12 }, (_, index) => ({ id: String(index) })),
+      nodes,
       edges: links.map(([source, target]) => ({ source: String(source), target: String(target) })),
     },
     node: {
@@ -19455,10 +19896,10 @@ function network(type: string): ExampleOptions {
         label: (node) => node.id,
         labelColor: '#fff',
         labelPlacement: 'center',
-        fill: (node) => type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff',
+        fill: (node) => String(node.data?.color ?? (type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff')),
       },
     },
-    edge: { style: { lineWidth: 2 } },
+    edge: { style: showClusters ? { lineWidth: 1.6, stroke: '#8494b0', endArrow: false } : { lineWidth: 2 } },
   };
 }
 
@@ -19468,7 +19909,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -19480,7 +19921,15 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
 }
 
 export function run(container: HTMLElement) {
-  const layout: LayoutConfig = { type: 'fruchterman', gravity: 12 };
+  const layout: LayoutConfig = {
+    type: 'fruchterman',
+    width: 560,
+    height: 300,
+    center: [240, 150],
+    gravity: 4,
+    maxIteration: 250,
+    minMovement: 0.05,
+  };
   return render(container, layout, network(layout.type));
 }
 ```
@@ -19577,7 +20026,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -19686,7 +20135,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -19768,9 +20217,26 @@ function network(type: string): ExampleOptions {
     [2, 5], [2, 6], [3, 7], [3, 8], [3, 9],
     [7, 8], [8, 9], [4, 10], [4, 11], [10, 11],
   ];
+  const showClusters = type === 'force-atlas2' || type === 'fruchterman';
+  // Seed the three groups around distinct centers so rerunning starts from the same layout.
+  const clusters = [
+    { ids: [3, 7, 8, 9], x: 90, y: 120, color: '#2468d8' },
+    { ids: [0, 1, 5, 2, 6], x: 240, y: 205, color: '#7755c7' },
+    { ids: [4, 10, 11], x: 390, y: 120, color: '#0c8177' },
+  ];
+  const nodes = showClusters
+    ? clusters.flatMap(({ ids, x, y, color }, clusterIndex) => {
+        const startAngle = type === 'fruchterman' && clusterIndex === 1 ? 3 * Math.PI / 2 : 0;
+        return ids.map((id, index) => {
+          const angle = startAngle + 2 * Math.PI * index / ids.length;
+          return { id: String(id), x: x + 34 * Math.cos(angle), y: y + 34 * Math.sin(angle), data: { color } };
+        });
+      })
+    : Array.from({ length: 12 }, (_, index) => ({ id: String(index) }));
+
   return {
     data: {
-      nodes: Array.from({ length: 12 }, (_, index) => ({ id: String(index) })),
+      nodes,
       edges: links.map(([source, target]) => ({ source: String(source), target: String(target) })),
     },
     node: {
@@ -19779,10 +20245,10 @@ function network(type: string): ExampleOptions {
         label: (node) => node.id,
         labelColor: '#fff',
         labelPlacement: 'center',
-        fill: (node) => type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff',
+        fill: (node) => String(node.data?.color ?? (type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff')),
       },
     },
-    edge: { style: { lineWidth: 2 } },
+    edge: { style: showClusters ? { lineWidth: 1.6, stroke: '#8494b0', endArrow: false } : { lineWidth: 2 } },
   };
 }
 
@@ -19792,7 +20258,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -19902,7 +20368,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -19962,8 +20428,16 @@ const layouts: Record<string, LayoutConfig> = {
   concentric: { type: 'concentric', sortBy: 'degree', nodeSize: 24 },
   force: { type: 'force', linkDistance: 100 },
   'd3-force': { type: 'd3-force', linkDistance: 100 },
-  'force-atlas2': { type: 'force-atlas2', kr: 8, kg: 2 },
-  fruchterman: { type: 'fruchterman', gravity: 12 },
+  'force-atlas2': { type: 'force-atlas2', kr: 12, kg: 0.5, preventOverlap: true, nodeSize: 24, maxIteration: 200 },
+  fruchterman: {
+    type: 'fruchterman',
+    width: 560,
+    height: 300,
+    center: [240, 150],
+    gravity: 4,
+    maxIteration: 250,
+    minMovement: 0.05,
+  },
   mds: { type: 'mds', linkDistance: 80 },
 };
 ```
@@ -19985,8 +20459,16 @@ export async function run(container: HTMLElement) {
     concentric: { type: 'concentric', sortBy: 'degree', nodeSize: 24 },
     force: { type: 'force', linkDistance: 100 },
     'd3-force': { type: 'd3-force', linkDistance: 100 },
-    'force-atlas2': { type: 'force-atlas2', kr: 8, kg: 2 },
-    fruchterman: { type: 'fruchterman', gravity: 12 },
+    'force-atlas2': { type: 'force-atlas2', kr: 12, kg: 0.5, preventOverlap: true, nodeSize: 24, maxIteration: 200 },
+    fruchterman: {
+      type: 'fruchterman',
+      width: 560,
+      height: 300,
+      center: [240, 150],
+      gravity: 4,
+      maxIteration: 250,
+      minMovement: 0.05,
+    },
     mds: { type: 'mds', linkDistance: 80 },
   };
   // #endregion network-options
@@ -20013,7 +20495,7 @@ export async function run(container: HTMLElement) {
     },
     edge: { style: { lineWidth: 2 } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   const panel = createDemoPanel(container);
   let revision = 0;
@@ -20034,7 +20516,7 @@ export async function run(container: HTMLElement) {
       try {
         await graph.layout();
         if (current !== revision || graph.destroyed) return;
-        graph.fitView({ padding: 48, maxZoom: 1 });
+        graph.fitView({ padding: 48 });
         panel.setStatus(`${type} ready`);
       } catch {
         if (current === revision && !graph.destroyed) panel.setStatus('Layout failed');
@@ -20134,8 +20616,8 @@ export function createDemoPanel(container: string | HTMLElement, description = '
 | [`dagre`](/docs/guides/layout-dagre)               | 按流程或依赖关系分层。                | `{ type: 'dagre', rankdir: 'LR', ranksep: 80 }`                   |
 | [`force`](/docs/guides/layout-force)               | 让相连节点靠近，同时拉开节点间距。          | `{ type: 'force', linkDistance: 100 }`                            |
 | [`d3-force`](/docs/guides/layout-d3-force)         | 用 D3 力模拟排列关系网络。            | `{ type: 'd3-force', linkDistance: 100 }`                         |
-| [`force-atlas2`](/docs/guides/layout-force-atlas2) | 用力模拟呈现网络中的群组。              | `{ type: 'force-atlas2', kr: 8, kg: 2 }`                          |
-| [`fruchterman`](/docs/guides/layout-fruchterman)   | 用引力和斥力分布节点。                | `{ type: 'fruchterman', gravity: 12 }`                            |
+| [`force-atlas2`](/docs/guides/layout-force-atlas2) | 用力模拟呈现网络中的群组。              | `{ type: 'force-atlas2', kr: 12, kg: 0.5 }`                       |
+| [`fruchterman`](/docs/guides/layout-fruchterman)   | 用引力和斥力分布节点。                | `{ type: 'fruchterman', gravity: 4 }`                             |
 | [`radial`](/docs/guides/layout-radial)             | **可选。** 围绕指定节点，按图上的距离分圈。   | `{ type: 'radial', focusNode: '0', unitRadius: 68 }`              |
 | [`concentric`](/docs/guides/layout-concentric)     | 按节点度数排成同心圆。                | `{ type: 'concentric', sortBy: 'degree' }`                        |
 | [`mds`](/docs/guides/layout-mds)                   | **可选。** 用平面上的距离表现节点在图中的远近。 | `{ type: 'mds', linkDistance: 80 }`                               |
@@ -20209,8 +20691,12 @@ const layouts: Record<string, LayoutConfig> = {
 **完整运行代码**
 
 ```ts
-import { Graph, type LayoutConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type LayoutConfig } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: [56, 48, 76, 48] };
+}
 
 export async function run(container: HTMLElement) {
   // #region layout-options
@@ -20233,7 +20719,7 @@ export async function run(container: HTMLElement) {
     layout: layouts.grid,
     node: { style: { size: 28, label: (node) => node.id, labelOffsetY: 8 } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   const ui = createDemoPanel(container);
   let generation = 0;
@@ -20249,7 +20735,7 @@ export async function run(container: HTMLElement) {
       try {
         await graph.layout();
         if (current !== generation || graph.destroyed) return;
-        graph.fitView({ padding: 56, maxZoom: 1 });
+        graph.fitView(getFitOptions());
         ui.setStatus(`${value} ready`);
       } catch {
         if (current === generation && !graph.destroyed) ui.setStatus('Layout failed');
@@ -20391,9 +20877,26 @@ function network(type: string): ExampleOptions {
     [2, 5], [2, 6], [3, 7], [3, 8], [3, 9],
     [7, 8], [8, 9], [4, 10], [4, 11], [10, 11],
   ];
+  const showClusters = type === 'force-atlas2' || type === 'fruchterman';
+  // Seed the three groups around distinct centers so rerunning starts from the same layout.
+  const clusters = [
+    { ids: [3, 7, 8, 9], x: 90, y: 120, color: '#2468d8' },
+    { ids: [0, 1, 5, 2, 6], x: 240, y: 205, color: '#7755c7' },
+    { ids: [4, 10, 11], x: 390, y: 120, color: '#0c8177' },
+  ];
+  const nodes = showClusters
+    ? clusters.flatMap(({ ids, x, y, color }, clusterIndex) => {
+        const startAngle = type === 'fruchterman' && clusterIndex === 1 ? 3 * Math.PI / 2 : 0;
+        return ids.map((id, index) => {
+          const angle = startAngle + 2 * Math.PI * index / ids.length;
+          return { id: String(id), x: x + 34 * Math.cos(angle), y: y + 34 * Math.sin(angle), data: { color } };
+        });
+      })
+    : Array.from({ length: 12 }, (_, index) => ({ id: String(index) }));
+
   return {
     data: {
-      nodes: Array.from({ length: 12 }, (_, index) => ({ id: String(index) })),
+      nodes,
       edges: links.map(([source, target]) => ({ source: String(source), target: String(target) })),
     },
     node: {
@@ -20402,10 +20905,10 @@ function network(type: string): ExampleOptions {
         label: (node) => node.id,
         labelColor: '#fff',
         labelPlacement: 'center',
-        fill: (node) => type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff',
+        fill: (node) => String(node.data?.color ?? (type === 'radial' && node.id === '0' ? '#6d28d9' : '#1677ff')),
       },
     },
-    edge: { style: { lineWidth: 2 } },
+    edge: { style: showClusters ? { lineWidth: 1.6, stroke: '#8494b0', endArrow: false } : { lineWidth: 2 } },
   };
 }
 
@@ -20415,7 +20918,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -20531,7 +21034,7 @@ async function render(container: HTMLElement, layout: LayoutConfig, options: Exa
     ...options,
     layout,
     behaviors: ['drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36, maxZoom: 1 },
+    autoFit: { padding: 36 },
   });
   try {
     await graph.render();
@@ -20683,7 +21186,7 @@ export async function run(container: HTMLElement) {
     },
     label: { hideOnLowZoom: false },
     behaviors: [],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   const ui = createDemoPanel(container);
   let generation = 0;
@@ -20832,7 +21335,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 6 } },
     edge: { style: { endArrow: false, opacity: 0.2 } },
     behaviors: [],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   const ui = createDemoPanel(container);
   let generation = 0;
@@ -20844,7 +21347,7 @@ export async function run(container: HTMLElement) {
     try {
       await graph.layout();
       if (current !== generation || graph.destroyed) return;
-      graph.fitView({ padding: 48, maxZoom: 1 });
+      graph.fitView({ padding: 48 });
       ui.setStatus(`${name} ready`);
     } catch {
       if (current === generation && !graph.destroyed) ui.setStatus('layout failed');
@@ -21099,8 +21602,12 @@ const layouts: Record<string, LayoutConfig> = {
 **完整运行代码**
 
 ```ts
-import { Graph, type LayoutConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type LayoutConfig } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: [56, 48, 76, 48] };
+}
 
 export async function run(container: HTMLElement) {
   // #region layout-options
@@ -21123,7 +21630,7 @@ export async function run(container: HTMLElement) {
     layout: layouts.grid,
     node: { style: { size: 28, label: (node) => node.id, labelOffsetY: 8 } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   const ui = createDemoPanel(container);
   let generation = 0;
@@ -21139,7 +21646,7 @@ export async function run(container: HTMLElement) {
       try {
         await graph.layout();
         if (current !== generation || graph.destroyed) return;
-        graph.fitView({ padding: 56, maxZoom: 1 });
+        graph.fitView(getFitOptions());
         ui.setStatus(`${value} ready`);
       } catch {
         if (current === generation && !graph.destroyed) ui.setStatus('Layout failed');
@@ -21420,7 +21927,11 @@ await graph.render();
 
 
 ```ts
-import { Graph, type NodeConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type NodeConfig } from '@antv/g6-lite';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: 40, maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const node: NodeConfig = {
@@ -21442,13 +21953,13 @@ export async function run(container: HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: 'high-risk', x: 120, y: 100, data: { risk: 'high' } },
-        { id: 'normal-risk', x: 360, y: 100, data: { risk: 'normal' } },
+        { id: 'high-risk', x: 160, y: 100, data: { risk: 'high' } },
+        { id: 'normal-risk', x: 320, y: 100, data: { risk: 'normal' } },
       ],
       edges: [],
     },
     node,
-    autoFit: { padding: 40, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: ['click-select'],
   });
   try {
@@ -21488,17 +21999,21 @@ node: {
 **完整运行代码**
 
 ```ts
-import { Graph } from '@antv/g6-lite';
+import { Graph, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: 40, maxZoom: 1.5 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
     container,
     data: {
       nodes: [
-        { id: 'A', x: 80, y: 100, data: { value: 16, group: 'core' } },
+        { id: 'A', x: 128, y: 100, data: { value: 16, group: 'core' } },
         { id: 'B', x: 240, y: 100, data: { value: 28, group: 'other' } },
-        { id: 'C', x: 400, y: 100, data: { value: 40, group: 'core' } },
+        { id: 'C', x: 352, y: 100, data: { value: 40, group: 'core' } },
       ],
       edges: [{ source: 'A', target: 'B' }, { source: 'B', target: 'C' }],
     },
@@ -21518,7 +22033,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion node-options
     edge: { style: { stroke: '#94a3b8' } },
-    autoFit: { padding: 40, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: ['click-select'],
   });
   const ui = createDemoPanel(container);
@@ -21654,9 +22169,9 @@ export async function run(container: HTMLElement) {
     data: {
       nodes: [
         { id: 'api', name: 'API', x: 100, y: 100, data: { placement: 'left' } },
-        { id: 'Database', x: 260, y: 100 },
-        { id: 'cache', name: 'Cache', x: 420, y: 100, data: { placement: 'right' } },
-        { id: 'worker', name: 'Worker', x: 580, y: 100, data: { hideLabel: true } },
+        { id: 'Database', x: 220, y: 100 },
+        { id: 'cache', name: 'Cache', x: 340, y: 100, data: { placement: 'right' } },
+        { id: 'worker', name: 'Worker', x: 460, y: 100, data: { hideLabel: true } },
       ],
       edges: [],
     },
@@ -21672,7 +22187,7 @@ export async function run(container: HTMLElement) {
       },
     },
     // #endregion label-style
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 64 },
     behaviors: [],
   });
   try {
@@ -21706,6 +22221,7 @@ const node: NodeConfig = {
     size: 40,
     label: (item) => String(item.data?.name ?? item.id),
     labelPlacement: 'bottom',
+    labelOffsetY: 8,
     labelMaxWidth: 120,
     labelBackground: (item) => item.id === 'db' ? '#fff1b8' : '#e6f4ff',
     labelBackgroundPadding: 6,
@@ -21717,7 +22233,11 @@ const node: NodeConfig = {
 **完整运行代码**
 
 ```ts
-import { Graph, type NodeConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type NodeConfig } from '@antv/g6-lite';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: [36, 60, 64, 42] };
+}
 
 export async function run(container: HTMLElement) {
   // #region node-label
@@ -21726,6 +22246,7 @@ export async function run(container: HTMLElement) {
       size: 40,
       label: (item) => String(item.data?.name ?? item.id),
       labelPlacement: 'bottom',
+      labelOffsetY: 8,
       labelMaxWidth: 120,
       labelBackground: (item) => item.id === 'db' ? '#fff1b8' : '#e6f4ff',
       labelBackgroundPadding: 6,
@@ -21737,13 +22258,13 @@ export async function run(container: HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: 'api', x: 120, y: 100, data: { name: 'API Server' } },
-        { id: 'db', x: 360, y: 100, data: { name: 'Database with a very long name' } },
+        { id: 'api', x: 160, y: 100, data: { name: 'API Server' } },
+        { id: 'db', x: 324, y: 100, data: { name: 'Database with a very long name' } },
       ],
       edges: [],
     },
     node,
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: [],
   });
   try {
@@ -21834,7 +22355,7 @@ export async function run(container: HTMLElement) {
       },
     },
     // #endregion icon-style
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: [48, 48, 88, 48] },
     behaviors: [],
   });
   try {
@@ -21923,7 +22444,7 @@ export async function run(container: string | HTMLElement) {
   const graph = new Graph({
     // Labels are two lines and hang below nodes (labelPlacement: 'bottom');
     // the bottom padding reserves their height so they stay inside the view.
-    autoFit: { padding: [24, 48, 64, 48] },
+    autoFit: { padding: [24, 64, 64, 64] },
     container,
     data: {
       nodes: [
@@ -22043,7 +22564,7 @@ export async function run(container: HTMLElement) {
       }],
       // #endregion badge-options
     },
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
     behaviors: [],
   });
   try {
@@ -22081,8 +22602,13 @@ stateStyles: {
 **完整运行代码**
 
 ```ts
-import { Graph, type ElementState } from '@antv/g6-lite';
+import { Graph, type ElementState, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  // Keep this two-node comparison comfortably sized on wide and high-DPI displays.
+  return { padding: [96, 60, 96, 60], maxZoom: 1.6 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -22102,7 +22628,7 @@ export async function run(container: HTMLElement) {
       // #endregion state-styles
     },
     behaviors: [],
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   // #region states
   const toggle = (state: ElementState) => {
@@ -22248,7 +22774,7 @@ export async function run(container: HTMLElement) {
       },
       // #endregion halo-options
     },
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: [48, 48, 72, 48] },
     behaviors: [],
   });
   try {
@@ -22314,7 +22840,7 @@ export async function run(container: HTMLElement) {
         labelOffsetY: 4,
       },
     },
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
     behaviors: [],
   });
   const ui = createDemoPanel(container);
@@ -22575,7 +23101,7 @@ export async function run(container: HTMLElement) {
     } satisfies CounterOptions],
     // #endregion activate
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64, maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1) },
   });
   try { await graph.render(); return graph; }
   catch (error) { graph.destroy(); throw error; }
@@ -22725,8 +23251,13 @@ const clear = () => graph.clearItemStates('A');
 **完整运行代码**
 
 ```ts
-import { Graph, type ElementState } from '@antv/g6-lite';
+import { Graph, type ElementState, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  // Keep this two-node comparison comfortably sized on wide and high-DPI displays.
+  return { padding: [96, 60, 96, 60], maxZoom: 1.6 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -22746,7 +23277,7 @@ export async function run(container: HTMLElement) {
       // #endregion state-styles
     },
     behaviors: [],
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   // #region states
   const toggle = (state: ElementState) => {
@@ -22957,7 +23488,8 @@ export async function run(container: HTMLElement) {
       { type: 'click-select', multiple: true, trigger: 'shift' },
       { type: 'hover-highlight', degree: 1 },
     ],
-    autoFit: { padding: 60, maxZoom: 1 },
+    // Reserve vertical room for the controls, node labels, and selection status.
+    autoFit: { padding: [88, 60, 112, 60] },
   });
   const nextData = (): GraphData => ({
     nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'C', x: 320, y: 0 }, { id: 'D', x: 160, y: 80 }],
@@ -23216,7 +23748,7 @@ export async function run(container: HTMLElement) {
     },
     node: { style: { label: (node) => node.id, labelColor: '#334155', labelOffsetY: 8 } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -23350,7 +23882,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { stroke: '#F08F56', strokeWidth: 3 } },
     },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: [56, 56, 112, 56] },
   });
   try {
     await graph.render();
@@ -23569,7 +24101,7 @@ export async function run(container: HTMLElement) {
     // #endregion config-transforms
     node: { style: { size: 32, label: (node) => String(node.data?.label ?? node.id) } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);
@@ -23707,15 +24239,21 @@ const pan = () => {
   graph.setCamera({ x: camera.x + 80 });
 };
 const center = () => graph.fitCenter();
-const fit = () => graph.fitView({ padding: [70, 50, 110, 50], maxZoom: 1 });
+const fit = () => graph.fitView(getFitOptions(container));
 const reset = () => graph.resetCamera();
 ```
 
 **完整运行代码**
 
 ```ts
-import { Graph, type Camera } from '@antv/g6-lite';
+import { Graph, type Camera, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(container: HTMLElement): FitViewOptions {
+  const controls = container.querySelector<HTMLElement>('.g6lite-demo-controls');
+  const right = container.clientWidth < 500 && (controls?.offsetHeight ?? 0) > 60 ? 184 : 36;
+  return { padding: [56, right, 116, 36], maxZoom: Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -23726,7 +24264,7 @@ export async function run(container: HTMLElement) {
     },
     node: { style: { size: 32, label: (node) => node.id === 'A' ? 'A (0, 0)' : 'B (240, 80)', labelOffsetY: 10 } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: [70, 50, 110, 50], maxZoom: 1 },
+    autoFit: getFitOptions(container),
   });
   // #region camera
   const zoom = () => graph.zoomBy(1.5, { maxZoom: 4 });
@@ -23735,7 +24273,7 @@ export async function run(container: HTMLElement) {
     graph.setCamera({ x: camera.x + 80 });
   };
   const center = () => graph.fitCenter();
-  const fit = () => graph.fitView({ padding: [70, 50, 110, 50], maxZoom: 1 });
+  const fit = () => graph.fitView(getFitOptions(container));
   const reset = () => graph.resetCamera();
   // #endregion camera
   let saved: Camera;
@@ -23779,6 +24317,7 @@ export async function run(container: HTMLElement) {
     disposed = true;
     cancelAnimationFrame(frame);
     for (const event of events) graph.off(event, schedule);
+    graph.off('resize', fit);
     window.removeEventListener('click', schedule);
     window.removeEventListener('wheel', schedule);
     window.removeEventListener('scroll', schedule, true);
@@ -23789,7 +24328,6 @@ export async function run(container: HTMLElement) {
   try {
     await graph.render();
     if (graph.destroyed) return graph;
-    save();
     for (const event of events) graph.on(event, schedule);
     // Refresh after interaction and page scrolling, including the shared toolbar.
     window.addEventListener('click', schedule);
@@ -23798,7 +24336,11 @@ export async function run(container: HTMLElement) {
     for (const [label, action] of actions) {
       ui.addAction(label, () => { action(); schedule(); });
     }
+    if (container.clientWidth < 500) ui.gui.close();
     container.append(status);
+    fit();
+    save();
+    graph.on('resize', fit);
     update();
     return graph;
   } catch (error) {
@@ -23896,8 +24438,12 @@ await graph.setData(data(next), {
 import { Graph, type FitViewOptions, type GraphData } from '@antv/g6-lite';
 import GUI from 'lil-gui';
 
+export function getFitOptions(): FitViewOptions {
+  return { padding: [96, 48, 112, 48], maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1) };
+}
+
 export async function run(container: HTMLElement) {
-  const fit: FitViewOptions = { padding: [76, 48, 100, 48], maxZoom: 1 };
+  const fit = getFitOptions();
   const data = (wide: boolean): GraphData => ({
     nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'B', x: wide ? 800 : 240, y: 0 }],
     edges: [{ id: 'A-B', source: 'A', target: 'B' }],
@@ -24064,7 +24610,7 @@ export function createDemoPanel(container: string | HTMLElement, description = '
 
 
 ```ts
-autoFit: { padding: [84, 40, 100, 40], maxZoom: 1 },
+autoFit: { padding: [84, 40, 100, 40] },
 ```
 
 **完整运行代码**
@@ -24085,7 +24631,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 10 } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
     // #region auto-fit
-    autoFit: { padding: [84, 40, 100, 40], maxZoom: 1 },
+    autoFit: { padding: [84, 40, 100, 40] },
     // #endregion auto-fit
   });
   // ResizeObserver detects these CSS width changes; no setSize or render call.
@@ -24273,6 +24819,72 @@ zoomTo / zoomBy 的 minZoom、maxZoom 只约束本次方法调用；滚轮范围
 * [搜索并聚焦](/docs/examples/search-focus)
 * [视口与坐标转换](/docs/examples/viewport-controls)
 * [缩放范围与灵敏度](/docs/examples/zoom-options)
+
+
+# 性能对比 (/docs/metrics/performance)
+
+
+
+本页比较 G6Lite、G6、Sigma.js 和 ECharts 的 Graph 系列。首绘使用同一份预置坐标数据，包体积使用同一种构建方式。测试于 2026-11-13 完成，G6Lite 使用本地打包的 `0.1.0`。
+
+<span id="常用图库选型对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="当前公开口径" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## 首绘耗时 [#render-time]
+
+表中是从创建图到渲染 API 完成后再经过两帧的中位耗时，单位为毫秒。本轮使用无头 Chromium，WebGL 由 SwiftShader 软件渲染。
+
+| npm 包                               | 渲染器       | 1,000 节点 / 3,000 边（ms） | 5,000 节点 / 15,000 边（ms） |
+| ----------------------------------- | --------- | ---------------------: | ----------------------: |
+| `@antv/g6-lite@0.1.0`               | WebGL     |                  134.1 |                   146.1 |
+| `@antv/g6@5.1.1`                    | Canvas 2D |                  297.4 |                 1,502.2 |
+| `sigma@4.0.4` + `graphology@0.26.0` | WebGL 2   |                  466.1 |                   748.4 |
+| `echarts@6.1.0`                     | Canvas 2D |                   56.6 |                   236.3 |
+
+<span id="环境要求" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="如何进行数值对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### 测试条件 [#benchmark-method]
+
+* Apple M3 Pro，macOS（Darwin 25.2.0），无头 Chromium 151.0.7922.34。画布 900 × 600 CSS 像素，DPR 1。WebGL 渲染器为 `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`。
+* 数据使用相同节点、边和固定坐标，绘制圆形节点与直线边，关闭标签和动画，不运行布局。每个规模下，每个库预热 3 次后交错测量 20 次，测完销毁实例。
+* 库在计时前已加载。计时包含图实例和内部模型的创建、首次渲染与两次帧回调。Sigma.js 包含 Graphology 建图。该指标反映本场景的首绘等待，GPU 执行时间、布局和交互需分别测量。 [下载原始样本](/benchmarks/graph-performance.json)
+
+本轮结果只适用于上述测试环境，不代表最低浏览器版本认证。各浏览器的能力版本参考与尚未覆盖的验收范围见[最低浏览器版本](/docs/compatibility/browser#最低浏览器版本)。
+
+## 浏览器包体积 [#bundle-size]
+
+使用 esbuild 0.21.5 将各库的 npm 入口和依赖打包为单个浏览器脚本，并进行代码压缩。G6Lite 测量默认入口，可选布局按需引入。ECharts 只引入 GraphChart 和 CanvasRenderer，Sigma.js 包含 Graphology。体积以 KiB 计，不含 source map。
+
+| npm 包                               | 代码压缩后（KiB） | gzip -9（KiB） |
+| ----------------------------------- | ---------: | -----------: |
+| `@antv/g6-lite@0.1.0`               |      511.3 |        159.5 |
+| `@antv/g6@5.1.1`                    |    1,435.3 |        413.4 |
+| `sigma@4.0.4` + `graphology@0.26.0` |      438.4 |        110.7 |
+| `echarts@6.1.0`                     |      386.3 |        130.2 |
+
+### G6Lite CDN 文件体积 [#umd-size]
+
+CDN 文件使用 `gzip -9` 分别测量，1 kB = 1,000 字节。首页展示默认脚本的体积。
+
+| 发布文件                     | 内容                | gzip -9（kB） |
+| ------------------------ | ----------------- | ----------: |
+| `g6-lite.min.js`         | 默认脚本，包含渲染、交互和内置布局 |       150.2 |
+| `g6-lite-layouts.min.js` | 六种可选布局，使用时额外加载    |        29.1 |
+
+需要使用可选布局时，加载附加脚本后注册对应的布局。 [可选布局用法](/docs/guides/layout-overview#optional-layouts)
+
+## 业务图怎么测 [#performance-tuning]
+
+用真实数据和目标设备分别记录布局、首绘和交互。首屏慢先拆开布局与绘制，再评估 Worker。更新卡顿时，复用图实例，通过增量 API 更新数据或状态。缩放掉帧时，逐项对比标签、装饰和视口尺寸。反复挂载后检查销毁与监听清理。 [Worker 布局](/docs/guides/layout-worker) · [数据写入](/docs/api/graph#graph-data-mutations) · [标签策略](/docs/api/options#options-label)
+
+**相关可运行示例**
+
+* [200 节点](/docs/examples/large)
+* [5000 节点与标签](/docs/examples/large-labeled)
+* [AI Papers 大规模关系图](/docs/examples/real-dataset)
 
 
 # 事件 (/docs/api/graph/events)
@@ -24608,7 +25220,7 @@ for (const event of events) watch(event); // Before render: capture initial even
 **完整运行代码**
 
 ```ts
-import { Graph, type GraphData, type GraphEventMap } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type GraphData, type GraphEventMap } from '@antv/g6-lite';
 import GUI from 'lil-gui';
 
 export async function run(container: HTMLElement) {
@@ -24616,7 +25228,10 @@ export async function run(container: HTMLElement) {
     nodes: ['A', 'B', 'C'].map((id) => ({ id, data: { edits: 0 } })),
     edges: [{ id: 'A-B', source: 'A', target: 'B' }],
   });
-  const fit = { padding: [70, 40, 140, 40] as [number, number, number, number], maxZoom: 1 };
+  const fit: FitViewOptions = {
+    padding: [70, 40, 140, 40],
+    maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1),
+  };
   const graph = new Graph({
     container,
     data: initialData(),
@@ -24803,7 +25418,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { fill: '#873BF4', stroke: '#5B21B6', strokeWidth: 2, haloWidth: 12 } },
     },
     behaviors,
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: { padding: 60 },
   });
   const status = document.createElement('div');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';

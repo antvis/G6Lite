@@ -69,7 +69,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { selected: { fill: '#8050d2', haloWidth: 10 } },
     },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 55, maxZoom: 1 },
+    autoFit: { padding: 55 },
   });
 
   const ui = createDemoPanel(container);
@@ -215,7 +215,7 @@ export async function run(container: HTMLElement) {
     // #region highlight
     behaviors: ['zoom-canvas', 'drag-canvas', { type: 'hover-highlight', degree: 1, inactiveState: 'inactive' }],
     // #endregion highlight
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: { padding: 60 },
   });
   const status = document.createElement('div');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';
@@ -312,7 +312,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 8 } },
     edge: { style: { hitAreaWidth: 12 } },
     behaviors: [tooltip],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();
@@ -391,7 +391,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 32, label: (node) => node.id, labelOffsetY: 8 } },
     edge: { style: { hitAreaWidth: 12 } },
     behaviors: [tooltip],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   try {
     await graph.render();

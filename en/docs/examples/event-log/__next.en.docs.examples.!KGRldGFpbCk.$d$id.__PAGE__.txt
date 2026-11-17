@@ -1,0 +1,66 @@
+1:"$Sreact.fragment"
+2:I[266110,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"ExampleDetailClient"]
+4:I[951315,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"default"]
+6:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+3:T736,// Local presentation helpers in this repository are used only for the example controls.
+/**
+ * Demo: listen to click, drag, and selection events.
+ */
+import { Graph } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+export async function run(container: string | HTMLElement) {
+  const graph = new Graph({
+    autoFit: true,
+    container,
+    data: {
+      nodes: [
+        { id: 'a', data: { label: 'A' }, x: 140, y: 180 },
+        { id: 'b', data: { label: 'B' }, x: 320, y: 100 },
+        { id: 'c', data: { label: 'C' }, x: 320, y: 260 },
+        { id: 'd', data: { label: 'D' }, x: 500, y: 180 },
+      ],
+      edges: [
+        { source: 'a', target: 'b' },
+        { source: 'a', target: 'c' },
+        { source: 'b', target: 'd' },
+        { source: 'c', target: 'd' },
+      ],
+    },
+    node: {
+      style: {
+        size: 36,
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'center',
+        labelColor: '#fff',
+      },
+    },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'click-select', 'drag-node'],
+  });
+  await graph.render();
+
+  const ui = createDemoPanel(container, '点击或拖拽节点，查看最近的公开事件。');
+  const lines: string[] = ['点击或拖拽节点'];
+  const push = (line: string) => {
+    lines.unshift(line);
+    ui.setStatus(lines.slice(0, 4).join('\n'));
+  };
+  graph.on('node:click', ({ nodeId }) => push(`node:click ${nodeId}`));
+  graph.on('node:dragend', ({ nodeId }) => push(`node:dragend ${nodeId}`));
+  graph.on('node:selectchange', ({ nodeId, selected }) => push(`node:selectchange ${nodeId} ${selected}`));
+  ui.setStatus(lines[0]);
+
+  return {
+    getGraphs: () => [graph],
+    getData: () => graph.getData(),
+    fitView: () => graph.fitView(),
+    destroy() {
+      graph.destroy();
+      ui.destroy();
+    },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Event log\",\"description\":\"Inspect the public events emitted by click, drag, and selection.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/event-log\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/event-log\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/event-log/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Event log\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/event-log\"}]}]}"}}],[[["$","$L2","event-log",{"id":"event-log","locale":"en","initialSource":"$3"}]],"\n",["$","p",null,{"children":["Click a node for node:selectchange, or drag it for node:dragend. A completed drag suppresses its subsequent node click. See the ",["$","$L4",null,{"href":"/en/docs/guides/events","children":"event guide"}]," for integration and the ",["$","$L4",null,{"href":"/en/docs/api/graph/events","children":"event reference"}]," for payloads and timing."]}]]],[["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]],"$L5"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"S7XSqoamkCc5GeDMtHoaG"}
+5:["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]
+8:null

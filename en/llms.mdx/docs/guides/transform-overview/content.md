@@ -158,7 +158,7 @@ export async function run(container: HTMLElement) {
     // #endregion config-transforms
     node: { style: { size: 32, label: (node) => String(node.data?.label ?? node.id) } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
   });
   const ui = createDemoPanel(container);
   const destroy = graph.destroy.bind(graph);

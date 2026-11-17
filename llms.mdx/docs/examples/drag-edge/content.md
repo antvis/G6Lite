@@ -8,7 +8,7 @@
 
 ## 如何体验
 
-按住边靠近端点的位置，拖到另一个节点上松开。
+按住 A → B 边上靠近 B 的圆点手柄，拖到 C 上松开。
 
 ## 数据说明
 
@@ -18,12 +18,14 @@
 
 ```ts
 // Local presentation helpers in this repository are used only for the example controls.
-import { Graph } from '@antv/g6-lite';
+import { Graph, type GraphEventMap } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: string | HTMLElement) {
+  const nodeSize = 38;
+  const activeColor = '#5366ad';
   const graph = new Graph({
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
     container,
     data: {
       nodes: [
@@ -37,14 +39,67 @@ export async function run(container: string | HTMLElement) {
         { id: 'reference-edge', source: 'c', target: 'd' },
       ],
     },
-    node: { style: { size: 38, label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' } },
-    edge: { style: { lineWidth: 4, hitAreaWidth: 16, endArrow: true } },
+    node: { style: { size: nodeSize, label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' } },
+    label: { hideOnLowZoom: false },
+    edge: {
+      style: {
+        stroke: (_source, _target, edge) => edge.id === 'editable-edge' ? activeColor : '#94a3b8',
+        lineWidth: 4,
+        hitAreaWidth: 36,
+        endArrow: true,
+        label: (_source, _target, edge) => edge.id === 'editable-edge' ? '●' : false,
+        labelPlacement: 'end',
+        labelFontSize: 18,
+        labelColor: activeColor,
+        labelBackground: false,
+        labelAutoRotate: false,
+      },
+      stateStyles: { inactive: { opacity: 0.25 } },
+    },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-edge'],
   });
   const ui = createDemoPanel(container);
+  const canvas = graph.getCanvas();
+  const preview = document.createElement('div');
+  preview.dataset.edgeDragPreview = '';
+  preview.setAttribute('aria-hidden', 'true');
+  preview.hidden = true;
+  preview.style.cssText = `position:absolute;pointer-events:none;z-index:1;height:0;border-top:2px dashed ${activeColor};transform-origin:left center;`;
+  canvas.parentElement!.append(preview);
 
-  graph.on('edge:dragstart', (payload: { edgeId?: string; dragEnd: string }) => {
+  const drawPreview = ({ source, target, dragEnd, event }: GraphEventMap['edge:drag'][0]) => {
+    const stationary = graph.getNodePosition(dragEnd === 'source' ? target : source);
+    if (!stationary) return;
+    const { x, y } = graph.graphToScreen(stationary.x, stationary.y);
+    const dx = event.clientX - x;
+    const dy = event.clientY - y;
+    const length = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx);
+    const radius = graph.graphToScreen(stationary.x + nodeSize / 2, stationary.y).x - x;
+    const bounds = canvas.getBoundingClientRect();
+    preview.style.left = `${x + radius * Math.cos(angle) - bounds.left}px`;
+    preview.style.top = `${y + radius * Math.sin(angle) - bounds.top}px`;
+    preview.style.width = `${Math.max(0, length - radius)}px`;
+    preview.style.transform = `rotate(${angle}rad)`;
+    preview.hidden = false;
+  };
+  graph.on('edge:pointerenter', () => {
+    if (preview.hidden) canvas.style.cursor = 'grab';
+  });
+  graph.on('edge:pointerleave', () => {
+    if (preview.hidden) canvas.style.cursor = '';
+  });
+  graph.on('edge:dragstart', (payload) => {
+    canvas.style.cursor = 'grabbing';
+    if (payload.edgeId) graph.setItemState(payload.edgeId, 'inactive', true);
+    drawPreview(payload);
     ui.setStatus(`dragstart ${payload.edgeId ?? '-'} (${payload.dragEnd})`);
+  });
+  graph.on('edge:drag', drawPreview);
+  graph.on('edge:dragend', ({ edgeId }) => {
+    preview.hidden = true;
+    canvas.style.cursor = '';
+    if (edgeId) graph.setItemState(edgeId, 'inactive', false);
   });
   // #region reconnect
   graph.on('edge:dragend', ({ edgeId, source, target, reconnected }) => {
@@ -57,6 +112,7 @@ export async function run(container: string | HTMLElement) {
 
   const destroy = graph.destroy.bind(graph);
   graph.destroy = () => {
+    preview.remove();
     ui.destroy();
     destroy();
   };

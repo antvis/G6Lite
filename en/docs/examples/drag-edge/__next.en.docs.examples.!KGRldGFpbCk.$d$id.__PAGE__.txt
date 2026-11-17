@@ -1,0 +1,115 @@
+1:"$Sreact.fragment"
+2:I[266110,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"ExampleDetailClient"]
+6:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+3:T1010,// Local presentation helpers in this repository are used only for the example controls.
+import { Graph, type GraphEventMap } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+export async function run(container: string | HTMLElement) {
+  const nodeSize = 38;
+  const activeColor = '#5366ad';
+  const graph = new Graph({
+    autoFit: { padding: 48 },
+    container,
+    data: {
+      nodes: [
+        { id: 'a', x: 120, y: 160, data: { label: 'A' } },
+        { id: 'b', x: 340, y: 80, data: { label: 'B' } },
+        { id: 'c', x: 340, y: 240, data: { label: 'C' } },
+        { id: 'd', x: 560, y: 160, data: { label: 'D' } },
+      ],
+      edges: [
+        { id: 'editable-edge', source: 'a', target: 'b' },
+        { id: 'reference-edge', source: 'c', target: 'd' },
+      ],
+    },
+    node: { style: { size: nodeSize, label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' } },
+    label: { hideOnLowZoom: false },
+    edge: {
+      style: {
+        stroke: (_source, _target, edge) => edge.id === 'editable-edge' ? activeColor : '#94a3b8',
+        lineWidth: 4,
+        hitAreaWidth: 36,
+        endArrow: true,
+        label: (_source, _target, edge) => edge.id === 'editable-edge' ? '●' : false,
+        labelPlacement: 'end',
+        labelFontSize: 18,
+        labelColor: activeColor,
+        labelBackground: false,
+        labelAutoRotate: false,
+      },
+      stateStyles: { inactive: { opacity: 0.25 } },
+    },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-edge'],
+  });
+  const ui = createDemoPanel(container);
+  const canvas = graph.getCanvas();
+  const preview = document.createElement('div');
+  preview.dataset.edgeDragPreview = '';
+  preview.setAttribute('aria-hidden', 'true');
+  preview.hidden = true;
+  preview.style.cssText = `position:absolute;pointer-events:none;z-index:1;height:0;border-top:2px dashed ${activeColor};transform-origin:left center;`;
+  canvas.parentElement!.append(preview);
+
+  const drawPreview = ({ source, target, dragEnd, event }: GraphEventMap['edge:drag'][0]) => {
+    const stationary = graph.getNodePosition(dragEnd === 'source' ? target : source);
+    if (!stationary) return;
+    const { x, y } = graph.graphToScreen(stationary.x, stationary.y);
+    const dx = event.clientX - x;
+    const dy = event.clientY - y;
+    const length = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx);
+    const radius = graph.graphToScreen(stationary.x + nodeSize / 2, stationary.y).x - x;
+    const bounds = canvas.getBoundingClientRect();
+    preview.style.left = `${x + radius * Math.cos(angle) - bounds.left}px`;
+    preview.style.top = `${y + radius * Math.sin(angle) - bounds.top}px`;
+    preview.style.width = `${Math.max(0, length - radius)}px`;
+    preview.style.transform = `rotate(${angle}rad)`;
+    preview.hidden = false;
+  };
+  graph.on('edge:pointerenter', () => {
+    if (preview.hidden) canvas.style.cursor = 'grab';
+  });
+  graph.on('edge:pointerleave', () => {
+    if (preview.hidden) canvas.style.cursor = '';
+  });
+  graph.on('edge:dragstart', (payload) => {
+    canvas.style.cursor = 'grabbing';
+    if (payload.edgeId) graph.setItemState(payload.edgeId, 'inactive', true);
+    drawPreview(payload);
+    ui.setStatus(`dragstart ${payload.edgeId ?? '-'} (${payload.dragEnd})`);
+  });
+  graph.on('edge:drag', drawPreview);
+  graph.on('edge:dragend', ({ edgeId }) => {
+    preview.hidden = true;
+    canvas.style.cursor = '';
+    if (edgeId) graph.setItemState(edgeId, 'inactive', false);
+  });
+  // #region reconnect
+  graph.on('edge:dragend', ({ edgeId, source, target, reconnected }) => {
+    if (reconnected && edgeId) {
+      graph.updateEdgeData([{ id: edgeId, source, target }]);
+    }
+    ui.setStatus(`dragend reconnected=${reconnected}\n${edgeId ?? '-'}: ${source} → ${target}`);
+  });
+  // #endregion reconnect
+
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => {
+    preview.remove();
+    ui.destroy();
+    destroy();
+  };
+  try {
+    await graph.render();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Drag edge endpoints\",\"description\":\"Drag an edge endpoint onto another node to reconnect it.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/drag-edge\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/drag-edge\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/drag-edge/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Drag edge endpoints\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/drag-edge\"}]}]}"}}],[["$","$L2","drag-edge",{"id":"drag-edge","locale":"en","initialSource":"$3"}]]],["$L4"],"$L5"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"S7XSqoamkCc5GeDMtHoaG"}
+4:["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]
+5:["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]
+8:null

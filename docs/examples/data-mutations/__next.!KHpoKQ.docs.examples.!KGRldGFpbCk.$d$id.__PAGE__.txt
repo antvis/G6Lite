@@ -1,0 +1,137 @@
+1:"$Sreact.fragment"
+2:I[266110,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"ExampleDetailClient"]
+6:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+3:T1010,// Local presentation helpers in this repository are used only for the example controls.
+import { Graph, type FitViewOptions, type GraphData } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+const INITIAL_DATA: GraphData = {
+  nodes: [
+    { id: 'a', x: 120, y: 160, data: { label: 'A', color: '#5B8FF9' } },
+    { id: 'b', x: 300, y: 90, data: { label: 'B', color: '#5AD8A6' } },
+    { id: 'c', x: 300, y: 230, data: { label: 'C', color: '#F6BD16' } },
+  ],
+  edges: [
+    { id: 'e-a-b', source: 'a', target: 'b', data: { weight: 1 } },
+    { id: 'e-a-c', source: 'a', target: 'c', data: { weight: 2 } },
+  ],
+};
+
+export async function run(container: string | HTMLElement) {
+  const fit: FitViewOptions = {
+    padding: [56, 28, 76, 28],
+    maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1),
+  };
+  const graph = new Graph({
+    autoFit: fit,
+    container,
+    data: INITIAL_DATA,
+    node: {
+      type: 'circle',
+      style: {
+        size: 34,
+        fill: (node) => String(node.data?.color ?? '#5B8FF9'),
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'center',
+        labelColor: '#fff',
+      },
+    },
+    edge: {
+      type: 'line',
+      style: {
+        stroke: '#94a3b8',
+        lineWidth: (_source, _target, edge) => Number(edge.data?.weight ?? 1) + 1,
+        endArrow: true,
+      },
+    },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+  });
+  await graph.render();
+
+  const ui = createDemoPanel(container);
+
+  let lastEvent = 'ready';
+  let sequence = 0;
+  const renderStatus = () => {
+    const snapshot = graph.getData();
+    ui.setStatus(
+      `nodes=${graph.getNodeCount()} edges=${graph.getEdgeCount()}\n` +
+        `ids=${snapshot.nodes.map((node) => node.id).join(', ')}\n` +
+        `last=${lastEvent}`,
+    );
+  };
+
+  for (const event of ['afteradditem', 'afterupdateitem', 'afterremoveitem'] as const) {
+    graph.on(event, (payload: { type: string; id: string; action?: string }) => {
+      lastEvent = `${event}: ${payload.type}:${payload.id}${payload.action ? ` (${payload.action})` : ''}`;
+      renderStatus();
+    });
+  }
+
+  ui.addAction('addNode', () => {
+    if (!graph.hasNode('d')) graph.addNode({ id: 'd', x: 480, y: 160, data: { label: 'D', color: '#E8684A' } });
+    renderStatus();
+  });
+  ui.addAction('addEdge', () => {
+    if (graph.hasNode('d') && !graph.hasEdge('e-c-d')) {
+      graph.addEdge({ id: 'e-c-d', source: 'c', target: 'd', data: { weight: 3 } });
+    }
+    renderStatus();
+  });
+  ui.addAction('updateNodeData', () => {
+    sequence++;
+    graph.updateNodeData('b', {
+      label: `B${sequence}`,
+      color: sequence % 2 ? '#9270CA' : '#5AD8A6',
+    });
+    renderStatus();
+  });
+  ui.addAction('updateEdgeData', () => {
+    graph.updateEdgeData([{ id: 'e-a-c', data: { weight: (sequence % 4) + 1 } }]);
+    renderStatus();
+  });
+  ui.addAction('批量新增', () => {
+    if (!graph.hasNode('e')) {
+      graph.addNodes([
+        { id: 'e', x: 480, y: 70, data: { label: 'E', color: '#6DC8EC' } },
+        { id: 'f', x: 480, y: 250, data: { label: 'F', color: '#FF9D4D' } },
+      ]);
+      graph.addEdges([
+        { id: 'e-b-e', source: 'b', target: 'e', data: { weight: 1 } },
+        { id: 'e-c-f', source: 'c', target: 'f', data: { weight: 1 } },
+      ]);
+    }
+    renderStatus();
+  });
+  ui.addAction('removeEdge', () => {
+    const edgeId = graph.hasEdge('e-c-d') ? 'e-c-d' : graph.hasEdge('e-a-c') ? 'e-a-c' : '';
+    if (edgeId) graph.removeEdge(edgeId);
+    renderStatus();
+  });
+  ui.addAction('removeNode', () => {
+    const nodeId = graph.hasNode('d') ? 'd' : graph.hasNode('f') ? 'f' : '';
+    if (nodeId) graph.removeNode(nodeId);
+    renderStatus();
+  });
+  ui.addAction('重置', async () => {
+    await graph.setData(INITIAL_DATA, { fitView: fit });
+    lastEvent = 'datachange: reset';
+    renderStatus();
+  });
+
+  renderStatus();
+  return {
+    getGraphs: () => [graph],
+    getData: () => graph.getData(),
+    fitView: () => graph.fitView({ padding: 64 }),
+    destroy: () => {
+      graph.destroy();
+      ui.destroy();
+    },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"节点与边增删改\",\"description\":\"集中演示节点和边的单个、批量新增、更新和删除\",\"url\":\"https://g6lite.antv.vision/docs/examples/data-mutations\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/data-mutations\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/data-mutations/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"节点与边增删改\",\"item\":\"https://g6lite.antv.vision/docs/examples/data-mutations\"}]}]}"}}],[["$","$L2","data-mutations",{"id":"data-mutations","locale":"zh","initialSource":"$3"}]]],["$L4"],"$L5"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"S7XSqoamkCc5GeDMtHoaG"}
+4:["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]
+5:["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]
+8:null

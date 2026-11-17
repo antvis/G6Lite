@@ -24,7 +24,7 @@ import { Graph } from '@antv/g6-lite';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
-    autoFit: true,
+    autoFit: { padding: 48 },
     container,
     data: {
       nodes: [
@@ -73,7 +73,6 @@ export async function run(container: string | HTMLElement) {
   });
   try {
     await graph.render();
-    graph.fitView({ padding: 48, maxZoom: 1 });
     return graph;
   } catch (error) {
     graph.destroy();

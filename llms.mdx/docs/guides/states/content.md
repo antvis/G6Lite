@@ -60,8 +60,13 @@ const clear = () => graph.clearItemStates('A');
 **完整运行代码**
 
 ```ts
-import { Graph, type ElementState } from '@antv/g6-lite';
+import { Graph, type ElementState, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  // Keep this two-node comparison comfortably sized on wide and high-DPI displays.
+  return { padding: [96, 60, 96, 60], maxZoom: 1.6 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -81,7 +86,7 @@ export async function run(container: HTMLElement) {
       // #endregion state-styles
     },
     behaviors: [],
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   // #region states
   const toggle = (state: ElementState) => {
@@ -292,7 +297,8 @@ export async function run(container: HTMLElement) {
       { type: 'click-select', multiple: true, trigger: 'shift' },
       { type: 'hover-highlight', degree: 1 },
     ],
-    autoFit: { padding: 60, maxZoom: 1 },
+    // Reserve vertical room for the controls, node labels, and selection status.
+    autoFit: { padding: [88, 60, 112, 60] },
   });
   const nextData = (): GraphData => ({
     nodes: [{ id: 'A', x: 0, y: 0 }, { id: 'C', x: 320, y: 0 }, { id: 'D', x: 160, y: 80 }],

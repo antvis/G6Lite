@@ -38,7 +38,7 @@ export async function mountGraph(container: HTMLElement) {
   });
   try {
     await graph.render();
-    graph.fitView({ padding: 32, maxZoom: 1 });
+    graph.fitView({ padding: 32 });
     return () => graph.destroy();
   } catch (error) {
     graph.destroy();

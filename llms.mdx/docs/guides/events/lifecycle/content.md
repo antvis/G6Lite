@@ -56,7 +56,7 @@ for (const event of events) watch(event); // Before render: capture initial even
 **完整运行代码**
 
 ```ts
-import { Graph, type GraphData, type GraphEventMap } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type GraphData, type GraphEventMap } from '@antv/g6-lite';
 import GUI from 'lil-gui';
 
 export async function run(container: HTMLElement) {
@@ -64,7 +64,10 @@ export async function run(container: HTMLElement) {
     nodes: ['A', 'B', 'C'].map((id) => ({ id, data: { edits: 0 } })),
     edges: [{ id: 'A-B', source: 'A', target: 'B' }],
   });
-  const fit = { padding: [70, 40, 140, 40] as [number, number, number, number], maxZoom: 1 };
+  const fit: FitViewOptions = {
+    padding: [70, 40, 140, 40],
+    maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1),
+  };
   const graph = new Graph({
     container,
     data: initialData(),

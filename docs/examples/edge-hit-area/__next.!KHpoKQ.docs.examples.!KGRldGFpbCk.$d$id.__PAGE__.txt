@@ -1,0 +1,104 @@
+1:"$Sreact.fragment"
+2:I[266110,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"ExampleDetailClient"]
+6:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+3:Te26,// Local presentation helpers in this repository are used only for the example controls.
+import { Graph } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+const EDGE_TYPES = [
+  { type: 'line' as const, title: '直线 + 箭头' },
+  { type: 'arc' as const, title: '弧线 / 平行边' },
+  { type: 'cubic' as const, title: '三次曲线' },
+  { type: 'polyline' as const, title: '折线' },
+];
+
+export async function run(container: string | HTMLElement) {
+  const root =
+    typeof container === 'string' ? (document.querySelector(container)! as HTMLElement) : container;
+  const graphs: Graph[] = [];
+  const board = document.createElement('div');
+  board.style.cssText =
+    'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px;width:100%;height:calc(100% - 36px);padding:8px;box-sizing:border-box;';
+  root.appendChild(board);
+
+  const ui = createDemoPanel(root, '边保持 1.5px 视觉宽度，但中心线两侧约 8px 都可悬停或点击。缩放后屏幕热区保持不变。');
+
+  for (const [index, item] of EDGE_TYPES.entries()) {
+    const panel = document.createElement('div');
+    panel.className = 'demo-canvas-card';
+    panel.style.cssText = 'position:relative;min-height:0;';
+    const title = document.createElement('div');
+    title.textContent = item.title;
+    title.style.cssText =
+      'position:absolute;z-index:2;left:12px;top:10px;font:12px/1.5 system-ui;color:#475569;pointer-events:none;';
+    const canvasHost = document.createElement('div');
+    canvasHost.style.cssText = 'position:absolute;inset:0;';
+    panel.append(title, canvasHost);
+    board.appendChild(panel);
+
+    const sourceId = `source-${index}`;
+    const targetId = `target-${index}`;
+    const graph = new Graph({
+      autoFit: true,
+      container: canvasHost,
+      data: {
+        nodes: [
+          { id: sourceId, x: 100, y: 120 },
+          { id: targetId, x: 340, y: index === 2 || index === 3 ? 150 : 120 },
+        ],
+        edges: [
+          { id: `edge-${index}`, source: sourceId, target: targetId },
+          ...(item.type === 'line'
+            ? [{ id: `loop-${index}`, source: sourceId, target: sourceId }]
+            : []),
+        ],
+      },
+      node: {
+        type: 'circle',
+        style: { size: 26, fill: '#1677ff', stroke: '#fff', strokeWidth: 2 },
+      },
+      edge: {
+        type: item.type,
+        style: {
+          stroke: '#64748b',
+          lineWidth: 1.5,
+          hitAreaWidth: 16,
+          endArrow: true,
+          curvature: 0.35,
+          curveOffset: 80,
+          router: 'orth',
+        },
+        stateStyles: {
+          highlight: { stroke: '#1677ff', lineWidth: 2 },
+          selected: { stroke: '#873bf4', lineWidth: 2, hitAreaWidth: 20 },
+        },
+      },
+      behaviors: ['zoom-canvas', 'highlight-edge', 'click-select'],
+      theme: 'light',
+    });
+    graph.on('edge:pointerover', ({ edgeId }) => ui.setStatus(`hover: ${edgeId ?? '-'}`));
+    graph.on('edge:pointerleave', () => ui.setStatus('move near a thin edge'));
+    graph.on('edge:selectchange', ({ edgeId, selected }) =>
+      ui.setStatus(`${selected ? 'selected' : 'unselected'}: ${edgeId ?? '-'}`),
+    );
+    await graph.render();
+    graphs.push(graph);
+  }
+
+  ui.setStatus('move near a thin edge');
+  return {
+    getGraphs: () => graphs,
+    getData: () => ({ views: graphs.map((graph) => graph.getData()) }),
+    fitView: () => graphs.forEach((graph) => graph.fitView()),
+    destroy: () => {
+      graphs.forEach((graph) => graph.destroy());
+      board.remove();
+      ui.destroy();
+    },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"交互热区\",\"description\":\"保持细线外观，同时扩大直线、曲线和自环的拾取范围。\",\"url\":\"https://g6lite.antv.vision/docs/examples/edge-hit-area\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/edge-hit-area\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/edge-hit-area/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"交互热区\",\"item\":\"https://g6lite.antv.vision/docs/examples/edge-hit-area\"}]}]}"}}],[["$","$L2","edge-hit-area",{"id":"edge-hit-area","locale":"zh","initialSource":"$3"}]]],["$L4"],"$L5"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"S7XSqoamkCc5GeDMtHoaG"}
+4:["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]
+5:["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]
+8:null

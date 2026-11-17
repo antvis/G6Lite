@@ -1,0 +1,48 @@
+1:"$Sreact.fragment"
+2:I[266110,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"ExampleDetailClient"]
+4:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T4ea,/**
+ * Demo: Edge colors - category palette
+ */
+import { Graph } from '@antv/g6-lite';
+
+const PALETTE = ['#1783FF', '#00C9C9', '#F08F56', '#D580FF', '#7863FF', '#DB9D0D', '#60C42D', '#FF80CA', '#2491B3', '#17C76F'];
+
+export async function run(container: string | HTMLElement) {
+  const nodes: { id: string; name: string; x: number; y: number }[] = [];
+  const edges: { source: string; target: string; data: { idx: number } }[] = [];
+
+  for (let i = 0; i < 10; i++) {
+    const x = 60 + i * 100;
+    nodes.push({ id: `s${i}`, name: PALETTE[i].slice(1, 4), x, y: 60 });
+    nodes.push({ id: `t${i}`, name: '', x, y: 200 });
+    edges.push({ source: `s${i}`, target: `t${i}`, data: { idx: i } });
+  }
+
+  const graph = new Graph({
+    autoFit: true,
+    container,
+    data: { nodes, edges },
+    node: { type: 'circle', style: { fill: '#5B8FF9', size: 20 } },
+    edge: {
+      type: 'line',
+      style: {
+        stroke: (_s: any, _t: any, e: any) => PALETTE[e.data?.idx % PALETTE.length],
+        lineWidth: 3,
+        endArrow: true,
+      },
+    },
+    theme: 'light',
+  });
+
+  await graph.render();
+  return {
+    getGraphs: () => [graph],
+    getData: () => graph.getData(),
+    fitView: () => graph.fitView(),
+    destroy: () => graph.destroy(),
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Edge colors\",\"description\":\"Map edge colors from a business category.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/edge-colors\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/edge-colors\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/edge-colors/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Edge colors\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/edge-colors\"}]}]}"}}],[["$","$L2","edge-colors",{"id":"edge-colors","locale":"en","initialSource":"$3"}]]],[["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"S7XSqoamkCc5GeDMtHoaG"}
+6:null

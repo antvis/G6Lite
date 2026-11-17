@@ -17,8 +17,8 @@
 | [`dagre`](/docs/guides/layout-dagre)               | 按流程或依赖关系分层。                | `{ type: 'dagre', rankdir: 'LR', ranksep: 80 }`                   |
 | [`force`](/docs/guides/layout-force)               | 让相连节点靠近，同时拉开节点间距。          | `{ type: 'force', linkDistance: 100 }`                            |
 | [`d3-force`](/docs/guides/layout-d3-force)         | 用 D3 力模拟排列关系网络。            | `{ type: 'd3-force', linkDistance: 100 }`                         |
-| [`force-atlas2`](/docs/guides/layout-force-atlas2) | 用力模拟呈现网络中的群组。              | `{ type: 'force-atlas2', kr: 8, kg: 2 }`                          |
-| [`fruchterman`](/docs/guides/layout-fruchterman)   | 用引力和斥力分布节点。                | `{ type: 'fruchterman', gravity: 12 }`                            |
+| [`force-atlas2`](/docs/guides/layout-force-atlas2) | 用力模拟呈现网络中的群组。              | `{ type: 'force-atlas2', kr: 12, kg: 0.5 }`                       |
+| [`fruchterman`](/docs/guides/layout-fruchterman)   | 用引力和斥力分布节点。                | `{ type: 'fruchterman', gravity: 4 }`                             |
 | [`radial`](/docs/guides/layout-radial)             | **可选。** 围绕指定节点，按图上的距离分圈。   | `{ type: 'radial', focusNode: '0', unitRadius: 68 }`              |
 | [`concentric`](/docs/guides/layout-concentric)     | 按节点度数排成同心圆。                | `{ type: 'concentric', sortBy: 'degree' }`                        |
 | [`mds`](/docs/guides/layout-mds)                   | **可选。** 用平面上的距离表现节点在图中的远近。 | `{ type: 'mds', linkDistance: 80 }`                               |
@@ -92,8 +92,12 @@ const layouts: Record<string, LayoutConfig> = {
 **完整运行代码**
 
 ```ts
-import { Graph, type LayoutConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type LayoutConfig } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: [56, 48, 76, 48] };
+}
 
 export async function run(container: HTMLElement) {
   // #region layout-options
@@ -116,7 +120,7 @@ export async function run(container: HTMLElement) {
     layout: layouts.grid,
     node: { style: { size: 28, label: (node) => node.id, labelOffsetY: 8 } },
     behaviors: [],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   const ui = createDemoPanel(container);
   let generation = 0;
@@ -132,7 +136,7 @@ export async function run(container: HTMLElement) {
       try {
         await graph.layout();
         if (current !== generation || graph.destroyed) return;
-        graph.fitView({ padding: 56, maxZoom: 1 });
+        graph.fitView(getFitOptions());
         ui.setStatus(`${value} ready`);
       } catch {
         if (current === generation && !graph.destroyed) ui.setStatus('Layout failed');

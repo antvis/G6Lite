@@ -44,7 +44,7 @@ export async function run(container: HTMLElement) {
     node: { style: { size: 6 } },
     edge: { style: { endArrow: false, opacity: 0.2 } },
     behaviors: [],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   const ui = createDemoPanel(container);
   let generation = 0;
@@ -56,7 +56,7 @@ export async function run(container: HTMLElement) {
     try {
       await graph.layout();
       if (current !== generation || graph.destroyed) return;
-      graph.fitView({ padding: 48, maxZoom: 1 });
+      graph.fitView({ padding: 48 });
       ui.setStatus(`${name} ready`);
     } catch {
       if (current === generation && !graph.destroyed) ui.setStatus('layout failed');

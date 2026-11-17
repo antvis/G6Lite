@@ -79,7 +79,7 @@ export async function run(container: HTMLElement) {
       stateStyles: { active: { fill: '#F08F56', stroke: '#914C1D', strokeWidth: 2 } },
     },
     behaviors: [{ type: BUSINESS_SELECT, state: 'active' } satisfies BusinessSelectOptions],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   const status = document.createElement('div');
   status.style.cssText = 'position:absolute;left:12px;bottom:12px;z-index:20;background:white;color:#334155;padding:6px 10px;border-radius:6px;font:12px system-ui;';

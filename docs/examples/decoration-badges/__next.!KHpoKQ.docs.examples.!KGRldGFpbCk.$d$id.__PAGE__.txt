@@ -1,0 +1,83 @@
+1:"$Sreact.fragment"
+2:I[266110,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"ExampleDetailClient"]
+4:I[221132,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"Heading"]
+d:I[951315,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"default"]
+e:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
+f:"$Sreact.suspense"
+3:T824,/**
+ * Demo: stack built-in badges on a node boundary.
+ */
+import { Graph, type NodeBadgeItem } from '@antv/g6-lite';
+
+export async function run(container: string | HTMLElement) {
+  const graph = new Graph({
+    // Padding covers the boundary badges extending past the rightmost node.
+    autoFit: { padding: 56 },
+    container,
+    data: {
+      nodes: [
+        {
+          id: 'orders',
+          data: {
+            label: '订单',
+            badges: [
+              { kind: 'count', value: 12 },
+              { kind: 'warning' },
+              { kind: 'text', text: '优先' },
+              { kind: 'lock' },
+              { kind: 'favorite' },
+            ] satisfies NodeBadgeItem[],
+          },
+        },
+        {
+          id: 'users',
+          data: {
+            label: '用户',
+            badges: [
+              { kind: 'favorite' },
+              { kind: 'lock' },
+            ] satisfies NodeBadgeItem[],
+          },
+        },
+        { id: 'audit', data: { label: '审计', badges: [{ kind: 'count', value: 3 }] satisfies NodeBadgeItem[] } },
+      ],
+      edges: [
+        { source: 'users', target: 'orders' },
+        { source: 'orders', target: 'audit' },
+      ],
+    },
+    node: {
+      type: 'circle',
+      style: { size: 56, fill: '#5B8FF9', label: (node) => String(node.data?.label ?? node.id), labelPlacement: 'center', labelColor: '#fff' },
+      decorations: [
+        {
+          renderer: 'builtin-badge',
+          placement: 'right',
+          attachment: 'boundary',
+          anchor: 'start',
+          boundaryOverlap: 'half-badge',
+          layout: 'stack',
+          items: (node) => (node.data?.badges as NodeBadgeItem[] | undefined) ?? [],
+          maxVisible: 3,
+          overflow: 'hover-expand',
+          overflowData: { kind: 'text', text: '···' },
+        },
+      ],
+    },
+    edge: { style: { endArrow: true, stroke: '#99ADD1' } },
+    layout: { type: 'dagre', rankdir: 'LR', nodesep: 40, ranksep: 120, nodeSize: 56 },
+    behaviors: ['zoom-canvas', 'drag-canvas'],
+  });
+  await graph.render();
+  return graph;
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"节点徽章\",\"description\":\"在节点边界堆叠计数、状态和文本徽章。\",\"url\":\"https://g6lite.antv.vision/docs/examples/decoration-badges\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/decoration-badges\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/decoration-badges/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"节点徽章\",\"item\":\"https://g6lite.antv.vision/docs/examples/decoration-badges\"}]}]}"}}],[[["$","$L2","decoration-badges",{"id":"decoration-badges","locale":"zh","initialSource":"$3"}]],"\n",["$","$L4",null,{"as":"h2","id":"操作与预期","children":"操作与预期"}],"\n",["$","ol",null,{"children":["\n",["$","li",null,{"children":["初始时，“订单”有 5 项徽章数据，","$L5"," 使其显示计数、警告和 ","$L6","；其余 3 项收起。“用户”的 2 项和“审计”的 1 项全部显示。"]}],"\n","$L7","\n","$L8","\n"]}],"\n","$L9","\n","$La"]],["$Lb"],"$Lc"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"S7XSqoamkCc5GeDMtHoaG"}
+5:["$","code",null,{"children":"maxVisible: 3"}]
+6:["$","code",null,{"children":"···"}]
+7:["$","li",null,{"children":["将鼠标移入“订单”右侧的 ",["$","code",null,{"children":"···"}],"，应展开全部 5 项；移出展开区域后恢复折叠。"]}]
+8:["$","li",null,{"children":["在源码中把 ",["$","code",null,{"children":"maxVisible"}]," 改为 ",["$","code",null,{"children":"5"}],"，点击“运行”，应直接显示全部徽章；点击“重置”恢复原例。"]}]
+9:["$","p",null,{"children":["关键配置在 ",["$","code",null,{"children":"node.decorations[]"}],"：",["$","code",null,{"children":"items"}]," 按节点读取业务数据，",["$","code",null,{"children":"anchor"}]," 与 ",["$","code",null,{"children":"boundaryOverlap"}]," 控制边界对齐，",["$","code",null,{"children":"overflowData"}]," 提供可悬停的占位项。徽章和节点标签分别配置。"]}]
+a:["$","p",null,{"children":["用法见",["$","$Ld",null,{"href":"/docs/guides/node","children":"节点指南"}],"与",["$","$Ld",null,{"href":"/docs/guides/extensions#decoration-renderer","children":"装饰扩展"}],"；完整定义见",["$","$Ld",null,{"href":"/docs/api/options#config-node-decoration","children":"节点装饰配置参考"}],"。"]}]
+b:["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]
+c:["$","$Le",null,{"children":["$","$f",null,{"name":"Next.MetadataOutlet","children":"$@10"}]}]
+10:null

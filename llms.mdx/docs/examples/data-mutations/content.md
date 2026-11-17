@@ -18,7 +18,7 @@
 
 ```ts
 // Local presentation helpers in this repository are used only for the example controls.
-import { Graph, type GraphData } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type GraphData } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
 const INITIAL_DATA: GraphData = {
@@ -34,8 +34,12 @@ const INITIAL_DATA: GraphData = {
 };
 
 export async function run(container: string | HTMLElement) {
+  const fit: FitViewOptions = {
+    padding: [56, 28, 76, 28],
+    maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1),
+  };
   const graph = new Graph({
-    autoFit: true,
+    autoFit: fit,
     container,
     data: INITIAL_DATA,
     node: {
@@ -59,7 +63,6 @@ export async function run(container: string | HTMLElement) {
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
   });
   await graph.render();
-  graph.fitView({ padding: 80 });
 
   const ui = createDemoPanel(container);
 
@@ -127,13 +130,14 @@ export async function run(container: string | HTMLElement) {
     renderStatus();
   });
   ui.addAction('重置', async () => {
-    await graph.setData(INITIAL_DATA, { fitView: { padding: 80 } });
+    await graph.setData(INITIAL_DATA, { fitView: fit });
     lastEvent = 'datachange: reset';
     renderStatus();
   });
 
   renderStatus();
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 64 }),
     destroy: () => {

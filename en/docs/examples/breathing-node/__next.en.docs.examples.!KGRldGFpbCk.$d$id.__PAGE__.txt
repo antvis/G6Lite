@@ -1,0 +1,81 @@
+1:"$Sreact.fragment"
+2:I[266110,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"ExampleDetailClient"]
+6:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+3:T902,// Local presentation helpers in this repository are used only for the example controls.
+/**
+ * Breathing node demo.
+ * Demonstrates the built-in breathing-node extension on selected/highlight states.
+ */
+
+import { Graph } from '@antv/g6-lite';
+import { createDemoPanel } from './demo-panel.ts';
+
+export async function run(container: string | HTMLElement) {
+  const graph = new Graph({
+    autoFit: true,
+    container,
+    data: {
+      nodes: [
+        { id: 'selected', x: 180, y: 180, data: { label: 'Selected' }, states: ['selected'] },
+        { id: 'highlight', x: 360, y: 180, data: { label: 'Highlight' }, states: ['highlight'] },
+        { id: 'normal', x: 540, y: 180, data: { label: 'Normal' } },
+      ],
+      edges: [
+        { id: 'edge-selected-highlight', source: 'selected', target: 'highlight' },
+        { id: 'edge-highlight-normal', source: 'highlight', target: 'normal' },
+      ],
+    },
+    // #region breathing-options
+    node: {
+      type: 'breathing-node',
+      style: {
+        size: 36,
+        fill: '#1677ff',
+        stroke: '#fff',
+        strokeWidth: 2,
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'bottom',
+        labelFontSize: 12,
+      },
+      stateStyles: {
+        selected: { fill: '#1677ff', stroke: '#003eb3', strokeWidth: 3, haloWidth: 16 },
+        highlight: { fill: '#2E8B57', stroke: '#1F6B43', strokeWidth: 3, haloWidth: 12 },
+      },
+    },
+    // #endregion breathing-options
+    edge: {
+      style: {
+        stroke: '#d1d5db',
+        lineWidth: 2,
+        endArrow: true,
+      },
+    },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+  });
+
+  const ui = createDemoPanel(container, '切换选中和高亮，观察节点呼吸动画。');
+  const destroy = graph.destroy.bind(graph);
+  graph.destroy = () => {
+    ui.destroy();
+    destroy();
+  };
+
+  const toggleState = (state: 'selected' | 'highlight') => {
+    const active = graph.getItemStates(state).includes(state);
+    graph.setItemState(state, state, !active);
+  };
+  try {
+    await graph.render();
+    ui.addAction('切换选中', () => toggleState('selected'));
+    ui.addAction('切换高亮', () => toggleState('highlight'));
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"Breathing node\",\"description\":\"Show selected and highlight states with a custom node animation.\",\"url\":\"https://g6lite.antv.vision/en/docs/examples/breathing-node\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/en/docs/examples/breathing-node\",\"image\":\"https://g6lite.antv.vision/en/og/docs/examples/breathing-node/image.png\",\"inLanguage\":\"en\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\",\"item\":\"https://g6lite.antv.vision/en\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"Docs\",\"item\":\"https://g6lite.antv.vision/en/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"Breathing node\",\"item\":\"https://g6lite.antv.vision/en/docs/examples/breathing-node\"}]}]}"}}],[["$","$L2","breathing-node",{"id":"breathing-node","locale":"en","initialSource":"$3"}]]],["$L4"],"$L5"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"S7XSqoamkCc5GeDMtHoaG"}
+4:["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]
+5:["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]
+8:null

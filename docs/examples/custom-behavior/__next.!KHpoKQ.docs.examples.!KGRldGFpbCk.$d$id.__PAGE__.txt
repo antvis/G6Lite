@@ -1,0 +1,89 @@
+1:"$Sreact.fragment"
+2:I[266110,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"ExampleDetailClient"]
+6:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+3:T8cd,/**
+ * Demo: register a behavior that selects the clicked node.
+ */
+import {
+  Graph,
+  register,
+  type BehaviorExtension,
+  type BehaviorOptions,
+  type ExtensionContext,
+} from '@antv/g6-lite';
+
+const PIN_BEHAVIOR = 'pin-node' as const;
+
+type PinBehaviorOptions = BehaviorOptions<typeof PIN_BEHAVIOR>;
+
+function createPinBehavior(): BehaviorExtension<PinBehaviorOptions> {
+  let context: ExtensionContext | undefined;
+  return {
+    init(nextContext) {
+      context = nextContext;
+    },
+    getEvents() {
+      return {
+        'node:click': ({ nodeId }) => {
+          if (!context) return;
+          const stateMap = Object.fromEntries(
+            context.data.getNodeIds().map((id) => [id, id === nodeId ? ['selected'] : []]),
+          );
+          context.state.setAll(stateMap);
+        },
+        'canvas:click': () => {
+          if (!context) return;
+          const stateMap = Object.fromEntries(context.data.getNodeIds().map((id) => [id, []]));
+          context.state.setAll(stateMap);
+        },
+      };
+    },
+    destroy() {
+      context = undefined;
+    },
+  };
+}
+
+register('behavior', PIN_BEHAVIOR, () => createPinBehavior());
+
+export async function run(container: string | HTMLElement) {
+  const graph = new Graph({
+    autoFit: true,
+    container,
+    data: {
+      nodes: [
+        { id: 'inbox', data: { label: '收件箱' } },
+        { id: 'draft', data: { label: '草稿' } },
+        { id: 'sent', data: { label: '已发送' } },
+        { id: 'archive', data: { label: '归档' } },
+      ],
+      edges: [
+        { source: 'inbox', target: 'draft' },
+        { source: 'draft', target: 'sent' },
+        { source: 'sent', target: 'archive' },
+      ],
+    },
+    node: {
+      type: 'rect',
+      style: {
+        fill: '#5B8FF9',
+        width: 88,
+        height: 36,
+        borderRadius: 8,
+        label: (node) => String(node.data?.label ?? node.id),
+        labelPlacement: 'center',
+        labelColor: '#fff',
+      },
+    },
+    edge: { style: { endArrow: true } },
+    layout: { type: 'dagre', rankdir: 'LR', nodesep: 24, ranksep: 70, nodeSize: [88, 36] },
+    behaviors: ['zoom-canvas', 'drag-canvas', { type: PIN_BEHAVIOR } satisfies PinBehaviorOptions],
+  });
+  await graph.render();
+  return graph;
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"TechArticle\",\"headline\":\"注册自定义交互\",\"description\":\"注册一个 Behavior：点击节点时选中它，点击画布时清除。\",\"url\":\"https://g6lite.antv.vision/docs/examples/custom-behavior\",\"mainEntityOfPage\":\"https://g6lite.antv.vision/docs/examples/custom-behavior\",\"image\":\"https://g6lite.antv.vision/og/docs/examples/custom-behavior/image.png\",\"inLanguage\":\"zh-CN\",\"author\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"publisher\":{\"@type\":\"Organization\",\"name\":\"AntV\",\"url\":\"https://antv.antgroup.com\"},\"isPartOf\":{\"@id\":\"https://g6lite.antv.vision/#website\"}},{\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"首页\",\"item\":\"https://g6lite.antv.vision\"},{\"@type\":\"ListItem\",\"position\":2,\"name\":\"文档\",\"item\":\"https://g6lite.antv.vision/docs\"},{\"@type\":\"ListItem\",\"position\":3,\"name\":\"注册自定义交互\",\"item\":\"https://g6lite.antv.vision/docs/examples/custom-behavior\"}]}]}"}}],[["$","$L2","custom-behavior",{"id":"custom-behavior","locale":"zh","initialSource":"$3"}]]],["$L4"],"$L5"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"S7XSqoamkCc5GeDMtHoaG"}
+4:["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]
+5:["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]
+8:null

@@ -43,7 +43,7 @@ const expandedData: GraphData = {
   edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
 };
 
-const fitView = { padding: 32, maxZoom: 1 };
+const fitView = { padding: 32 };
 
 export default function GraphView() {
   const containerRef = useRef<HTMLDivElement>(null);

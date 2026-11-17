@@ -1,0 +1,108 @@
+1:"$Sreact.fragment"
+3:I[266110,["/_next/static/chunks/42zx5m00dcxbm.js","/_next/static/chunks/0itbisld93ip-.js","/_next/static/chunks/2izp1b5youls_.js","/_next/static/chunks/0sg2ahyg5b632.js","/_next/static/chunks/346i-qsnufqze.js","/_next/static/chunks/0bk5_fd5v768t.js","/_next/static/chunks/3ztrn4ugl5fot.js","/_next/static/chunks/0ou72xkdvsacc.js","/_next/static/chunks/2wyrvfjjh28xn.js","/_next/static/chunks/08vl6wig_5zw6.js","/_next/static/chunks/1ff7gkskzag1s.js"],"ExampleDetailClient"]
+7:I[675049,["/_next/static/chunks/3uttw1_lsv8sm.js","/_next/static/chunks/2hscboar6z993.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+2:T407,{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","headline":"Character relationship network","description":"Explore character connections with force layout and relationship labels","url":"https://g6lite.antv.vision/en/docs/examples/relationship","mainEntityOfPage":"https://g6lite.antv.vision/en/docs/examples/relationship","image":"https://g6lite.antv.vision/en/og/docs/examples/relationship/image.png","inLanguage":"en","author":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"publisher":{"@type":"Organization","name":"AntV","url":"https://antv.antgroup.com"},"isPartOf":{"@id":"https://g6lite.antv.vision/#website"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://g6lite.antv.vision/en"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://g6lite.antv.vision/en/docs"},{"@type":"ListItem","position":3,"name":"Character relationship network","item":"https://g6lite.antv.vision/en/docs/examples/relationship"}]}]}4:Td82,// Local presentation helpers in this repository provide example label overlays.
+/**
+ * Demo: 人物关系网络图 — 哈利波特角色关系 (force 布局 + 边标签)
+ */
+import { Graph } from '@antv/g6-lite';
+import { attachLabelsCanvas, attachEdgeLabelsCanvas, type GraphInstanceWithTools } from './tooling.ts';
+
+const COLORS: Record<string, string> = {
+  gryffindor: '#5B8FF9',
+  friend: '#F6BD16',
+  enemy: '#30BF78',
+  mentor: '#E86452',
+};
+
+const data = {
+  nodes: [
+    { id: 'harry', name: '哈利·波特', data: { house: 'gryffindor' } },
+    { id: 'ron', name: '罗恩·韦斯莱', data: { house: 'friend' } },
+    { id: 'hermione', name: '赫敏·格兰杰', data: { house: 'mentor' } },
+    { id: 'voldemort', name: '伏地魔', data: { house: 'enemy' } },
+    { id: 'dumbledore', name: '邓布利多', data: { house: 'mentor' } },
+    { id: 'snape', name: '斯内普', data: { house: 'friend' } },
+    { id: 'draco', name: '德拉科', data: { house: 'enemy' } },
+    { id: 'sirius', name: '小天狼星', data: { house: 'friend' } },
+  ],
+  edges: [
+    { source: 'ron', target: 'harry', data: { label: '朋友' } },
+    { source: 'hermione', target: 'harry', data: { label: '朋友' } },
+    { source: 'harry', target: 'voldemort', data: { label: '试图杀死' } },
+    { source: 'dumbledore', target: 'harry', data: { label: '导师' } },
+    { source: 'snape', target: 'harry', data: { label: '保护' } },
+    { source: 'draco', target: 'harry', data: { label: '敌对' } },
+    { source: 'sirius', target: 'harry', data: { label: '教父' } },
+    { source: 'ron', target: 'hermione', data: { label: '朋友' } },
+    { source: 'snape', target: 'voldemort', data: { label: '暗中效忠' } },
+    { source: 'dumbledore', target: 'snape', data: { label: '信任' } },
+  ],
+};
+
+export async function run(container: string | HTMLElement) {
+  const wrapper = typeof container === 'string' ? document.querySelector(container)! as HTMLElement : container;
+  wrapper.style.position = 'relative';
+
+  // Use the same fit for initial render, resize, and the toolbar action.
+  // A low maxZoom leaves this small network tiny on large or high-DPI canvases.
+  const fitOptions = { padding: 64 };
+  const graph = new Graph({
+    autoFit: fitOptions,
+    container: wrapper,
+    data,
+    node: {
+      type: 'circle',
+      style: {
+        fill: (n) => COLORS[n.data?.house as string] ?? '#5B8FF9',
+        stroke: '#fff',
+        strokeWidth: 2,
+      },
+    },
+    edge: {
+      type: 'line',
+      style: {
+        stroke: '#bbb',
+        lineWidth: 1.5,
+        endArrow: true,
+      },
+    },
+    layout: {
+      type: 'd3-force',
+      linkDistance: 180,
+      nodeStrength: -600,
+      collideRadius: 60,
+      forceSimulation: null,
+    },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node'],
+    theme: 'light',
+  });
+
+  await graph.render();
+
+  const g = graph as unknown as GraphInstanceWithTools;
+  const cleanupNodeLabels = attachLabelsCanvas(wrapper, g, {
+    nodeLabel: (n) => n.name ?? n.id,
+    position: 'below',
+    fontSize: 11,
+    color: '#333',
+  });
+  const cleanupEdgeLabels = attachEdgeLabelsCanvas(wrapper, g, {
+    fontSize: 9,
+    color: '#555',
+    rotated: true,
+    showBg: false,
+  });
+
+  return {
+    getGraphs: () => [graph],
+    getData: () => graph.getData(),
+    fitView: () => graph.fitView(fitOptions),
+    destroy: () => { cleanupNodeLabels(); cleanupEdgeLabels(); graph.destroy(); },
+  };
+}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],[["$","$L3","relationship",{"id":"relationship","locale":"en","initialSource":"$4"}]]],["$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"S7XSqoamkCc5GeDMtHoaG"}
+5:["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

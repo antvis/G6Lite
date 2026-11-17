@@ -66,6 +66,7 @@ export async function run(container: string | HTMLElement) {
   ui.setStatus(lines[0]);
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {

@@ -22,7 +22,7 @@ The toolbar replaces the nodes and edges, then runs layout again.
  * Demo: setData + layout() 端到端验证
  * 测试运行时整体数据替换和布局切换
  */
-import { Graph } from '@antv/g6-lite';
+import { Graph, type FitViewOptions } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
 
 const DATA_A = {
@@ -70,8 +70,11 @@ export async function run(container: string | HTMLElement) {
 
   el.style.position = 'relative';
 
+  const fit: FitViewOptions = {
+    padding: [72, 28, 60, 28],
+  };
   const graph = new Graph({
-    autoFit: true,
+    autoFit: fit,
     container: el,
     data: DATA_A,
     layout: { type: 'circular', radius: 120 },
@@ -98,8 +101,7 @@ export async function run(container: string | HTMLElement) {
   ui.addChoice('数据', { 'A · 5 节点': 'a', 'B · 8 节点': 'b' }, 'a', async (value) => {
     const next = value === 'b' ? DATA_B : DATA_A;
     log(`setData → DATA_${value.toUpperCase()}`);
-    await graph.setData(next);
-    graph.fitView();
+    await graph.setData(next, { fitView: fit });
     log(`done. nodeCount=${graph.getNodeCount()}`);
   });
 
@@ -109,7 +111,7 @@ export async function run(container: string | HTMLElement) {
     else if (value === 'force') graph.setLayout({ type: 'd3-force' });
     else graph.setLayout({ type: 'circular', radius: 150 });
     await graph.layout();
-    graph.fitView();
+    graph.fitView(fit);
     log(`${value} done`);
   });
 
@@ -128,7 +130,10 @@ export async function run(container: string | HTMLElement) {
     graph.focusItem(id);
   });
 
+  if (el.clientWidth < 480) ui.gui.close();
+
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView(),
     destroy() {

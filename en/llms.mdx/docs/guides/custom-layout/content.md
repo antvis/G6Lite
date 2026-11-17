@@ -76,7 +76,7 @@ export async function run(container: HTMLElement) {
     layout: { type: 'docs-column', gap: 100 },
     node: { style: { size: 30, label: (node) => node.id } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 56, maxZoom: 1 },
+    autoFit: { padding: 56 },
   });
   let revision = 0;
   const ui = createDemoPanel(container);
@@ -90,7 +90,7 @@ export async function run(container: HTMLElement) {
     graph.setLayout(mode === 'grid' ? { type: 'grid' } : { type: 'docs-column', gap: 100, delay: mode === 'slow' ? 180 : 0 });
     await graph.layout();
     if (graph.destroyed || request !== revision) return;
-    graph.fitView({ padding: 56, maxZoom: 1 });
+    graph.fitView({ padding: 56 });
     status.textContent = mode === 'grid' ? 'Canceled old run; grid' : 'Column layout complete';
   };
   const destroy = graph.destroy.bind(graph);

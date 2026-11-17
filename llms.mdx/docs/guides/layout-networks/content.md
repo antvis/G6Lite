@@ -27,8 +27,16 @@ const layouts: Record<string, LayoutConfig> = {
   concentric: { type: 'concentric', sortBy: 'degree', nodeSize: 24 },
   force: { type: 'force', linkDistance: 100 },
   'd3-force': { type: 'd3-force', linkDistance: 100 },
-  'force-atlas2': { type: 'force-atlas2', kr: 8, kg: 2 },
-  fruchterman: { type: 'fruchterman', gravity: 12 },
+  'force-atlas2': { type: 'force-atlas2', kr: 12, kg: 0.5, preventOverlap: true, nodeSize: 24, maxIteration: 200 },
+  fruchterman: {
+    type: 'fruchterman',
+    width: 560,
+    height: 300,
+    center: [240, 150],
+    gravity: 4,
+    maxIteration: 250,
+    minMovement: 0.05,
+  },
   mds: { type: 'mds', linkDistance: 80 },
 };
 ```
@@ -50,8 +58,16 @@ export async function run(container: HTMLElement) {
     concentric: { type: 'concentric', sortBy: 'degree', nodeSize: 24 },
     force: { type: 'force', linkDistance: 100 },
     'd3-force': { type: 'd3-force', linkDistance: 100 },
-    'force-atlas2': { type: 'force-atlas2', kr: 8, kg: 2 },
-    fruchterman: { type: 'fruchterman', gravity: 12 },
+    'force-atlas2': { type: 'force-atlas2', kr: 12, kg: 0.5, preventOverlap: true, nodeSize: 24, maxIteration: 200 },
+    fruchterman: {
+      type: 'fruchterman',
+      width: 560,
+      height: 300,
+      center: [240, 150],
+      gravity: 4,
+      maxIteration: 250,
+      minMovement: 0.05,
+    },
     mds: { type: 'mds', linkDistance: 80 },
   };
   // #endregion network-options
@@ -78,7 +94,7 @@ export async function run(container: HTMLElement) {
     },
     edge: { style: { lineWidth: 2 } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
   });
   const panel = createDemoPanel(container);
   let revision = 0;
@@ -99,7 +115,7 @@ export async function run(container: HTMLElement) {
       try {
         await graph.layout();
         if (current !== revision || graph.destroyed) return;
-        graph.fitView({ padding: 48, maxZoom: 1 });
+        graph.fitView({ padding: 48 });
         panel.setStatus(`${type} ready`);
       } catch {
         if (current === revision && !graph.destroyed) panel.setStatus('Layout failed');

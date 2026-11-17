@@ -100,6 +100,7 @@ export async function run(container: string | HTMLElement) {
   graph.on('canvas:click', close);
 
   return {
+    getGraphs: () => [graph],
     getData: () => graph.getData(),
     fitView: () => graph.fitView({ padding: 80 }),
     destroy() {

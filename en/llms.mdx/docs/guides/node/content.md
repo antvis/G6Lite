@@ -91,7 +91,11 @@ This example sets the rectangle width to `96`, height to `40`, and corner radius
 
 
 ```ts
-import { Graph, type NodeConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type NodeConfig } from '@antv/g6-lite';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: 40, maxZoom: 1.4 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const node: NodeConfig = {
@@ -113,13 +117,13 @@ export async function run(container: HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: 'high-risk', x: 120, y: 100, data: { risk: 'high' } },
-        { id: 'normal-risk', x: 360, y: 100, data: { risk: 'normal' } },
+        { id: 'high-risk', x: 160, y: 100, data: { risk: 'high' } },
+        { id: 'normal-risk', x: 320, y: 100, data: { risk: 'normal' } },
       ],
       edges: [],
     },
     node,
-    autoFit: { padding: 40, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: ['click-select'],
   });
   try {
@@ -159,17 +163,21 @@ node: {
 **Complete runnable code**
 
 ```ts
-import { Graph } from '@antv/g6-lite';
+import { Graph, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: 40, maxZoom: 1.5 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
     container,
     data: {
       nodes: [
-        { id: 'A', x: 80, y: 100, data: { value: 16, group: 'core' } },
+        { id: 'A', x: 128, y: 100, data: { value: 16, group: 'core' } },
         { id: 'B', x: 240, y: 100, data: { value: 28, group: 'other' } },
-        { id: 'C', x: 400, y: 100, data: { value: 40, group: 'core' } },
+        { id: 'C', x: 352, y: 100, data: { value: 40, group: 'core' } },
       ],
       edges: [{ source: 'A', target: 'B' }, { source: 'B', target: 'C' }],
     },
@@ -189,7 +197,7 @@ export async function run(container: HTMLElement) {
     },
     // #endregion node-options
     edge: { style: { stroke: '#94a3b8' } },
-    autoFit: { padding: 40, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: ['click-select'],
   });
   const ui = createDemoPanel(container);
@@ -325,9 +333,9 @@ export async function run(container: HTMLElement) {
     data: {
       nodes: [
         { id: 'api', name: 'API', x: 100, y: 100, data: { placement: 'left' } },
-        { id: 'Database', x: 260, y: 100 },
-        { id: 'cache', name: 'Cache', x: 420, y: 100, data: { placement: 'right' } },
-        { id: 'worker', name: 'Worker', x: 580, y: 100, data: { hideLabel: true } },
+        { id: 'Database', x: 220, y: 100 },
+        { id: 'cache', name: 'Cache', x: 340, y: 100, data: { placement: 'right' } },
+        { id: 'worker', name: 'Worker', x: 460, y: 100, data: { hideLabel: true } },
       ],
       edges: [],
     },
@@ -343,7 +351,7 @@ export async function run(container: HTMLElement) {
       },
     },
     // #endregion label-style
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 64 },
     behaviors: [],
   });
   try {
@@ -377,6 +385,7 @@ const node: NodeConfig = {
     size: 40,
     label: (item) => String(item.data?.name ?? item.id),
     labelPlacement: 'bottom',
+    labelOffsetY: 8,
     labelMaxWidth: 120,
     labelBackground: (item) => item.id === 'db' ? '#fff1b8' : '#e6f4ff',
     labelBackgroundPadding: 6,
@@ -388,7 +397,11 @@ const node: NodeConfig = {
 **Complete runnable code**
 
 ```ts
-import { Graph, type NodeConfig } from '@antv/g6-lite';
+import { Graph, type FitViewOptions, type NodeConfig } from '@antv/g6-lite';
+
+export function getFitOptions(): FitViewOptions {
+  return { padding: [36, 60, 64, 42] };
+}
 
 export async function run(container: HTMLElement) {
   // #region node-label
@@ -397,6 +410,7 @@ export async function run(container: HTMLElement) {
       size: 40,
       label: (item) => String(item.data?.name ?? item.id),
       labelPlacement: 'bottom',
+      labelOffsetY: 8,
       labelMaxWidth: 120,
       labelBackground: (item) => item.id === 'db' ? '#fff1b8' : '#e6f4ff',
       labelBackgroundPadding: 6,
@@ -408,13 +422,13 @@ export async function run(container: HTMLElement) {
     container,
     data: {
       nodes: [
-        { id: 'api', x: 120, y: 100, data: { name: 'API Server' } },
-        { id: 'db', x: 360, y: 100, data: { name: 'Database with a very long name' } },
+        { id: 'api', x: 160, y: 100, data: { name: 'API Server' } },
+        { id: 'db', x: 324, y: 100, data: { name: 'Database with a very long name' } },
       ],
       edges: [],
     },
     node,
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: getFitOptions(),
     behaviors: [],
   });
   try {
@@ -505,7 +519,7 @@ export async function run(container: HTMLElement) {
       },
     },
     // #endregion icon-style
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: [48, 48, 88, 48] },
     behaviors: [],
   });
   try {
@@ -594,7 +608,7 @@ export async function run(container: string | HTMLElement) {
   const graph = new Graph({
     // Labels are two lines and hang below nodes (labelPlacement: 'bottom');
     // the bottom padding reserves their height so they stay inside the view.
-    autoFit: { padding: [24, 48, 64, 48] },
+    autoFit: { padding: [24, 64, 64, 64] },
     container,
     data: {
       nodes: [
@@ -714,7 +728,7 @@ export async function run(container: HTMLElement) {
       }],
       // #endregion badge-options
     },
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: 48 },
     behaviors: [],
   });
   try {
@@ -752,8 +766,13 @@ stateStyles: {
 **Complete runnable code**
 
 ```ts
-import { Graph, type ElementState } from '@antv/g6-lite';
+import { Graph, type ElementState, type FitViewOptions } from '@antv/g6-lite';
 import GUI from 'lil-gui';
+
+export function getFitOptions(): FitViewOptions {
+  // Keep this two-node comparison comfortably sized on wide and high-DPI displays.
+  return { padding: [96, 60, 96, 60], maxZoom: 1.6 * Math.min(2, window.devicePixelRatio || 1) };
+}
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -773,7 +792,7 @@ export async function run(container: HTMLElement) {
       // #endregion state-styles
     },
     behaviors: [],
-    autoFit: { padding: 60, maxZoom: 1 },
+    autoFit: getFitOptions(),
   });
   // #region states
   const toggle = (state: ElementState) => {
@@ -919,7 +938,7 @@ export async function run(container: HTMLElement) {
       },
       // #endregion halo-options
     },
-    autoFit: { padding: 48, maxZoom: 1 },
+    autoFit: { padding: [48, 48, 72, 48] },
     behaviors: [],
   });
   try {
@@ -985,7 +1004,7 @@ export async function run(container: HTMLElement) {
         labelOffsetY: 4,
       },
     },
-    autoFit: { padding: 64, maxZoom: 1 },
+    autoFit: { padding: 64 },
     behaviors: [],
   });
   const ui = createDemoPanel(container);

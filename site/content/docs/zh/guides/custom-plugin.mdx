@@ -11,6 +11,8 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 用工厂函数创建插件。计数、面板和退订函数都保存在工厂函数内部，每个插件实例独立管理自己的状态。
 
+<span id="选项与清理" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
 | 方法 | 在示例中的作用 |
 | --- | --- |
 | `init(context, options)` | 读取标题等插件参数。 |
@@ -27,6 +29,18 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 <NodeDocExample id="extension-plugin" locale="zh" focus="plugin" />
 
-展开「完整代码」可查看节点点击的接入方式：应用通过 `subscribe` 传入订阅函数，在里面调用 `graph.on()`，并返回调用 `graph.off()` 的退订函数。如果重挂载后一次点击加了多次，检查 `destroy()` 是否执行了退订。
+<span id="事件与作用域" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+展开「完整代码」可查看节点点击的接入方式：应用通过 `subscribe` 传入订阅函数，在里面调用 `graph.on()`，并返回调用 `graph.off()` 的退订函数。
+
+## 常见问题
+
+### 为什么 setData 不把计数器归零 [#为什么-setdata-不把计数器归零]
+
+`setData()` 只替换图数据，保留当前插件实例及其计数。重新调用 `render()` 会重建插件实例，因此示例的计数会归零。
+
+### 为什么多次 render 后点击增加多次 [#为什么多次-render-后点击增加多次]
+
+如果重挂载后一次点击加了多次，检查 `destroy()` 是否执行了退订，避免旧实例的监听器继续接收事件。
 
 更多钩子见 [PluginExtension](/docs/api/extensions#pluginextension)。

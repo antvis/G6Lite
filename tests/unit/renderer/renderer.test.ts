@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DataModel } from '@src/dataModel.js';
 import {
   createQuadraticPath,
@@ -10,6 +10,7 @@ import { Renderer } from '@src/renderer/renderer.js';
 import type { Program } from '@src/renderer/programs/program.js';
 import { analyzeEdgeConfig, analyzeNodeConfig } from '@src/renderer/style.js';
 import { resolveTheme } from '@src/theme.js';
+import { RenderScheduler } from '@src/scheduler.js';
 import type { EdgeConfig, GraphEdge, LayoutNode, ThemeTokens } from '@src/types.js';
 
 // ============================================================
@@ -259,6 +260,158 @@ describe('Renderer — WebGL context lifecycle', () => {
   });
 });
 
+describe('Renderer — batched mutations', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it.each(['position-state', 'state-position', 'add-position', 'add-state', 'add-data'])(
+    'keeps GPU positions and styles consistent with data for %s',
+    (operation) => {
+      const { canvas } = makeCanvas();
+      const renderer = new Renderer(canvas);
+      const nodeConfig = {
+        style: {
+          size: 20,
+          fill: (node: LayoutNode) =>
+            typeof node.data?.fill === 'string' ? node.data.fill : '#ff0000',
+        },
+        stateStyles: { selected: { fill: '#00ff00' } },
+      } satisfies NonNullable<Parameters<typeof analyzeNodeConfig>[0]>;
+      analyzeNodeConfig(nodeConfig, theme);
+      const dm = new DataModel({ theme, nodeConfig });
+      dm.replaceData([{ id: 'a', x: 100, y: 100 }], []);
+      dm.getChanges();
+      renderer.setData({ ...rendererData(dm.getNodes() as LayoutNode[], []), nodeConfig });
+      renderer.draw();
+      const scheduler = new RenderScheduler(renderer, dm);
+      const update = (action: string) => {
+        if (action === 'add') dm.addNode({ id: 'b', x: 300, y: 300 });
+        if (action === 'position') dm.updateNodePosition('a', 150, 160);
+        if (action === 'state') dm.setNodeState('a', 'selected', true);
+        if (action === 'data') dm.updateNodeData('a', { fill: '#00ff00' });
+        scheduler.schedule();
+      };
+      operation.split('-').forEach(update);
+      vi.runAllTimers();
+
+      const program = rendererInternals(renderer).activeNodeProgram;
+      const moved = operation.includes('position');
+      expect(Array.from(program.array.slice(0, 2))).toEqual(moved ? [150, 160] : [100, 100]);
+      const green = operation.includes('state') || operation.includes('data');
+      expect(Array.from(program.array.slice(3, 6))).toEqual(green ? [0, 1, 0] : [1, 0, 0]);
+      expect(program.itemCount).toBe(dm.getNodeCount());
+      scheduler.destroy();
+      renderer.destroy();
+    },
+  );
+
+  it.each(['scheduler', 'renderer'])(
+    'rebuilds replaced node slots and picking IDs through the %s path',
+    (path) => {
+      const { canvas, setPickPixel } = makeCanvas();
+      const renderer = new Renderer(canvas);
+      const dm = new DataModel({ theme });
+      dm.replaceData(
+        [
+          { id: 'a', x: 100, y: 100 },
+          { id: 'b', x: 300, y: 300 },
+        ],
+        [],
+      );
+      dm.getChanges();
+      renderer.setData(rendererData(dm.getNodes() as LayoutNode[], []));
+      renderer.resize(800, 600);
+      renderer.draw();
+      const scheduler = new RenderScheduler(renderer, dm);
+      dm.removeNode('a');
+      if (path === 'scheduler') scheduler.schedule();
+      dm.addNode({ id: 'c', x: 400, y: 400 });
+      if (path === 'scheduler') {
+        scheduler.schedule();
+        vi.runAllTimers();
+      } else {
+        renderer.partialProcess(dm, ['c'], []);
+        renderer.draw();
+      }
+
+      const program = rendererInternals(renderer).activeNodeProgram;
+      expect(Array.from(program.array.slice(0, 2))).toEqual([300, 300]);
+      expect(Array.from(program.array.slice(15, 17))).toEqual([400, 400]);
+      setPickPixel([...encodeId(0), 255]);
+      expect(renderer.pickAt(300, 300)).toEqual({ type: 'node', id: 'b' });
+      setPickPixel([...encodeId(1), 255]);
+      expect(renderer.pickAt(400, 400)).toEqual({ type: 'node', id: 'c' });
+      scheduler.destroy();
+      renderer.destroy();
+    },
+  );
+
+  it.each([false, true])('updates picking when appending a node (existing edge: %s)', (hasEdge) => {
+    const { canvas, setPickPixel } = makeCanvas();
+    const renderer = new Renderer(canvas);
+    const edgeConfig: EdgeConfig = { type: 'line', style: { lineWidth: 1, endArrow: false } };
+    analyzeEdgeConfig(edgeConfig, theme);
+    const dm = new DataModel({ theme });
+    dm.replaceData(
+      [
+        { id: 'a', x: 100, y: 100 },
+        { id: 'b', x: 300, y: 300 },
+      ],
+      hasEdge ? [{ id: 'ab', source: 'a', target: 'b' }] : [],
+    );
+    renderer.resize(800, 600);
+    renderer.setData({
+      ...rendererData(dm.getNodes() as LayoutNode[], dm.getEdges() as GraphEdge[]),
+      edgeConfig,
+    });
+    renderer.draw();
+    dm.addNode({ id: 'c', x: 400, y: 400 });
+    renderer.partialProcess(dm, ['c'], []);
+    renderer.draw();
+
+    setPickPixel([...encodeId(2), 255]);
+    expect(renderer.pickAt(400, 400)).toEqual({ type: 'node', id: 'c' });
+    expect(renderer.getNodeDimensions('c')).toEqual({
+      width: theme.nodeSize,
+      height: theme.nodeSize,
+    });
+    if (hasEdge) {
+      setPickPixel([...encodeId(3), 255]);
+      expect(renderer.pickAt(200, 200)).toEqual({ type: 'edge', index: 0 });
+      const edgeProgram = rendererInternals(renderer).activeEdgeProgram;
+      const encoded = encodeId(3);
+      expect(Array.from(edgeProgram.array.slice(13, 16))).toEqual(
+        encoded.map((value) => expect.closeTo(value / 255)),
+      );
+    }
+    renderer.destroy();
+  });
+
+  it('rebuilds removed edges when nodes are appended in the same batch', () => {
+    const { canvas } = makeCanvas();
+    const renderer = new Renderer(canvas);
+    const dm = new DataModel({ theme });
+    dm.replaceData(
+      [
+        { id: 'a', x: 100, y: 100 },
+        { id: 'b', x: 300, y: 300 },
+      ],
+      [{ id: 'ab', source: 'a', target: 'b' }],
+    );
+    renderer.setData(rendererData(dm.getNodes() as LayoutNode[], dm.getEdges() as GraphEdge[]));
+    renderer.draw();
+    dm.removeEdge('ab');
+    dm.addNode({ id: 'c', x: 400, y: 400 });
+    renderer.partialProcess(dm, ['c'], []);
+    renderer.draw();
+
+    expect(rendererInternals(renderer).activeEdgeProgram.itemCount).toBe(0);
+    expect(renderer.getEdgePathCache().size).toBe(0);
+    expect(renderer.getNodeDimensions('c')?.width).toBe(theme.nodeSize);
+    renderer.destroy();
+  });
+});
+
 describe('Renderer — data pipeline', () => {
   let renderer: Renderer;
 
@@ -295,12 +448,15 @@ describe('Renderer — data pipeline', () => {
     );
     renderer.draw();
 
+    const processSpy = vi.spyOn(renderer as unknown as { process: () => void }, 'process');
     dm.addNode({ id: 'b', x: 30, y: 40 });
     renderer.partialProcess(dm, ['b'], []);
+    renderer.draw();
 
     const program = rendererInternals(renderer).activeNodeProgram;
     expect(program.itemCount).toBe(2);
     expect(Array.from(program.array.slice(15, 17))).toEqual([30, 40]);
+    expect(processSpy).not.toHaveBeenCalled();
   });
 
   it('caches the rendered cubic path for self-loop labels', () => {

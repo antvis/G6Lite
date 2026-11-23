@@ -122,6 +122,15 @@ export class RenderScheduler {
   private executeRefresh(level: RefreshLevel, changes: readonly ChangeRecord[]): void {
     if (level === RefreshLevel.NONE) return;
 
+    // Appending buffers does not apply mutations to existing items. Keep that
+    // fast path for pure additions; mixed structural changes need a rebuild.
+    if (
+      level === RefreshLevel.PARTIAL_PROCESS &&
+      changes.some((change) => change.type !== 'nodeAdded' && change.type !== 'edgeAdded')
+    ) {
+      level = RefreshLevel.FULL_PROCESS;
+    }
+
     switch (level) {
       case RefreshLevel.DRAW_ONLY:
         this.renderer.draw();
@@ -150,12 +159,19 @@ export class RenderScheduler {
       }
 
       case RefreshLevel.PATCH_POSITION: {
-        // Collect moved node IDs
+        // Position patches do not include style patches. Both may be pending
+        // in the same frame, including changes to different nodes.
         const movedNodeIds = new Set<string>();
+        const changedNodeIds = new Set<string>();
         for (const c of changes) {
           if (c.type === 'nodePositionChanged') {
             for (const id of c.ids) movedNodeIds.add(id);
+          } else if (c.type === 'nodeDataChanged' || c.type === 'nodeStateChanged') {
+            for (const id of c.ids) changedNodeIds.add(id);
           }
+        }
+        if (changedNodeIds.size > 0) {
+          this.renderer.patchStyles(this.dataModel, changedNodeIds, new Set());
         }
         this.renderer.patchPositions(this.dataModel, movedNodeIds);
         this.renderer.draw();

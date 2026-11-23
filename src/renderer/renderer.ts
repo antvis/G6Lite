@@ -195,6 +195,7 @@ export class Renderer {
   private edgePathCache = new Map<number, EdgePath>();
   /** Number of nodes whose attributes have been written to the active GPU program. */
   private processedNodeCount = 0;
+  private processedEdgeCount = 0;
 
   // Render scheduling
   private renderFrame: number | null = null;
@@ -735,6 +736,7 @@ export class Renderer {
     this.picking.setNodeCount(this.nodes.length);
     this.hasArrows = renderedArrowCount > 0;
     this.processedNodeCount = this.nodes.length;
+    this.processedEdgeCount = this.edges.length;
     this.needToProcess = false;
     this.needPickingRender = true;
 
@@ -1859,7 +1861,7 @@ export class Renderer {
     // additions by the time the scheduler flushes. Track the processed boundary
     // independently instead of treating the shared array length as the old count.
     const prevNodeCount = this.processedNodeCount;
-    const prevEdgeCount = this.edges.length;
+    const prevEdgeCount = this.processedEdgeCount;
 
     this.nodes = getRendererNodes(dataModel.getNodes());
     this.edges = getRendererEdges(dataModel.getEdges());
@@ -1926,15 +1928,14 @@ export class Renderer {
       return;
     }
 
-    // Use incremental processing if only adding nodes/edges
-    if (addedNodeIds?.length || addedEdgeIds?.length) {
-      this.incrementalProcessAdded(
-        dataModel,
-        addedNodeIds ?? [],
-        addedEdgeIds ?? [],
-        prevNodeCount,
-        prevEdgeCount,
-      );
+    // Shared arrays may already contain removals as well as additions. Counts
+    // must match an append before retaining any existing GPU slots. New nodes
+    // also shift every edge's encoded picking ID, requiring an edge rebuild.
+    const appendOnly =
+      this.nodes.length === prevNodeCount + (addedNodeIds?.length ?? 0) &&
+      this.edges.length === prevEdgeCount + (addedEdgeIds?.length ?? 0);
+    if (appendOnly && this.edges.length === 0 && addedNodeIds?.length) {
+      this.incrementalProcessAdded(prevNodeCount);
     } else {
       // Full rebuild needed for removals or mixed changes
       this.needToProcess = true;
@@ -1943,16 +1944,10 @@ export class Renderer {
   }
 
   /**
-   * Incrementally process only newly added nodes and edges.
+   * Incrementally process newly added nodes when no edge buffers need updating.
    * Appends to existing GPU buffers instead of rebuilding.
    */
-  private incrementalProcessAdded(
-    dataModel: DataModel,
-    addedNodeIds: string[],
-    addedEdgeIds: string[],
-    prevNodeCount: number,
-    _prevEdgeCount: number,
-  ): void {
+  private incrementalProcessAdded(prevNodeCount: number): void {
     const { theme, nodeConfig } = this;
     const bg = parseColor(this.theme.canvasBackground ?? '#fff');
     const hasHighlight = this.highlightNodeIds.size > 0;
@@ -1961,6 +1956,20 @@ export class Renderer {
 
     // Ensure buffer capacity
     nodeProgram.reallocate(this.nodes.length);
+    if (
+      !this._nodeHalfWidths ||
+      !this._nodeHeights ||
+      this._nodeHalfWidths.length < this.nodes.length ||
+      this._nodeHeights.length < this.nodes.length
+    ) {
+      const capacity = Math.max(this.nodes.length, (this._nodeHalfWidths?.length ?? 0) * 2);
+      const halfWidths = new Float64Array(capacity);
+      const heights = new Float64Array(capacity);
+      if (this._nodeHalfWidths) halfWidths.set(this._nodeHalfWidths);
+      if (this._nodeHeights) heights.set(this._nodeHeights);
+      this._nodeHalfWidths = halfWidths;
+      this._nodeHeights = heights;
+    }
 
     // Process only new nodes
     let maxCircleExtent = this.maxCircleExtent;
@@ -1983,6 +1992,8 @@ export class Renderer {
       const opacity = active ? style.opacity : Math.min(style.opacity, HOVER_DIM_STRENGTH);
       const effectiveOpacity = isFillTransparent ? 0 : opacity;
       const effectiveStrokeWidth = isStrokeTransparent ? 0 : style.strokeWidth;
+      this._nodeHalfWidths[i] = (this.activeNodeType === 'rect' ? style.width : style.size) / 2;
+      this._nodeHeights[i] = this.activeNodeType === 'rect' ? style.height : style.size;
 
       if (this.activeNodeType === 'rect') {
         (nodeProgram as NodeRectProgram).processNode(
@@ -2025,11 +2036,7 @@ export class Renderer {
     }
     nodeProgram.upload();
     this.processedNodeCount = this.nodes.length;
-
-    // For edges, fall back to full process for now (edge processing is more complex)
-    if (addedEdgeIds.length > 0) {
-      this.needToProcess = true;
-    }
+    this.picking.setNodeCount(this.nodes.length);
   }
 
   /** Schedule a render on the next animation frame. */

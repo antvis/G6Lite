@@ -3,16 +3,48 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSelectedLayoutSegment } from 'next/navigation';
-import { useLayoutEffect, useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { localizedPath, type Locale } from '@/lib/i18n';
 import { getSiteExample, localizedExamplePath, localizedText, siteExampleCategories, siteExamples } from '@/lib/site-examples';
 import { withBasePath } from '@/lib/shared';
 
 const STORAGE_KEY = 'g6lite-example-directory-open';
+const STORAGE_EVENT = 'g6lite-example-directory-change';
+let fallbackSnapshot: string | undefined;
 
-function readOpenCategories(): string[] {
+function getOpenCategoriesSnapshot(): string {
+  if (fallbackSnapshot !== undefined) return fallbackSnapshot;
   try {
-    const value: unknown = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? '[]');
+    return sessionStorage.getItem(STORAGE_KEY) ?? '[]';
+  } catch {
+    return '[]';
+  }
+}
+
+function subscribeOpenCategories(onChange: () => void): () => void {
+  window.addEventListener(STORAGE_EVENT, onChange);
+  window.addEventListener('storage', onChange);
+  return () => {
+    window.removeEventListener(STORAGE_EVENT, onChange);
+    window.removeEventListener('storage', onChange);
+  };
+}
+
+function writeOpenCategories(categories: string[]): void {
+  const snapshot = JSON.stringify(categories);
+  try {
+    sessionStorage.setItem(STORAGE_KEY, snapshot);
+    fallbackSnapshot = undefined;
+  } catch {
+    // Keep the directory usable when session storage is unavailable.
+    fallbackSnapshot = snapshot;
+  }
+  window.dispatchEvent(new Event(STORAGE_EVENT));
+}
+
+function parseOpenCategories(snapshot: string): string[] {
+  try {
+    const value: unknown = JSON.parse(snapshot);
     return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : [];
   } catch {
     return [];
@@ -24,27 +56,19 @@ export function ExampleDirectory({ locale }: { locale: Locale }) {
   const activeCategory = id ? getSiteExample(id)?.category : undefined;
   const [query, setQuery] = useState('');
   const [directoryOpen, setDirectoryOpen] = useState(false);
-  const [openCategories, setOpenCategories] = useState<string[]>();
+  const snapshot = useSyncExternalStore(subscribeOpenCategories, getOpenCategoriesSnapshot, () => null);
+  const openCategories = useMemo(() => snapshot === null ? undefined : parseOpenCategories(snapshot), [snapshot]);
   const search = query.trim().toLocaleLowerCase();
   const zh = locale === 'zh';
   const directoryLabel = zh ? '示例目录' : 'Example directory';
   const searchLabel = zh ? '搜索示例、能力或 API' : 'Search examples, capabilities, or APIs';
 
   useLayoutEffect(() => {
-    setOpenCategories((previous) => {
-      const categories = previous ?? readOpenCategories();
-      return activeCategory && !categories.includes(activeCategory) ? [...categories, activeCategory] : categories;
-    });
-  }, [id, activeCategory]);
-
-  useLayoutEffect(() => {
-    if (!openCategories) return;
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(openCategories));
-    } catch {
-      // The directory still works when session storage is unavailable.
+    const categories = parseOpenCategories(getOpenCategoriesSnapshot());
+    if (activeCategory && !categories.includes(activeCategory)) {
+      writeOpenCategories([...categories, activeCategory]);
     }
-  }, [openCategories]);
+  }, [id, activeCategory]);
 
   const entries = useMemo(() => {
     if (!search) return siteExamples;
@@ -98,7 +122,8 @@ export function ExampleDirectory({ locale }: { locale: Locale }) {
                   <summary onClick={(event) => {
                     event.preventDefault();
                     if (search) return;
-                    setOpenCategories((previous = []) => open
+                    const previous = openCategories ?? [];
+                    writeOpenCategories(open
                       ? previous.filter((item) => item !== category.id)
                       : [...previous, category.id]);
                   }}>

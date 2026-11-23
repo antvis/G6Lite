@@ -144,10 +144,36 @@ describe('RenderScheduler', () => {
     scheduler.schedule();
     vi.runAllTimers();
 
-    // PARTIAL_PROCESS (from nodeAdded) > PATCH_POSITION (from positionChanged)
-    expect(renderer.partialProcess).toHaveBeenCalled();
+    // Appending alone would miss position updates to already-rendered nodes.
+    expect(renderer.updateData).toHaveBeenCalled();
+    expect(renderer.partialProcess).not.toHaveBeenCalled();
     expect(renderer.draw).toHaveBeenCalledTimes(1);
   });
+
+  it.each(['position-first', 'style-first'])(
+    'applies position and state changes in one frame (%s)',
+    (order) => {
+      const renderer = createMockRenderer();
+      const dataModel = new DataModel({ theme: mockTheme });
+      dataModel.addNodes([
+        { id: 'a', x: 0, y: 0 },
+        { id: 'b', x: 50, y: 50 },
+      ]);
+      dataModel.getChanges();
+      const scheduler = new RenderScheduler(asRenderer(renderer), dataModel);
+      const move = () => dataModel.updateNodePosition('a', 100, 200);
+      const select = () => dataModel.setNodeState('b', 'selected', true);
+      for (const update of order === 'position-first' ? [move, select] : [select, move]) {
+        update();
+        scheduler.schedule();
+      }
+      vi.runAllTimers();
+
+      expect(renderer.patchStyles).toHaveBeenCalledWith(dataModel, new Set(['b']), new Set());
+      expect(renderer.patchPositions).toHaveBeenCalledWith(dataModel, new Set(['a']));
+      expect(renderer.draw).toHaveBeenCalledTimes(1);
+    },
+  );
 
   it('should not schedule after destroy', () => {
     const renderer = createMockRenderer();

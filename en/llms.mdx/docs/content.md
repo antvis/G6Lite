@@ -2,6 +2,8 @@
 
 
 
+<span id="choosing-g6lite" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
 G6Lite is a browser-based graph visualization engine built for large-scale relationship data. Use it for service and device topologies, relationship networks, and knowledge graphs to understand connections and explore regions of interest in large graphs.
 
 ## Core capabilities [#core-capabilities]
@@ -11,6 +13,8 @@ G6Lite is a browser-based graph visualization engine built for large-scale relat
 * **Flexible layouts and interactions** — Choose from multiple graph layouts and add zoom, pan, drag, selection, and highlighting.
 * **Customization and extensions** — Map business data to visual styles and extend graph elements, layouts, and interactions as needed.
 * **AI-assisted development** — Use the G6Lite Skill to help an agent create graphs, refine styles, and configure interactions.
+
+<span id="documentation-structure" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
 ## Start here [#start-here]
 

@@ -1224,3 +1224,7 @@ await graph.render();
 ```
 
 See the [extension reference](/en/docs/api/extensions) for configuration and callbacks by type.
+
+## Related examples [#related-examples]
+
+* [Queries, batch states, and visibility](/en/docs/examples/queries-and-states)

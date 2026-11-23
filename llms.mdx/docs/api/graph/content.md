@@ -1224,3 +1224,7 @@ await graph.render();
 ```
 
 各类扩展的配置位置和回调见[扩展参考](/docs/api/extensions)。
+
+## 相关示例 [#相关示例]
+
+* [查询、批量状态与可见性](/docs/examples/queries-and-states)

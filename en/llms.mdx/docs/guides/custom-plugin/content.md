@@ -10,6 +10,8 @@ This example adds a click counter to the graph container. The count increases wh
 
 Use a factory to create the plugin. Keep the count, panel, and unsubscribe callback inside the factory so each plugin instance has its own state.
 
+<span id="options-and-cleanup" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
 | Method                   | What it does in the example                                                                                         |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | `init(context, options)` | Reads options such as the caption.                                                                                  |
@@ -181,6 +183,18 @@ export function createDemoPanel(container: string | HTMLElement, description = '
 
 
 
-Open the full code to see how the application provides a `subscribe` option. It calls `graph.on()` and returns a function that calls `graph.off()`. If a click counts more than once after remounting, check that `destroy()` calls the unsubscribe function.
+<span id="events-and-instance-scope" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+Open the full code to see how the application provides a `subscribe` option. It calls `graph.on()` and returns a function that calls `graph.off()`.
+
+## Common questions [#common-questions]
+
+### Why did setData not reset the counter? [#why-did-setdata-not-reset-the-counter]
+
+`setData()` replaces graph data while preserving the current plugin instance and its count. Calling `render()` again recreates the plugin instance, resetting the counter in this example.
+
+### Why do clicks increment multiple times after render? [#why-do-clicks-increment-multiple-times-after-render]
+
+If a click counts more than once after remounting, check that `destroy()` calls the unsubscribe function so old instances stop receiving events.
 
 See [PluginExtension](/en/docs/api/extensions#pluginextension) for the full contract.

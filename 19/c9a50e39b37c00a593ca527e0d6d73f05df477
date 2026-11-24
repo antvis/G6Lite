@@ -1,0 +1,21 @@
+README.zh-CN.md
+  s_2dc56783e42a8a::t_1abf6a317b89ad 16-17,28,114
+README.md
+  s_2dc56783e42a8a::t_1abf6a317b89ad 16-17,28,114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "19c9a50e39b37c00a593ca527e0d6d73f05df477",
+  "prompts": {},
+  "sessions": {
+    "s_2dc56783e42a8a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20d39-7caa-7a60-b8d7-a78ac1f6d6d1",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

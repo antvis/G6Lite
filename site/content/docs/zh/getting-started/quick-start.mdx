@@ -5,10 +5,10 @@ description: 安装 G6Lite，创建第一个可交互的关系图
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-选择一种接入方式。两种方式都用 6 个节点和 7 条边创建同一张团队协作图。
+选择包管理器或 CDN 接入。下面的包管理器和 ESM CDN 完整示例都用 6 个节点和 7 条边创建同一张团队协作图。
 
 - [包管理器](#包管理器)适合使用 Vite、Webpack 等构建工具的项目。安装后从 `@antv/g6-lite` 导入 `Graph`。
-- [CDN](#cdn)适合直接在 HTML 中使用。通过 `<script type="module">` 导入 `Graph`。
+- [CDN](#cdn)适合直接在 HTML 中使用。可通过 ES 模块导入 `Graph`，也可加载 [UMD 脚本](#cdn-umd)后使用 `G6Lite.Graph`。
 
 ## 包管理器
 
@@ -87,7 +87,7 @@ const graph = new Graph({
     type: 'd3-force',
     linkDistance: 100,
     nodeStrength: -400,
-    collideRadius: 32,
+    collide: { radius: 32 },
   },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
@@ -106,6 +106,8 @@ try {
 移除容器或卸载组件前，调用 `graph.destroy()` 释放资源。
 
 ## CDN
+
+ESM CDN 通过模块脚本导入 `Graph`，并加载所选布局。使用普通 `<script>` 标签时，见下方的 [UMD 接入](#cdn-umd)。
 
 ```js
 import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
@@ -167,7 +169,7 @@ import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
           type: 'd3-force',
           linkDistance: 100,
           nodeStrength: -400,
-          collideRadius: 32,
+          collide: { radius: 32 },
         },
         behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
       });
@@ -184,13 +186,41 @@ import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
 </html>
 ```
 
-单页示例在 `pagehide` 时销毁图实例。浏览器从往返缓存恢复页面时，需要重新创建实例。
+### 使用 UMD 脚本 [#cdn-umd]
+
+UMD 主脚本包含运行依赖和内置布局，加载后通过 `G6Lite.Graph` 创建图。下面的最小示例绘制两个节点和一条边：
+
+```html
+<div id="container" style="width: 100%; height: 360px"></div>
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
+<script>
+  const graph = new G6Lite.Graph({
+    container: '#container',
+    data: {
+      nodes: [{ id: 'Alice' }, { id: 'Bob' }],
+      edges: [{ source: 'Alice', target: 'Bob' }],
+    },
+    layout: { type: 'circular', radius: 80 },
+    node: { style: { label: (node) => node.id } },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+  });
+  graph.render().catch((error) => {
+    graph.destroy();
+    console.error(error);
+  });
+  window.addEventListener('pagehide', () => graph.destroy(), { once: true });
+</script>
+```
+
+ESM 接入支持通过构建工具按需加载布局；UMD 主脚本已内联内置布局。两种接入方式使用可选布局时都需要[先导入并注册](/docs/guides/layout-overview#optional-layouts)。布局的 Worker 部署要求见 [Worker 指南](/docs/guides/layout-worker)。
+
+上面的独立 HTML 示例在 `pagehide` 时销毁图实例。浏览器从往返缓存恢复页面时，需要重新创建实例。
 
 <span id="验证效果与清理" style={{ scrollMarginTop: '8rem' }} />
 
 ## 运行效果
 
-两种接入方式都会生成下方的团队协作图，包含 6 个带标签的节点和 7 条边。拖动空白处可平移画布。
+包管理器和 ESM CDN 完整示例会生成下方的团队协作图，包含 6 个带标签的节点和 7 条边。拖动空白处可平移画布。
 
 <QuickStartExample locale="zh" variant="network" />
 

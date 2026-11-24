@@ -5,10 +5,10 @@ description: Install G6Lite and create your first interactive graph
 
 import { QuickStartExample } from '@/components/quick-start-example';
 
-Choose an integration method. Both create the same team collaboration graph with 6 nodes and 7 edges.
+Choose a package manager or CDN integration. The complete package-manager and ESM CDN examples below create the same team collaboration graph with 6 nodes and 7 edges.
 
 - [Package manager](#package-manager) works with projects that use a bundler such as Vite or Webpack. Install the package and import `Graph` from `@antv/g6-lite`.
-- [CDN](#cdn) works directly in HTML. Import `Graph` with a `<script type="module">` tag.
+- [CDN](#cdn) works directly in HTML. Import `Graph` from an ES module, or load the [UMD script](#cdn-umd) and use `G6Lite.Graph`.
 
 ## Package manager
 
@@ -87,7 +87,7 @@ const graph = new Graph({
     type: 'd3-force',
     linkDistance: 100,
     nodeStrength: -400,
-    collideRadius: 32,
+    collide: { radius: 32 },
   },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
@@ -106,6 +106,8 @@ TypeScript declarations are included in the package.
 Call `graph.destroy()` before removing the container or unmounting the component.
 
 ## CDN
+
+The ESM CDN imports `Graph` through a module script and loads the selected layout. For a regular `<script>` tag, use the [UMD integration](#cdn-umd) below.
 
 ```js
 import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
@@ -167,7 +169,7 @@ Save the HTML below as `index.html` and open it in your browser.
           type: 'd3-force',
           linkDistance: 100,
           nodeStrength: -400,
-          collideRadius: 32,
+          collide: { radius: 32 },
         },
         behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
       });
@@ -184,13 +186,41 @@ Save the HTML below as `index.html` and open it in your browser.
 </html>
 ```
 
-The single-page example destroys the instance on `pagehide`. Recreate it if the browser restores the page from its back/forward cache.
+### Use the UMD script [#cdn-umd]
+
+The UMD script includes runtime dependencies and built-in layouts. Once loaded, create a graph with `G6Lite.Graph`. This minimal example draws two nodes and one edge:
+
+```html
+<div id="container" style="width: 100%; height: 360px"></div>
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
+<script>
+  const graph = new G6Lite.Graph({
+    container: '#container',
+    data: {
+      nodes: [{ id: 'Alice' }, { id: 'Bob' }],
+      edges: [{ source: 'Alice', target: 'Bob' }],
+    },
+    layout: { type: 'circular', radius: 80 },
+    node: { style: { label: (node) => node.id } },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+  });
+  graph.render().catch((error) => {
+    graph.destroy();
+    console.error(error);
+  });
+  window.addEventListener('pagehide', () => graph.destroy(), { once: true });
+</script>
+```
+
+ESM integrations support on-demand layout loading through a bundler; the UMD script bundles built-in layouts. Both integrations require [importing and registering optional layouts](/en/docs/guides/layout-overview#optional-layouts) before use. See the [Worker guide](/en/docs/guides/layout-worker) for Worker deployment requirements.
+
+The standalone HTML examples above destroy their instances on `pagehide`. Recreate them if the browser restores the page from its back/forward cache.
 
 <span id="verify-and-clean-up" style={{ scrollMarginTop: '8rem' }} />
 
 ## Result
 
-Both methods render the team collaboration graph below, with 6 labeled nodes and 7 edges. Drag the background to pan the canvas.
+The complete package-manager and ESM CDN examples render the team collaboration graph below, with 6 labeled nodes and 7 edges. Drag the background to pan the canvas.
 
 <QuickStartExample locale="en" variant="network" />
 

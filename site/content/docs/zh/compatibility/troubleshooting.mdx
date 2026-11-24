@@ -41,7 +41,7 @@ console.table({
 
 ## Worker 没运行或回退
 
-在 Network/Performance 检查模块 Worker 请求、执行线程、克隆错误和服务器响应。普通函数与循环引用配置不能直接克隆；worker: true 不是成功证据。
+在 Network/Performance 检查模块 Worker 请求、执行线程、克隆错误和服务器响应。函数、DOM 节点等值不能结构化克隆；循环引用本身可以克隆。`worker: true` 表示尝试启用，实际执行线程需在开发工具中确认。
 [Worker 部署与取消](/docs/guides/layout-worker)
 
 ## 卸载后残留或重复响应
@@ -75,7 +75,7 @@ Graph 不能在普通 Node.js / SSR 阶段出图。在客户端挂载后创建�
 
 ### 安装后某个字段不存在怎么办？
 
-先检查实际版本和包根类型，不复制开发分支字段。安装与 UMD 的已知发布物差异见[快速上手](/docs/getting-started/quick-start)。
+先检查已安装的版本和包根类型，核对字段是否属于该版本的公开 API。`0.1.0` 提供 ESM、UMD 和类型声明；安装方式见[快速上手](/docs/getting-started/quick-start)，普通脚本接入见 [UMD 示例](/docs/getting-started/quick-start#cdn-umd)。
 
 ## 选型、功能与示例
 
@@ -85,7 +85,7 @@ Graph 不能在普通 Node.js / SSR 阶段出图。在客户端挂载后创建�
 
 ### Combo 可以使用吗？
 
-可以验证分组、嵌套和折叠，但当前仍为实验能力。使用前检查[Combo 边界](/docs/api/options#options-combo)。
+`0.1.0` 支持 Combo 分组。嵌套、折叠和运行时归组三类 API 仍标记为实验性，接入前请核对 [Combo 配置与限制](/docs/api/options#options-combo)。
 
 ### 示例能在线运行吗？
 

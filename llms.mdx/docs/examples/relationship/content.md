@@ -87,7 +87,7 @@ export async function run(container: string | HTMLElement) {
       type: 'd3-force',
       linkDistance: 180,
       nodeStrength: -600,
-      collideRadius: 60,
+      collide: { radius: 60 },
       forceSimulation: null,
     },
     behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node'],

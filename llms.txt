@@ -85,7 +85,7 @@
 - 开始使用
   - [技术架构](/docs/concepts/architecture): 图运行时、绘制图层、渲染调度与布局交互如何协作
 - 排查与升级
-  - [浏览器与运行环境](/docs/compatibility/browser): 实际能力、ESM、Worker、CSP、SSR 和设备验收边界
+  - [浏览器与运行环境](/docs/compatibility/browser): 浏览器运行要求、模块接入、Worker、CSP 与兼容性验证范围
   - [从 G6 v5 迁移](/docs/compatibility/g6-v5-migration): 逐项迁移配置、数据、交互、事件和扩展，保留可回退的业务基线
   - [故障排查](/docs/compatibility/troubleshooting): 排查画布、布局、交互与接入问题，按症状找到检查步骤
 - 示例
@@ -229,7 +229,7 @@
 - Getting started
   - [Technical architecture](/en/docs/concepts/architecture): How the graph runtime, drawing layers, scheduling, layouts, and interactions work together
 - Troubleshooting and upgrades
-  - [Browsers and runtime](/en/docs/compatibility/browser): Runtime capabilities, ESM, Worker, CSP, SSR, and device acceptance boundaries
+  - [Browsers and runtime](/en/docs/compatibility/browser): Browser requirements, module integration, Workers, CSP, and compatibility testing
   - [Migrate from G6 v5](/en/docs/compatibility/g6-v5-migration): Migrate configuration, data, interactions, events, and extensions with a reversible business baseline
   - [Troubleshooting](/en/docs/compatibility/troubleshooting): Diagnose canvas, layout, interaction, and setup issues by symptom
 - Examples

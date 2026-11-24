@@ -68,7 +68,7 @@ export async function mountGraph(container: HTMLElement) {
 
 ## Node、Edge 与 Combo 配置 [#nodeedge-与-combo-配置]
 
-内置 circle / rect 和常用边复用 WebGL 基型；任意场景图形状不是直接替代。状态样式分别位于 node.stateStyles、edge.stateStyles 与 combo.style.stateStyles。Combo 嵌套、折叠与运行时归组仍为实验能力。
+内置 circle / rect 和常用边复用 WebGL 基型；任意场景图形状不是直接替代。状态样式分别位于 node.stateStyles、edge.stateStyles 与 combo.style.stateStyles。`0.1.0` 提供 Combo 分组，其中嵌套、折叠和运行时归组三类 API 仍标记为实验性；迁移这些功能前请核对 [Combo 配置与限制](/docs/api/options#options-combo)。
 
 [节点](/docs/guides/node#options-node) · [边](/docs/api/options#options-edge) · [Combo](/docs/api/options#options-combo)
 

@@ -17,7 +17,7 @@ Graph runs in a real browser DOM container. It prefers WebGL2 and then tries Web
 
 ## Minimum browser versions [#minimum-browser-versions]
 
-G6Lite does not yet have certified minimum supported browser versions. The table lists minimum versions for syntax and APIs used by the core code, as starting points for testing. These versions have not passed G6Lite compatibility acceptance.
+Minimum supported browser versions have not yet completed compatibility testing. The table lists minimum versions for core syntax and APIs as starting points for project testing; check layout dependencies and build output for the complete integration.
 
 | Browser                  | Core syntax and API version reference | Module Worker API version reference |
 | ------------------------ | ------------------------------------- | ----------------------------------- |
@@ -30,19 +30,9 @@ The core reference takes the highest requirement among optional chaining, nullis
 
 The ES2020 target controls this library's TypeScript output; it does not automatically downlevel layout dependencies. For example, current layout dependencies contain private class methods. Loading the UMD bundle containing layouts or importing the affected layouts may require newer versions than the table indicates. Check dependencies, transpilation targets, and runtime APIs in the application build. Browsers without module Worker support may fall back to the main thread; a successful fallback is not a Worker pass.
 
-Browser/WebView, GPU drivers, and bundles determine usability. Validate creation, rendering, zoom, layouts, Worker execution, resizing, and cleanup before recording the passing scope for a target version. Mobile browsers and enterprise WebViews require separate acceptance. Legacy IE/EdgeHTML are not current targets.
+Test creation, rendering, zoom, layouts, Worker execution, resizing, and cleanup in the target browser or WebView. Record the OS, GPU, DPR, and test date. Test mobile browsers and enterprise WebViews separately. Legacy IE/EdgeHTML are outside the current target environments.
 
-## Coverage reference [#coverage-reference]
-
-Usage-share percentages are not G6Lite device pass rates. This page does not maintain an unreproducible global coverage figure. Record the project’s browser, OS, GPU, DPR, and verification date.
-
-<span id="comparison-with-sigmajs" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-## Browser comparison with sigma.js [#browser-comparison-with-sigmajs]
-
-Browser requirements vary by library and major version. Check the compatibility documentation for the version you plan to use.
-
-## WebGL support matrix [#webgl-support-matrix]
+## WebGL support [#webgl-support-matrix]
 
 WebGL1 is the fallback; WebGL2 is not mandatory. Acceleration, optional extensions, and resource limits affect output and throughput. A WebGL version does not determine a supported node count.
 
@@ -54,14 +44,20 @@ regl uses dynamic function compilation, which conflicts with strict CSP that pro
 
 ## Modules, SSR, and resources [#modules-ssr-and-resources]
 
-The package root provides ESM and type declarations. CommonJS applications can use `await import('@antv/g6-lite')` in asynchronous client code. Graph renders in the browser. See [Quick start](/en/docs/getting-started/quick-start) for React, Vue, and UMD setup.
+`0.1.0` provides ESM, UMD, and type declarations. CommonJS applications can use `await import('@antv/g6-lite')` in asynchronous client code. Graph renders in the browser. See [React](/en/docs/getting-started/react) and [Vue](/en/docs/getting-started/vue) for framework integration, or the [UMD example](/en/docs/getting-started/quick-start#cdn-umd) for script tags.
 
-In React and Vue, create the graph after the component mounts on the client. Check the available APIs if you need arbitrary HTML or React node trees, server-side rendering, or full animation orchestration. See [Combo configuration](/en/docs/api/options#options-combo) for the experimental boundaries of nesting and collapse.
+In React and Vue, create the graph after the component mounts on the client. Check the available APIs if you need arbitrary HTML or React node trees, server-side rendering, or full animation orchestration. Combo APIs for nesting, collapsing, and changing membership at runtime remain experimental; see [Combo configuration](/en/docs/api/options#options-combo) for their behavior.
 
 High DPR, large containers, and concurrent graphs increase pixel and GPU costs. Context and memory limits depend on browser/device. The engine handles context lost/restored and attempts resource restoration, without guaranteeing host or application-state recovery. Call destroy when leaving.
 
+<span id="coverage-reference" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="comparison-with-sigmajs" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="browser-comparison-with-sigmajs" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
 ## Test scope [#test-scope]
 
-Local Chromium automation covers executed paths only. It does not certify Safari, Firefox, mobile, or enterprise WebViews. Record tested environments and uncovered devices, and repeat [measurement](/en/docs/metrics/performance) with business data.
+The public [performance samples](/benchmarks/graph-performance.json), recorded on 2026-11-13, use macOS, headless Chromium 151.0.7922.34, and SwiftShader. They measure first draw with fixed positions, labels disabled, and no layout execution.
 
-The current public [performance samples](/benchmarks/graph-performance.json), recorded on 2026-11-10, use headless Chromium 151.0.7922.34 on macOS with SwiftShader. They cover first draw with fixed positions, labels disabled, and no layout execution. They do not validate the older browser versions above or the Worker path.
+These samples do not cover older browsers, Safari, Firefox, mobile browsers, enterprise WebViews, or Worker execution. Repeat the [measurement procedure](/en/docs/metrics/performance) with your data and target devices. When comparing libraries, check the runtime requirements for each version.

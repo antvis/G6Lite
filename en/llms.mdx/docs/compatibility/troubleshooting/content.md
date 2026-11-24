@@ -40,7 +40,7 @@ Check behaviors, required Behavior types, and modifiers; \[] disables defaults. 
 
 ## Worker does not run or falls back [#worker-does-not-run-or-falls-back]
 
-Inspect Worker requests, execution threads, clone errors, and server responses. Function/cyclic configuration may not clone; worker: true is not evidence of success.
+Inspect Worker requests, execution threads, clone errors, and server responses. Functions and DOM nodes cannot be structured-cloned; circular references themselves are supported. `worker: true` requests Worker execution; confirm the actual thread in developer tools.
 [Worker deployment and cancellation](/en/docs/guides/layout-worker)
 
 ## Leftovers or duplicate responses after unmount [#leftovers-or-duplicate-responses-after-unmount]
@@ -74,7 +74,7 @@ Import values and types from the `@antv/g6-lite` package root and use the declar
 
 ### What if an installed package does not contain a field? [#what-if-an-installed-package-does-not-contain-a-field]
 
-Identify the actual version and root types rather than copying development-only fields. See [installation](/en/docs/getting-started/quick-start) for known archive and UMD differences.
+Check the installed version and its root declarations to confirm that the field belongs to that version's public API. `0.1.0` provides ESM, UMD, and type declarations. See [Quick start](/en/docs/getting-started/quick-start) for installation and the [UMD example](/en/docs/getting-started/quick-start#cdn-umd) for script-tag integration.
 
 ## Choosing features and finding examples [#choosing-features-and-finding-examples]
 
@@ -84,7 +84,7 @@ Compare required graphics, runtime, and interactions, then validate with your ow
 
 ### Can I use Combo? [#can-i-use-combo]
 
-Grouping, nesting, and collapsing can be evaluated but remain experimental. Check [Combo boundaries](/en/docs/api/options#options-combo).
+`0.1.0` supports Combo groups. The APIs for nesting, collapsing, and changing membership at runtime remain experimental. Review [Combo configuration and limitations](/en/docs/api/options#options-combo) before using them.
 
 ### Can examples run online? [#can-examples-run-online]
 

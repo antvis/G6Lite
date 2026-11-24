@@ -12,11 +12,11 @@ A Worker moves layout computation off the main thread so the canvas can stay res
 layout: { type: 'force-atlas2', worker: true, maxIteration: 100 },
 ```
 
-| layout.worker | Graph behavior                                                                                                                      |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Omitted       | Attempts a Worker at ≥ 1000 nodes; main thread below that threshold                                                                 |
-| true          | Attempts a Worker for library layouts; registered extensions and three built-in tree layouts still execute on the main thread first |
-| false         | Explicitly disables Workers, including for large graphs                                                                             |
+| layout.worker | Graph behavior                                                                                                                        |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Omitted       | Attempts a Worker at ≥ 1000 nodes; main thread below that threshold                                                                   |
+| true          | Attempts a Worker for built-in library layouts; registered extensions, including all six optional layouts, execute on the main thread |
+| false         | Explicitly disables Workers, including for large graphs                                                                               |
 
 Standalone runLayout has no node-count-based automatic switch. Worker failures fall back to the same main-thread algorithm. See the [layout reference](/en/docs/guides/layout#worker) for execution order and iteration defaults.
 

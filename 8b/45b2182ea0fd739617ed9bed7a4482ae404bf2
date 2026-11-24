@@ -1,0 +1,53 @@
+site/content/docs/en/api/options.mdx
+  s_a24fb03aee4092::t_8304f0e36cd750 431
+site/content/docs/zh/compatibility/g6-v5-migration.mdx
+  s_a24fb03aee4092::t_8304f0e36cd750 72
+site/content/docs/en/guides/layout-worker.mdx
+  s_a24fb03aee4092::t_8304f0e36cd750 19
+site/content/docs/en/compatibility/browser.mdx
+  s_a24fb03aee4092::t_8304f0e36cd750 3,21,34,36,48,50,54-59,62,64
+site/content/docs/zh/api/options.mdx
+  s_a24fb03aee4092::t_8304f0e36cd750 431
+site/content/docs/zh/getting-started/quick-start.mdx
+  s_a24fb03aee4092::t_6a000728c2325e 8,11,90,110-111,172,189-217,223
+site/content/docs/zh/compatibility/troubleshooting.mdx
+  s_a24fb03aee4092::t_6a000728c2325e 44,78,88
+site/content/docs/en/metrics/performance.mdx
+  s_a24fb03aee4092::t_f1c6779358c37c 6-8,22,47,54,58
+site/content/docs/zh/compatibility/browser.mdx
+  s_a24fb03aee4092::t_8304f0e36cd750 3,19,32,34,46,48,52-55,58,60
+site/content/docs/zh/metrics/performance.mdx
+  s_a24fb03aee4092::t_f1c6779358c37c 6-8,20,43,50,54
+site/demos/relationship.ts
+  s_a24fb03aee4092::t_6a000728c2325e 70
+site/src/lib/quick-start.ts
+  s_a24fb03aee4092::t_6a000728c2325e 60
+tests/unit/site/quick-start.test.ts
+  s_a24fb03aee4092::t_6a000728c2325e 1-17
+site/content/docs/en/compatibility/g6-v5-migration.mdx
+  s_a24fb03aee4092::t_8304f0e36cd750 74
+site/content/docs/en/getting-started/quick-start.mdx
+  s_a24fb03aee4092::t_6a000728c2325e 8,11,90,110-111,172,189-217,223
+site/content/docs/zh/guides/layout-worker.mdx
+  s_a24fb03aee4092::t_8304f0e36cd750 21
+site/src/components/homepage/bundle-measurement.json
+  s_a24fb03aee4092::t_f1c6779358c37c 3-4,7-11
+site/content/docs/en/compatibility/troubleshooting.mdx
+  s_a24fb03aee4092::t_6a000728c2325e 44,78,88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8b45b2182ea0fd739617ed9bed7a4482ae404bf2",
+  "prompts": {},
+  "sessions": {
+    "s_a24fb03aee4092": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a20835-fd4d-77a3-b092-c7a07768dfa2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "gengsheng.wp <gengsheng.wp@antgroup.com>"
+    }
+  }
+}

@@ -25,7 +25,7 @@ English | [简体中文](./README.zh-CN.md)
   <a href="https://g6lite.antv.vision/en/docs/examples">Examples</a>
 </p>
 
-![G6Lite exploring the AI Papers network with 8,798 nodes and 71,077 edges](./site/public/examples/ai-papers.gif)
+![G6Lite exploring the AI Papers network with 8,798 nodes and 71,077 edges](./site/public/examples/ai-papers.webp)
 
 ## Why G6Lite
 

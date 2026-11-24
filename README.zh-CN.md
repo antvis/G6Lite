@@ -25,7 +25,7 @@
   <a href="https://g6lite.antv.vision/docs/examples">示例</a>
 </p>
 
-![G6Lite 探索 AI Papers 论文关系网络：8,798 个节点、71,077 条边](./site/public/examples/ai-papers.gif)
+![G6Lite 探索 AI Papers 论文关系网络：8,798 个节点、71,077 条边](./site/public/examples/ai-papers.webp)
 
 ## 为什么选择 G6Lite
 

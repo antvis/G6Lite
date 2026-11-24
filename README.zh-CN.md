@@ -13,8 +13,8 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@antv/g6-lite/v/0.1.0"><img alt="npm 版本" src="https://img.shields.io/badge/version-0.1.0-blue"></a>
   <a href="https://github.com/antvis/G6Lite/actions/workflows/build.yml"><img alt="构建" src="https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg"></a>
-  <a href="https://bundlephobia.com/package/@antv/g6-lite@0.1.0"><img alt="压缩后体积" src="https://img.shields.io/bundlephobia/minzip/@antv/g6-lite/0.1.0"></a>
-  <a href="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"><img alt="UMD gzip 体积" src="https://img.badgesize.io/https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
+  <a href="https://bundlephobia.com/package/@antv/g6-lite@0.1.0"><img alt="0.1.0 npm 入口压缩后体积：91.5 kB" src="https://img.shields.io/badge/minzip-91.5_kB-blue"></a>
+  <a href="https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"><img alt="UMD gzip 体积" src="https://img.badgesize.io/https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
   <a href="./LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/@antv/g6-lite.svg"></a>
 </p>
 
@@ -25,7 +25,7 @@
   <a href="https://g6lite.antv.vision/docs/examples">示例</a>
 </p>
 
-![G6Lite 大规模关系图渲染效果](./site/public/examples/large.png)
+![G6Lite 探索 AI Papers 论文关系网络：8,798 个节点、71,077 条边](./site/public/examples/ai-papers.gif)
 
 ## 为什么选择 G6Lite
 
@@ -111,7 +111,7 @@ await graph.render();
 - [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
 - [UNPKG](https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
 
-UMD 徽章展示完整 CDN 文件的下载体积；Bundlephobia 徽章展示该服务打包 npm 入口后测得的体积。
+minzip 徽章记录 Bundlephobia 对 0.1.0 版本 npm 入口的测量值（gzip 后 91,468 字节）；UMD 徽章通过 UNPKG 测量完整 CDN 文件的下载体积。
 
 ## 继续阅读
 

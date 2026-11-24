@@ -3921,401 +3921,6 @@ graph.updateOptions(
 You can also change interactions with [setBehaviors()](/en/docs/api/graph#setbehaviors). Use [data mutations](/en/docs/api/graph#graph-data-mutations) for data and Combos and [setLayout() and layout()](/en/docs/api/graph#graph-layout) for layout. Create a Graph with new options to change the container, `autoFit`, plugins, or transforms.
 
 
-# Browsers and runtime (/en/docs/compatibility/browser)
-
-
-
-Graph runs in a real browser DOM container. It prefers WebGL2 and then tries WebGL1; text and Combo also need Canvas 2D. Build-time Node.js requirements do not imply server rendering support.
-
-## Rendering dependencies [#rendering-dependencies]
-
-| Capability                             | Requirement and role                                                                                       |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| DOM / Canvas 2D                        | Required for containers, text, and information layers                                                      |
-| WebGL2 / WebGL1                        | At least one usable context; blocked GPUs or remote environments may expose APIs but fail context creation |
-| ResizeObserver / requestAnimationFrame | Resize observation and scheduling; required browser APIs                                                   |
-| ESM / dynamic import / AbortController | Modules, lazy layouts, cancellation; check actual artifacts and application build targets                  |
-
-<span id="minimum-versions" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-## Minimum browser versions [#minimum-browser-versions]
-
-Minimum supported browser versions have not yet completed compatibility testing. The table lists minimum versions for core syntax and APIs as starting points for project testing; check layout dependencies and build output for the complete integration.
-
-| Browser                  | Core syntax and API version reference | Module Worker API version reference |
-| ------------------------ | ------------------------------------- | ----------------------------------- |
-| Chrome (desktop)         | 80                                    | 80                                  |
-| Edge (Chromium, desktop) | 80                                    | 80                                  |
-| Firefox (desktop)        | 74                                    | 114                                 |
-| Safari (macOS)           | 13.1                                  | 15                                  |
-
-The core reference takes the highest requirement among optional chaining, nullish coalescing, ResizeObserver, and AbortController. The Worker column only identifies when module Workers became available. Sources: [optional chaining](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining#browser_compatibility), [nullish coalescing](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing#browser_compatibility), [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#browser_compatibility), [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController#browser_compatibility), and [Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker#browser_compatibility).
-
-The ES2020 target controls this library's TypeScript output; it does not automatically downlevel layout dependencies. For example, current layout dependencies contain private class methods. Loading the UMD bundle containing layouts or importing the affected layouts may require newer versions than the table indicates. Check dependencies, transpilation targets, and runtime APIs in the application build. Browsers without module Worker support may fall back to the main thread; a successful fallback is not a Worker pass.
-
-Test creation, rendering, zoom, layouts, Worker execution, resizing, and cleanup in the target browser or WebView. Record the OS, GPU, DPR, and test date. Test mobile browsers and enterprise WebViews separately. Legacy IE/EdgeHTML are outside the current target environments.
-
-## WebGL support [#webgl-support-matrix]
-
-WebGL1 is the fallback; WebGL2 is not mandatory. Acceleration, optional extensions, and resource limits affect output and throughput. A WebGL version does not determine a supported node count.
-
-## Worker, CSP and deployment [#worker-csp-and-deployment]
-
-The ESM package uses a module Worker URL for layouts. Verify base paths, files, Content-Type, cross-origin rules, and host CSP. worker: true does not prove execution; clone or loading failures may fall back. See the [Worker guide](/en/docs/guides/layout-worker).
-
-regl uses dynamic function compilation, which conflicts with strict CSP that prohibits eval. wasm-unsafe-eval alone is insufficient. Confirm host security requirements instead of treating weaker site policies as a universal fix.
-
-## Modules, SSR, and resources [#modules-ssr-and-resources]
-
-`0.1.0` provides ESM, UMD, and type declarations. CommonJS applications can use `await import('@antv/g6-lite')` in asynchronous client code. Graph renders in the browser. See [React](/en/docs/getting-started/react) and [Vue](/en/docs/getting-started/vue) for framework integration, or the [UMD example](/en/docs/getting-started/quick-start#cdn-umd) for script tags.
-
-In React and Vue, create the graph after the component mounts on the client. Check the available APIs if you need arbitrary HTML or React node trees, server-side rendering, or full animation orchestration. Combo APIs for nesting, collapsing, and changing membership at runtime remain experimental; see [Combo configuration](/en/docs/api/options#options-combo) for their behavior.
-
-High DPR, large containers, and concurrent graphs increase pixel and GPU costs. Context and memory limits depend on browser/device. The engine handles context lost/restored and attempts resource restoration, without guaranteeing host or application-state recovery. Call destroy when leaving.
-
-<span id="coverage-reference" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="comparison-with-sigmajs" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="browser-comparison-with-sigmajs" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-## Test scope [#test-scope]
-
-The public [performance samples](/benchmarks/graph-performance.json), recorded on 2026-11-13, use macOS, headless Chromium 151.0.7922.34, and SwiftShader. They measure first draw with fixed positions, labels disabled, and no layout execution.
-
-These samples do not cover older browsers, Safari, Firefox, mobile browsers, enterprise WebViews, or Worker execution. Repeat the [measurement procedure](/en/docs/metrics/performance) with your data and target devices. When comparing libraries, check the runtime requirements for each version.
-
-
-# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
-
-
-
-G6Lite and G6 v5 use separate npm packages and implementations. This guide uses G6 5.1.1 as its starting point and maps its usage to the public G6Lite APIs. [G6 quick start](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start) · [Graph API](/en/docs/api/graph) · [GitHub Releases](https://github.com/antvis/G6Lite/releases)
-
-## Decide whether to migrate [#decide-whether-to-migrate]
-
-Validate the most complex nodes, interactions, labels, and groups first. Keep G6 when arbitrary DOM/React nodes, multiple renderers, server rendering, full animation, algorithms, or established plugins are essential.
-
-## Installation and imports [#installation-and-imports]
-
-```bash
-npm install @antv/g6-lite@0.1.0
-```
-
-Import values and types from @antv/g6-lite only; do not migrate to deep src/dist paths.
-
-<span id="minimal-configuration-side-by-side" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-## Minimal configuration comparison [#minimal-configuration-comparison]
-
-G6 v5 commonly uses a container ID, labelText, and drag-element; see the [official example](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start). This standalone G6Lite starting point needs a mounted, non-zero-size container:
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-export async function mountGraph(container: HTMLElement) {
-  const graph = new Graph({
-    container,
-    data: {
-      nodes: [{ id: 'a' }, { id: 'b' }],
-      edges: [{ id: 'a-b', source: 'a', target: 'b' }],
-    },
-    node: { style: { label: (node) => node.id } },
-    layout: { type: 'circular', radius: 100 },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
-  });
-  try {
-    await graph.render();
-    graph.fitView({ padding: 32 });
-    return () => graph.destroy();
-  } catch (error) {
-    graph.destroy();
-    throw error;
-  }
-}
-```
-
-Call the returned disposer for cleanup. For React/Vue asynchronous unmounting, use the [framework pattern](/en/docs/getting-started/react) instead of leaving a mounting task unmanaged.
-
-## GraphOptions mapping [#graphoptions-mapping]
-
-| G6 v5                            | G6Lite                                                                                |
-| -------------------------------- | ------------------------------------------------------------------------------------- |
-| container ID                     | CSS selector #container, or HTMLElement                                               |
-| node.style.labelText             | node.style.label                                                                      |
-| width / height                   | Container CSS; runtime setSize                                                        |
-| palette / renderer / animation   | Not drop-in equivalents; map styles or keep G6                                        |
-| setOptions                       | updateOptions supports node / edge / label / theme / behaviors; set layout separately |
-| plugins / transforms / behaviors | Recheck registration, names, options, and lifecycle                                   |
-
-Complete fields: [GraphOptions](/en/docs/api/options)。
-
-## Data field mapping [#data-field-mapping]
-
-Provide nodes/edges arrays, unique node IDs, and valid endpoints. Keep stable edge IDs. Use node x/y, comboId, and business data fields. Do not copy G6 internal models or assume per-node style compatibility.
-
-Runtime node additions require positions; full replacement and incremental writes differ. See [input data](/en/docs/api/options#options-data) · [data updates](/en/docs/guides/data)。
-
-## Node, Edge and Combo configuration [#node-edge-and-combo-configuration]
-
-Built-in circle/rect and common edges reuse WebGL primitives; they do not replace arbitrary scene-graph shapes. State styles live in node.stateStyles, edge.stateStyles, and combo.style.stateStyles. `0.1.0` provides Combo groups; APIs for nesting, collapsing, and changing membership at runtime remain experimental. Review [Combo configuration and limitations](/en/docs/api/options#options-combo) before migrating those features.
-
-[Nodes](/en/docs/guides/node#options-node) · [Edges](/en/docs/api/options#options-edge) · [Combo](/en/docs/api/options#options-combo)
-
-## Behavior mapping [#behavior-mapping]
-
-| G6 v5                      | G6Lite                                                                   |
-| -------------------------- | ------------------------------------------------------------------------ |
-| drag-element               | drag-node                                                                |
-| hover-activate             | hover-highlight or state APIs                                            |
-| collapse-expand            | collapseCombo / expandCombo / toggleCombo                                |
-| create-edge                | Application creation + addEdge; drag-edge only reconnects existing edges |
-| focus-element              | focusItem                                                                |
-| zoom-canvas / click-select | Names may match; recheck options, payloads, and modifiers                |
-
-Omitted behaviors enable default zoom/pan; \[] disables them. See [Behavior](/en/docs/api/options#options-behaviors)。
-
-## Layout migration [#layout-migration]
-
-Matching names do not guarantee matching options. Fix data and node sizes when mapping center, rankdir, iteration, and distance options. At runtime call setLayout then await layout. See [layout contracts](/en/docs/api/graph#graph-layout) for cancellation and Worker boundaries.
-
-## Event migration [#event-migration]
-
-Use string names and GraphEventMap instead of G6 event enums. Element native events use nativeEvent; selection/drag derived payloads have their own contracts. Do not replace every event field globally. Pair listeners with off.
-
-[Event contracts](/en/docs/api/graph/events) · [Application event guide](/en/docs/guides/events)
-
-## Graph API mapping [#graph-api-mapping]
-
-| G6 v5                               | G6Lite lookup                                                                                                                                                   |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| getNodeData(id?) / getEdgeData(id?) | Separate single/list calls: getNodeData / getNodes, getEdgeData / getEdges                                                                                      |
-| addNodeData / removeNodeData        | addNode(s) / removeNode(s)                                                                                                                                      |
-| setElementState / getElementState   | setElementStates / getItemStates                                                                                                                                |
-| hideElement / showElement           | hideItem / showItem                                                                                                                                             |
-| focusElement / resize               | focusItem / setSize                                                                                                                                             |
-| draw / render                       | [render for initial rendering](/en/docs/api/graph#graph-lifecycle-render), [updateOptions for visual changes](/en/docs/api/graph#graph-lifecycle-updateoptions) |
-
-Use the [method index](/en/docs/api/graph) for full arguments, returns, and missing-ID behavior. New code should avoid toData, isDestroyed, and internal getCanvas/updateData.
-
-<span id="extension-transform-and-plugin-migration" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-## Extension, Transform and Plugin [#extension-transform-and-plugin]
-
-G6 base classes do not migrate unchanged. Select the category and follow [tutorials](/en/docs/guides/extensions) and [contracts](/en/docs/api/graph#graph-extensions). The controlled context is not a full Graph. Hosts can explicitly inject plugin subscriptions, with cleanup in destroy.
-
-## Unsupported capabilities and alternatives [#unsupported-capabilities-and-alternatives]
-
-Run algorithms in a separate analysis pipeline and write results into data. Implement peripheral controls in application UI or Plugins. Keep G6 pages that cannot fit supported primitives, runtimes, or lifecycles; partial migration is not full compatibility.
-
-## Migration acceptance checklist [#migration-acceptance-checklist]
-
-1. Pin both versions and retain the original fallback.
-2. Verify data, styles, labels, states, groups, and key gestures.
-3. Cover updates, unsubscription, asynchronous unmounting, and repeated mounting.
-4. Measure layout, rendering, interactions, and resources under equivalent visual/runtime conditions before switching.
-
-
-# Troubleshooting (/en/docs/compatibility/troubleshooting)
-
-
-
-Keep a minimal reproduction and console errors, then change one condition at a time. Verify the environment with the [quick start](/en/docs/getting-started/quick-start) instead of changing data, layout, and styling together.
-
-[Blank canvas](#blank-canvas) · [Graph is very small](#tiny-graph-or-unexpected-position) · [Missing labels](#missing-or-overlapping-labels) · [Installation and runtime](#installation-and-runtime)
-
-## Blank canvas [#blank-canvas]
-
-Check mounted/non-zero container dimensions, initialization errors, unique node IDs, and endpoints. Start with two nodes and an edge, without optional styling or extensions.
-
-```ts
-const container = document.querySelector<HTMLElement>('#container');
-console.table({
-  exists: Boolean(container),
-  width: container?.clientWidth ?? 0,
-  height: container?.clientHeight ?? 0,
-  visibility: document.visibilityState,
-});
-```
-
-If dimensions are valid but WebGL fails, check GPU/host/CSP instead of repeatedly constructing Graph.
-[Runtime requirements](/en/docs/compatibility/browser) · [Data identity rules](/en/docs/api/options#options-data)
-
-## Tiny graph or unexpected position [#tiny-graph-or-unexpected-position]
-
-Check coordinates, outliers, and dimensions before changing fitView padding/maxZoom. First render, resize, setData, and layout fit differently. Do not force fitting after every user zoom.
-[Why the graph is still small](/en/docs/guides/viewport#why-is-the-graph-still-small-after-fitting)
-
-## Missing or overlapping labels [#missing-or-overlapping-labels]
-
-Confirm node/edge.style.label produces text; then check zoom thresholds, collisions, colors, and clipping. Disable policies for a comparison, then restore them individually.
-[Label guide](/en/docs/guides/label) · [Policy fields](/en/docs/api/options#options-label)
-
-## Clicking, dragging, or edge events do not respond [#clicking-dragging-or-edge-events-do-not-respond]
-
-Check behaviors, required Behavior types, and modifiers; \[] disables defaults. Inspect DOM overlays, edge hit areas, and event types. Subscribing to a derived event does not enable its Behavior.
-[Interaction composition](/en/docs/guides/behaviors) · [Event reference](/en/docs/api/graph/events)
-
-## Worker does not run or falls back [#worker-does-not-run-or-falls-back]
-
-Inspect Worker requests, execution threads, clone errors, and server responses. Functions and DOM nodes cannot be structured-cloned; circular references themselves are supported. `worker: true` requests Worker execution; confirm the actual thread in developer tools.
-[Worker deployment and cancellation](/en/docs/guides/layout-worker)
-
-## Leftovers or duplicate responses after unmount [#leftovers-or-duplicate-responses-after-unmount]
-
-Pair creation/destroy, on/off, and requests/cancellation. Handle StrictMode’s extra mounting with cleanup instead of skipping setup.
-[React](/en/docs/getting-started/react) · [Vue](/en/docs/getting-started/vue) · [Extension cleanup](/en/docs/api/graph#extension-registration)
-
-## Performance issues [#performance-issues]
-
-### What if force layout makes startup slow? [#what-if-force-layout-makes-startup-slow]
-
-Measure layout separately from render. Omit layout for supplied positions and assess Worker/iteration options where supported. See [performance tuning](/en/docs/metrics/performance#performance-tuning).
-
-### What if highlighting or selection stutters? [#what-if-highlighting-or-selection-stutters]
-
-Reuse Graph and update states instead of rebuilding or replacing the graph for a highlight. See the [state guide](/en/docs/guides/states).
-
-## Installation and runtime [#installation-and-runtime]
-
-### What browsers and WebGL capabilities are required? [#what-browsers-and-webgl-capabilities-are-required]
-
-Real DOM, Canvas 2D, and a usable WebGL1 or WebGL2 context are required. See [runtime requirements](/en/docs/compatibility/browser) for modules, Worker, and CSP.
-
-### Can Graph run directly in Node.js or during SSR? [#can-graph-run-directly-in-nodejs-or-during-ssr]
-
-Graph does not render in ordinary Node.js/SSR. Create it after client mounting and destroy on unmount; see [framework integration](/en/docs/getting-started/react).
-
-### Where should TypeScript types be imported from? [#where-should-typescript-types-be-imported-from]
-
-Import values and types from the `@antv/g6-lite` package root and use the declarations shipped with your installed version. See [Configuration options](/en/docs/api/options) for constructor options and data types.
-
-### What if an installed package does not contain a field? [#what-if-an-installed-package-does-not-contain-a-field]
-
-Check the installed version and its root declarations to confirm that the field belongs to that version's public API. `0.1.0` provides ESM, UMD, and type declarations. See [Quick start](/en/docs/getting-started/quick-start) for installation and the [UMD example](/en/docs/getting-started/quick-start#cdn-umd) for script-tag integration.
-
-## Choosing features and finding examples [#choosing-features-and-finding-examples]
-
-### How should I choose between G6Lite and G6 v5? [#how-should-i-choose-between-g6lite-and-g6-v5]
-
-Compare required graphics, runtime, and interactions, then validate with your own data. See [What is G6Lite?](/en/docs) for G6Lite's intended use cases.
-
-### Can I use Combo? [#can-i-use-combo]
-
-`0.1.0` supports Combo groups. The APIs for nesting, collapsing, and changing membership at runtime remain experimental. Review [Combo configuration and limitations](/en/docs/api/options#options-combo) before using them.
-
-### Can examples run online? [#can-examples-run-online]
-
-Run the [example gallery](/en/docs/examples); each case includes code, data descriptions, and interaction expectations.
-
-## Provide reproducible information [#provide-reproducible-information]
-
-```text
-Package version / source commit:
-Framework / bundler / deployment base path:
-Browser / OS / GPU / DPR / container CSS size:
-Minimal GraphData and options:
-Steps:
-Expected / actual:
-First console error and failed network request:
-Does the minimal quick-start graph work?
-```
-
-
-# Technical architecture (/en/docs/concepts/architecture)
-
-
-
-
-
-This page explains module responsibilities and collaboration for readers exploring rendering, performance paths, or extension boundaries. See [Graph lifecycle methods](/en/docs/api/graph#graph-lifecycle) for the application calling sequence.
-
-## Architecture layers [#architecture-layers]
-
-<ArchitectureDiagram locale="en" />
-
-Applications use `Graph` and extension contracts from the package root. Graph orchestrates transforms, layouts, and the runtime; DataModel owns graph data and states; RenderScheduler coordinates drawing based on the scope of each change. Renderer, Picking, and GPU buffers are internal implementation details.
-
-These layers share one graph runtime. Layouts provide positions, interactions produce data or state changes, and the scheduler sends changes to the appropriate drawing layers. This division lets layouts, information layers, and interactions be extended independently.
-
-## Drawing layers [#drawing-layers]
-
-G6Lite batches nodes and edges through WebGL and uses Canvas 2D for text measurement, label collision, and grouping bounds:
-
-| Layer, bottom to top | Content                        | Reason                                                    |
-| -------------------- | ------------------------------ | --------------------------------------------------------- |
-| Canvas 2D underlay   | Combo boundaries               | Fits group bounds and background information              |
-| Main WebGL canvas    | Nodes, edges, and arrows       | Supports batched geometry and buffer updates              |
-| Canvas 2D overlay    | Labels, icons, and decorations | Supports text measurement, layout, and collision handling |
-
-The layers share the camera, dimensions, DPR, and scheduling signals within one Graph. WebGL prefers WebGL2 and falls back to WebGL1. See [Browsers and runtime](/en/docs/compatibility/browser) for environment requirements.
-
-## Rendering and update paths [#rendering-and-update-paths]
-
-### First-render data flow [#first-render-data-flow]
-
-Calling `render()` prepares input, builds the runtime, and draws the first frame:
-
-<FirstRenderFlow locale="en" />
-
-After asynchronous layout, Graph checks generation and destruction before committing stale results. The render Promise describes initialization/submission, not GPU completion; consult the [lifecycle contract](/en/docs/api/graph#graph-lifecycle) for plugin mounting and other boundaries. Generations are an internal cancellation and result-commit mechanism; applications manage instances through public lifecycle methods.
-
-### Frequent-update paths [#frequent-update-paths]
-
-RenderScheduler selects processing based on the change level:
-
-| Change                                | Main path                                                                    |
-| ------------------------------------- | ---------------------------------------------------------------------------- |
-| Node selected / highlight / inactive  | Resolve state and patch GPU styles, reprocessing when required               |
-| Edge business fields or states        | Fully process data to keep edge types, visibility, and arrow batches aligned |
-| Batched node positions                | Update adjacency data, upload affected buffer ranges, redraw Canvas layers   |
-| Label or Combo information            | Redraw the corresponding Canvas 2D information layer                         |
-| Camera pan and zoom                   | Update uniforms and draw without rebuilding graph-data buffers               |
-| Full replacement or structural change | Update DataModel and fully or partially process render data and buffers      |
-
-Selection, highlighting, and dragging should update the existing instance through state, position, and batch APIs. See [Data](/en/docs/guides/data) for choosing update methods and [Performance tuning](/en/docs/metrics/performance#performance-tuning) for practical guidance.
-
-## Layout and interaction collaboration [#layout-and-interaction-collaboration]
-
-### Layout and Worker [#layout-and-worker]
-
-The layout layer computes positions from graph data and configuration. Graph commits the result to DataModel and passes it to Renderer. Official algorithms are lazy-loaded by `layout.type`; supported expensive layouts can run in a Worker to reduce main-thread blocking.
-
-Cancelled layout results are not committed to the active render generation. A Worker does not remove algorithm cost, and data with existing coordinates can omit layout. See [Layout configuration](/en/docs/guides/layout) for algorithms, options, and Worker limits.
-
-### Interaction and picking [#interaction-and-picking]
-
-InteractionDispatcher centralizes pointer events and hit detection, then delivers normalized events to Behaviors:
-
-```text
-Native event → Hit detection → Graph event → Behavior → Public data or state API
-```
-
-Nodes and edges prefer GPU Picking and fall back to CPU detection when the picking buffer is unavailable. Combo uses its own geometric hit path. Picking buffers are maintained on demand; drawing does not always require a picking pass.
-
-Interaction changes return through the update scheduler, so Behaviors do not need to manipulate framebuffers. See [Interactions](/en/docs/guides/behaviors) and [Events](/en/docs/guides/events) for application usage.
-
-## Extension boundary [#extension-boundary]
-
-G6Lite supports node, edge, label, decoration, layout, behavior, transform, and plugin extensions. These contribute shape descriptions, information layers, positions, event responses, or runtime orchestration.
-
-Stateful extensions collaborate through the data, state, viewport, and `requestRender()` capabilities of `ExtensionContext`. They should not hold internal DataModel, Renderer, WebGL contexts, or GPU buffers.
-
-See [Extensions](/en/docs/guides/extensions) for registration, instance scope, and cleanup. See the [Extension API](/en/docs/api/graph#graph-extensions) for signatures and types.
-
-## Resource ownership and cleanup [#resource-ownership-and-cleanup]
-
-| Resource                                                    | Owner              | Release boundary                           |
-| ----------------------------------------------------------- | ------------------ | ------------------------------------------ |
-| Container, application fetch, external subscriptions        | Application        | Unmount or obsolete request                |
-| Graph canvases, scheduling, resize observation, interaction | Graph              | destroy                                    |
-| Worker / layout request                                     | Layout runtime     | Completion, cancellation, destruction      |
-| Plugin DOM and subscriptions                                | Extension instance | Extension destroy                          |
-| WebGL buffers / framebuffers                                | Internal renderer  | Runtime destruction / resource restoration |
-
-These are implementation responsibilities, not additional application APIs. See [React](/en/docs/getting-started/react), [Vue](/en/docs/getting-started/vue), and the [public extension context](/en/docs/api/graph#extension-registration). Context restoration depends on the browser/device and does not guarantee automatic restoration of application state or page conditions.
-
-
 # Combo overview (/en/docs/elements/combo)
 
 
@@ -4764,6 +4369,100 @@ Switch examples to see how extensions use `register()` in G6Lite. Each guide inc
 * [Custom edges](/en/docs/guides/custom-edge) set arc color and width by edge weight.
 * [Custom node decorations](/en/docs/guides/custom-decoration) draw and stack badges next to a node.
 * [Custom label renderers](/en/docs/guides/custom-label-renderer) draw multiline text for nodes and edges.
+
+
+# Technical architecture (/en/docs/concepts/architecture)
+
+
+
+
+
+This page explains module responsibilities and collaboration for readers exploring rendering, performance paths, or extension boundaries. See [Graph lifecycle methods](/en/docs/api/graph#graph-lifecycle) for the application calling sequence.
+
+## Architecture layers [#architecture-layers]
+
+<ArchitectureDiagram locale="en" />
+
+Applications use `Graph` and extension contracts from the package root. Graph orchestrates transforms, layouts, and the runtime; DataModel owns graph data and states; RenderScheduler coordinates drawing based on the scope of each change. Renderer, Picking, and GPU buffers are internal implementation details.
+
+These layers share one graph runtime. Layouts provide positions, interactions produce data or state changes, and the scheduler sends changes to the appropriate drawing layers. This division lets layouts, information layers, and interactions be extended independently.
+
+## Drawing layers [#drawing-layers]
+
+G6Lite batches nodes and edges through WebGL and uses Canvas 2D for text measurement, label collision, and grouping bounds:
+
+| Layer, bottom to top | Content                        | Reason                                                    |
+| -------------------- | ------------------------------ | --------------------------------------------------------- |
+| Canvas 2D underlay   | Combo boundaries               | Fits group bounds and background information              |
+| Main WebGL canvas    | Nodes, edges, and arrows       | Supports batched geometry and buffer updates              |
+| Canvas 2D overlay    | Labels, icons, and decorations | Supports text measurement, layout, and collision handling |
+
+The layers share the camera, dimensions, DPR, and scheduling signals within one Graph. WebGL prefers WebGL2 and falls back to WebGL1. See [Browsers and runtime](/en/docs/compatibility/browser) for environment requirements.
+
+## Rendering and update paths [#rendering-and-update-paths]
+
+### First-render data flow [#first-render-data-flow]
+
+Calling `render()` prepares input, builds the runtime, and draws the first frame:
+
+<FirstRenderFlow locale="en" />
+
+After asynchronous layout, Graph checks generation and destruction before committing stale results. The render Promise describes initialization/submission, not GPU completion; consult the [lifecycle contract](/en/docs/api/graph#graph-lifecycle) for plugin mounting and other boundaries. Generations are an internal cancellation and result-commit mechanism; applications manage instances through public lifecycle methods.
+
+### Frequent-update paths [#frequent-update-paths]
+
+RenderScheduler selects processing based on the change level:
+
+| Change                                | Main path                                                                    |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| Node selected / highlight / inactive  | Resolve state and patch GPU styles, reprocessing when required               |
+| Edge business fields or states        | Fully process data to keep edge types, visibility, and arrow batches aligned |
+| Batched node positions                | Update adjacency data, upload affected buffer ranges, redraw Canvas layers   |
+| Label or Combo information            | Redraw the corresponding Canvas 2D information layer                         |
+| Camera pan and zoom                   | Update uniforms and draw without rebuilding graph-data buffers               |
+| Full replacement or structural change | Update DataModel and fully or partially process render data and buffers      |
+
+Selection, highlighting, and dragging should update the existing instance through state, position, and batch APIs. See [Data](/en/docs/guides/data) for choosing update methods and [Performance tuning](/en/docs/metrics/performance#performance-tuning) for practical guidance.
+
+## Layout and interaction collaboration [#layout-and-interaction-collaboration]
+
+### Layout and Worker [#layout-and-worker]
+
+The layout layer computes positions from graph data and configuration. Graph commits the result to DataModel and passes it to Renderer. Official algorithms are lazy-loaded by `layout.type`; supported expensive layouts can run in a Worker to reduce main-thread blocking.
+
+Cancelled layout results are not committed to the active render generation. A Worker does not remove algorithm cost, and data with existing coordinates can omit layout. See [Layout configuration](/en/docs/guides/layout) for algorithms, options, and Worker limits.
+
+### Interaction and picking [#interaction-and-picking]
+
+InteractionDispatcher centralizes pointer events and hit detection, then delivers normalized events to Behaviors:
+
+```text
+Native event → Hit detection → Graph event → Behavior → Public data or state API
+```
+
+Nodes and edges prefer GPU Picking and fall back to CPU detection when the picking buffer is unavailable. Combo uses its own geometric hit path. Picking buffers are maintained on demand; drawing does not always require a picking pass.
+
+Interaction changes return through the update scheduler, so Behaviors do not need to manipulate framebuffers. See [Interactions](/en/docs/guides/behaviors) and [Events](/en/docs/guides/events) for application usage.
+
+## Extension boundary [#extension-boundary]
+
+G6Lite supports node, edge, label, decoration, layout, behavior, transform, and plugin extensions. These contribute shape descriptions, information layers, positions, event responses, or runtime orchestration.
+
+Stateful extensions collaborate through the data, state, viewport, and `requestRender()` capabilities of `ExtensionContext`. They should not hold internal DataModel, Renderer, WebGL contexts, or GPU buffers.
+
+See [Extensions](/en/docs/guides/extensions) for registration, instance scope, and cleanup. See the [Extension API](/en/docs/api/graph#graph-extensions) for signatures and types.
+
+## Resource ownership and cleanup [#resource-ownership-and-cleanup]
+
+| Resource                                                    | Owner              | Release boundary                           |
+| ----------------------------------------------------------- | ------------------ | ------------------------------------------ |
+| Container, application fetch, external subscriptions        | Application        | Unmount or obsolete request                |
+| Graph canvases, scheduling, resize observation, interaction | Graph              | destroy                                    |
+| Worker / layout request                                     | Layout runtime     | Completion, cancellation, destruction      |
+| Plugin DOM and subscriptions                                | Extension instance | Extension destroy                          |
+| WebGL buffers / framebuffers                                | Internal renderer  | Runtime destruction / resource restoration |
+
+These are implementation responsibilities, not additional application APIs. See [React](/en/docs/getting-started/react), [Vue](/en/docs/getting-started/vue), and the [public extension context](/en/docs/api/graph#extension-registration). Context restoration depends on the browser/device and does not guarantee automatic restoration of application state or page conditions.
 
 
 # Minimal graph (/en/docs/examples/basic)
@@ -11701,6 +11400,78 @@ export async function run(container: HTMLElement) {
 ```
 
 
+
+
+# Performance comparison (/en/docs/metrics/performance)
+
+
+
+This comparison covers G6Lite, G6, Sigma.js, and the ECharts Graph series. All renderers receive the same precomputed positions, and all bundles use the same build settings. The 2026-11-13 comparison used a local G6Lite development build whose version field was `0.1.0`, rather than the package later published to npm.
+
+The original record did not retain a source commit or package integrity identifier for that development build, so these results apply only to that build. First-draw performance of the published package needs a separate measurement. The [CDN file sizes](#umd-size) below have been measured again using the published npm package.
+
+<span id="library-selection-comparison" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="selecting-a-graph-library" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="current-public-measurement-scope" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## First-draw timing [#render-time]
+
+The table shows the median time in milliseconds from graph creation through two animation frames after the render API completes. Headless Chromium uses the SwiftShader software renderer for WebGL in this run.
+
+| npm package                                 | Renderer  | 1,000 nodes / 3,000 edges (ms) | 5,000 nodes / 15,000 edges (ms) |
+| ------------------------------------------- | --------- | -----------------------------: | ------------------------------: |
+| `@antv/g6-lite` development build (`0.1.0`) | WebGL     |                          134.1 |                           146.1 |
+| `@antv/g6@5.1.1`                            | Canvas 2D |                          297.4 |                         1,502.2 |
+| `sigma@4.0.4` + `graphology@0.26.0`         | WebGL 2   |                          466.1 |                           748.4 |
+| `echarts@6.1.0`                             | Canvas 2D |                           56.6 |                           236.3 |
+
+<span id="environment-requirements" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="how-to-compare-numbers" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="rules-for-numerical-comparisons" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### Test conditions [#benchmark-method]
+
+* Apple M3 Pro, macOS (Darwin 25.2.0), headless Chromium 151.0.7922.34. The canvas is 900 × 600 CSS pixels at DPR 1. The WebGL renderer reports `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`.
+* Each library receives the same nodes, edges, and fixed positions. The graphs use circular nodes and straight edges, with labels and animation disabled and no layout run. For each size, each library warms up 3 times, then runs 20 interleaved samples. The instance is disposed after each sample.
+* Libraries are loaded before timing. Samples cover instance and internal model creation, the first render, and two animation frame callbacks. Sigma.js includes building the Graphology graph. Measure GPU execution, layout, and interactions separately. [Download raw samples](/benchmarks/graph-performance.json)
+
+These results apply only to the environment above and do not certify minimum supported browser versions. See [Minimum browser versions](/en/docs/compatibility/browser#minimum-browser-versions) for capability version references and the remaining acceptance scope.
+
+## Browser bundle size [#bundle-size]
+
+esbuild 0.21.5 bundles each npm entry and its dependencies into a single minified browser script. The G6Lite measurement uses the default entry, with optional layouts imported separately as needed. ECharts imports GraphChart and CanvasRenderer only. Sigma.js includes Graphology. Sizes are in KiB and exclude source maps.
+
+| npm package                                 | Minified (KiB) | gzip -9 (KiB) |
+| ------------------------------------------- | -------------: | ------------: |
+| `@antv/g6-lite` development build (`0.1.0`) |          511.3 |         159.5 |
+| `@antv/g6@5.1.1`                            |        1,435.3 |         413.4 |
+| `sigma@4.0.4` + `graphology@0.26.0`         |          438.4 |         110.7 |
+| `echarts@6.1.0`                             |          386.3 |         130.2 |
+
+### G6Lite CDN file sizes [#umd-size]
+
+These files come from the published npm package `@antv/g6-lite@0.1.0`, downloaded again and measured with `gzip -9` on 2026-11-24. One kB is 1,000 bytes. The homepage uses the default script's measurement from the same run. These are the distributed UMD files, measured separately from the esbuild bundles above.
+
+| Published file           | Contents                                                          | gzip -9 (kB) |
+| ------------------------ | ----------------------------------------------------------------- | -----------: |
+| `g6-lite.min.js`         | Default script with rendering, interactions, and built-in layouts |        150.3 |
+| `g6-lite-layouts.min.js` | Six optional layouts, loaded when needed                          |         29.1 |
+
+Load the optional script before registering the layout you want to use. [Optional layouts](/en/docs/guides/layout-overview#optional-layouts)
+
+## Measuring your own graph [#performance-tuning]
+
+Use production data and target devices to measure layout, first draw, and interactions separately. For a slow startup, isolate layout from drawing before assessing Worker execution. For slow updates, reuse the graph and update data or states incrementally. For frame drops during zoom, compare labels, decorations, and viewport size one at a time. Check disposal and listener cleanup after repeated mounts. [Worker layouts](/en/docs/guides/layout-worker) · [Data mutations](/en/docs/api/graph#graph-data-mutations) · [Label policy](/en/docs/api/options#options-label)
+
+**Related runnable examples**
+
+* [200 nodes](/en/docs/examples/large)
+* [5000 nodes with labels](/en/docs/examples/large-labeled)
+* [AI Papers large relationship graph](/en/docs/examples/real-dataset)
 
 
 # Brush select (/en/docs/guides/behavior-brush-select)
@@ -24881,76 +24652,305 @@ Continue with [viewport methods](/en/docs/api/graph#graph-viewport), [autoFit](/
 * [Zoom range and sensitivity](/en/docs/examples/zoom-options)
 
 
-# Performance comparison (/en/docs/metrics/performance)
+# Browsers and runtime (/en/docs/compatibility/browser)
 
 
 
-This comparison covers G6Lite, G6, Sigma.js, and the ECharts Graph series. All renderers receive the same precomputed positions, and all bundles use the same build settings. The 2026-11-13 comparison used a local G6Lite development build whose version field was `0.1.0`, rather than the package later published to npm.
+Graph runs in a real browser DOM container. It prefers WebGL2 and then tries WebGL1; text and Combo also need Canvas 2D. Build-time Node.js requirements do not imply server rendering support.
 
-The original record did not retain a source commit or package integrity identifier for that development build, so these results apply only to that build. First-draw performance of the published package needs a separate measurement. The [CDN file sizes](#umd-size) below have been measured again using the published npm package.
+## Rendering dependencies [#rendering-dependencies]
 
-<span id="library-selection-comparison" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+| Capability                             | Requirement and role                                                                                       |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| DOM / Canvas 2D                        | Required for containers, text, and information layers                                                      |
+| WebGL2 / WebGL1                        | At least one usable context; blocked GPUs or remote environments may expose APIs but fail context creation |
+| ResizeObserver / requestAnimationFrame | Resize observation and scheduling; required browser APIs                                                   |
+| ESM / dynamic import / AbortController | Modules, lazy layouts, cancellation; check actual artifacts and application build targets                  |
 
-<span id="selecting-a-graph-library" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+<span id="minimum-versions" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-<span id="current-public-measurement-scope" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+## Minimum browser versions [#minimum-browser-versions]
 
-## First-draw timing [#render-time]
+Minimum supported browser versions have not yet completed compatibility testing. The table lists minimum versions for core syntax and APIs as starting points for project testing; check layout dependencies and build output for the complete integration.
 
-The table shows the median time in milliseconds from graph creation through two animation frames after the render API completes. Headless Chromium uses the SwiftShader software renderer for WebGL in this run.
+| Browser                  | Core syntax and API version reference | Module Worker API version reference |
+| ------------------------ | ------------------------------------- | ----------------------------------- |
+| Chrome (desktop)         | 80                                    | 80                                  |
+| Edge (Chromium, desktop) | 80                                    | 80                                  |
+| Firefox (desktop)        | 74                                    | 114                                 |
+| Safari (macOS)           | 13.1                                  | 15                                  |
 
-| npm package                                 | Renderer  | 1,000 nodes / 3,000 edges (ms) | 5,000 nodes / 15,000 edges (ms) |
-| ------------------------------------------- | --------- | -----------------------------: | ------------------------------: |
-| `@antv/g6-lite` development build (`0.1.0`) | WebGL     |                          134.1 |                           146.1 |
-| `@antv/g6@5.1.1`                            | Canvas 2D |                          297.4 |                         1,502.2 |
-| `sigma@4.0.4` + `graphology@0.26.0`         | WebGL 2   |                          466.1 |                           748.4 |
-| `echarts@6.1.0`                             | Canvas 2D |                           56.6 |                           236.3 |
+The core reference takes the highest requirement among optional chaining, nullish coalescing, ResizeObserver, and AbortController. The Worker column only identifies when module Workers became available. Sources: [optional chaining](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining#browser_compatibility), [nullish coalescing](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing#browser_compatibility), [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#browser_compatibility), [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController#browser_compatibility), and [Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker#browser_compatibility).
 
-<span id="environment-requirements" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+The ES2020 target controls this library's TypeScript output; it does not automatically downlevel layout dependencies. For example, current layout dependencies contain private class methods. Loading the UMD bundle containing layouts or importing the affected layouts may require newer versions than the table indicates. Check dependencies, transpilation targets, and runtime APIs in the application build. Browsers without module Worker support may fall back to the main thread; a successful fallback is not a Worker pass.
 
-<span id="how-to-compare-numbers" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+Test creation, rendering, zoom, layouts, Worker execution, resizing, and cleanup in the target browser or WebView. Record the OS, GPU, DPR, and test date. Test mobile browsers and enterprise WebViews separately. Legacy IE/EdgeHTML are outside the current target environments.
 
-<span id="rules-for-numerical-comparisons" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+## WebGL support [#webgl-support-matrix]
 
-### Test conditions [#benchmark-method]
+WebGL1 is the fallback; WebGL2 is not mandatory. Acceleration, optional extensions, and resource limits affect output and throughput. A WebGL version does not determine a supported node count.
 
-* Apple M3 Pro, macOS (Darwin 25.2.0), headless Chromium 151.0.7922.34. The canvas is 900 × 600 CSS pixels at DPR 1. The WebGL renderer reports `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`.
-* Each library receives the same nodes, edges, and fixed positions. The graphs use circular nodes and straight edges, with labels and animation disabled and no layout run. For each size, each library warms up 3 times, then runs 20 interleaved samples. The instance is disposed after each sample.
-* Libraries are loaded before timing. Samples cover instance and internal model creation, the first render, and two animation frame callbacks. Sigma.js includes building the Graphology graph. Measure GPU execution, layout, and interactions separately. [Download raw samples](/benchmarks/graph-performance.json)
+## Worker, CSP and deployment [#worker-csp-and-deployment]
 
-These results apply only to the environment above and do not certify minimum supported browser versions. See [Minimum browser versions](/en/docs/compatibility/browser#minimum-browser-versions) for capability version references and the remaining acceptance scope.
+The ESM package uses a module Worker URL for layouts. Verify base paths, files, Content-Type, cross-origin rules, and host CSP. worker: true does not prove execution; clone or loading failures may fall back. See the [Worker guide](/en/docs/guides/layout-worker).
 
-## Browser bundle size [#bundle-size]
+regl uses dynamic function compilation, which conflicts with strict CSP that prohibits eval. wasm-unsafe-eval alone is insufficient. Confirm host security requirements instead of treating weaker site policies as a universal fix.
 
-esbuild 0.21.5 bundles each npm entry and its dependencies into a single minified browser script. The G6Lite measurement uses the default entry, with optional layouts imported separately as needed. ECharts imports GraphChart and CanvasRenderer only. Sigma.js includes Graphology. Sizes are in KiB and exclude source maps.
+## Modules, SSR, and resources [#modules-ssr-and-resources]
 
-| npm package                                 | Minified (KiB) | gzip -9 (KiB) |
-| ------------------------------------------- | -------------: | ------------: |
-| `@antv/g6-lite` development build (`0.1.0`) |          511.3 |         159.5 |
-| `@antv/g6@5.1.1`                            |        1,435.3 |         413.4 |
-| `sigma@4.0.4` + `graphology@0.26.0`         |          438.4 |         110.7 |
-| `echarts@6.1.0`                             |          386.3 |         130.2 |
+`0.1.0` provides ESM, UMD, and type declarations. CommonJS applications can use `await import('@antv/g6-lite')` in asynchronous client code. Graph renders in the browser. See [React](/en/docs/getting-started/react) and [Vue](/en/docs/getting-started/vue) for framework integration, or the [UMD example](/en/docs/getting-started/quick-start#cdn-umd) for script tags.
 
-### G6Lite CDN file sizes [#umd-size]
+In React and Vue, create the graph after the component mounts on the client. Check the available APIs if you need arbitrary HTML or React node trees, server-side rendering, or full animation orchestration. Combo APIs for nesting, collapsing, and changing membership at runtime remain experimental; see [Combo configuration](/en/docs/api/options#options-combo) for their behavior.
 
-These files come from the published npm package `@antv/g6-lite@0.1.0`, downloaded again and measured with `gzip -9` on 2026-11-24. One kB is 1,000 bytes. The homepage uses the default script's measurement from the same run. These are the distributed UMD files, measured separately from the esbuild bundles above.
+High DPR, large containers, and concurrent graphs increase pixel and GPU costs. Context and memory limits depend on browser/device. The engine handles context lost/restored and attempts resource restoration, without guaranteeing host or application-state recovery. Call destroy when leaving.
 
-| Published file           | Contents                                                          | gzip -9 (kB) |
-| ------------------------ | ----------------------------------------------------------------- | -----------: |
-| `g6-lite.min.js`         | Default script with rendering, interactions, and built-in layouts |        150.3 |
-| `g6-lite-layouts.min.js` | Six optional layouts, loaded when needed                          |         29.1 |
+<span id="coverage-reference" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-Load the optional script before registering the layout you want to use. [Optional layouts](/en/docs/guides/layout-overview#optional-layouts)
+<span id="comparison-with-sigmajs" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-## Measuring your own graph [#performance-tuning]
+<span id="browser-comparison-with-sigmajs" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-Use production data and target devices to measure layout, first draw, and interactions separately. For a slow startup, isolate layout from drawing before assessing Worker execution. For slow updates, reuse the graph and update data or states incrementally. For frame drops during zoom, compare labels, decorations, and viewport size one at a time. Check disposal and listener cleanup after repeated mounts. [Worker layouts](/en/docs/guides/layout-worker) · [Data mutations](/en/docs/api/graph#graph-data-mutations) · [Label policy](/en/docs/api/options#options-label)
+## Test scope [#test-scope]
 
-**Related runnable examples**
+The public [performance samples](/benchmarks/graph-performance.json), recorded on 2026-11-13, use macOS, headless Chromium 151.0.7922.34, and SwiftShader. They measure first draw with fixed positions, labels disabled, and no layout execution.
 
-* [200 nodes](/en/docs/examples/large)
-* [5000 nodes with labels](/en/docs/examples/large-labeled)
-* [AI Papers large relationship graph](/en/docs/examples/real-dataset)
+These samples do not cover older browsers, Safari, Firefox, mobile browsers, enterprise WebViews, or Worker execution. Repeat the [measurement procedure](/en/docs/metrics/performance) with your data and target devices. When comparing libraries, check the runtime requirements for each version.
+
+
+# Migrate from G6 v5 (/en/docs/compatibility/g6-v5-migration)
+
+
+
+G6Lite and G6 v5 use separate npm packages and implementations. This guide uses G6 5.1.1 as its starting point and maps its usage to the public G6Lite APIs. [G6 quick start](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start) · [Graph API](/en/docs/api/graph) · [GitHub Releases](https://github.com/antvis/G6Lite/releases)
+
+## Decide whether to migrate [#decide-whether-to-migrate]
+
+Validate the most complex nodes, interactions, labels, and groups first. Keep G6 when arbitrary DOM/React nodes, multiple renderers, server rendering, full animation, algorithms, or established plugins are essential.
+
+## Installation and imports [#installation-and-imports]
+
+```bash
+npm install @antv/g6-lite@0.1.0
+```
+
+Import values and types from @antv/g6-lite only; do not migrate to deep src/dist paths.
+
+<span id="minimal-configuration-side-by-side" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## Minimal configuration comparison [#minimal-configuration-comparison]
+
+G6 v5 commonly uses a container ID, labelText, and drag-element; see the [official example](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start). This standalone G6Lite starting point needs a mounted, non-zero-size container:
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+export async function mountGraph(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [{ id: 'a' }, { id: 'b' }],
+      edges: [{ id: 'a-b', source: 'a', target: 'b' }],
+    },
+    node: { style: { label: (node) => node.id } },
+    layout: { type: 'circular', radius: 100 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+  });
+  try {
+    await graph.render();
+    graph.fitView({ padding: 32 });
+    return () => graph.destroy();
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+```
+
+Call the returned disposer for cleanup. For React/Vue asynchronous unmounting, use the [framework pattern](/en/docs/getting-started/react) instead of leaving a mounting task unmanaged.
+
+## GraphOptions mapping [#graphoptions-mapping]
+
+| G6 v5                            | G6Lite                                                                                |
+| -------------------------------- | ------------------------------------------------------------------------------------- |
+| container ID                     | CSS selector #container, or HTMLElement                                               |
+| node.style.labelText             | node.style.label                                                                      |
+| width / height                   | Container CSS; runtime setSize                                                        |
+| palette / renderer / animation   | Not drop-in equivalents; map styles or keep G6                                        |
+| setOptions                       | updateOptions supports node / edge / label / theme / behaviors; set layout separately |
+| plugins / transforms / behaviors | Recheck registration, names, options, and lifecycle                                   |
+
+Complete fields: [GraphOptions](/en/docs/api/options)。
+
+## Data field mapping [#data-field-mapping]
+
+Provide nodes/edges arrays, unique node IDs, and valid endpoints. Keep stable edge IDs. Use node x/y, comboId, and business data fields. Do not copy G6 internal models or assume per-node style compatibility.
+
+Runtime node additions require positions; full replacement and incremental writes differ. See [input data](/en/docs/api/options#options-data) · [data updates](/en/docs/guides/data)。
+
+## Node, Edge and Combo configuration [#node-edge-and-combo-configuration]
+
+Built-in circle/rect and common edges reuse WebGL primitives; they do not replace arbitrary scene-graph shapes. State styles live in node.stateStyles, edge.stateStyles, and combo.style.stateStyles. `0.1.0` provides Combo groups; APIs for nesting, collapsing, and changing membership at runtime remain experimental. Review [Combo configuration and limitations](/en/docs/api/options#options-combo) before migrating those features.
+
+[Nodes](/en/docs/guides/node#options-node) · [Edges](/en/docs/api/options#options-edge) · [Combo](/en/docs/api/options#options-combo)
+
+## Behavior mapping [#behavior-mapping]
+
+| G6 v5                      | G6Lite                                                                   |
+| -------------------------- | ------------------------------------------------------------------------ |
+| drag-element               | drag-node                                                                |
+| hover-activate             | hover-highlight or state APIs                                            |
+| collapse-expand            | collapseCombo / expandCombo / toggleCombo                                |
+| create-edge                | Application creation + addEdge; drag-edge only reconnects existing edges |
+| focus-element              | focusItem                                                                |
+| zoom-canvas / click-select | Names may match; recheck options, payloads, and modifiers                |
+
+Omitted behaviors enable default zoom/pan; \[] disables them. See [Behavior](/en/docs/api/options#options-behaviors)。
+
+## Layout migration [#layout-migration]
+
+Matching names do not guarantee matching options. Fix data and node sizes when mapping center, rankdir, iteration, and distance options. At runtime call setLayout then await layout. See [layout contracts](/en/docs/api/graph#graph-layout) for cancellation and Worker boundaries.
+
+## Event migration [#event-migration]
+
+Use string names and GraphEventMap instead of G6 event enums. Element native events use nativeEvent; selection/drag derived payloads have their own contracts. Do not replace every event field globally. Pair listeners with off.
+
+[Event contracts](/en/docs/api/graph/events) · [Application event guide](/en/docs/guides/events)
+
+## Graph API mapping [#graph-api-mapping]
+
+| G6 v5                               | G6Lite lookup                                                                                                                                                   |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| getNodeData(id?) / getEdgeData(id?) | Separate single/list calls: getNodeData / getNodes, getEdgeData / getEdges                                                                                      |
+| addNodeData / removeNodeData        | addNode(s) / removeNode(s)                                                                                                                                      |
+| setElementState / getElementState   | setElementStates / getItemStates                                                                                                                                |
+| hideElement / showElement           | hideItem / showItem                                                                                                                                             |
+| focusElement / resize               | focusItem / setSize                                                                                                                                             |
+| draw / render                       | [render for initial rendering](/en/docs/api/graph#graph-lifecycle-render), [updateOptions for visual changes](/en/docs/api/graph#graph-lifecycle-updateoptions) |
+
+Use the [method index](/en/docs/api/graph) for full arguments, returns, and missing-ID behavior. New code should avoid toData, isDestroyed, and internal getCanvas/updateData.
+
+<span id="extension-transform-and-plugin-migration" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## Extension, Transform and Plugin [#extension-transform-and-plugin]
+
+G6 base classes do not migrate unchanged. Select the category and follow [tutorials](/en/docs/guides/extensions) and [contracts](/en/docs/api/graph#graph-extensions). The controlled context is not a full Graph. Hosts can explicitly inject plugin subscriptions, with cleanup in destroy.
+
+## Unsupported capabilities and alternatives [#unsupported-capabilities-and-alternatives]
+
+Run algorithms in a separate analysis pipeline and write results into data. Implement peripheral controls in application UI or Plugins. Keep G6 pages that cannot fit supported primitives, runtimes, or lifecycles; partial migration is not full compatibility.
+
+## Migration acceptance checklist [#migration-acceptance-checklist]
+
+1. Pin both versions and retain the original fallback.
+2. Verify data, styles, labels, states, groups, and key gestures.
+3. Cover updates, unsubscription, asynchronous unmounting, and repeated mounting.
+4. Measure layout, rendering, interactions, and resources under equivalent visual/runtime conditions before switching.
+
+
+# Troubleshooting (/en/docs/compatibility/troubleshooting)
+
+
+
+Keep a minimal reproduction and console errors, then change one condition at a time. Verify the environment with the [quick start](/en/docs/getting-started/quick-start) instead of changing data, layout, and styling together.
+
+[Blank canvas](#blank-canvas) · [Graph is very small](#tiny-graph-or-unexpected-position) · [Missing labels](#missing-or-overlapping-labels) · [Installation and runtime](#installation-and-runtime)
+
+## Blank canvas [#blank-canvas]
+
+Check mounted/non-zero container dimensions, initialization errors, unique node IDs, and endpoints. Start with two nodes and an edge, without optional styling or extensions.
+
+```ts
+const container = document.querySelector<HTMLElement>('#container');
+console.table({
+  exists: Boolean(container),
+  width: container?.clientWidth ?? 0,
+  height: container?.clientHeight ?? 0,
+  visibility: document.visibilityState,
+});
+```
+
+If dimensions are valid but WebGL fails, check GPU/host/CSP instead of repeatedly constructing Graph.
+[Runtime requirements](/en/docs/compatibility/browser) · [Data identity rules](/en/docs/api/options#options-data)
+
+## Tiny graph or unexpected position [#tiny-graph-or-unexpected-position]
+
+Check coordinates, outliers, and dimensions before changing fitView padding/maxZoom. First render, resize, setData, and layout fit differently. Do not force fitting after every user zoom.
+[Why the graph is still small](/en/docs/guides/viewport#why-is-the-graph-still-small-after-fitting)
+
+## Missing or overlapping labels [#missing-or-overlapping-labels]
+
+Confirm node/edge.style.label produces text; then check zoom thresholds, collisions, colors, and clipping. Disable policies for a comparison, then restore them individually.
+[Label guide](/en/docs/guides/label) · [Policy fields](/en/docs/api/options#options-label)
+
+## Clicking, dragging, or edge events do not respond [#clicking-dragging-or-edge-events-do-not-respond]
+
+Check behaviors, required Behavior types, and modifiers; \[] disables defaults. Inspect DOM overlays, edge hit areas, and event types. Subscribing to a derived event does not enable its Behavior.
+[Interaction composition](/en/docs/guides/behaviors) · [Event reference](/en/docs/api/graph/events)
+
+## Worker does not run or falls back [#worker-does-not-run-or-falls-back]
+
+Inspect Worker requests, execution threads, clone errors, and server responses. Functions and DOM nodes cannot be structured-cloned; circular references themselves are supported. `worker: true` requests Worker execution; confirm the actual thread in developer tools.
+[Worker deployment and cancellation](/en/docs/guides/layout-worker)
+
+## Leftovers or duplicate responses after unmount [#leftovers-or-duplicate-responses-after-unmount]
+
+Pair creation/destroy, on/off, and requests/cancellation. Handle StrictMode’s extra mounting with cleanup instead of skipping setup.
+[React](/en/docs/getting-started/react) · [Vue](/en/docs/getting-started/vue) · [Extension cleanup](/en/docs/api/graph#extension-registration)
+
+## Performance issues [#performance-issues]
+
+### What if force layout makes startup slow? [#what-if-force-layout-makes-startup-slow]
+
+Measure layout separately from render. Omit layout for supplied positions and assess Worker/iteration options where supported. See [performance tuning](/en/docs/metrics/performance#performance-tuning).
+
+### What if highlighting or selection stutters? [#what-if-highlighting-or-selection-stutters]
+
+Reuse Graph and update states instead of rebuilding or replacing the graph for a highlight. See the [state guide](/en/docs/guides/states).
+
+## Installation and runtime [#installation-and-runtime]
+
+### What browsers and WebGL capabilities are required? [#what-browsers-and-webgl-capabilities-are-required]
+
+Real DOM, Canvas 2D, and a usable WebGL1 or WebGL2 context are required. See [runtime requirements](/en/docs/compatibility/browser) for modules, Worker, and CSP.
+
+### Can Graph run directly in Node.js or during SSR? [#can-graph-run-directly-in-nodejs-or-during-ssr]
+
+Graph does not render in ordinary Node.js/SSR. Create it after client mounting and destroy on unmount; see [framework integration](/en/docs/getting-started/react).
+
+### Where should TypeScript types be imported from? [#where-should-typescript-types-be-imported-from]
+
+Import values and types from the `@antv/g6-lite` package root and use the declarations shipped with your installed version. See [Configuration options](/en/docs/api/options) for constructor options and data types.
+
+### What if an installed package does not contain a field? [#what-if-an-installed-package-does-not-contain-a-field]
+
+Check the installed version and its root declarations to confirm that the field belongs to that version's public API. `0.1.0` provides ESM, UMD, and type declarations. See [Quick start](/en/docs/getting-started/quick-start) for installation and the [UMD example](/en/docs/getting-started/quick-start#cdn-umd) for script-tag integration.
+
+## Choosing features and finding examples [#choosing-features-and-finding-examples]
+
+### How should I choose between G6Lite and G6 v5? [#how-should-i-choose-between-g6lite-and-g6-v5]
+
+Compare required graphics, runtime, and interactions, then validate with your own data. See [What is G6Lite?](/en/docs) for G6Lite's intended use cases.
+
+### Can I use Combo? [#can-i-use-combo]
+
+`0.1.0` supports Combo groups. The APIs for nesting, collapsing, and changing membership at runtime remain experimental. Review [Combo configuration and limitations](/en/docs/api/options#options-combo) before using them.
+
+### Can examples run online? [#can-examples-run-online]
+
+Run the [example gallery](/en/docs/examples); each case includes code, data descriptions, and interaction expectations.
+
+## Provide reproducible information [#provide-reproducible-information]
+
+```text
+Package version / source commit:
+Framework / bundler / deployment base path:
+Browser / OS / GPU / DPR / container CSS size:
+Minimal GraphData and options:
+Steps:
+Expected / actual:
+First console error and failed network request:
+Does the minimal quick-start graph work?
+```
 
 
 # Events (/en/docs/api/graph/events)

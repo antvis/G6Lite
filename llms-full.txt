@@ -3923,393 +3923,6 @@ graph.updateOptions(
 只切换交互也可用 [setBehaviors()](/docs/api/graph#setbehaviors)。数据和 Combo 用[数据写入方法](/docs/api/graph#graph-data-mutations)，布局用 [setLayout() 和 layout()](/docs/api/graph#graph-layout)。更换容器、`autoFit`、插件或转换配置时，使用新配置创建 Graph。
 
 
-# 浏览器与运行环境 (/docs/compatibility/browser)
-
-
-
-Graph 在真实浏览器 DOM 容器中运行，WebGL2 优先，失败后尝试 WebGL1；文字和 Combo 还需要 Canvas 2D。构建工具的 Node.js 要求不是浏览器渲染支持。
-
-## 渲染技术依赖 [#渲染技术依赖]
-
-| 能力                                     | 要求与用途                                    |
-| -------------------------------------- | ---------------------------------------- |
-| DOM / Canvas 2D                        | 必需；容器、文字、信息层                             |
-| WebGL2 / WebGL1                        | 至少一种能实际创建上下文；GPU 黑名单或远程环境可能使 API 存在但创建失败 |
-| ResizeObserver / requestAnimationFrame | 尺寸观察与调度；宿主需要提供这些浏览器 API                  |
-| ESM / dynamic import / AbortController | 模块加载、按需布局与取消；取决于实际发布产物和业务构建目标            |
-
-## 最低浏览器版本 [#最低浏览器版本]
-
-最低支持版本尚未完成兼容性验证。下表列出核心代码所用语法和 API 的最低版本参考，可作为项目测试的起点；完整接入还需检查布局依赖和构建产物。
-
-| 浏览器               | 核心语法与 API 下限参考 | Module Worker API 下限参考 |
-| ----------------- | -------------- | ---------------------- |
-| Chrome（桌面）        | 80             | 80                     |
-| Edge（Chromium，桌面） | 80             | 80                     |
-| Firefox（桌面）       | 74             | 114                    |
-| Safari（macOS）     | 13.1           | 15                     |
-
-核心列版本依据核心代码使用的可选链、空值合并、ResizeObserver 和 AbortController，取各项要求的最高版本；Worker 列仅表示浏览器支持模块 Worker 的起始版本。依据：[可选链](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining#browser_compatibility)、[空值合并](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing#browser_compatibility)、[ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#browser_compatibility)、[AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController#browser_compatibility)、[Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker#browser_compatibility)。
-
-构建目标 ES2020 只约束自身 TypeScript 的输出，不会自动降低布局依赖的语法要求。例如当前布局依赖包含私有类方法，直接加载含布局的 UMD 或按需加载相关布局时，要求可能高于上表；业务构建需要同时检查依赖、转译目标与运行时 API。未达到 Module Worker 要求时可能回退主线程，不能把回退成功记为 Worker 通过。
-
-请在目标浏览器或 WebView 中验证创建、渲染、缩放、布局、Worker、尺寸变化和销毁，并记录系统、GPU、DPR 及测试日期。移动端和企业 WebView 需单独测试；旧 IE/EdgeHTML 不在当前目标范围内。
-
-## WebGL 支持 [#webgl-支持矩阵]
-
-WebGL1 是当前回退路径，WebGL2 不是强制要求。硬件加速、可选扩展和资源上限影响效果与吞吐，不能仅凭 WebGL 版本推算可支持的节点数。
-
-## Worker、CSP 与部署 [#workercsp-与部署]
-
-ESM 包通过模块 Worker URL 加载布局资源。验证部署子路径、Worker 文件、Content-Type、跨域和宿主 CSP；开启 worker: true 不证明 Worker 已运行。克隆或加载失败可能回退主线程，详见[Worker 指南](/docs/guides/layout-worker)。
-
-底层 regl 的动态函数编译与禁止 eval 的严格 CSP 存在冲突；只允许 wasm-unsafe-eval 不能解决。先与宿主安全策略确认支持范围，不把放宽站点策略当成通用修复。
-
-## 模块、SSR 与资源 [#模块ssr-与资源]
-
-`0.1.0` 提供 ESM、UMD 和类型声明。CommonJS 应用可在客户端异步调用 `await import('@antv/g6-lite')`。Graph 在浏览器端出图。框架接入见 [React](/docs/getting-started/react)和 [Vue](/docs/getting-started/vue)，普通脚本接入见 [UMD 示例](/docs/getting-started/quick-start#cdn-umd)。
-
-React、Vue 等框架应在组件挂载到客户端后创建图。需求涉及任意 HTML 或 React 节点树、服务端出图或完整动画编排时，应先核对所需能力。Combo 的嵌套、折叠和运行时归组 API 仍标记为实验性，具体行为见 [Combo 配置](/docs/api/options#options-combo)。
-
-高 DPR、大容器与多实例增加像素和 GPU 资源开销；上下文数量与显存上限由浏览器/设备决定。引擎监听 context lost/restored 并尝试恢复资源，但不保证宿主或业务状态自动恢复。离开页面调用 destroy。
-
-<span id="覆盖率参考" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="与-sigmajs-的浏览器口径" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-## 测试范围说明 [#测试范围说明]
-
-公开的[性能样本](/benchmarks/graph-performance.json)记录于 2026-11-13，使用 macOS、无头 Chromium 151.0.7922.34 和 SwiftShader，测量固定坐标、关闭标签且不运行布局的首绘场景。
-
-这份样本未覆盖旧版浏览器、Safari、Firefox、移动端、企业 WebView 或 Worker 执行。请按[测量方法](/docs/metrics/performance)在业务数据和目标设备上补充验证；比较其他图库时，也应核对对应版本的运行要求。
-
-
-# 从 G6 v5 迁移 (/docs/compatibility/g6-v5-migration)
-
-
-
-G6Lite 和 G6 v5 使用独立的 npm 包和实现。本页以 G6 5.1.1 的接入方式为基线，对照 G6Lite 的公开 API。 [G6 快速上手](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start) · [图 API](/docs/api/graph) · [GitHub Releases](https://github.com/antvis/G6Lite/releases)
-
-## 先判断是否应该迁移 [#先判断是否应该迁移]
-
-先验证最复杂的节点、交互、标签和分组。强依赖任意 DOM/React 节点、多渲染器、SSR 出图、完整动画、图算法或成熟插件集合时，先保留 G6。
-
-## 安装与导入 [#安装与导入]
-
-```bash
-npm install @antv/g6-lite@0.1.0
-```
-
-所有值和类型都从 @antv/g6-lite 包根导入；不迁入 src / dist 深层路径。
-
-## 最小配置对照 [#最小配置对照]
-
-G6 v5 通常使用容器 ID、labelText 与 drag-element；见[官方示例](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start)。下列是独立的 G6Lite 起点，容器需先挂载且有非零尺寸：
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-export async function mountGraph(container: HTMLElement) {
-  const graph = new Graph({
-    container,
-    data: {
-      nodes: [{ id: 'a' }, { id: 'b' }],
-      edges: [{ id: 'a-b', source: 'a', target: 'b' }],
-    },
-    node: { style: { label: (node) => node.id } },
-    layout: { type: 'circular', radius: 100 },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
-  });
-  try {
-    await graph.render();
-    graph.fitView({ padding: 32 });
-    return () => graph.destroy();
-  } catch (error) {
-    graph.destroy();
-    throw error;
-  }
-}
-```
-
-调用返回的函数清理实例；React/Vue 的异步卸载采用[框架示例](/docs/getting-started/react)，不要复制一个长期悬空的异步挂载任务。
-
-## GraphOptions 对照 [#graphoptions-对照]
-
-| G6 v5                            | G6Lite                                                          |
-| -------------------------------- | --------------------------------------------------------------- |
-| container ID                     | CSS 选择器 #container，或 HTMLElement                                |
-| node.style.labelText             | node.style.label                                                |
-| width / height                   | 容器 CSS；运行时 setSize                                              |
-| palette / renderer / animation   | 不是同名兼容配置；按样式映射或保留 G6                                            |
-| setOptions                       | updateOptions 支持 node / edge / label / theme / behaviors；布局另行设置 |
-| plugins / transforms / behaviors | 重新核对注册、名称、选项与生命周期                                               |
-
-完整字段统一查[GraphOptions](/docs/api/options)。
-
-## 数据字段映射 [#数据字段映射]
-
-显式传 nodes、edges 数组，节点 id 唯一，端点引用已有节点；为边保留稳定 ID。坐标使用节点 x/y，归属使用 comboId，业务字段放 data。不要复制 G6 内部模型或依赖节点 style 原样兼容。
-
-运行时新增节点需要坐标；全量替换与增量写入语义不同。见[输入数据](/docs/api/options#options-data) · [数据更新](/docs/guides/data)。
-
-## Node、Edge 与 Combo 配置 [#nodeedge-与-combo-配置]
-
-内置 circle / rect 和常用边复用 WebGL 基型；任意场景图形状不是直接替代。状态样式分别位于 node.stateStyles、edge.stateStyles 与 combo.style.stateStyles。`0.1.0` 提供 Combo 分组，其中嵌套、折叠和运行时归组三类 API 仍标记为实验性；迁移这些功能前请核对 [Combo 配置与限制](/docs/api/options#options-combo)。
-
-[节点](/docs/guides/node#options-node) · [边](/docs/api/options#options-edge) · [Combo](/docs/api/options#options-combo)
-
-## Behavior 映射 [#behavior-映射]
-
-| G6 v5                      | G6Lite                                    |
-| -------------------------- | ----------------------------------------- |
-| drag-element               | drag-node                                 |
-| hover-activate             | hover-highlight 或对应状态 API                 |
-| collapse-expand            | collapseCombo / expandCombo / toggleCombo |
-| create-edge                | 业务创建后 addEdge；drag-edge 只重连已有边            |
-| focus-element              | focusItem                                 |
-| zoom-canvas / click-select | 名称可相同，仍需核对选项、载荷与组合键                       |
-
-省略 behaviors 使用默认缩放和平移；\[] 关闭默认。逐项查[Behavior](/docs/api/options#options-behaviors)。
-
-## Layout 迁移 [#layout-迁移]
-
-同名算法不保证参数相同。迁移 center、rankdir、迭代与距离参数时，固定数据和节点尺寸；运行时用 setLayout 后 await layout。支持情况、取消和 Worker 查[布局参考](/docs/api/graph#graph-layout)。
-
-## 事件迁移 [#事件迁移]
-
-不导出 G6 的事件枚举，使用字符串事件名与 GraphEventMap。元素原生事件用 nativeEvent；选择、拖拽等派生载荷按各自契约读取，不全局替换 event 字段。监听需要配对 off。
-
-[完整事件契约](/docs/api/graph/events) · [业务联动](/docs/guides/events)
-
-## Graph API 映射 [#graph-api-映射]
-
-| G6 v5                               | G6Lite 查询位置                                                                                                                 |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| getNodeData(id?) / getEdgeData(id?) | 单个与列表分为 getNodeData / getNodes、getEdgeData / getEdges                                                                       |
-| addNodeData / removeNodeData        | addNode(s) / removeNode(s)                                                                                                  |
-| setElementState / getElementState   | setElementStates / getItemStates                                                                                            |
-| hideElement / showElement           | hideItem / showItem                                                                                                         |
-| focusElement / resize               | focusItem / setSize                                                                                                         |
-| draw / render                       | [render 执行首次渲染](/docs/api/graph#graph-lifecycle-render)，[updateOptions 更新外观](/docs/api/graph#graph-lifecycle-updateoptions) |
-
-完整参数、返回值和缺失 ID 行为统一查[方法索引](/docs/api/graph)。新代码不使用 toData、isDestroyed 或内部 getCanvas/updateData。
-
-## Extension、Transform 与 Plugin [#extensiontransform-与-plugin]
-
-G6 基类不能原样迁移。先选择扩展类别，再按[扩展教程](/docs/guides/extensions)与[公开契约](/docs/api/graph#graph-extensions)实现。受控上下文不提供完整 Graph；插件订阅可由宿主显式注入，并在 destroy 中清理。
-
-## 当前不支持与替代方式 [#当前不支持与替代方式]
-
-图算法可由独立分析链路计算后写回数据；外围工具可由业务 UI 或 Plugin 实现。无法收敛到支持图元、环境或生命周期的页面继续使用 G6，不把部分迁移写成完整兼容。
-
-## 迁移验收清单 [#迁移验收清单]
-
-1. 锁定两个版本并保留原实现回退。
-2. 验证数据、样式、标签、状态、分组及关键手势。
-3. 覆盖更新、事件退订、异步卸载和重复挂载。
-4. 按相同视觉与环境测量布局、渲染、交互与资源，再决定切换。
-
-
-# 故障排查 (/docs/compatibility/troubleshooting)
-
-
-
-先保留最小复现和控制台错误，再一次只改变一个条件。用[快速上手](/docs/getting-started/quick-start)验证环境，不同时改数据、布局和样式。
-
-[空白画布](#空白画布) · [图特别小](#图特别小或位置不对) · [标签不见了](#标签消失或重叠) · [安装与运行环境](#安装与运行环境)
-
-## 空白画布 [#空白画布]
-
-检查容器是否已挂载且非零宽高、初始化是否报错、节点 ID 和端点是否有效。先只保留两个节点与一条边，移除可选样式和扩展。
-
-```ts
-const container = document.querySelector<HTMLElement>('#container');
-console.table({
-  exists: Boolean(container),
-  width: container?.clientWidth ?? 0,
-  height: container?.clientHeight ?? 0,
-  visibility: document.visibilityState,
-});
-```
-
-尺寸正常仍报 WebGL 错误时，核对 GPU、宿主环境与 CSP；不要反复创建 Graph。
-[环境要求](/docs/compatibility/browser) · [数据身份规则](/docs/api/options#options-data)
-
-## 图特别小或位置不对 [#图特别小或位置不对]
-
-先检查异常坐标、离群节点和容器尺寸，再决定 fitView 的 padding / maxZoom。首次 render、容器 resize、setData 和 layout 的适配语义不同，不要在每次用户缩放后强制适配。
-[适配后图仍然很小](/docs/guides/viewport#适配后为什么图仍然很小)
-
-## 标签消失或重叠 [#标签消失或重叠]
-
-确认 node / edge.style.label 产生了文本，再检查缩放阈值、碰撞、颜色与容器裁剪。先关闭策略做对照，再逐项恢复。
-[标签指南](/docs/guides/label) · [策略字段](/docs/api/options#options-label)
-
-## 点击、拖拽或边事件无响应 [#点击拖拽或边事件无响应]
-
-确认 behaviors 列表、所需 Behavior 与组合键；\[] 会关闭默认。再检查覆盖画布的 DOM、边热区和事件类型。只监听派生事件不会自动启用行为。
-[交互组合](/docs/guides/behaviors) · [事件参考](/docs/api/graph/events)
-
-## Worker 没运行或回退 [#worker-没运行或回退]
-
-在 Network/Performance 检查模块 Worker 请求、执行线程、克隆错误和服务器响应。函数、DOM 节点等值不能结构化克隆；循环引用本身可以克隆。`worker: true` 表示尝试启用，实际执行线程需在开发工具中确认。
-[Worker 部署与取消](/docs/guides/layout-worker)
-
-## 卸载后残留或重复响应 [#卸载后残留或重复响应]
-
-逐个匹配创建与 destroy、on 与 off、业务请求与取消。StrictMode 的额外挂载应正常清理，不通过跳过 setup 隐藏问题。
-[React](/docs/getting-started/react) · [Vue](/docs/getting-started/vue) · [扩展清理](/docs/api/graph#extension-registration)
-
-## 性能问题 [#性能问题]
-
-### 力导向布局首屏慢怎么办？ [#力导向布局首屏慢怎么办]
-
-分开测量布局和 render；已有坐标时省略 layout，支持时评估 Worker 与迭代参数。步骤见[性能优化](/docs/metrics/performance#performance-tuning)。
-
-### 高亮或选中卡顿怎么办？ [#高亮或选中卡顿怎么办]
-
-复用 Graph，通过状态 API 更新，不为一次高亮重建或替换整图。见[状态指南](/docs/guides/states)。
-
-## 安装与运行环境 [#安装与运行环境]
-
-### 浏览器和 WebGL 要求是什么？ [#浏览器和-webgl-要求是什么]
-
-需要真实 DOM、Canvas 2D 和可用的 WebGL1 或 WebGL2。具体模块、Worker 和 CSP 约束见[运行环境](/docs/compatibility/browser)。
-
-### 能在 Node.js 或 SSR 阶段直接运行吗？ [#能在-nodejs-或-ssr-阶段直接运行吗]
-
-Graph 不能在普通 Node.js / SSR 阶段出图。在客户端挂载后创建并在卸载时销毁，见[框架接入](/docs/getting-started/react)。
-
-### TypeScript 类型从哪里导入？ [#typescript-类型从哪里导入]
-
-值和类型均从 `@antv/g6-lite` 包根导入，以已安装版本的类型声明为准。构造参数及数据类型见[配置项](/docs/api/options)。
-
-### 安装后某个字段不存在怎么办？ [#安装后某个字段不存在怎么办]
-
-先检查已安装的版本和包根类型，核对字段是否属于该版本的公开 API。`0.1.0` 提供 ESM、UMD 和类型声明；安装方式见[快速上手](/docs/getting-started/quick-start)，普通脚本接入见 [UMD 示例](/docs/getting-started/quick-start#cdn-umd)。
-
-## 选型、功能与示例 [#选型功能与示例]
-
-### G6Lite 和 G6 v5 怎么选？ [#g6lite-和-g6-v5-怎么选]
-
-先比较必须具备的图形、环境和交互能力，再用业务数据验证。G6Lite 的适用场景见[G6Lite 是什么](/docs)。
-
-### Combo 可以使用吗？ [#combo-可以使用吗]
-
-`0.1.0` 支持 Combo 分组。嵌套、折叠和运行时归组三类 API 仍标记为实验性，接入前请核对 [Combo 配置与限制](/docs/api/options#options-combo)。
-
-### 示例能在线运行吗？ [#示例能在线运行吗]
-
-可以在[示例中心](/docs/examples)运行；操作预期、数据说明和代码在各案例页面中。
-
-## 提供可复现信息 [#提供可复现信息]
-
-```text
-Package version / source commit:
-Framework / bundler / deployment base path:
-Browser / OS / GPU / DPR / container CSS size:
-Minimal GraphData and options:
-Steps:
-Expected / actual:
-First console error and failed network request:
-Does the minimal quick-start graph work?
-```
-
-
-# 技术架构 (/docs/concepts/architecture)
-
-
-
-
-
-本页解释 G6Lite 各模块的职责及协作方式，适合需要理解渲染原理、性能路径和扩展边界的读者。初始化与卸载的调用顺序见 [Graph 生命周期方法](/docs/api/graph#graph-lifecycle)。
-
-## 架构分层 [#架构分层]
-
-<ArchitectureDiagram locale="zh" />
-
-业务通过包根的 `Graph` 和扩展契约使用 G6Lite。Graph 编排数据转换、布局和运行时；DataModel 管理图数据与状态；RenderScheduler 根据变化范围协调绘制。Renderer、Picking 和 GPU Buffer 属于内部实现。
-
-各层围绕同一份图运行时协作：布局提供坐标，交互产生数据或状态变更，调度器将变更交给对应图层。职责分离使布局算法、信息层和交互能力可以独立扩展。
-
-## 绘制图层 [#绘制图层]
-
-G6Lite 使用 WebGL 批量绘制节点和边，并用 Canvas 2D 处理文本测量、标签碰撞与分组包围框：
-
-| 图层（从下到上）           | 绘制内容      | 选择原因                    |
-| ------------------ | --------- | ----------------------- |
-| Canvas 2D underlay | Combo 包围框 | 适合分组边界及背景信息             |
-| WebGL 主画布          | 节点、边和箭头   | 适合大量同类图元批量绘制与 Buffer 更新 |
-| Canvas 2D overlay  | 标签、图标与装饰  | 便于文字测量、排版和碰撞处理          |
-
-这些图层共享相机、尺寸、DPR 和调度信号，属于同一个 Graph。WebGL 优先使用 WebGL2，不可用时回退 WebGL1；运行环境限制见[浏览器与运行环境](/docs/compatibility/browser)。
-
-## 渲染与更新路径 [#渲染与更新路径]
-
-### 首次渲染数据流 [#首次渲染数据流]
-
-调用 `render()` 后，Graph 根据配置准备输入、建立运行时并完成首帧：
-
-<FirstRenderFlow locale="zh" />
-
-异步布局返回时，Graph 检查渲染代次和销毁状态，避免过期结果写回。render Promise 表示当前初始化/提交路径完成，不是 GPU 完成计时；插件挂载等边界按[生命周期参考](/docs/api/graph#graph-lifecycle)查询。渲染代次是内部取消与结果提交机制，业务通过公开生命周期方法管理实例即可。
-
-### 高频更新路径 [#高频更新路径]
-
-RenderScheduler 根据变更级别选择处理路径：
-
-| 变化                                 | 主要路径                              |
-| ---------------------------------- | --------------------------------- |
-| 节点 selected / highlight / inactive | 状态解析与 GPU 样式 patch，必要时重新处理        |
-| 边业务字段或状态                           | 完整处理，保持边类型、可见性与箭头批次一致             |
-| 批量节点位置                             | 邻接数据更新、相关 Buffer 区间上传、Canvas 图层重绘 |
-| 标签或 Combo 信息                       | 对应 Canvas 2D 信息层重绘                |
-| 相机平移与缩放                            | 更新 uniform 后重新 draw，不重建图数据 Buffer |
-| 完整数据替换或结构变化                        | 更新 DataModel，完整或部分处理渲染数据与 Buffer  |
-
-因此选择、高亮和拖拽应通过状态、位置和批量 API 更新现有实例。业务侧如何选择更新方法见[数据指南](/docs/guides/data)，性能实践见[性能调优](/docs/metrics/performance#performance-tuning)。
-
-## 布局与交互协作 [#布局与交互协作]
-
-### 布局与 Worker [#布局与-worker]
-
-布局层根据图数据和配置计算坐标，Graph 将结果写入 DataModel，再交给 Renderer。官方算法按 `layout.type` 懒加载；支持的耗时布局可通过 Worker 减少主线程阻塞。
-
-布局取消后，旧计算结果不会写回当前渲染代次。Worker 不会消除算法本身的成本，已有坐标的数据可以省略布局。算法选择、参数和 Worker 限制见[布局配置](/docs/guides/layout)。
-
-### 交互与 Picking [#交互与-picking]
-
-InteractionDispatcher 统一处理指针事件与命中检测，将规范化事件分发给 Behavior：
-
-```text
-原生事件 → 命中检测 → 图事件 → Behavior → 公开的数据或状态 API
-```
-
-节点和边优先使用 GPU Picking；命中缓冲不可用时回退 CPU 检测。Combo 使用自身的几何命中路径。Picking 缓冲按需维护，无需每次绘制都执行拾取。
-
-交互产生的变更重新进入更新调度路径，Behavior 无需直接操作 framebuffer。使用方式见[交互配置](/docs/guides/behaviors)和[事件](/docs/guides/events)。
-
-## 扩展边界 [#扩展边界]
-
-G6Lite 支持 node、edge、label、decoration、layout、behavior、transform 和 plugin 八类扩展。它们分别参与图形描述、信息层绘制、坐标计算、事件响应或运行时编排。
-
-有状态扩展通过 `ExtensionContext` 的 data、state、viewport 和 `requestRender()` 能力协作，不应持有内部 DataModel、Renderer、WebGL context 或 GPU Buffer。
-
-注册方式、实例作用域与清理规则见[扩展体系](/docs/guides/extensions)。签名与类型见[扩展 API](/docs/api/graph#graph-extensions)。
-
-## 资源归属与释放 [#资源归属与释放]
-
-| 资源                         | 负责方   | 释放时机         |
-| -------------------------- | ----- | ------------ |
-| DOM 容器、业务 fetch 与外部订阅      | 应用    | 页面卸载或请求失效    |
-| 图画布、调度、尺寸观察和交互             | Graph | destroy      |
-| Worker / 布局请求              | 布局运行时 | 完成、取消或销毁     |
-| 插件 DOM 与订阅                 | 扩展实例  | 扩展 destroy   |
-| WebGL buffer / framebuffer | 内部渲染器 | 对应运行时销毁/资源恢复 |
-
-这些是实现职责，不是新的业务 API。实例清理见[React](/docs/getting-started/react)、[Vue](/docs/getting-started/vue)，扩展只依赖[公开上下文](/docs/api/graph#extension-registration)。context lost 恢复受浏览器与设备影响，不承诺业务状态或页面环境自动恢复。
-
-
 # 分组总览 (/docs/elements/combo)
 
 
@@ -4758,6 +4371,100 @@ export async function run(container: HTMLElement) {
 * [自定义边](/docs/guides/custom-edge)根据边权重设置弧线颜色和线宽。
 * [自定义节点装饰](/docs/guides/custom-decoration)在节点旁绘制并堆叠状态徽章。
 * [自定义标签渲染](/docs/guides/custom-label-renderer)为节点和边绘制多行文字。
+
+
+# 技术架构 (/docs/concepts/architecture)
+
+
+
+
+
+本页解释 G6Lite 各模块的职责及协作方式，适合需要理解渲染原理、性能路径和扩展边界的读者。初始化与卸载的调用顺序见 [Graph 生命周期方法](/docs/api/graph#graph-lifecycle)。
+
+## 架构分层 [#架构分层]
+
+<ArchitectureDiagram locale="zh" />
+
+业务通过包根的 `Graph` 和扩展契约使用 G6Lite。Graph 编排数据转换、布局和运行时；DataModel 管理图数据与状态；RenderScheduler 根据变化范围协调绘制。Renderer、Picking 和 GPU Buffer 属于内部实现。
+
+各层围绕同一份图运行时协作：布局提供坐标，交互产生数据或状态变更，调度器将变更交给对应图层。职责分离使布局算法、信息层和交互能力可以独立扩展。
+
+## 绘制图层 [#绘制图层]
+
+G6Lite 使用 WebGL 批量绘制节点和边，并用 Canvas 2D 处理文本测量、标签碰撞与分组包围框：
+
+| 图层（从下到上）           | 绘制内容      | 选择原因                    |
+| ------------------ | --------- | ----------------------- |
+| Canvas 2D underlay | Combo 包围框 | 适合分组边界及背景信息             |
+| WebGL 主画布          | 节点、边和箭头   | 适合大量同类图元批量绘制与 Buffer 更新 |
+| Canvas 2D overlay  | 标签、图标与装饰  | 便于文字测量、排版和碰撞处理          |
+
+这些图层共享相机、尺寸、DPR 和调度信号，属于同一个 Graph。WebGL 优先使用 WebGL2，不可用时回退 WebGL1；运行环境限制见[浏览器与运行环境](/docs/compatibility/browser)。
+
+## 渲染与更新路径 [#渲染与更新路径]
+
+### 首次渲染数据流 [#首次渲染数据流]
+
+调用 `render()` 后，Graph 根据配置准备输入、建立运行时并完成首帧：
+
+<FirstRenderFlow locale="zh" />
+
+异步布局返回时，Graph 检查渲染代次和销毁状态，避免过期结果写回。render Promise 表示当前初始化/提交路径完成，不是 GPU 完成计时；插件挂载等边界按[生命周期参考](/docs/api/graph#graph-lifecycle)查询。渲染代次是内部取消与结果提交机制，业务通过公开生命周期方法管理实例即可。
+
+### 高频更新路径 [#高频更新路径]
+
+RenderScheduler 根据变更级别选择处理路径：
+
+| 变化                                 | 主要路径                              |
+| ---------------------------------- | --------------------------------- |
+| 节点 selected / highlight / inactive | 状态解析与 GPU 样式 patch，必要时重新处理        |
+| 边业务字段或状态                           | 完整处理，保持边类型、可见性与箭头批次一致             |
+| 批量节点位置                             | 邻接数据更新、相关 Buffer 区间上传、Canvas 图层重绘 |
+| 标签或 Combo 信息                       | 对应 Canvas 2D 信息层重绘                |
+| 相机平移与缩放                            | 更新 uniform 后重新 draw，不重建图数据 Buffer |
+| 完整数据替换或结构变化                        | 更新 DataModel，完整或部分处理渲染数据与 Buffer  |
+
+因此选择、高亮和拖拽应通过状态、位置和批量 API 更新现有实例。业务侧如何选择更新方法见[数据指南](/docs/guides/data)，性能实践见[性能调优](/docs/metrics/performance#performance-tuning)。
+
+## 布局与交互协作 [#布局与交互协作]
+
+### 布局与 Worker [#布局与-worker]
+
+布局层根据图数据和配置计算坐标，Graph 将结果写入 DataModel，再交给 Renderer。官方算法按 `layout.type` 懒加载；支持的耗时布局可通过 Worker 减少主线程阻塞。
+
+布局取消后，旧计算结果不会写回当前渲染代次。Worker 不会消除算法本身的成本，已有坐标的数据可以省略布局。算法选择、参数和 Worker 限制见[布局配置](/docs/guides/layout)。
+
+### 交互与 Picking [#交互与-picking]
+
+InteractionDispatcher 统一处理指针事件与命中检测，将规范化事件分发给 Behavior：
+
+```text
+原生事件 → 命中检测 → 图事件 → Behavior → 公开的数据或状态 API
+```
+
+节点和边优先使用 GPU Picking；命中缓冲不可用时回退 CPU 检测。Combo 使用自身的几何命中路径。Picking 缓冲按需维护，无需每次绘制都执行拾取。
+
+交互产生的变更重新进入更新调度路径，Behavior 无需直接操作 framebuffer。使用方式见[交互配置](/docs/guides/behaviors)和[事件](/docs/guides/events)。
+
+## 扩展边界 [#扩展边界]
+
+G6Lite 支持 node、edge、label、decoration、layout、behavior、transform 和 plugin 八类扩展。它们分别参与图形描述、信息层绘制、坐标计算、事件响应或运行时编排。
+
+有状态扩展通过 `ExtensionContext` 的 data、state、viewport 和 `requestRender()` 能力协作，不应持有内部 DataModel、Renderer、WebGL context 或 GPU Buffer。
+
+注册方式、实例作用域与清理规则见[扩展体系](/docs/guides/extensions)。签名与类型见[扩展 API](/docs/api/graph#graph-extensions)。
+
+## 资源归属与释放 [#资源归属与释放]
+
+| 资源                         | 负责方   | 释放时机         |
+| -------------------------- | ----- | ------------ |
+| DOM 容器、业务 fetch 与外部订阅      | 应用    | 页面卸载或请求失效    |
+| 图画布、调度、尺寸观察和交互             | Graph | destroy      |
+| Worker / 布局请求              | 布局运行时 | 完成、取消或销毁     |
+| 插件 DOM 与订阅                 | 扩展实例  | 扩展 destroy   |
+| WebGL buffer / framebuffer | 内部渲染器 | 对应运行时销毁/资源恢复 |
+
+这些是实现职责，不是新的业务 API。实例清理见[React](/docs/getting-started/react)、[Vue](/docs/getting-started/vue)，扩展只依赖[公开上下文](/docs/api/graph#extension-registration)。context lost 恢复受浏览器与设备影响，不承诺业务状态或页面环境自动恢复。
 
 
 # 最简关系图 (/docs/examples/basic)
@@ -11695,6 +11402,74 @@ export async function run(container: HTMLElement) {
 ```
 
 
+
+
+# 性能对比 (/docs/metrics/performance)
+
+
+
+本页比较 G6Lite、G6、Sigma.js 和 ECharts 的 Graph 系列。首绘使用同一份预置坐标数据，包体积使用同一种构建方式。2026-11-13 的对比测试使用 G6Lite 本地开发构建，当时的版本字段为 `0.1.0`；它不是后来发布到 npm 的正式包。
+
+原始记录未保存该开发构建的源码提交号或包完整性标识，因此这些结果仅对应当时的构建。正式包的首绘性能需要单独复测；下方 [CDN 文件体积](#umd-size)已按 npm 正式发布包重新测量。
+
+<span id="常用图库选型对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="当前公开口径" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## 首绘耗时 [#render-time]
+
+表中是从创建图到渲染 API 完成后再经过两帧的中位耗时，单位为毫秒。本轮使用无头 Chromium，WebGL 由 SwiftShader 软件渲染。
+
+| npm 包                               | 渲染器       | 1,000 节点 / 3,000 边（ms） | 5,000 节点 / 15,000 边（ms） |
+| ----------------------------------- | --------- | ---------------------: | ----------------------: |
+| `@antv/g6-lite` 开发构建（`0.1.0`）       | WebGL     |                  134.1 |                   146.1 |
+| `@antv/g6@5.1.1`                    | Canvas 2D |                  297.4 |                 1,502.2 |
+| `sigma@4.0.4` + `graphology@0.26.0` | WebGL 2   |                  466.1 |                   748.4 |
+| `echarts@6.1.0`                     | Canvas 2D |                   56.6 |                   236.3 |
+
+<span id="环境要求" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="如何进行数值对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### 测试条件 [#benchmark-method]
+
+* Apple M3 Pro，macOS（Darwin 25.2.0），无头 Chromium 151.0.7922.34。画布 900 × 600 CSS 像素，DPR 1。WebGL 渲染器为 `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`。
+* 数据使用相同节点、边和固定坐标，绘制圆形节点与直线边，关闭标签和动画，不运行布局。每个规模下，每个库预热 3 次后交错测量 20 次，测完销毁实例。
+* 库在计时前已加载。计时包含图实例和内部模型的创建、首次渲染与两次帧回调。Sigma.js 包含 Graphology 建图。该指标反映本场景的首绘等待，GPU 执行时间、布局和交互需分别测量。 [下载原始样本](/benchmarks/graph-performance.json)
+
+本轮结果只适用于上述测试环境，不代表最低浏览器版本认证。各浏览器的能力版本参考与尚未覆盖的验收范围见[最低浏览器版本](/docs/compatibility/browser#最低浏览器版本)。
+
+## 浏览器包体积 [#bundle-size]
+
+使用 esbuild 0.21.5 将各库的 npm 入口和依赖打包为单个浏览器脚本，并进行代码压缩。G6Lite 测量默认入口，可选布局按需引入。ECharts 只引入 GraphChart 和 CanvasRenderer，Sigma.js 包含 Graphology。体积以 KiB 计，不含 source map。
+
+| npm 包                               | 代码压缩后（KiB） | gzip -9（KiB） |
+| ----------------------------------- | ---------: | -----------: |
+| `@antv/g6-lite` 开发构建（`0.1.0`）       |      511.3 |        159.5 |
+| `@antv/g6@5.1.1`                    |    1,435.3 |        413.4 |
+| `sigma@4.0.4` + `graphology@0.26.0` |      438.4 |        110.7 |
+| `echarts@6.1.0`                     |      386.3 |        130.2 |
+
+### G6Lite CDN 文件体积 [#umd-size]
+
+以下文件来自 npm 正式发布的 `@antv/g6-lite@0.1.0`，于 2026-11-24 重新下载并使用 `gzip -9` 分别测量，1 kB = 1,000 字节。首页展示默认脚本的同次测量值。这些文件是现成的 UMD 产物，与上方 esbuild 重新打包的体积采用不同口径。
+
+| 发布文件                     | 内容                | gzip -9（kB） |
+| ------------------------ | ----------------- | ----------: |
+| `g6-lite.min.js`         | 默认脚本，包含渲染、交互和内置布局 |       150.3 |
+| `g6-lite-layouts.min.js` | 六种可选布局，使用时额外加载    |        29.1 |
+
+需要使用可选布局时，加载附加脚本后注册对应的布局。 [可选布局用法](/docs/guides/layout-overview#optional-layouts)
+
+## 业务图怎么测 [#performance-tuning]
+
+用真实数据和目标设备分别记录布局、首绘和交互。首屏慢先拆开布局与绘制，再评估 Worker。更新卡顿时，复用图实例，通过增量 API 更新数据或状态。缩放掉帧时，逐项对比标签、装饰和视口尺寸。反复挂载后检查销毁与监听清理。 [Worker 布局](/docs/guides/layout-worker) · [数据写入](/docs/api/graph#graph-data-mutations) · [标签策略](/docs/api/options#options-label)
+
+**相关可运行示例**
+
+* [200 节点](/docs/examples/large)
+* [5000 节点与标签](/docs/examples/large-labeled)
+* [AI Papers 大规模关系图](/docs/examples/real-dataset)
 
 
 # 框选 (/docs/guides/behavior-brush-select)
@@ -24883,72 +24658,297 @@ zoomTo / zoomBy 的 minZoom、maxZoom 只约束本次方法调用；滚轮范围
 * [缩放范围与灵敏度](/docs/examples/zoom-options)
 
 
-# 性能对比 (/docs/metrics/performance)
+# 浏览器与运行环境 (/docs/compatibility/browser)
 
 
 
-本页比较 G6Lite、G6、Sigma.js 和 ECharts 的 Graph 系列。首绘使用同一份预置坐标数据，包体积使用同一种构建方式。2026-11-13 的对比测试使用 G6Lite 本地开发构建，当时的版本字段为 `0.1.0`；它不是后来发布到 npm 的正式包。
+Graph 在真实浏览器 DOM 容器中运行，WebGL2 优先，失败后尝试 WebGL1；文字和 Combo 还需要 Canvas 2D。构建工具的 Node.js 要求不是浏览器渲染支持。
 
-原始记录未保存该开发构建的源码提交号或包完整性标识，因此这些结果仅对应当时的构建。正式包的首绘性能需要单独复测；下方 [CDN 文件体积](#umd-size)已按 npm 正式发布包重新测量。
+## 渲染技术依赖 [#渲染技术依赖]
 
-<span id="常用图库选型对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+| 能力                                     | 要求与用途                                    |
+| -------------------------------------- | ---------------------------------------- |
+| DOM / Canvas 2D                        | 必需；容器、文字、信息层                             |
+| WebGL2 / WebGL1                        | 至少一种能实际创建上下文；GPU 黑名单或远程环境可能使 API 存在但创建失败 |
+| ResizeObserver / requestAnimationFrame | 尺寸观察与调度；宿主需要提供这些浏览器 API                  |
+| ESM / dynamic import / AbortController | 模块加载、按需布局与取消；取决于实际发布产物和业务构建目标            |
 
-<span id="当前公开口径" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+## 最低浏览器版本 [#最低浏览器版本]
 
-## 首绘耗时 [#render-time]
+最低支持版本尚未完成兼容性验证。下表列出核心代码所用语法和 API 的最低版本参考，可作为项目测试的起点；完整接入还需检查布局依赖和构建产物。
 
-表中是从创建图到渲染 API 完成后再经过两帧的中位耗时，单位为毫秒。本轮使用无头 Chromium，WebGL 由 SwiftShader 软件渲染。
+| 浏览器               | 核心语法与 API 下限参考 | Module Worker API 下限参考 |
+| ----------------- | -------------- | ---------------------- |
+| Chrome（桌面）        | 80             | 80                     |
+| Edge（Chromium，桌面） | 80             | 80                     |
+| Firefox（桌面）       | 74             | 114                    |
+| Safari（macOS）     | 13.1           | 15                     |
 
-| npm 包                               | 渲染器       | 1,000 节点 / 3,000 边（ms） | 5,000 节点 / 15,000 边（ms） |
-| ----------------------------------- | --------- | ---------------------: | ----------------------: |
-| `@antv/g6-lite` 开发构建（`0.1.0`）       | WebGL     |                  134.1 |                   146.1 |
-| `@antv/g6@5.1.1`                    | Canvas 2D |                  297.4 |                 1,502.2 |
-| `sigma@4.0.4` + `graphology@0.26.0` | WebGL 2   |                  466.1 |                   748.4 |
-| `echarts@6.1.0`                     | Canvas 2D |                   56.6 |                   236.3 |
+核心列版本依据核心代码使用的可选链、空值合并、ResizeObserver 和 AbortController，取各项要求的最高版本；Worker 列仅表示浏览器支持模块 Worker 的起始版本。依据：[可选链](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining#browser_compatibility)、[空值合并](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing#browser_compatibility)、[ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#browser_compatibility)、[AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController#browser_compatibility)、[Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker#browser_compatibility)。
 
-<span id="环境要求" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+构建目标 ES2020 只约束自身 TypeScript 的输出，不会自动降低布局依赖的语法要求。例如当前布局依赖包含私有类方法，直接加载含布局的 UMD 或按需加载相关布局时，要求可能高于上表；业务构建需要同时检查依赖、转译目标与运行时 API。未达到 Module Worker 要求时可能回退主线程，不能把回退成功记为 Worker 通过。
 
-<span id="如何进行数值对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+请在目标浏览器或 WebView 中验证创建、渲染、缩放、布局、Worker、尺寸变化和销毁，并记录系统、GPU、DPR 及测试日期。移动端和企业 WebView 需单独测试；旧 IE/EdgeHTML 不在当前目标范围内。
 
-### 测试条件 [#benchmark-method]
+## WebGL 支持 [#webgl-支持矩阵]
 
-* Apple M3 Pro，macOS（Darwin 25.2.0），无头 Chromium 151.0.7922.34。画布 900 × 600 CSS 像素，DPR 1。WebGL 渲染器为 `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`。
-* 数据使用相同节点、边和固定坐标，绘制圆形节点与直线边，关闭标签和动画，不运行布局。每个规模下，每个库预热 3 次后交错测量 20 次，测完销毁实例。
-* 库在计时前已加载。计时包含图实例和内部模型的创建、首次渲染与两次帧回调。Sigma.js 包含 Graphology 建图。该指标反映本场景的首绘等待，GPU 执行时间、布局和交互需分别测量。 [下载原始样本](/benchmarks/graph-performance.json)
+WebGL1 是当前回退路径，WebGL2 不是强制要求。硬件加速、可选扩展和资源上限影响效果与吞吐，不能仅凭 WebGL 版本推算可支持的节点数。
 
-本轮结果只适用于上述测试环境，不代表最低浏览器版本认证。各浏览器的能力版本参考与尚未覆盖的验收范围见[最低浏览器版本](/docs/compatibility/browser#最低浏览器版本)。
+## Worker、CSP 与部署 [#workercsp-与部署]
 
-## 浏览器包体积 [#bundle-size]
+ESM 包通过模块 Worker URL 加载布局资源。验证部署子路径、Worker 文件、Content-Type、跨域和宿主 CSP；开启 worker: true 不证明 Worker 已运行。克隆或加载失败可能回退主线程，详见[Worker 指南](/docs/guides/layout-worker)。
 
-使用 esbuild 0.21.5 将各库的 npm 入口和依赖打包为单个浏览器脚本，并进行代码压缩。G6Lite 测量默认入口，可选布局按需引入。ECharts 只引入 GraphChart 和 CanvasRenderer，Sigma.js 包含 Graphology。体积以 KiB 计，不含 source map。
+底层 regl 的动态函数编译与禁止 eval 的严格 CSP 存在冲突；只允许 wasm-unsafe-eval 不能解决。先与宿主安全策略确认支持范围，不把放宽站点策略当成通用修复。
 
-| npm 包                               | 代码压缩后（KiB） | gzip -9（KiB） |
-| ----------------------------------- | ---------: | -----------: |
-| `@antv/g6-lite` 开发构建（`0.1.0`）       |      511.3 |        159.5 |
-| `@antv/g6@5.1.1`                    |    1,435.3 |        413.4 |
-| `sigma@4.0.4` + `graphology@0.26.0` |      438.4 |        110.7 |
-| `echarts@6.1.0`                     |      386.3 |        130.2 |
+## 模块、SSR 与资源 [#模块ssr-与资源]
 
-### G6Lite CDN 文件体积 [#umd-size]
+`0.1.0` 提供 ESM、UMD 和类型声明。CommonJS 应用可在客户端异步调用 `await import('@antv/g6-lite')`。Graph 在浏览器端出图。框架接入见 [React](/docs/getting-started/react)和 [Vue](/docs/getting-started/vue)，普通脚本接入见 [UMD 示例](/docs/getting-started/quick-start#cdn-umd)。
 
-以下文件来自 npm 正式发布的 `@antv/g6-lite@0.1.0`，于 2026-11-24 重新下载并使用 `gzip -9` 分别测量，1 kB = 1,000 字节。首页展示默认脚本的同次测量值。这些文件是现成的 UMD 产物，与上方 esbuild 重新打包的体积采用不同口径。
+React、Vue 等框架应在组件挂载到客户端后创建图。需求涉及任意 HTML 或 React 节点树、服务端出图或完整动画编排时，应先核对所需能力。Combo 的嵌套、折叠和运行时归组 API 仍标记为实验性，具体行为见 [Combo 配置](/docs/api/options#options-combo)。
 
-| 发布文件                     | 内容                | gzip -9（kB） |
-| ------------------------ | ----------------- | ----------: |
-| `g6-lite.min.js`         | 默认脚本，包含渲染、交互和内置布局 |       150.3 |
-| `g6-lite-layouts.min.js` | 六种可选布局，使用时额外加载    |        29.1 |
+高 DPR、大容器与多实例增加像素和 GPU 资源开销；上下文数量与显存上限由浏览器/设备决定。引擎监听 context lost/restored 并尝试恢复资源，但不保证宿主或业务状态自动恢复。离开页面调用 destroy。
 
-需要使用可选布局时，加载附加脚本后注册对应的布局。 [可选布局用法](/docs/guides/layout-overview#optional-layouts)
+<span id="覆盖率参考" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-## 业务图怎么测 [#performance-tuning]
+<span id="与-sigmajs-的浏览器口径" style="{ display: 'block', scrollMarginTop: '8rem' }" />
 
-用真实数据和目标设备分别记录布局、首绘和交互。首屏慢先拆开布局与绘制，再评估 Worker。更新卡顿时，复用图实例，通过增量 API 更新数据或状态。缩放掉帧时，逐项对比标签、装饰和视口尺寸。反复挂载后检查销毁与监听清理。 [Worker 布局](/docs/guides/layout-worker) · [数据写入](/docs/api/graph#graph-data-mutations) · [标签策略](/docs/api/options#options-label)
+## 测试范围说明 [#测试范围说明]
 
-**相关可运行示例**
+公开的[性能样本](/benchmarks/graph-performance.json)记录于 2026-11-13，使用 macOS、无头 Chromium 151.0.7922.34 和 SwiftShader，测量固定坐标、关闭标签且不运行布局的首绘场景。
 
-* [200 节点](/docs/examples/large)
-* [5000 节点与标签](/docs/examples/large-labeled)
-* [AI Papers 大规模关系图](/docs/examples/real-dataset)
+这份样本未覆盖旧版浏览器、Safari、Firefox、移动端、企业 WebView 或 Worker 执行。请按[测量方法](/docs/metrics/performance)在业务数据和目标设备上补充验证；比较其他图库时，也应核对对应版本的运行要求。
+
+
+# 从 G6 v5 迁移 (/docs/compatibility/g6-v5-migration)
+
+
+
+G6Lite 和 G6 v5 使用独立的 npm 包和实现。本页以 G6 5.1.1 的接入方式为基线，对照 G6Lite 的公开 API。 [G6 快速上手](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start) · [图 API](/docs/api/graph) · [GitHub Releases](https://github.com/antvis/G6Lite/releases)
+
+## 先判断是否应该迁移 [#先判断是否应该迁移]
+
+先验证最复杂的节点、交互、标签和分组。强依赖任意 DOM/React 节点、多渲染器、SSR 出图、完整动画、图算法或成熟插件集合时，先保留 G6。
+
+## 安装与导入 [#安装与导入]
+
+```bash
+npm install @antv/g6-lite@0.1.0
+```
+
+所有值和类型都从 @antv/g6-lite 包根导入；不迁入 src / dist 深层路径。
+
+## 最小配置对照 [#最小配置对照]
+
+G6 v5 通常使用容器 ID、labelText 与 drag-element；见[官方示例](https://g6.antv.antgroup.com/en/manual/getting-started/quick-start)。下列是独立的 G6Lite 起点，容器需先挂载且有非零尺寸：
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+export async function mountGraph(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [{ id: 'a' }, { id: 'b' }],
+      edges: [{ id: 'a-b', source: 'a', target: 'b' }],
+    },
+    node: { style: { label: (node) => node.id } },
+    layout: { type: 'circular', radius: 100 },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select'],
+  });
+  try {
+    await graph.render();
+    graph.fitView({ padding: 32 });
+    return () => graph.destroy();
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+```
+
+调用返回的函数清理实例；React/Vue 的异步卸载采用[框架示例](/docs/getting-started/react)，不要复制一个长期悬空的异步挂载任务。
+
+## GraphOptions 对照 [#graphoptions-对照]
+
+| G6 v5                            | G6Lite                                                          |
+| -------------------------------- | --------------------------------------------------------------- |
+| container ID                     | CSS 选择器 #container，或 HTMLElement                                |
+| node.style.labelText             | node.style.label                                                |
+| width / height                   | 容器 CSS；运行时 setSize                                              |
+| palette / renderer / animation   | 不是同名兼容配置；按样式映射或保留 G6                                            |
+| setOptions                       | updateOptions 支持 node / edge / label / theme / behaviors；布局另行设置 |
+| plugins / transforms / behaviors | 重新核对注册、名称、选项与生命周期                                               |
+
+完整字段统一查[GraphOptions](/docs/api/options)。
+
+## 数据字段映射 [#数据字段映射]
+
+显式传 nodes、edges 数组，节点 id 唯一，端点引用已有节点；为边保留稳定 ID。坐标使用节点 x/y，归属使用 comboId，业务字段放 data。不要复制 G6 内部模型或依赖节点 style 原样兼容。
+
+运行时新增节点需要坐标；全量替换与增量写入语义不同。见[输入数据](/docs/api/options#options-data) · [数据更新](/docs/guides/data)。
+
+## Node、Edge 与 Combo 配置 [#nodeedge-与-combo-配置]
+
+内置 circle / rect 和常用边复用 WebGL 基型；任意场景图形状不是直接替代。状态样式分别位于 node.stateStyles、edge.stateStyles 与 combo.style.stateStyles。`0.1.0` 提供 Combo 分组，其中嵌套、折叠和运行时归组三类 API 仍标记为实验性；迁移这些功能前请核对 [Combo 配置与限制](/docs/api/options#options-combo)。
+
+[节点](/docs/guides/node#options-node) · [边](/docs/api/options#options-edge) · [Combo](/docs/api/options#options-combo)
+
+## Behavior 映射 [#behavior-映射]
+
+| G6 v5                      | G6Lite                                    |
+| -------------------------- | ----------------------------------------- |
+| drag-element               | drag-node                                 |
+| hover-activate             | hover-highlight 或对应状态 API                 |
+| collapse-expand            | collapseCombo / expandCombo / toggleCombo |
+| create-edge                | 业务创建后 addEdge；drag-edge 只重连已有边            |
+| focus-element              | focusItem                                 |
+| zoom-canvas / click-select | 名称可相同，仍需核对选项、载荷与组合键                       |
+
+省略 behaviors 使用默认缩放和平移；\[] 关闭默认。逐项查[Behavior](/docs/api/options#options-behaviors)。
+
+## Layout 迁移 [#layout-迁移]
+
+同名算法不保证参数相同。迁移 center、rankdir、迭代与距离参数时，固定数据和节点尺寸；运行时用 setLayout 后 await layout。支持情况、取消和 Worker 查[布局参考](/docs/api/graph#graph-layout)。
+
+## 事件迁移 [#事件迁移]
+
+不导出 G6 的事件枚举，使用字符串事件名与 GraphEventMap。元素原生事件用 nativeEvent；选择、拖拽等派生载荷按各自契约读取，不全局替换 event 字段。监听需要配对 off。
+
+[完整事件契约](/docs/api/graph/events) · [业务联动](/docs/guides/events)
+
+## Graph API 映射 [#graph-api-映射]
+
+| G6 v5                               | G6Lite 查询位置                                                                                                                 |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| getNodeData(id?) / getEdgeData(id?) | 单个与列表分为 getNodeData / getNodes、getEdgeData / getEdges                                                                       |
+| addNodeData / removeNodeData        | addNode(s) / removeNode(s)                                                                                                  |
+| setElementState / getElementState   | setElementStates / getItemStates                                                                                            |
+| hideElement / showElement           | hideItem / showItem                                                                                                         |
+| focusElement / resize               | focusItem / setSize                                                                                                         |
+| draw / render                       | [render 执行首次渲染](/docs/api/graph#graph-lifecycle-render)，[updateOptions 更新外观](/docs/api/graph#graph-lifecycle-updateoptions) |
+
+完整参数、返回值和缺失 ID 行为统一查[方法索引](/docs/api/graph)。新代码不使用 toData、isDestroyed 或内部 getCanvas/updateData。
+
+## Extension、Transform 与 Plugin [#extensiontransform-与-plugin]
+
+G6 基类不能原样迁移。先选择扩展类别，再按[扩展教程](/docs/guides/extensions)与[公开契约](/docs/api/graph#graph-extensions)实现。受控上下文不提供完整 Graph；插件订阅可由宿主显式注入，并在 destroy 中清理。
+
+## 当前不支持与替代方式 [#当前不支持与替代方式]
+
+图算法可由独立分析链路计算后写回数据；外围工具可由业务 UI 或 Plugin 实现。无法收敛到支持图元、环境或生命周期的页面继续使用 G6，不把部分迁移写成完整兼容。
+
+## 迁移验收清单 [#迁移验收清单]
+
+1. 锁定两个版本并保留原实现回退。
+2. 验证数据、样式、标签、状态、分组及关键手势。
+3. 覆盖更新、事件退订、异步卸载和重复挂载。
+4. 按相同视觉与环境测量布局、渲染、交互与资源，再决定切换。
+
+
+# 故障排查 (/docs/compatibility/troubleshooting)
+
+
+
+先保留最小复现和控制台错误，再一次只改变一个条件。用[快速上手](/docs/getting-started/quick-start)验证环境，不同时改数据、布局和样式。
+
+[空白画布](#空白画布) · [图特别小](#图特别小或位置不对) · [标签不见了](#标签消失或重叠) · [安装与运行环境](#安装与运行环境)
+
+## 空白画布 [#空白画布]
+
+检查容器是否已挂载且非零宽高、初始化是否报错、节点 ID 和端点是否有效。先只保留两个节点与一条边，移除可选样式和扩展。
+
+```ts
+const container = document.querySelector<HTMLElement>('#container');
+console.table({
+  exists: Boolean(container),
+  width: container?.clientWidth ?? 0,
+  height: container?.clientHeight ?? 0,
+  visibility: document.visibilityState,
+});
+```
+
+尺寸正常仍报 WebGL 错误时，核对 GPU、宿主环境与 CSP；不要反复创建 Graph。
+[环境要求](/docs/compatibility/browser) · [数据身份规则](/docs/api/options#options-data)
+
+## 图特别小或位置不对 [#图特别小或位置不对]
+
+先检查异常坐标、离群节点和容器尺寸，再决定 fitView 的 padding / maxZoom。首次 render、容器 resize、setData 和 layout 的适配语义不同，不要在每次用户缩放后强制适配。
+[适配后图仍然很小](/docs/guides/viewport#适配后为什么图仍然很小)
+
+## 标签消失或重叠 [#标签消失或重叠]
+
+确认 node / edge.style.label 产生了文本，再检查缩放阈值、碰撞、颜色与容器裁剪。先关闭策略做对照，再逐项恢复。
+[标签指南](/docs/guides/label) · [策略字段](/docs/api/options#options-label)
+
+## 点击、拖拽或边事件无响应 [#点击拖拽或边事件无响应]
+
+确认 behaviors 列表、所需 Behavior 与组合键；\[] 会关闭默认。再检查覆盖画布的 DOM、边热区和事件类型。只监听派生事件不会自动启用行为。
+[交互组合](/docs/guides/behaviors) · [事件参考](/docs/api/graph/events)
+
+## Worker 没运行或回退 [#worker-没运行或回退]
+
+在 Network/Performance 检查模块 Worker 请求、执行线程、克隆错误和服务器响应。函数、DOM 节点等值不能结构化克隆；循环引用本身可以克隆。`worker: true` 表示尝试启用，实际执行线程需在开发工具中确认。
+[Worker 部署与取消](/docs/guides/layout-worker)
+
+## 卸载后残留或重复响应 [#卸载后残留或重复响应]
+
+逐个匹配创建与 destroy、on 与 off、业务请求与取消。StrictMode 的额外挂载应正常清理，不通过跳过 setup 隐藏问题。
+[React](/docs/getting-started/react) · [Vue](/docs/getting-started/vue) · [扩展清理](/docs/api/graph#extension-registration)
+
+## 性能问题 [#性能问题]
+
+### 力导向布局首屏慢怎么办？ [#力导向布局首屏慢怎么办]
+
+分开测量布局和 render；已有坐标时省略 layout，支持时评估 Worker 与迭代参数。步骤见[性能优化](/docs/metrics/performance#performance-tuning)。
+
+### 高亮或选中卡顿怎么办？ [#高亮或选中卡顿怎么办]
+
+复用 Graph，通过状态 API 更新，不为一次高亮重建或替换整图。见[状态指南](/docs/guides/states)。
+
+## 安装与运行环境 [#安装与运行环境]
+
+### 浏览器和 WebGL 要求是什么？ [#浏览器和-webgl-要求是什么]
+
+需要真实 DOM、Canvas 2D 和可用的 WebGL1 或 WebGL2。具体模块、Worker 和 CSP 约束见[运行环境](/docs/compatibility/browser)。
+
+### 能在 Node.js 或 SSR 阶段直接运行吗？ [#能在-nodejs-或-ssr-阶段直接运行吗]
+
+Graph 不能在普通 Node.js / SSR 阶段出图。在客户端挂载后创建并在卸载时销毁，见[框架接入](/docs/getting-started/react)。
+
+### TypeScript 类型从哪里导入？ [#typescript-类型从哪里导入]
+
+值和类型均从 `@antv/g6-lite` 包根导入，以已安装版本的类型声明为准。构造参数及数据类型见[配置项](/docs/api/options)。
+
+### 安装后某个字段不存在怎么办？ [#安装后某个字段不存在怎么办]
+
+先检查已安装的版本和包根类型，核对字段是否属于该版本的公开 API。`0.1.0` 提供 ESM、UMD 和类型声明；安装方式见[快速上手](/docs/getting-started/quick-start)，普通脚本接入见 [UMD 示例](/docs/getting-started/quick-start#cdn-umd)。
+
+## 选型、功能与示例 [#选型功能与示例]
+
+### G6Lite 和 G6 v5 怎么选？ [#g6lite-和-g6-v5-怎么选]
+
+先比较必须具备的图形、环境和交互能力，再用业务数据验证。G6Lite 的适用场景见[G6Lite 是什么](/docs)。
+
+### Combo 可以使用吗？ [#combo-可以使用吗]
+
+`0.1.0` 支持 Combo 分组。嵌套、折叠和运行时归组三类 API 仍标记为实验性，接入前请核对 [Combo 配置与限制](/docs/api/options#options-combo)。
+
+### 示例能在线运行吗？ [#示例能在线运行吗]
+
+可以在[示例中心](/docs/examples)运行；操作预期、数据说明和代码在各案例页面中。
+
+## 提供可复现信息 [#提供可复现信息]
+
+```text
+Package version / source commit:
+Framework / bundler / deployment base path:
+Browser / OS / GPU / DPR / container CSS size:
+Minimal GraphData and options:
+Steps:
+Expected / actual:
+First console error and failed network request:
+Does the minimal quick-start graph work?
+```
 
 
 # 事件 (/docs/api/graph/events)

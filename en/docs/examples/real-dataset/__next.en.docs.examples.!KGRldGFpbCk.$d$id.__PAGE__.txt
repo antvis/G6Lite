@@ -61,6 +61,6 @@ export async function run(container: string | HTMLElement) {
     destroy: () => graph.destroy(),
   };
 }
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],[["$","$L3","real-dataset",{"id":"real-dataset","locale":"en","initialSource":"$4"}]]],[["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]],"$L5"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"UNdL2IUeyY6Y6pefwUQpW"}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],[["$","$L3","real-dataset",{"id":"real-dataset","locale":"en","initialSource":"$4"}]]],[["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]],"$L5"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"bnYYpdu633gJcT0zvxbjf"}
 5:["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]
 8:null

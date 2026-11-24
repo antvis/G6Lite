@@ -40,12 +40,53 @@ await graph.render();
 
 `container` accepts a CSS selector or an `HTMLElement`. For `<div id="container">`, use `'#container'`. The element must already exist and have an explicit width and height. Call `graph.destroy()` when the page or component unmounts.
 
+## CDN / standalone HTML
+
+For a single HTML file or an online preview without a bundler, load the published UMD build and use `window.G6Lite`. Use npm ESM imports for existing bundled applications. Pin the CDN version; this example uses `0.1.0`.
+
+- UNPKG: `https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js`
+- jsDelivr: `https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js`
+
+Use one CDN URL. If it cannot be fetched, replace it with the other URL. The preview environment needs to allow external scripts and WebGL.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>G6Lite graph</title>
+  </head>
+  <body>
+    <div id="container" style="width: 100%; height: 500px"></div>
+    <script src="https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
+    <script>
+      const graph = new window.G6Lite.Graph({
+        container: '#container',
+        data: {
+          nodes: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+          edges: [
+            { source: 'a', target: 'b' },
+            { source: 'a', target: 'c' },
+          ],
+        },
+        layout: { type: 'circular', radius: 140 },
+        behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+      });
+      graph.render().catch(console.error);
+    </script>
+  </body>
+</html>
+```
+
+The main UMD script includes runtime dependencies and built-in layouts. For optional layouts, follow the [layout overview](https://g6lite.antv.vision/en/docs/guides/layout-overview#optional-layouts) and keep companion scripts on the same package version. Do not put a bare `import ... from '@antv/g6-lite'` in plain HTML without a bundler or an import map.
+
 ## Critical rules
 
 ### Package and runtime
 
-- Import only from `@antv/g6-lite`. Never import from `@antv/g6-lite/src/...`, `dist/...`, or repository internals.
-- Treat the current package as ESM-only. Do not generate synchronous `require('@antv/g6-lite')` examples.
+- In bundled applications, import only from the public `@antv/g6-lite` package entry or its documented exports. Never deep-import `src/...`, `dist/...`, or repository internals; the published CDN script above is a browser distribution entry.
+- The npm package uses ESM imports; the CDN UMD build exposes `window.G6Lite`. Do not generate synchronous `require('@antv/g6-lite')` examples.
 - Create `Graph` only in a client lifecycle with real DOM, Canvas, and WebGL. Do not claim server-side rendering support.
 - Await `graph.render()`, `graph.setData()`, and `graph.layout()` when using their asynchronous work.
 
@@ -110,6 +151,7 @@ await graph.render();
 ## Example prompts
 
 - `Use $antv-g6lite-graph to build a force-directed dependency graph with hover highlighting and node dragging.`
+- `Use $antv-g6lite-graph to create a single HTML relationship graph using the pinned CDN script, with zooming, dragging, and hover highlighting.`
 - `Use $antv-g6lite-graph to migrate this G6 v5 configuration and list unsupported capabilities before editing code.`
 - `Use $antv-g6lite-graph to diagnose why this graph renders blank in React.`
 - `Use $antv-g6lite-graph to optimize a 10k-node graph without changing its public behavior.`

@@ -40,5 +40,5 @@ export async function run(container: string | HTMLElement) {
   await graph.render();
   return graph;
 }
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],[["$","$L3","neighbor-highlight",{"id":"neighbor-highlight","locale":"en","initialSource":"$4"}]]],[["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]],["$","$L5",null,{"children":["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"4RiPySqTZc82S12iY4_IF"}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"$2"}}],[["$","$L3","neighbor-highlight",{"id":"neighbor-highlight","locale":"en","initialSource":"$4"}]]],[["$","script","script-0",{"src":"/_next/static/chunks/1ff7gkskzag1s.js","async":true}]],["$","$L5",null,{"children":["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"66iVFOagcBl7Y-WhsF7uT"}
 7:null

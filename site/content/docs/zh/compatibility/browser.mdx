@@ -1,6 +1,6 @@
 ---
 title: 浏览器与运行环境
-description: 实际能力、ESM、Worker、CSP、SSR 和设备验收边界
+description: 浏览器运行要求、模块接入、Worker、CSP 与兼容性验证范围
 ---
 
 Graph 在真实浏览器 DOM 容器中运行，WebGL2 优先，失败后尝试 WebGL1；文字和 Combo 还需要 Canvas 2D。构建工具的 Node.js 要求不是浏览器渲染支持。
@@ -16,7 +16,7 @@ Graph 在真实浏览器 DOM 容器中运行，WebGL2 优先，失败后尝试 W
 
 ## 最低浏览器版本
 
-目前尚未认证 G6Lite 的最低支持版本。下表是核心代码使用的语法与 API 的最低版本参考，供确定测试起点；这些版本尚未完成 G6Lite 兼容性验收。
+最低支持版本尚未完成兼容性验证。下表列出核心代码所用语法和 API 的最低版本参考，可作为项目测试的起点；完整接入还需检查布局依赖和构建产物。
 
 | 浏览器 | 核心语法与 API 下限参考 | Module Worker API 下限参考 |
 | --- | --- | --- |
@@ -29,17 +29,9 @@ Graph 在真实浏览器 DOM 容器中运行，WebGL2 优先，失败后尝试 W
 
 构建目标 ES2020 只约束自身 TypeScript 的输出，不会自动降低布局依赖的语法要求。例如当前布局依赖包含私有类方法，直接加载含布局的 UMD 或按需加载相关布局时，要求可能高于上表；业务构建需要同时检查依赖、转译目标与运行时 API。未达到 Module Worker 要求时可能回退主线程，不能把回退成功记为 Worker 通过。
 
-浏览器、WebView、GPU 驱动和打包结果共同决定是否可用。在目标版本中验证创建、渲染、缩放、布局、Worker、尺寸变化和卸载后，才能记录该版本的通过范围。移动端和企业 WebView 需要单独验收；旧 IE/EdgeHTML 不是当前目标环境。
+请在目标浏览器或 WebView 中验证创建、渲染、缩放、布局、Worker、尺寸变化和销毁，并记录系统、GPU、DPR 及测试日期。移动端和企业 WebView 需单独测试；旧 IE/EdgeHTML 不在当前目标范围内。
 
-## 覆盖率参考
-
-旧使用率百分比不能表示 G6Lite 真机通过率。本页不维护无法持续复现的全球覆盖率；记录项目实际浏览器、系统、GPU、DPR 和验证日期。
-
-## 与 sigma.js 的浏览器口径
-
-不同图库和主版本的浏览器要求各异。选型时以目标版本的官方兼容性说明为准。
-
-## WebGL 支持矩阵
+## WebGL 支持 [#webgl-支持矩阵]
 
 WebGL1 是当前回退路径，WebGL2 不是强制要求。硬件加速、可选扩展和资源上限影响效果与吞吐，不能仅凭 WebGL 版本推算可支持的节点数。
 
@@ -51,14 +43,18 @@ ESM 包通过模块 Worker URL 加载布局资源。验证部署子路径、Work
 
 ## 模块、SSR 与资源
 
-包根提供 ESM 和类型声明。CommonJS 应用可在客户端异步调用 `await import('@antv/g6-lite')`。Graph 在浏览器端出图。React、Vue 和 UMD 的接入步骤见[快速上手](/docs/getting-started/quick-start)。
+`0.1.0` 提供 ESM、UMD 和类型声明。CommonJS 应用可在客户端异步调用 `await import('@antv/g6-lite')`。Graph 在浏览器端出图。框架接入见 [React](/docs/getting-started/react)和 [Vue](/docs/getting-started/vue)，普通脚本接入见 [UMD 示例](/docs/getting-started/quick-start#cdn-umd)。
 
-React、Vue 等框架应在组件挂载到客户端后创建图。需求涉及任意 HTML 或 React 节点树、服务端出图或完整动画编排时，应先验证所需能力。Combo 嵌套与折叠的实验性边界见[Combo 配置](/docs/api/options#options-combo)。
+React、Vue 等框架应在组件挂载到客户端后创建图。需求涉及任意 HTML 或 React 节点树、服务端出图或完整动画编排时，应先核对所需能力。Combo 的嵌套、折叠和运行时归组 API 仍标记为实验性，具体行为见 [Combo 配置](/docs/api/options#options-combo)。
 
 高 DPR、大容器与多实例增加像素和 GPU 资源开销；上下文数量与显存上限由浏览器/设备决定。引擎监听 context lost/restored 并尝试恢复资源，但不保证宿主或业务状态自动恢复。离开页面调用 destroy。
 
+<span id="覆盖率参考" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
+<span id="与-sigmajs-的浏览器口径" style={{ display: 'block', scrollMarginTop: '8rem' }} />
+
 ## 测试范围说明
 
-本地 Chromium 自动化只能说明所执行路径；不能视为 Safari、Firefox、移动端或企业 WebView 认证。报告需列明实际环境与未覆盖设备，按[测量记录](/docs/metrics/performance)复测业务数据。
+公开的[性能样本](/benchmarks/graph-performance.json)记录于 2026-11-13，使用 macOS、无头 Chromium 151.0.7922.34 和 SwiftShader，测量固定坐标、关闭标签且不运行布局的首绘场景。
 
-当前公开的[性能样本](/benchmarks/graph-performance.json)记录于 2026-11-10，使用 macOS 上的无头 Chromium 151.0.7922.34 和 SwiftShader，仅覆盖固定坐标、关闭标签且不运行布局的首绘场景，未验证上表中的旧版浏览器或 Worker 路径。
+这份样本未覆盖旧版浏览器、Safari、Firefox、移动端、企业 WebView 或 Worker 执行。请按[测量方法](/docs/metrics/performance)在业务数据和目标设备上补充验证；比较其他图库时，也应核对对应版本的运行要求。

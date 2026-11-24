@@ -3,7 +3,9 @@ title: 性能对比
 description: 同一图数据下 G6Lite、G6、Sigma.js 与 ECharts 的首绘耗时和浏览器包体积
 ---
 
-本页比较 G6Lite、G6、Sigma.js 和 ECharts 的 Graph 系列。首绘使用同一份预置坐标数据，包体积使用同一种构建方式。测试于 2026-11-13 完成，G6Lite 使用本地打包的 `0.1.0`。
+本页比较 G6Lite、G6、Sigma.js 和 ECharts 的 Graph 系列。首绘使用同一份预置坐标数据，包体积使用同一种构建方式。2026-11-13 的对比测试使用 G6Lite 本地开发构建，当时的版本字段为 `0.1.0`；它不是后来发布到 npm 的正式包。
+
+原始记录未保存该开发构建的源码提交号或包完整性标识，因此这些结果仅对应当时的构建。正式包的首绘性能需要单独复测；下方 [CDN 文件体积](#umd-size)已按 npm 正式发布包重新测量。
 
 <span id="常用图库选型对比" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
@@ -15,7 +17,7 @@ description: 同一图数据下 G6Lite、G6、Sigma.js 与 ECharts 的首绘耗�
 
 | npm 包 | 渲染器 | 1,000 节点 / 3,000 边（ms） | 5,000 节点 / 15,000 边（ms） |
 | --- | --- | ---: | ---: |
-| `@antv/g6-lite@0.1.0` | WebGL | 134.1 | 146.1 |
+| `@antv/g6-lite` 开发构建（`0.1.0`） | WebGL | 134.1 | 146.1 |
 | `@antv/g6@5.1.1` | Canvas 2D | 297.4 | 1,502.2 |
 | `sigma@4.0.4` + `graphology@0.26.0` | WebGL 2 | 466.1 | 748.4 |
 | `echarts@6.1.0` | Canvas 2D | 56.6 | 236.3 |
@@ -38,18 +40,18 @@ description: 同一图数据下 G6Lite、G6、Sigma.js 与 ECharts 的首绘耗�
 
 | npm 包 | 代码压缩后（KiB） | gzip -9（KiB） |
 | --- | ---: | ---: |
-| `@antv/g6-lite@0.1.0` | 511.3 | 159.5 |
+| `@antv/g6-lite` 开发构建（`0.1.0`） | 511.3 | 159.5 |
 | `@antv/g6@5.1.1` | 1,435.3 | 413.4 |
 | `sigma@4.0.4` + `graphology@0.26.0` | 438.4 | 110.7 |
 | `echarts@6.1.0` | 386.3 | 130.2 |
 
 ### G6Lite CDN 文件体积 [#umd-size]
 
-CDN 文件使用 `gzip -9` 分别测量，1 kB = 1,000 字节。首页展示默认脚本的体积。
+以下文件来自 npm 正式发布的 `@antv/g6-lite@0.1.0`，于 2026-11-24 重新下载并使用 `gzip -9` 分别测量，1 kB = 1,000 字节。首页展示默认脚本的同次测量值。这些文件是现成的 UMD 产物，与上方 esbuild 重新打包的体积采用不同口径。
 
 | 发布文件 | 内容 | gzip -9（kB） |
 | --- | --- | ---: |
-| `g6-lite.min.js` | 默认脚本，包含渲染、交互和内置布局 | 150.2 |
+| `g6-lite.min.js` | 默认脚本，包含渲染、交互和内置布局 | 150.3 |
 | `g6-lite-layouts.min.js` | 六种可选布局，使用时额外加载 | 29.1 |
 
 需要使用可选布局时，加载附加脚本后注册对应的布局。 [可选布局用法](/docs/guides/layout-overview#optional-layouts)

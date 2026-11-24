@@ -1,9 +1,12 @@
 {
   "version": "0.1.0",
-  "measuredAt": "2026-11-13",
-  "gzipBytes": 150176,
+  "measuredAt": "2026-11-24",
+  "gzipBytes": 150304,
   "unitBytes": 1000,
   "entry": "dist/g6-lite.min.js",
-  "compression": "Gzip",
-  "command": "npm run build && gzip -9 -c dist/g6-lite.min.js | wc -c"
+  "compression": "Gzip -9",
+  "source": "https://registry.npmjs.org/@antv/g6-lite/-/g6-lite-0.1.0.tgz",
+  "integrity": "sha512-o3NWidrTaTEAA4RiNd56NDQOgTizoPtHwCQl6aoxipkJYk2pwnPI7d34E8LcC4UX0u6DgeyIYG8OclVBlWWI4Q==",
+  "gitHead": "448fc17d278693cb6bbe1886d78d43b2f4bab407",
+  "command": "gzip -9 -c package/dist/g6-lite.min.js | wc -c"
 }

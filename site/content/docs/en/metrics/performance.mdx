@@ -3,7 +3,9 @@ title: Performance comparison
 description: First-draw timing and browser bundle sizes for G6Lite, G6, Sigma.js, and ECharts on the same graph data
 ---
 
-This comparison covers G6Lite, G6, Sigma.js, and the ECharts Graph series. All renderers receive the same precomputed positions, and all bundles use the same build settings. The 2026-11-13 run used a locally packaged G6Lite `0.1.0` build.
+This comparison covers G6Lite, G6, Sigma.js, and the ECharts Graph series. All renderers receive the same precomputed positions, and all bundles use the same build settings. The 2026-11-13 comparison used a local G6Lite development build whose version field was `0.1.0`, rather than the package later published to npm.
+
+The original record did not retain a source commit or package integrity identifier for that development build, so these results apply only to that build. First-draw performance of the published package needs a separate measurement. The [CDN file sizes](#umd-size) below have been measured again using the published npm package.
 
 <span id="library-selection-comparison" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
@@ -17,7 +19,7 @@ The table shows the median time in milliseconds from graph creation through two 
 
 | npm package | Renderer | 1,000 nodes / 3,000 edges (ms) | 5,000 nodes / 15,000 edges (ms) |
 | --- | --- | ---: | ---: |
-| `@antv/g6-lite@0.1.0` | WebGL | 134.1 | 146.1 |
+| `@antv/g6-lite` development build (`0.1.0`) | WebGL | 134.1 | 146.1 |
 | `@antv/g6@5.1.1` | Canvas 2D | 297.4 | 1,502.2 |
 | `sigma@4.0.4` + `graphology@0.26.0` | WebGL 2 | 466.1 | 748.4 |
 | `echarts@6.1.0` | Canvas 2D | 56.6 | 236.3 |
@@ -42,18 +44,18 @@ esbuild 0.21.5 bundles each npm entry and its dependencies into a single minifie
 
 | npm package | Minified (KiB) | gzip -9 (KiB) |
 | --- | ---: | ---: |
-| `@antv/g6-lite@0.1.0` | 511.3 | 159.5 |
+| `@antv/g6-lite` development build (`0.1.0`) | 511.3 | 159.5 |
 | `@antv/g6@5.1.1` | 1,435.3 | 413.4 |
 | `sigma@4.0.4` + `graphology@0.26.0` | 438.4 | 110.7 |
 | `echarts@6.1.0` | 386.3 | 130.2 |
 
 ### G6Lite CDN file sizes [#umd-size]
 
-Each CDN file is measured with `gzip -9`. One kB is 1,000 bytes. The homepage shows the size of the default script.
+These files come from the published npm package `@antv/g6-lite@0.1.0`, downloaded again and measured with `gzip -9` on 2026-11-24. One kB is 1,000 bytes. The homepage uses the default script's measurement from the same run. These are the distributed UMD files, measured separately from the esbuild bundles above.
 
 | Published file | Contents | gzip -9 (kB) |
 | --- | --- | ---: |
-| `g6-lite.min.js` | Default script with rendering, interactions, and built-in layouts | 150.2 |
+| `g6-lite.min.js` | Default script with rendering, interactions, and built-in layouts | 150.3 |
 | `g6-lite-layouts.min.js` | Six optional layouts, loaded when needed | 29.1 |
 
 Load the optional script before registering the layout you want to use. [Optional layouts](/en/docs/guides/layout-overview#optional-layouts)

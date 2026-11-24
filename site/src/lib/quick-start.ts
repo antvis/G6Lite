@@ -57,7 +57,7 @@ export function quickStartNetworkOptions(): Omit<GraphOptions, 'container'> {
       type: 'd3-force',
       linkDistance: 100,
       nodeStrength: -400,
-      collideRadius: 32,
+      collide: { radius: 32 },
     },
     autoFit: { padding: 48 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],

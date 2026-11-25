@@ -13,3 +13,9 @@ Desktop loads the full network. A viewport at most 767px wide, or a device that 
 - Copyright (C) 2012-2026 Alexis Jacomy, Guillaume Plique, Benoît Simard. MIT License.
 
 This is a presentation graph, not a benchmark workload or a claim about engine limits.
+
+Homepage CTAs, content links, and footer links disable Next.js prefetch. The shared
+Fumadocs link adapter also disables navigation prefetch on `/` and `/en`, while
+keeping the default document-to-document behavior. Route data loads on navigation
+instead of competing with the initial graph downloads. Heading fonts use disjoint
+Unicode subsets without preload; see `fonts/README.md` for regeneration details.

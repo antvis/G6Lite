@@ -1,7 +1,17 @@
 'use client';
 import { RootProvider } from 'fumadocs-ui/provider/next';
+import type { Framework } from 'fumadocs-core/framework';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { type ReactNode, useEffect } from 'react';
+
+// Fumadocs owns the navigation links, so configure its link adapter as well as
+// the homepage CTAs. Keep document-to-document prefetching on its default path.
+const NavigationLink: NonNullable<Framework['Link']> = ({ href = '#', prefetch, ...props }) => {
+  const pathname = usePathname();
+  const homepage = pathname === '/' || pathname === '/en' || pathname === '/en/';
+  return <Link {...props} href={href} prefetch={homepage ? false : prefetch} />;
+};
 
 export function Provider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -14,6 +24,7 @@ export function Provider({ children }: { children: ReactNode }) {
 
   return (
     <RootProvider
+      components={{ Link: NavigationLink }}
       search={{ enabled: false }}
       i18n={{
         locale,

@@ -49,6 +49,7 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
           >
             {copy.workflow.description}{' '}
             <Link
+              prefetch={false}
               className={styles.workflowLifecycleLink}
               href={localizedPath('/docs/api/graph#graph-lifecycle', locale)}
             >
@@ -102,6 +103,7 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
                 </span>
               </div>
               <Link
+                prefetch={false}
                 className={styles.advantageLink}
                 href={localizedPath('/docs/metrics/performance#bundle-size', locale)}
               >
@@ -124,6 +126,7 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
                 <UpdateScenarios locale={locale} />
               </div>
               <Link
+                prefetch={false}
                 className={styles.advantageLink}
                 href={localizedPath('/docs/metrics/performance', locale)}
               >
@@ -160,14 +163,18 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
                 </div>
                 <span className={styles.visualCaption}>{copy.performance.aiCaption}</span>
               </div>
-              <Link className={styles.advantageLink} href={localizedPath('/ai', locale)}>
+              <Link
+                prefetch={false}
+                className={styles.advantageLink}
+                href={localizedPath('/ai', locale)}
+              >
                 {copy.performance.aiLink} <ArrowRight aria-hidden="true" />
               </Link>
             </article>
           </div>
           <p className={styles.advantageFootnote}>
             {copy.performance.footnote}
-            <Link href={localizedPath('/docs/metrics/performance', locale)}>
+            <Link prefetch={false} href={localizedPath('/docs/metrics/performance', locale)}>
               {copy.performance.method} <ArrowRight aria-hidden="true" />
             </Link>
           </p>
@@ -193,6 +200,7 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
             <h2 id="architecture-title">{copy.architecture.title}</h2>
             <p>{copy.architecture.description}</p>
             <Link
+              prefetch={false}
               className={styles.textLink}
               href={localizedPath('/docs/concepts/architecture', locale)}
             >
@@ -218,15 +226,20 @@ function HomepageActions({ locale }: { locale: Locale }) {
   return (
     <div className={styles.actions}>
       <Link
+        prefetch={false}
         className={styles.secondaryButton}
         href={localizedPath('/docs/getting-started/quick-start', locale)}
       >
         {copy.actions.start} <ArrowRight />
       </Link>
-      <Link className={styles.primaryButton} href={localizedPath('/ai', locale)}>
+      <Link prefetch={false} className={styles.primaryButton} href={localizedPath('/ai', locale)}>
         <Bot aria-hidden="true" /> {copy.actions.ai} <ArrowRight aria-hidden="true" />
       </Link>
-      <Link className={styles.heroExampleLink} href={localizedPath('/docs/examples', locale)}>
+      <Link
+        prefetch={false}
+        className={styles.heroExampleLink}
+        href={localizedPath('/docs/examples', locale)}
+      >
         {copy.actions.examples} <ArrowUpRight aria-hidden="true" />
       </Link>
     </div>

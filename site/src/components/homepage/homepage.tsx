@@ -24,6 +24,7 @@ import bundleMeasurement from './bundle-measurement.json';
 import { HomepageArchitecture } from './homepage-architecture';
 import { FeaturedExamples } from './featured-examples';
 import { HeroLiveGraph } from './hero-live-graph';
+import { HeroGraphPreload } from './hero-graph-preload';
 import { UpdateScenarios } from './update-scenarios';
 
 const stageIcons = [Database, Network, Cpu, MousePointer2];
@@ -38,6 +39,7 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
       className={`${styles.page} ${headingFont.variable}`}
       lang={locale === 'zh' ? 'zh-CN' : 'en'}
     >
+      <HeroGraphPreload />
       <ScrollNavigation />
       <HeroStage locale={locale} />
 

@@ -3,7 +3,18 @@
 The hero graph is the sigma.js v4 homepage dataset: highly cited AI papers.
 Coordinates are the upstream precomputed ForceAtlas2 layout, translated to the origin.
 The desktop hero doubles the horizontal span of node positions; narrow screens keep the original proportions. All nodes and citations are retained.
-The page does not run a force layout. Preset coordinates load with the renderer chunk, so the hero does not wait on a separate JSON request.
+The page does not run a force layout. Packed coordinates and edges live in hashed
+JSON assets. An inline HTML hint selects the full or compact asset using the same
+viewport, memory, and CPU policy as the renderer, then preloads it as a fetch before
+hydration, at low priority to protect the initial page scripts. A small client
+entry starts the asynchronous engine download
+before the renderer's idle callback, without making navigation hydration wait
+for the engine. Its boundary is isolated with `Suspense`.
+The renderer reuses the preload response; graph construction and WebGL creation
+still wait for visibility and an idle callback. Failed fetches are evicted from the
+shared request cache so the existing retry button can issue a fresh request.
+
+The `.mjs` dataset adapters retain `createHeroGraph()` for offline validation.
 
 Desktop loads the full network. A viewport at most 767px wide, or a device that reports 4 GB of memory or two CPU cores, loads a spatially sampled subset instead. Citation paths from the original graph join that subset into one weakly connected component.
 

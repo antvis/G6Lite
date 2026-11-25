@@ -4766,637 +4766,6 @@ Switch examples to see how extensions use `register()` in G6Lite. Each guide inc
 * [Custom label renderers](/en/docs/guides/custom-label-renderer) draw multiline text for nodes and edges.
 
 
-# Quick start (/en/docs/getting-started/quick-start)
-
-
-
-
-
-Choose a package manager or CDN integration. The complete package-manager and ESM CDN examples below create the same team collaboration graph with 6 nodes and 7 edges.
-
-* [Package manager](#package-manager) works with projects that use a bundler such as Vite or Webpack. Install the package and import `Graph` from `@antv/g6-lite`.
-* [CDN](#cdn) works directly in HTML. Import `Graph` from an ES module, or load the [UMD script](#cdn-umd) and use `G6Lite.Graph`.
-
-## Package manager [#package-manager]
-
-### Install [#install]
-
-For projects using a bundler such as Vite or Webpack, install G6Lite with one of the following package managers:
-
-<div className="quick-start-install">
-  ```bash
-  # npm
-  npm install @antv/g6-lite@0.1.0
-  ```
-
-  ```bash
-  # pnpm
-  pnpm add @antv/g6-lite@0.1.0
-  ```
-
-  ```bash
-  # Yarn
-  yarn add @antv/g6-lite@0.1.0
-  ```
-</div>
-
-### Create the graph [#create-the-graph]
-
-After installation, add a container with an explicit size:
-
-```html
-<div id="container" style="width: 100%; height: 360px"></div>
-```
-
-Then create a graph in your JavaScript or TypeScript entry after the container has mounted. Use `await` in an ES module or an `async` function.
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const data = {
-  nodes: [
-    { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
-    { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
-    { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
-    { id: 'David', data: { color: '#61DDAA', size: 40 } },
-    { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
-    { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
-  ],
-  edges: [
-    { source: 'Alice', target: 'Bob' },
-    { source: 'Alice', target: 'Carol' },
-    { source: 'David', target: 'Eva' },
-    { source: 'David', target: 'Frank' },
-    { source: 'Alice', target: 'David' },
-    { source: 'Bob', target: 'Eva' },
-    { source: 'Carol', target: 'Frank' },
-  ],
-};
-
-const graph = new Graph({
-  container: '#container',
-  data,
-  node: {
-    style: {
-      size: (node) => Number(node.data?.size ?? 26),
-      fill: (node) => String(node.data?.color ?? '#5B8FF9'),
-      stroke: '#fff',
-      strokeWidth: 2,
-      label: (node) => node.id,
-      labelPlacement: 'bottom',
-      labelColor: '#334155',
-    },
-  },
-  edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
-  layout: {
-    type: 'd3-force',
-    linkDistance: 100,
-    nodeStrength: -400,
-    collide: { radius: 32 },
-  },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-});
-
-try {
-  await graph.render();
-  graph.fitView({ padding: 48 });
-} catch (error) {
-  graph.destroy();
-  throw error;
-}
-```
-
-TypeScript declarations are included in the package.
-
-Call `graph.destroy()` before removing the container or unmounting the component.
-
-## CDN [#cdn]
-
-The ESM CDN imports `Graph` through a module script and loads the selected layout. For a regular `<script>` tag, use the [UMD integration](#cdn-umd) below.
-
-```js
-import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
-```
-
-### Create the graph [#create-the-graph-1]
-
-Save the HTML below as `index.html` and open it in your browser.
-
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>G6Lite team collaboration network</title>
-  </head>
-  <body>
-    <div id="container" style="height: 360px"></div>
-    <script type="module">
-      import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
-
-      const data = {
-        nodes: [
-          { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
-          { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
-          { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
-          { id: 'David', data: { color: '#61DDAA', size: 40 } },
-          { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
-          { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
-        ],
-        edges: [
-          { source: 'Alice', target: 'Bob' },
-          { source: 'Alice', target: 'Carol' },
-          { source: 'David', target: 'Eva' },
-          { source: 'David', target: 'Frank' },
-          { source: 'Alice', target: 'David' },
-          { source: 'Bob', target: 'Eva' },
-          { source: 'Carol', target: 'Frank' },
-        ],
-      };
-
-      const graph = new Graph({
-        container: '#container',
-        data,
-        node: {
-          style: {
-            size: (node) => Number(node.data?.size ?? 26),
-            fill: (node) => String(node.data?.color ?? '#5B8FF9'),
-            stroke: '#fff',
-            strokeWidth: 2,
-            label: (node) => node.id,
-            labelPlacement: 'bottom',
-            labelColor: '#334155',
-          },
-        },
-        edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
-        layout: {
-          type: 'd3-force',
-          linkDistance: 100,
-          nodeStrength: -400,
-          collide: { radius: 32 },
-        },
-        behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-      });
-
-      graph.render().then(() => {
-        graph.fitView({ padding: 48 });
-      }).catch((error) => {
-        graph.destroy();
-        console.error(error);
-      });
-      window.addEventListener('pagehide', () => graph.destroy(), { once: true });
-    </script>
-  </body>
-</html>
-```
-
-### Use the UMD script [#cdn-umd]
-
-The UMD script includes runtime dependencies and built-in layouts. Once loaded, create a graph with `G6Lite.Graph`. This minimal example draws two nodes and one edge:
-
-```html
-<div id="container" style="width: 100%; height: 360px"></div>
-<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
-<script>
-  const graph = new G6Lite.Graph({
-    container: '#container',
-    data: {
-      nodes: [{ id: 'Alice' }, { id: 'Bob' }],
-      edges: [{ source: 'Alice', target: 'Bob' }],
-    },
-    layout: { type: 'circular', radius: 80 },
-    node: { style: { label: (node) => node.id } },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
-  });
-  graph.render().catch((error) => {
-    graph.destroy();
-    console.error(error);
-  });
-  window.addEventListener('pagehide', () => graph.destroy(), { once: true });
-</script>
-```
-
-ESM integrations support on-demand layout loading through a bundler; the UMD script bundles built-in layouts. Both integrations require [importing and registering optional layouts](/en/docs/guides/layout-overview#optional-layouts) before use. See the [Worker guide](/en/docs/guides/layout-worker) for Worker deployment requirements.
-
-The standalone HTML examples above destroy their instances on `pagehide`. Recreate them if the browser restores the page from its back/forward cache.
-
-<span id="verify-and-clean-up" style="{ scrollMarginTop: '8rem' }" />
-
-## Result [#result]
-
-The complete package-manager and ESM CDN examples render the team collaboration graph below, with 6 labeled nodes and 7 edges. Drag the background to pan the canvas.
-
-<QuickStartExample locale="en" variant="network" />
-
-For a blank graph, check the container dimensions, WebGL support, and browser console.
-
-## Use in frontend frameworks [#use-in-frontend-frameworks]
-
-In React and Vue, obtain the DOM element through a ref, create the graph after client-side mount, and call `graph.destroy()` on unmount.
-
-<Cards>
-  <Card title="Use with React" href="/en/docs/getting-started/react#use-with-react">
-    Mount a graph in an effect, update its data, and clean up on unmount.
-  </Card>
-
-  <Card title="Use with Vue" href="/en/docs/getting-started/vue">
-    Manage a graph with template refs and lifecycle hooks.
-  </Card>
-</Cards>
-
-
-# React integration (/en/docs/getting-started/react)
-
-
-
-
-
-## Use with React [#use-with-react]
-
-Import `GraphView` into your page.
-
-```tsx
-import GraphView from './GraphView';
-
-export default function App() {
-  return <GraphView />;
-}
-```
-
-<span id="prepare-two-datasets" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="react-respond-to-data-dependency-changes" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-### Define GraphView [#define-graphview]
-
-Save the following as `GraphView.tsx`. The component creates a graph on mount, calls `setData()` when you switch datasets, and destroys the instance on unmount.
-
-```tsx
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
-import { Graph, type GraphData } from '@antv/g6-lite';
-
-const basicData: GraphData = {
-  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-  edges: [
-    { source: 'Alice', target: 'Bob' },
-    { source: 'Alice', target: 'Carol' },
-  ],
-};
-
-const expandedData: GraphData = {
-  nodes: [...basicData.nodes, { id: 'David' }],
-  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
-};
-
-const fitView = { padding: 32 };
-
-export default function GraphView() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const graphRef = useRef<Graph | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const graph = new Graph({
-      container: containerRef.current,
-      data: basicData,
-      layout: { type: 'circular', radius: 120 },
-      node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
-      edge: { style: { endArrow: true } },
-      autoFit: fitView,
-      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-    });
-
-    graph.render().then(() => {
-      if (graph.destroyed) return;
-      graphRef.current = graph;
-      setReady(true);
-    }).catch((error) => {
-      if (!graph.destroyed) {
-        graph.destroy();
-        console.error(error);
-      }
-    });
-
-    return () => {
-      graphRef.current = null;
-      graph.destroy();
-    };
-  }, []);
-
-  async function changeData(data: GraphData) {
-    const graph = graphRef.current;
-    if (!graph) return;
-    try {
-      await graph.setData(data, { fitView });
-    } catch (error) {
-      if (!graph.destroyed) console.error(error);
-    }
-  }
-
-  return (
-    <div>
-      <select
-        aria-label="Graph data"
-        defaultValue="basic"
-        disabled={!ready}
-        onChange={(event) => void changeData(event.target.value === 'expanded' ? expandedData : basicData)}
-      >
-        <option value="basic">Basic network</option>
-        <option value="expanded">Extended network</option>
-      </select>
-      <div ref={containerRef} style={{ width: '100%', height: 360 }} />
-    </div>
-  );
-}
-```
-
-## Result [#update-the-graph-when-data-changes]
-
-Select “Extended network” to add David and the Bob → David edge. Select “Basic network” to restore the original graph.
-
-<QuickStartExample locale="en" variant="framework-data" />
-
-<span id="use-with-vue" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="vue-synchronize-data-with-watch" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-
-# Vue integration (/en/docs/getting-started/vue)
-
-
-
-
-
-## Use with Vue [#use-with-vue]
-
-Import `GraphView` into your page.
-
-```vue
-<script setup lang="ts">
-import GraphView from './GraphView.vue';
-</script>
-
-<template>
-  <GraphView />
-</template>
-```
-
-<span id="prepare-two-datasets" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="vue-synchronize-data-with-watch" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-### Define GraphView [#define-graphview]
-
-Save the following as `GraphView.vue`. The component creates a graph on mount, calls `setData()` when you switch datasets, and destroys the instance on unmount.
-
-```vue
-<script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { Graph, type GraphData } from '@antv/g6-lite';
-
-const basicData: GraphData = {
-  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-  edges: [
-    { source: 'Alice', target: 'Bob' },
-    { source: 'Alice', target: 'Carol' },
-  ],
-};
-
-const expandedData: GraphData = {
-  nodes: [...basicData.nodes, { id: 'David' }],
-  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
-};
-
-const fitView = { padding: 32 };
-const containerRef = ref<HTMLDivElement | null>(null);
-const ready = ref(false);
-let graph: Graph | undefined;
-
-onMounted(async () => {
-  if (!containerRef.value) return;
-
-  const instance = new Graph({
-    container: containerRef.value,
-    data: basicData,
-    layout: { type: 'circular', radius: 120 },
-    node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
-    edge: { style: { endArrow: true } },
-    autoFit: fitView,
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-  });
-  graph = instance;
-
-  try {
-    await instance.render();
-    if (!instance.destroyed) ready.value = true;
-  } catch (error) {
-    if (!instance.destroyed) {
-      instance.destroy();
-      console.error(error);
-    }
-  }
-});
-
-onBeforeUnmount(() => graph?.destroy());
-
-async function changeData(event: Event) {
-  const instance = graph;
-  if (!ready.value || !instance || instance.destroyed) return;
-
-  const { value } = event.target as HTMLSelectElement;
-  const data = value === 'expanded' ? expandedData : basicData;
-  try {
-    await instance.setData(data, { fitView });
-  } catch (error) {
-    if (!instance.destroyed) console.error(error);
-  }
-}
-</script>
-
-<template>
-  <div>
-    <select aria-label="Graph data" :disabled="!ready" @change="changeData">
-      <option value="basic">Basic network</option>
-      <option value="expanded">Extended network</option>
-    </select>
-    <div ref="containerRef" style="width: 100%; height: 360px" />
-  </div>
-</template>
-```
-
-## Result [#update-the-graph-when-data-changes]
-
-Select “Extended network” to add David and the Bob → David edge. Select “Basic network” to restore the original graph.
-
-<QuickStartExample locale="en" variant="framework-data" />
-
-
-# Graph overview (/en/docs/graph/overview)
-
-
-
-
-
-## What is a Graph? [#what-is-a-graph]
-
-A graph describes objects as nodes and relationships as edges. A G6Lite `Graph` instance draws that data in a container and provides methods to query elements, adjust the viewport, and listen for interactions.
-
-A graph instance typically goes through four steps.
-
-1. **Create.** Call `new Graph(options)` to bind the container and initialize rendering resources.
-2. **Render.** Await `graph.render()` to complete the initial layout and draw the graph.
-3. **Update.** Reuse the instance. Call `setData()` to replace graph data and `updateOptions()` to change supported options.
-4. **Destroy.** Call `graph.destroy()` when leaving the page or unmounting the component to release the canvas and listeners.
-
-<span id="working-with-a-graph" />
-
-## Use G6Lite Graph [#use-g6lite-graph]
-
-Follow the [quick start](/en/docs/getting-started/quick-start) to install `@antv/g6-lite`. Mount a container with nonzero width and height, then create and render the graph.
-
-```html
-<div id="container" style="width: 100%; height: 320px"></div>
-```
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const graph = new Graph({
-  container: '#container',
-  data: {
-    nodes: [
-      { id: 'browser', x: 0, y: 0 },
-      { id: 'api', x: 120, y: 0 },
-    ],
-    edges: [{ source: 'browser', target: 'api' }],
-  },
-});
-
-await graph.render();
-```
-
-After the first render, you can focus a node or update the data. For method timing and cleanup, see the [Graph lifecycle API](/en/docs/api/graph#graph-lifecycle).
-
-<span id="container-and-options" />
-
-## Graph options [#graph-options]
-
-`GraphOptions` is the configuration object passed to the constructor. See the [GraphOptions API](/en/docs/api/options#graphoptions) for the full type definitions and details.
-
-| Option       | Type                                  | Default              | Purpose                                                                                |
-| ------------ | ------------------------------------- | -------------------- | -------------------------------------------------------------------------------------- |
-| `container`  | `string \| HTMLElement`               | Required             | Mounts the graph. String values are CSS selectors.                                     |
-| `data`       | `GraphData`                           | Required             | Supplies nodes, edges, and optional Combo groups.                                      |
-| `autoFit`    | `boolean \| number \| FitViewOptions` | `false`              | Controls refitting on container resize. The first render fits the graph automatically. |
-| `node`       | `NodeConfig`                          | Circle nodes         | Sets node shapes, styles, and states.                                                  |
-| `edge`       | `EdgeConfig`                          | Straight edges       | Sets edge shapes, arrowheads, and states.                                              |
-| `combo`      | `ComboConfig`                         | Built-in styles      | Sets group appearance, labels, and collapsed shapes.                                   |
-| `label`      | `LabelOptions`                        | Built-in policy      | Controls label scaling and visibility.                                                 |
-| `layout`     | `LayoutConfig`                        | Input coordinates    | Chooses the algorithm and options for positioning nodes.                               |
-| `behaviors`  | `BehaviorOption[]`                    | Canvas zoom and drag | Configures interactions such as zooming, dragging, and selection.                      |
-| `theme`      | `ThemeOption`                         | `'light'`            | Sets default styles for the canvas and elements.                                       |
-| `transforms` | `TransformOption[]`                   | None                 | Processes input data in order before layout.                                           |
-| `plugins`    | `PluginOption[]`                      | None                 | Mounts registered plugins.                                                             |
-
-The container sets the initial canvas dimensions. See [Viewport and coordinates](/en/docs/guides/viewport) for fitting and resizing.
-
-## Graph properties [#graph-properties]
-
-| Property                                                          | Type      | Description                                                                                                       |
-| ----------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
-| [`graph.destroyed`](/en/docs/api/graph#graph-lifecycle-destroyed) | `boolean` | Read-only. Becomes `true` when destruction begins. Check it before using the graph after an asynchronous request. |
-
-Use `await graph.render()` to wait for the initial render.
-
-## Example [#example]
-
-### Complete creation and configuration example [#complete-creation-and-configuration-example]
-
-The example uses Dagre to lay out the dependencies from left to right and groups Cache and Database in a Combo. Click a node to see its selected style, or drag and zoom the canvas.
-
-
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-export async function run(container: HTMLElement) {
-  const graph = new Graph({
-    container,
-    data: {
-      nodes: [
-        { id: 'web', name: 'Browser' },
-        { id: 'api', name: 'API' },
-        { id: 'cache', name: 'Cache', comboId: 'storage' },
-        { id: 'db', name: 'Database', comboId: 'storage' },
-      ],
-      edges: [
-        { source: 'web', target: 'api', data: { protocol: 'HTTPS' } },
-        { source: 'api', target: 'cache', data: { protocol: 'GET' } },
-        { source: 'api', target: 'db', data: { protocol: 'SQL' } },
-      ],
-      combos: [{ id: 'storage' }],
-    },
-    // #region element-options
-    node: {
-      type: 'rect',
-      style: {
-        width: 96,
-        height: 38,
-        borderRadius: 8,
-        fill: '#eef2ff',
-        stroke: '#6366f1',
-        strokeWidth: 1,
-        label: (node) => node.name ?? node.id,
-        labelPlacement: 'center',
-        labelColor: '#1e293b',
-      },
-      stateStyles: { selected: { stroke: '#4338ca', strokeWidth: 3 } },
-    },
-    edge: {
-      style: {
-        stroke: '#64748b',
-        endArrow: true,
-        label: (_source, _target, edge) => String(edge.data?.protocol ?? ''),
-        labelColor: '#334155',
-        labelBackground: '#fff',
-        labelBackgroundPadding: 4,
-      },
-    },
-    combo: {
-      style: {
-        label: 'Storage',
-        labelPlacement: 'top',
-        labelColor: '#065f46',
-        padding: 20,
-        borderRadius: 12,
-        fill: 'rgba(16,185,129,0.08)',
-        stroke: '#6ee7b7',
-      },
-    },
-    // #endregion element-options
-    layout: { type: 'dagre', rankdir: 'LR', ranksep: 84, nodesep: 16, nodeSize: 96 },
-    label: { hideOnLowZoom: false, scaleWithZoom: false },
-    behaviors: ['click-select', 'drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36 },
-  });
-  try {
-    await graph.render();
-    return graph;
-  } catch (error) {
-    graph.destroy();
-    throw error;
-  }
-}
-```
-
-
-
-
 # Minimal graph (/en/docs/examples/basic)
 
 
@@ -11703,76 +11072,635 @@ export async function run(container: string | HTMLElement) {
 - [Viewport guide](/en/docs/guides/viewport)
 - [Viewport methods](/en/docs/api/graph#graph-viewport)
 
-# Performance comparison (/en/docs/metrics/performance)
+# Quick start (/en/docs/getting-started/quick-start)
 
 
 
-This comparison covers G6Lite, G6, Sigma.js, and the ECharts Graph series. All renderers receive the same precomputed positions, and all bundles use the same build settings. The 2026-11-13 comparison used a local G6Lite development build whose version field was `0.1.0`, rather than the package later published to npm.
 
-The original record did not retain a source commit or package integrity identifier for that development build, so these results apply only to that build. First-draw performance of the published package needs a separate measurement. The [CDN file sizes](#umd-size) below have been measured again using the published npm package.
 
-<span id="library-selection-comparison" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+Choose a package manager or CDN integration. The complete package-manager and ESM CDN examples below create the same team collaboration graph with 6 nodes and 7 edges.
 
-<span id="selecting-a-graph-library" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+* [Package manager](#package-manager) works with projects that use a bundler such as Vite or Webpack. Install the package and import `Graph` from `@antv/g6-lite`.
+* [CDN](#cdn) works directly in HTML. Import `Graph` from an ES module, or load the [UMD script](#cdn-umd) and use `G6Lite.Graph`.
 
-<span id="current-public-measurement-scope" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+## Package manager [#package-manager]
 
-## First-draw timing [#render-time]
+### Install [#install]
 
-The table shows the median time in milliseconds from graph creation through two animation frames after the render API completes. Headless Chromium uses the SwiftShader software renderer for WebGL in this run.
+For projects using a bundler such as Vite or Webpack, install G6Lite with one of the following package managers:
 
-| npm package                                 | Renderer  | 1,000 nodes / 3,000 edges (ms) | 5,000 nodes / 15,000 edges (ms) |
-| ------------------------------------------- | --------- | -----------------------------: | ------------------------------: |
-| `@antv/g6-lite` development build (`0.1.0`) | WebGL     |                          134.1 |                           146.1 |
-| `@antv/g6@5.1.1`                            | Canvas 2D |                          297.4 |                         1,502.2 |
-| `sigma@4.0.4` + `graphology@0.26.0`         | WebGL 2   |                          466.1 |                           748.4 |
-| `echarts@6.1.0`                             | Canvas 2D |                           56.6 |                           236.3 |
+<div className="quick-start-install">
+  ```bash
+  # npm
+  npm install @antv/g6-lite@0.1.0
+  ```
 
-<span id="environment-requirements" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+  ```bash
+  # pnpm
+  pnpm add @antv/g6-lite@0.1.0
+  ```
 
-<span id="how-to-compare-numbers" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+  ```bash
+  # Yarn
+  yarn add @antv/g6-lite@0.1.0
+  ```
+</div>
 
-<span id="rules-for-numerical-comparisons" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+### Create the graph [#create-the-graph]
 
-### Test conditions [#benchmark-method]
+After installation, add a container with an explicit size:
 
-* Apple M3 Pro, macOS (Darwin 25.2.0), headless Chromium 151.0.7922.34. The canvas is 900 × 600 CSS pixels at DPR 1. The WebGL renderer reports `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`.
-* Each library receives the same nodes, edges, and fixed positions. The graphs use circular nodes and straight edges, with labels and animation disabled and no layout run. For each size, each library warms up 3 times, then runs 20 interleaved samples. The instance is disposed after each sample.
-* Libraries are loaded before timing. Samples cover instance and internal model creation, the first render, and two animation frame callbacks. Sigma.js includes building the Graphology graph. Measure GPU execution, layout, and interactions separately. [Download raw samples](/benchmarks/graph-performance.json)
+```html
+<div id="container" style="width: 100%; height: 360px"></div>
+```
 
-These results apply only to the environment above and do not certify minimum supported browser versions. See [Minimum browser versions](/en/docs/compatibility/browser#minimum-browser-versions) for capability version references and the remaining acceptance scope.
+Then create a graph in your JavaScript or TypeScript entry after the container has mounted. Use `await` in an ES module or an `async` function.
 
-## Browser bundle size [#bundle-size]
+```ts
+import { Graph } from '@antv/g6-lite';
 
-esbuild 0.21.5 bundles each npm entry and its dependencies into a single minified browser script. The G6Lite measurement uses the default entry, with optional layouts imported separately as needed. ECharts imports GraphChart and CanvasRenderer only. Sigma.js includes Graphology. Sizes are in KiB and exclude source maps.
+const data = {
+  nodes: [
+    { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
+    { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
+    { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
+    { id: 'David', data: { color: '#61DDAA', size: 40 } },
+    { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
+    { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
+  ],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+    { source: 'David', target: 'Eva' },
+    { source: 'David', target: 'Frank' },
+    { source: 'Alice', target: 'David' },
+    { source: 'Bob', target: 'Eva' },
+    { source: 'Carol', target: 'Frank' },
+  ],
+};
 
-| npm package                                 | Minified (KiB) | gzip -9 (KiB) |
-| ------------------------------------------- | -------------: | ------------: |
-| `@antv/g6-lite` development build (`0.1.0`) |          511.3 |         159.5 |
-| `@antv/g6@5.1.1`                            |        1,435.3 |         413.4 |
-| `sigma@4.0.4` + `graphology@0.26.0`         |          438.4 |         110.7 |
-| `echarts@6.1.0`                             |          386.3 |         130.2 |
+const graph = new Graph({
+  container: '#container',
+  data,
+  node: {
+    style: {
+      size: (node) => Number(node.data?.size ?? 26),
+      fill: (node) => String(node.data?.color ?? '#5B8FF9'),
+      stroke: '#fff',
+      strokeWidth: 2,
+      label: (node) => node.id,
+      labelPlacement: 'bottom',
+      labelColor: '#334155',
+    },
+  },
+  edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
+  layout: {
+    type: 'd3-force',
+    linkDistance: 100,
+    nodeStrength: -400,
+    collide: { radius: 32 },
+  },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+});
 
-### G6Lite CDN file sizes [#umd-size]
+try {
+  await graph.render();
+  graph.fitView({ padding: 48 });
+} catch (error) {
+  graph.destroy();
+  throw error;
+}
+```
 
-These files come from the published npm package `@antv/g6-lite@0.1.0`, downloaded again and measured with `gzip -9` on 2026-11-24. One kB is 1,000 bytes. The homepage uses the default script's measurement from the same run. These are the distributed UMD files, measured separately from the esbuild bundles above.
+TypeScript declarations are included in the package.
 
-| Published file           | Contents                                                          | gzip -9 (kB) |
-| ------------------------ | ----------------------------------------------------------------- | -----------: |
-| `g6-lite.min.js`         | Default script with rendering, interactions, and built-in layouts |        150.3 |
-| `g6-lite-layouts.min.js` | Six optional layouts, loaded when needed                          |         29.1 |
+Call `graph.destroy()` before removing the container or unmounting the component.
 
-Load the optional script before registering the layout you want to use. [Optional layouts](/en/docs/guides/layout-overview#optional-layouts)
+## CDN [#cdn]
 
-## Measuring your own graph [#performance-tuning]
+The ESM CDN imports `Graph` through a module script and loads the selected layout. For a regular `<script>` tag, use the [UMD integration](#cdn-umd) below.
 
-Use production data and target devices to measure layout, first draw, and interactions separately. For a slow startup, isolate layout from drawing before assessing Worker execution. For slow updates, reuse the graph and update data or states incrementally. For frame drops during zoom, compare labels, decorations, and viewport size one at a time. Check disposal and listener cleanup after repeated mounts. [Worker layouts](/en/docs/guides/layout-worker) · [Data mutations](/en/docs/api/graph#graph-data-mutations) · [Label policy](/en/docs/api/options#options-label)
+```js
+import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
+```
 
-**Related runnable examples**
+### Create the graph [#create-the-graph-1]
 
-* [200 nodes](/en/docs/examples/large)
-* [5000 nodes with labels](/en/docs/examples/large-labeled)
-* [AI Papers large relationship graph](/en/docs/examples/real-dataset)
+Save the HTML below as `index.html` and open it in your browser.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>G6Lite team collaboration network</title>
+  </head>
+  <body>
+    <div id="container" style="height: 360px"></div>
+    <script type="module">
+      import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
+
+      const data = {
+        nodes: [
+          { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
+          { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
+          { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
+          { id: 'David', data: { color: '#61DDAA', size: 40 } },
+          { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
+          { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
+        ],
+        edges: [
+          { source: 'Alice', target: 'Bob' },
+          { source: 'Alice', target: 'Carol' },
+          { source: 'David', target: 'Eva' },
+          { source: 'David', target: 'Frank' },
+          { source: 'Alice', target: 'David' },
+          { source: 'Bob', target: 'Eva' },
+          { source: 'Carol', target: 'Frank' },
+        ],
+      };
+
+      const graph = new Graph({
+        container: '#container',
+        data,
+        node: {
+          style: {
+            size: (node) => Number(node.data?.size ?? 26),
+            fill: (node) => String(node.data?.color ?? '#5B8FF9'),
+            stroke: '#fff',
+            strokeWidth: 2,
+            label: (node) => node.id,
+            labelPlacement: 'bottom',
+            labelColor: '#334155',
+          },
+        },
+        edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
+        layout: {
+          type: 'd3-force',
+          linkDistance: 100,
+          nodeStrength: -400,
+          collide: { radius: 32 },
+        },
+        behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+      });
+
+      graph.render().then(() => {
+        graph.fitView({ padding: 48 });
+      }).catch((error) => {
+        graph.destroy();
+        console.error(error);
+      });
+      window.addEventListener('pagehide', () => graph.destroy(), { once: true });
+    </script>
+  </body>
+</html>
+```
+
+### Use the UMD script [#cdn-umd]
+
+The UMD script includes runtime dependencies and built-in layouts. Once loaded, create a graph with `G6Lite.Graph`. This minimal example draws two nodes and one edge:
+
+```html
+<div id="container" style="width: 100%; height: 360px"></div>
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
+<script>
+  const graph = new G6Lite.Graph({
+    container: '#container',
+    data: {
+      nodes: [{ id: 'Alice' }, { id: 'Bob' }],
+      edges: [{ source: 'Alice', target: 'Bob' }],
+    },
+    layout: { type: 'circular', radius: 80 },
+    node: { style: { label: (node) => node.id } },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+  });
+  graph.render().catch((error) => {
+    graph.destroy();
+    console.error(error);
+  });
+  window.addEventListener('pagehide', () => graph.destroy(), { once: true });
+</script>
+```
+
+ESM integrations support on-demand layout loading through a bundler; the UMD script bundles built-in layouts. Both integrations require [importing and registering optional layouts](/en/docs/guides/layout-overview#optional-layouts) before use. See the [Worker guide](/en/docs/guides/layout-worker) for Worker deployment requirements.
+
+The standalone HTML examples above destroy their instances on `pagehide`. Recreate them if the browser restores the page from its back/forward cache.
+
+<span id="verify-and-clean-up" style="{ scrollMarginTop: '8rem' }" />
+
+## Result [#result]
+
+The complete package-manager and ESM CDN examples render the team collaboration graph below, with 6 labeled nodes and 7 edges. Drag the background to pan the canvas.
+
+<QuickStartExample locale="en" variant="network" />
+
+For a blank graph, check the container dimensions, WebGL support, and browser console.
+
+## Use in frontend frameworks [#use-in-frontend-frameworks]
+
+In React and Vue, obtain the DOM element through a ref, create the graph after client-side mount, and call `graph.destroy()` on unmount.
+
+<Cards>
+  <Card title="Use with React" href="/en/docs/getting-started/react#use-with-react">
+    Mount a graph in an effect, update its data, and clean up on unmount.
+  </Card>
+
+  <Card title="Use with Vue" href="/en/docs/getting-started/vue">
+    Manage a graph with template refs and lifecycle hooks.
+  </Card>
+</Cards>
+
+
+# React integration (/en/docs/getting-started/react)
+
+
+
+
+
+## Use with React [#use-with-react]
+
+Import `GraphView` into your page.
+
+```tsx
+import GraphView from './GraphView';
+
+export default function App() {
+  return <GraphView />;
+}
+```
+
+<span id="prepare-two-datasets" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="react-respond-to-data-dependency-changes" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### Define GraphView [#define-graphview]
+
+Save the following as `GraphView.tsx`. The component creates a graph on mount, calls `setData()` when you switch datasets, and destroys the instance on unmount.
+
+```tsx
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+
+const fitView = { padding: 32 };
+
+export default function GraphView() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const graphRef = useRef<Graph | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: basicData,
+      layout: { type: 'circular', radius: 120 },
+      node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
+      edge: { style: { endArrow: true } },
+      autoFit: fitView,
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+    });
+
+    graph.render().then(() => {
+      if (graph.destroyed) return;
+      graphRef.current = graph;
+      setReady(true);
+    }).catch((error) => {
+      if (!graph.destroyed) {
+        graph.destroy();
+        console.error(error);
+      }
+    });
+
+    return () => {
+      graphRef.current = null;
+      graph.destroy();
+    };
+  }, []);
+
+  async function changeData(data: GraphData) {
+    const graph = graphRef.current;
+    if (!graph) return;
+    try {
+      await graph.setData(data, { fitView });
+    } catch (error) {
+      if (!graph.destroyed) console.error(error);
+    }
+  }
+
+  return (
+    <div>
+      <select
+        aria-label="Graph data"
+        defaultValue="basic"
+        disabled={!ready}
+        onChange={(event) => void changeData(event.target.value === 'expanded' ? expandedData : basicData)}
+      >
+        <option value="basic">Basic network</option>
+        <option value="expanded">Extended network</option>
+      </select>
+      <div ref={containerRef} style={{ width: '100%', height: 360 }} />
+    </div>
+  );
+}
+```
+
+## Result [#update-the-graph-when-data-changes]
+
+Select “Extended network” to add David and the Bob → David edge. Select “Basic network” to restore the original graph.
+
+<QuickStartExample locale="en" variant="framework-data" />
+
+<span id="use-with-vue" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="vue-synchronize-data-with-watch" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+
+# Vue integration (/en/docs/getting-started/vue)
+
+
+
+
+
+## Use with Vue [#use-with-vue]
+
+Import `GraphView` into your page.
+
+```vue
+<script setup lang="ts">
+import GraphView from './GraphView.vue';
+</script>
+
+<template>
+  <GraphView />
+</template>
+```
+
+<span id="prepare-two-datasets" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="vue-synchronize-data-with-watch" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### Define GraphView [#define-graphview]
+
+Save the following as `GraphView.vue`. The component creates a graph on mount, calls `setData()` when you switch datasets, and destroys the instance on unmount.
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+
+const fitView = { padding: 32 };
+const containerRef = ref<HTMLDivElement | null>(null);
+const ready = ref(false);
+let graph: Graph | undefined;
+
+onMounted(async () => {
+  if (!containerRef.value) return;
+
+  const instance = new Graph({
+    container: containerRef.value,
+    data: basicData,
+    layout: { type: 'circular', radius: 120 },
+    node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
+    edge: { style: { endArrow: true } },
+    autoFit: fitView,
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+  graph = instance;
+
+  try {
+    await instance.render();
+    if (!instance.destroyed) ready.value = true;
+  } catch (error) {
+    if (!instance.destroyed) {
+      instance.destroy();
+      console.error(error);
+    }
+  }
+});
+
+onBeforeUnmount(() => graph?.destroy());
+
+async function changeData(event: Event) {
+  const instance = graph;
+  if (!ready.value || !instance || instance.destroyed) return;
+
+  const { value } = event.target as HTMLSelectElement;
+  const data = value === 'expanded' ? expandedData : basicData;
+  try {
+    await instance.setData(data, { fitView });
+  } catch (error) {
+    if (!instance.destroyed) console.error(error);
+  }
+}
+</script>
+
+<template>
+  <div>
+    <select aria-label="Graph data" :disabled="!ready" @change="changeData">
+      <option value="basic">Basic network</option>
+      <option value="expanded">Extended network</option>
+    </select>
+    <div ref="containerRef" style="width: 100%; height: 360px" />
+  </div>
+</template>
+```
+
+## Result [#update-the-graph-when-data-changes]
+
+Select “Extended network” to add David and the Bob → David edge. Select “Basic network” to restore the original graph.
+
+<QuickStartExample locale="en" variant="framework-data" />
+
+
+# Graph overview (/en/docs/graph/overview)
+
+
+
+
+
+## What is a Graph? [#what-is-a-graph]
+
+A graph describes objects as nodes and relationships as edges. A G6Lite `Graph` instance draws that data in a container and provides methods to query elements, adjust the viewport, and listen for interactions.
+
+A graph instance typically goes through four steps.
+
+1. **Create.** Call `new Graph(options)` to bind the container and initialize rendering resources.
+2. **Render.** Await `graph.render()` to complete the initial layout and draw the graph.
+3. **Update.** Reuse the instance. Call `setData()` to replace graph data and `updateOptions()` to change supported options.
+4. **Destroy.** Call `graph.destroy()` when leaving the page or unmounting the component to release the canvas and listeners.
+
+<span id="working-with-a-graph" />
+
+## Use G6Lite Graph [#use-g6lite-graph]
+
+Follow the [quick start](/en/docs/getting-started/quick-start) to install `@antv/g6-lite`. Mount a container with nonzero width and height, then create and render the graph.
+
+```html
+<div id="container" style="width: 100%; height: 320px"></div>
+```
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [
+      { id: 'browser', x: 0, y: 0 },
+      { id: 'api', x: 120, y: 0 },
+    ],
+    edges: [{ source: 'browser', target: 'api' }],
+  },
+});
+
+await graph.render();
+```
+
+After the first render, you can focus a node or update the data. For method timing and cleanup, see the [Graph lifecycle API](/en/docs/api/graph#graph-lifecycle).
+
+<span id="container-and-options" />
+
+## Graph options [#graph-options]
+
+`GraphOptions` is the configuration object passed to the constructor. See the [GraphOptions API](/en/docs/api/options#graphoptions) for the full type definitions and details.
+
+| Option       | Type                                  | Default              | Purpose                                                                                |
+| ------------ | ------------------------------------- | -------------------- | -------------------------------------------------------------------------------------- |
+| `container`  | `string \| HTMLElement`               | Required             | Mounts the graph. String values are CSS selectors.                                     |
+| `data`       | `GraphData`                           | Required             | Supplies nodes, edges, and optional Combo groups.                                      |
+| `autoFit`    | `boolean \| number \| FitViewOptions` | `false`              | Controls refitting on container resize. The first render fits the graph automatically. |
+| `node`       | `NodeConfig`                          | Circle nodes         | Sets node shapes, styles, and states.                                                  |
+| `edge`       | `EdgeConfig`                          | Straight edges       | Sets edge shapes, arrowheads, and states.                                              |
+| `combo`      | `ComboConfig`                         | Built-in styles      | Sets group appearance, labels, and collapsed shapes.                                   |
+| `label`      | `LabelOptions`                        | Built-in policy      | Controls label scaling and visibility.                                                 |
+| `layout`     | `LayoutConfig`                        | Input coordinates    | Chooses the algorithm and options for positioning nodes.                               |
+| `behaviors`  | `BehaviorOption[]`                    | Canvas zoom and drag | Configures interactions such as zooming, dragging, and selection.                      |
+| `theme`      | `ThemeOption`                         | `'light'`            | Sets default styles for the canvas and elements.                                       |
+| `transforms` | `TransformOption[]`                   | None                 | Processes input data in order before layout.                                           |
+| `plugins`    | `PluginOption[]`                      | None                 | Mounts registered plugins.                                                             |
+
+The container sets the initial canvas dimensions. See [Viewport and coordinates](/en/docs/guides/viewport) for fitting and resizing.
+
+## Graph properties [#graph-properties]
+
+| Property                                                          | Type      | Description                                                                                                       |
+| ----------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
+| [`graph.destroyed`](/en/docs/api/graph#graph-lifecycle-destroyed) | `boolean` | Read-only. Becomes `true` when destruction begins. Check it before using the graph after an asynchronous request. |
+
+Use `await graph.render()` to wait for the initial render.
+
+## Example [#example]
+
+### Complete creation and configuration example [#complete-creation-and-configuration-example]
+
+The example uses Dagre to lay out the dependencies from left to right and groups Cache and Database in a Combo. Click a node to see its selected style, or drag and zoom the canvas.
+
+
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+export async function run(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'web', name: 'Browser' },
+        { id: 'api', name: 'API' },
+        { id: 'cache', name: 'Cache', comboId: 'storage' },
+        { id: 'db', name: 'Database', comboId: 'storage' },
+      ],
+      edges: [
+        { source: 'web', target: 'api', data: { protocol: 'HTTPS' } },
+        { source: 'api', target: 'cache', data: { protocol: 'GET' } },
+        { source: 'api', target: 'db', data: { protocol: 'SQL' } },
+      ],
+      combos: [{ id: 'storage' }],
+    },
+    // #region element-options
+    node: {
+      type: 'rect',
+      style: {
+        width: 96,
+        height: 38,
+        borderRadius: 8,
+        fill: '#eef2ff',
+        stroke: '#6366f1',
+        strokeWidth: 1,
+        label: (node) => node.name ?? node.id,
+        labelPlacement: 'center',
+        labelColor: '#1e293b',
+      },
+      stateStyles: { selected: { stroke: '#4338ca', strokeWidth: 3 } },
+    },
+    edge: {
+      style: {
+        stroke: '#64748b',
+        endArrow: true,
+        label: (_source, _target, edge) => String(edge.data?.protocol ?? ''),
+        labelColor: '#334155',
+        labelBackground: '#fff',
+        labelBackgroundPadding: 4,
+      },
+    },
+    combo: {
+      style: {
+        label: 'Storage',
+        labelPlacement: 'top',
+        labelColor: '#065f46',
+        padding: 20,
+        borderRadius: 12,
+        fill: 'rgba(16,185,129,0.08)',
+        stroke: '#6ee7b7',
+      },
+    },
+    // #endregion element-options
+    layout: { type: 'dagre', rankdir: 'LR', ranksep: 84, nodesep: 16, nodeSize: 96 },
+    label: { hideOnLowZoom: false, scaleWithZoom: false },
+    behaviors: ['click-select', 'drag-canvas', 'zoom-canvas'],
+    autoFit: { padding: 36 },
+  });
+  try {
+    await graph.render();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+```
+
+
 
 
 # Brush select (/en/docs/guides/behavior-brush-select)
@@ -24951,6 +24879,78 @@ Continue with [viewport methods](/en/docs/api/graph#graph-viewport), [autoFit](/
 * [Search and focus](/en/docs/examples/search-focus)
 * [Viewport and coordinate conversion](/en/docs/examples/viewport-controls)
 * [Zoom range and sensitivity](/en/docs/examples/zoom-options)
+
+
+# Performance comparison (/en/docs/metrics/performance)
+
+
+
+This comparison covers G6Lite, G6, Sigma.js, and the ECharts Graph series. All renderers receive the same precomputed positions, and all bundles use the same build settings. The 2026-11-13 comparison used a local G6Lite development build whose version field was `0.1.0`, rather than the package later published to npm.
+
+The original record did not retain a source commit or package integrity identifier for that development build, so these results apply only to that build. First-draw performance of the published package needs a separate measurement. The [CDN file sizes](#umd-size) below have been measured again using the published npm package.
+
+<span id="library-selection-comparison" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="selecting-a-graph-library" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="current-public-measurement-scope" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## First-draw timing [#render-time]
+
+The table shows the median time in milliseconds from graph creation through two animation frames after the render API completes. Headless Chromium uses the SwiftShader software renderer for WebGL in this run.
+
+| npm package                                 | Renderer  | 1,000 nodes / 3,000 edges (ms) | 5,000 nodes / 15,000 edges (ms) |
+| ------------------------------------------- | --------- | -----------------------------: | ------------------------------: |
+| `@antv/g6-lite` development build (`0.1.0`) | WebGL     |                          134.1 |                           146.1 |
+| `@antv/g6@5.1.1`                            | Canvas 2D |                          297.4 |                         1,502.2 |
+| `sigma@4.0.4` + `graphology@0.26.0`         | WebGL 2   |                          466.1 |                           748.4 |
+| `echarts@6.1.0`                             | Canvas 2D |                           56.6 |                           236.3 |
+
+<span id="environment-requirements" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="how-to-compare-numbers" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="rules-for-numerical-comparisons" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### Test conditions [#benchmark-method]
+
+* Apple M3 Pro, macOS (Darwin 25.2.0), headless Chromium 151.0.7922.34. The canvas is 900 × 600 CSS pixels at DPR 1. The WebGL renderer reports `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`.
+* Each library receives the same nodes, edges, and fixed positions. The graphs use circular nodes and straight edges, with labels and animation disabled and no layout run. For each size, each library warms up 3 times, then runs 20 interleaved samples. The instance is disposed after each sample.
+* Libraries are loaded before timing. Samples cover instance and internal model creation, the first render, and two animation frame callbacks. Sigma.js includes building the Graphology graph. Measure GPU execution, layout, and interactions separately. [Download raw samples](/benchmarks/graph-performance.json)
+
+These results apply only to the environment above and do not certify minimum supported browser versions. See [Minimum browser versions](/en/docs/compatibility/browser#minimum-browser-versions) for capability version references and the remaining acceptance scope.
+
+## Browser bundle size [#bundle-size]
+
+esbuild 0.21.5 bundles each npm entry and its dependencies into a single minified browser script. The G6Lite measurement uses the default entry, with optional layouts imported separately as needed. ECharts imports GraphChart and CanvasRenderer only. Sigma.js includes Graphology. Sizes are in KiB and exclude source maps.
+
+| npm package                                 | Minified (KiB) | gzip -9 (KiB) |
+| ------------------------------------------- | -------------: | ------------: |
+| `@antv/g6-lite` development build (`0.1.0`) |          511.3 |         159.5 |
+| `@antv/g6@5.1.1`                            |        1,435.3 |         413.4 |
+| `sigma@4.0.4` + `graphology@0.26.0`         |          438.4 |         110.7 |
+| `echarts@6.1.0`                             |          386.3 |         130.2 |
+
+### G6Lite CDN file sizes [#umd-size]
+
+These files come from the published npm package `@antv/g6-lite@0.1.0`, downloaded again and measured with `gzip -9` on 2026-11-24. One kB is 1,000 bytes. The homepage uses the default script's measurement from the same run. These are the distributed UMD files, measured separately from the esbuild bundles above.
+
+| Published file           | Contents                                                          | gzip -9 (kB) |
+| ------------------------ | ----------------------------------------------------------------- | -----------: |
+| `g6-lite.min.js`         | Default script with rendering, interactions, and built-in layouts |        150.3 |
+| `g6-lite-layouts.min.js` | Six optional layouts, loaded when needed                          |         29.1 |
+
+Load the optional script before registering the layout you want to use. [Optional layouts](/en/docs/guides/layout-overview#optional-layouts)
+
+## Measuring your own graph [#performance-tuning]
+
+Use production data and target devices to measure layout, first draw, and interactions separately. For a slow startup, isolate layout from drawing before assessing Worker execution. For slow updates, reuse the graph and update data or states incrementally. For frame drops during zoom, compare labels, decorations, and viewport size one at a time. Check disposal and listener cleanup after repeated mounts. [Worker layouts](/en/docs/guides/layout-worker) · [Data mutations](/en/docs/api/graph#graph-data-mutations) · [Label policy](/en/docs/api/options#options-label)
+
+**Related runnable examples**
+
+* [200 nodes](/en/docs/examples/large)
+* [5000 nodes with labels](/en/docs/examples/large-labeled)
+* [AI Papers large relationship graph](/en/docs/examples/real-dataset)
 
 
 # Events (/en/docs/api/graph/events)

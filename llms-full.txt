@@ -4760,637 +4760,6 @@ export async function run(container: HTMLElement) {
 * [自定义标签渲染](/docs/guides/custom-label-renderer)为节点和边绘制多行文字。
 
 
-# 快速上手 (/docs/getting-started/quick-start)
-
-
-
-
-
-选择包管理器或 CDN 接入。下面的包管理器和 ESM CDN 完整示例都用 6 个节点和 7 条边创建同一张团队协作图。
-
-* [包管理器](#包管理器)适合使用 Vite、Webpack 等构建工具的项目。安装后从 `@antv/g6-lite` 导入 `Graph`。
-* [CDN](#cdn)适合直接在 HTML 中使用。可通过 ES 模块导入 `Graph`，也可加载 [UMD 脚本](#cdn-umd)后使用 `G6Lite.Graph`。
-
-## 包管理器 [#包管理器]
-
-### 安装 [#安装]
-
-在使用 Vite、Webpack 等构建工具的项目中，选择一种包管理器安装：
-
-<div className="quick-start-install">
-  ```bash
-  # npm
-  npm install @antv/g6-lite@0.1.0
-  ```
-
-  ```bash
-  # pnpm
-  pnpm add @antv/g6-lite@0.1.0
-  ```
-
-  ```bash
-  # Yarn
-  yarn add @antv/g6-lite@0.1.0
-  ```
-</div>
-
-### 创建关系图 [#创建关系图]
-
-安装后，在页面中添加一个有明确宽高的容器：
-
-```html
-<div id="container" style="width: 100%; height: 360px"></div>
-```
-
-然后在 JavaScript 或 TypeScript 入口中创建关系图。容器需要先挂载到页面，`await` 应在 ES 模块或 `async` 函数中使用。
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const data = {
-  nodes: [
-    { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
-    { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
-    { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
-    { id: 'David', data: { color: '#61DDAA', size: 40 } },
-    { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
-    { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
-  ],
-  edges: [
-    { source: 'Alice', target: 'Bob' },
-    { source: 'Alice', target: 'Carol' },
-    { source: 'David', target: 'Eva' },
-    { source: 'David', target: 'Frank' },
-    { source: 'Alice', target: 'David' },
-    { source: 'Bob', target: 'Eva' },
-    { source: 'Carol', target: 'Frank' },
-  ],
-};
-
-const graph = new Graph({
-  container: '#container',
-  data,
-  node: {
-    style: {
-      size: (node) => Number(node.data?.size ?? 26),
-      fill: (node) => String(node.data?.color ?? '#5B8FF9'),
-      stroke: '#fff',
-      strokeWidth: 2,
-      label: (node) => node.id,
-      labelPlacement: 'bottom',
-      labelColor: '#334155',
-    },
-  },
-  edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
-  layout: {
-    type: 'd3-force',
-    linkDistance: 100,
-    nodeStrength: -400,
-    collide: { radius: 32 },
-  },
-  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-});
-
-try {
-  await graph.render();
-  graph.fitView({ padding: 48 });
-} catch (error) {
-  graph.destroy();
-  throw error;
-}
-```
-
-包中已包含 TypeScript 类型。
-
-移除容器或卸载组件前，调用 `graph.destroy()` 释放资源。
-
-## CDN [#cdn]
-
-ESM CDN 通过模块脚本导入 `Graph`，并加载所选布局。使用普通 `<script>` 标签时，见下方的 [UMD 接入](#cdn-umd)。
-
-```js
-import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
-```
-
-### 创建关系图 [#创建关系图-1]
-
-将下面的 HTML 保存为 `index.html`，用浏览器打开。
-
-```html
-<!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>G6Lite 团队协作关系图</title>
-  </head>
-  <body>
-    <div id="container" style="height: 360px"></div>
-    <script type="module">
-      import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
-
-      const data = {
-        nodes: [
-          { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
-          { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
-          { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
-          { id: 'David', data: { color: '#61DDAA', size: 40 } },
-          { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
-          { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
-        ],
-        edges: [
-          { source: 'Alice', target: 'Bob' },
-          { source: 'Alice', target: 'Carol' },
-          { source: 'David', target: 'Eva' },
-          { source: 'David', target: 'Frank' },
-          { source: 'Alice', target: 'David' },
-          { source: 'Bob', target: 'Eva' },
-          { source: 'Carol', target: 'Frank' },
-        ],
-      };
-
-      const graph = new Graph({
-        container: '#container',
-        data,
-        node: {
-          style: {
-            size: (node) => Number(node.data?.size ?? 26),
-            fill: (node) => String(node.data?.color ?? '#5B8FF9'),
-            stroke: '#fff',
-            strokeWidth: 2,
-            label: (node) => node.id,
-            labelPlacement: 'bottom',
-            labelColor: '#334155',
-          },
-        },
-        edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
-        layout: {
-          type: 'd3-force',
-          linkDistance: 100,
-          nodeStrength: -400,
-          collide: { radius: 32 },
-        },
-        behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-      });
-
-      graph.render().then(() => {
-        graph.fitView({ padding: 48 });
-      }).catch((error) => {
-        graph.destroy();
-        console.error(error);
-      });
-      window.addEventListener('pagehide', () => graph.destroy(), { once: true });
-    </script>
-  </body>
-</html>
-```
-
-### 使用 UMD 脚本 [#cdn-umd]
-
-UMD 主脚本包含运行依赖和内置布局，加载后通过 `G6Lite.Graph` 创建图。下面的最小示例绘制两个节点和一条边：
-
-```html
-<div id="container" style="width: 100%; height: 360px"></div>
-<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
-<script>
-  const graph = new G6Lite.Graph({
-    container: '#container',
-    data: {
-      nodes: [{ id: 'Alice' }, { id: 'Bob' }],
-      edges: [{ source: 'Alice', target: 'Bob' }],
-    },
-    layout: { type: 'circular', radius: 80 },
-    node: { style: { label: (node) => node.id } },
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
-  });
-  graph.render().catch((error) => {
-    graph.destroy();
-    console.error(error);
-  });
-  window.addEventListener('pagehide', () => graph.destroy(), { once: true });
-</script>
-```
-
-ESM 接入支持通过构建工具按需加载布局；UMD 主脚本已内联内置布局。两种接入方式使用可选布局时都需要[先导入并注册](/docs/guides/layout-overview#optional-layouts)。布局的 Worker 部署要求见 [Worker 指南](/docs/guides/layout-worker)。
-
-上面的独立 HTML 示例在 `pagehide` 时销毁图实例。浏览器从往返缓存恢复页面时，需要重新创建实例。
-
-<span id="验证效果与清理" style="{ scrollMarginTop: '8rem' }" />
-
-## 运行效果 [#运行效果]
-
-包管理器和 ESM CDN 完整示例会生成下方的团队协作图，包含 6 个带标签的节点和 7 条边。拖动空白处可平移画布。
-
-<QuickStartExample locale="zh" variant="network" />
-
-图没有显示时，检查容器宽高、浏览器 WebGL 和控制台错误。
-
-## 在前端框架中使用 [#在前端框架中使用]
-
-在 React / Vue 中，通过 ref 获取真实 DOM，在客户端挂载后创建实例，并在组件卸载时调用 `graph.destroy()` 释放资源。
-
-<Cards>
-  <Card title="在 React 中使用" href="/docs/getting-started/react#在-react-中使用">
-    在 effect 中挂载关系图，更新数据，并处理组件卸载。
-  </Card>
-
-  <Card title="在 Vue 中使用" href="/docs/getting-started/vue">
-    通过模板 ref 和生命周期钩子管理图实例。
-  </Card>
-</Cards>
-
-
-# React 接入 (/docs/getting-started/react)
-
-
-
-
-
-## 在 React 中使用 [#在-react-中使用]
-
-在页面中引入 `GraphView` 组件。
-
-```tsx
-import GraphView from './GraphView';
-
-export default function App() {
-  return <GraphView />;
-}
-```
-
-<span id="准备两组数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="react响应数据依赖变化" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-### 定义 GraphView [#定义-graphview]
-
-将下面的代码保存为 `GraphView.tsx`。组件挂载后创建图，切换数据时调用 `setData()`，卸载时销毁实例。
-
-```tsx
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
-import { Graph, type GraphData } from '@antv/g6-lite';
-
-const basicData: GraphData = {
-  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-  edges: [
-    { source: 'Alice', target: 'Bob' },
-    { source: 'Alice', target: 'Carol' },
-  ],
-};
-
-const expandedData: GraphData = {
-  nodes: [...basicData.nodes, { id: 'David' }],
-  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
-};
-
-const fitView = { padding: 32 };
-
-export default function GraphView() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const graphRef = useRef<Graph | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const graph = new Graph({
-      container: containerRef.current,
-      data: basicData,
-      layout: { type: 'circular', radius: 120 },
-      node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
-      edge: { style: { endArrow: true } },
-      autoFit: fitView,
-      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-    });
-
-    graph.render().then(() => {
-      if (graph.destroyed) return;
-      graphRef.current = graph;
-      setReady(true);
-    }).catch((error) => {
-      if (!graph.destroyed) {
-        graph.destroy();
-        console.error(error);
-      }
-    });
-
-    return () => {
-      graphRef.current = null;
-      graph.destroy();
-    };
-  }, []);
-
-  async function changeData(data: GraphData) {
-    const graph = graphRef.current;
-    if (!graph) return;
-    try {
-      await graph.setData(data, { fitView });
-    } catch (error) {
-      if (!graph.destroyed) console.error(error);
-    }
-  }
-
-  return (
-    <div>
-      <select
-        aria-label="关系图数据"
-        defaultValue="basic"
-        disabled={!ready}
-        onChange={(event) => void changeData(event.target.value === 'expanded' ? expandedData : basicData)}
-      >
-        <option value="basic">基础关系</option>
-        <option value="expanded">扩展关系</option>
-      </select>
-      <div ref={containerRef} style={{ width: '100%', height: 360 }} />
-    </div>
-  );
-}
-```
-
-## 运行效果 [#数据变化时更新图]
-
-选择「扩展关系」会添加 David 节点和 Bob → David 连线。切回「基础关系」即可恢复。
-
-<QuickStartExample locale="zh" variant="framework-data" />
-
-<span id="在-vue-中使用" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="vue用-watch-同步数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-
-# Vue 接入 (/docs/getting-started/vue)
-
-
-
-
-
-## 在 Vue 中使用 [#在-vue-中使用]
-
-在页面中引入 `GraphView` 组件。
-
-```vue
-<script setup lang="ts">
-import GraphView from './GraphView.vue';
-</script>
-
-<template>
-  <GraphView />
-</template>
-```
-
-<span id="准备两组数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-<span id="vue用-watch-同步数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
-
-### 定义 GraphView [#定义-graphview]
-
-将下面的代码保存为 `GraphView.vue`。组件挂载后创建图，切换数据时调用 `setData()`，卸载时销毁实例。
-
-```vue
-<script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { Graph, type GraphData } from '@antv/g6-lite';
-
-const basicData: GraphData = {
-  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
-  edges: [
-    { source: 'Alice', target: 'Bob' },
-    { source: 'Alice', target: 'Carol' },
-  ],
-};
-
-const expandedData: GraphData = {
-  nodes: [...basicData.nodes, { id: 'David' }],
-  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
-};
-
-const fitView = { padding: 32 };
-const containerRef = ref<HTMLDivElement | null>(null);
-const ready = ref(false);
-let graph: Graph | undefined;
-
-onMounted(async () => {
-  if (!containerRef.value) return;
-
-  const instance = new Graph({
-    container: containerRef.value,
-    data: basicData,
-    layout: { type: 'circular', radius: 120 },
-    node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
-    edge: { style: { endArrow: true } },
-    autoFit: fitView,
-    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
-  });
-  graph = instance;
-
-  try {
-    await instance.render();
-    if (!instance.destroyed) ready.value = true;
-  } catch (error) {
-    if (!instance.destroyed) {
-      instance.destroy();
-      console.error(error);
-    }
-  }
-});
-
-onBeforeUnmount(() => graph?.destroy());
-
-async function changeData(event: Event) {
-  const instance = graph;
-  if (!ready.value || !instance || instance.destroyed) return;
-
-  const { value } = event.target as HTMLSelectElement;
-  const data = value === 'expanded' ? expandedData : basicData;
-  try {
-    await instance.setData(data, { fitView });
-  } catch (error) {
-    if (!instance.destroyed) console.error(error);
-  }
-}
-</script>
-
-<template>
-  <div>
-    <select aria-label="关系图数据" :disabled="!ready" @change="changeData">
-      <option value="basic">基础关系</option>
-      <option value="expanded">扩展关系</option>
-    </select>
-    <div ref="containerRef" style="width: 100%; height: 360px" />
-  </div>
-</template>
-```
-
-## 运行效果 [#数据变化时更新图]
-
-选择「扩展关系」会添加 David 节点和 Bob → David 连线。切回「基础关系」即可恢复。
-
-<QuickStartExample locale="zh" variant="framework-data" />
-
-
-# 图总览 (/docs/graph/overview)
-
-
-
-
-
-## 什么是 Graph [#什么是-graph]
-
-图由表示对象的节点和表示关系的边组成。G6Lite 的 `Graph` 实例把这些数据绘制到容器中，并提供查询元素、调整视口和监听交互的方法。
-
-一个图实例通常经历以下步骤。
-
-1. **创建。** 用 `new Graph(options)` 绑定容器并初始化渲染资源。
-2. **渲染。** 调用并等待 `graph.render()`，完成首次布局和绘制。
-3. **更新。** 复用同一个实例，用 `setData()` 更新图数据，用 `updateOptions()` 更新支持的配置。
-4. **销毁。** 页面离开或组件卸载时调用 `graph.destroy()`，释放画布和监听器等资源。
-
-<span id="使用图实例" />
-
-## 使用 G6Lite Graph [#使用-g6lite-graph]
-
-按[快速上手](/docs/getting-started/quick-start)安装 `@antv/g6-lite`。先在页面上准备一个已挂载、宽高非零的容器，再创建实例并渲染。
-
-```html
-<div id="container" style="width: 100%; height: 320px"></div>
-```
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-const graph = new Graph({
-  container: '#container',
-  data: {
-    nodes: [
-      { id: 'browser', x: 0, y: 0 },
-      { id: 'api', x: 120, y: 0 },
-    ],
-    edges: [{ source: 'browser', target: 'api' }],
-  },
-});
-
-await graph.render();
-```
-
-首次渲染完成后，就可以定位节点或更新数据。调用时序和资源清理见 [Graph 生命周期 API](/docs/api/graph#graph-lifecycle)。
-
-<span id="容器与配置" />
-
-## 图配置项 [#图配置项]
-
-`GraphOptions` 是传给构造函数的配置对象。完整类型和字段细节见 [GraphOptions API](/docs/api/options#graphoptions)。
-
-| 配置项          | 类型                                    | 默认值       | 用途                           |
-| ------------ | ------------------------------------- | --------- | ---------------------------- |
-| `container`  | `string \| HTMLElement`               | 必填        | 指定挂载容器。字符串使用 CSS 选择器。        |
-| `data`       | `GraphData`                           | 必填        | 提供节点、边和可选的 Combo 分组。         |
-| `autoFit`    | `boolean \| number \| FitViewOptions` | `false`   | 控制容器尺寸变化时是否重新适配视图。首次渲染会自动适配。 |
-| `node`       | `NodeConfig`                          | 圆形节点      | 配置节点形状、样式和状态。                |
-| `edge`       | `EdgeConfig`                          | 直线边       | 配置线型、箭头和状态。                  |
-| `combo`      | `ComboConfig`                         | 内置样式      | 配置分组外观、标签和折叠形态。              |
-| `label`      | `LabelOptions`                        | 内置策略      | 控制标签的缩放和可见性。                 |
-| `layout`     | `LayoutConfig`                        | 使用数据坐标    | 指定布局算法及参数，由布局计算节点位置。         |
-| `behaviors`  | `BehaviorOption[]`                    | 缩放、拖动画布   | 配置缩放、拖拽、选择等交互。               |
-| `theme`      | `ThemeOption`                         | `'light'` | 设置画布和元素的默认样式。                |
-| `transforms` | `TransformOption[]`                   | 无         | 按顺序处理布局前的输入数据。               |
-| `plugins`    | `PluginOption[]`                      | 无         | 挂载已注册的插件。                    |
-
-画布初始宽高由容器决定。适配方式和运行时尺寸调整见[视口与坐标](/docs/guides/viewport)。
-
-## 图属性 [#图属性]
-
-| 属性                                                             | 类型        | 说明                                      |
-| -------------------------------------------------------------- | --------- | --------------------------------------- |
-| [`graph.destroyed`](/docs/api/graph#graph-lifecycle-destroyed) | `boolean` | 只读。开始销毁后变为 `true`，可在异步数据返回后用它判断实例是否仍可用。 |
-
-需要等待首次渲染时，使用 `await graph.render()`。
-
-## 参考示例 [#参考示例]
-
-### 完整的创建和配置示例 [#完整的创建和配置示例]
-
-示例用 Dagre 将调用关系从左到右排列，将 Cache 和 Database 放进同一个 Combo。可以点击节点查看选中样式，也可以拖动或缩放画布。
-
-
-
-```ts
-import { Graph } from '@antv/g6-lite';
-
-export async function run(container: HTMLElement) {
-  const graph = new Graph({
-    container,
-    data: {
-      nodes: [
-        { id: 'web', name: 'Browser' },
-        { id: 'api', name: 'API' },
-        { id: 'cache', name: 'Cache', comboId: 'storage' },
-        { id: 'db', name: 'Database', comboId: 'storage' },
-      ],
-      edges: [
-        { source: 'web', target: 'api', data: { protocol: 'HTTPS' } },
-        { source: 'api', target: 'cache', data: { protocol: 'GET' } },
-        { source: 'api', target: 'db', data: { protocol: 'SQL' } },
-      ],
-      combos: [{ id: 'storage' }],
-    },
-    // #region element-options
-    node: {
-      type: 'rect',
-      style: {
-        width: 96,
-        height: 38,
-        borderRadius: 8,
-        fill: '#eef2ff',
-        stroke: '#6366f1',
-        strokeWidth: 1,
-        label: (node) => node.name ?? node.id,
-        labelPlacement: 'center',
-        labelColor: '#1e293b',
-      },
-      stateStyles: { selected: { stroke: '#4338ca', strokeWidth: 3 } },
-    },
-    edge: {
-      style: {
-        stroke: '#64748b',
-        endArrow: true,
-        label: (_source, _target, edge) => String(edge.data?.protocol ?? ''),
-        labelColor: '#334155',
-        labelBackground: '#fff',
-        labelBackgroundPadding: 4,
-      },
-    },
-    combo: {
-      style: {
-        label: 'Storage',
-        labelPlacement: 'top',
-        labelColor: '#065f46',
-        padding: 20,
-        borderRadius: 12,
-        fill: 'rgba(16,185,129,0.08)',
-        stroke: '#6ee7b7',
-      },
-    },
-    // #endregion element-options
-    layout: { type: 'dagre', rankdir: 'LR', ranksep: 84, nodesep: 16, nodeSize: 96 },
-    label: { hideOnLowZoom: false, scaleWithZoom: false },
-    behaviors: ['click-select', 'drag-canvas', 'zoom-canvas'],
-    autoFit: { padding: 36 },
-  });
-  try {
-    await graph.render();
-    return graph;
-  } catch (error) {
-    graph.destroy();
-    throw error;
-  }
-}
-```
-
-
-
-
 # 最简关系图 (/docs/examples/basic)
 
 
@@ -11697,72 +11066,635 @@ export async function run(container: string | HTMLElement) {
 - [视口指南](/docs/guides/viewport)
 - [视口方法](/docs/api/graph#graph-viewport)
 
-# 性能对比 (/docs/metrics/performance)
+# 快速上手 (/docs/getting-started/quick-start)
 
 
 
-本页比较 G6Lite、G6、Sigma.js 和 ECharts 的 Graph 系列。首绘使用同一份预置坐标数据，包体积使用同一种构建方式。2026-11-13 的对比测试使用 G6Lite 本地开发构建，当时的版本字段为 `0.1.0`；它不是后来发布到 npm 的正式包。
 
-原始记录未保存该开发构建的源码提交号或包完整性标识，因此这些结果仅对应当时的构建。正式包的首绘性能需要单独复测；下方 [CDN 文件体积](#umd-size)已按 npm 正式发布包重新测量。
 
-<span id="常用图库选型对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+选择包管理器或 CDN 接入。下面的包管理器和 ESM CDN 完整示例都用 6 个节点和 7 条边创建同一张团队协作图。
 
-<span id="当前公开口径" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+* [包管理器](#包管理器)适合使用 Vite、Webpack 等构建工具的项目。安装后从 `@antv/g6-lite` 导入 `Graph`。
+* [CDN](#cdn)适合直接在 HTML 中使用。可通过 ES 模块导入 `Graph`，也可加载 [UMD 脚本](#cdn-umd)后使用 `G6Lite.Graph`。
 
-## 首绘耗时 [#render-time]
+## 包管理器 [#包管理器]
 
-表中是从创建图到渲染 API 完成后再经过两帧的中位耗时，单位为毫秒。本轮使用无头 Chromium，WebGL 由 SwiftShader 软件渲染。
+### 安装 [#安装]
 
-| npm 包                               | 渲染器       | 1,000 节点 / 3,000 边（ms） | 5,000 节点 / 15,000 边（ms） |
-| ----------------------------------- | --------- | ---------------------: | ----------------------: |
-| `@antv/g6-lite` 开发构建（`0.1.0`）       | WebGL     |                  134.1 |                   146.1 |
-| `@antv/g6@5.1.1`                    | Canvas 2D |                  297.4 |                 1,502.2 |
-| `sigma@4.0.4` + `graphology@0.26.0` | WebGL 2   |                  466.1 |                   748.4 |
-| `echarts@6.1.0`                     | Canvas 2D |                   56.6 |                   236.3 |
+在使用 Vite、Webpack 等构建工具的项目中，选择一种包管理器安装：
 
-<span id="环境要求" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+<div className="quick-start-install">
+  ```bash
+  # npm
+  npm install @antv/g6-lite@0.1.0
+  ```
 
-<span id="如何进行数值对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+  ```bash
+  # pnpm
+  pnpm add @antv/g6-lite@0.1.0
+  ```
 
-### 测试条件 [#benchmark-method]
+  ```bash
+  # Yarn
+  yarn add @antv/g6-lite@0.1.0
+  ```
+</div>
 
-* Apple M3 Pro，macOS（Darwin 25.2.0），无头 Chromium 151.0.7922.34。画布 900 × 600 CSS 像素，DPR 1。WebGL 渲染器为 `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`。
-* 数据使用相同节点、边和固定坐标，绘制圆形节点与直线边，关闭标签和动画，不运行布局。每个规模下，每个库预热 3 次后交错测量 20 次，测完销毁实例。
-* 库在计时前已加载。计时包含图实例和内部模型的创建、首次渲染与两次帧回调。Sigma.js 包含 Graphology 建图。该指标反映本场景的首绘等待，GPU 执行时间、布局和交互需分别测量。 [下载原始样本](/benchmarks/graph-performance.json)
+### 创建关系图 [#创建关系图]
 
-本轮结果只适用于上述测试环境，不代表最低浏览器版本认证。各浏览器的能力版本参考与尚未覆盖的验收范围见[最低浏览器版本](/docs/compatibility/browser#最低浏览器版本)。
+安装后，在页面中添加一个有明确宽高的容器：
 
-## 浏览器包体积 [#bundle-size]
+```html
+<div id="container" style="width: 100%; height: 360px"></div>
+```
 
-使用 esbuild 0.21.5 将各库的 npm 入口和依赖打包为单个浏览器脚本，并进行代码压缩。G6Lite 测量默认入口，可选布局按需引入。ECharts 只引入 GraphChart 和 CanvasRenderer，Sigma.js 包含 Graphology。体积以 KiB 计，不含 source map。
+然后在 JavaScript 或 TypeScript 入口中创建关系图。容器需要先挂载到页面，`await` 应在 ES 模块或 `async` 函数中使用。
 
-| npm 包                               | 代码压缩后（KiB） | gzip -9（KiB） |
-| ----------------------------------- | ---------: | -----------: |
-| `@antv/g6-lite` 开发构建（`0.1.0`）       |      511.3 |        159.5 |
-| `@antv/g6@5.1.1`                    |    1,435.3 |        413.4 |
-| `sigma@4.0.4` + `graphology@0.26.0` |      438.4 |        110.7 |
-| `echarts@6.1.0`                     |      386.3 |        130.2 |
+```ts
+import { Graph } from '@antv/g6-lite';
 
-### G6Lite CDN 文件体积 [#umd-size]
+const data = {
+  nodes: [
+    { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
+    { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
+    { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
+    { id: 'David', data: { color: '#61DDAA', size: 40 } },
+    { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
+    { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
+  ],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+    { source: 'David', target: 'Eva' },
+    { source: 'David', target: 'Frank' },
+    { source: 'Alice', target: 'David' },
+    { source: 'Bob', target: 'Eva' },
+    { source: 'Carol', target: 'Frank' },
+  ],
+};
 
-以下文件来自 npm 正式发布的 `@antv/g6-lite@0.1.0`，于 2026-11-24 重新下载并使用 `gzip -9` 分别测量，1 kB = 1,000 字节。首页展示默认脚本的同次测量值。这些文件是现成的 UMD 产物，与上方 esbuild 重新打包的体积采用不同口径。
+const graph = new Graph({
+  container: '#container',
+  data,
+  node: {
+    style: {
+      size: (node) => Number(node.data?.size ?? 26),
+      fill: (node) => String(node.data?.color ?? '#5B8FF9'),
+      stroke: '#fff',
+      strokeWidth: 2,
+      label: (node) => node.id,
+      labelPlacement: 'bottom',
+      labelColor: '#334155',
+    },
+  },
+  edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
+  layout: {
+    type: 'd3-force',
+    linkDistance: 100,
+    nodeStrength: -400,
+    collide: { radius: 32 },
+  },
+  behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+});
 
-| 发布文件                     | 内容                | gzip -9（kB） |
-| ------------------------ | ----------------- | ----------: |
-| `g6-lite.min.js`         | 默认脚本，包含渲染、交互和内置布局 |       150.3 |
-| `g6-lite-layouts.min.js` | 六种可选布局，使用时额外加载    |        29.1 |
+try {
+  await graph.render();
+  graph.fitView({ padding: 48 });
+} catch (error) {
+  graph.destroy();
+  throw error;
+}
+```
 
-需要使用可选布局时，加载附加脚本后注册对应的布局。 [可选布局用法](/docs/guides/layout-overview#optional-layouts)
+包中已包含 TypeScript 类型。
 
-## 业务图怎么测 [#performance-tuning]
+移除容器或卸载组件前，调用 `graph.destroy()` 释放资源。
 
-用真实数据和目标设备分别记录布局、首绘和交互。首屏慢先拆开布局与绘制，再评估 Worker。更新卡顿时，复用图实例，通过增量 API 更新数据或状态。缩放掉帧时，逐项对比标签、装饰和视口尺寸。反复挂载后检查销毁与监听清理。 [Worker 布局](/docs/guides/layout-worker) · [数据写入](/docs/api/graph#graph-data-mutations) · [标签策略](/docs/api/options#options-label)
+## CDN [#cdn]
 
-**相关可运行示例**
+ESM CDN 通过模块脚本导入 `Graph`，并加载所选布局。使用普通 `<script>` 标签时，见下方的 [UMD 接入](#cdn-umd)。
 
-* [200 节点](/docs/examples/large)
-* [5000 节点与标签](/docs/examples/large-labeled)
-* [AI Papers 大规模关系图](/docs/examples/real-dataset)
+```js
+import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
+```
+
+### 创建关系图 [#创建关系图-1]
+
+将下面的 HTML 保存为 `index.html`，用浏览器打开。
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>G6Lite 团队协作关系图</title>
+  </head>
+  <body>
+    <div id="container" style="height: 360px"></div>
+    <script type="module">
+      import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
+
+      const data = {
+        nodes: [
+          { id: 'Alice', data: { color: '#5B8FF9', size: 40 } },
+          { id: 'Bob', data: { color: '#5B8FF9', size: 28 } },
+          { id: 'Carol', data: { color: '#5B8FF9', size: 28 } },
+          { id: 'David', data: { color: '#61DDAA', size: 40 } },
+          { id: 'Eva', data: { color: '#61DDAA', size: 28 } },
+          { id: 'Frank', data: { color: '#61DDAA', size: 28 } },
+        ],
+        edges: [
+          { source: 'Alice', target: 'Bob' },
+          { source: 'Alice', target: 'Carol' },
+          { source: 'David', target: 'Eva' },
+          { source: 'David', target: 'Frank' },
+          { source: 'Alice', target: 'David' },
+          { source: 'Bob', target: 'Eva' },
+          { source: 'Carol', target: 'Frank' },
+        ],
+      };
+
+      const graph = new Graph({
+        container: '#container',
+        data,
+        node: {
+          style: {
+            size: (node) => Number(node.data?.size ?? 26),
+            fill: (node) => String(node.data?.color ?? '#5B8FF9'),
+            stroke: '#fff',
+            strokeWidth: 2,
+            label: (node) => node.id,
+            labelPlacement: 'bottom',
+            labelColor: '#334155',
+          },
+        },
+        edge: { style: { stroke: '#CBD5E1', lineWidth: 1.5 } },
+        layout: {
+          type: 'd3-force',
+          linkDistance: 100,
+          nodeStrength: -400,
+          collide: { radius: 32 },
+        },
+        behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+      });
+
+      graph.render().then(() => {
+        graph.fitView({ padding: 48 });
+      }).catch((error) => {
+        graph.destroy();
+        console.error(error);
+      });
+      window.addEventListener('pagehide', () => graph.destroy(), { once: true });
+    </script>
+  </body>
+</html>
+```
+
+### 使用 UMD 脚本 [#cdn-umd]
+
+UMD 主脚本包含运行依赖和内置布局，加载后通过 `G6Lite.Graph` 创建图。下面的最小示例绘制两个节点和一条边：
+
+```html
+<div id="container" style="width: 100%; height: 360px"></div>
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
+<script>
+  const graph = new G6Lite.Graph({
+    container: '#container',
+    data: {
+      nodes: [{ id: 'Alice' }, { id: 'Bob' }],
+      edges: [{ source: 'Alice', target: 'Bob' }],
+    },
+    layout: { type: 'circular', radius: 80 },
+    node: { style: { label: (node) => node.id } },
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
+  });
+  graph.render().catch((error) => {
+    graph.destroy();
+    console.error(error);
+  });
+  window.addEventListener('pagehide', () => graph.destroy(), { once: true });
+</script>
+```
+
+ESM 接入支持通过构建工具按需加载布局；UMD 主脚本已内联内置布局。两种接入方式使用可选布局时都需要[先导入并注册](/docs/guides/layout-overview#optional-layouts)。布局的 Worker 部署要求见 [Worker 指南](/docs/guides/layout-worker)。
+
+上面的独立 HTML 示例在 `pagehide` 时销毁图实例。浏览器从往返缓存恢复页面时，需要重新创建实例。
+
+<span id="验证效果与清理" style="{ scrollMarginTop: '8rem' }" />
+
+## 运行效果 [#运行效果]
+
+包管理器和 ESM CDN 完整示例会生成下方的团队协作图，包含 6 个带标签的节点和 7 条边。拖动空白处可平移画布。
+
+<QuickStartExample locale="zh" variant="network" />
+
+图没有显示时，检查容器宽高、浏览器 WebGL 和控制台错误。
+
+## 在前端框架中使用 [#在前端框架中使用]
+
+在 React / Vue 中，通过 ref 获取真实 DOM，在客户端挂载后创建实例，并在组件卸载时调用 `graph.destroy()` 释放资源。
+
+<Cards>
+  <Card title="在 React 中使用" href="/docs/getting-started/react#在-react-中使用">
+    在 effect 中挂载关系图，更新数据，并处理组件卸载。
+  </Card>
+
+  <Card title="在 Vue 中使用" href="/docs/getting-started/vue">
+    通过模板 ref 和生命周期钩子管理图实例。
+  </Card>
+</Cards>
+
+
+# React 接入 (/docs/getting-started/react)
+
+
+
+
+
+## 在 React 中使用 [#在-react-中使用]
+
+在页面中引入 `GraphView` 组件。
+
+```tsx
+import GraphView from './GraphView';
+
+export default function App() {
+  return <GraphView />;
+}
+```
+
+<span id="准备两组数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="react响应数据依赖变化" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### 定义 GraphView [#定义-graphview]
+
+将下面的代码保存为 `GraphView.tsx`。组件挂载后创建图，切换数据时调用 `setData()`，卸载时销毁实例。
+
+```tsx
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+
+const fitView = { padding: 32 };
+
+export default function GraphView() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const graphRef = useRef<Graph | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const graph = new Graph({
+      container: containerRef.current,
+      data: basicData,
+      layout: { type: 'circular', radius: 120 },
+      node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
+      edge: { style: { endArrow: true } },
+      autoFit: fitView,
+      behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+    });
+
+    graph.render().then(() => {
+      if (graph.destroyed) return;
+      graphRef.current = graph;
+      setReady(true);
+    }).catch((error) => {
+      if (!graph.destroyed) {
+        graph.destroy();
+        console.error(error);
+      }
+    });
+
+    return () => {
+      graphRef.current = null;
+      graph.destroy();
+    };
+  }, []);
+
+  async function changeData(data: GraphData) {
+    const graph = graphRef.current;
+    if (!graph) return;
+    try {
+      await graph.setData(data, { fitView });
+    } catch (error) {
+      if (!graph.destroyed) console.error(error);
+    }
+  }
+
+  return (
+    <div>
+      <select
+        aria-label="关系图数据"
+        defaultValue="basic"
+        disabled={!ready}
+        onChange={(event) => void changeData(event.target.value === 'expanded' ? expandedData : basicData)}
+      >
+        <option value="basic">基础关系</option>
+        <option value="expanded">扩展关系</option>
+      </select>
+      <div ref={containerRef} style={{ width: '100%', height: 360 }} />
+    </div>
+  );
+}
+```
+
+## 运行效果 [#数据变化时更新图]
+
+选择「扩展关系」会添加 David 节点和 Bob → David 连线。切回「基础关系」即可恢复。
+
+<QuickStartExample locale="zh" variant="framework-data" />
+
+<span id="在-vue-中使用" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="vue用-watch-同步数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+
+# Vue 接入 (/docs/getting-started/vue)
+
+
+
+
+
+## 在 Vue 中使用 [#在-vue-中使用]
+
+在页面中引入 `GraphView` 组件。
+
+```vue
+<script setup lang="ts">
+import GraphView from './GraphView.vue';
+</script>
+
+<template>
+  <GraphView />
+</template>
+```
+
+<span id="准备两组数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="vue用-watch-同步数据" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### 定义 GraphView [#定义-graphview]
+
+将下面的代码保存为 `GraphView.vue`。组件挂载后创建图，切换数据时调用 `setData()`，卸载时销毁实例。
+
+```vue
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { Graph, type GraphData } from '@antv/g6-lite';
+
+const basicData: GraphData = {
+  nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
+  edges: [
+    { source: 'Alice', target: 'Bob' },
+    { source: 'Alice', target: 'Carol' },
+  ],
+};
+
+const expandedData: GraphData = {
+  nodes: [...basicData.nodes, { id: 'David' }],
+  edges: [...basicData.edges, { source: 'Bob', target: 'David' }],
+};
+
+const fitView = { padding: 32 };
+const containerRef = ref<HTMLDivElement | null>(null);
+const ready = ref(false);
+let graph: Graph | undefined;
+
+onMounted(async () => {
+  if (!containerRef.value) return;
+
+  const instance = new Graph({
+    container: containerRef.value,
+    data: basicData,
+    layout: { type: 'circular', radius: 120 },
+    node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
+    edge: { style: { endArrow: true } },
+    autoFit: fitView,
+    behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
+  });
+  graph = instance;
+
+  try {
+    await instance.render();
+    if (!instance.destroyed) ready.value = true;
+  } catch (error) {
+    if (!instance.destroyed) {
+      instance.destroy();
+      console.error(error);
+    }
+  }
+});
+
+onBeforeUnmount(() => graph?.destroy());
+
+async function changeData(event: Event) {
+  const instance = graph;
+  if (!ready.value || !instance || instance.destroyed) return;
+
+  const { value } = event.target as HTMLSelectElement;
+  const data = value === 'expanded' ? expandedData : basicData;
+  try {
+    await instance.setData(data, { fitView });
+  } catch (error) {
+    if (!instance.destroyed) console.error(error);
+  }
+}
+</script>
+
+<template>
+  <div>
+    <select aria-label="关系图数据" :disabled="!ready" @change="changeData">
+      <option value="basic">基础关系</option>
+      <option value="expanded">扩展关系</option>
+    </select>
+    <div ref="containerRef" style="width: 100%; height: 360px" />
+  </div>
+</template>
+```
+
+## 运行效果 [#数据变化时更新图]
+
+选择「扩展关系」会添加 David 节点和 Bob → David 连线。切回「基础关系」即可恢复。
+
+<QuickStartExample locale="zh" variant="framework-data" />
+
+
+# 图总览 (/docs/graph/overview)
+
+
+
+
+
+## 什么是 Graph [#什么是-graph]
+
+图由表示对象的节点和表示关系的边组成。G6Lite 的 `Graph` 实例把这些数据绘制到容器中，并提供查询元素、调整视口和监听交互的方法。
+
+一个图实例通常经历以下步骤。
+
+1. **创建。** 用 `new Graph(options)` 绑定容器并初始化渲染资源。
+2. **渲染。** 调用并等待 `graph.render()`，完成首次布局和绘制。
+3. **更新。** 复用同一个实例，用 `setData()` 更新图数据，用 `updateOptions()` 更新支持的配置。
+4. **销毁。** 页面离开或组件卸载时调用 `graph.destroy()`，释放画布和监听器等资源。
+
+<span id="使用图实例" />
+
+## 使用 G6Lite Graph [#使用-g6lite-graph]
+
+按[快速上手](/docs/getting-started/quick-start)安装 `@antv/g6-lite`。先在页面上准备一个已挂载、宽高非零的容器，再创建实例并渲染。
+
+```html
+<div id="container" style="width: 100%; height: 320px"></div>
+```
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+const graph = new Graph({
+  container: '#container',
+  data: {
+    nodes: [
+      { id: 'browser', x: 0, y: 0 },
+      { id: 'api', x: 120, y: 0 },
+    ],
+    edges: [{ source: 'browser', target: 'api' }],
+  },
+});
+
+await graph.render();
+```
+
+首次渲染完成后，就可以定位节点或更新数据。调用时序和资源清理见 [Graph 生命周期 API](/docs/api/graph#graph-lifecycle)。
+
+<span id="容器与配置" />
+
+## 图配置项 [#图配置项]
+
+`GraphOptions` 是传给构造函数的配置对象。完整类型和字段细节见 [GraphOptions API](/docs/api/options#graphoptions)。
+
+| 配置项          | 类型                                    | 默认值       | 用途                           |
+| ------------ | ------------------------------------- | --------- | ---------------------------- |
+| `container`  | `string \| HTMLElement`               | 必填        | 指定挂载容器。字符串使用 CSS 选择器。        |
+| `data`       | `GraphData`                           | 必填        | 提供节点、边和可选的 Combo 分组。         |
+| `autoFit`    | `boolean \| number \| FitViewOptions` | `false`   | 控制容器尺寸变化时是否重新适配视图。首次渲染会自动适配。 |
+| `node`       | `NodeConfig`                          | 圆形节点      | 配置节点形状、样式和状态。                |
+| `edge`       | `EdgeConfig`                          | 直线边       | 配置线型、箭头和状态。                  |
+| `combo`      | `ComboConfig`                         | 内置样式      | 配置分组外观、标签和折叠形态。              |
+| `label`      | `LabelOptions`                        | 内置策略      | 控制标签的缩放和可见性。                 |
+| `layout`     | `LayoutConfig`                        | 使用数据坐标    | 指定布局算法及参数，由布局计算节点位置。         |
+| `behaviors`  | `BehaviorOption[]`                    | 缩放、拖动画布   | 配置缩放、拖拽、选择等交互。               |
+| `theme`      | `ThemeOption`                         | `'light'` | 设置画布和元素的默认样式。                |
+| `transforms` | `TransformOption[]`                   | 无         | 按顺序处理布局前的输入数据。               |
+| `plugins`    | `PluginOption[]`                      | 无         | 挂载已注册的插件。                    |
+
+画布初始宽高由容器决定。适配方式和运行时尺寸调整见[视口与坐标](/docs/guides/viewport)。
+
+## 图属性 [#图属性]
+
+| 属性                                                             | 类型        | 说明                                      |
+| -------------------------------------------------------------- | --------- | --------------------------------------- |
+| [`graph.destroyed`](/docs/api/graph#graph-lifecycle-destroyed) | `boolean` | 只读。开始销毁后变为 `true`，可在异步数据返回后用它判断实例是否仍可用。 |
+
+需要等待首次渲染时，使用 `await graph.render()`。
+
+## 参考示例 [#参考示例]
+
+### 完整的创建和配置示例 [#完整的创建和配置示例]
+
+示例用 Dagre 将调用关系从左到右排列，将 Cache 和 Database 放进同一个 Combo。可以点击节点查看选中样式，也可以拖动或缩放画布。
+
+
+
+```ts
+import { Graph } from '@antv/g6-lite';
+
+export async function run(container: HTMLElement) {
+  const graph = new Graph({
+    container,
+    data: {
+      nodes: [
+        { id: 'web', name: 'Browser' },
+        { id: 'api', name: 'API' },
+        { id: 'cache', name: 'Cache', comboId: 'storage' },
+        { id: 'db', name: 'Database', comboId: 'storage' },
+      ],
+      edges: [
+        { source: 'web', target: 'api', data: { protocol: 'HTTPS' } },
+        { source: 'api', target: 'cache', data: { protocol: 'GET' } },
+        { source: 'api', target: 'db', data: { protocol: 'SQL' } },
+      ],
+      combos: [{ id: 'storage' }],
+    },
+    // #region element-options
+    node: {
+      type: 'rect',
+      style: {
+        width: 96,
+        height: 38,
+        borderRadius: 8,
+        fill: '#eef2ff',
+        stroke: '#6366f1',
+        strokeWidth: 1,
+        label: (node) => node.name ?? node.id,
+        labelPlacement: 'center',
+        labelColor: '#1e293b',
+      },
+      stateStyles: { selected: { stroke: '#4338ca', strokeWidth: 3 } },
+    },
+    edge: {
+      style: {
+        stroke: '#64748b',
+        endArrow: true,
+        label: (_source, _target, edge) => String(edge.data?.protocol ?? ''),
+        labelColor: '#334155',
+        labelBackground: '#fff',
+        labelBackgroundPadding: 4,
+      },
+    },
+    combo: {
+      style: {
+        label: 'Storage',
+        labelPlacement: 'top',
+        labelColor: '#065f46',
+        padding: 20,
+        borderRadius: 12,
+        fill: 'rgba(16,185,129,0.08)',
+        stroke: '#6ee7b7',
+      },
+    },
+    // #endregion element-options
+    layout: { type: 'dagre', rankdir: 'LR', ranksep: 84, nodesep: 16, nodeSize: 96 },
+    label: { hideOnLowZoom: false, scaleWithZoom: false },
+    behaviors: ['click-select', 'drag-canvas', 'zoom-canvas'],
+    autoFit: { padding: 36 },
+  });
+  try {
+    await graph.render();
+    return graph;
+  } catch (error) {
+    graph.destroy();
+    throw error;
+  }
+}
+```
+
+
 
 
 # 框选 (/docs/guides/behavior-brush-select)
@@ -24949,6 +24881,74 @@ zoomTo / zoomBy 的 minZoom、maxZoom 只约束本次方法调用；滚轮范围
 * [搜索并聚焦](/docs/examples/search-focus)
 * [视口与坐标转换](/docs/examples/viewport-controls)
 * [缩放范围与灵敏度](/docs/examples/zoom-options)
+
+
+# 性能对比 (/docs/metrics/performance)
+
+
+
+本页比较 G6Lite、G6、Sigma.js 和 ECharts 的 Graph 系列。首绘使用同一份预置坐标数据，包体积使用同一种构建方式。2026-11-13 的对比测试使用 G6Lite 本地开发构建，当时的版本字段为 `0.1.0`；它不是后来发布到 npm 的正式包。
+
+原始记录未保存该开发构建的源码提交号或包完整性标识，因此这些结果仅对应当时的构建。正式包的首绘性能需要单独复测；下方 [CDN 文件体积](#umd-size)已按 npm 正式发布包重新测量。
+
+<span id="常用图库选型对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="当前公开口径" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+## 首绘耗时 [#render-time]
+
+表中是从创建图到渲染 API 完成后再经过两帧的中位耗时，单位为毫秒。本轮使用无头 Chromium，WebGL 由 SwiftShader 软件渲染。
+
+| npm 包                               | 渲染器       | 1,000 节点 / 3,000 边（ms） | 5,000 节点 / 15,000 边（ms） |
+| ----------------------------------- | --------- | ---------------------: | ----------------------: |
+| `@antv/g6-lite` 开发构建（`0.1.0`）       | WebGL     |                  134.1 |                   146.1 |
+| `@antv/g6@5.1.1`                    | Canvas 2D |                  297.4 |                 1,502.2 |
+| `sigma@4.0.4` + `graphology@0.26.0` | WebGL 2   |                  466.1 |                   748.4 |
+| `echarts@6.1.0`                     | Canvas 2D |                   56.6 |                   236.3 |
+
+<span id="环境要求" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+<span id="如何进行数值对比" style="{ display: 'block', scrollMarginTop: '8rem' }" />
+
+### 测试条件 [#benchmark-method]
+
+* Apple M3 Pro，macOS（Darwin 25.2.0），无头 Chromium 151.0.7922.34。画布 900 × 600 CSS 像素，DPR 1。WebGL 渲染器为 `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)`。
+* 数据使用相同节点、边和固定坐标，绘制圆形节点与直线边，关闭标签和动画，不运行布局。每个规模下，每个库预热 3 次后交错测量 20 次，测完销毁实例。
+* 库在计时前已加载。计时包含图实例和内部模型的创建、首次渲染与两次帧回调。Sigma.js 包含 Graphology 建图。该指标反映本场景的首绘等待，GPU 执行时间、布局和交互需分别测量。 [下载原始样本](/benchmarks/graph-performance.json)
+
+本轮结果只适用于上述测试环境，不代表最低浏览器版本认证。各浏览器的能力版本参考与尚未覆盖的验收范围见[最低浏览器版本](/docs/compatibility/browser#最低浏览器版本)。
+
+## 浏览器包体积 [#bundle-size]
+
+使用 esbuild 0.21.5 将各库的 npm 入口和依赖打包为单个浏览器脚本，并进行代码压缩。G6Lite 测量默认入口，可选布局按需引入。ECharts 只引入 GraphChart 和 CanvasRenderer，Sigma.js 包含 Graphology。体积以 KiB 计，不含 source map。
+
+| npm 包                               | 代码压缩后（KiB） | gzip -9（KiB） |
+| ----------------------------------- | ---------: | -----------: |
+| `@antv/g6-lite` 开发构建（`0.1.0`）       |      511.3 |        159.5 |
+| `@antv/g6@5.1.1`                    |    1,435.3 |        413.4 |
+| `sigma@4.0.4` + `graphology@0.26.0` |      438.4 |        110.7 |
+| `echarts@6.1.0`                     |      386.3 |        130.2 |
+
+### G6Lite CDN 文件体积 [#umd-size]
+
+以下文件来自 npm 正式发布的 `@antv/g6-lite@0.1.0`，于 2026-11-24 重新下载并使用 `gzip -9` 分别测量，1 kB = 1,000 字节。首页展示默认脚本的同次测量值。这些文件是现成的 UMD 产物，与上方 esbuild 重新打包的体积采用不同口径。
+
+| 发布文件                     | 内容                | gzip -9（kB） |
+| ------------------------ | ----------------- | ----------: |
+| `g6-lite.min.js`         | 默认脚本，包含渲染、交互和内置布局 |       150.3 |
+| `g6-lite-layouts.min.js` | 六种可选布局，使用时额外加载    |        29.1 |
+
+需要使用可选布局时，加载附加脚本后注册对应的布局。 [可选布局用法](/docs/guides/layout-overview#optional-layouts)
+
+## 业务图怎么测 [#performance-tuning]
+
+用真实数据和目标设备分别记录布局、首绘和交互。首屏慢先拆开布局与绘制，再评估 Worker。更新卡顿时，复用图实例，通过增量 API 更新数据或状态。缩放掉帧时，逐项对比标签、装饰和视口尺寸。反复挂载后检查销毁与监听清理。 [Worker 布局](/docs/guides/layout-worker) · [数据写入](/docs/api/graph#graph-data-mutations) · [标签策略](/docs/api/options#options-label)
+
+**相关可运行示例**
+
+* [200 节点](/docs/examples/large)
+* [5000 节点与标签](/docs/examples/large-labeled)
+* [AI Papers 大规模关系图](/docs/examples/real-dataset)
 
 
 # 事件 (/docs/api/graph/events)

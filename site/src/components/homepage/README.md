@@ -30,3 +30,14 @@ Fumadocs link adapter also disables navigation prefetch on `/` and `/en`, while
 keeping the default document-to-document behavior. Route data loads on navigation
 instead of competing with the initial graph downloads. Heading fonts use disjoint
 Unicode subsets without preload; see `fonts/README.md` for regeneration details.
+
+The showcase serializes only the default relationship example and its light-theme
+source/highlighted markup. Other tabs and the dark variant load from statically
+exported `/showcase/{locale}/{id}/{theme}/data.json` files when needed. Offscreen
+examples do not fetch code, completed requests are cached, failed requests can be
+retried, and stale responses cannot replace the active tab. Source generation and
+Shiki remain server-only; live preview options load with the visible example.
+
+Shared navigation and page primitives stay in `app/global.css`. Documentation,
+example directory, and editor overrides live in `app/docs.css`, imported by the
+Chinese and English docs layouts. Unused legacy landing/terminal rules are removed.

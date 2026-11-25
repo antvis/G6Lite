@@ -125,7 +125,7 @@ export async function Homepage({ locale = 'zh' }: { locale?: Locale }) {
                   </span>
                   <span>{copy.performance.incrementalUpdates}</span>
                 </div>
-                <UpdateScenarios locale={locale} />
+                <UpdateScenarios locale={locale} copy={copy.update} />
               </div>
               <Link
                 prefetch={false}
@@ -293,7 +293,7 @@ function HeroStage({ locale }: { locale: Locale }) {
         </div>
         <div className={styles.productWindow}>
           <div className={styles.heroCanvas}>
-            <HeroLiveGraph locale={locale} />
+            <HeroLiveGraph copy={copy.graph} />
           </div>
           <p className={styles.graphAttribution}>
             {copy.graph.dataset}

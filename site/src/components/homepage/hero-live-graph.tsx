@@ -5,10 +5,9 @@ import { LoaderCircle, Minus, Plus, Scan } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import type { Camera, Graph, GraphOptions } from '../../../../src/index.ts';
-import type { Locale } from '@/lib/i18n';
 
 import styles from './homepage.module.css';
-import { homepageCopy } from './content';
+import type { HomepageGraphCopy } from './content';
 import { HERO_MAX_ZOOM, HERO_MIN_ZOOM, bindHeroGestures } from './hero-gestures';
 import { bindHeroHighlight } from './hero-highlight';
 
@@ -88,8 +87,7 @@ function visualOptions(
 }
 
 /** A single on-demand WebGL instance with a loading state and explicit retry. */
-export function HeroLiveGraph({ locale }: { locale: Locale }) {
-  const copy = homepageCopy[locale].graph;
+export function HeroLiveGraph({ copy }: { copy: HomepageGraphCopy }) {
   const { resolvedTheme } = useTheme();
   const mountRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);

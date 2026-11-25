@@ -9,12 +9,14 @@ export function CopyPrompt({
   copiedLabel,
   failedLabel,
   className,
+  disabled = false,
 }: {
   text: string;
   label: string;
   copiedLabel: string;
   failedLabel: string;
   className?: string;
+  disabled?: boolean;
 }) {
   const [status, setStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
 
@@ -31,7 +33,7 @@ export function CopyPrompt({
   const message = status === 'copied' ? copiedLabel : status === 'failed' ? failedLabel : label;
 
   return (
-    <button type="button" className={className} onClick={() => void copy()}>
+    <button type="button" className={className} disabled={disabled} onClick={() => void copy()}>
       {status === 'copied' ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
       <span>{message}</span>
     </button>

@@ -1145,6 +1145,21 @@
   scrollbar-color: #354158 transparent;
   overscroll-behavior: contain;
 }
+
+.showcaseCodeState {
+  display: grid;
+  min-height: 180px;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  color: #adb7ca;
+  font-size: 13px;
+}
+
+.showcaseCopy:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
 .showcaseSource pre {
   min-width: max-content;
   min-height: 100%;

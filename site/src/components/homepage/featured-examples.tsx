@@ -1,23 +1,16 @@
-import { codeToHtml } from 'shiki';
-
 import type { Locale } from '@/lib/i18n';
 import { ExampleShowcase } from './example-showcase';
-import { showcaseIds, showcaseSource } from './showcase-examples';
+import { createShowcaseCode } from './showcase-code.server';
+import { homepageCopy } from './content';
 
-/** Highlight the same options used by each live example, for both themes. */
+/** Only the initially selected example is serialized into the homepage. */
 export async function FeaturedExamples({ locale }: { locale: Locale }) {
-  const examples = await Promise.all(
-    showcaseIds.map(async (id) => {
-      const light = showcaseSource(id, locale);
-      const dark = showcaseSource(id, locale, true);
-      return {
-        id,
-        light,
-        dark,
-        lightHtml: await codeToHtml(light, { lang: 'ts', theme: 'github-dark' }),
-        darkHtml: await codeToHtml(dark, { lang: 'ts', theme: 'github-dark' }),
-      };
-    }),
+  const initialCode = await createShowcaseCode('relationship', locale, 'light');
+  return (
+    <ExampleShowcase
+      locale={locale}
+      copy={homepageCopy[locale].examples}
+      initialCode={initialCode}
+    />
   );
-  return <ExampleShowcase locale={locale} examples={examples} />;
 }

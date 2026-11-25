@@ -318,3 +318,7 @@ const en: typeof zh = {
 };
 
 export const homepageCopy: Record<Locale, typeof zh> = { zh, en };
+
+export type HomepageGraphCopy = (typeof zh)['graph'];
+export type HomepageShowcaseCopy = (typeof zh)['examples'];
+export type HomepageUpdateCopy = (typeof zh)['update'];

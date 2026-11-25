@@ -5,10 +5,9 @@ import { LoaderCircle, Minus, Plus, Scan } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import type { Camera, Graph, GraphOptions } from '../../../../src/index.ts';
-import type { Locale } from '@/lib/i18n';
 
 import styles from './homepage.module.css';
-import { homepageCopy } from './content';
+import type { HomepageGraphCopy } from './content';
 import { HERO_MAX_ZOOM, HERO_MIN_ZOOM, bindHeroGestures } from './hero-gestures';
 import { bindHeroHighlight } from './hero-highlight';
 
@@ -87,23 +86,8 @@ function visualOptions(
   };
 }
 
-/**
- * Narrow phones, and devices that report at most 4 GB or two CPU cores, use the
- * sampled cloud. Four cores is a normal laptop, so core count alone does not
- * replace the desktop citation network.
- */
-function prefersCompactHeroGraph(): boolean {
-  const narrow = window.matchMedia('(max-width: 767px)').matches;
-  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-  const lowMemory = typeof memory === 'number' && memory > 0 && memory <= 4;
-  const cores = navigator.hardwareConcurrency;
-  const lowCpu = typeof cores === 'number' && cores > 0 && cores <= 2;
-  return narrow || lowMemory || lowCpu;
-}
-
 /** A single on-demand WebGL instance with a loading state and explicit retry. */
-export function HeroLiveGraph({ locale }: { locale: Locale }) {
-  const copy = homepageCopy[locale].graph;
+export function HeroLiveGraph({ copy }: { copy: HomepageGraphCopy }) {
   const { resolvedTheme } = useTheme();
   const mountRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);
@@ -182,14 +166,10 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
       timeout = setTimeout(fail, 12000);
       const started = performance.now();
       try {
-        const [module, dataModule] = await Promise.all([
-          import('../../../../src/index.ts'),
-          prefersCompactHeroGraph()
-            ? import('./hero-graph-mobile.mjs')
-            : import('./hero-graph-data.mjs'),
-        ]);
+        const { loadHeroGraphResources } = await import('./hero-graph-loader');
+        const { Graph, createHeroGraph } = await loadHeroGraphResources();
         if (disposed || failed) return;
-        const data = dataModule.createHeroGraph();
+        const data = createHeroGraph();
         // Keep the original layout with twice the horizontal span on desktop.
         if (!window.matchMedia('(max-width: 767px)').matches) {
           for (const node of data.nodes) node.x *= 2;
@@ -197,7 +177,7 @@ export function HeroLiveGraph({ locale }: { locale: Locale }) {
         if (disposed || failed) return;
         const loaded = performance.now();
         const initialDark = darkRef.current;
-        const graph = new module.Graph({
+        const graph = new Graph({
           container: mount,
           data,
           // Preset coordinates: never run a force layout on the homepage.

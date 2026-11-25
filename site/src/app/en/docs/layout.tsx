@@ -5,6 +5,8 @@ import { source } from '@/lib/source';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import type { ReactNode } from 'react';
 
+import '../../docs.css';
+
 export default function Layout({ children }: { children: ReactNode }) {
   const tree = getDocsNavigationTree(source.getPageTree('en'), 'en');
 

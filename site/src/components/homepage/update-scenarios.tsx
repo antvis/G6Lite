@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import type { Locale } from '@/lib/i18n';
 import styles from './homepage.module.css';
-import { homepageCopy } from './content';
+import type { HomepageUpdateCopy } from './content';
 
 type Scenario = 'highlight' | 'position' | 'viewport';
 const scenarioIds: Scenario[] = ['highlight', 'position', 'viewport'];
@@ -40,8 +40,7 @@ const neighbors = new Set(
 );
 
 /** Mechanism illustration only: no second WebGL graph and no invented timing. */
-export function UpdateScenarios({ locale }: { locale: Locale }) {
-  const copy = homepageCopy[locale].update;
+export function UpdateScenarios({ locale, copy }: { locale: Locale; copy: HomepageUpdateCopy }) {
   const scenarios = copy.scenarios.map((item, index) => ({ ...item, id: scenarioIds[index] }));
   const [scenario, setScenario] = useState<Scenario>('highlight');
   const points = nodes.map((node, index) =>

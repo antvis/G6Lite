@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Service dependencies · G6Lite</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #f8fafc;
+        color: #0f172a;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 1100px;
+        margin: auto;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 24px;
+      }
+      .toolbar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 16px 0;
+      }
+      button {
+        padding: 8px 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: white;
+        color: #0f172a;
+        cursor: pointer;
+      }
+      button:focus-visible {
+        outline: 3px solid #2563eb;
+        outline-offset: 3px;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      #status {
+        min-height: 24px;
+      }
+      #container {
+        position: relative;
+        width: 100%;
+        height: 520px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+        box-shadow: 0 0 0 1px #e2e8f0;
+      }
+      @media (max-width: 600px) {
+        body {
+          padding: 16px;
+        }
+        #container {
+          height: 420px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Service dependencies</h1>
+      <p>
+        Drag nodes or the canvas, scroll to zoom, and hover to trace connections. Click a node to
+        select it.
+      </p>
+      <div class="toolbar">
+        <button id="fit" type="button" disabled>Fit graph</button>
+        <span id="status" role="status" aria-live="polite">Loading graph…</span>
+      </div>
+      <div
+        id="container"
+        role="img"
+        aria-label="Gateway calls API; API reads Database; Audit is independent."
+      ></div>
+    </main>
+    <script src="https://unpkg.com/@antv/g6-lite"></script>
+    <script>
+      let graph;
+      const status = document.querySelector('#status');
+      const fitButton = document.querySelector('#fit');
+      fitButton.addEventListener('click', () => graph?.fitView({ padding: 56 }));
+      window.addEventListener('pagehide', () => graph?.destroy(), { once: true });
+
+      async function main() {
+        try {
+          if (!window.G6Lite)
+            throw new Error('G6Lite did not load. Check the CDN request and script policy.');
+          graph = new window.G6Lite.Graph({
+            container: '#container',
+            data: {
+              nodes: [
+                { id: 'gateway', name: 'Gateway' },
+                { id: 'api', name: 'API' },
+                { id: 'db', name: 'Database', data: { kind: 'storage' } },
+                { id: 'audit', name: 'Audit' },
+              ],
+              edges: [
+                { id: 'gateway-api', source: 'gateway', target: 'api' },
+                { id: 'api-db', source: 'api', target: 'db' },
+              ],
+            },
+            node: {
+              style: {
+                size: 34,
+                fill: (node) => (node.data?.kind === 'storage' ? '#0f766e' : '#2563eb'),
+                stroke: '#ffffff',
+                strokeWidth: 2,
+                label: (node) => node.name ?? node.id,
+                labelPlacement: 'bottom',
+                labelOffsetY: 8,
+                labelColor: '#334155',
+                labelFontSize: 13,
+              },
+              stateStyles: {
+                selected: { stroke: '#7c3aed', strokeWidth: 3 },
+                highlight: { stroke: '#f59e0b', strokeWidth: 3 },
+                inactive: { opacity: 0.2 },
+              },
+            },
+            edge: {
+              style: { stroke: '#94a3b8', lineWidth: 1.5, endArrow: true, arrowSize: 6 },
+              stateStyles: {
+                highlight: { stroke: '#f59e0b', lineWidth: 2.5 },
+                inactive: { opacity: 0.15 },
+              },
+            },
+            layout: { type: 'dagre', rankdir: 'LR', ranksep: 120, nodesep: 64 },
+            behaviors: [
+              'zoom-canvas',
+              'drag-canvas',
+              'drag-node',
+              'click-select',
+              { type: 'hover-highlight', inactiveState: 'inactive' },
+            ],
+          });
+          graph.on('node:click', ({ nodeId }) => {
+            status.textContent = `Selected: ${nodeId}`;
+          });
+          await graph.render();
+          if (graph.destroyed) return;
+          graph.fitView({ padding: 56 });
+          fitButton.disabled = false;
+          status.textContent = '4 nodes · 2 directed connections';
+        } catch (error) {
+          graph?.destroy();
+          status.textContent = error instanceof Error ? error.message : String(error);
+          console.error(error);
+        }
+      }
+      main();
+    </script>
+  </body>
+</html>

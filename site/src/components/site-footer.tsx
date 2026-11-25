@@ -57,7 +57,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
               <i /> <span className={styles.brandName}>G6</span><sup className={styles.brandTag}>Lite</sup>
             </span>
             <p>{copy.description}</p>
-            <Link href={home}>
+            <Link prefetch={false} href={home}>
               {copy.home} <ArrowUpRight aria-hidden="true" />
             </Link>
           </div>
@@ -65,7 +65,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
             <div key={group.title}>
               <h3>{group.title}</h3>
               {group.labels.map((label, index) => (
-                <Link href={group.hrefs[index]} key={label}>
+                <Link prefetch={false} href={group.hrefs[index]} key={label}>
                   {label}
                 </Link>
               ))}

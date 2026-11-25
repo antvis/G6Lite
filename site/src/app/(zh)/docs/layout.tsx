@@ -4,6 +4,8 @@ import { baseOptions } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 
+import '../../docs.css';
+
 export default function Layout({ children }: LayoutProps<'/docs'>) {
   const tree = getDocsNavigationTree(source.getPageTree('zh'), 'zh');
 

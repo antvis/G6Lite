@@ -3,38 +3,73 @@
 import { useTheme } from 'fumadocs-ui/provider/base';
 import { ArrowUpRight, LoaderCircle, Minus, Plus, RotateCcw, Scan } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import type { Graph } from '../../../../src/index.ts';
 import { CopyPrompt } from '@/components/ai-skill/copy-prompt';
 import { localizedPath, type Locale } from '@/lib/i18n';
-import { homepageCopy } from './content';
+import type { HomepageShowcaseCopy } from './content';
 import styles from './homepage.module.css';
 import {
-  bindHomepageHighlight,
   getShowcaseOptionalLayout,
-  showcaseOptions,
+  showcaseIds,
+  type ShowcaseCode,
   type ShowcaseId,
-} from './showcase-examples';
-
-type Example = { id: ShowcaseId; light: string; dark: string; lightHtml: string; darkHtml: string };
+} from './showcase-catalog';
+import { loadShowcaseCode } from './showcase-code-loader';
 
 const layoutLoaders = {
   mindmap: () => import('@antv/g6-lite/layouts/mindmap'),
   fishbone: () => import('@antv/g6-lite/layouts/fishbone'),
 };
 
-export function ExampleShowcase({ locale, examples }: { locale: Locale; examples: Example[] }) {
-  const copy = homepageCopy[locale].examples;
+const subscribeNoop = () => () => {};
+
+export function ExampleShowcase({
+  locale,
+  copy,
+  initialCode,
+}: {
+  locale: Locale;
+  copy: HomepageShowcaseCopy;
+  initialCode: ShowcaseCode;
+}) {
   const { resolvedTheme } = useTheme();
-  const dark = resolvedTheme === 'dark';
+  // Static HTML contains the default light example. Match it during hydration
+  // even when a saved dark theme is already available in the browser.
+  const hydrated = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
+  const dark = hydrated && resolvedTheme === 'dark';
   const mountRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);
   const [active, setActive] = useState<ShowcaseId>('relationship');
   const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState<'waiting' | 'loading' | 'ready' | 'error'>('waiting');
-  const selected = examples.find((example) => example.id === active) ?? examples[0];
-  const index = examples.indexOf(selected);
+  const [visible, setVisible] = useState(false);
+  const [codes, setCodes] = useState<Record<string, ShowcaseCode>>({});
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [codeAttempt, setCodeAttempt] = useState(0);
+  const codeKey = `${locale}:${active}:${dark ? 'dark' : 'light'}`;
+  const selected = codeKey === `${locale}:relationship:light` ? initialCode : codes[codeKey];
+  const index = showcaseIds.indexOf(active);
+
+  useEffect(() => {
+    if (selected || !visible) return;
+    let disposed = false;
+    void loadShowcaseCode(locale, active, dark ? 'dark' : 'light')
+      .then((code) => {
+        if (!disposed) setCodes((current) => ({ ...current, [codeKey]: code }));
+      })
+      .catch(() => {
+        if (!disposed) setCodeError(codeKey);
+      });
+    return () => {
+      disposed = true;
+    };
+  }, [active, locale, dark, codeKey, selected, visible, codeAttempt]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -46,17 +81,18 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
       setStatus('loading');
       try {
         const layout = getShowcaseOptionalLayout(active);
-        const [{ Graph, register }, layoutModule] = await Promise.all([
+        const [{ Graph, register }, runtime, layoutModule] = await Promise.all([
           import('../../../../src/index.ts'),
+          import('./showcase-examples'),
           layout && layoutLoaders[layout](),
         ]);
         if (disposed) return;
         if (layout && layoutModule) register('layout', layout, layoutModule.default);
-        graph = new Graph({ container: mount, ...showcaseOptions(active, locale, dark) });
+        graph = new Graph({ container: mount, ...runtime.showcaseOptions(active, locale, dark) });
         graphRef.current = graph;
         await graph.render();
         if (disposed) return;
-        if (active === 'relationship') clearHighlight = bindHomepageHighlight(graph);
+        if (active === 'relationship') clearHighlight = runtime.bindHomepageHighlight(graph);
         setStatus('ready');
       } catch {
         if (disposed) return;
@@ -70,6 +106,7 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
+        setVisible(true);
         void start();
       },
       { rootMargin: '160px' },
@@ -87,6 +124,7 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
   function select(id: ShowcaseId) {
     if (id === active) return;
     setStatus('loading');
+    setCodeError(null);
     setActive(id);
   }
 
@@ -94,16 +132,16 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
     <div className={styles.showcase} id="developers">
       <div className={styles.showcaseHeader}>
         <div className={styles.showcaseTabs} role="tablist" aria-label={copy.tabs}>
-          {examples.map((example, exampleIndex) => (
+          {showcaseIds.map((id, exampleIndex) => (
             <button
               type="button"
               role="tab"
-              key={example.id}
-              id={`showcase-tab-${example.id}`}
-              aria-selected={active === example.id}
+              key={id}
+              id={`showcase-tab-${id}`}
+              aria-selected={active === id}
               aria-controls="showcase-panel"
-              tabIndex={active === example.id ? 0 : -1}
-              onClick={() => select(example.id)}
+              tabIndex={active === id ? 0 : -1}
+              onClick={() => select(id)}
               onKeyDown={(event) => {
                 const offset = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
                 if (!offset && event.key !== 'Home' && event.key !== 'End') return;
@@ -112,10 +150,10 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
                   event.key === 'Home'
                     ? 0
                     : event.key === 'End'
-                      ? examples.length - 1
-                      : (exampleIndex + offset + examples.length) % examples.length;
-                select(examples[next].id);
-                document.getElementById(`showcase-tab-${examples[next].id}`)?.focus();
+                      ? showcaseIds.length - 1
+                      : (exampleIndex + offset + showcaseIds.length) % showcaseIds.length;
+                select(showcaseIds[next]);
+                document.getElementById(`showcase-tab-${showcaseIds[next]}`)?.focus();
               }}
             >
               {copy.items[exampleIndex].title}
@@ -124,7 +162,8 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
         </div>
         <CopyPrompt
           key={`${active}-${dark}`}
-          text={dark ? selected.dark : selected.light}
+          text={selected?.source ?? ''}
+          disabled={!selected}
           label={copy.copy}
           copiedLabel={copy.copied}
           failedLabel={copy.copyFailed}
@@ -219,7 +258,13 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
             </div>
           </div>
         </div>
-        <div className={styles.showcaseCode}>
+        <div
+          className={styles.showcaseCode}
+          data-showcase-code-status={
+            selected ? 'ready' : codeError === codeKey ? 'error' : 'loading'
+          }
+          aria-busy={!selected && codeError !== codeKey}
+        >
           <div className={styles.showcaseCodeBar}>
             <span>
               <span className={styles.showcaseWindowDots} aria-hidden="true">
@@ -230,13 +275,37 @@ export function ExampleShowcase({ locale, examples }: { locale: Locale; examples
               {active}.ts
             </span>
           </div>
-          <div
-            key={`${active}-${dark}`}
-            className={styles.showcaseSource}
-            tabIndex={0}
-            aria-label={copy.codeLabel}
-            dangerouslySetInnerHTML={{ __html: dark ? selected.darkHtml : selected.lightHtml }}
-          />
+          {selected ? (
+            <div
+              key={`${active}-${dark}`}
+              className={styles.showcaseSource}
+              tabIndex={0}
+              aria-label={copy.codeLabel}
+              dangerouslySetInnerHTML={{ __html: selected.html }}
+            />
+          ) : (
+            <div className={styles.showcaseCodeState} role="status">
+              {codeError === codeKey ? (
+                <>
+                  <p>{locale === 'zh' ? '示例代码加载失败' : 'Unable to load example code'}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCodeError(null);
+                      setCodeAttempt((value) => value + 1);
+                    }}
+                  >
+                    {locale === 'zh' ? '重新加载代码' : 'Retry code'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <LoaderCircle aria-hidden="true" />
+                  {locale === 'zh' ? '正在加载代码' : 'Loading code'}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

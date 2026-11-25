@@ -13,6 +13,8 @@ for the engine. Its boundary is isolated with `Suspense`.
 The renderer reuses the preload response; graph construction and WebGL creation
 still wait for visibility and an idle callback. Failed fetches are evicted from the
 shared request cache so the existing retry button can issue a fresh request.
+The resource loader in `hero-graph-loader.ts` has no React dependency; only the
+preload component imports React, so root unit tests run without site dependencies.
 
 The `.mjs` dataset adapters retain `createHeroGraph()` for offline validation.
 

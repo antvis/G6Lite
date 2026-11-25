@@ -166,7 +166,7 @@ export function HeroLiveGraph({ copy }: { copy: HomepageGraphCopy }) {
       timeout = setTimeout(fail, 12000);
       const started = performance.now();
       try {
-        const { loadHeroGraphResources } = await import('./hero-graph-resources');
+        const { loadHeroGraphResources } = await import('./hero-graph-loader');
         const { Graph, createHeroGraph } = await loadHeroGraphResources();
         if (disposed || failed) return;
         const data = createHeroGraph();

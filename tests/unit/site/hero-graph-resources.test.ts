@@ -16,7 +16,7 @@ describe('homepage graph resource loading', () => {
     const fetchData = vi.fn().mockResolvedValue(new Response(JSON.stringify(packed)));
     vi.stubGlobal('fetch', fetchData);
     const { loadHeroGraphResources } =
-      await import('../../../site/src/components/homepage/hero-graph-resources');
+      await import('../../../site/src/components/homepage/hero-graph-loader');
     const [first, second] = await Promise.all([loadHeroGraphResources(), loadHeroGraphResources()]);
     expect(fetchData).toHaveBeenCalledTimes(1);
     const firstGraph = first.createHeroGraph();
@@ -33,7 +33,7 @@ describe('homepage graph resource loading', () => {
       .mockResolvedValueOnce(new Response(JSON.stringify(packed)));
     vi.stubGlobal('fetch', fetchData);
     const { loadHeroGraphResources } =
-      await import('../../../site/src/components/homepage/hero-graph-resources');
+      await import('../../../site/src/components/homepage/hero-graph-loader');
     await expect(loadHeroGraphResources()).rejects.toThrow('503');
     const recovered = await loadHeroGraphResources();
     expect(recovered.createHeroGraph().edges).toHaveLength(1);

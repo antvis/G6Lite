@@ -1,0 +1,25 @@
+src/layout/libraryLayout.ts
+  s_17b7895fef0302::t_8d1acf28d3f6ae 64
+src/layout/builtinLayouts.ts
+  s_17b7895fef0302::t_83f72d6dcc3a3e 9-12
+src/types.ts
+  s_17b7895fef0302::t_ae0a18ec9e974f 595-600
+src/layout/layoutWorker.ts
+  s_17b7895fef0302::t_c41c8f550f651d 47-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b80502a8f4c6215ed3faf9d22a4eacb6cc08068b",
+  "prompts": {},
+  "sessions": {
+    "s_17b7895fef0302": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "b1d1972b-e32e-428e-9c7d-0920211eae84",
+        "model": "codefuse_official_channel/Kimi-K3.1-Pro:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

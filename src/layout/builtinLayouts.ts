@@ -6,8 +6,8 @@ import type { LayoutConstructor } from '../types';
  * Other @antv/layout algorithms can be passed directly as `layout.type`.
  */
 export const BUILTIN_LAYOUTS: Record<string, LayoutConstructor> = {
-  force: ForceLayout as unknown as LayoutConstructor,
-  'force-atlas2': ForceAtlas2Layout as unknown as LayoutConstructor,
-  'd3-force': D3ForceLayout as unknown as LayoutConstructor,
-  fruchterman: FruchtermanLayout as unknown as LayoutConstructor,
+  force: ForceLayout,
+  'force-atlas2': ForceAtlas2Layout,
+  'd3-force': D3ForceLayout,
+  fruchterman: FruchtermanLayout,
 };

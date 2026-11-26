@@ -592,7 +592,12 @@ export interface EdgeConfig {
 /** Runtime layout instance contract used by G6Lite. */
 export interface LayoutInstance {
   execute: (data: GraphData) => Promise<void>;
-  forEachNode: (fn: (node: GraphNode & { x: number; y: number }) => void) => void;
+  forEachNode: (
+    fn: (
+      node: { id: string | number; x: number; y: number; data?: Record<string, unknown> },
+      index?: number,
+    ) => void,
+  ) => void;
 }
 
 /** Layout class constructor, typically imported from @antv/layout. */

@@ -44,8 +44,8 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
     await layout.execute(layoutData);
 
     const positions: Array<{ id: string; x: number; y: number }> = [];
-    layout.forEachNode((node: { id: string; x: number; y: number }) => {
-      positions.push({ id: node.id, x: node.x, y: node.y });
+    layout.forEachNode((node) => {
+      positions.push({ id: String(node.id), x: node.x, y: node.y });
     });
 
     const response: WorkerResponse = { id, positions };

@@ -3,13 +3,14 @@ import mds from '@antv/g6-lite/layouts/mds';
 import radial from '@antv/g6-lite/layouts/radial';
 import random from '@antv/g6-lite/layouts/random';
 import { createDemoPanel } from './demo-panel.ts';
+import { ConcentricLayout } from '@antv/layout';
 
 const NODES = Array.from({ length: 18 }, (_, index) => ({ id: String(index), data: { label: String(index) } }));
 const EDGES = Array.from({ length: 17 }, (_, index) => ({ id: `e-${index}`, source: String(Math.floor(index / 2)), target: String(index + 1) }));
 
 const LAYOUTS: Array<{ label: string; config: LayoutConfig }> = [
   { label: 'Radial', config: { type: 'radial', unitRadius: 68, linkDistance: 60 } },
-  { label: 'Concentric', config: { type: 'concentric', nodeSize: 28, minNodeSpacing: 18 } },
+  { label: 'Concentric', config: { type: ConcentricLayout, nodeSize: 28, minNodeSpacing: 18 } },
   { label: 'ForceAtlas2', config: { type: 'force-atlas2', maxIteration: 60, barnesHut: true, prune: false } },
   { label: 'Fruchterman', config: { type: 'fruchterman', maxIteration: 80, gravity: 8, speed: 5 } },
   { label: 'MDS', config: { type: 'mds', linkDistance: 70 } },

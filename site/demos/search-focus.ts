@@ -3,6 +3,7 @@
  */
 import { Graph } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { CircularLayout } from '@antv/layout';
 
 const PEOPLE = [
   'Alice',
@@ -44,7 +45,7 @@ export async function run(container: string | HTMLElement) {
         labelPlacement: 'bottom',
       },
     },
-    layout: { type: 'circular', radius: 180 },
+    layout: { type: CircularLayout, radius: 180 },
     behaviors: ['zoom-canvas', 'drag-canvas'],
   });
   await graph.render();

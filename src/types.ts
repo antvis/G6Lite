@@ -589,10 +589,20 @@ export interface EdgeConfig {
   stateStyles?: Partial<Record<EdgeState, EdgeStateStyleOverride>>;
 }
 
+/** Runtime layout instance contract used by G6Lite. */
+export interface LayoutInstance {
+  execute: (data: GraphData) => Promise<void>;
+  forEachNode: (fn: (node: GraphNode & { x: number; y: number }) => void) => void;
+}
+
+/** Layout class constructor, typically imported from @antv/layout. */
+export type LayoutConstructor = new (options?: Record<string, unknown>) => LayoutInstance;
+
 /** Layout config: type + algorithm-specific options (aligned with @antv/layout). */
 export interface LayoutConfig {
-  type: string;
-  /** Run layout in a Web Worker to avoid blocking the main thread. */
+  /** Built-in layout name or a layout class imported from @antv/layout. */
+  type: string | LayoutConstructor;
+  /** Run layout in a Web Worker to avoid blocking the main thread. Only string-named built-in layouts support Worker. */
   worker?: boolean;
   /** Layout viewport width; defaults to the canvas width (injected by Graph). */
   width?: number;
@@ -754,7 +764,7 @@ export interface GraphOptions {
   node?: NodeConfig;
   edge?: EdgeConfig;
   combo?: ComboConfig;
-  layout?: LayoutConfig;
+  layout?: LayoutConfig | LayoutConstructor;
   behaviors?: BehaviorOption[];
   transforms?: TransformOption[];
   plugins?: PluginOption[];

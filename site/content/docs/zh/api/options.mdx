@@ -101,6 +101,7 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 ```ts
 import { Graph, type GraphNode } from '@antv/g6-lite';
+import { CircularLayout } from '@antv/layout';
 
 // 省略 layout 时，节点按 x、y 定位。
 const nodes: GraphNode[] = [
@@ -115,7 +116,7 @@ const graph = new Graph({
 await graph.render();
 
 // 启用圆形布局，通过 setData() 传入 fx 固定 A 的横坐标。
-graph.setLayout({ type: 'circular' });
+graph.setLayout({ type: CircularLayout });
 await graph.setData({
   nodes: [{ id: 'A', fx: 100 }, { id: 'B' }],
   edges: [],
@@ -550,8 +551,8 @@ graph.updateNodeData('A', { score: 80 });
 
 | 属性 | 描述 | 类型 | 默认值 |
 | --- | --- | --- | --- |
-| `type` | 必填。内置布局名称或已注册的布局名，例如 `'dagre'`、`'grid'`。未知名称采用随机坐标。可选布局需先注册。 | `string` | — |
-| `worker` | 设为 `false` 可关闭。执行顺序与回退见[布局指南](/docs/guides/layout#worker)。 | `boolean` | Graph 中节点数 ≥ 1000 时默认尝试启用 |
+| `type` | 必填。内置布局名称（`'force'`、`'force-atlas2'`、`'d3-force'`、`'fruchterman'`）、已注册的布局名，或直接从 `@antv/layout` 导入的布局类（如 `DagreLayout`）。未知名称采用随机坐标。 | `string \| LayoutConstructor` | — |
+| `worker` | 设为 `false` 可关闭。仅字符串形式的内置布局支持 Worker；自定义布局类在主线程执行。执行顺序与回退见[布局指南](/docs/guides/layout#worker)。 | `boolean` | Graph 中节点数 ≥ 1000 且为字符串内置布局时默认尝试启用 |
 | `width` | 布局计算使用的宽度。 | `number` | 当前画布宽度 |
 | `height` | 布局计算使用的高度。 | `number` | 当前画布高度 |
 | `center` | 布局中心，是否使用由算法决定。 | `[number, number]` | `[width / 2, height / 2]` |
@@ -645,7 +646,7 @@ const edge: EdgeConfig = { type: 'polyline', style: { router: 'fishbone', endArr
 
 ### 布局参数 [#config-library-layout-fields]
 
-在 `layout` 中设置布局类型 `type`，再加上表里的参数。例如，`layout: { type: 'dagre', rankdir: 'LR' }` 会让流程从左向右排列。
+在 `layout` 中设置布局类型 `type`，再加上表里的参数。例如，`layout: { type: DagreLayout, rankdir: 'LR' }` 会让流程从左向右排列。
 
 | 布局类型 | 参数示例 | 效果 |
 | --- | --- | --- |

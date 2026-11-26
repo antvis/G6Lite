@@ -101,6 +101,7 @@ Use distinct IDs for nodes, edges, and Combos, and keep them stable across updat
 
 ```ts
 import { Graph, type GraphNode } from '@antv/g6-lite';
+import { CircularLayout } from '@antv/layout';
 
 // Without a layout, x and y position each node.
 const nodes: GraphNode[] = [
@@ -115,7 +116,7 @@ const graph = new Graph({
 await graph.render();
 
 // Enable circular layout and pass fx through setData() to fix A's x coordinate.
-graph.setLayout({ type: 'circular' });
+graph.setLayout({ type: CircularLayout });
 await graph.setData({
   nodes: [{ id: 'A', fx: 100 }, { id: 'B' }],
   edges: [],
@@ -550,8 +551,8 @@ See the [Labels and icons guide](/en/docs/guides/label#global-label-policies) fo
 
 | Property | Description | Type | Default |
 | --- | --- | --- | --- |
-| `type` | Required. A built-in or registered layout name, such as `'dagre'` or `'grid'`. Unknown names use random placement. Register optional layouts before use. | `string` | — |
-| `worker` | Set to `false` to disable. See the [layout guide](/en/docs/guides/layout#worker) for execution order and fallback behavior. | `boolean` | Graph attempts to use a Worker by default at 1,000 nodes or more |
+| `type` | Required. A built-in layout name (`'force'`, `'force-atlas2'`, `'d3-force'`, `'fruchterman'`), a registered layout name, or a layout class imported from `@antv/layout` (such as `DagreLayout`). Unknown names use random placement. | `string \| LayoutConstructor` | — |
+| `worker` | Set to `false` to disable. Only string-named built-in layouts support Workers; custom layout classes run on the main thread. See the [layout guide](/en/docs/guides/layout#worker) for execution order and fallback behavior. | `boolean` | Graph attempts to use a Worker by default at 1,000 nodes or more for string-named built-in layouts |
 | `width` | Width used for layout computation. | `number` | Current canvas width |
 | `height` | Height used for layout computation. | `number` | Current canvas height |
 | `center` | Layout center. Each algorithm decides whether to use it. | `[number, number]` | `[width / 2, height / 2]` |
@@ -645,7 +646,7 @@ const edge: EdgeConfig = { type: 'polyline', style: { router: 'fishbone', endArr
 
 ### Layout options [#config-library-layout-fields]
 
-Set the layout `type` and its options in `layout`. For example, `layout: { type: 'dagre', rankdir: 'LR' }` arranges a flow from left to right.
+Set the layout `type` and its options in `layout`. For example, `layout: { type: DagreLayout, rankdir: 'LR' }` arranges a flow from left to right.
 
 | Layout type | Example options | Effect |
 | --- | --- | --- |

@@ -9,9 +9,17 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 | 类型 | 描述 | 配置示例 |
 | --- | --- | --- |
-| [`grid`](/docs/guides/layout-grid) | 将节点排成两行三列。 | `{ type: 'grid', rows: 2, cols: 3 }` |
-| [`circular`](/docs/guides/layout-circular) | 沿半径为 100 的圆周排列。 | `{ type: 'circular', radius: 100 }` |
-| [`dagre`](/docs/guides/layout-dagre) | 按依赖关系从左到右分层。 | `{ type: 'dagre', rankdir: 'LR' }` |
+| [`grid`](/docs/guides/layout-grid) | 将节点排成两行三列。 | `{ type: GridLayout, rows: 2, cols: 3 }` |
+| [`circular`](/docs/guides/layout-circular) | 沿半径为 100 的圆周排列。 | `{ type: CircularLayout, radius: 100 }` |
+| [`dagre`](/docs/guides/layout-dagre) | 按依赖关系从左到右分层。 | `{ type: DagreLayout, rankdir: 'LR' }` |
+
+上述配置示例需要导入对应的布局类：
+
+```ts
+import { GridLayout } from '@antv/layout';
+import { CircularLayout } from '@antv/layout';
+import { DagreLayout } from '@antv/layout';
+```
 
 ## 布局对比
 

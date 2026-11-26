@@ -282,7 +282,9 @@ For text-only child nodes, use `right` to extend the line to the end of the text
 Polylines follow the layout direction. For Dagre, `rankdir: 'LR'` goes left to right and `rankdir: 'TB'` goes top to bottom. Use **Direction** in the [orthogonal connections example](#orthogonal-connections-and-rounding) to compare them.
 
 ```ts
-graph.setLayout({ type: 'dagre', rankdir: 'TB', nodeSize: [84, 32] });
+import { DagreLayout } from '@antv/layout';
+
+graph.setLayout({ type: DagreLayout, rankdir: 'TB', nodeSize: [84, 32] });
 await graph.render();
 ```
 

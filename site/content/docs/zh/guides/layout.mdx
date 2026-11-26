@@ -13,7 +13,7 @@ import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-exampl
 
 | 字段 | 用途 |
 | --- | --- |
-| `type` | 指定布局算法，例如 `dagre` |
+| `type` | 指定布局算法：内置布局名称（如 `force`）或从 `@antv/layout` 导入的布局类（如 `DagreLayout`） |
 | `width`、`height` | 设置计算范围，默认取画布宽高 |
 | `center` | 设置布局中心，默认取计算范围的中心，由算法决定是否使用 |
 | `worker` | 设置是否尝试在 Worker 中计算 |
@@ -24,17 +24,17 @@ import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-exampl
 
 下表的 11 种布局用同一份数据生成缩略图。想试用其中一种，可以打开[布局示例合集](/docs/examples/layout-gallery)。完整算法参数见 [AntV Layout 文档](https://layout.antv.vision/)。
 
-标为「可选」的布局需先导入并注册，见[可选布局](/docs/guides/layout-overview#optional-layouts)。
+标为「外部」的布局需从 `@antv/layout` 导入布局类后传入，见[内置与外部布局](/docs/guides/layout-overview#builtin-and-external-layouts)。标为「可选」的布局需先导入并注册，见[可选布局](/docs/guides/layout-overview#optional-layouts)。
 
 <div className="effect-table">
 
 | type | 效果 | 用途 | 常用算法参数 |
 | --- | --- | --- | --- |
-| [`circular`](/docs/guides/layout-circular) | ![节点沿圆周均匀排列](/layouts/reference/circular.svg) | 圆周或螺旋排列 | radius、startRadius、endRadius、startAngle、endAngle、clockwise |
-| [`concentric`](/docs/guides/layout-concentric) | ![节点按度数从中心向外分圈](/layouts/reference/concentric.svg) | 按重要程度分圈 | sortBy、maxLevelDiff、nodeSize、nodeSpacing、preventOverlap |
-| [`grid`](/docs/guides/layout-grid) | ![节点对齐到规则行列](/layouts/reference/grid.svg) | 规则行列 | rows、cols、begin、sortBy、nodeSize、nodeSpacing、preventOverlap |
+| [`circular`](/docs/guides/layout-circular) | ![节点沿圆周均匀排列](/layouts/reference/circular.svg) | **外部。** 圆周或螺旋排列 | radius、startRadius、endRadius、startAngle、endAngle、clockwise |
+| [`concentric`](/docs/guides/layout-concentric) | ![节点按度数从中心向外分圈](/layouts/reference/concentric.svg) | **外部。** 按重要程度分圈 | sortBy、maxLevelDiff、nodeSize、nodeSpacing、preventOverlap |
+| [`grid`](/docs/guides/layout-grid) | ![节点对齐到规则行列](/layouts/reference/grid.svg) | **外部。** 规则行列 | rows、cols、begin、sortBy、nodeSize、nodeSpacing、preventOverlap |
 | [`random`](/docs/guides/layout-random) | ![节点散布在画布上](/layouts/reference/random.svg) | **可选。** 随机位置 | width、height、center |
-| [`dagre`](/docs/guides/layout-dagre) | ![有向图从左到右分层排列](/layouts/reference/dagre.svg) | 有向分层 | rankdir: TB/BT/LR/RL，nodesep、ranksep、edgesep、nodeSize、ranker |
+| [`dagre`](/docs/guides/layout-dagre) | ![有向图从左到右分层排列](/layouts/reference/dagre.svg) | **外部。** 有向分层 | rankdir: TB/BT/LR/RL，nodesep、ranksep、edgesep、nodeSize、ranker |
 | [`force`](/docs/guides/layout-force) | ![相连节点在力模拟中聚拢](/layouts/reference/force.svg) | 力导向网络 | linkDistance、nodeStrength、edgeStrength、maxIteration、minMovement |
 | [`d3-force`](/docs/guides/layout-d3-force) | ![D3 力模拟生成的节点排布](/layouts/reference/d3-force.svg) | D3 力模拟 | linkDistance、nodeStrength、alphaDecay、alphaMin；使用 nodeStrength，不是 charge |
 | [`force-atlas2`](/docs/guides/layout-force-atlas2) | ![ForceAtlas2 生成的节点排布](/layouts/reference/force-atlas2.svg) | ForceAtlas2 网络 | kr、kg、barnesHut、prune、maxIteration |
@@ -136,7 +136,9 @@ import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-exampl
 首次渲染后，布局配置通过 `setLayout()` 替换，节点位置在 `layout()` 完成后更新。需要让整张图重新进入视野时，再调用 `fitView()`。
 
 ```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR', nodesep: 32, ranksep: 64 });
+import { DagreLayout } from '@antv/layout';
+
+graph.setLayout({ type: DagreLayout, rankdir: 'LR', nodesep: 32, ranksep: 64 });
 await graph.layout();
 graph.fitView({ padding: 48, maxZoom: 1 });
 ```
@@ -147,7 +149,7 @@ graph.fitView({ padding: 48, maxZoom: 1 });
 
 ## Worker
 
-库布局可通过 `worker: true` 尝试在后台线程计算。图达到 1000 个节点时默认尝试启用。算法参数包含函数时，可设置 `worker: false` 在主线程计算。启用、回退和取消示例见 [Worker 布局指南](/docs/guides/layout-worker)。
+字符串形式的内置布局可通过 `worker: true` 尝试在后台线程计算，图达到 1000 个节点时默认尝试启用。自定义布局类无法传入 Worker，始终在主线程执行。算法参数包含函数时，可设置 `worker: false` 在主线程计算。启用、回退和取消示例见 [Worker 布局指南](/docs/guides/layout-worker)。
 
 ## 常见问题
 

@@ -8,6 +8,7 @@ import {
   type BehaviorOptions,
   type ExtensionContext,
 } from '@antv/g6-lite';
+import { DagreLayout } from '@antv/layout';
 
 const PIN_BEHAVIOR = 'pin-node' as const;
 
@@ -73,7 +74,7 @@ export async function run(container: string | HTMLElement) {
       },
     },
     edge: { style: { endArrow: true } },
-    layout: { type: 'dagre', rankdir: 'LR', nodesep: 24, ranksep: 70, nodeSize: [88, 36] },
+    layout: { type: DagreLayout, rankdir: 'LR', nodesep: 24, ranksep: 70, nodeSize: [88, 36] },
     behaviors: ['zoom-canvas', 'drag-canvas', { type: PIN_BEHAVIOR } satisfies PinBehaviorOptions],
   });
   await graph.render();

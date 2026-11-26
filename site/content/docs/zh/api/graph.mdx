@@ -775,7 +775,9 @@ console.log(client, point);
 <span id="graph-layout-代码与对应效果" style={{ display: 'block', scrollMarginTop: '8rem' }} />
 
 ```ts
-graph.setLayout({ type: 'circular' });
+import { CircularLayout } from '@antv/layout';
+
+graph.setLayout({ type: CircularLayout });
 await graph.layout();
 graph.fitView();
 ```
@@ -824,8 +826,9 @@ declare function runLayout(
 
 ```ts
 import { runLayout } from '@antv/g6-lite';
+import { DagreLayout } from '@antv/layout';
 
-const { nodes } = await runLayout(data, { type: 'dagre', rankdir: 'LR' });
+const { nodes } = await runLayout(data, { type: DagreLayout, rankdir: 'LR' });
 console.log(nodes);
 ```
 

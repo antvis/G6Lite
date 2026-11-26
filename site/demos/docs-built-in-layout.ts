@@ -5,18 +5,22 @@ import indented from '@antv/g6-lite/layouts/indented';
 import mindmap from '@antv/g6-lite/layouts/mindmap';
 import fishboneLayout from '@antv/g6-lite/layouts/fishbone';
 import random from '@antv/g6-lite/layouts/random';
+import { GridLayout } from '@antv/layout';
+import { CircularLayout } from '@antv/layout';
+import { DagreLayout } from '@antv/layout';
+import { ConcentricLayout } from '@antv/layout';
 
 const optionalLayouts = new Map(Object.entries({ mds, radial, indented, mindmap, fishbone: fishboneLayout, random }));
 
 const layouts = {
   // #region layout-grid-config
-  'grid': { type: 'grid', rows: 2, cols: 3, width: 360, height: 160 },
+  'grid': { type: GridLayout, rows: 2, cols: 3, width: 360, height: 160 },
   // #endregion layout-grid-config
   // #region layout-circular-config
-  'circular': { type: 'circular', radius: 100 },
+  'circular': { type: CircularLayout, radius: 100 },
   // #endregion layout-circular-config
   // #region layout-dagre-config
-  'dagre': { type: 'dagre', rankdir: 'LR', nodesep: 32, ranksep: 80, nodeSize: [80, 32] },
+  'dagre': { type: DagreLayout, rankdir: 'LR', nodesep: 32, ranksep: 80, nodeSize: [80, 32] },
   // #endregion layout-dagre-config
   // #region layout-force-config
   'force': { type: 'force', linkDistance: 100 },
@@ -51,7 +55,7 @@ const layouts = {
   // #endregion layout-radial-config
   // #region layout-concentric-config
   'concentric': {
-    type: 'concentric',
+    type: ConcentricLayout,
     sortBy: 'degree',
     maxLevelDiff: 1,
     preventOverlap: true,

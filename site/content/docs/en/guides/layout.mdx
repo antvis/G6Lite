@@ -11,7 +11,7 @@ Configure the layout in `new Graph()` through `layout`. See the [Layout overview
 
 | Field | Purpose |
 | --- | --- |
-| `type` | Algorithm name, such as `dagre` |
+| `type` | Algorithm name for built-in layouts (such as `force`) or a layout class imported from `@antv/layout` (such as `DagreLayout`) |
 | `width`, `height` | Computation bounds, defaulting to canvas dimensions |
 | `center` | Layout center for algorithms that use it |
 | `worker` | Whether to try computing in a Worker |
@@ -24,17 +24,17 @@ Direction and spacing depend on the algorithm. See the [layout reference](/en/do
 
 The thumbnails show 11 layouts on the same data. Try them in the [layout gallery](/en/docs/examples/layout-gallery) or see the [AntV Layout documentation](https://layout.antv.vision/) for more options.
 
-Layouts marked **Optional** must be imported and registered. See [Optional layouts](/en/docs/guides/layout-overview#optional-layouts).
+Layouts marked **External** must be imported from `@antv/layout` and passed as a class. See [Built-in and external layouts](/en/docs/guides/layout-overview#builtin-and-external-layouts). Layouts marked **Optional** must be imported and registered. See [Optional layouts](/en/docs/guides/layout-overview#optional-layouts).
 
 <div className="effect-table">
 
 | type | Preview | Purpose | Common algorithm options |
 | --- | --- | --- | --- |
-| [`circular`](/en/docs/guides/layout-circular) | ![Nodes are evenly spaced on a circle](/layouts/reference/circular.svg) | Circle or spiral | radius, startRadius, endRadius, startAngle, endAngle, clockwise |
-| [`concentric`](/en/docs/guides/layout-concentric) | ![Nodes are arranged in rings by degree](/layouts/reference/concentric.svg) | Rings by importance | sortBy, maxLevelDiff, nodeSize, nodeSpacing, preventOverlap |
-| [`grid`](/en/docs/guides/layout-grid) | ![Nodes align in rows and columns](/layouts/reference/grid.svg) | Rows and columns | rows, cols, begin, sortBy, nodeSize, nodeSpacing, preventOverlap |
+| [`circular`](/en/docs/guides/layout-circular) | ![Nodes are evenly spaced on a circle](/layouts/reference/circular.svg) | **External.** Circle or spiral | radius, startRadius, endRadius, startAngle, endAngle, clockwise |
+| [`concentric`](/en/docs/guides/layout-concentric) | ![Nodes are arranged in rings by degree](/layouts/reference/concentric.svg) | **External.** Rings by importance | sortBy, maxLevelDiff, nodeSize, nodeSpacing, preventOverlap |
+| [`grid`](/en/docs/guides/layout-grid) | ![Nodes align in rows and columns](/layouts/reference/grid.svg) | **External.** Rows and columns | rows, cols, begin, sortBy, nodeSize, nodeSpacing, preventOverlap |
 | [`random`](/en/docs/guides/layout-random) | ![Nodes are scattered across the canvas](/layouts/reference/random.svg) | **Optional.** Random positions | width, height, center |
-| [`dagre`](/en/docs/guides/layout-dagre) | ![The directed graph is layered from left to right](/layouts/reference/dagre.svg) | Directed layers | rankdir: TB/BT/LR/RL, nodesep, ranksep, edgesep, nodeSize, ranker |
+| [`dagre`](/en/docs/guides/layout-dagre) | ![The directed graph is layered from left to right](/layouts/reference/dagre.svg) | **External.** Directed layers | rankdir: TB/BT/LR/RL, nodesep, ranksep, edgesep, nodeSize, ranker |
 | [`force`](/en/docs/guides/layout-force) | ![Connected nodes are drawn together by the force simulation](/layouts/reference/force.svg) | Force-directed network | linkDistance, nodeStrength, edgeStrength, maxIteration, minMovement |
 | [`d3-force`](/en/docs/guides/layout-d3-force) | ![Node positions from the D3 force simulation](/layouts/reference/d3-force.svg) | D3 simulation | linkDistance, nodeStrength, alphaDecay, alphaMin; use nodeStrength, not charge |
 | [`force-atlas2`](/en/docs/guides/layout-force-atlas2) | ![Node positions from ForceAtlas2](/layouts/reference/force-atlas2.svg) | ForceAtlas2 network | kr, kg, barnesHut, prune, maxIteration |
@@ -136,7 +136,9 @@ For root → category → item structures. Deeper nodes do not receive a complet
 For a graph that has completed render: setLayout replaces the entire configuration. Fit the graph after layout only when needed:
 
 ```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR', nodesep: 32, ranksep: 64 });
+import { DagreLayout } from '@antv/layout';
+
+graph.setLayout({ type: DagreLayout, rankdir: 'LR', nodesep: 32, ranksep: 64 });
 await graph.layout();
 graph.fitView({ padding: 48, maxZoom: 1 });
 ```
@@ -149,7 +151,7 @@ Layout may change existing x/y. Graph's fx/fy override the corresponding final a
 
 ## Worker
 
-Graph supplies worker: true when node count ≥ 1000 and worker is omitted, without filtering by algorithm name. Standalone runLayout has no automatic switch. Execution order is registered extension → built-in tree → Worker → main-thread library. Worker creation, cloning, or execution failures fall back to the same main-thread algorithm, which may block again.
+Graph supplies worker: true when node count ≥ 1000 and worker is omitted for string-named built-in layouts. Custom layout classes cannot be transferred to a Worker and always run on the main thread. Standalone runLayout has no automatic switch. Execution order is registered extension → built-in tree → Worker → main-thread library. Worker creation, cloning, or execution failures fall back to the same main-thread algorithm, which may block again.
 
 Prefer explicit worker: false for function-valued options. See [layout methods](/en/docs/api/graph#layout) for cancellation. Successful configuration does not prove a Worker actually ran.
 

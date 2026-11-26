@@ -1,3 +1,4 @@
+import { DagreLayout } from '@antv/layout';
 import type { Graph, GraphNode, GraphOptions } from '../../../../src/index.ts';
 import type { Locale } from '@/lib/i18n';
 
@@ -183,7 +184,7 @@ export function showcaseOptions(id: ShowcaseId, locale: Locale, dark = false): O
       [2, 6],
     ];
     options.layout = {
-      type: 'dagre',
+      type: DagreLayout,
       rankdir: 'TB',
       nodesep: 32,
       ranksep: 70,

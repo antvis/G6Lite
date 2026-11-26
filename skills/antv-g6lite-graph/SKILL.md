@@ -48,6 +48,7 @@ In bundled applications, use ESM:
 
 ```ts
 import { Graph } from '@antv/g6-lite';
+import { DagreLayout } from '@antv/layout';
 
 const graph = new Graph({
   container: '#container',
@@ -56,7 +57,7 @@ const graph = new Graph({
     edges: [{ id: 'a-b', source: 'a', target: 'b' }],
   },
   node: { style: { label: (node) => node.name ?? node.id } },
-  layout: { type: 'dagre', rankdir: 'LR', ranksep: 80 },
+  layout: { type: DagreLayout, rankdir: 'LR', ranksep: 80 },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
 await graph.render();

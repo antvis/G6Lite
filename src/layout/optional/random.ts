@@ -1,6 +1,6 @@
-import { RandomLayout } from '@antv/layout/lib/algorithm/random/index.js';
+import { RandomLayout } from '@antv/layout';
 import type { LayoutExtension } from '../../extensions/contracts';
-import type { LayoutConstructor } from '../layoutLoader';
+import type { LayoutConstructor } from '../../types';
 import { runLibraryLayout } from '../libraryLayout';
 
 const random: LayoutExtension = {

@@ -34,7 +34,7 @@ class FakeWorker {
 }
 
 const data = { nodes: [{ id: 'node' }], edges: [] };
-const config = { type: 'grid', worker: true } as const;
+const config = { type: 'force', worker: true } as const;
 
 afterEach(() => {
   terminateLayoutWorker();

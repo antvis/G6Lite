@@ -2,6 +2,7 @@ import { Graph, register, type LayoutConfig } from '@antv/g6-lite';
 import mds from '@antv/g6-lite/layouts/mds';
 import radial from '@antv/g6-lite/layouts/radial';
 import { createDemoPanel } from './demo-panel.ts';
+import { ConcentricLayout } from '@antv/layout';
 
 export async function run(container: HTMLElement) {
   register('layout', 'mds', mds);
@@ -9,7 +10,7 @@ export async function run(container: HTMLElement) {
   // #region network-options
   const layouts: Record<string, LayoutConfig> = {
     radial: { type: 'radial', focusNode: '0', unitRadius: 68 },
-    concentric: { type: 'concentric', sortBy: 'degree', nodeSize: 24 },
+    concentric: { type: ConcentricLayout, sortBy: 'degree', nodeSize: 24 },
     force: { type: 'force', linkDistance: 100 },
     'd3-force': { type: 'd3-force', linkDistance: 100 },
     'force-atlas2': { type: 'force-atlas2', kr: 12, kg: 0.5, preventOverlap: true, nodeSize: 24, maxIteration: 200 },

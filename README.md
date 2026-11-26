@@ -75,7 +75,7 @@ const graph = new Graph({
     },
   },
   edge: { type: 'line', style: { lineWidth: 2 } },
-  layout: { type: 'circular', radius: 140 },
+  layout: { type: 'force', linkDistance: 120 },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
 
@@ -86,7 +86,7 @@ Only package-root exports from `@antv/g6-lite` and `package.json#exports` are pu
 
 ## CDN / UMD
 
-Use the UMD build directly in a browser without a bundler. It exposes `window.G6Lite` and includes the runtime dependencies and built-in layouts. See [Optional layouts](https://g6lite.antv.vision/en/docs/guides/layout-overview#optional-layouts) for additional layouts.
+Use the UMD build directly in a browser without a bundler. It exposes `window.G6Lite` and includes the runtime dependencies and built-in force-directed layouts (`force`, `force-atlas2`, `d3-force`, `fruchterman`). Other `@antv/layout` algorithms can be passed as layout classes; see [Built-in and external layouts](https://g6lite.antv.vision/en/docs/guides/layout-overview#builtin-and-external-layouts). See [Optional layouts](https://g6lite.antv.vision/en/docs/guides/layout-overview#optional-layouts) for additional registered layouts.
 
 ```html
 <div id="container" style="width: 100%; height: 500px"></div>
@@ -101,7 +101,7 @@ Use the UMD build directly in a browser without a bundler. It exposes `window.G6
         { source: 'gateway', target: 'inventory' },
       ],
     },
-    layout: { type: 'circular', radius: 140 },
+    layout: { type: 'force', linkDistance: 120 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
   });
   graph.render().catch(console.error);

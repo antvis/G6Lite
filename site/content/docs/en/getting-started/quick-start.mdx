@@ -188,7 +188,7 @@ Save the HTML below as `index.html` and open it in your browser.
 
 ### Use the UMD script [#cdn-umd]
 
-The UMD script includes runtime dependencies and built-in layouts. Once loaded, create a graph with `G6Lite.Graph`. This minimal example draws two nodes and one edge:
+The UMD script includes runtime dependencies and built-in force-directed layouts (`force`, `force-atlas2`, `d3-force`, `fruchterman`). Once loaded, create a graph with `G6Lite.Graph`. This minimal example draws two nodes and one edge:
 
 ```html
 <div id="container" style="width: 100%; height: 360px"></div>
@@ -200,7 +200,7 @@ The UMD script includes runtime dependencies and built-in layouts. Once loaded, 
       nodes: [{ id: 'Alice' }, { id: 'Bob' }],
       edges: [{ source: 'Alice', target: 'Bob' }],
     },
-    layout: { type: 'circular', radius: 80 },
+    layout: { type: 'force', linkDistance: 80 },
     node: { style: { label: (node) => node.id } },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
   });

@@ -1,5 +1,10 @@
-import type { GraphData, GraphNode, LayoutConfig } from '../types';
-import type { LayoutConstructor, LayoutInstance } from './layoutLoader';
+import type {
+  GraphData,
+  GraphNode,
+  LayoutConfig,
+  LayoutConstructor,
+  LayoutInstance,
+} from '../types';
 import { normalizeLibraryLayoutOptions } from './layoutOptions';
 import type { LayoutResult } from './runLayout';
 
@@ -32,7 +37,7 @@ function createLibraryLayoutData(data: GraphData): GraphData {
 
 async function executeLibraryLayout(
   layout: LayoutInstance,
-  type: string,
+  type: string | LayoutConstructor,
   layoutData: GraphData,
   options: Record<string, unknown>,
 ): Promise<void> {

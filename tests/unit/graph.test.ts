@@ -374,7 +374,7 @@ describe('P1: repeated render resource lifecycle', () => {
       transformInstances: new Map(),
       options: {
         data: { nodes: [{ id: 'node' }], edges: [] },
-        layout: { type: 'grid' },
+        layout: { type: 'force' },
       },
       containerEl: { clientWidth: 400, clientHeight: 300 },
       renderer: { resize: vi.fn(), clearWithTheme: vi.fn() },
@@ -394,7 +394,7 @@ describe('P1: repeated render resource lifecycle', () => {
   });
 
   it('derives automatic worker layout without mutating the configured options', async () => {
-    const layout = { type: 'grid' };
+    const layout = { type: 'force' };
     const executeLayout = vi.fn(async (data: { nodes: Array<{ id: string }> }, config) => ({
       nodes: data.nodes.map((node, index) => ({ ...node, x: index, y: index })),
       config,
@@ -418,10 +418,10 @@ describe('P1: repeated render resource lifecycle', () => {
       }
     ).runConfiguredLayout({ nodes, edges: [] }, 1);
 
-    expect(layout).toEqual({ type: 'grid' });
+    expect(layout).toEqual({ type: 'force' });
     expect(executeLayout).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ type: 'grid', worker: true }),
+      expect.objectContaining({ type: 'force', worker: true }),
     );
     expect(executeLayout.mock.calls[0][1]).not.toBe(layout);
   });

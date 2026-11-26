@@ -188,7 +188,7 @@ import { Graph } from 'https://esm.sh/@antv/g6-lite@0.1.0?bundle';
 
 ### 使用 UMD 脚本 [#cdn-umd]
 
-UMD 主脚本包含运行依赖和内置布局，加载后通过 `G6Lite.Graph` 创建图。下面的最小示例绘制两个节点和一条边：
+UMD 主脚本包含运行依赖和内置力导向布局（`force`、`force-atlas2`、`d3-force`、`fruchterman`），加载后通过 `G6Lite.Graph` 创建图。下面的最小示例绘制两个节点和一条边：
 
 ```html
 <div id="container" style="width: 100%; height: 360px"></div>
@@ -200,7 +200,7 @@ UMD 主脚本包含运行依赖和内置布局，加载后通过 `G6Lite.Graph` 
       nodes: [{ id: 'Alice' }, { id: 'Bob' }],
       edges: [{ source: 'Alice', target: 'Bob' }],
     },
-    layout: { type: 'circular', radius: 80 },
+    layout: { type: 'force', linkDistance: 80 },
     node: { style: { label: (node) => node.id } },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
   });

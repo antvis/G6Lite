@@ -1,5 +1,6 @@
 import { Graph, register, type ExtensionContext, type LayoutExtension } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { GridLayout } from '@antv/layout';
 
 interface ColumnOptions extends Record<string, unknown> { gap?: number; delay?: number }
 function pause(signal: AbortSignal | undefined, delay: number) {
@@ -49,7 +50,7 @@ export async function run(container: HTMLElement) {
     const request = ++revision;
     status.textContent = mode === 'slow' ? 'Running slow layout…' : 'Running…';
     if (mode === 'grid') graph.cancelLayout();
-    graph.setLayout(mode === 'grid' ? { type: 'grid' } : { type: 'docs-column', gap: 100, delay: mode === 'slow' ? 180 : 0 });
+    graph.setLayout(mode === 'grid' ? { type: GridLayout } : { type: 'docs-column', gap: 100, delay: mode === 'slow' ? 180 : 0 });
     await graph.layout();
     if (graph.destroyed || request !== revision) return;
     graph.fitView({ padding: 56 });

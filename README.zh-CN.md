@@ -75,7 +75,7 @@ const graph = new Graph({
     },
   },
   edge: { type: 'line', style: { lineWidth: 2 } },
-  layout: { type: 'circular', radius: 140 },
+  layout: { type: 'force', linkDistance: 120 },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
 
@@ -86,7 +86,7 @@ await graph.render();
 
 ## CDN / UMD
 
-无需构建工具，在浏览器中直接加载 UMD 包即可使用 `window.G6Lite`。主脚本包含运行时依赖和内置布局。可选布局的接入方式见[布局总览](https://g6lite.antv.vision/docs/guides/layout-overview#optional-layouts)。
+无需构建工具，在浏览器中直接加载 UMD 包即可使用 `window.G6Lite`。主脚本包含运行时依赖和内置力导向布局（`force`、`force-atlas2`、`d3-force`、`fruchterman`）。其他 `@antv/layout` 算法可作为布局类传入，见[内置与外部布局](https://g6lite.antv.vision/docs/guides/layout-overview#builtin-and-external-layouts)。可选布局的接入方式见[布局总览](https://g6lite.antv.vision/docs/guides/layout-overview#optional-layouts)。
 
 ```html
 <div id="container" style="width: 100%; height: 500px"></div>
@@ -101,7 +101,7 @@ await graph.render();
         { source: 'gateway', target: 'inventory' },
       ],
     },
-    layout: { type: 'circular', radius: 140 },
+    layout: { type: 'force', linkDistance: 120 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
   });
   graph.render().catch(console.error);

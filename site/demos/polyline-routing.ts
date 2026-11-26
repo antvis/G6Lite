@@ -2,6 +2,7 @@
  * Demo: orthogonal polyline edges with rounded corners.
  */
 import { Graph } from '@antv/g6-lite';
+import { DagreLayout } from '@antv/layout';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -45,7 +46,7 @@ export async function run(container: string | HTMLElement) {
         router: 'orth',
       },
     },
-    layout: { type: 'dagre', rankdir: 'LR', nodesep: 28, ranksep: 72, nodeSize: [88, 36] },
+    layout: { type: DagreLayout, rankdir: 'LR', nodesep: 28, ranksep: 72, nodeSize: [88, 36] },
     behaviors: ['zoom-canvas', 'drag-canvas'],
   });
   await graph.render();

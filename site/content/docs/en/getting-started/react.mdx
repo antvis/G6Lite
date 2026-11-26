@@ -30,6 +30,7 @@ Save the following as `GraphView.tsx`. The component creates a graph on mount, c
 
 import { useEffect, useRef, useState } from 'react';
 import { Graph, type GraphData } from '@antv/g6-lite';
+import { CircularLayout } from '@antv/layout';
 
 const basicData: GraphData = {
   nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
@@ -57,7 +58,7 @@ export default function GraphView() {
     const graph = new Graph({
       container: containerRef.current,
       data: basicData,
-      layout: { type: 'circular', radius: 120 },
+      layout: { type: CircularLayout, radius: 120 },
       node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
       edge: { style: { endArrow: true } },
       autoFit: fitView,

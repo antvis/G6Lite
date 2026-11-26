@@ -16,7 +16,7 @@ const FakeLayout = vi.hoisted(
     },
 );
 
-vi.mock('@antv/layout/lib/algorithm/dagre/index.js', () => ({ DagreLayout: FakeLayout }));
+vi.mock('@antv/layout/lib/algorithm/force/index.js', () => ({ ForceLayout: FakeLayout }));
 vi.mock('@antv/layout/lib/algorithm/mds/index.js', () => ({ MDSLayout: FakeLayout }));
 vi.mock('@antv/layout/lib/algorithm/radial/index.js', () => ({ RadialLayout: FakeLayout }));
 vi.mock('@antv/layout/lib/algorithm/random/index.js', () => ({ RandomLayout: FakeLayout }));
@@ -24,8 +24,19 @@ vi.mock('@antv/layout/lib/algorithm/random/index.js', () => ({ RandomLayout: Fak
 describe('layoutLoader', () => {
   const data = { nodes: [{ id: 'a' }], edges: [] };
 
-  it('loads dagre without explicit registration', async () => {
-    await expect(getLayoutLoader('dagre')?.()).resolves.toBe(FakeLayout);
+  it('loads built-in force without explicit registration', async () => {
+    await expect(getLayoutLoader('force')?.()).resolves.toBe(FakeLayout);
+  });
+
+  it('does not bundle non-built-in layout names', () => {
+    expect(getLayoutLoader('dagre')).toBeUndefined();
+    expect(getLayoutLoader('circular')).toBeUndefined();
+  });
+
+  it('runs a custom layout class on the main thread even when worker is requested', async () => {
+    await expect(runLayout(data, { type: FakeLayout, worker: true })).resolves.toEqual({
+      nodes: [{ id: 'a', x: 20, y: 30 }],
+    });
   });
 
   it.each(Object.entries({ mds, radial, random }))(

@@ -75,7 +75,9 @@ Insert those two actual script tags, in order, before the graph's initialization
 After initialization:
 
 ```ts
-graph.setLayout({ type: 'dagre', rankdir: 'LR', ranksep: 100 });
+import { DagreLayout } from '@antv/layout';
+
+graph.setLayout({ type: DagreLayout, rankdir: 'LR', ranksep: 100 });
 await graph.layout();
 if (!graph.destroyed) graph.fitView({ padding: 48 });
 ```

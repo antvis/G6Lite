@@ -1,9 +1,12 @@
+import type { LayoutConstructor } from '../types';
+
 /**
  * Normalize options shared by main-thread and Worker-backed @antv/layout execution.
  * Keep this module side-effect free so both runtimes use identical thresholds.
+ * Custom layout classes skip the built-in per-algorithm defaults.
  */
 export function normalizeLibraryLayoutOptions(
-  type: string,
+  type: string | LayoutConstructor,
   config: Record<string, unknown>,
   nodeCount: number,
 ): Record<string, unknown> {

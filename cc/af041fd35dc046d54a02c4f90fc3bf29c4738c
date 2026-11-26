@@ -1,0 +1,241 @@
+site/demos/theme.ts
+  s_17b7895fef0302::t_ed57d142c5755d 6,39
+tests/unit/layout/layoutLoader.test.ts
+  s_17b7895fef0302::t_e02673e2e6ac26 19
+  s_17b7895fef0302::t_f26f37614073b4 27-39
+src/layout/builtinLayouts.ts
+  s_17b7895fef0302::t_810f0c0f4eef50 1
+  s_17b7895fef0302::t_4b2faab6e7f59f 2-13
+src/layout/layoutWorker.ts
+  s_17b7895fef0302::t_21a8727dccd73d 7
+  s_17b7895fef0302::t_0e750aec1df9d0 41-42
+site/content/docs/zh/guides/layout.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 139
+  s_17b7895fef0302::t_adb9cdae207e74 16
+  s_17b7895fef0302::t_425d10613bae79 140-141
+  s_17b7895fef0302::t_35e58283776ace 27,33-35,37
+  s_17b7895fef0302::t_7770abd2119c80 152
+src/graph.ts
+  s_17b7895fef0302::t_b0a17a8e9388fa 923
+  s_17b7895fef0302::t_9bf66fd74a6c42 1473
+  s_17b7895fef0302::t_40ff83c9994213 1467
+  s_17b7895fef0302::t_284b0b99194342 45
+  s_17b7895fef0302::t_106d9e7f61e2a4 1412-1417
+  s_17b7895fef0302::t_d51081c0eebb49 1464,1466
+site/content/docs/en/guides/layout-arrangements.mdx
+  s_17b7895fef0302::t_bb5db1b709efc0 12-18,22
+  s_17b7895fef0302::t_ed57d142c5755d 19-21
+site/content/docs/en/guides/layout-concentric.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 21
+  s_17b7895fef0302::t_bb5db1b709efc0 22,26
+site/demos/flowchart.ts
+  s_17b7895fef0302::t_ed57d142c5755d 6,85
+src/layout/runLayout.ts
+  s_17b7895fef0302::t_be7eb398c12e31 43
+  s_17b7895fef0302::t_9d3020030a4f3d 116-123
+site/demos/g6-v5-compat.ts
+  s_17b7895fef0302::t_ed57d142c5755d 8,93
+site/content/docs/en/guides/layout-overview.mdx
+  s_17b7895fef0302::t_95567e3e7df810 96
+  s_17b7895fef0302::t_16776de36ed594 20-23,33-40,42-52
+  s_17b7895fef0302::t_ed57d142c5755d 41,85
+  s_17b7895fef0302::t_104e8d42650396 53
+site/content/docs/en/getting-started/quick-start.mdx
+  s_17b7895fef0302::t_4edddad00b1d61 191
+  s_17b7895fef0302::t_659524cdbab0b7 203
+site/demos/docs-layout-result.ts
+  s_17b7895fef0302::t_ed57d142c5755d 2,13
+skills/antv-g6lite-graph/references/layouts.md
+  s_17b7895fef0302::t_dfad1fda5265cf 79-80
+  s_17b7895fef0302::t_ed57d142c5755d 78
+site/demos/layouts.ts
+  s_17b7895fef0302::t_ed57d142c5755d 6-8,24,26-27
+site/demos/polyline-routing.ts
+  s_17b7895fef0302::t_ed57d142c5755d 5,49
+site/content/docs/en/getting-started/react.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 33
+  s_17b7895fef0302::t_f06ee5254734ae 61
+site/content/docs/zh/guides/layout-overview.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 41,85
+  s_17b7895fef0302::t_2be9005e214674 96
+  s_17b7895fef0302::t_7d838b59d7e217 20-23,33-40,42-52
+  s_17b7895fef0302::t_b2c9edfe785c0c 53
+README.md
+  s_17b7895fef0302::t_8ccb7fc80a3e9e 89
+  s_17b7895fef0302::t_6714b535a36c69 78
+  s_17b7895fef0302::t_a00862b122decf 104
+site/content/docs/en/getting-started/vue.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 34
+  s_17b7895fef0302::t_b9694c0ab8f735 60
+site/content/docs/en/guides/data.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 194,199
+site/content/docs/zh/api/options.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 104,119,649
+  s_17b7895fef0302::t_f4fc94c2d3059c 554-555
+site/demos/custom-behavior.ts
+  s_17b7895fef0302::t_ed57d142c5755d 11,77
+skills/antv-g6lite-graph/SKILL.md
+  s_17b7895fef0302::t_ed57d142c5755d 51
+  s_17b7895fef0302::t_433aa577abe3e4 60
+site/content/docs/en/guides/layout-grid.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 21
+  s_17b7895fef0302::t_bb5db1b709efc0 22,26
+src/layout/optional/random.ts
+  s_17b7895fef0302::t_96c988dd0efe45 3
+  s_17b7895fef0302::t_ed57d142c5755d 1
+site/content/docs/en/guides/layout.mdx
+  s_17b7895fef0302::t_9b1be09f14fe08 14
+  s_17b7895fef0302::t_cb857e54b06396 27,33-35,37
+  s_17b7895fef0302::t_2b73903fe05233 140-141
+  s_17b7895fef0302::t_7cf89049038ede 154
+  s_17b7895fef0302::t_ed57d142c5755d 139
+site/content/docs/en/compatibility/g6-v5-migration.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 28,38
+site/content/docs/zh/api/graph.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 778-780,829,831
+site/demos/docs-built-in-layout.ts
+  s_17b7895fef0302::t_ed57d142c5755d 8-11,17,20,23,58
+site/demos/docs-layout-worker.ts
+  s_17b7895fef0302::t_ed57d142c5755d 3,6
+tests/unit/layout/workerLayout.test.ts
+  s_17b7895fef0302::t_c7a7e7b44c164a 37
+site/src/components/homepage/showcase-examples.ts
+  s_17b7895fef0302::t_ed57d142c5755d 1
+  s_17b7895fef0302::t_35c55ae5413445 187
+src/index.ts
+  s_17b7895fef0302::t_d03c8a248cad55 84-85
+site/content/docs/zh/guides/layout-grid.mdx
+  s_17b7895fef0302::t_bb5db1b709efc0 22,26
+  s_17b7895fef0302::t_ed57d142c5755d 21
+site/demos/basic.ts
+  s_17b7895fef0302::t_ed57d142c5755d 5,27
+src/layout/libraryLayout.ts
+  s_17b7895fef0302::t_40ff83c9994213 1-7
+  s_17b7895fef0302::t_8a6ad0f8a9f48f 40
+site/content/docs/zh/guides/data.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 194,199
+site/demos/dependency-graph.ts
+  s_17b7895fef0302::t_ed57d142c5755d 5,45
+site/demos/search-focus.ts
+  s_17b7895fef0302::t_ed57d142c5755d 6,48
+site/content/docs/zh/guides/layout-circular.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 21,52
+  s_17b7895fef0302::t_bb5db1b709efc0 22,26
+  s_17b7895fef0302::t_2d99559aebd367 53-54
+src/layout/optional/mds.ts
+  s_17b7895fef0302::t_08cf557044d2a5 3
+  s_17b7895fef0302::t_ed57d142c5755d 1
+site/content/docs/en/guides/layout-circular.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 21,52
+  s_17b7895fef0302::t_bb5db1b709efc0 22,26
+  s_17b7895fef0302::t_74779042e8c59b 53-54
+site/demos/layout-gallery.ts
+  s_17b7895fef0302::t_ed57d142c5755d 6,13
+site/content/docs/zh/getting-started/vue.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 34
+  s_17b7895fef0302::t_c5113bafa6a2a3 60
+src/layout/layoutLoader.ts
+  s_17b7895fef0302::t_e897bb530ceeef 1-2,4,8-9
+site/content/docs/zh/compatibility/g6-v5-migration.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 26,36
+site/demos/docs-events-lifecycle.ts
+  s_17b7895fef0302::t_ed57d142c5755d 3,17
+site/content/docs/zh/guides/layout-arrangements.mdx
+  s_17b7895fef0302::t_bb5db1b709efc0 12-18,22
+  s_17b7895fef0302::t_ed57d142c5755d 19-21
+site/demos/custom-label-renderer.ts
+  s_17b7895fef0302::t_ed57d142c5755d 6,66
+site/demos/docs-extension-layout.ts
+  s_17b7895fef0302::t_ed57d142c5755d 3,53
+site/demos/set-data.ts
+  s_17b7895fef0302::t_ed57d142c5755d 7-8,62,92,94
+site/demos/shapes.ts
+  s_17b7895fef0302::t_ed57d142c5755d 5,54,96
+site/src/lib/quick-start.ts
+  s_17b7895fef0302::t_5a5c4af175ee45 80
+  s_17b7895fef0302::t_ed57d142c5755d 1
+site/content/docs/zh/getting-started/react.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 33
+  s_17b7895fef0302::t_2b02db727e9c3d 61
+site/content/docs/en/guides/edge.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 285
+  s_17b7895fef0302::t_88316407a414fb 286-287
+site/content/docs/en/api/graph.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 778-780,829,831
+site/demos/docs-polyline-orth.ts
+  s_17b7895fef0302::t_ed57d142c5755d 3,8
+site/content/docs/en/guides/layout-dagre.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 21
+  s_17b7895fef0302::t_bb5db1b709efc0 22,26
+site/content/docs/zh/guides/layout-concentric.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 21
+  s_17b7895fef0302::t_bb5db1b709efc0 22,26
+site/demos/docs-layout-switch.ts
+  s_17b7895fef0302::t_ed57d142c5755d 3-5,14-16
+site/content/docs/zh/guides/edge.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 287-289
+site/demos/docs-graph-options.ts
+  s_17b7895fef0302::t_ed57d142c5755d 2,59
+site/content/docs/zh/getting-started/quick-start.mdx
+  s_17b7895fef0302::t_788b81c889a448 203
+  s_17b7895fef0302::t_6b037ab20c9e70 191
+site/demos/decoration-badges.ts
+  s_17b7895fef0302::t_ed57d142c5755d 5,63
+site/demos/behaviors.ts
+  s_17b7895fef0302::t_ed57d142c5755d 7,37
+site/demos/org-chart.ts
+  s_17b7895fef0302::t_ed57d142c5755d 6,64
+tests/bugfix/layout/layoutViewport.test.ts
+  s_17b7895fef0302::t_9671ecd55d5cce 75
+skills/antv-g6lite-graph/references/templates/standalone.html
+  s_17b7895fef0302::t_ebfa1a511df2dc 141
+site/demos/layout-worker-cancel.ts
+  s_17b7895fef0302::t_ed57d142c5755d 3,20,51,57
+site/content/docs/en/api/options.mdx
+  s_17b7895fef0302::t_ed57d142c5755d 104,119,649
+  s_17b7895fef0302::t_10b7efac721136 554-555
+README.zh-CN.md
+  s_17b7895fef0302::t_690eab16edf2c0 78
+  s_17b7895fef0302::t_803c6e88a41e22 104
+  s_17b7895fef0302::t_db9e48379231c3 89
+src/types.ts
+  s_17b7895fef0302::t_096ccf3ee90f1c 767
+  s_17b7895fef0302::t_254f3e427e9438 592-600,603-605
+src/layout/optional/radial.ts
+  s_17b7895fef0302::t_ed57d142c5755d 1
+  s_17b7895fef0302::t_7fe0f032a9fea1 3
+site/demos/docs-layout-networks.ts
+  s_17b7895fef0302::t_ed57d142c5755d 5,13
+site/demos/labels.ts
+  s_17b7895fef0302::t_ed57d142c5755d 6,44,97
+tests/unit/site/quick-start.test.ts
+  s_17b7895fef0302::t_ed57d142c5755d 2
+src/layout/layoutOptions.ts
+  s_17b7895fef0302::t_23db36ec7e5a63 1-2,6,9
+skills/antv-g6lite-graph/references/templates/react-graph.tsx
+  s_17b7895fef0302::t_ed57d142c5755d 5
+  s_17b7895fef0302::t_84a2cf08ba635f 52
+tests/unit/graph.test.ts
+  s_17b7895fef0302::t_15d0812734b3cd 397
+  s_17b7895fef0302::t_b5a5c57e070a49 377
+  s_17b7895fef0302::t_82ba67b39c936f 421,424
+site/content/docs/zh/guides/layout-dagre.mdx
+  s_17b7895fef0302::t_bb5db1b709efc0 22,26
+  s_17b7895fef0302::t_ed57d142c5755d 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ccaf041fd35dc046d54a02c4f90fc3bf29c4738c",
+  "prompts": {},
+  "sessions": {
+    "s_17b7895fef0302": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "b1d1972b-e32e-428e-9c7d-0920211eae84",
+        "model": "codefuse_official_channel/Kimi-K3.1-Pro:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

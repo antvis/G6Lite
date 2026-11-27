@@ -18,7 +18,7 @@ layout: { type: 'force-atlas2', worker: true, maxIteration: 100 },
 | layout.worker | Graph 中的行为 |
 | --- | --- |
 | 省略 | 节点数 ≥ 1000 时尝试启用；低于 1000 时走主线程 |
-| true | 对内置库布局尝试 Worker；注册扩展（包括六种可选布局）在主线程执行 |
+| true | 对字符串形式的内置布局尝试 Worker；从 `@antv/layout` 导入的布局类和注册扩展均在主线程执行 |
 | false | 显式关闭，包括大图 |
 
 独立 runLayout 没有按节点数自动启用的行为。Worker 失败会回退到同一算法的主线程实现；具体执行顺序和默认迭代值见[布局参考](/docs/guides/layout#worker)。

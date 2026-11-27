@@ -3,6 +3,7 @@
  */
 import { Graph, type GraphEdge, type GraphNode, type LabelPlacement } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { CircularLayout } from '@antv/layout';
 
 const DATA = {
   nodes: [
@@ -40,7 +41,7 @@ export async function run(container: string | HTMLElement) {
     autoFit: true,
     container: el,
     data: DATA,
-    layout: { type: 'circular', radius: 180 },
+    layout: { type: CircularLayout, radius: 180 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
     node: {
       style: {
@@ -93,7 +94,7 @@ export async function run(container: string | HTMLElement) {
     graph.updateOptions({ node: { style: { icon: iconsVisible ? iconForNode : false } } });
   });
   ui.addChoice('布局', ['circular', 'force'], 'circular', async (value) => {
-    graph.setLayout(value === 'circular' ? { type: 'circular', radius: 180 } : { type: 'd3-force' });
+    graph.setLayout(value === 'circular' ? { type: CircularLayout, radius: 180 } : { type: 'd3-force' });
     await graph.layout();
     graph.fitView();
   });

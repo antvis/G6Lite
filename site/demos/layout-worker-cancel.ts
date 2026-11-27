@@ -1,5 +1,6 @@
 import { Graph, type GraphData } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { GridLayout } from '@antv/layout';
 
 function createData(): GraphData {
   const nodes = Array.from({ length: 240 }, (_, index) => ({ id: String(index) }));
@@ -16,7 +17,7 @@ export async function run(container: string | HTMLElement) {
     autoFit: true,
     container,
     data: createData(),
-    layout: { type: 'grid', rows: 15, cols: 16 },
+    layout: { type: GridLayout, rows: 15, cols: 16 },
     node: { style: { size: 7 } },
     edge: { style: { stroke: '#cbd5e1', opacity: 0.45 } },
     behaviors: ['zoom-canvas', 'drag-canvas'],
@@ -47,13 +48,13 @@ export async function run(container: string | HTMLElement) {
     void runLayout({ type: 'force-atlas2', worker: true, maxIteration: 200, barnesHut: true, prune: false }, 'cancel test');
     cancelTimer = window.setTimeout(() => {
       graph.cancelLayout();
-      void runLayout({ type: 'grid', rows: 15, cols: 16 }, 'cancelled → grid');
+      void runLayout({ type: GridLayout, rows: 15, cols: 16 }, 'cancelled → grid');
     }, 20);
   });
   ui.addAction('恢复 Grid', () => {
     clearTimeout(cancelTimer);
     graph.cancelLayout();
-    void runLayout({ type: 'grid', rows: 15, cols: 16 }, 'grid');
+    void runLayout({ type: GridLayout, rows: 15, cols: 16 }, 'grid');
   });
 
   ui.setStatus('grid ready');

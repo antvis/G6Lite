@@ -4,6 +4,8 @@
  */
 import { Graph, type FitViewOptions } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { CircularLayout } from '@antv/layout';
+import { GridLayout } from '@antv/layout';
 
 const DATA_A = {
   nodes: [
@@ -57,7 +59,7 @@ export async function run(container: string | HTMLElement) {
     autoFit: fit,
     container: el,
     data: DATA_A,
-    layout: { type: 'circular', radius: 120 },
+    layout: { type: CircularLayout, radius: 120 },
     behaviors: [
       'zoom-canvas',
       'drag-canvas',
@@ -87,9 +89,9 @@ export async function run(container: string | HTMLElement) {
 
   ui.addChoice('布局', ['circular', 'grid', 'force'], 'circular', async (value) => {
     log(`setLayout(${value}) + layout()`);
-    if (value === 'grid') graph.setLayout({ type: 'grid' });
+    if (value === 'grid') graph.setLayout({ type: GridLayout });
     else if (value === 'force') graph.setLayout({ type: 'd3-force' });
-    else graph.setLayout({ type: 'circular', radius: 150 });
+    else graph.setLayout({ type: CircularLayout, radius: 150 });
     await graph.layout();
     graph.fitView(fit);
     log(`${value} done`);

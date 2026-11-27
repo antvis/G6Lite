@@ -28,7 +28,6 @@ class FakeLayout {
 }
 
 vi.mock('@antv/layout/lib/algorithm/force/index.js', () => ({ ForceLayout: FakeLayout }));
-vi.mock('@antv/layout/lib/algorithm/circular/index.js', () => ({ CircularLayout: FakeLayout }));
 
 // Import AFTER the mock is registered.
 const { runLayout } = await import('@src/layout/runLayout.js');
@@ -73,7 +72,7 @@ describe('runLayout viewport injection', () => {
   });
 
   it('leaves opts viewport untouched when no viewport is passed (back-compat)', async () => {
-    await runLayout(data as never, { type: 'circular' });
+    await runLayout(data as never, { type: 'force' });
     expect(captured.opts!.width).toBeUndefined();
     expect(captured.opts!.height).toBeUndefined();
     expect(captured.opts!.center).toBeUndefined();

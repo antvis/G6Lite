@@ -7,6 +7,8 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 需要按业务规则安排节点时，可以注册 `LayoutExtension`。它接收图数据，返回节点坐标。本例把节点等距排成一行。内置算法见[布局总览](/docs/guides/layout-overview)。
 
+从 `@antv/layout` 导入的现有布局类可直接作为 `layout.type` 传入，无需注册；只有自定义 `LayoutExtension` 才需要调用 `register`。
+
 ## 实现与执行
 
 `execute()` 接收本次图数据和运行参数。节点的 ID 和业务数据原样返回，位置用计算出的 `x`、`y`。示例从 `options.gap` 读取间距。

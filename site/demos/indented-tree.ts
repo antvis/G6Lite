@@ -7,8 +7,8 @@
  *
  * 通过右上角菜单切换两种模式。
  */
-import { Graph, register } from '@antv/g6-lite';
-import indented from '@antv/g6-lite/layouts/indented';
+import { Graph } from '@antv/g6-lite';
+import { IndentedLayout } from '@antv/layout';
 import { createDemoPanel } from './demo-panel.ts';
 import { attachLabelsCanvas, type GraphInstanceWithTools } from './tooling.ts';
 
@@ -64,7 +64,7 @@ function measureTextWidth(text: string): number {
 }
 
 const layoutBase = {
-  type: 'indented' as const,
+  type: IndentedLayout,
   indent: 80,
   rowHeight: 52,
   direction: 'LR' as const,
@@ -146,7 +146,6 @@ function configMinimal() {
 }
 
 export async function run(container: string | HTMLElement) {
-  register('layout', 'indented', indented);
   const wrapper =
     typeof container === 'string'
       ? (document.querySelector(container)! as HTMLElement)

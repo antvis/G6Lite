@@ -1,8 +1,8 @@
 /**
  * Demo: 思维导图 (Mind Map) — 台风形成因素
  */
-import { Graph, register, type GraphEdge, type GraphNode } from '@antv/g6-lite';
-import mindmap from '@antv/g6-lite/layouts/mindmap';
+import { Graph, type GraphEdge, type GraphNode } from '@antv/g6-lite';
+import { MindmapLayout } from '@antv/layout';
 import { attachLabelsCanvas, type GraphInstanceWithTools } from './tooling.ts';
 
 const BRANCH_COLORS = ['#E8684A', '#5B8FF9', '#5AD8A6', '#F6BD16'];
@@ -118,7 +118,6 @@ function getEdgeColor(_source: GraphNode, _target: GraphNode, edge: GraphEdge) {
 }
 
 export async function run(container: string | HTMLElement) {
-  register('layout', 'mindmap', mindmap);
   const wrapper = typeof container === 'string' ? document.querySelector(container)! as HTMLElement : container;
   wrapper.style.position = 'relative';
 
@@ -139,7 +138,7 @@ export async function run(container: string | HTMLElement) {
       },
     },
     layout: {
-      type: 'mindmap',
+      type: MindmapLayout,
       direction: 'H',
       levelGap: 120,  // 缩短左右间距
       nodeGap: 12,

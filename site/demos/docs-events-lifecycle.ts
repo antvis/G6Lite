@@ -1,5 +1,6 @@
 import { Graph, type FitViewOptions, type GraphData, type GraphEventMap } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { GridLayout } from '@antv/layout';
 
 export async function run(container: HTMLElement) {
   const initialData = (): GraphData => ({
@@ -13,7 +14,7 @@ export async function run(container: HTMLElement) {
   const graph = new Graph({
     container,
     data: initialData(),
-    layout: { type: 'grid', rows: 1, width: 320, height: 80 },
+    layout: { type: GridLayout, rows: 1, width: 320, height: 80 },
     node: { style: { size: 30, label: (node) => `${node.id}: ${node.data?.edits ?? 0}`, labelOffsetY: 8 } },
     behaviors: [],
     autoFit: fit,

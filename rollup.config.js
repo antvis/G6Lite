@@ -19,13 +19,6 @@ const ts = () =>
     },
   });
 
-const optionalLayouts = Object.fromEntries(
-  ['mds', 'radial', 'indented', 'mindmap', 'fishbone', 'random'].map((type) => [
-    `layouts/${type}`,
-    `src/layout/optional/${type}.ts`,
-  ]),
-);
-
 export default [
   // npm 产物：ESM bundle + 独立 layout worker chunk。
   {
@@ -34,7 +27,6 @@ export default [
       // workerLayout.ts 以 `new URL('./layoutWorker.js', import.meta.url)` 引用
       // worker，入口必须保持扁平文件名，落在 dist 根目录。
       layoutWorker: 'src/layout/layoutWorker.ts',
-      ...optionalLayouts,
     },
     external,
     output: {
@@ -46,9 +38,8 @@ export default [
     },
     plugins: [ts()],
   },
-  // Share declarations between the main entry and the optional layouts.
   {
-    input: { index: 'src/index.ts', ...optionalLayouts },
+    input: 'src/index.ts',
     external,
     output: {
       dir: 'dist',
@@ -67,17 +58,6 @@ export default [
       name: 'G6Lite',
       sourcemap: true,
       inlineDynamicImports: true,
-      plugins: [terser()],
-    },
-    plugins: [resolve({ browser: true, preferBuiltins: false }), commonjs(), ts()],
-  },
-  {
-    input: 'src/layout/optional/index.ts',
-    output: {
-      file: 'dist/g6-lite-layouts.min.js',
-      format: 'umd',
-      name: 'G6LiteLayouts',
-      sourcemap: true,
       plugins: [terser()],
     },
     plugins: [resolve({ browser: true, preferBuiltins: false }), commonjs(), ts()],

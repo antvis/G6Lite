@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Graph, type GraphData, type NodeGraphEvent } from '@antv/g6-lite';
+import { DagreLayout } from '@antv/layout';
 
 type Props = {
   data: GraphData;
@@ -48,7 +49,7 @@ export function RelationshipGraph({ data, onNodeClick }: Props) {
           style: { stroke: '#94a3b8', endArrow: true, arrowSize: 6 },
           stateStyles: { inactive: { opacity: 0.15 } },
         },
-        layout: { type: 'dagre', rankdir: 'LR', ranksep: 100 },
+        layout: { type: DagreLayout, rankdir: 'LR', ranksep: 100 },
         behaviors: [
           'zoom-canvas',
           'drag-canvas',

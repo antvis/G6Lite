@@ -18,10 +18,12 @@ Use a circle for networks without a hierarchy, or a spiral for ordered nodes.
 Set the layout type with `layout.type`.
 
 ```ts
+import { CircularLayout } from '@antv/layout';
+
 const graph = new Graph({
   container,
   data,
-  layout: { type: 'circular' },
+  layout: { type: CircularLayout },
 });
 ```
 
@@ -47,7 +49,9 @@ Eight nodes sit on a circle with a radius of 100.
 Set `startRadius` and `endRadius` to different values and omit `radius`.
 
 ```ts
-const layout = { type: 'circular', startRadius: 30, endRadius: 140 };
+import { CircularLayout } from '@antv/layout';
+
+const layout = { type: CircularLayout, startRadius: 30, endRadius: 140 };
 ```
 
 [Compare Grid, Circular, and Dagre](/en/docs/guides/layout-arrangements)

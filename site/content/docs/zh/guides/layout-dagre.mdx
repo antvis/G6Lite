@@ -18,10 +18,12 @@ import { NodeDocExample } from '@/components/node-doc-example';
 布局类型通过 `layout.type` 指定。
 
 ```ts
+import { DagreLayout } from '@antv/layout';
+
 const graph = new Graph({
   container,
   data,
-  layout: { type: 'dagre' },
+  layout: { type: DagreLayout },
 });
 ```
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { D3ForceLayout } from '@antv/layout/lib/algorithm/d3-force/index.js';
+import { D3ForceLayout } from '@antv/layout';
 import { quickStartNetworkOptions } from '../../../site/src/lib/quick-start';
 
 describe('quick-start network', () => {

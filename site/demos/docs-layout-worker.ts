@@ -1,8 +1,9 @@
 import { Graph, type LayoutConfig } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { GridLayout } from '@antv/layout';
 
 export async function run(container: HTMLElement) {
-  const grid: LayoutConfig = { type: 'grid', rows: 10, cols: 16, width: 400, height: 200, worker: false };
+  const grid: LayoutConfig = { type: GridLayout, rows: 10, cols: 16, width: 400, height: 200, worker: false };
   const graph = new Graph({
     container,
     data: {

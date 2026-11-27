@@ -2,6 +2,7 @@
  * Demo: stack built-in badges on a node boundary.
  */
 import { Graph, type NodeBadgeItem } from '@antv/g6-lite';
+import { DagreLayout } from '@antv/layout';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -59,7 +60,7 @@ export async function run(container: string | HTMLElement) {
       ],
     },
     edge: { style: { endArrow: true, stroke: '#99ADD1' } },
-    layout: { type: 'dagre', rankdir: 'LR', nodesep: 40, ranksep: 120, nodeSize: 56 },
+    layout: { type: DagreLayout, rankdir: 'LR', nodesep: 40, ranksep: 120, nodeSize: 56 },
     behaviors: ['zoom-canvas', 'drag-canvas'],
   });
   await graph.render();

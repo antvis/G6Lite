@@ -31,6 +31,7 @@ import GraphView from './GraphView.vue';
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { Graph, type GraphData } from '@antv/g6-lite';
+import { CircularLayout } from '@antv/layout';
 
 const basicData: GraphData = {
   nodes: [{ id: 'Alice' }, { id: 'Bob' }, { id: 'Carol' }],
@@ -56,7 +57,7 @@ onMounted(async () => {
   const instance = new Graph({
     container: containerRef.value,
     data: basicData,
-    layout: { type: 'circular', radius: 120 },
+    layout: { type: CircularLayout, radius: 120 },
     node: { style: { size: 24, label: (node) => node.id, labelPlacement: 'bottom' } },
     edge: { style: { endArrow: true } },
     autoFit: fitView,

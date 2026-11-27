@@ -191,11 +191,12 @@ graph.collapseCombo('storage');
 
 ```ts
 import { Graph, type GraphData } from '@antv/g6-lite';
+import { GridLayout } from '@antv/layout';
 
 const graph = new Graph({
   container: '#container',
   data: { nodes: [], edges: [] },
-  layout: { type: 'grid' },
+  layout: { type: GridLayout },
 });
 await graph.render();
 

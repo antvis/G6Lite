@@ -3,6 +3,9 @@
  */
 import { Graph } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { CircularLayout } from '@antv/layout';
+import { GridLayout } from '@antv/layout';
+import { DagreLayout } from '@antv/layout';
 
 const data = {
   nodes: [
@@ -18,10 +21,10 @@ const data = {
 };
 
 const LAYOUTS = [
-  { type: 'circular', radius: 180 },
+  { type: CircularLayout, radius: 180 },
   { type: 'force', linkDistance: 80 },
-  { type: 'grid', rows: 2, cols: 5 },
-  { type: 'dagre', rankdir: 'TB', nodesep: 30, ranksep: 40 },
+  { type: GridLayout, rows: 2, cols: 5 },
+  { type: DagreLayout, rankdir: 'TB', nodesep: 30, ranksep: 40 },
 ] as const;
 
 export async function run(container: string | HTMLElement) {

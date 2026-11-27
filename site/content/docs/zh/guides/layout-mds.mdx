@@ -15,18 +15,16 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 ## 基本用法
 
-这是可选布局。先导入并注册，再设置 `layout.type`。CDN 接入见[可选布局](/docs/guides/layout-overview#optional-layouts)。
+这是外部布局。从 `@antv/layout` 导入布局类并作为 `layout.type` 传入，无需注册。详见[内置与外部布局](/docs/guides/layout-overview#builtin-and-external-layouts)。
 
 ```ts
-import { Graph, register } from '@antv/g6-lite';
-import mds from '@antv/g6-lite/layouts/mds';
-
-register('layout', 'mds', mds);
+import { Graph } from '@antv/g6-lite';
+import { MDSLayout } from '@antv/layout';
 
 const graph = new Graph({
   container,
   data,
-  layout: { type: 'mds' },
+  layout: { type: MDSLayout },
 });
 ```
 

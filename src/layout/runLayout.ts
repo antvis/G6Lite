@@ -13,8 +13,6 @@ import { runLayoutInWorker } from './workerLayout';
 
 export type LayoutResult = { nodes: Array<GraphNode & { x: number; y: number }> };
 
-const OPTIONAL_LAYOUTS = new Set(['mds', 'radial', 'indented', 'mindmap', 'fishbone', 'random']);
-
 interface LayoutRuntime {
   signal?: AbortSignal;
   extensionContext?: ExtensionContext;
@@ -40,6 +38,7 @@ async function runExtensionLayout(
   viewport: { width: number; height: number } | undefined,
   runtime: LayoutRuntime,
 ): Promise<LayoutResult | undefined> {
+  if (typeof config.type !== 'string') return undefined;
   const extension = createExtension<LayoutExtension>('layout', config.type);
   if (!extension) return undefined;
   const options = Object.freeze({ ...config });
@@ -112,10 +111,12 @@ export async function runLayout(
   if (runtime.signal?.aborted) return createFallbackResult(data);
 
   const { type } = resolvedConfig;
-  if (OPTIONAL_LAYOUTS.has(type)) {
-    throw new Error(
-      `[G6Lite] Register layout "${type}" from @antv/g6-lite/layouts/${type} before use.`,
-    );
+
+  // Custom layout classes are executed on the main thread because functions
+  // cannot be transferred to a Worker via postMessage.
+  if (typeof type === 'function') {
+    if (runtime.signal?.aborted) return createFallbackResult(data);
+    return runLibraryLayout(type, data, resolvedConfig, runtime.signal);
   }
 
   const loadLayout = getLayoutLoader(type);

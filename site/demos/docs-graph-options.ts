@@ -1,4 +1,5 @@
 import { Graph } from '@antv/g6-lite';
+import { DagreLayout } from '@antv/layout';
 
 export async function run(container: HTMLElement) {
   const graph = new Graph({
@@ -55,7 +56,7 @@ export async function run(container: HTMLElement) {
       },
     },
     // #endregion element-options
-    layout: { type: 'dagre', rankdir: 'LR', ranksep: 84, nodesep: 16, nodeSize: 96 },
+    layout: { type: DagreLayout, rankdir: 'LR', ranksep: 84, nodesep: 16, nodeSize: 96 },
     label: { hideOnLowZoom: false, scaleWithZoom: false },
     behaviors: ['click-select', 'drag-canvas', 'zoom-canvas'],
     autoFit: { padding: 36 },

@@ -4,7 +4,7 @@
  */
 
 import type { GraphData, GraphEdge, GraphNode } from '../types';
-import { getLayoutLoader } from './layoutLoader';
+import { BUILTIN_LAYOUTS } from './builtinLayouts';
 import { normalizeLibraryLayoutOptions } from './layoutOptions';
 
 interface WorkerMessage {
@@ -38,15 +38,14 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
   const layoutData: GraphData = { nodes: layoutNodes, edges: layoutEdges };
 
   try {
-    const loadLayout = getLayoutLoader(type);
-    if (!loadLayout) throw new Error(`Unknown built-in layout "${type}"`);
-    const LayoutClass = await loadLayout();
+    const LayoutClass = BUILTIN_LAYOUTS[type];
+    if (!LayoutClass) throw new Error(`Unknown built-in layout "${type}"`);
     const layout = new LayoutClass(opts);
     await layout.execute(layoutData);
 
     const positions: Array<{ id: string; x: number; y: number }> = [];
-    layout.forEachNode((node: { id: string; x: number; y: number }) => {
-      positions.push({ id: node.id, x: node.x, y: node.y });
+    layout.forEachNode((node) => {
+      positions.push({ id: String(node.id), x: node.x, y: node.y });
     });
 
     const response: WorkerResponse = { id, positions };

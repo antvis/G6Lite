@@ -4,7 +4,6 @@ import { codeToHtml } from 'shiki';
 import type { Locale } from '@/lib/i18n';
 import type { ShowcaseCode, ShowcaseId, ShowcaseTheme } from './showcase-catalog';
 import { showcaseOptions } from './showcase-examples';
-import { getShowcaseOptionalLayout } from './showcase-catalog';
 
 /** Highlight at build time; the browser receives one selected source and markup. */
 export async function createShowcaseCode(
@@ -23,6 +22,9 @@ export function showcaseSource(id: ShowcaseId, locale: Locale, dark = false): st
   const config = JSON.stringify(
     options,
     (key, value) => {
+      if (key === 'type' && typeof value === 'function' && value.name) {
+        return `__layout_class_${value.name}__`;
+      }
       if (typeof value !== 'function') return value;
       const token = `__showcase_callback_${callbacks.length}__`;
       let source = value.toString();
@@ -40,15 +42,15 @@ export function showcaseSource(id: ShowcaseId, locale: Locale, dark = false): st
     2,
   )
     .replace(/"__showcase_callback_(\d+)__"/g, (_match, index) => callbacks[Number(index)])
+    .replace(/"__layout_class_(\w+)__"/g, '$1')
     .slice(2, -2);
   const nodes = data.nodes.map((node) => `    ${JSON.stringify(node)}`).join(',\n');
   const edges = data.edges.map((edge) => `    ${JSON.stringify(edge)}`).join(',\n');
-  const layout = getShowcaseOptionalLayout(id);
-  const imports = layout
-    ? `import { Graph, register } from '@antv/g6-lite';
-import ${layout} from '@antv/g6-lite/layouts/${layout}';
-
-register('layout', '${layout}', ${layout});`
+  const layoutType = typeof options.layout === 'object' ? options.layout?.type : undefined;
+  const layoutClass = typeof layoutType === 'function' ? layoutType.name : undefined;
+  const imports = layoutClass
+    ? `import { Graph } from '@antv/g6-lite';
+import { ${layoutClass} } from '@antv/layout';`
     : "import { Graph } from '@antv/g6-lite';";
   return `${imports}
 

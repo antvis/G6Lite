@@ -12,30 +12,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./layouts/mds": {
-      "types": "./dist/layouts/mds.d.ts",
-      "import": "./dist/layouts/mds.js"
-    },
-    "./layouts/radial": {
-      "types": "./dist/layouts/radial.d.ts",
-      "import": "./dist/layouts/radial.js"
-    },
-    "./layouts/indented": {
-      "types": "./dist/layouts/indented.d.ts",
-      "import": "./dist/layouts/indented.js"
-    },
-    "./layouts/mindmap": {
-      "types": "./dist/layouts/mindmap.d.ts",
-      "import": "./dist/layouts/mindmap.js"
-    },
-    "./layouts/fishbone": {
-      "types": "./dist/layouts/fishbone.d.ts",
-      "import": "./dist/layouts/fishbone.js"
-    },
-    "./layouts/random": {
-      "types": "./dist/layouts/random.d.ts",
-      "import": "./dist/layouts/random.js"
     }
   },
   "files": [
@@ -97,7 +73,7 @@
   },
   "dependencies": {
     "@antv/event-emitter": "^0.1.3",
-    "@antv/layout": "^2.0.0",
+    "@antv/layout": "^2.1.0-beta.1",
     "regl": "^2.1.1"
   },
   "engines": {

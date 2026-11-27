@@ -1,0 +1,21 @@
+site/content/docs/en/metrics/performance.mdx
+  s_17b7895fef0302::t_1b73e47b09b0c4 43,45,47-50
+site/content/docs/zh/metrics/performance.mdx
+  s_17b7895fef0302::t_d55f308c511f27 39,41,43-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "067c51ae74b4fbea4db773fdae166393a76e3c9d",
+  "prompts": {},
+  "sessions": {
+    "s_17b7895fef0302": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "b1d1972b-e32e-428e-9c7d-0920211eae84",
+        "model": "codefuse_official_channel/Kimi-K3.1-Pro:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

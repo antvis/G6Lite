@@ -1,0 +1,27 @@
+site/content/docs/zh/metrics/performance.mdx
+  s_17b7895fef0302::t_46bb980680abbc 43
+  s_17b7895fef0302::t_5cc1fc579503ef 54
+README.md
+  s_17b7895fef0302::t_359d02673ee816 114
+README.zh-CN.md
+  s_17b7895fef0302::t_6e69906e970135 114
+site/content/docs/en/metrics/performance.mdx
+  s_17b7895fef0302::t_c7782bddf19d27 47
+  s_17b7895fef0302::t_274a8be27b88db 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d985b6f952c6b8bbe935aca6bf3df7664a9b1caf",
+  "prompts": {},
+  "sessions": {
+    "s_17b7895fef0302": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "b1d1972b-e32e-428e-9c7d-0920211eae84",
+        "model": "codefuse_official_channel/Kimi-K3.1-Pro:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

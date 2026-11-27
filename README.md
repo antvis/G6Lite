@@ -13,8 +13,7 @@ English | [简体中文](./README.zh-CN.md)
 <p align="center">
   <a href="https://www.npmjs.com/package/@antv/g6-lite/v/0.1.0"><img alt="npm version" src="https://img.shields.io/badge/version-0.1.0-blue"></a>
   <a href="https://github.com/antvis/G6Lite/actions/workflows/build.yml"><img alt="build" src="https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg"></a>
-  <a href="https://bundlephobia.com/package/@antv/g6-lite@0.1.0"><img alt="0.1.0 npm entry, minified and gzipped: 91.5 kB" src="https://img.shields.io/badge/minzip-91.5_kB-blue"></a>
-  <a href="https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"><img alt="UMD gzip size" src="https://img.badgesize.io/https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
+  <a href="https://unpkg.com/@antv/g6-lite/dist/g6-lite.min.js"><img alt="UMD gzip size" src="https://img.badgesize.io/https://unpkg.com/@antv/g6-lite/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
   <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/npm/l/@antv/g6-lite.svg"></a>
 </p>
 
@@ -75,7 +74,7 @@ const graph = new Graph({
     },
   },
   edge: { type: 'line', style: { lineWidth: 2 } },
-  layout: { type: 'circular', radius: 140 },
+  layout: { type: 'force', linkDistance: 120 },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
 
@@ -86,11 +85,11 @@ Only package-root exports from `@antv/g6-lite` and `package.json#exports` are pu
 
 ## CDN / UMD
 
-Use the UMD build directly in a browser without a bundler. It exposes `window.G6Lite` and includes the runtime dependencies and built-in layouts. See [Optional layouts](https://g6lite.antv.vision/en/docs/guides/layout-overview#optional-layouts) for additional layouts.
+Use the UMD build directly in a browser without a bundler. It exposes `window.G6Lite` and includes the runtime dependencies and built-in force-directed layouts (`force`, `force-atlas2`, `d3-force`, `fruchterman`). Other `@antv/layout` algorithms can be passed as layout classes; see [Built-in and external layouts](https://g6lite.antv.vision/en/docs/guides/layout-overview#builtin-and-external-layouts). See [Optional layouts](https://g6lite.antv.vision/en/docs/guides/layout-overview#optional-layouts) for additional registered layouts.
 
 ```html
 <div id="container" style="width: 100%; height: 500px"></div>
-<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite/dist/g6-lite.min.js"></script>
 <script>
   const graph = new G6Lite.Graph({
     container: '#container',
@@ -101,17 +100,17 @@ Use the UMD build directly in a browser without a bundler. It exposes `window.G6
         { source: 'gateway', target: 'inventory' },
       ],
     },
-    layout: { type: 'circular', radius: 140 },
+    layout: { type: 'force', linkDistance: 120 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
   });
   graph.render().catch(console.error);
 </script>
 ```
 
-- [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
-- [UNPKG](https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
+- [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite/dist/g6-lite.min.js)
+- [UNPKG](https://unpkg.com/@antv/g6-lite/dist/g6-lite.min.js)
 
-The minzip badge records Bundlephobia's measurement of the 0.1.0 npm entry (91,468 bytes gzip). The UMD badge measures the complete CDN download via UNPKG.
+The minzip badge records Bundlephobia's measurement of the npm entry. The UMD badge measures the complete CDN download via UNPKG.
 
 ## Learn More
 

@@ -18,10 +18,12 @@ Use it for device panels or resource lists that need aligned nodes.
 Set the layout type with `layout.type`.
 
 ```ts
+import { GridLayout } from '@antv/layout';
+
 const graph = new Graph({
   container,
   data,
-  layout: { type: 'grid' },
+  layout: { type: GridLayout },
 });
 ```
 

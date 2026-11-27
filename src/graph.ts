@@ -42,6 +42,7 @@ import type {
   GraphOptions,
   InternalCombo,
   LayoutConfig,
+  LayoutConstructor,
   LayoutNode,
   NodeDataUpdate,
   NodeModel,
@@ -919,7 +920,7 @@ export class Graph {
   /**
    * Set the layout configuration. Does not execute layout — call layout() after.
    */
-  setLayout(config: LayoutConfig): void {
+  setLayout(config: LayoutConfig | LayoutConstructor): void {
     if (this._destroyed) return;
     this.options.layout = config;
   }
@@ -1408,9 +1409,12 @@ export class Graph {
   private resolveEffectiveLayout(nodeCount: number): LayoutConfig | undefined {
     const layout = this.options.layout;
     if (!layout) return undefined;
-    return layout.worker === undefined && nodeCount >= 1000
-      ? { ...layout, worker: true }
-      : { ...layout };
+    const config: LayoutConfig = typeof layout === 'function' ? { type: layout } : layout;
+    // Custom layout classes cannot run in a Worker; only string-named built-ins
+    // get the automatic Worker default for large graphs.
+    return config.worker === undefined && nodeCount >= 1000 && typeof config.type === 'string'
+      ? { ...config, worker: true }
+      : { ...config };
   }
 
   private getCurrentLayoutNodes(): LayoutNode[] {
@@ -1457,14 +1461,16 @@ export class Graph {
 
   private createDataModel(theme: ReturnType<typeof resolveTheme>): DataModel {
     const { node, edge, layout } = this.options;
+    const layoutConfig = typeof layout === 'function' ? undefined : layout;
     const layoutDirection =
-      ((layout?.rankdir ?? layout?.direction) as ('TB' | 'LR' | 'BT' | 'RL') | undefined) ?? 'TB';
+      ((layoutConfig?.rankdir ?? layoutConfig?.direction) as
+        ('TB' | 'LR' | 'BT' | 'RL') | undefined) ?? 'TB';
     return new DataModel({
       nodeConfig: node,
       edgeConfig: edge,
       theme,
       layoutDirection,
-      layoutType: layout?.type,
+      layoutType: typeof layoutConfig?.type === 'string' ? layoutConfig.type : undefined,
       polylineRouter: edge?.style?.router ?? 'orth',
     });
   }

@@ -1,10 +1,11 @@
 import { Graph, type EdgeConfig, type LayoutConfig } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { DagreLayout } from '@antv/layout';
 
 export async function run(container: HTMLElement) {
   // #region routing
   const layout = {
-    type: 'dagre', rankdir: 'LR',
+    type: DagreLayout, rankdir: 'LR',
     nodesep: 40, ranksep: 96, nodeSize: [84, 32],
   } satisfies LayoutConfig;
   const edge: EdgeConfig = {

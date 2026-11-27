@@ -1,5 +1,8 @@
 import { Graph, type FitViewOptions, type LayoutConfig } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { GridLayout } from '@antv/layout';
+import { CircularLayout } from '@antv/layout';
+import { DagreLayout } from '@antv/layout';
 
 export function getFitOptions(): FitViewOptions {
   return { padding: [56, 48, 76, 48] };
@@ -8,9 +11,9 @@ export function getFitOptions(): FitViewOptions {
 export async function run(container: HTMLElement) {
   // #region layout-options
   const layouts: Record<string, LayoutConfig> = {
-    grid: { type: 'grid', rows: 2, cols: 3, width: 360, height: 160 },
-    circular: { type: 'circular', radius: 100 },
-    dagre: { type: 'dagre', rankdir: 'LR', nodesep: 64, ranksep: 96, nodeSize: 28 },
+    grid: { type: GridLayout, rows: 2, cols: 3, width: 360, height: 160 },
+    circular: { type: CircularLayout, radius: 100 },
+    dagre: { type: DagreLayout, rankdir: 'LR', nodesep: 64, ranksep: 96, nodeSize: 28 },
   };
   // #endregion layout-options
   const graph = new Graph({

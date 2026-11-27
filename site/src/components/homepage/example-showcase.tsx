@@ -10,18 +10,8 @@ import { CopyPrompt } from '@/components/ai-skill/copy-prompt';
 import { localizedPath, type Locale } from '@/lib/i18n';
 import type { HomepageShowcaseCopy } from './content';
 import styles from './homepage.module.css';
-import {
-  getShowcaseOptionalLayout,
-  showcaseIds,
-  type ShowcaseCode,
-  type ShowcaseId,
-} from './showcase-catalog';
+import { showcaseIds, type ShowcaseCode, type ShowcaseId } from './showcase-catalog';
 import { loadShowcaseCode } from './showcase-code-loader';
-
-const layoutLoaders = {
-  mindmap: () => import('@antv/g6-lite/layouts/mindmap'),
-  fishbone: () => import('@antv/g6-lite/layouts/fishbone'),
-};
 
 const subscribeNoop = () => () => {};
 
@@ -80,14 +70,11 @@ export function ExampleShowcase({
     const start = async () => {
       setStatus('loading');
       try {
-        const layout = getShowcaseOptionalLayout(active);
-        const [{ Graph, register }, runtime, layoutModule] = await Promise.all([
+        const [{ Graph }, runtime] = await Promise.all([
           import('../../../../src/index.ts'),
           import('./showcase-examples'),
-          layout && layoutLoaders[layout](),
         ]);
         if (disposed) return;
-        if (layout && layoutModule) register('layout', layout, layoutModule.default);
         graph = new Graph({ container: mount, ...runtime.showcaseOptions(active, locale, dark) });
         graphRef.current = graph;
         await graph.render();

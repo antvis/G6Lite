@@ -18,10 +18,12 @@ Use it to emphasize hubs by their number of connections.
 Set the layout type with `layout.type`.
 
 ```ts
+import { ConcentricLayout } from '@antv/layout';
+
 const graph = new Graph({
   container,
   data,
-  layout: { type: 'concentric' },
+  layout: { type: ConcentricLayout },
 });
 ```
 

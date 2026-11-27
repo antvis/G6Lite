@@ -284,7 +284,9 @@ edge: {
 折线随布局方向走。Dagre 布局用 `rankdir`，`LR` 表示从左到右，`TB` 表示从上到下。切换[正交连接与圆角示例](#正交连接与圆角)里的 **Direction** 可以对比两种效果。
 
 ```ts
-graph.setLayout({ type: 'dagre', rankdir: 'TB', nodeSize: [84, 32] });
+import { DagreLayout } from '@antv/layout';
+
+graph.setLayout({ type: DagreLayout, rankdir: 'TB', nodeSize: [84, 32] });
 await graph.render();
 ```
 

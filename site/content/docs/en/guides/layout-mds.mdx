@@ -15,18 +15,16 @@ Use it to examine how close or far apart nodes are in a network.
 
 ## Basic usage
 
-This layout is optional. Import and register it before setting `layout.type`. For CDN usage, see [Optional layouts](/en/docs/guides/layout-overview#optional-layouts).
+This is an external layout. Import its class from `@antv/layout` and pass it as `layout.type`; no registration is required. See [Built-in and external layouts](/en/docs/guides/layout-overview#builtin-and-external-layouts).
 
 ```ts
-import { Graph, register } from '@antv/g6-lite';
-import mds from '@antv/g6-lite/layouts/mds';
-
-register('layout', 'mds', mds);
+import { Graph } from '@antv/g6-lite';
+import { MDSLayout } from '@antv/layout';
 
 const graph = new Graph({
   container,
   data,
-  layout: { type: 'mds' },
+  layout: { type: MDSLayout },
 });
 ```
 

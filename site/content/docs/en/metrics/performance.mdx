@@ -38,27 +38,18 @@ The table shows the median time in milliseconds from graph creation through two 
 
 These results apply only to the environment above and do not certify minimum supported browser versions. See [Minimum browser versions](/en/docs/compatibility/browser#minimum-browser-versions) for capability version references and the remaining acceptance scope.
 
-## Browser bundle size [#bundle-size]
+## G6Lite CDN file sizes [#umd-size]
 
-esbuild 0.21.5 bundles each npm entry and its dependencies into a single minified browser script. The G6Lite measurement uses the default entry, with optional layouts imported separately as needed. ECharts imports GraphChart and CanvasRenderer only. Sigma.js includes Graphology. Sizes are in KiB and exclude source maps.
+The published UMD file `g6-lite.min.js` includes rendering, interactions, and built-in force-directed layouts. Other libraries are measured from their published UMD bundles on unpkg.
 
-| npm package | Minified (KiB) | gzip -9 (KiB) |
-| --- | ---: | ---: |
-| `@antv/g6-lite` development build (`0.1.0`) | 511.3 | 159.5 |
-| `@antv/g6@5.1.1` | 1,435.3 | 413.4 |
-| `sigma@4.0.4` + `graphology@0.26.0` | 438.4 | 110.7 |
-| `echarts@6.1.0` | 386.3 | 130.2 |
+| Library | UMD bundle | Minified (kB) | gzip -9 (kB) |
+| --- | --- | ---: | ---: |
+| `@antv/g6-lite` | `g6-lite.min.js` | 408.1 | 118.2 |
+| `@antv/g6@5.1.1` | `g6.min.js` | 1,383.3 | 390.6 |
+| `echarts@6.1.0` | `echarts.min.js` | 1,121.9 | 368.2 |
+| `sigma@4.0.4` + `graphology@0.26.0` | `sigma.min.js` + `graphology.umd.min.js` | 466.7 | 117.6 |
 
-### G6Lite CDN file sizes [#umd-size]
-
-These files come from the published npm package `@antv/g6-lite@0.1.0`, downloaded again and measured with `gzip -9` on 2026-11-24. One kB is 1,000 bytes. The homepage uses the default script's measurement from the same run. These are the distributed UMD files, measured separately from the esbuild bundles above.
-
-| Published file | Contents | gzip -9 (kB) |
-| --- | --- | ---: |
-| `g6-lite.min.js` | Default script with rendering, interactions, and built-in layouts | 150.3 |
-| `g6-lite-layouts.min.js` | Six optional layouts, loaded when needed | 29.1 |
-
-Load the optional script before registering the layout you want to use. [Optional layouts](/en/docs/guides/layout-overview#optional-layouts)
+Other layouts are imported as classes from `@antv/layout` and run on the main thread. [Built-in and external layouts](/en/docs/guides/layout-overview#builtin-and-external-layouts)
 
 ## Measuring your own graph [#performance-tuning]
 

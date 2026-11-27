@@ -2,6 +2,7 @@
  * Demo: 最简示例 — 少量节点边 + 环形布局
  */
 import { Graph } from '@antv/g6-lite';
+import { CircularLayout } from '@antv/layout';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -23,7 +24,7 @@ export async function run(container: string | HTMLElement) {
         { source: '3', target: '4' },
       ],
     },
-    layout: { type: 'circular', radius: 150 },
+    layout: { type: CircularLayout, radius: 150 },
     behaviors: ['zoom-canvas', 'drag-canvas'],
     theme: 'light',
   });

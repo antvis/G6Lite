@@ -5,6 +5,7 @@
 
 import { Graph, register, type NodeExtension } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { DagreLayout } from '@antv/layout';
 
 const statusBadgeNode: NodeExtension = {
   base: 'rect',
@@ -89,7 +90,7 @@ export async function run(container: string | HTMLElement) {
         labelFontSize: 13,
       },
     },
-    layout: { type: 'dagre', rankdir: 'LR', nodesep: 45, ranksep: 90, nodeSize: [96, 34] },
+    layout: { type: DagreLayout, rankdir: 'LR', nodesep: 45, ranksep: 90, nodeSize: [96, 34] },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'click-select', 'hover-highlight'],
   });
 

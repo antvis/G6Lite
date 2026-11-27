@@ -3,6 +3,7 @@
  * The multiline behavior lives entirely in this demo, not in G6Lite core.
  */
 import { Graph, register, type LabelRenderer } from '@antv/g6-lite';
+import { DagreLayout } from '@antv/layout';
 
 interface MultilineLayoutData {
   lines: string[];
@@ -62,7 +63,7 @@ export async function run(container: string | HTMLElement) {
         { source: 'gateway', target: 'target', data: { label: 'RPC\nresponse' } },
       ],
     },
-    layout: { type: 'dagre', rankdir: 'LR', nodeSize: 32, ranksep: 180 },
+    layout: { type: DagreLayout, rankdir: 'LR', nodeSize: 32, ranksep: 180 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
     // #region node-label
     node: {

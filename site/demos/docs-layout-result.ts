@@ -1,4 +1,5 @@
 import { Graph, runLayout } from '@antv/g6-lite';
+import { DagreLayout } from '@antv/layout';
 
 export async function run(container: HTMLElement) {
   const data = {
@@ -9,7 +10,7 @@ export async function run(container: HTMLElement) {
       { source: 'Validate', target: 'Output' },
     ],
   };
-  const result = await runLayout(data, { type: 'dagre', rankdir: 'LR', ranksep: 72 }, { width: 600, height: 300 });
+  const result = await runLayout(data, { type: DagreLayout, rankdir: 'LR', ranksep: 72 }, { width: 600, height: 300 });
   // No layout option on Graph: display the coordinates already computed above.
   const graph = new Graph({
     container,

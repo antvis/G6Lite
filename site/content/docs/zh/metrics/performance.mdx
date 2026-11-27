@@ -34,27 +34,18 @@ description: 同一图数据下 G6Lite、G6、Sigma.js 与 ECharts 的首绘耗�
 
 本轮结果只适用于上述测试环境，不代表最低浏览器版本认证。各浏览器的能力版本参考与尚未覆盖的验收范围见[最低浏览器版本](/docs/compatibility/browser#最低浏览器版本)。
 
-## 浏览器包体积 [#bundle-size]
+## G6Lite CDN 文件体积 [#umd-size]
 
-使用 esbuild 0.21.5 将各库的 npm 入口和依赖打包为单个浏览器脚本，并进行代码压缩。G6Lite 测量默认入口，可选布局按需引入。ECharts 只引入 GraphChart 和 CanvasRenderer，Sigma.js 包含 Graphology。体积以 KiB 计，不含 source map。
+发布的 UMD 文件 `g6-lite.min.js` 包含渲染、交互和内置力导向布局。其他库测量自 unpkg 上发布的 UMD 产物。
 
-| npm 包 | 代码压缩后（KiB） | gzip -9（KiB） |
-| --- | ---: | ---: |
-| `@antv/g6-lite` 开发构建（`0.1.0`） | 511.3 | 159.5 |
-| `@antv/g6@5.1.1` | 1,435.3 | 413.4 |
-| `sigma@4.0.4` + `graphology@0.26.0` | 438.4 | 110.7 |
-| `echarts@6.1.0` | 386.3 | 130.2 |
+| 库 | UMD 产物 | 压缩前（kB） | gzip 后（kB） |
+| --- | --- | ---: | ---: |
+| `@antv/g6-lite` | `g6-lite.min.js` | 408.1 | 118.2 |
+| `@antv/g6@5.1.1` | `g6.min.js` | 1,383.3 | 390.6 |
+| `echarts@6.1.0` | `echarts.min.js` | 1,121.9 | 368.2 |
+| `sigma@4.0.4` + `graphology@0.26.0` | `sigma.min.js` + `graphology.umd.min.js` | 466.7 | 117.6 |
 
-### G6Lite CDN 文件体积 [#umd-size]
-
-以下文件来自 npm 正式发布的 `@antv/g6-lite@0.1.0`，于 2026-11-24 重新下载并使用 `gzip -9` 分别测量，1 kB = 1,000 字节。首页展示默认脚本的同次测量值。这些文件是现成的 UMD 产物，与上方 esbuild 重新打包的体积采用不同口径。
-
-| 发布文件 | 内容 | gzip -9（kB） |
-| --- | --- | ---: |
-| `g6-lite.min.js` | 默认脚本，包含渲染、交互和内置布局 | 150.3 |
-| `g6-lite-layouts.min.js` | 六种可选布局，使用时额外加载 | 29.1 |
-
-需要使用可选布局时，加载附加脚本后注册对应的布局。 [可选布局用法](/docs/guides/layout-overview#optional-layouts)
+其他布局从 `@antv/layout` 导入布局类后传入，在主线程执行。 [内置与外部布局](/docs/guides/layout-overview#builtin-and-external-layouts)
 
 ## 业务图怎么测 [#performance-tuning]
 

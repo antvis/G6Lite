@@ -2,6 +2,19 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import type { BuiltInLayoutExample } from '../../demos/docs-built-in-layout.ts';
 
+const LAYOUT_CLASSES: Record<string, string> = {
+  grid: 'GridLayout',
+  circular: 'CircularLayout',
+  dagre: 'DagreLayout',
+  concentric: 'ConcentricLayout',
+  radial: 'RadialLayout',
+  mds: 'MDSLayout',
+  indented: 'IndentedLayout',
+  mindmap: 'MindmapLayout',
+  fishbone: 'FishboneLayout',
+  random: 'RandomLayout',
+};
+
 type RegisteredNodeDocExampleId = Exclude<NodeDocExampleId, 'built-in-layout'>;
 
 export type NodeDocExampleId = 'demo-drag-canvas' | 'demo-click-select' | 'demo-brush-select' | 'demo-lasso-select' | 'demo-highlight-node' | 'demo-highlight-edge' | 'behavior-drag-node' | 'behavior-drag-edge' | 'behavior-zoom-pan' | 'built-in-layout' | 'graph-options' | 'parallel-workflow' | 'self-loops' | 'extension-plugin' | 'extension-transform' | 'extension-layout' | 'extension-decoration' | 'extension-label' | 'extension-edge' | 'extension-node' | 'polyline-orth' | 'body' | 'style' | 'labels' | 'node-icons' | 'label-options' | 'badges' | 'edge-style' | 'edge-hit-area' | 'edge-parallel' | 'edge-curves' | 'edge-cubic' | 'edge-orth' | 'edge-indented' | 'edge-labels' | 'combo-data' | 'combo-style' | 'combo-collapsed' | 'combo-states' | 'combo-membership' | 'label-policy' | 'theme-switch' | 'theme-precedence' | 'layout-switch' | 'layout-networks' | 'layout-tree' | 'layout-worker' | 'layout-result' | 'behavior-switch' | 'behavior-selection' | 'behavior-highlight' | 'behavior-custom' | 'behavior-tooltip' | 'behavior-tooltip-hover' | 'events-listen' | 'events-lifecycle' | 'state-concept' | 'state-preserve' | 'viewport-concept' | 'viewport-preserve' | 'state-visibility' | 'viewport-resize' | 'viewport-zoom-to' | 'viewport-zoom-by' | 'graph-lifecycle' | 'data-workflow' | 'combo-operations' | 'dependency-graph' | 'node-halo' | 'node-updates' | 'breathing-node' | 'edge-state-styles' | 'edge-updates' | 'edge-arrows' | 'edge-dashes';
@@ -122,9 +135,8 @@ export function readBuiltInLayoutExample(type: BuiltInLayoutExample) {
       ? 'arrangement'
       : 'network';
   const [mainImport] = source.split('\n');
-  const layoutImport = source.split('\n').find((line) => line.endsWith(`'@antv/g6-lite/layouts/${type}';`));
-  const layoutName = layoutImport?.split(' ')[1];
-  const registration = layoutName ? `  register('layout', '${type}', ${layoutName});\n` : '';
+  const layoutClass = LAYOUT_CLASSES[type];
+  const layoutImport = layoutClass ? `import { ${layoutClass} } from '@antv/layout';` : undefined;
   const code = [
     type === 'mindmap' ? mainImport : mainImport.replace(', type GraphNode', ''),
     ...(layoutImport ? [layoutImport] : []),
@@ -132,12 +144,11 @@ export function readBuiltInLayoutExample(type: BuiltInLayoutExample) {
     getNodeDocExampleSnippet(source, dataRegion),
     getNodeDocExampleSnippet(source, 'render'),
     `export function run(container: HTMLElement) {
-${registration}  const layout: LayoutConfig = ${config.replaceAll('\n', '\n  ')};
-  return render(container, layout, ${dataRegion}(${dedicatedExample ? '' : 'layout.type'}));
+  const layout: LayoutConfig = ${config.replaceAll('\n', '\n  ')};
+  return render(container, layout, ${dataRegion}(${dedicatedExample ? '' : `'${type}'`}));
 }`,
   ].join('\n\n');
-  const registrationImport = layoutImport ? "import { register } from '@antv/g6-lite';" : undefined;
-  const excerpt = [registrationImport, layoutImport, registration.trim(), `const layout = ${config};`].filter(Boolean).join('\n\n');
+  const excerpt = [layoutImport, `const layout = ${config};`].filter(Boolean).join('\n\n');
   return { code, excerpt: type === 'fishbone' ? `${excerpt}\n\n${getNodeDocExampleSnippet(source, 'edge-router')}` : excerpt };
 }
 

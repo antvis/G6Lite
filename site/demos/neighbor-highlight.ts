@@ -1,11 +1,10 @@
 /**
  * Demo: hover a node to highlight its neighbors, or an edge to highlight its endpoints.
  */
-import { Graph, register } from '@antv/g6-lite';
-import radial from '@antv/g6-lite/layouts/radial';
+import { Graph } from '@antv/g6-lite';
+import { RadialLayout } from '@antv/layout';
 
 export async function run(container: string | HTMLElement) {
-  register('layout', 'radial', radial);
   const graph = new Graph({
     autoFit: true,
     container,
@@ -30,7 +29,7 @@ export async function run(container: string | HTMLElement) {
       },
     },
     edge: { style: { stroke: '#C5CEDB', lineWidth: 2 } },
-    layout: { type: 'radial', unitRadius: 120, linkDistance: 100 },
+    layout: { type: RadialLayout, unitRadius: 120, linkDistance: 100 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'highlight-node', 'highlight-edge'],
   });
   await graph.render();

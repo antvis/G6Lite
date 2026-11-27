@@ -9,9 +9,17 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 | Type | Description | Example configuration |
 | --- | --- | --- |
-| [`grid`](/en/docs/guides/layout-grid) | Arrange nodes in two rows and three columns. | `{ type: 'grid', rows: 2, cols: 3 }` |
-| [`circular`](/en/docs/guides/layout-circular) | Arrange nodes in a ring with radius 100. | `{ type: 'circular', radius: 100 }` |
-| [`dagre`](/en/docs/guides/layout-dagre) | Arrange dependency layers from left to right. | `{ type: 'dagre', rankdir: 'LR' }` |
+| [`grid`](/en/docs/guides/layout-grid) | Arrange nodes in two rows and three columns. | `{ type: GridLayout, rows: 2, cols: 3 }` |
+| [`circular`](/en/docs/guides/layout-circular) | Arrange nodes in a ring with radius 100. | `{ type: CircularLayout, radius: 100 }` |
+| [`dagre`](/en/docs/guides/layout-dagre) | Arrange dependency layers from left to right. | `{ type: DagreLayout, rankdir: 'LR' }` |
+
+Import the layout classes used by the example configurations:
+
+```ts
+import { GridLayout } from '@antv/layout';
+import { CircularLayout } from '@antv/layout';
+import { DagreLayout } from '@antv/layout';
+```
 
 ## Compare layouts
 

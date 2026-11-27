@@ -11,30 +11,17 @@ interface SiteExampleModule {
   run(container: string | HTMLElement): Promise<SiteExampleHandle>;
 }
 
-const layoutModules = {
-  '@antv/g6-lite/layouts/mds': () => import('@antv/g6-lite/layouts/mds'),
-  '@antv/g6-lite/layouts/radial': () => import('@antv/g6-lite/layouts/radial'),
-  '@antv/g6-lite/layouts/indented': () => import('@antv/g6-lite/layouts/indented'),
-  '@antv/g6-lite/layouts/mindmap': () => import('@antv/g6-lite/layouts/mindmap'),
-  '@antv/g6-lite/layouts/fishbone': () => import('@antv/g6-lite/layouts/fishbone'),
-  '@antv/g6-lite/layouts/random': () => import('@antv/g6-lite/layouts/random'),
-};
-
 async function loadExternals(code: string): Promise<Record<string, unknown>> {
-  const [g6, demoPanel, tooling, lilGui] = await Promise.all([
+  const [g6, layout, demoPanel, tooling, lilGui] = await Promise.all([
     import('@antv/g6-lite'),
+    import('@antv/layout'),
     import('../../demos/demo-panel.ts'),
     import('../../demos/tooling.ts'),
     import('lil-gui'),
   ]);
-  const layouts = await Promise.all(
-    Object.entries(layoutModules)
-      .filter(([name]) => code.includes(`'${name}'`) || code.includes(`"${name}"`))
-      .map(async ([name, load]) => [name, await load()] as const),
-  );
   return {
-    ...Object.fromEntries(layouts),
     '@antv/g6-lite': g6,
+    '@antv/layout': layout,
     'lil-gui': lilGui,
     './demo-panel.ts': demoPanel,
     './demo-panel': demoPanel,

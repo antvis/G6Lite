@@ -18,10 +18,12 @@ Use it for workflows, call chains, and dependency graphs.
 Set the layout type with `layout.type`.
 
 ```ts
+import { DagreLayout } from '@antv/layout';
+
 const graph = new Graph({
   container,
   data,
-  layout: { type: 'dagre' },
+  layout: { type: DagreLayout },
 });
 ```
 

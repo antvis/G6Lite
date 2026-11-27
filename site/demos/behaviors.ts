@@ -4,6 +4,7 @@
  * 操作:滚轮缩放、拖拽平移、悬停高亮;按住 Shift 拖拽框选节点(brush-select)。
  */
 import { Graph } from '@antv/g6-lite';
+import { CircularLayout } from '@antv/layout';
 
 export async function run(container: string | HTMLElement) {
   const graph = new Graph({
@@ -33,7 +34,7 @@ export async function run(container: string | HTMLElement) {
       },
     },
     edge: { type: 'line', style: { lineWidth: 2 } },
-    layout: { type: 'circular', radius: 150 },
+    layout: { type: CircularLayout, radius: 150 },
     behaviors: [
       'zoom-canvas',
       'drag-canvas',

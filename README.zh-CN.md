@@ -13,8 +13,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@antv/g6-lite/v/0.1.0"><img alt="npm 版本" src="https://img.shields.io/badge/version-0.1.0-blue"></a>
   <a href="https://github.com/antvis/G6Lite/actions/workflows/build.yml"><img alt="构建" src="https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg"></a>
-  <a href="https://bundlephobia.com/package/@antv/g6-lite@0.1.0"><img alt="0.1.0 npm 入口压缩后体积：91.5 kB" src="https://img.shields.io/badge/minzip-91.5_kB-blue"></a>
-  <a href="https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"><img alt="UMD gzip 体积" src="https://img.badgesize.io/https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
+  <a href="https://unpkg.com/@antv/g6-lite/dist/g6-lite.min.js"><img alt="UMD gzip 体积" src="https://img.badgesize.io/https://unpkg.com/@antv/g6-lite/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
   <a href="./LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/@antv/g6-lite.svg"></a>
 </p>
 
@@ -75,7 +74,7 @@ const graph = new Graph({
     },
   },
   edge: { type: 'line', style: { lineWidth: 2 } },
-  layout: { type: 'circular', radius: 140 },
+  layout: { type: 'force', linkDistance: 120 },
   behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
 });
 
@@ -86,11 +85,11 @@ await graph.render();
 
 ## CDN / UMD
 
-无需构建工具，在浏览器中直接加载 UMD 包即可使用 `window.G6Lite`。主脚本包含运行时依赖和内置布局。可选布局的接入方式见[布局总览](https://g6lite.antv.vision/docs/guides/layout-overview#optional-layouts)。
+无需构建工具，在浏览器中直接加载 UMD 包即可使用 `window.G6Lite`。主脚本包含运行时依赖和内置力导向布局（`force`、`force-atlas2`、`d3-force`、`fruchterman`）。其他 `@antv/layout` 算法可作为布局类传入，见[内置与外部布局](https://g6lite.antv.vision/docs/guides/layout-overview#builtin-and-external-layouts)。可选布局的接入方式见[布局总览](https://g6lite.antv.vision/docs/guides/layout-overview#optional-layouts)。
 
 ```html
 <div id="container" style="width: 100%; height: 500px"></div>
-<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite/dist/g6-lite.min.js"></script>
 <script>
   const graph = new G6Lite.Graph({
     container: '#container',
@@ -101,17 +100,17 @@ await graph.render();
         { source: 'gateway', target: 'inventory' },
       ],
     },
-    layout: { type: 'circular', radius: 140 },
+    layout: { type: 'force', linkDistance: 120 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node'],
   });
   graph.render().catch(console.error);
 </script>
 ```
 
-- [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
-- [UNPKG](https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
+- [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite/dist/g6-lite.min.js)
+- [UNPKG](https://unpkg.com/@antv/g6-lite/dist/g6-lite.min.js)
 
-minzip 徽章记录 Bundlephobia 对 0.1.0 版本 npm 入口的测量值（gzip 后 91,468 字节）；UMD 徽章通过 UNPKG 测量完整 CDN 文件的下载体积。
+minzip 徽章记录 Bundlephobia 对 npm 入口的测量值；UMD 徽章通过 UNPKG 测量完整 CDN 文件的下载体积。
 
 ## 继续阅读
 

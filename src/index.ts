@@ -81,6 +81,8 @@ export type {
   LabelRenderer,
   LabelType,
   LayoutConfig,
+  LayoutConstructor,
+  LayoutInstance,
   NodeBadgeItem,
   NodeBadgeKind,
   NodeConfig,

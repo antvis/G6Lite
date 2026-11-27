@@ -3,6 +3,7 @@
  */
 import { Graph } from '@antv/g6-lite';
 import { attachLabelsCanvas, type GraphInstanceWithTools } from './tooling.ts';
+import { DagreLayout } from '@antv/layout';
 
 const LEVEL_COLORS: Record<string, string> = {
   ceo: '#4A7DC0',
@@ -60,7 +61,7 @@ export async function run(container: string | HTMLElement) {
         startArrow: false,
       },
     },
-    layout: { type: 'dagre', rankdir: 'TB', nodesep: 50, ranksep: 80, nodeSize: [NODE_W, NODE_H] },
+    layout: { type: DagreLayout, rankdir: 'TB', nodesep: 50, ranksep: 80, nodeSize: [NODE_W, NODE_H] },
     behaviors: ['zoom-canvas', 'drag-canvas'],
     theme: 'light',
   });

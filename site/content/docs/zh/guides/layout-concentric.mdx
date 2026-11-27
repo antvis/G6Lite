@@ -18,10 +18,12 @@ import { NodeDocExample } from '@/components/node-doc-example';
 布局类型通过 `layout.type` 指定。
 
 ```ts
+import { ConcentricLayout } from '@antv/layout';
+
 const graph = new Graph({
   container,
   data,
-  layout: { type: 'concentric' },
+  layout: { type: ConcentricLayout },
 });
 ```
 

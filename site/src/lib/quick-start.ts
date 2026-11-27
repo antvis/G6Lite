@@ -1,3 +1,4 @@
+import { CircularLayout } from '@antv/layout';
 import type { GraphData, GraphOptions } from '../../../src/index.ts';
 
 /** Immutable data replacements for the framework update example. */
@@ -76,7 +77,7 @@ export function quickStartOptions(): Omit<GraphOptions, 'container'> {
       },
     },
     edge: { style: { endArrow: true } },
-    layout: { type: 'circular', radius: 120 },
+    layout: { type: CircularLayout, radius: 120 },
     autoFit: { padding: 32 },
     behaviors: ['zoom-canvas', 'drag-canvas', 'drag-node', 'hover-highlight'],
   };

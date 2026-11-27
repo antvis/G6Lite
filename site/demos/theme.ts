@@ -3,6 +3,7 @@
  */
 import { Graph } from '@antv/g6-lite';
 import { createDemoPanel } from './demo-panel.ts';
+import { CircularLayout } from '@antv/layout';
 
 const data = {
   nodes: [{ id: '0' }, { id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }],
@@ -35,7 +36,7 @@ export async function run(container: string | HTMLElement) {
       data,
       node: { type: 'circle', style: { size: 14 } },
       edge: { type: 'line' },
-      layout: { type: 'circular', radius: 120 },
+      layout: { type: CircularLayout, radius: 120 },
       behaviors: ['zoom-canvas', 'drag-canvas'],
       theme: themeOption,
     });

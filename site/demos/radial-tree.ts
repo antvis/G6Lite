@@ -1,8 +1,8 @@
 /**
  * Demo: a topic tree laid out with the radial algorithm.
  */
-import { Graph, register } from '@antv/g6-lite';
-import radial from '@antv/g6-lite/layouts/radial';
+import { Graph } from '@antv/g6-lite';
+import { RadialLayout } from '@antv/layout';
 
 const TREE: Array<[string, string, string?]> = [
   ['root', '产品'],
@@ -18,7 +18,6 @@ const TREE: Array<[string, string, string?]> = [
 ];
 
 export async function run(container: string | HTMLElement) {
-  register('layout', 'radial', radial);
   const graph = new Graph({
     autoFit: { padding: 32 },
     container,
@@ -35,7 +34,7 @@ export async function run(container: string | HTMLElement) {
       },
     },
     edge: { style: { stroke: '#C5CEDB', lineWidth: 1.5 } },
-    layout: { type: 'radial', unitRadius: 110, linkDistance: 90, nodeSize: 28 },
+    layout: { type: RadialLayout, unitRadius: 110, linkDistance: 90, nodeSize: 28 },
     behaviors: ['zoom-canvas', 'drag-canvas'],
   });
   await graph.render();

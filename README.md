@@ -13,7 +13,6 @@ English | [简体中文](./README.zh-CN.md)
 <p align="center">
   <a href="https://www.npmjs.com/package/@antv/g6-lite/v/0.1.0"><img alt="npm version" src="https://img.shields.io/badge/version-0.1.0-blue"></a>
   <a href="https://github.com/antvis/G6Lite/actions/workflows/build.yml"><img alt="build" src="https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg"></a>
-  <a href="https://bundlephobia.com/package/@antv/g6-lite@0.1.0"><img alt="0.1.0 npm entry, minified and gzipped: 91.5 kB" src="https://img.shields.io/badge/minzip-91.5_kB-blue"></a>
   <a href="https://unpkg.com/@antv/g6-lite/dist/g6-lite.min.js"><img alt="UMD gzip size" src="https://img.badgesize.io/https://unpkg.com/@antv/g6-lite/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
   <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/npm/l/@antv/g6-lite.svg"></a>
 </p>

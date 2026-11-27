@@ -1,0 +1,21 @@
+README.zh-CN.md
+  s_17b7895fef0302::t_6cc2804b31a215 16
+README.md
+  s_17b7895fef0302::t_c02cc336c0fc30 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "abc73a995617cf8e26177a9567eb933c1ce44a6f",
+  "prompts": {},
+  "sessions": {
+    "s_17b7895fef0302": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "b1d1972b-e32e-428e-9c7d-0920211eae84",
+        "model": "codefuse_official_channel/Kimi-K3.1-Pro:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

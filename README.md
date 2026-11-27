@@ -111,7 +111,7 @@ Use the UMD build directly in a browser without a bundler. It exposes `window.G6
 - [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
 - [UNPKG](https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
 
-The minzip badge records Bundlephobia's measurement of the 0.1.0 npm entry (91,468 bytes gzip). The UMD badge measures the complete CDN download via UNPKG.
+The minzip badge records Bundlephobia's measurement of the npm entry. The UMD badge measures the complete CDN download via UNPKG.
 
 ## Learn More
 

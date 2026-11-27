@@ -111,7 +111,7 @@ await graph.render();
 - [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
 - [UNPKG](https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
 
-minzip 徽章记录 Bundlephobia 对 0.1.0 版本 npm 入口的测量值（gzip 后 91,468 字节）；UMD 徽章通过 UNPKG 测量完整 CDN 文件的下载体积。
+minzip 徽章记录 Bundlephobia 对 npm 入口的测量值；UMD 徽章通过 UNPKG 测量完整 CDN 文件的下载体积。
 
 ## 继续阅读
 

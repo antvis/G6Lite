@@ -24,7 +24,7 @@ Direction and spacing depend on the algorithm. See the [layout reference](/en/do
 
 The thumbnails show 11 layouts on the same data. Try them in the [layout gallery](/en/docs/examples/layout-gallery) or see the [AntV Layout documentation](https://layout.antv.vision/) for more options.
 
-Layouts marked **External** must be imported from `@antv/layout` and passed as a class. See [Built-in and external layouts](/en/docs/guides/layout-overview#builtin-and-external-layouts). Layouts marked **Optional** must be imported and registered. See [Optional layouts](/en/docs/guides/layout-overview#optional-layouts).
+Layouts marked **External** must be imported from `@antv/layout` and passed as classes through `layout.type`; no registration is required. See [Built-in and external layouts](/en/docs/guides/layout-overview#builtin-and-external-layouts).
 
 <div className="effect-table">
 
@@ -33,14 +33,14 @@ Layouts marked **External** must be imported from `@antv/layout` and passed as a
 | [`circular`](/en/docs/guides/layout-circular) | ![Nodes are evenly spaced on a circle](/layouts/reference/circular.svg) | **External.** Circle or spiral | radius, startRadius, endRadius, startAngle, endAngle, clockwise |
 | [`concentric`](/en/docs/guides/layout-concentric) | ![Nodes are arranged in rings by degree](/layouts/reference/concentric.svg) | **External.** Rings by importance | sortBy, maxLevelDiff, nodeSize, nodeSpacing, preventOverlap |
 | [`grid`](/en/docs/guides/layout-grid) | ![Nodes align in rows and columns](/layouts/reference/grid.svg) | **External.** Rows and columns | rows, cols, begin, sortBy, nodeSize, nodeSpacing, preventOverlap |
-| [`random`](/en/docs/guides/layout-random) | ![Nodes are scattered across the canvas](/layouts/reference/random.svg) | **Optional.** Random positions | width, height, center |
+| [`random`](/en/docs/guides/layout-random) | ![Nodes are scattered across the canvas](/layouts/reference/random.svg) | **External.** Random positions | width, height, center |
 | [`dagre`](/en/docs/guides/layout-dagre) | ![The directed graph is layered from left to right](/layouts/reference/dagre.svg) | **External.** Directed layers | rankdir: TB/BT/LR/RL, nodesep, ranksep, edgesep, nodeSize, ranker |
 | [`force`](/en/docs/guides/layout-force) | ![Connected nodes are drawn together by the force simulation](/layouts/reference/force.svg) | Force-directed network | linkDistance, nodeStrength, edgeStrength, maxIteration, minMovement |
 | [`d3-force`](/en/docs/guides/layout-d3-force) | ![Node positions from the D3 force simulation](/layouts/reference/d3-force.svg) | D3 simulation | linkDistance, nodeStrength, alphaDecay, alphaMin; use nodeStrength, not charge |
 | [`force-atlas2`](/en/docs/guides/layout-force-atlas2) | ![Node positions from ForceAtlas2](/layouts/reference/force-atlas2.svg) | ForceAtlas2 network | kr, kg, barnesHut, prune, maxIteration |
 | [`fruchterman`](/en/docs/guides/layout-fruchterman) | ![Node positions from Fruchterman](/layouts/reference/fruchterman.svg) | Fruchterman network | gravity, speed, maxIteration, minMovement |
-| [`radial`](/en/docs/guides/layout-radial) | ![Nodes form rings by graph distance from the focus](/layouts/reference/radial.svg) | **Optional.** Rings around a focus | focusNode, unitRadius, linkDistance, preventOverlap |
-| [`mds`](/en/docs/guides/layout-mds) | ![Graph distances determine node positions in two dimensions](/layouts/reference/mds.svg) | **Optional.** Positions from graph distances | linkDistance, center |
+| [`radial`](/en/docs/guides/layout-radial) | ![Nodes form rings by graph distance from the focus](/layouts/reference/radial.svg) | **External.** Rings around a focus | focusNode, unitRadius, linkDistance, preventOverlap |
+| [`mds`](/en/docs/guides/layout-mds) | ![Graph distances determine node positions in two dimensions](/layouts/reference/mds.svg) | **External.** Positions from graph distances | linkDistance, center |
 
 </div>
 
@@ -48,7 +48,7 @@ Rendered node sizes are not automatically passed to algorithms. For overlap avoi
 
 ### Computation defaults [#computation-defaults]
 
-G6Lite injects or rewrites the following options; explicit values win. These rules apply to library layouts, not the three functional tree layouts.
+G6Lite injects or rewrites the following options; explicit values win. These rules apply to the library layouts above, including tree layout classes imported from `@antv/layout`.
 
 | Algorithm / option | Default or rule |
 | --- | --- |
@@ -74,7 +74,7 @@ Use **Layout** to compare Grid, Circular, and Dagre on the same data. The code s
 
 Set parent-child relationships in `edges`, with the parent as `source` and the child as `target`. Compare mind map, indented, and fishbone layouts in the [tree layout example](/en/docs/guides/layout-trees#configuration-and-example).
 
-### Functional tree layouts [#functional-tree-layouts]
+### Tree layouts [#functional-tree-layouts]
 
 Use a connected tree with one root and no cycles.
 
@@ -82,9 +82,9 @@ Use a connected tree with one root and no cycles.
 
 | type | Preview | Purpose |
 | --- | --- | --- |
-| [`mindmap`](/en/docs/guides/layout-mindmap) | ![Branches fan out on both sides of the root](/layouts/reference/mindmap.svg) | **Optional.** Organize a hierarchy into branches |
-| [`indented`](/en/docs/guides/layout-indented) | ![Nodes are listed in rows and indented by depth](/layouts/reference/indented.svg) | **Optional.** Show a tree as a list |
-| [`fishbone`](/en/docs/guides/layout-fishbone) | ![Categories alternate along a horizontal spine, with items branching off the ribs](/layouts/reference/fishbone.svg) | **Optional.** Group categories and items along a spine |
+| [`mindmap`](/en/docs/guides/layout-mindmap) | ![Branches fan out on both sides of the root](/layouts/reference/mindmap.svg) | **External.** Organize a hierarchy into branches |
+| [`indented`](/en/docs/guides/layout-indented) | ![Nodes are listed in rows and indented by depth](/layouts/reference/indented.svg) | **External.** Show a tree as a list |
+| [`fishbone`](/en/docs/guides/layout-fishbone) | ![Categories alternate along a horizontal spine, with items branching off the ribs](/layouts/reference/fishbone.svg) | **External.** Group categories and items along a spine |
 
 </div>
 
@@ -151,7 +151,7 @@ Layout may change existing x/y. Graph's fx/fy override the corresponding final a
 
 ## Worker
 
-Graph supplies worker: true when node count ≥ 1000 and worker is omitted for string-named built-in layouts. Custom layout classes cannot be transferred to a Worker and always run on the main thread. Standalone runLayout has no automatic switch. Execution order is registered extension → built-in tree → Worker → main-thread library. Worker creation, cloning, or execution failures fall back to the same main-thread algorithm, which may block again.
+Graph supplies worker: true when node count ≥ 1000 and worker is omitted for string-named built-in layouts. Layout classes imported from `@antv/layout` and custom layout classes cannot be transferred to a Worker and always run on the main thread. Standalone runLayout has no automatic switch. Execution order is registered extension → Worker → main-thread library. Worker creation, cloning, or execution failures fall back to the same main-thread algorithm, which may block again.
 
 Prefer explicit worker: false for function-valued options. See [layout methods](/en/docs/api/graph#layout) for cancellation. Successful configuration does not prove a Worker actually ran.
 

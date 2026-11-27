@@ -1,16 +1,16 @@
-import { Graph, register, type GraphNode, type GraphOptions, type LayoutConfig } from '@antv/g6-lite';
-import mds from '@antv/g6-lite/layouts/mds';
-import radial from '@antv/g6-lite/layouts/radial';
-import indented from '@antv/g6-lite/layouts/indented';
-import mindmap from '@antv/g6-lite/layouts/mindmap';
-import fishboneLayout from '@antv/g6-lite/layouts/fishbone';
-import random from '@antv/g6-lite/layouts/random';
-import { GridLayout } from '@antv/layout';
-import { CircularLayout } from '@antv/layout';
-import { DagreLayout } from '@antv/layout';
-import { ConcentricLayout } from '@antv/layout';
-
-const optionalLayouts = new Map(Object.entries({ mds, radial, indented, mindmap, fishbone: fishboneLayout, random }));
+import { Graph, type GraphNode, type GraphOptions, type LayoutConfig } from '@antv/g6-lite';
+import {
+  CircularLayout,
+  ConcentricLayout,
+  DagreLayout,
+  FishboneLayout,
+  GridLayout,
+  IndentedLayout,
+  MDSLayout,
+  MindmapLayout,
+  RadialLayout,
+  RandomLayout,
+} from '@antv/layout';
 
 const layouts = {
   // #region layout-grid-config
@@ -51,7 +51,7 @@ const layouts = {
   },
   // #endregion layout-fruchterman-config
   // #region layout-radial-config
-  'radial': { type: 'radial', focusNode: '0', unitRadius: 68 },
+  'radial': { type: RadialLayout, focusNode: '0', unitRadius: 68 },
   // #endregion layout-radial-config
   // #region layout-concentric-config
   'concentric': {
@@ -64,14 +64,14 @@ const layouts = {
   },
   // #endregion layout-concentric-config
   // #region layout-mds-config
-  'mds': { type: 'mds', linkDistance: 80 },
+  'mds': { type: MDSLayout, linkDistance: 80 },
   // #endregion layout-mds-config
   // #region layout-indented-config
-  'indented': { type: 'indented', direction: 'LR', indent: 72, rowHeight: 30 },
+  'indented': { type: IndentedLayout, direction: 'LR', indent: 72, rowHeight: 30 },
   // #endregion layout-indented-config
   // #region layout-mindmap-config
   'mindmap': {
-    type: 'mindmap',
+    type: MindmapLayout,
     direction: 'H',
     levelGap: 100,
     nodeGap: 24,
@@ -82,7 +82,7 @@ const layouts = {
   // #endregion layout-mindmap-config
   // #region layout-fishbone-config
   'fishbone': {
-    type: 'fishbone',
+    type: FishboneLayout,
     direction: 'LR',
     categoryGap: 200,
     categoryDistance: 138,
@@ -91,7 +91,7 @@ const layouts = {
   },
   // #endregion layout-fishbone-config
   // #region layout-random-config
-  'random': { type: 'random', width: 400, height: 240, center: [200, 120] },
+  'random': { type: RandomLayout, width: 400, height: 240, center: [200, 120] },
   // #endregion layout-random-config
 } satisfies Record<string, LayoutConfig>;
 
@@ -270,8 +270,6 @@ function tree(type: string): ExampleOptions {
 // #endregion tree
 
 export function run(container: HTMLElement, type: BuiltInLayoutExample) {
-  const extension = optionalLayouts.get(type);
-  if (extension) register('layout', type, extension);
   const layout = layouts[type];
   if (type === 'concentric') return render(container, layout, concentric());
   if (type === 'fishbone') return render(container, layout, fishbone());

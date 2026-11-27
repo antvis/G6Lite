@@ -764,7 +764,7 @@ console.log(client, point);
 
 `graph.setLayout(config: LayoutConfig): void`
 
-Replaces the layout configuration. To rearrange an existing graph with the new configuration, call [layout()](#graph-layout-layout).
+Replaces the layout configuration. External layout classes imported from `@antv/layout` can be passed directly as `config.type` without registration. To rearrange an existing graph with the new configuration, call [layout()](#graph-layout-layout).
 
 ### layout() [#graph-layout-layout]
 
@@ -834,7 +834,7 @@ console.log(nodes);
 
 <Callout type="warn" title="Standalone calculation boundaries">
 
-Execution order follows the configuration reference: registered names, built-in functional trees, Worker, then library algorithm. With viewport, extension execute context width/height prefer viewport values; explicit config.width/height remain in context.options. Without viewport, context dimensions fall back to config or 800×600.
+String-named layouts resolve through a registered extension, Worker, then the main-thread library algorithm. Layout classes imported from `@antv/layout` execute directly on the main thread. With viewport, extension execute context width/height prefer viewport values; explicit config.width/height remain in context.options. Without viewport, context dimensions fall back to config or 800×600.
 
 Standalone runLayout does not perform Graph's final fx/fy override, execute Graph transforms, or emit Graph layout events. Use results in your own renderer; use instance layout for Graph's writeback, state, and event sequence.
 

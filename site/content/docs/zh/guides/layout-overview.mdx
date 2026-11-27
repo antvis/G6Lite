@@ -21,12 +21,12 @@ import { NodeDocExample } from '@/components/node-doc-example';
 | [`circular`](/docs/guides/layout-circular) | **外部。** 沿圆周排列。 | `{ type: CircularLayout, radius: 100 }` |
 | [`dagre`](/docs/guides/layout-dagre) | **外部。** 按流程或依赖关系分层。 | `{ type: DagreLayout, rankdir: 'LR', ranksep: 80 }` |
 | [`concentric`](/docs/guides/layout-concentric) | **外部。** 按节点度数排成同心圆。 | `{ type: ConcentricLayout, sortBy: 'degree' }` |
-| [`radial`](/docs/guides/layout-radial) | **可选。** 围绕指定节点，按图上的距离分圈。 | `{ type: 'radial', focusNode: '0', unitRadius: 68 }` |
-| [`mds`](/docs/guides/layout-mds) | **可选。** 用平面上的距离表现节点在图中的远近。 | `{ type: 'mds', linkDistance: 80 }` |
-| [`indented`](/docs/guides/layout-indented) | **可选。** 把树排成逐层缩进的目录。 | `{ type: 'indented', indent: 80, rowHeight: 40 }` |
-| [`mindmap`](/docs/guides/layout-mindmap) | **可选。** 把树排成脑图分支。 | `{ type: 'mindmap', levelGap: 120, nodeGap: 30 }` |
-| [`fishbone`](/docs/guides/layout-fishbone) | **可选。** 沿鱼骨主干展示分类和条目。 | `{ type: 'fishbone', categoryGap: 180 }` |
-| [`random`](/docs/guides/layout-random) | **可选。** 在指定范围内随机放置节点。 | `{ type: 'random', width: 800, height: 600, center: [400, 300] }` |
+| [`radial`](/docs/guides/layout-radial) | **外部。** 围绕指定节点，按图上的距离分圈。 | `{ type: RadialLayout, focusNode: '0', unitRadius: 68 }` |
+| [`mds`](/docs/guides/layout-mds) | **外部。** 用平面上的距离表现节点在图中的远近。 | `{ type: MDSLayout, linkDistance: 80 }` |
+| [`indented`](/docs/guides/layout-indented) | **外部。** 把树排成逐层缩进的目录。 | `{ type: IndentedLayout, indent: 80, rowHeight: 40 }` |
+| [`mindmap`](/docs/guides/layout-mindmap) | **外部。** 把树排成脑图分支。 | `{ type: MindmapLayout, levelGap: 120, nodeGap: 30 }` |
+| [`fishbone`](/docs/guides/layout-fishbone) | **外部。** 沿鱼骨主干展示分类和条目。 | `{ type: FishboneLayout, categoryGap: 180 }` |
+| [`random`](/docs/guides/layout-random) | **外部。** 在指定范围内随机放置节点。 | `{ type: RandomLayout, width: 800, height: 600, center: [400, 300] }` |
 
 表中的配置对象写在 `layout` 中。更多参数和效果见[布局通用配置项](/docs/guides/layout)。
 
@@ -51,30 +51,17 @@ const graph = new Graph({
 
 外部布局类在主线程执行，不支持 Worker。
 
-## 可选布局 [#optional-layouts]
+## 其他布局 [#optional-layouts]
 
-缩进树、思维导图、鱼骨图、放射布局、MDS 和随机布局需要先注册。npm 项目可以从各自的子路径导入，之后照常通过 `layout.type` 指定。
+缩进树、思维导图、鱼骨图、放射布局、MDS 和随机布局同样属于外部布局，直接从 `@antv/layout` 导入对应布局类即可，无需注册。以放射布局为例：
 
 ```ts
-import { register } from '@antv/g6-lite';
-import radial from '@antv/g6-lite/layouts/radial';
+import { RadialLayout } from '@antv/layout';
 
-register('layout', 'radial', radial);
-
-const layout = { type: 'radial', focusNode: '0', unitRadius: 68 };
+const layout = { type: RadialLayout, focusNode: '0', unitRadius: 68 };
 ```
 
-通过 CDN 使用 UMD 时，在主脚本之后加载同版本的 `dist/g6-lite-layouts.min.js`，再从 `G6LiteLayouts` 取出要注册的布局。
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite-layouts.min.js"></script>
-<script>
-  G6Lite.register('layout', 'radial', G6LiteLayouts.radial);
-</script>
-```
-
-注册的布局在主线程运行。
+这些布局类也在主线程运行。
 
 ## 配置与示例
 

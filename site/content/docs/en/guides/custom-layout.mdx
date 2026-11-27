@@ -7,6 +7,8 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 Use a `LayoutExtension` to calculate node positions from graph data. This example arranges nodes in a row with equal spacing. See the [Layout overview](/en/docs/guides/layout-overview) for built-in layouts.
 
+Existing layout classes imported from `@antv/layout` can be passed directly as `layout.type` without registration. Only a custom `LayoutExtension` needs to be registered with `register`.
+
 ## Implement and execute
 
 Read current data and runtime.options, retain node IDs/business fields, and return finite x/y. Reading options from runtime also supports standalone execution without init.

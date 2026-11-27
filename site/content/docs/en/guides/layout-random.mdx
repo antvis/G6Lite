@@ -15,18 +15,16 @@ Use it for a quick preview of graph data. Each run samples new positions.
 
 ## Basic usage
 
-This layout is optional. Import and register it before setting `layout.type`. For CDN usage, see [Optional layouts](/en/docs/guides/layout-overview#optional-layouts).
+This is an external layout. Import its class from `@antv/layout` and pass it as `layout.type`; no registration is required. See [Built-in and external layouts](/en/docs/guides/layout-overview#builtin-and-external-layouts).
 
 ```ts
-import { Graph, register } from '@antv/g6-lite';
-import random from '@antv/g6-lite/layouts/random';
-
-register('layout', 'random', random);
+import { Graph } from '@antv/g6-lite';
+import { RandomLayout } from '@antv/layout';
 
 const graph = new Graph({
   container,
   data,
-  layout: { type: 'random' },
+  layout: { type: RandomLayout },
 });
 ```
 

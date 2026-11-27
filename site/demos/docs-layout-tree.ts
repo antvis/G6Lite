@@ -1,20 +1,15 @@
-import { Graph, register, type EdgeConfig, type GraphNode, type LayoutConfig } from '@antv/g6-lite';
-import indented from '@antv/g6-lite/layouts/indented';
-import mindmap from '@antv/g6-lite/layouts/mindmap';
-import fishbone from '@antv/g6-lite/layouts/fishbone';
+import { Graph, type EdgeConfig, type GraphNode, type LayoutConfig } from '@antv/g6-lite';
+import { FishboneLayout, IndentedLayout, MindmapLayout } from '@antv/layout';
 import { createDemoPanel } from './demo-panel.ts';
 
 export async function run(container: HTMLElement) {
-  register('layout', 'indented', indented);
-  register('layout', 'mindmap', mindmap);
-  register('layout', 'fishbone', fishbone);
   const nodeSize = 16;
   const leftBranches = new Set(['A', 'C']);
   // #region tree-layouts
   const layouts = {
     mindmap: {
       layout: {
-        type: 'mindmap',
+        type: MindmapLayout,
         direction: 'H',
         levelGap: 100,
         nodeGap: 24,
@@ -25,12 +20,12 @@ export async function run(container: HTMLElement) {
       edge: { type: 'line', style: { endArrow: false } },
     },
     indented: {
-      layout: { type: 'indented', direction: 'LR', indent: 72, rowHeight: 30 },
+      layout: { type: IndentedLayout, direction: 'LR', indent: 72, rowHeight: 30 },
       edge: { type: 'polyline', style: { router: 'indented', endArrow: false } },
     },
     fishbone: {
       layout: {
-        type: 'fishbone',
+        type: FishboneLayout,
         direction: 'LR',
         categoryGap: 156,
         categoryDistance: 130,

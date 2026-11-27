@@ -764,7 +764,7 @@ console.log(client, point);
 
 `graph.setLayout(config: LayoutConfig): void`
 
-替换布局配置。要让已有的图按新配置重排，再调用 [layout()](#graph-layout-layout)。
+替换布局配置。从 `@antv/layout` 导入的外部布局类可直接作为 `config.type` 传入，无需注册。要让已有的图按新配置重排，再调用 [layout()](#graph-layout-layout)。
 
 ### layout() [#graph-layout-layout]
 
@@ -834,7 +834,7 @@ console.log(nodes);
 
 <Callout type="warn" title="独立计算的边界">
 
-执行顺序同布局配置参考：已注册同名扩展、内置函数式树布局、Worker、库算法。传 viewport 时，扩展 execute 上下文的 width/height 优先使用 viewport；显式 config.width/height 仍在 context.options 中。无 viewport 时，上下文尺寸回退到 config 或 800×600。
+字符串布局按已注册同名扩展、Worker、主线程库算法的顺序解析；从 `@antv/layout` 导入的布局类直接在主线程执行。传 viewport 时，扩展 execute 上下文的 width/height 优先使用 viewport；显式 config.width/height 仍在 context.options 中。无 viewport 时，上下文尺寸回退到 config 或 800×600。
 
 独立 runLayout 不执行 Graph 的最终 fx/fy 覆盖，不运行 Graph transforms，也不发送 Graph 布局事件。返回后将坐标用于自己的渲染器；需要 Graph 的数据写回、状态和事件链时，使用实例 layout。
 

@@ -13,8 +13,6 @@ import { runLayoutInWorker } from './workerLayout';
 
 export type LayoutResult = { nodes: Array<GraphNode & { x: number; y: number }> };
 
-const OPTIONAL_LAYOUTS = new Set(['mds', 'radial', 'indented', 'mindmap', 'fishbone', 'random']);
-
 interface LayoutRuntime {
   signal?: AbortSignal;
   extensionContext?: ExtensionContext;
@@ -119,12 +117,6 @@ export async function runLayout(
   if (typeof type === 'function') {
     if (runtime.signal?.aborted) return createFallbackResult(data);
     return runLibraryLayout(type, data, resolvedConfig, runtime.signal);
-  }
-
-  if (OPTIONAL_LAYOUTS.has(type)) {
-    throw new Error(
-      `[G6Lite] Register layout "${type}" from @antv/g6-lite/layouts/${type} before use.`,
-    );
   }
 
   const loadLayout = getLayoutLoader(type);

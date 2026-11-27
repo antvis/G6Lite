@@ -19,7 +19,7 @@ import { NodeDocExample } from '@/components/node-doc-example';
 
 用 **Tree layout** 切换三种布局。示例同时调整边的画法，缩进树用折线连接，鱼骨图用斜线展示条目。
 
-这三种树布局都需要先注册。 [可选布局](/docs/guides/layout-overview#optional-layouts)
+这三种树布局均从 `@antv/layout` 导入对应布局类并作为 `layout.type` 传入，无需注册。见[内置与外部布局](/docs/guides/layout-overview#builtin-and-external-layouts)。
 
 <NodeDocExample id="layout-tree" locale="zh" focus="tree-layouts" />
 

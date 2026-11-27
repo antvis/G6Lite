@@ -55,10 +55,9 @@ These files come from the published npm package `@antv/g6-lite@0.1.0`, downloade
 
 | Published file | Contents | gzip -9 (kB) |
 | --- | --- | ---: |
-| `g6-lite.min.js` | Default script with rendering, interactions, and built-in layouts | 150.3 |
-| `g6-lite-layouts.min.js` | Six optional layouts, loaded when needed | 29.1 |
+| `g6-lite.min.js` | Default script with rendering, interactions, and built-in force-directed layouts | 150.3 |
 
-Load the optional script before registering the layout you want to use. [Optional layouts](/en/docs/guides/layout-overview#optional-layouts)
+Other layouts are imported as classes from `@antv/layout` and run on the main thread. [Built-in and external layouts](/en/docs/guides/layout-overview#builtin-and-external-layouts)
 
 ## Measuring your own graph [#performance-tuning]
 

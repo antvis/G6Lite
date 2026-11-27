@@ -68,7 +68,7 @@ The container must already exist, have nonzero width/height, and use `position: 
 
 ## Contract details that prevent common failures
 
-- Import runtime APIs from the package root or documented exports such as `@antv/g6-lite/layouts/mindmap`. Do not deep-import source or distribution internals in application code; CDN browser distribution URLs are separate.
+- Import runtime APIs from the package root. Import layout classes such as `MindmapLayout` from `@antv/layout`. Do not deep-import source or distribution internals in application code; CDN browser distribution URLs are separate.
 - Nodes need unique string IDs and edges must reference existing node IDs. Give edges stable explicit IDs when selection or updates must survive data replacement.
 - Node borders use `node.style.strokeWidth`; labels use `node.style.label`, `labelColor`, `labelFontSize`, and `labelPlacement`. Do not use nested `node.label` objects.
 - Arrows use `edge.style.endArrow: true` and `arrowSize: 6`; `startArrow` is also boolean. Arrow objects such as `{ fill, size }` are unsupported and can cause rendering errors during dragging in 0.1.0.

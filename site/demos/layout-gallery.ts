@@ -1,26 +1,20 @@
-import { Graph, register, type LayoutConfig } from '@antv/g6-lite';
-import mds from '@antv/g6-lite/layouts/mds';
-import radial from '@antv/g6-lite/layouts/radial';
-import random from '@antv/g6-lite/layouts/random';
+import { Graph, type LayoutConfig } from '@antv/g6-lite';
+import { ConcentricLayout, MDSLayout, RadialLayout, RandomLayout } from '@antv/layout';
 import { createDemoPanel } from './demo-panel.ts';
-import { ConcentricLayout } from '@antv/layout';
 
 const NODES = Array.from({ length: 18 }, (_, index) => ({ id: String(index), data: { label: String(index) } }));
 const EDGES = Array.from({ length: 17 }, (_, index) => ({ id: `e-${index}`, source: String(Math.floor(index / 2)), target: String(index + 1) }));
 
 const LAYOUTS: Array<{ label: string; config: LayoutConfig }> = [
-  { label: 'Radial', config: { type: 'radial', unitRadius: 68, linkDistance: 60 } },
+  { label: 'Radial', config: { type: RadialLayout, unitRadius: 68, linkDistance: 60 } },
   { label: 'Concentric', config: { type: ConcentricLayout, nodeSize: 28, minNodeSpacing: 18 } },
   { label: 'ForceAtlas2', config: { type: 'force-atlas2', maxIteration: 60, barnesHut: true, prune: false } },
   { label: 'Fruchterman', config: { type: 'fruchterman', maxIteration: 80, gravity: 8, speed: 5 } },
-  { label: 'MDS', config: { type: 'mds', linkDistance: 70 } },
-  { label: 'Random', config: { type: 'random' } },
+  { label: 'MDS', config: { type: MDSLayout, linkDistance: 70 } },
+  { label: 'Random', config: { type: RandomLayout } },
 ];
 
 export async function run(container: string | HTMLElement) {
-  register('layout', 'mds', mds);
-  register('layout', 'radial', radial);
-  register('layout', 'random', random);
   const graph = new Graph({
     autoFit: true,
     container,

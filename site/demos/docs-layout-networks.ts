@@ -1,15 +1,11 @@
-import { Graph, register, type LayoutConfig } from '@antv/g6-lite';
-import mds from '@antv/g6-lite/layouts/mds';
-import radial from '@antv/g6-lite/layouts/radial';
+import { Graph, type LayoutConfig } from '@antv/g6-lite';
+import { ConcentricLayout, MDSLayout, RadialLayout } from '@antv/layout';
 import { createDemoPanel } from './demo-panel.ts';
-import { ConcentricLayout } from '@antv/layout';
 
 export async function run(container: HTMLElement) {
-  register('layout', 'mds', mds);
-  register('layout', 'radial', radial);
   // #region network-options
   const layouts: Record<string, LayoutConfig> = {
-    radial: { type: 'radial', focusNode: '0', unitRadius: 68 },
+    radial: { type: RadialLayout, focusNode: '0', unitRadius: 68 },
     concentric: { type: ConcentricLayout, sortBy: 'degree', nodeSize: 24 },
     force: { type: 'force', linkDistance: 100 },
     'd3-force': { type: 'd3-force', linkDistance: 100 },
@@ -23,7 +19,7 @@ export async function run(container: HTMLElement) {
       maxIteration: 250,
       minMovement: 0.05,
     },
-    mds: { type: 'mds', linkDistance: 80 },
+    mds: { type: MDSLayout, linkDistance: 80 },
   };
   // #endregion network-options
   const connections = [

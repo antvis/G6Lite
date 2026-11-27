@@ -1,4 +1,4 @@
-import { DagreLayout } from '@antv/layout';
+import { DagreLayout, FishboneLayout, MindmapLayout } from '@antv/layout';
 import type { Graph, GraphNode, GraphOptions } from '../../../../src/index.ts';
 import type { Locale } from '@/lib/i18n';
 
@@ -215,7 +215,7 @@ export function showcaseOptions(id: ShowcaseId, locale: Locale, dark = false): O
       [4, 8],
     ];
     options.layout = {
-      type: 'mindmap',
+      type: MindmapLayout,
       direction: 'H',
       levelGap: 40,
       nodeGap: 120,
@@ -240,7 +240,7 @@ export function showcaseOptions(id: ShowcaseId, locale: Locale, dark = false): O
       [4, 8],
     ];
     options.layout = {
-      type: 'fishbone',
+      type: FishboneLayout,
       direction: 'LR',
       categoryGap: 110,
       categoryDistance: 100,

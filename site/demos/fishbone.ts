@@ -1,8 +1,8 @@
 /**
  * Demo: 鱼骨图 (Fishbone/Ishikawa Diagram) — 盈利未达预期分析
  */
-import { Graph, register, type GraphEdge, type GraphNode } from '@antv/g6-lite';
-import fishbone from '@antv/g6-lite/layouts/fishbone';
+import { Graph, type GraphEdge, type GraphNode } from '@antv/g6-lite';
+import { FishboneLayout } from '@antv/layout';
 import { attachLabelsCanvas, type GraphInstanceWithTools } from './tooling.ts';
 
 const CATEGORY_COLORS = ['#E8684A', '#5B8FF9', '#5AD8A6', '#F6BD16', '#6F5EF9', '#5D7092'];
@@ -106,7 +106,6 @@ function getEdgeColor(_source: GraphNode, _target: GraphNode, edge: GraphEdge) {
 }
 
 export async function run(container: string | HTMLElement) {
-  register('layout', 'fishbone', fishbone);
   const wrapper = typeof container === 'string' ? document.querySelector(container)! as HTMLElement : container;
   wrapper.style.position = 'relative';
 
@@ -116,7 +115,7 @@ export async function run(container: string | HTMLElement) {
     data,
     node: { type: 'rect', style: (n) => getNodeStyle(n) },
     edge: { type: 'polyline', style: { stroke: getEdgeColor, lineWidth: 1.5, router: 'fishbone', endArrow: false, startArrow: false } },
-    layout: { type: 'fishbone', direction: 'LR', categoryGap: 180, itemGap: 44, itemHStep: 50, categoryDistance: 200 },
+    layout: { type: FishboneLayout, direction: 'LR', categoryGap: 180, itemGap: 44, itemHStep: 50, categoryDistance: 200 },
     behaviors: ['zoom-canvas', 'drag-canvas'],
     theme: 'light',
   });

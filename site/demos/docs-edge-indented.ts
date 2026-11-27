@@ -1,8 +1,7 @@
-import { Graph, register } from '@antv/g6-lite';
-import indented from '@antv/g6-lite/layouts/indented';
+import { Graph } from '@antv/g6-lite';
+import { IndentedLayout } from '@antv/layout';
 
 export async function run(container: HTMLElement) {
-  register('layout', 'indented', indented);
   const graph = new Graph({
     container,
     data: {
@@ -18,7 +17,7 @@ export async function run(container: HTMLElement) {
       style: { width: 80, height: 28, borderRadius: 5, label: (node) => node.id, labelPlacement: 'center', labelColor: '#fff' },
     },
     // #region routing
-    layout: { type: 'indented', direction: 'LR', indent: 160, rowHeight: 70 },
+    layout: { type: IndentedLayout, direction: 'LR', indent: 160, rowHeight: 70 },
     edge: {
       type: 'polyline',
       style: { router: 'indented', indentTarget: 'left', radius: 10, lineWidth: 2, hitAreaWidth: 12 },

@@ -24,7 +24,7 @@ import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-exampl
 
 下表的 11 种布局用同一份数据生成缩略图。想试用其中一种，可以打开[布局示例合集](/docs/examples/layout-gallery)。完整算法参数见 [AntV Layout 文档](https://layout.antv.vision/)。
 
-标为「外部」的布局需从 `@antv/layout` 导入布局类后传入，见[内置与外部布局](/docs/guides/layout-overview#builtin-and-external-layouts)。标为「可选」的布局需先导入并注册，见[可选布局](/docs/guides/layout-overview#optional-layouts)。
+标为「外部」的布局都需从 `@antv/layout` 导入布局类并作为 `layout.type` 传入，无需注册，见[内置与外部布局](/docs/guides/layout-overview#builtin-and-external-layouts)。
 
 <div className="effect-table">
 
@@ -33,14 +33,14 @@ import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-exampl
 | [`circular`](/docs/guides/layout-circular) | ![节点沿圆周均匀排列](/layouts/reference/circular.svg) | **外部。** 圆周或螺旋排列 | radius、startRadius、endRadius、startAngle、endAngle、clockwise |
 | [`concentric`](/docs/guides/layout-concentric) | ![节点按度数从中心向外分圈](/layouts/reference/concentric.svg) | **外部。** 按重要程度分圈 | sortBy、maxLevelDiff、nodeSize、nodeSpacing、preventOverlap |
 | [`grid`](/docs/guides/layout-grid) | ![节点对齐到规则行列](/layouts/reference/grid.svg) | **外部。** 规则行列 | rows、cols、begin、sortBy、nodeSize、nodeSpacing、preventOverlap |
-| [`random`](/docs/guides/layout-random) | ![节点散布在画布上](/layouts/reference/random.svg) | **可选。** 随机位置 | width、height、center |
+| [`random`](/docs/guides/layout-random) | ![节点散布在画布上](/layouts/reference/random.svg) | **外部。** 随机位置 | width、height、center |
 | [`dagre`](/docs/guides/layout-dagre) | ![有向图从左到右分层排列](/layouts/reference/dagre.svg) | **外部。** 有向分层 | rankdir: TB/BT/LR/RL，nodesep、ranksep、edgesep、nodeSize、ranker |
 | [`force`](/docs/guides/layout-force) | ![相连节点在力模拟中聚拢](/layouts/reference/force.svg) | 力导向网络 | linkDistance、nodeStrength、edgeStrength、maxIteration、minMovement |
 | [`d3-force`](/docs/guides/layout-d3-force) | ![D3 力模拟生成的节点排布](/layouts/reference/d3-force.svg) | D3 力模拟 | linkDistance、nodeStrength、alphaDecay、alphaMin；使用 nodeStrength，不是 charge |
 | [`force-atlas2`](/docs/guides/layout-force-atlas2) | ![ForceAtlas2 生成的节点排布](/layouts/reference/force-atlas2.svg) | ForceAtlas2 网络 | kr、kg、barnesHut、prune、maxIteration |
 | [`fruchterman`](/docs/guides/layout-fruchterman) | ![Fruchterman 生成的节点排布](/layouts/reference/fruchterman.svg) | Fruchterman 网络 | gravity、speed、maxIteration、minMovement |
-| [`radial`](/docs/guides/layout-radial) | ![节点按到焦点的距离向外分层](/layouts/reference/radial.svg) | **可选。** 围绕焦点的同心层 | focusNode、unitRadius、linkDistance、preventOverlap |
-| [`mds`](/docs/guides/layout-mds) | ![节点按图距离映射到二维平面](/layouts/reference/mds.svg) | **可选。** 按图距离求二维位置 | linkDistance、center |
+| [`radial`](/docs/guides/layout-radial) | ![节点按到焦点的距离向外分层](/layouts/reference/radial.svg) | **外部。** 围绕焦点的同心层 | focusNode、unitRadius、linkDistance、preventOverlap |
+| [`mds`](/docs/guides/layout-mds) | ![节点按图距离映射到二维平面](/layouts/reference/mds.svg) | **外部。** 按图距离求二维位置 | linkDistance、center |
 
 </div>
 
@@ -48,7 +48,7 @@ import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-exampl
 
 ### 计算默认值 [#计算默认值]
 
-以下由 G6Lite 注入或改写，用户显式值优先；仅适用于上面的库布局，不用于三个函数式树布局。
+以下由 G6Lite 注入或改写，用户显式值优先；适用于上面的库布局，包括从 `@antv/layout` 导入的树布局类。
 
 | 算法 / 选项 | 默认或规则 |
 | --- | --- |
@@ -82,9 +82,9 @@ import { NodeDocExample as LayoutDocExample } from '@/components/node-doc-exampl
 
 | type | 效果 | 用途 |
 | --- | --- | --- |
-| [`mindmap`](/docs/guides/layout-mindmap) | ![子树分布在根节点两侧](/layouts/reference/mindmap.svg) | **可选。** 按左右分支组织层级 |
-| [`indented`](/docs/guides/layout-indented) | ![子节点按深度缩进并逐行排列](/layouts/reference/indented.svg) | **可选。** 逐行展示树形列表 |
-| [`fishbone`](/docs/guides/layout-fishbone) | ![分类沿水平主干交替分布，条目挂在斜支线上](/layouts/reference/fishbone.svg) | **可选。** 沿主干展示分类和条目 |
+| [`mindmap`](/docs/guides/layout-mindmap) | ![子树分布在根节点两侧](/layouts/reference/mindmap.svg) | **外部。** 按左右分支组织层级 |
+| [`indented`](/docs/guides/layout-indented) | ![子节点按深度缩进并逐行排列](/layouts/reference/indented.svg) | **外部。** 逐行展示树形列表 |
+| [`fishbone`](/docs/guides/layout-fishbone) | ![分类沿水平主干交替分布，条目挂在斜支线上](/layouts/reference/fishbone.svg) | **外部。** 沿主干展示分类和条目 |
 
 </div>
 
@@ -149,7 +149,7 @@ graph.fitView({ padding: 48, maxZoom: 1 });
 
 ## Worker
 
-字符串形式的内置布局可通过 `worker: true` 尝试在后台线程计算，图达到 1000 个节点时默认尝试启用。自定义布局类无法传入 Worker，始终在主线程执行。算法参数包含函数时，可设置 `worker: false` 在主线程计算。启用、回退和取消示例见 [Worker 布局指南](/docs/guides/layout-worker)。
+字符串形式的内置布局可通过 `worker: true` 尝试在后台线程计算，图达到 1000 个节点时默认尝试启用。从 `@antv/layout` 导入的布局类及自定义布局类无法传入 Worker，始终在主线程执行。算法参数包含函数时，可设置 `worker: false` 在主线程计算。启用、回退和取消示例见 [Worker 布局指南](/docs/guides/layout-worker)。
 
 ## 常见问题
 

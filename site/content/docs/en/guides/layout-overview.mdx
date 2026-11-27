@@ -21,12 +21,12 @@ A layout determines where nodes go. A workflow can run left to right, while a fo
 | [`circular`](/en/docs/guides/layout-circular) | **External.** Arrange nodes along a circle. | `{ type: CircularLayout, radius: 100 }` |
 | [`dagre`](/en/docs/guides/layout-dagre) | **External.** Arrange steps or dependencies in layers. | `{ type: DagreLayout, rankdir: 'LR', ranksep: 80 }` |
 | [`concentric`](/en/docs/guides/layout-concentric) | **External.** Arrange nodes in concentric rings by degree. | `{ type: ConcentricLayout, sortBy: 'degree' }` |
-| [`radial`](/en/docs/guides/layout-radial) | **Optional.** Arrange nodes in rings by graph distance from a focal node. | `{ type: 'radial', focusNode: '0', unitRadius: 68 }` |
-| [`mds`](/en/docs/guides/layout-mds) | **Optional.** Approximate graph distances in two dimensions. | `{ type: 'mds', linkDistance: 80 }` |
-| [`indented`](/en/docs/guides/layout-indented) | **Optional.** Arrange a tree as an indented list. | `{ type: 'indented', indent: 80, rowHeight: 40 }` |
-| [`mindmap`](/en/docs/guides/layout-mindmap) | **Optional.** Arrange a tree as mind map branches. | `{ type: 'mindmap', levelGap: 120, nodeGap: 30 }` |
-| [`fishbone`](/en/docs/guides/layout-fishbone) | **Optional.** Arrange categories and items along a fishbone spine. | `{ type: 'fishbone', categoryGap: 180 }` |
-| [`random`](/en/docs/guides/layout-random) | **Optional.** Scatter nodes randomly within an area. | `{ type: 'random', width: 800, height: 600, center: [400, 300] }` |
+| [`radial`](/en/docs/guides/layout-radial) | **External.** Arrange nodes in rings by graph distance from a focal node. | `{ type: RadialLayout, focusNode: '0', unitRadius: 68 }` |
+| [`mds`](/en/docs/guides/layout-mds) | **External.** Approximate graph distances in two dimensions. | `{ type: MDSLayout, linkDistance: 80 }` |
+| [`indented`](/en/docs/guides/layout-indented) | **External.** Arrange a tree as an indented list. | `{ type: IndentedLayout, indent: 80, rowHeight: 40 }` |
+| [`mindmap`](/en/docs/guides/layout-mindmap) | **External.** Arrange a tree as mind map branches. | `{ type: MindmapLayout, levelGap: 120, nodeGap: 30 }` |
+| [`fishbone`](/en/docs/guides/layout-fishbone) | **External.** Arrange categories and items along a fishbone spine. | `{ type: FishboneLayout, categoryGap: 180 }` |
+| [`random`](/en/docs/guides/layout-random) | **External.** Scatter nodes randomly within an area. | `{ type: RandomLayout, width: 800, height: 600, center: [400, 300] }` |
 
 Pass these configuration objects to `layout`. See [Common layout options](/en/docs/guides/layout) for more parameters and previews.
 
@@ -51,30 +51,17 @@ You can also pass the class directly without an options object: `layout: DagreLa
 
 External layout classes run on the main thread and do not support Workers.
 
-## Optional layouts [#optional-layouts]
+## Other layouts [#optional-layouts]
 
-Indented, Mindmap, Fishbone, Radial, MDS, and Random require registration. With npm, import the layout from its own subpath, register it, and set `layout.type`.
+Indented, Mindmap, Fishbone, Radial, MDS, and Random are also external layouts. Import their classes directly from `@antv/layout`; no registration is required. This example uses Radial:
 
 ```ts
-import { register } from '@antv/g6-lite';
-import radial from '@antv/g6-lite/layouts/radial';
+import { RadialLayout } from '@antv/layout';
 
-register('layout', 'radial', radial);
-
-const layout = { type: 'radial', focusNode: '0', unitRadius: 68 };
+const layout = { type: RadialLayout, focusNode: '0', unitRadius: 68 };
 ```
 
-When using UMD from a CDN, load the same version of `dist/g6-lite-layouts.min.js` after the main script. The layout extensions are available on `G6LiteLayouts`.
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite-layouts.min.js"></script>
-<script>
-  G6Lite.register('layout', 'radial', G6LiteLayouts.radial);
-</script>
-```
-
-Registered layouts run on the main thread.
+These layout classes also run on the main thread.
 
 ## Configuration and example
 

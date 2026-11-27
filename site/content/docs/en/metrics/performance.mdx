@@ -40,11 +40,14 @@ These results apply only to the environment above and do not certify minimum sup
 
 ## G6Lite CDN file sizes [#umd-size]
 
-The published UMD file `g6-lite.min.js` includes rendering, interactions, and built-in force-directed layouts. One kB is 1,000 bytes.
+The published UMD file `g6-lite.min.js` includes rendering, interactions, and built-in force-directed layouts. Other libraries are measured from their published UMD bundles on unpkg.
 
-| Published file | Contents | Minified (kB) | gzip -9 (kB) |
+| Library | UMD bundle | Minified (kB) | gzip -9 (kB) |
 | --- | --- | ---: | ---: |
-| `g6-lite.min.js` | Default script with rendering, interactions, and built-in force-directed layouts | 408.1 | 118.2 |
+| `@antv/g6-lite` | `g6-lite.min.js` | 408.1 | 118.2 |
+| `@antv/g6@5.1.1` | `g6.min.js` | 1,383.3 | 390.6 |
+| `echarts@6.1.0` | `echarts.min.js` | 1,121.9 | 368.2 |
+| `sigma@4.0.4` + `graphology@0.26.0` | `sigma.min.js` + `graphology.umd.min.js` | 466.7 | 117.6 |
 
 Other layouts are imported as classes from `@antv/layout` and run on the main thread. [Built-in and external layouts](/en/docs/guides/layout-overview#builtin-and-external-layouts)
 

@@ -36,11 +36,14 @@ description: 同一图数据下 G6Lite、G6、Sigma.js 与 ECharts 的首绘耗�
 
 ## G6Lite CDN 文件体积 [#umd-size]
 
-发布的 UMD 文件 `g6-lite.min.js` 包含渲染、交互和内置力导向布局，1 kB = 1,000 字节。
+发布的 UMD 文件 `g6-lite.min.js` 包含渲染、交互和内置力导向布局。其他库测量自 unpkg 上发布的 UMD 产物。
 
-| 发布文件 | 内容 | 压缩前（kB） | gzip 后（kB） |
+| 库 | UMD 产物 | 压缩前（kB） | gzip 后（kB） |
 | --- | --- | ---: | ---: |
-| `g6-lite.min.js` | 默认脚本，包含渲染、交互和内置力导向布局 | 408.1 | 118.2 |
+| `@antv/g6-lite` | `g6-lite.min.js` | 408.1 | 118.2 |
+| `@antv/g6@5.1.1` | `g6.min.js` | 1,383.3 | 390.6 |
+| `echarts@6.1.0` | `echarts.min.js` | 1,121.9 | 368.2 |
+| `sigma@4.0.4` + `graphology@0.26.0` | `sigma.min.js` + `graphology.umd.min.js` | 466.7 | 117.6 |
 
 其他布局从 `@antv/layout` 导入布局类后传入，在主线程执行。 [内置与外部布局](/docs/guides/layout-overview#builtin-and-external-layouts)
 

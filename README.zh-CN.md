@@ -14,7 +14,7 @@
   <a href="https://www.npmjs.com/package/@antv/g6-lite/v/0.1.0"><img alt="npm 版本" src="https://img.shields.io/badge/version-0.1.0-blue"></a>
   <a href="https://github.com/antvis/G6Lite/actions/workflows/build.yml"><img alt="构建" src="https://github.com/antvis/G6Lite/actions/workflows/build.yml/badge.svg"></a>
   <a href="https://bundlephobia.com/package/@antv/g6-lite@0.1.0"><img alt="0.1.0 npm 入口压缩后体积：91.5 kB" src="https://img.shields.io/badge/minzip-91.5_kB-blue"></a>
-  <a href="https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"><img alt="UMD gzip 体积" src="https://img.badgesize.io/https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
+  <a href="https://unpkg.com/@antv/g6-lite/dist/g6-lite.min.js"><img alt="UMD gzip 体积" src="https://img.badgesize.io/https://unpkg.com/@antv/g6-lite/dist/g6-lite.min.js?compression=gzip&amp;label=UMD%20gzip"></a>
   <a href="./LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/npm/l/@antv/g6-lite.svg"></a>
 </p>
 
@@ -90,7 +90,7 @@ await graph.render();
 
 ```html
 <div id="container" style="width: 100%; height: 500px"></div>
-<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@antv/g6-lite/dist/g6-lite.min.js"></script>
 <script>
   const graph = new G6Lite.Graph({
     container: '#container',
@@ -108,8 +108,8 @@ await graph.render();
 </script>
 ```
 
-- [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
-- [UNPKG](https://unpkg.com/@antv/g6-lite@0.1.0/dist/g6-lite.min.js)
+- [jsDelivr](https://cdn.jsdelivr.net/npm/@antv/g6-lite/dist/g6-lite.min.js)
+- [UNPKG](https://unpkg.com/@antv/g6-lite/dist/g6-lite.min.js)
 
 minzip 徽章记录 Bundlephobia 对 npm 入口的测量值；UMD 徽章通过 UNPKG 测量完整 CDN 文件的下载体积。
 

@@ -1,0 +1,52 @@
+skills/antv-g6lite-graph/SKILL.md
+  s_17b7895fef0302::t_cbc56a086ae0c2 71
+site/demos/neighbor-highlight.ts
+  s_17b7895fef0302::t_591830df4ce32b 32
+  s_17b7895fef0302::t_e0d458e1efce9d 4-5
+rollup.config.js
+  s_17b7895fef0302::t_4dff1b83b14cbd 42
+site/src/components/homepage/showcase-code.server.ts
+  s_17b7895fef0302::t_4b177f70dc5518 25-27,45,49-53
+site/src/lib/node-doc-example-source.ts
+  s_17b7895fef0302::t_785cad353f5dd9 138-139,147-148,151
+  s_17b7895fef0302::t_48dd5d7ad54828 5-17
+site/src/components/homepage/showcase-examples.ts
+  s_17b7895fef0302::t_fa942f05e894f3 1
+  s_17b7895fef0302::t_57282660aea3ad 218
+  s_17b7895fef0302::t_449cb19f94d0d9 243
+package.json
+  s_17b7895fef0302::t_b2976ea6a2f041 76
+site/content/docs/zh/metrics/performance.mdx
+  s_17b7895fef0302::t_b6bc2cd7ad1e7c 54,56
+site/content/docs/en/metrics/performance.mdx
+  s_17b7895fef0302::t_5a76ee9e31c680 58,60
+site/demos/docs-built-in-layout.ts
+  s_17b7895fef0302::t_93e17980e87b74 94
+  s_17b7895fef0302::t_6e621205cd7d26 1-13,54,67,70,74,85
+skills/antv-g6lite-graph/references/layouts.md
+  s_17b7895fef0302::t_ea70b78f0708d9 11-19,23,26-27,42,53,55,57,59-68,71,90
+site/src/components/homepage/example-showcase.tsx
+  s_17b7895fef0302::t_1bdef3eb0dfa69 13
+  s_17b7895fef0302::t_26c76c3b0a4efc 73
+site/demos/docs-edge-indented.ts
+  s_17b7895fef0302::t_ff99b0ff3dc22d 20
+  s_17b7895fef0302::t_a0de9834f0eb5d 1-2
+site/src/lib/playground-runtime.ts
+  s_17b7895fef0302::t_03eb7e4625f3ab 15,17,24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "651ce06392e7c288a4a3af7684f878dd76746f14",
+  "prompts": {},
+  "sessions": {
+    "s_17b7895fef0302": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "b1d1972b-e32e-428e-9c7d-0920211eae84",
+        "model": "codefuse_official_channel/Kimi-K3.1-Pro:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}

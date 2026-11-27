@@ -1,0 +1,25 @@
+site/content/docs/en/getting-started/quick-start.mdx
+  s_17b7895fef0302::t_915c436de9b7e2 195
+site/content/docs/zh/getting-started/quick-start.mdx
+  s_17b7895fef0302::t_915c436de9b7e2 195
+README.md
+  s_17b7895fef0302::t_915c436de9b7e2 17,93,111-112
+README.zh-CN.md
+  s_17b7895fef0302::t_915c436de9b7e2 17,93,111-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e0f0989b3ef24d9a3c72c9c469f1836d2fdc103d",
+  "prompts": {},
+  "sessions": {
+    "s_17b7895fef0302": {
+      "agent_id": {
+        "tool": "codefuse",
+        "id": "b1d1972b-e32e-428e-9c7d-0920211eae84",
+        "model": "codefuse_official_channel/Kimi-K3.1-Pro:glink_domestic"
+      },
+      "human_author": "hustcc <i@hust.cc>"
+    }
+  }
+}
